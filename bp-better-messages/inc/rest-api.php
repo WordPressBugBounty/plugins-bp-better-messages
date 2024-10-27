@@ -465,7 +465,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
-            $clientThreads = (array) $request->get_param( 'threadIds' );
+            $alreadyRequestedThreads =  array_column($return['threads'], 'thread_id');
+            $clientThreads = array_unique(array_merge($alreadyRequestedThreads, (array) $request->get_param( 'threadIds' )));
 
             if( $clientThreads ){
                 /**

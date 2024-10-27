@@ -26,7 +26,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
             add_action('profile_magic_profile_tab_content', array( $this, 'profile_tab_content'), 10, 2 );
 
             add_action('better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
-            add_filter( 'bp_core_get_userlink', array( $this, 'member_link' ), 10, 2 );
 
             if( Better_Messages()->settings['chatPage'] === '0' ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
@@ -42,12 +41,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
             $url = $pmrequests->pm_get_user_profile_url( $user_id );
             return $url;
         }
-
-        public function member_link($link, $user_id){
-            return $this->get_user_profile_url( $user_id );
-        }
-
-
         function custom_user_meta( $item, $user_id, $include_personal ){
             $user = get_userdata( $user_id );
             if( ! $user ) return $item;

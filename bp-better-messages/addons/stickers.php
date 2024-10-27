@@ -179,6 +179,9 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
 
                 $desc = '<i class="fas fa-sticky-note"></i> ' . __('Sticker', 'bp-better-messages');
                 if( $context !== 'stack' ) {
+                    if( $context === 'mobile_app' ){
+                        $desc = __('Sticker', 'bp-better-messages');
+                    }
                     return $desc;
                 } else {
                     //return str_replace('<span class="bpbm-sticker">', '<span class="bpbm-sticker" data-desc="' . base64_encode($desc) . '">',$message);

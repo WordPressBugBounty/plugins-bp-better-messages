@@ -220,6 +220,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Block_Users::instance();
             }
 
+            if( Better_Messages()->settings['allowReports'] === '1' ) {
+                require_once Better_Messages()->path . 'addons/user-reports/user-reports.php';
+                Better_Messages_User_Reports::instance();
+            }
+
             if( Better_Messages()->settings['enableReactions'] === '1' ) {
                 Better_Messages_Reactions::instance();
             }
@@ -331,7 +336,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter('bp_better_messages_script_variable', array( $this, 'script_variables'), 10, 1 );
 
-            add_filter( 'better_messages_message_content_before_save', 'bp_messages_filter_kses', 1 );
+            add_filter( 'better_messages_message_content_before_save', [ Better_Messages()->functions, 'messages_filter_kses' ], 1 );
 
             add_action( 'deleted_user', array( $this, 'wp_on_deleted_user' ), 10, 3 );
             add_action( 'better_messages_on_deleted_user', array( $this, 'bm_on_deleted_user'), 10, 1 );
@@ -1256,9 +1261,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         public function update_last_activity(){
             $user_id = Better_Messages()->functions->get_current_user_id();
             if( is_user_logged_in() ) {
-                bp_update_user_last_activity($user_id);
-            } else {
+                Better_Messages()->users->update_last_activity( $user_id );
 
+                if( function_exists('bp_update_user_last_activity') ) {
+                    bp_update_user_last_activity($user_id);
+                }
             }
         }
 

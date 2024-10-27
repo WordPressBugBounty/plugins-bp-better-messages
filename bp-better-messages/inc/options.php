@@ -180,6 +180,7 @@ class Better_Messages_Options
             'umOnlyFriendsMode'             => '0',
             'umOnlyFollowersMode'           => '0',
             'allowUsersBlock'               => '0',
+            'allowReports'                  => '0',
             'restrictBlockUsers'            => [],
             'restrictBlockUsersImmun'       => [],
             'messagesViewer'                => '1',
@@ -267,6 +268,10 @@ class Better_Messages_Options
             $args['enableUsersSuggestions'] = '0';
         }
 
+        if( ! isset($args['messagesViewer']) || $args['messagesViewer'] === '0' ){
+            $args['allowReports'] = '0';
+        }
+
         $this->settings = wp_parse_args( $args, $this->defaults );
     }
 
@@ -281,9 +286,25 @@ class Better_Messages_Options
      */
     public function settings_page()
     {
+        $administration_title = $menu_title = _x('Administration', 'WP Admin', 'bp-better-messages');
+        $plugin_menu_title = _x( 'Better Messages', 'WP Admin', 'bp-better-messages' );
+
+        if( class_exists('Better_Messages_User_Reports') ){
+            $reports_count = Better_Messages_User_Reports::instance()->get_reported_messages_count();
+
+            if( $reports_count > 0 ){
+                $menu_title .= " <span class='awaiting-mod count-{$reports_count} bm-reports-count'>{$reports_count}</span>";
+                $plugin_menu_title .= " <span class='awaiting-mod count-{$reports_count} bm-reports-count'>{$reports_count}</span>";
+
+                wp_register_style('bm-reports-count', false);
+                wp_add_inline_style('bm-reports-count', '.awaiting-mod.bm-reports-count+.fs-trial{display:none!important}');
+                wp_enqueue_style( 'bm-reports-count' );
+            }
+        }
+
         add_menu_page(
             __( 'Better Messages' ),
-            _x( 'Better Messages', 'WP Admin', 'bp-better-messages' ),
+            $plugin_menu_title,
             'manage_options',
             'bp-better-messages',
             array( $this, 'settings_page_html' ),
@@ -312,17 +333,18 @@ class Better_Messages_Options
             );
         } */
 
-        if( ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0' ) {
-            add_submenu_page(
-                'bp-better-messages',
-                _x('Administration', 'WP Admin', 'bp-better-messages'),
-                _x('Administration', 'WP Admin', 'bp-better-messages'),
-                'manage_options',
-                'better-messages-viewer',
-                array($this, 'viewer_page_html'),
-                10
-            );
-        }
+        //if( ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0' ) {
+
+        add_submenu_page(
+            'bp-better-messages',
+            $administration_title,
+            $menu_title,
+            'manage_options',
+            'better-messages-viewer',
+            array($this, 'viewer_page_html'),
+            10
+        );
+        //}
 
         /*add_submenu_page(
             'bp-better-messages',
@@ -807,6 +829,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['allowUsersBlock'] ) ){
             $settings['allowUsersBlock'] = '0';
+        }
+
+        if( ! isset( $settings['allowReports'] ) ){
+            $settings['allowReports'] = '0';
         }
 
         if( ! isset( $settings['messagesViewer'] ) ) {

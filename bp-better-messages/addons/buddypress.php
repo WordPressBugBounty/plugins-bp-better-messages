@@ -85,6 +85,45 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
              * Youzify button
              */
             add_filter( 'youzify_get_send_message_button', array( $this, 'modify_youzify_button' ), 20 );
+
+            add_action('better_messages_mobile_settings', array($this, 'mobile_settings'), 5, 1);
+            add_action('bp_init', array($this, 'mobile_app_web_auth'), 10 );
+
+            add_filter('better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
+        }
+
+        public function rest_user_item( $item, $user_id, $include_personal ){
+            $item['url'] = Better_Messages()->functions->bp_core_get_user_domain( $user_id );
+            return $item;
+        }
+
+        public function mobile_app_web_auth()
+        {
+            if( isset( $_REQUEST['bm_app_delete_account'] ) ){
+                $user_id = Better_Messages()->functions->get_current_user_id();
+                if( $user_id > 0 ) {
+                    $user_domain = bp_members_get_user_url( (int) $user_id );
+                    $delete_account_link = trailingslashit($user_domain) . 'settings/delete-account/';
+                    wp_redirect($delete_account_link);
+                    exit;
+                }
+            }
+        }
+
+        public function mobile_settings( $settings )
+        {
+            $user_is_able_to_delete_account = ! bp_disable_account_deletion();
+
+            if( $user_is_able_to_delete_account ){
+                $deleteAccountUrl = add_query_arg([
+                    'bm_app_delete_account' => true,
+                    'bm_app_auth_token' => '=',
+                ], site_url('/'));
+
+                $settings['deleteAccount'] = $deleteAccountUrl;
+            }
+
+            return $settings;
         }
 
         public function modify_youzify_button($args){

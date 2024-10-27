@@ -107,12 +107,12 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
             Better_Messages()->functions->before_message_send_filter( $args, $errors );
 
             if( empty( $errors ) ){
-                remove_filter( 'better_messages_message_content_before_save', 'bp_messages_filter_kses', 1 );
+                remove_filter( 'better_messages_message_content_before_save', [ Better_Messages()->functions, 'messages_filter_kses' ], 1 );
                 remove_action( 'better_messages_message_sent', 'messages_notification_new_message', 10 );
                 $sent = Better_Messages()->functions->new_message( $args );
                 add_action( 'better_messages_message_sent', 'messages_notification_new_message', 10 );
                 Better_Messages()->functions->messages_mark_thread_read( $thread_id );
-                add_filter( 'better_messages_message_content_before_save', 'bp_messages_filter_kses', 1 );
+                add_filter( 'better_messages_message_content_before_save', [ Better_Messages()->functions, 'messages_filter_kses' ], 1 );
 
                 if ( is_wp_error( $sent ) ) {
                     $errors[] = $sent->get_error_message();
@@ -239,8 +239,8 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
             if( count($gifs ) > 0 ){
                 foreach ( $gifs as $gif ){
                     $return['gifs'][] = [
-                      'id'  => $gif->id,
-                      'url' => $gif->images->fixed_width->url
+                        'id'  => $gif->id,
+                        'url' => $gif->images->fixed_width->url
                     ];
                 }
             }
@@ -284,6 +284,10 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
             if( $is_gif ){
                 $desc = '<i class="bpbm-gifs-icon" title="' . __('GIF', 'bp-better-messages') . '"></i>';
                 if( $context !== 'stack' ) {
+                    if( $context === 'mobile_app' ){
+                        $desc = __('GIF', 'bp-better-messages');
+                    }
+
                     return $desc;
                 } else {
                     #return str_replace('<span class="bpbm-gif">', '<span class="bpbm-gif" title="' . __('GIF', 'bp-better-messages') . '"><span class="bpbm-gif-play"></span>', $message);

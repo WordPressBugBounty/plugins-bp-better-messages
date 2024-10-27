@@ -124,7 +124,7 @@ class Better_Messages_Shortcodes
         if( $type === 'button'){
             return '<button class="' . esc_attr($class) . '" data-user-id="' . $user_id . '" ' . $attrs . '><span class="bm-button-text">' . wp_kses($text, ['i' => [ 'class' => [] ]]) . '</span></button>';
         } else {
-            return '<a href="' . esc_url($link) .  '" class="' . esc_attr($class) . '" data-user-id="' . $user_id . '" ' . $attrs . '><span class="bm-button-text">' . wp_kses($text, ['i' => [ 'class' => [] ]]) . '</span></a>';
+            return '<a class="' . esc_attr($class) . '" data-user-id="' . $user_id . '" ' . $attrs . '><span class="bm-button-text">' . wp_kses($text, ['i' => [ 'class' => [] ]]) . '</span></a>';
         }
     }
 

@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
-Tested up to: 6.6.1
+Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.5.19
+Stable tag: 2.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,6 +169,13 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.6.0 =
+* Added report messages feature
+* Added ability to build iOS Mobile App (only WebSocket version)
+* Update Freemius SDK to 2.9.0
+* Tested up to WordPress 6.7
+* Other bugfixes and improvements
 
 = 2.5.19 =
 * New [better_messages_live_chat_button](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode

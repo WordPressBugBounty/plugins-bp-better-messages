@@ -145,6 +145,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 SELECT COUNT(*) 
                 FROM `" . bm_get_table('guests') . "` `guests`
                 WHERE `deleted_at` IS NULL
+                AND `ip` NOT LIKE 'ai-chat-bot-%'
                 $search_sql
             "));
 
@@ -158,6 +159,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                  WHERE `user_id` = (-1 * `guests`.`id` )) participants
                 FROM `" . bm_get_table('guests') . "` `guests`
                 WHERE `deleted_at` IS NULL
+                AND `ip` NOT LIKE 'ai-chat-bot-%'
                 $search_sql
                 ORDER BY id ASC
                 LIMIT {$offset}, {$per_page}
@@ -330,6 +332,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             $search = $request->has_param('search') ?  sanitize_text_field( $request->get_param('search' )) : false;
             $thread_id = $request->has_param('thread_id') ?  intval($request->get_param('thread_id' )) : false;
 
+            $message_ids = $request->has_param('message_ids') ?  $request->get_param('message_ids' ) : false;
+
+            $only_reported = $request->has_param('reported') && intval($request->get_param('reported')) === 1;
+
             $sender_sql = $search_sql = $thread_sql = '';
 
             if( $sender_id ) {
@@ -344,25 +350,74 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $thread_sql = $wpdb->prepare('AND `thread_id` = %d', $thread_id);
             }
 
-            $count = $wpdb->get_var( "
+            $count = (int) $wpdb->get_var( "
             SELECT COUNT(*) 
             FROM `" . bm_get_table('messages') . "`
             WHERE `created_at` > 0
             AND `message` != '<!-- BBPM START THREAD -->'
             $sender_sql $search_sql $thread_sql");
 
-            $messages = $wpdb->get_results( "
-                SELECT *,
-                (SELECT COUNT(*) 
-                  FROM `" . bm_get_table('recipients') . "` 
-                 WHERE `thread_id` = `messages`.`thread_id`) participants
+            if( $message_ids ){
+                $message_ids = array_map( 'intval', $message_ids );
+
+                $message_ids = implode( ',', $message_ids );
+
+                $sql = "SELECT `messages`.*,
+                `user_reports_meta`.`meta_value` as user_reports,
+                (SELECT COUNT(*)  FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = `messages`.`thread_id`) participants
                 FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                WHERE `created_at` > 0
+                    AND `message` != '<!-- BBPM START THREAD -->'
+                    AND `id` IN ({$message_ids})";
+            } else if( $only_reported) {
+                $count = (int) $wpdb->get_var( "
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('messages') . "`
                 WHERE `created_at` > 0
                 AND `message` != '<!-- BBPM START THREAD -->'
+                AND `id` IN (
+                    SELECT `bm_message_id`
+                    FROM `" . bm_get_table('meta') . "`
+                    WHERE `meta_key` = 'user_reports'
+                )
+                $sender_sql $search_sql $thread_sql");
+
+                $sql = "SELECT `messages`.*,
+                `user_reports_meta`.`meta_value` as user_reports,
+                (SELECT COUNT(*)  FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = `messages`.`thread_id`) participants
+                FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                WHERE `created_at` > 0
+                    AND `message` != '<!-- BBPM START THREAD -->'
+                    AND `id` IN (
+                        SELECT `bm_message_id`
+                        FROM `" . bm_get_table('meta') . "`
+                        WHERE `meta_key` = 'user_reports'
+                    )
                 $sender_sql $search_sql $thread_sql
                 ORDER BY `created_at` DESC
-                LIMIT {$offset}, {$per_page}
-            ", ARRAY_A );
+                LIMIT {$offset}, {$per_page}";
+            } else {
+                $sql = "SELECT `messages`.*,
+                `user_reports_meta`.`meta_value` as user_reports,
+                (SELECT COUNT(*)  FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = `messages`.`thread_id`) participants
+                FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                WHERE `created_at` > 0
+                    AND `message` != '<!-- BBPM START THREAD -->'
+                $sender_sql $search_sql $thread_sql
+                ORDER BY `created_at` DESC
+                LIMIT {$offset}, {$per_page}";
+            }
+
+            $messages = $wpdb->get_results( $sql, ARRAY_A );
 
             $return = [
                 'total'    => $count,
@@ -371,6 +426,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'pages'    => ceil( $count / $per_page ),
                 'messages' => [],
             ];
+
+            if( class_exists('Better_Messages_User_Reports') ){
+                $return['reported'] = Better_Messages_User_Reports::instance()->get_reported_messages_count();
+            }
 
             if( count( $messages ) > 0 ) {
                 foreach ($messages as $i => $message) {
@@ -428,6 +487,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
                              $item['receiver'] = Better_Messages()->functions->rest_user_item( reset($receivers)->user_id );
                          }
+                    }
+
+                    if( class_exists('Better_Messages_User_Reports') ){
+                        $reports = maybe_unserialize( $message['user_reports'] );
+
+                        if( is_array( $reports ) && count( $reports ) > 0 ){
+                            $categories = Better_Messages_User_Reports::instance()->get_categories( (int) $message['id'], (int) $message['thread_id'] );
+
+                            foreach ( $reports as $user_id => $report ){
+                                $reports[ $user_id ]['user'] = Better_Messages()->functions->rest_user_item( $user_id );
+                                $reports[ $user_id ]['category'] = $categories[$report['category']] ?? $report['category'];
+                            }
+
+                            $item['reports'] = $reports;
+                        }
                     }
 
                     $return['messages'][] = $item;

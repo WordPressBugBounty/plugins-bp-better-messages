@@ -1825,12 +1825,18 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function rest_user_item( $user_id, $include_personal = true ){
+            $url = false;
+
+            if( count_user_posts($user_id) > 0 ) {
+                $url = get_author_posts_url($user_id);
+            }
+
             $item = [
                 'id'         => (string) $user_id,
                 'user_id'    => (int) $user_id,
                 'name'       => html_entity_decode( Better_Messages()->functions->get_name( $user_id ) ),
                 'avatar'     => Better_Messages()->functions->get_avatar( $user_id, 50, ['html' => false] ),
-                'url'        => bp_core_get_userlink( $user_id, false, true ),
+                'url'        => $url,
                 'verified'   => (int) $this->is_verified( $user_id ),
                 'lastActive' => Better_Messages()->functions->get_last_activity( $user_id )
             ];
@@ -3442,6 +3448,51 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $site_url = get_site_url();
             $parse = parse_url($site_url);
             return $parse['host'];
+        }
+
+        public function get_allowedtags() {
+            global $allowedtags;
+
+            return array_merge_recursive( $allowedtags, array(
+                'a' => array(
+                    'aria-label'      => array(),
+                    'class'           => array(),
+                    'data-bp-tooltip' => array(),
+                    'id'              => array(),
+                    'rel'             => array(),
+                ),
+                'img' => array(
+                    'src'    => array(),
+                    'alt'    => array(),
+                    'width'  => array(),
+                    'height' => array(),
+                    'class'  => array(),
+                    'id'     => array(),
+                ),
+                'span'=> array(
+                    'class'          => array(),
+                    'data-livestamp' => array(),
+                ),
+                'ul' => array(),
+                'ol' => array(),
+                'li' => array(),
+            ) );
+        }
+
+        public function messages_filter_kses( $content ) {
+            $messages_allowedtags      = $this->get_allowedtags();
+            $messages_allowedtags['p'] = array();
+
+            /**
+             * Filters the allowed HTML tags for BuddyPress Messages content.
+             *
+             * @since 3.0.0
+             *
+             * @param array $value Array of allowed HTML tags and attributes.
+             */
+            $messages_allowedtags = apply_filters( 'better_messages_allowed_tags', $messages_allowedtags );
+
+            return wp_kses( $content, $messages_allowedtags );
         }
     }
 

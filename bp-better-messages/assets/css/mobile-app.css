@@ -46,15 +46,18 @@ input, textarea {
   background: #fcfcfc;
   padding-top: var(--bm-safe-area-top);
   padding-bottom: var(--bm-safe-area-bottom);
+  min-height: 100%;
 }
 #bm-app-login-screen .bm-login-logo {
   margin: 150px auto 50px;
-  height: 100px;
   user-select: none;
 }
 #bm-app-login-screen .bm-login-logo img {
   pointer-events: none;
   user-select: none;
+  max-height: 100px;
+  display: block;
+  margin: 0 auto;
 }
 #bm-app-login-screen .bm-login-form {
   width: 80%;
@@ -85,6 +88,26 @@ input, textarea {
   height: 50px;
   font-size: 16px;
   text-transform: uppercase;
+}
+#bm-app-login-screen .bm-login-form .bm-register-button {
+  text-align: center;
+  margin-top: 20px;
+}
+#bm-app-login-screen .bm-login-form .bm-register-button a {
+  text-decoration: none;
+  color: black;
+  opacity: 0.8;
+}
+#bm-app-login-screen .bm-login-form .terms-and-conditions-container {
+  margin: 20px 0;
+  text-align: center;
+}
+#bm-app-login-screen .bm-login-form .terms-and-conditions-container input {
+  margin-right: 5px;
+}
+#bm-app-login-screen .bm-login-form .terms-and-conditions-container a {
+  color: black;
+  text-decoration: underline;
 }
 
 .bp-messages-wrap .chat-header {
@@ -120,6 +143,31 @@ input, textarea {
 .bp-messages-wrap .bm-reply {
   padding-bottom: var(--bm-safe-area-bottom) !important;
   box-sizing: content-box !important;
+}
+
+.Toastify__toast-container {
+  padding-top: var(--bm-safe-area-top);
+  padding-bottom: var(--bm-safe-area-bottom);
+}
+
+.bm-user-option-link {
+  display: block;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.fslightbox-nav {
+  top: var(--bm-safe-area-top);
+}
+
+.bp-messages-private-call.bpbm-tapped .bp-messages-call-controls.show-on-tap,
+.bp-messages-call-controls:not(.show-on-tap),
+.bp-messages-group-call-controls-v2 {
+  bottom: var(--bm-safe-area-bottom) !important;
+}
+
+.bp-messages-wrap .bp-messages-call-wrap-group .bpbm-call-settings {
+  margin-bottom: var(--bm-safe-area-bottom) !important;
 }
 
 /*# sourceMappingURL=mobile-app.css.map */

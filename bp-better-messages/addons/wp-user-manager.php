@@ -34,16 +34,7 @@ if ( !class_exists( 'Better_Messages_WP_User_Manager' ) ){
 
 
             add_filter('better_messages_rest_user_item', array( $this, 'custom_user_meta' ), 20, 3 );
-            add_filter( 'bp_core_get_userlink', array( $this, 'member_link' ), 10, 2 );
-
         }
-
-        public function member_link($link, $user_id){
-            $user = get_userdata( $user_id );
-            if( ! $user ) return $link;
-            return wpum_get_profile_url( $user );
-        }
-
         function custom_user_meta( $item, $user_id, $include_personal ){
             $user = get_userdata( $user_id );
             if( ! $user ) return $item;

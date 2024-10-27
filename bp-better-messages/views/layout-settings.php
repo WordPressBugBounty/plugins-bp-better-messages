@@ -379,6 +379,20 @@ $all_roles['bm-guest'] = [
             }
         }
 
+
+        var messageViewer = $('input[name="messagesViewer"]');
+        messageViewer.on('change', changeMessageViewer);
+
+        changeMessageViewer();
+
+        function changeMessageViewer(){
+            if( messageViewer.is(':checked') ){
+                $('input[name="allowReports"]').attr('disabled', false);
+            } else {
+                $('input[name="allowReports"]').attr('disabled', true);
+            }
+        }
+
         function changeReactionStatuses(){
             var reactionsOptions = $('input[name="enableReactionsPopup"]')
             if( reactions.is(':checked') ){
@@ -829,11 +843,21 @@ $all_roles['bm-guest'] = [
 
                         <tr valign="top" class="">
                             <th scope="row" valign="top">
-                                <?php _ex( 'Enable Administration', 'Settings page', 'bp-better-messages' ); ?>
-                                <p style="font-size: 10px;"><?php _ex( 'Enable administration page in WordPress admin', 'Settings page', 'bp-better-messages' ); ?></p>
+                                <?php _ex( 'Enable Messages Viewer', 'Settings page', 'bp-better-messages' ); ?>
+                                <p style="font-size: 10px;"><?php _ex( 'Enable messages viewer in administration page in WordPress admin', 'Settings page', 'bp-better-messages' ); ?></p>
                             </th>
                             <td>
                                 <input name="messagesViewer" type="checkbox" <?php checked( $this->settings[ 'messagesViewer' ], '1' ); ?> value="1" />
+                            </td>
+                        </tr>
+
+                        <tr valign="top" class="">
+                            <th scope="row" valign="top">
+                                <?php _ex( 'Message Reports', 'Settings page', 'bp-better-messages' ); ?>
+                                <p style="font-size: 10px;"><?php _ex( 'Allow users to report messages, which will appear at Messages Viewer', 'Settings page', 'bp-better-messages' ); ?></p>
+                            </th>
+                            <td>
+                                <input name="allowReports" type="checkbox" <?php checked( $this->settings[ 'allowReports' ], '1' ); ?> value="1" />
                             </td>
                         </tr>
                         </tbody>
@@ -4771,7 +4795,7 @@ $all_roles['bm-guest'] = [
                         <a href="https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button" class="button bm-docs-btn" target="_blank">Docs <span class="dashicons dashicons-external"></span></a>
                     </th>
                     <td>
-                        <input readonly type="text" style="width: 100%;" onclick="this.focus();this.select()" value='[better_messages_live_chat_button type="button" text="Private Message" subject="Have a question to you" unique_tag="private_conversation"]'>
+                        <input readonly type="text" style="width: 100%;" onclick="this.focus();this.select()" value='[better_messages_live_chat_button type="button" unique_tag="product_chat_15" text="Product Chat" subject="Product Chat Subject"]'>
                     </td>
                 </tr>
 

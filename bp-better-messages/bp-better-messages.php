@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.5.19
+    Version: 2.6.0
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.1
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.5.19';
+        public $version = '2.6.0';
 
         public $db_version = '1.0.4';
 
@@ -382,10 +382,11 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             if ( empty( $suffix ) ) {
                 $version .= filemtime( $this->path . 'assets/css/bp-messages' . $suffix . '.css' );
             }
+            $dependencies = apply_filters( 'better_messages_style_dependencies', array() );
             wp_register_style(
                 'better-messages',
                 plugins_url( 'assets/css/bp-messages' . $suffix . '.css', __FILE__ ),
-                false,
+                $dependencies,
                 $version
             );
             wp_add_inline_style( 'better-messages', Better_Messages()->hooks->css_customizations() );
@@ -547,6 +548,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'mobileOnsite'       => ( in_array( $this->settings['mobileOnsiteLocation'], ['top', 'bottom'] ) ? $this->settings['mobileOnsiteLocation'] : 'auto' ),
                 'enableSound'        => $enableSound,
                 'guests'             => ( Better_Messages()->guests->guest_access_enabled() ? '1' : '0' ),
+                'reports'            => ( $this->settings['allowReports'] == '1' ? '1' : '0' ),
             );
             if ( !is_user_logged_in() && get_option( 'users_can_register' ) ) {
                 $script_variables['registerUrl'] = apply_filters( 'better_messages_registration_url', wp_registration_url() );
@@ -717,10 +719,6 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 Better_Messages();
             } else {
                 require_once 'vendor/buddypress/functions.php';
-                require_once 'vendor/buddypress/class-bp-messages-message.php';
-                require_once 'vendor/buddypress/class-bp-user-query.php';
-                require_once 'vendor/buddypress/class-bp-suggestions.php';
-                require_once 'vendor/buddypress/class-bp-members-suggestions.php';
                 Better_Messages();
             }
         }

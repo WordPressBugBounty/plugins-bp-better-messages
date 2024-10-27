@@ -39,8 +39,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         public $scripts_loaded = false;
 
         public function load_scripts( $context ){
-            if( $context === 'mobile-app' ) return;
-
             if( $this->scripts_loaded ) return;
             $this->scripts_loaded = true;
 
@@ -264,12 +262,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
         public function nice_files( $message, $message_id, $context, $user_id )
         {
-            if( $context === 'email'  ) {
-
+            if( $context === 'email' || $context === 'mobile_app' ) {
                 if( class_exists('Better_Messages_Voice_Messages') ){
                     $is_voice_message = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
 
-                    if ( ! empty($is_voice_message) ) {
+                    if ( ! empty( $is_voice_message ) ) {
                         return __('Voice Message', 'bp-better-messages');
                     }
                 }
@@ -280,7 +277,16 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $desc = false;
             if( is_array($attachments) ) {
                 if (count($attachments) > 0) {
-                    $desc = "<i class=\"fas fa-file\"></i> " . count($attachments) . " " . __('attachments', 'bp-better-messages');
+                    $desc = '';
+
+                    if( $context !== 'mobile_app' ){
+                        $desc .= "<i class=\"fas fa-file\"></i> ";
+                    } else {
+                        $desc .= "\n";
+                        $message = str_replace("<!-- BM-ONLY-FILES -->", "", $message);
+                    }
+
+                    $desc .= count($attachments) . " " . __('attachments', 'bp-better-messages');
                 }
             }
 

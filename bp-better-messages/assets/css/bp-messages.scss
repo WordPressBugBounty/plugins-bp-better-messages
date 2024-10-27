@@ -1781,7 +1781,7 @@ body.bp-messages-mobile {
         align-items: center;
         flex-direction: row;
         justify-content: flex-start;
-        z-index: 1;
+        z-index: 2;
         font-size: 1.1rem;
 
         > .bm-btn{
@@ -10357,6 +10357,10 @@ body.buddyboss-theme.bb-template-v1:not(.wcfm-dashboard-page), body.buddyboss-th
     }
 }
 
+.bm-lc-button{
+  cursor: pointer;
+}
+
 .bm-thread-info{
     .bm-product-info{
         display: flex;
@@ -10539,5 +10543,59 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
     font-size: 13px;
     transition: border-color 0.2s;
     color: rgba(var(--bm-text-color), 1) !important;
+  }
+}
+
+.bm-report-message-panel{
+  label{
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .bm-report-message-panel-information{
+    margin-bottom: 10px;
+  }
+
+  .bm-report-message-panel-category{
+    margin-bottom: 10px;
+
+    select{
+      max-height: 30px !important;
+      min-height: 30px !important;
+      display: block;
+      background: rgba(var(--bm-bg-color), 1) !important;
+      border-radius: 3px;
+      border: 1px solid rgba(var(--bm-border-secondary-color), 1) !important;
+      max-width: 200px;
+      box-sizing: border-box;
+      font-size: 13px;
+      transition: border-color 0.2s;
+      color: rgba(var(--bm-text-color), 1) !important;
+      padding: 5px;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+  }
+
+  .bm-report-message-panel-description{
+    margin-bottom: 10px;
+
+    #bm-report-message-panel-description-textarea{
+      background: rgba(var(--bm-bg-color), 1) !important;
+      border-radius: 3px;
+      border: 1px solid rgba(var(--bm-border-secondary-color), 1) !important;
+      box-sizing: border-box;
+      padding: 10px 25px 10px 10px;
+      font-size: 13px;
+      transition: border-color 0.2s;
+      color: rgba(var(--bm-text-color), 1) !important;
+      width: 100%;
+      min-height: 95px;
+    }
+  }
+
+  .bm-report-message-panel-actions{
+    text-align: center;
   }
 }

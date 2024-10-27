@@ -78,10 +78,14 @@
 
 .bm-icon-loading{
   display: inline-block;
-  animation-name: spin;
-  animation-duration: 2000ms;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
+  vertical-align: middle;
+
+  svg{
+    animation-name: spin;
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
 }
 
 .bm-new-build-platform{
@@ -168,7 +172,7 @@ table.build-info-table{
   background: white;
   border: 1px solid #ccc;
   text-align: center;
-  padding: 20px 0 20px;
+  padding: 20px;
   overflow: hidden;
 
   &.bm-builds-list-has-items{
@@ -186,15 +190,23 @@ table.build-info-table{
   }
 
   .bm-builds-list-items{
-    display: flex;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+    &.bm-builds-list-items-count-1{
+      .bm-builds-list-item{
+        max-width: 50%;
+      }
+    }
 
     .bm-builds-list-item{
       border: 1px solid #ccc;
-      margin: 0 20px;
       padding: 10px;
-      width: 33%;
       border-radius: 3px;
       background: #fafafa;
+      color: #1e1e1e;
+      text-decoration: none;
 
       &:hover{
         background: #f5f5f5;
@@ -386,6 +398,26 @@ table.build-info-table{
   }
 }
 
+#messages-admin{
+  .bm-reported-messages-panel{
+    display: flex;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #e6bfc2;
+    padding: 15px;
+    line-height: 24px;
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 10px 0;
+
+    > span{
+      margin-left: 10px;
+    }
+  }
+}
+
 .bm-list-wrapper{
   margin: 15px 0;
   position: relative;
@@ -409,8 +441,45 @@ table.build-info-table{
       }
     }
 
+    &.bm-updating-rows {
+      tr {
+        &::before {
+          content: '';
+        }
+
+        &.bm-updating-row{
+          &::before{
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgb(255 255 255 / 50%);
+            z-index: 10;
+            left: 0;
+            top: 0;
+          }
+        }
+      }
+    }
+
     tbody {
       tr {
+        position: relative;
+
+        &.bm-reported-row{
+          background: #f8d7da;
+
+          .bm-reports-table{
+            width: auto;
+            text-align: left;
+            margin: 0 auto;
+
+            button{
+              margin: 0 5px;
+            }
+          }
+        }
+
         td {
           .user-td {
             display: flex;
@@ -511,7 +580,17 @@ table.build-info-table{
   z-index: 10000;
 
   .bm-admin-modal-content{
+    .bm-upload-errors{
+      color: red;
 
+      & + button{
+        margin-top: 10px;
+      }
+    }
+
+    .bm-upload-app-button{
+      margin-top: 10px;
+    }
   }
 }
 
