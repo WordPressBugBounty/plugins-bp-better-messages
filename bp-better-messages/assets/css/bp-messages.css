@@ -7081,7 +7081,6 @@ body.bp-messages-mobile #better-messages-modals-container input {
   margin-right: 5px;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack.bm-hide-avatars .bm-content {
-  position: relative;
   padding-left: 15px;
   margin-top: 0 !important;
 }

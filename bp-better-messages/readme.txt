@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.6.0
+Stable tag: 2.6.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,6 +169,16 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.6.2 =
+* Improved performance of initial browser database load of the plugin
+* Fixed scroll to message did not work in some cases
+* Fixed friends and groups tab in iOS Mobile App
+* Plugin styling settings are now applied to iOS Mobile App correctly (rebuild of application is required)
+
+= 2.6.1 =
+* Translations of reports reasons are now working properly
+* Added iOS Team ID configuration field to iOS build settings, please add Team ID and try to rebuild the iOS application if you already tried to do
 
 = 2.6.0 =
 * Added report messages feature

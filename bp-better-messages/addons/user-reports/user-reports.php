@@ -108,11 +108,11 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
         public function get_categories( $message_id, $thread_id )
         {
             $reasons = array(
-                'inappropriate' => _x('Inappropriate', 'Report reason', 'better-messages'),
-                'spam'          => _x('Spam', 'Report reason', 'better-messages'),
-                'harassment'    => _x('Harassment', 'Report reason', 'better-messages'),
-                'offensive'     => _x('Offensive', 'Report reason', 'better-messages'),
-                'other'         => _x('Other', 'Report reason', 'better-messages')
+                'inappropriate' => _x('Inappropriate', 'Report reason', 'bp-better-messages'),
+                'spam'          => _x('Spam', 'Report reason', 'bp-better-messages'),
+                'harassment'    => _x('Harassment', 'Report reason', 'bp-better-messages'),
+                'offensive'     => _x('Offensive', 'Report reason', 'bp-better-messages'),
+                'other'         => _x('Other', 'Report reason', 'bp-better-messages')
             );
 
             return apply_filters( 'better_messages_get_report_reasons', $reasons, $message_id, $thread_id );

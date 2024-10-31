@@ -320,6 +320,11 @@ table.build-info-table button {
   background-color: #f8d7da;
   border-color: #f5c6cb;
 }
+.better-messages-banner.better-messages-banner-blue {
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #b8daff;
+}
 
 .bm-info-table {
   border: 1px solid #c3c4c7;

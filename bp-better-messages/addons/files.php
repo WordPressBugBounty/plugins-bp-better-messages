@@ -44,7 +44,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             $is_dev = defined( 'BM_DEV' );
 
-            $version = '3.9.5';
+            $version = Better_Messages()->version;
             $suffix = ( $is_dev ? '' : '.min' );
 
             $deps = [
