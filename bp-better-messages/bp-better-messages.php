@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.6.2
+    Version: 2.6.3
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.1
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.6.2';
+        public $version = '2.6.3';
 
         public $db_version = '1.0.4';
 
@@ -262,18 +262,28 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
         }
 
         public function ensure_version_included( $src, $handle ) {
-            if ( $handle === 'better-messages' ) {
-                $parsed_vars = parse_url( $src, PHP_URL_QUERY );
-                $version_included = false;
-                if ( $parsed_vars ) {
-                    parse_str( $parsed_vars, $url_vars );
-                    if ( isset( $url_vars['ver'] ) ) {
-                        $version_included = true;
-                    }
+            $handles_to_ensure = [
+                'better-messages',
+                'better-messages-media',
+                'better-messages-files-webcam',
+                'better-messages-files-image-editor',
+                'better-messages-files-react',
+                'better-messages-files-core',
+                'better-messages-app'
+            ];
+            if ( !in_array( $handle, $handles_to_ensure ) ) {
+                return $src;
+            }
+            $parsed_vars = parse_url( $src, PHP_URL_QUERY );
+            $version_included = false;
+            if ( $parsed_vars ) {
+                parse_str( $parsed_vars, $url_vars );
+                if ( isset( $url_vars['ver'] ) ) {
+                    $version_included = true;
                 }
-                if ( !$version_included ) {
-                    $src = add_query_arg( 'ver', $this->version, $src );
-                }
+            }
+            if ( !$version_included ) {
+                $src = add_query_arg( 'ver', $this->version, $src );
             }
             return $src;
         }

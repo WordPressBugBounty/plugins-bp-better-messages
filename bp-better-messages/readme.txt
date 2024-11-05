@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,6 +169,10 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.6.3 =
+* Fixed issues with push notifications subscriptions in iOS applications
+* Other minor bugfixes and improvements
 
 = 2.6.2 =
 * Improved performance of initial browser database load of the plugin
