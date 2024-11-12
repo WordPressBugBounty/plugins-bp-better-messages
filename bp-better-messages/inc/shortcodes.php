@@ -149,17 +149,14 @@ class Better_Messages_Shortcodes
             return Better_Messages()->functions->render_login_form();
         }
 
-        $user_id = intval( $args['user_id'] );
-        //$thread = Better_Messages()->functions->get_thread( $thread_id );
+        if( isset( $args['user_id'] ) ) {
+            $user_id = (int) $args['user_id'];
+        } else {
+            $user_id = (int) Better_Messages()->functions->get_member_id();
+        }
 
         $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
         return '<div class="bp-messages-single-thread-wrap" style="height: ' . $initialHeight . 'px" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
-
-        /*if( $thread ) {
-            return Better_Messages()->functions->get_conversation_layout($thread_id);
-        } else {
-            return '<p>' . __('Conversation not exists', 'bp-better-messages') .  '</p>';
-        }*/
     }
 
     public function bp_better_messages(){

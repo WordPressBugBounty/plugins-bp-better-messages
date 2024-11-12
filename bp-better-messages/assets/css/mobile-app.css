@@ -110,6 +110,42 @@ input, textarea {
   text-decoration: underline;
 }
 
+body.landscape .bp-messages-wrap.bp-messages-mobile .chat-header, body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .chat-header {
+  padding-left: var(--bm-safe-area-left);
+  padding-right: var(--bm-safe-area-right);
+}
+body.landscape .bp-messages-wrap.bp-messages-mobile .threads-list .thread .pic, body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .threads-list .thread .pic {
+  padding-left: max(var(--bm-safe-area-left), 15px) !important;
+}
+body.landscape .bp-messages-wrap.bp-messages-mobile .threads-list .thread .actions, body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .threads-list .thread .actions {
+  padding-right: max(var(--bm-safe-area-right), 15px) !important;
+}
+body.landscape .bp-messages-wrap.bp-messages-mobile .chat-footer,
+body.landscape .bp-messages-wrap.bp-messages-mobile .bpbm-chat-main .bm-before-message-list > *,
+body.landscape .bp-messages-wrap.bp-messages-mobile .bm-messages-list,
+body.landscape .bp-messages-wrap.bp-messages-mobile .bpbm-user-options,
+body.landscape .bp-messages-wrap.bp-messages-mobile .bm_user_selector .bm_user_selector__menu .bm_user_selector__menu-list .bm_user_selector__option,
+body.landscape .bp-messages-wrap.bp-messages-mobile .bm_user_selector, body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .chat-footer,
+body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .bpbm-chat-main .bm-before-message-list > *,
+body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .bm-messages-list,
+body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .bpbm-user-options,
+body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .bm_user_selector .bm_user_selector__menu .bm_user_selector__menu-list .bm_user_selector__option,
+body.portrait-secondary .bp-messages-wrap.bp-messages-mobile .bm_user_selector {
+  padding-left: max(var(--bm-safe-area-left), 15px);
+  padding-right: max(var(--bm-safe-area-right), 15px);
+}
+body.landscape .bm-reply, body.portrait-secondary .bm-reply {
+  box-sizing: border-box !important;
+  padding-left: max(var(--bm-safe-area-left), 15px);
+  padding-right: max(var(--bm-safe-area-right), 15px);
+}
+body.landscape .chat-tabs > div:first-child, body.portrait-secondary .chat-tabs > div:first-child {
+  padding-left: max(var(--bm-safe-area-left), 15px);
+}
+body.landscape .chat-tabs > div:last-child, body.portrait-secondary .chat-tabs > div:last-child {
+  padding-right: max(var(--bm-safe-area-right), 15px);
+}
+
 .bp-messages-wrap .chat-header {
   padding-top: var(--bm-safe-area-top);
   box-sizing: content-box !important;

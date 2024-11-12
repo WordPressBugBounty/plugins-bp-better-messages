@@ -329,6 +329,8 @@ class Better_Messages_Users
     public function update_last_activity( $user_id, $time = null ){
         global $wpdb;
 
+        if( is_numeric( $time ) ) $time = gmdate( 'Y-m-d H:i:s', $time );
+
         if( ! $time ) $time = gmdate( 'Y-m-d H:i:s' );
 
         $wpdb->query( $wpdb->prepare("INSERT INTO `{$this->users_table}` (ID, last_activity)

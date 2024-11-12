@@ -133,33 +133,79 @@ input, textarea {
     }
 }
 
-  .bp-messages-wrap {
-  .chat-header {
-    padding-top: var(--bm-safe-area-top);
-    box-sizing: content-box !important;
-  }
+body.landscape, body.portrait-secondary{
+  .bp-messages-wrap.bp-messages-mobile{
 
-  .chat-tabs{
-    > div {
+    .chat-header{
+      padding-left: var(--bm-safe-area-left);
+      padding-right: var(--bm-safe-area-right);
+    }
+
+      .threads-list .thread {
+        .pic {
+          padding-left: max(var(--bm-safe-area-left), 15px) !important;
+        }
+
+        .actions{
+            padding-right: max(var(--bm-safe-area-right), 15px) !important;
+        }
+      }
+
+    .chat-footer,
+    .bpbm-chat-main .bm-before-message-list > *,
+    .bm-messages-list,
+    .bpbm-user-options,
+    .bm_user_selector .bm_user_selector__menu .bm_user_selector__menu-list .bm_user_selector__option,
+    .bm_user_selector{
+          padding-left: max(var(--bm-safe-area-left), 15px);
+          padding-right: max(var(--bm-safe-area-right), 15px);
+      }
+    }
+
+    .bm-reply{
+      box-sizing: border-box !important;
+      padding-left: max(var(--bm-safe-area-left), 15px);;
+      padding-right: max(var(--bm-safe-area-right), 15px);
+    }
+
+    .chat-tabs > div{
+      &:first-child{
+        padding-left: max(var(--bm-safe-area-left), 15px);
+      }
+
+      &:last-child{
+          padding-right: max(var(--bm-safe-area-right), 15px);
+      }
+    }
+}
+
+  .bp-messages-wrap {
+    .chat-header {
+      padding-top: var(--bm-safe-area-top);
+      box-sizing: content-box !important;
+    }
+
+    .chat-tabs{
+      > div {
+        padding-bottom: var(--bm-safe-area-bottom) !important;
+        box-sizing: content-box !important;
+      }
+    }
+
+    .chat-footer {
       padding-bottom: var(--bm-safe-area-bottom) !important;
       box-sizing: content-box !important;
     }
-  }
 
-  .chat-footer {
-    padding-bottom: var(--bm-safe-area-bottom) !important;
-    box-sizing: content-box !important;
-  }
-
-  .bm-app-settings{
-    button{
-      display: block;
-      width: 100%;
-      height: 50px;
-      font-size: 16px;
-      text-transform: uppercase;
+    .bm-app-settings{
+      button{
+        display: block;
+        width: 100%;
+        height: 50px;
+        font-size: 16px;
+        text-transform: uppercase;
+      }
     }
-  }
 }
 
 .bpbm-gifs-selector{

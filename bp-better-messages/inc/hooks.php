@@ -1114,22 +1114,17 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function disable_message_to_deleted_users( $allowed, $user_id, $thread_id ){
             $type = Better_Messages()->functions->get_thread_type( $thread_id );
-            if( $type !== 'thread' ) return $allowed;;
+            if( $type !== 'thread' ) return $allowed;
 
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
             unset( $recipients[$user_id] );
 
             if( count( $recipients ) === 1 ){
                 $user_id = array_keys($recipients)[0];
-                if( $user_id > 0 ){
-                    $userdata = get_userdata(array_keys($recipients)[0]);
-                    if( ! $userdata ) return false;
-                } else {
-                    $guest_user = Better_Messages()->guests->get_guest_user( $user_id );
-                    if( ! $guest_user ){
-                        return false;
-                    }
-                }
+
+                if( ! Better_Messages()->functions->is_valid_user_id( $user_id ) ) return false;
+            } else if ( count( $recipients ) === 0 ){
+                return false;
             }
 
             return $allowed;

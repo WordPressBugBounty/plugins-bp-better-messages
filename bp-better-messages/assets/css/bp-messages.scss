@@ -2872,6 +2872,8 @@ body.bp-messages-mobile {
         border-radius: 0;
 
         .bm_user_selector__menu-list{
+            //max-height: 100% !important;
+
             .bm_user_selector__option{
                 display: flex;
                 align-items: center;
@@ -3732,10 +3734,6 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel{
 
 .bp-messages-wrap .clearfix::after {
     clear: both;
-}
-
-.bp-messages-wrap .clearfix {
-    zoom: 1; /* For IE 6/7 (trigger hasLayout) */
 }
 
 .bp-messages-wrap .threads-list {

@@ -9443,10 +9443,6 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   clear: both;
 }
 
-.bp-messages-wrap .clearfix {
-  zoom: 1; /* For IE 6/7 (trigger hasLayout) */
-}
-
 .bp-messages-wrap .threads-list {
   position: relative;
   display: table;
