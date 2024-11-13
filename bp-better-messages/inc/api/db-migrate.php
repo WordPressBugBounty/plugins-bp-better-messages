@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.2;
+        private $db_version = 1.3;
 
         public static function instance()
         {
@@ -268,7 +268,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       KEY `thread_id` (`thread_id`),
                       KEY `is_deleted` (`is_deleted`),
                       KEY `unread_count` (`unread_count`),
-                      KEY `is_pinned` (`is_pinned`)
+                      KEY `is_pinned` (`is_pinned`),
+                      KEY `unread_count_index` (`user_id`, `is_deleted`, `unread_count`)
                     ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('threadsmeta') ."` (
@@ -514,6 +515,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     "UPDATE `" . bm_get_table('messages') ."`
                     SET `updated_at` = `created_at`
                     WHERE `updated_at` = 0 AND `created_at` > 0;"
+                ],
+                '1.3' => [
+                    "ALTER TABLE `" . bm_get_table('recipients') ."` ADD INDEX `unread_count_index` (`user_id`, `is_deleted`, `unread_count`);"
                 ]
             ];
 

@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.6.4
+Stable tag: 2.6.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,6 +169,11 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.6.5 =
+* Added new database index to recipients table to improve performance
+* Moved translations initialization to init event to prevent issues with translations in WP 6.7
+* Other minor bugfixes and improvements
 
 = 2.6.4 =
 * Fixed better_messages_user_conversation automatic post author detection if no user_id provided

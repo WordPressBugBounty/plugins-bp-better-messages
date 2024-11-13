@@ -141,15 +141,15 @@ body.landscape, body.portrait-secondary{
       padding-right: var(--bm-safe-area-right);
     }
 
-      .threads-list .thread {
-        .pic {
-          padding-left: max(var(--bm-safe-area-left), 15px) !important;
-        }
-
-        .actions{
-            padding-right: max(var(--bm-safe-area-right), 15px) !important;
-        }
+    .threads-list .thread {
+      .pic {
+        padding-left: max(var(--bm-safe-area-left), 15px) !important;
       }
+
+      .actions{
+          padding-right: max(var(--bm-safe-area-right), 15px) !important;
+      }
+    }
 
     .chat-footer,
     .bpbm-chat-main .bm-before-message-list > *,

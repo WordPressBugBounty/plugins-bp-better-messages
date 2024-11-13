@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.6.4
+    Version: 2.6.5
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.1
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.6.4';
+        public $version = '2.6.5';
 
         public $db_version = '1.0.4';
 
@@ -117,7 +117,6 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             // Only run these methods if they haven't been run previously
             if ( null === $instance ) {
                 $instance = new Better_Messages();
-                $instance->load_textDomain();
                 $instance->setup_vars();
                 $instance->setup_actions();
                 $instance->setup_classes();
@@ -141,6 +140,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             add_action( 'wp_enqueue_scripts', array($this, 'load_scripts') );
             //add_filter( 'script_loader_tag',  array( $this, 'script_loader_tag' ), 10, 3);
             add_action( 'admin_enqueue_scripts', array($this, 'load_admin_scripts') );
+            add_action( 'init', array($this, 'load_textDomain') );
         }
 
         /**
