@@ -194,6 +194,7 @@ _x('This is a list of users that you have blocked. You may unblock them from the
 _x('Unblock user', 'User settings screen', 'bp-better-messages');
 _x('You haven’t blocked anyone yet', 'User settings screen', 'bp-better-messages');
 _x('Only participants can see this chat room messages', 'Chat Room Screen', 'bp-better-messages');
+__('Continue as guest', 'bp-better-messages');
 _x('Guest Settings', 'Moderation actions', 'bp-better-messages');
 _x('Messages', 'Mobile view tabs', 'bp-better-messages');
 _x('Friends', 'Mobile view tabs', 'bp-better-messages');
@@ -482,7 +483,6 @@ _x('Successfully subscribed to Web Push notifications', 'Push Notifications', 'b
 _x('Failed to subscribe to Web Push notifications. Please ensure that your web browser permission settings allows to send notifications at this website.', 'Push Notifications', 'bp-better-messages');
 _x('Successfully unsubscribed from Web Push notifications', 'Push Notifications', 'bp-better-messages');
 __('Continue with account', 'bp-better-messages');
-__('Continue as guest', 'bp-better-messages');
 __('Continue', 'bp-better-messages');
 _x('Message hidden', 'Messages from blocked user', 'bp-better-messages');
 _nx('%s attachment', '%s attachments', variable, 'Conversations list item', 'bp-better-messages');

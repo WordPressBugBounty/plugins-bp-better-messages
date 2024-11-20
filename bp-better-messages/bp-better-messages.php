@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.6.5
+    Version: 2.6.6
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.1
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.6.5';
+        public $version = '2.6.6';
 
         public $db_version = '1.0.4';
 
@@ -138,9 +138,8 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
         public function setup_actions() {
             $this->require_files();
             add_action( 'wp_enqueue_scripts', array($this, 'load_scripts') );
-            //add_filter( 'script_loader_tag',  array( $this, 'script_loader_tag' ), 10, 3);
             add_action( 'admin_enqueue_scripts', array($this, 'load_admin_scripts') );
-            add_action( 'init', array($this, 'load_textDomain') );
+            add_action( 'init', array($this, 'load_text_domain') );
         }
 
         /**
@@ -242,7 +241,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             $this->settings = apply_filters( 'bp_better_messages_overwrite_settings', $this->settings );
         }
 
-        public function load_textDomain() {
+        public function load_text_domain() {
             load_plugin_textdomain( 'bp-better-messages', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
         }
 
@@ -443,15 +442,6 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             wp_localize_script( 'better-messages', 'Better_Messages', apply_filters( 'bp_better_messages_script_variables', $script_variables ) );
             wp_enqueue_script( 'better-messages' );
             $this->js_loaded = true;
-        }
-
-        public function script_loader_tag( $tag, $handle, $src ) {
-            if ( $handle === 'better-messages' ) {
-                if ( false === stripos( $tag, 'async' ) ) {
-                    $tag = str_replace( ' src', ' async="async" src', $tag );
-                }
-            }
-            return $tag;
         }
 
         public function get_script_variables() {

@@ -1426,7 +1426,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                     $from = array_map('intval', $wpdb->get_col($sql));
                 } else {
-                    $from = [];
+                    return new WP_Error(
+                        'rest_forbidden',
+                        __( 'Message not found in this conversation', 'bp-better-messages' ),
+                        array( 'status' => 400 )
+                    );
                 }
             } else if( $from > 0 && $to > 0 ){
                 $sql = $wpdb->prepare("

@@ -257,6 +257,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('threadsmeta') . " WHERE `bm_thread_id` = %d", $thread_id));
             $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('recipients') . " WHERE `thread_id` = %d", $thread_id));
             $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('threads') . " WHERE `id` = %d", $thread_id));
+            $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('threadsmeta') . " WHERE `bm_thread_id` = %d", $thread_id));
 
             Better_Messages()->functions->update_thread_meta( $thread_id, 'bm_last_update', Better_Messages()->functions->get_microtime() );
 
@@ -350,9 +351,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $wpdb->query($sql);
 
                 do_action('bp_better_messages_message_deleted', $message_id );
-            }
 
-            $this->update_message_update_time( $message_id, false, true );
+                $this->update_message_update_time($message_id, false, true);
+            }
 
             if( $update_thread ){
                 do_action( 'better_messages_thread_updated', $thread_id );
@@ -2929,6 +2930,27 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             if( strlen( $microtime ) < $length ){
                 $microtime = str_pad($microtime, $length, '0', STR_PAD_RIGHT);
+            }
+
+            return (int) $microtime;
+        }
+
+        public function to_microtime( $time )
+        {
+            $time = (string) $time;
+
+            $max_int = strlen( PHP_INT_MAX );
+
+            $length = 14;
+
+            if( $max_int < $length ) $length = $max_int;
+
+            if( strlen($time) > $length ){
+                $microtime = substr( $time, 0, $length );
+            }
+
+            if( strlen( $time ) < $length ){
+                $microtime = str_pad($time, $length, '0', STR_PAD_RIGHT);
             }
 
             return (int) $microtime;

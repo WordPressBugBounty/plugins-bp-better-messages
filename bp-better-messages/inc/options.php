@@ -58,17 +58,17 @@ class Better_Messages_Options
             'oEmbedEnable'                => '1',
             'disableEnterForDesktop'      => '0',
             'rateLimitReply'              => [],
-            'rateLimitReplyMessage'       => __( 'Your limit for replies is exceeded', 'bp-better-messages' ),
+            'rateLimitReplyMessage'       => 'Your limit for replies is exceeded',
             'restrictNewThreads'          => [],
-            'restrictNewThreadsMessage'   => __( 'You are not allowed to start new conversations', 'bp-better-messages' ),
-            'restrictBadWordsList'        => __( 'Your message contains a word from blacklist', 'bp-better-messages' ),
+            'restrictNewThreadsMessage'   => 'You are not allowed to start new conversations',
+            'restrictBadWordsList'        => 'Your message contains a word from blacklist',
             'restrictNewThreadsRemoveNewThreadButton' => '0',
             'restrictNewReplies'          => [],
-            'restrictNewRepliesMessage'   => __( 'You are not allowed to continue conversation', 'bp-better-messages' ),
+            'restrictNewRepliesMessage'   => 'You are not allowed to continue conversation',
             'restrictCalls'               => [],
-            'restrictCallsMessage'        => __( 'You are not allowed to make a call', 'bp-better-messages' ),
+            'restrictCallsMessage'        => 'You are not allowed to make a call',
             'restrictViewMessages'        => [],
-            'restrictViewMessagesMessage' => __( 'Message hidden', 'bp-better-messages' ),
+            'restrictViewMessagesMessage' => 'Message hidden',
             'restrictViewMiniThreads'     => [],
             'restrictViewMiniFriends'     => [],
             'restrictViewMiniGroups'      => [],
@@ -146,28 +146,27 @@ class Better_Messages_Options
             'desktopFullScreen'           => '1',
             'restrictRoleBlock'           => [],
             'restrictRoleType'            => 'allow',
-            'restrictRoleMessage'         => esc_attr_x('You are not allowed to send messages', 'Settings page', 'bp-better-messages'),
+            'restrictRoleMessage'         => 'You are not allowed to send messages',
             'friendsOnSiteNotifications'  => '0',
             'groupsOnSiteNotifications'   => '0',
             'enableUsersSuggestions'      => '1',
             'hidePossibleBreakingElements'  => '0',
 
             'myCredNewMessageCharge'        => [],
-            'myCredNewMessageChargeMessage' => _x( 'Not enough points to send a new message.', 'Settings page', 'bp-better-messages' ),
+            'myCredNewMessageChargeMessage' => 'Not enough points to send a new message.',
             'myCredNewThreadCharge'         => [],
-            'myCredNewThreadChargeMessage'  => _x( 'Not enough points to start a new conversation.', 'Settings page', 'bp-better-messages' ),
+            'myCredNewThreadChargeMessage'  => 'Not enough points to start a new conversation.',
             'myCredCallPricing'         => [],
-            'myCredCallPricingStartMessage'  => _x( 'Not enough points to start new call', 'Settings page', 'bp-better-messages' ),
-            'myCredCallPricingEndMessage'    => _x( 'Not enough points to continue the call', 'Settings page', 'bp-better-messages' ),
+            'myCredCallPricingStartMessage'  => 'Not enough points to start new call',
+            'myCredCallPricingEndMessage'    => 'Not enough points to continue the call',
 
             'GamiPressNewMessageCharge'        => [],
-            'GamiPressNewMessageChargeMessage' => _x( 'Not enough points to send a new message.', 'Settings page', 'bp-better-messages' ),
+            'GamiPressNewMessageChargeMessage' => 'Not enough points to send a new message.',
             'GamiPressNewThreadCharge'         => [],
-            'GamiPressNewThreadChargeMessage'  => _x( 'Not enough points to start a new conversation.', 'Settings page', 'bp-better-messages' ),
+            'GamiPressNewThreadChargeMessage'  => 'Not enough points to start a new conversation.',
             'GamiPressCallPricing'             => [],
-            'GamiPressCallPricingStartMessage' => _x( 'Not enough points to start new call', 'Settings page', 'bp-better-messages' ),
-            'GamiPressCallPricingEndMessage'   => _x( 'Not enough points to continue the call', 'Settings page', 'bp-better-messages' ),
-
+            'GamiPressCallPricingStartMessage' => 'Not enough points to start new call',
+            'GamiPressCallPricingEndMessage'   => 'Not enough points to continue the call',
             'createEmailTemplate'           => '1',
             'notificationsOfflineDelay'     => 15,
             'bbPressAuthorDetailsLink'      => '0',
@@ -234,7 +233,6 @@ class Better_Messages_Options
             'redirectUnlogged'              => '0',
             'wpJobManagerIntegration'       => '0',
             'pinnedMessages'                => '0',
-
             'openAiApiKey'                  => ''
         );
 
@@ -399,7 +397,7 @@ class Better_Messages_Options
 
             <div id="messages-settings"></div>
         </div>
-    <?php
+        <?php
     }
 
     public function viewer_page_html(){

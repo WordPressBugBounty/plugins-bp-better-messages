@@ -15372,12 +15372,17 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   width: 100%;
   background: rgba(255, 255, 255, 0.95);
   overflow: auto;
+  z-index: 2;
 }
 .bm-guest-wall .bm-guest-wall-content {
   margin-top: 50px;
 }
 
 .bp-messages-mobile .bm-guest-wall-content {
+  margin-top: 100px;
+}
+
+.bp-messages-wrap-main .bm-guest-wall-content {
   margin-top: 100px;
 }
 

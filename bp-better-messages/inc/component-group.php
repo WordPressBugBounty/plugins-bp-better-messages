@@ -319,6 +319,12 @@ class Better_Messages_Group extends BP_Group_Extension
         }
 
         if( ! $thread_id ) {
+            $enabled = ( $this->is_group_messages_enabled( $group_id ) === 'enabled' );
+
+            if( ! $enabled ){
+                return false;
+            }
+
             $wpdb->query( $wpdb->prepare( "
             DELETE  
             FROM `" . bm_get_table('threadsmeta') . "` 
@@ -348,6 +354,14 @@ class Better_Messages_Group extends BP_Group_Extension
     }
 
     public function sync_thread_members( $thread_id ){
+        if( ! $thread_id ) return false;
+
+        $thread = Better_Messages()->functions->get_thread( $thread_id );
+
+        if( ! $thread ) {
+            return false;
+        }
+
         wp_cache_delete( 'thread_recipients_' . $thread_id, 'bm_messages' );
         wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
         $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'group_id' );
