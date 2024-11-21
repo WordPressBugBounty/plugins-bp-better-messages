@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.6.6
+Stable tag: 2.6.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,7 +170,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-* 2.6.6
+* 2.6.7
 * Guests now able to enter their display name when entering chat room
 * Added automatic cleaner for bm_deleted_time messages meta_key
 * Fixed infinite loading which could appear in some cases
