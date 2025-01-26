@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.1
-Stable tag: 2.6.7
+Stable tag: 2.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,7 +170,24 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-* 2.6.7
+= 2.7.0 =
+* Private & Group Video Calls review and improvements
+* Added ability to pin participants in group video chats
+* Increased max allowed participants in group video chats to 32
+* Private calls now using same technology as group calls to improve connection stability and quality
+* Added switch camera button to private video calls at mobile devices for easier camera switching
+* Using OPFS Storage when possible better performance and stability
+* Using Dedicated Worker for better performance and stability
+* Changed authorization function from wp_authorize to custom implementation using wp_check_password for better compatibility with 3rd party plugins
+* Removed option to not use random generated file names for uploaded files to improve security
+* Added index.php file to uploads folder to prevent files listing when allowed in server configuration
+* Updated Freemius SDK to latest version
+
+= 2.6.8 - 2.6.9 =
+* Unplanned update: Compatibility with new version of OneSignal plugin
+* Working hard on other updates, stay tuned!
+
+= 2.6.7 =
 * Guests now able to enter their display name when entering chat room
 * Added automatic cleaner for bm_deleted_time messages meta_key
 * Fixed infinite loading which could appear in some cases

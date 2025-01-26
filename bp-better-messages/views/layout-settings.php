@@ -1715,15 +1715,6 @@ $all_roles['bm-guest'] = [
                 </tr>
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
-                        <?php _ex( 'Random file names', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Changes file names to random to improve users privacy', 'Settings page','bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="attachmentsRandomName" type="checkbox" <?php checked( $this->settings[ 'attachmentsRandomName' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
                         <?php _ex( 'Allow to capture photos', 'Settings page','bp-better-messages' ); ?>
                         <p style="font-size: 10px;"><?php _ex( 'Allow to capture photos from user webcam', 'Settings page','bp-better-messages' ); ?></p>
                         <p style="font-size: 10px;"><?php _ex( '.jpg or .png format must be enabled', 'Settings page','bp-better-messages' ); ?></p>
@@ -2498,25 +2489,6 @@ $all_roles['bm-guest'] = [
                             </label>
                             <?php Better_Messages()->functions->license_proposal(); ?>
                         </fieldset>
-                    </td>
-                </tr>
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Missed call message when user was offline', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Leaving message about missed call for user if user was offline at that moment.', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="offlineCallsNotifications" type="checkbox" <?php checked( $this->settings[ 'offlineCallsNotifications' ], '1' ); ?> value="1" <?php if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
-                        <?php Better_Messages()->functions->license_proposal(); ?>
-                    </td>
-                </tr>
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Allow call even when user is offline', 'Settings page', 'bp-better-messages' ); ?>
-                    </th>
-                    <td>
-                        <input name="offlineCallsAllowed" type="checkbox" <?php checked( $this->settings[ 'offlineCallsAllowed' ], '1' ); ?> value="1" <?php if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
-                        <?php Better_Messages()->functions->license_proposal(); ?>
                     </td>
                 </tr>
 

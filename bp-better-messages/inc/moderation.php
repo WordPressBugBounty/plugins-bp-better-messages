@@ -323,6 +323,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             wp_cache_set( $key, $result, 'bm_messages' );
 
+            if( empty( $result ) ) return (object) [];
+
             return $result;
         }
 

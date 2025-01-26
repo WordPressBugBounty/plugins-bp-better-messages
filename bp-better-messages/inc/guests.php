@@ -235,10 +235,10 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 return $item;
             }
 
-            $item['canBlock'] = false;
-            $item['canVideo'] = false;
-            $item['canAudio'] = false;
-            $item['verified'] = false;
+            $item['canBlock'] = 0;
+            $item['canVideo'] = 0;
+            $item['canAudio'] = 0;
+            $item['verified'] = 0;
 
             $item['avatar'] = Better_Messages()->url . 'assets/images/avatar.png';
 
@@ -248,7 +248,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 $item['name'] = $guest_user->name;
 
                 if( ! empty( $guest_user->ip ) && str_starts_with($guest_user->ip, 'ai-chat-bot-') ){
-                    $item['is_bot'] = true;
+                    $item['is_bot'] = 1;
                     $bot_id = str_replace('ai-chat-bot-', '', $guest_user->ip);
 
                     if( has_post_thumbnail( $bot_id ) ) {
@@ -484,11 +484,13 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         public function get_client_ip(){
             $ip = '';
 
-            if ( isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP'])) {
+            if ( isset($_SERVER['HTTP_X_REAL_IP']) && ! empty($_SERVER['HTTP_X_REAL_IP']) && ! str_contains($_SERVER['HTTP_X_REAL_IP'], ',') ) {
+                $ip = $_SERVER['HTTP_X_REAL_IP'];
+            } else if ( isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP']) && ! str_contains($_SERVER['HTTP_CLIENT_IP'], ',')) {
                 $ip = $_SERVER['HTTP_CLIENT_IP'];
-            } elseif ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'] )) {
+            } elseif ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'] ) && ! str_contains($_SERVER['HTTP_X_FORWARDED_FOR'], ',') ) {
                 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            } else if( isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'] ) ){
+            } else if( isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'] ) && ! str_contains($_SERVER['REMOTE_ADDR'], ',') ){
                 $ip = $_SERVER['REMOTE_ADDR'];
             }
 

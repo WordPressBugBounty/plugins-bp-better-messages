@@ -1865,7 +1865,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $item['canVideo'] = (int) $this->video_calls_active() && $item['isFriend'];
                     $item['canAudio'] = (int) $this->audio_calls_active() && $item['isFriend'];
                 }
-                // if( Better_Messages()->settings['callsLimitFriends'] === '1' )
             }
 
             return apply_filters( 'better_messages_rest_user_item', $item, $user_id, $include_personal );
@@ -3395,7 +3394,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_user_roles( $user_id ){
             if( $user_id > 0 ){
-                $user             = get_userdata( $user_id );
+                $user = get_userdata( $user_id );
 
                 if( ! $user ){
                     return [];
@@ -3515,6 +3514,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $messages_allowedtags = apply_filters( 'better_messages_allowed_tags', $messages_allowedtags );
 
             return wp_kses( $content, $messages_allowedtags );
+        }
+
+        function current_time( $gmt = true, $type = 'mysql' ) {
+            return current_time( $type, $gmt );
         }
     }
 

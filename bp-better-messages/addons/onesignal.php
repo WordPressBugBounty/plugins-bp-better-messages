@@ -40,7 +40,7 @@ if ( ! class_exists( 'Better_Messages_OneSignal' ) ) {
 
             $url = Better_Messages()->url . "addons/onesignal/sub-update{$suffix}.js";
 
-            echo '<script src="' . $url . '?ver=0.1"></script>';
+            echo '<script src="' . $url . '?ver=0.2"></script>';
         }
 
         public function rest_api_init()
@@ -54,52 +54,94 @@ if ( ! class_exists( 'Better_Messages_OneSignal' ) ) {
 
         public function update_subscription( WP_REST_Request $request )
         {
-            if( ! class_exists('OneSignal') ) return false;
-
             $user_id = Better_Messages()->functions->get_current_user_id();
 
-            if( $user_id <= 0 ){
-                return new WP_Error( 'onesignal_error', 'User ID is required', array( 'status' => 400 ) );
+            if ($user_id <= 0) {
+                return new WP_Error('onesignal_error', 'User ID is required', array('status' => 400));
             }
 
-            $onesignal_wp_settings = OneSignal::get_onesignal_settings();
-            $onesignal_app_id      = $onesignal_wp_settings['app_id'];
-            $onesignal_auth_key    = $onesignal_wp_settings['app_rest_api_key'];
+            if (class_exists('OneSignal')) {
+                $onesignal_wp_settings = OneSignal::get_onesignal_settings();
+                $onesignal_app_id = $onesignal_wp_settings['app_id'];
+                $onesignal_auth_key = $onesignal_wp_settings['app_rest_api_key'];
 
-            $subscription_id = (string) $request->get_param( 'subscription_id');
+                $subscription_id = (string) $request->get_param('subscription_id');
 
-            if( ! $subscription_id ){
-                return new WP_Error( 'onesignal_error', 'Subscription ID is required', array( 'status' => 400 ) );
+                if ( ! $subscription_id ) {
+                    return new WP_Error('onesignal_error', 'Subscription ID is required', array('status' => 400));
+                }
+
+                $onesignal_post_url = "https://api.onesignal.com/apps/{$onesignal_app_id}/subscriptions/{$subscription_id}/user/identity";
+
+                $fields = [
+                    'identity' => [
+                        'external_id' => (string)$user_id
+                    ]
+                ];
+
+                $request = array(
+                    'method' => 'PATCH',
+                    'headers' => array(
+                        'content-type' => 'application/json;charset=utf-8',
+                        'Authorization' => 'Basic ' . $onesignal_auth_key,
+                    ),
+                    'body' => wp_json_encode($fields),
+                    'timeout' => 3,
+                );
+
+                $response = wp_remote_request($onesignal_post_url, $request);
+
+                if (is_wp_error($response)) {
+                    return new WP_Error('onesignal_error', $response->get_error_message(), array('status' => 500));
+                }
+
+                return [
+                    'user_id' => $user_id,
+                    'subscription_id' => $subscription_id,
+                ];
             }
 
-            $onesignal_post_url = "https://api.onesignal.com/apps/{$onesignal_app_id}/subscriptions/{$subscription_id}/user/identity";
+            if( defined('ONESIGNAL_VERSION_V3' ) ) {
+                $apiKey = get_option('OneSignalWPSetting')['app_rest_api_key'] ?? '';
+                if( $apiKey === '' ) return false;
+                $onesignal_app_id = get_option('OneSignalWPSetting')['app_id'];
+                $subscription_id = (string) $request->get_param('subscription_id');
 
-            $fields = [
-                'identity' => [
-                    'external_id' => (string) $user_id
-                ]
-            ];
+                if ( ! $subscription_id ) {
+                    return new WP_Error('onesignal_error', 'Subscription ID is required', array('status' => 400));
+                }
 
-            $request = array(
-                'method' => 'PATCH',
-                'headers' => array(
-                    'content-type' => 'application/json;charset=utf-8',
-                    'Authorization' => 'Basic ' . $onesignal_auth_key,
-                ),
-                'body' => wp_json_encode($fields),
-                'timeout' => 3,
-            );
+                $onesignal_post_url = "https://api.onesignal.com/apps/{$onesignal_app_id}/subscriptions/{$subscription_id}/user/identity";
 
-            $response = wp_remote_request($onesignal_post_url, $request);
+                $fields = [
+                    'identity' => [
+                        'external_id' => (string)$user_id
+                    ]
+                ];
 
-            if( is_wp_error($response) ){
-                return new WP_Error( 'onesignal_error', $response->get_error_message(), array( 'status' => 500 ) );
+                $request = array(
+                    'method' => 'PATCH',
+                    'headers' => array(
+                        'content-type' => 'application/json;charset=utf-8',
+                        'Authorization' => 'Key ' . $apiKey,
+                    ),
+                    'body' => wp_json_encode($fields),
+                    'timeout' => 3,
+                );
+
+                $response = wp_remote_request($onesignal_post_url, $request);
+
+                if ( is_wp_error( $response ) ) {
+                    return new WP_Error('onesignal_error', $response->get_error_message(), array('status' => 500));
+                }
+
+                return [
+                    'user_id' => $user_id,
+                    'subscription_id' => $subscription_id,
+                ];
             }
 
-            return [
-                'user_id' => $user_id,
-                'subscription_id' => $subscription_id,
-            ];
+            return false;
         }
 
         public function add_onesignal_script_variable( $script_variable ){
@@ -112,59 +154,106 @@ if ( ! class_exists( 'Better_Messages_OneSignal' ) ) {
 
         public function send_bulk_pushs( $pushs, $all_recipients, $notification, $message )
         {
-            if( ! class_exists('OneSignal_Admin') || ! class_exists('OneSignal') ) return $pushs;
+            if( class_exists('OneSignal_Admin') && class_exists('OneSignal') ) {
 
-            $onesignal_wp_settings = OneSignal::get_onesignal_settings();
+                $onesignal_wp_settings = OneSignal::get_onesignal_settings();
 
-            if( $onesignal_wp_settings['app_id'] === '' || $onesignal_wp_settings['app_rest_api_key'] === '' ) return $pushs;
+                if ($onesignal_wp_settings['app_id'] === '' || $onesignal_wp_settings['app_rest_api_key'] === '') return $pushs;
 
-            $image = $notification['icon'];
+                $image = $notification['icon'];
 
-            $fields = array(
-                'app_id'           => $onesignal_wp_settings['app_id'],
-                'chrome_web_icon'  => $image,
-                'chrome_web_badge' => $image,
-                'firefox_icon'     => $image,
-                'headings'         => [ 'en' => stripslashes_deep(wp_specialchars_decode($notification['title'])) ],
-                'url'              => $notification['data']['url'],
-                'contents'         => [ 'en' => stripslashes_deep(wp_specialchars_decode($notification['body'])) ],
-            );
+                $fields = array(
+                    'app_id' => $onesignal_wp_settings['app_id'],
+                    'chrome_web_icon' => $image,
+                    'chrome_web_badge' => $image,
+                    'firefox_icon' => $image,
+                    'headings' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['title']))],
+                    'url' => $notification['data']['url'],
+                    'contents' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['body']))],
+                );
 
-            $pushs = [
-                'onesignal_api_key' => $onesignal_wp_settings['app_rest_api_key'],
-                'user_ids'          => array_map('strval', $all_recipients),
-                'fields'            => $fields
-            ];
+                $pushs = [
+                    'onesignal_api_key' => $onesignal_wp_settings['app_rest_api_key'],
+                    'user_ids' => array_map('strval', $all_recipients),
+                    'fields' => $fields
+                ];
+            } else if( defined('ONESIGNAL_VERSION_V3' ) ){
+                $apiKey = get_option('OneSignalWPSetting')['app_rest_api_key'] ?? '';
+                if( $apiKey === '' ) return $pushs;
+
+                $image = $notification['icon'];
+
+                $fields = array(
+                    'app_id' => get_option('OneSignalWPSetting')['app_id'],
+                    'chrome_web_icon' => $image,
+                    'chrome_web_badge' => $image,
+                    'firefox_icon' => $image,
+                    'headings' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['title']))],
+                    'url' => $notification['data']['url'],
+                    'contents' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['body']))],
+                );
+
+                $pushs = [
+                    'onesignal_api_key' => $apiKey,
+                    'user_ids' => array_map('strval', $all_recipients),
+                    'fields' => $fields
+                ];
+            }
 
             return $pushs;
         }
 
         public function send_pushs( $result, $user_id, $notification, $type, $thread_id, $message_id, $sender_id ){
-            if( ! class_exists('OneSignal_Admin') || ! class_exists('OneSignal') ) return $result;
+            if( class_exists('OneSignal_Admin') && class_exists('OneSignal') ) {
 
-            $onesignal_wp_settings = OneSignal::get_onesignal_settings();
+                $onesignal_wp_settings = OneSignal::get_onesignal_settings();
 
-            if( $onesignal_wp_settings['app_id'] === '' || $onesignal_wp_settings['app_rest_api_key'] === '' ) return $result;
-            
-            $onesignal_auth_key = $onesignal_wp_settings['app_rest_api_key'];
+                if ($onesignal_wp_settings['app_id'] === '' || $onesignal_wp_settings['app_rest_api_key'] === '') return $result;
 
-            $image = $notification['icon'];
+                $onesignal_auth_key = $onesignal_wp_settings['app_rest_api_key'];
 
-            $fields = array(
-                'app_id' => $onesignal_wp_settings['app_id'],
-                'chrome_web_icon' => $image,
-                'chrome_web_badge' => $image,
-                'firefox_icon' => $image,
-                'headings' => [ 'en' => stripslashes_deep(wp_specialchars_decode($notification['title'])) ],
-                'url' => $notification['data']['url'],
-                'contents' => [ 'en' => stripslashes_deep(wp_specialchars_decode($notification['body'])) ],
-            );
+                $image = $notification['icon'];
 
-            return [
-                'onesignal_api_key' => $onesignal_auth_key,
-                'user_ids'          => array_map('strval', [ $user_id ]),
-                'fields'            => $fields
-            ];
+                $fields = array(
+                    'app_id' => $onesignal_wp_settings['app_id'],
+                    'chrome_web_icon' => $image,
+                    'chrome_web_badge' => $image,
+                    'firefox_icon' => $image,
+                    'headings' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['title']))],
+                    'url' => $notification['data']['url'],
+                    'contents' => ['en' => stripslashes_deep(wp_specialchars_decode($notification['body']))],
+                );
+
+                return [
+                    'onesignal_api_key' => $onesignal_auth_key,
+                    'user_ids' => array_map('strval', [$user_id]),
+                    'fields' => $fields
+                ];
+            } else if( defined('ONESIGNAL_VERSION_V3' ) ){
+                $apiKey = get_option('OneSignalWPSetting')['app_rest_api_key'] ?? '';
+
+                if( $apiKey === '' ) return $result;
+
+                $image = $notification['icon'];
+
+                $fields = array(
+                    'app_id'           => get_option('OneSignalWPSetting')['app_id'],
+                    'chrome_web_icon' => $image,
+                    'chrome_web_badge' => $image,
+                    'firefox_icon'     => $image,
+                    'headings'         => ['en' => stripslashes_deep(wp_specialchars_decode($notification['title']))],
+                    'url'              => $notification['data']['url'],
+                    'contents'         => ['en' => stripslashes_deep(wp_specialchars_decode($notification['body']))],
+                );
+
+                return [
+                    'onesignal_api_key' => $apiKey,
+                    'user_ids' => array_map('strval', [$user_id]),
+                    'fields' => $fields
+                ];
+            }
+
+            return $result;
         }
 
         public function push_message_in_settings( $message ){

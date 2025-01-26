@@ -55,7 +55,11 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             $blacklist = [
                 '127.0.0.1',
                 'localhost',
-                '::1'
+                '::1',
+                '0.0.0.0',
+                '10.0.0.0/8',
+                '172.16.0.0/12',
+                '192.168.0.0/16'
             ];
 
             if( in_array( $parts['host'], $blacklist ) ){
@@ -63,7 +67,16 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             }
 
             if (filter_var($parts['host'], FILTER_VALIDATE_IP)) {
-                return false;
+                foreach ($blacklist as $blocked) {
+                    if (strpos($blocked, '/') !== false) {
+                        list($subnet, $mask) = explode('/', $blocked);
+                        if ((ip2long($parts['host']) & ~((1 << (32 - $mask)) - 1)) == ip2long($subnet)) {
+                            return false;
+                        }
+                    } else if ($parts['host'] === $blocked) {
+                        return false;
+                    }
+                }
             }
 
             return true;

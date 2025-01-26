@@ -355,6 +355,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                             $message->thread_id  = $_thread_id;
 
                             $meta                = apply_filters('better_messages_rest_message_meta', [], (int) $message->message_id, (int) $message->thread_id, $message->message );
+                            if( empty( $meta ) ) $meta = (object) [];
                             $message->meta       = $meta;
 
                             $message->favorited = (Better_Messages()->functions->is_message_starred($message->message_id, $current_user_id)) ? 1 : 0;
@@ -1195,7 +1196,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
 
                 $meta = apply_filters('better_messages_rest_message_meta', $meta, (int) $message->message_id, (int) $message->thread_id, $message->message );
-                $messages[ $key ]->meta       = $meta;
+                if( empty( $meta ) ) $meta = (object) [];
+                $messages[ $key ]->meta = $meta;
 
                 if( $apply_filters ) {
                     $messages[$key]->favorited = (Better_Messages()->functions->is_message_starred($message->message_id, $current_user_id)) ? 1 : 0;
@@ -1283,7 +1285,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             /** Find all unloaded unread */
             $sql = $wpdb->prepare("
                 SELECT
-                `threads`.`id`    	        as `thread_id`,
+                `threads`.`id` as `thread_id`,
                 ( SELECT `id`
                     FROM " . bm_get_table('messages') . "
                     WHERE `thread_id` = `threads`.`id`
@@ -1754,7 +1756,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     'subject'            => (string) html_entity_decode($thread->subject),
                     'image'              => $image,
                     'lastTime'           => (int) $thread->created_at,
-                    'participants'       => array_map('intval', array_values($_all_user_ids)),
+                    'participants'       => array_map( 'intval', array_values($_all_user_ids) ),
                     'participantsCount'  => (int) count( $_all_user_ids ),
                     'moderators'         => $moderators,
                     'url'                => $url,

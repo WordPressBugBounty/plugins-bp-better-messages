@@ -24,7 +24,7 @@ if ( !class_exists( 'Better_Messages_GamiPress' ) ) {
             add_action( 'bp_better_messages_new_thread_created',      array( $this, 'core_charge_new_thread_created'), 10, 2 );
             add_action( 'better_messages_before_new_thread',          array( $this, 'core_charge_for_new_thread' ), 10, 2 );
 
-            add_filter( 'better_messages_private_call_allowed_error', array( $this, 'is_call_allowed' ), 10, 4 );
+            add_filter( 'better_messages_call_create_custom_error',   array( $this, 'is_call_allowed' ), 10, 4 );
             add_action( 'better_messages_register_call_usage',        array( $this, 'call_usage_charge' ), 10, 3 );
         }
 

@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.3;
+        private $db_version = 1.4;
 
         public static function instance()
         {
@@ -518,6 +518,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 ],
                 '1.3' => [
                     "ALTER TABLE `" . bm_get_table('recipients') ."` ADD INDEX `unread_count_index` (`user_id`, `is_deleted`, `unread_count`);"
+                ],
+                '1.4' => [
+                    function (){
+                        if( Better_Messages()->files ) {
+                            Better_Messages_Files()->create_index_file();
+                        }
+                    }
                 ]
             ];
 

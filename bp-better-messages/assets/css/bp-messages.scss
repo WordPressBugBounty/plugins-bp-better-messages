@@ -5919,18 +5919,6 @@ body.bp-messages-mobile #yz-profile-navmenu{
     list-style: none!important;
 }
 
-
-
-.bp-messages-wrap .bp-messages-audio-container{
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    min-height: 200px;
-    z-index: 5;
-}
-
-
 .bp-messages-group-call-controls-v2{
     position: absolute;
     z-index: 2;
@@ -5949,6 +5937,8 @@ body.bp-messages-mobile #yz-profile-navmenu{
     justify-content: space-between;
 
     .bp-messages-group-call-controls-buttons {
+        white-space: nowrap;
+
         > span {
             position: relative;
             display: inline-block;
@@ -6252,9 +6242,7 @@ body.bp-messages-mobile #yz-profile-navmenu{
 
 }
 
-.bpbm-switch-camera-select-wrap,
-.bpbm-switch-audio-select-wrap,
-.bpbm-switch-mic-select-wrap {
+.bpbm-switch-device-select-wrap {
     display: grid;
     grid-template-areas: "select";
     align-items: center;
@@ -6269,12 +6257,12 @@ body.bp-messages-mobile #yz-profile-navmenu{
     background-color: #fff;
     background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
     pointer-events: auto;
+
     select,
     &::after {
         grid-area: select;
     }
 
-    // Custom arrow
     &:not(.select--multiple)::after {
         content: "";
         justify-self: end;
@@ -6285,7 +6273,6 @@ body.bp-messages-mobile #yz-profile-navmenu{
     }
 
     select {
-        // A reset of styles, including removing the default dropdown arrow
         appearance: none;
         background-color: transparent;
         border: none;
@@ -6293,7 +6280,7 @@ body.bp-messages-mobile #yz-profile-navmenu{
         margin: 0;
         width: 100%;
         font-family: inherit;
-        font-size: inherit;
+        font-size: inherit !important;
         cursor: inherit;
         line-height: inherit;
         z-index: 1;
@@ -6306,7 +6293,6 @@ body.bp-messages-mobile #yz-profile-navmenu{
         }
     }
 }
-
 
 .bp-messages-wrap.bp-messages-popup .bpbm-answer{
     background: green;
@@ -6416,18 +6402,79 @@ body.bp-messages-mobile #yz-profile-navmenu{
             font-size: 18px;
         }
     }
+
+  .bp-messages-placeholder-no-source-message{
+    margin-top: 40px;
+    text-align: center;
+    background: black;
+    color: white;
+    opacity: 0.7;
+    padding: 15px;
+    margin-right: 20px;
+    margin-left: 20px;
+    width: auto;
+    border-radius: var(--bm-border-radius);
+  }
+
+  .bp-messages-placeholder-no-source-message{
+    margin-top: 40px;
+    text-align: center;
+    background: black;
+    color: white;
+    opacity: 0.7;
+    padding: 15px;
+    margin-right: 20px;
+    margin-left: 20px;
+    width: auto;
+    border-radius: var(--bm-border-radius);
+
+    svg{
+      font-size: 28px;
+    }
+
+    .bp-messages-placeholder-participant-no-source-message-text{
+      display: block;
+      font-size: 18px;
+    }
+  }
+
+}
+
+.bp-messages-placeholder-participant-lost-message{
+  position: absolute;
+  margin: auto;
+  text-align: center;
+  background: black;
+  color: white;
+  opacity: 0.7;
+  padding: 15px;
+  bottom: 44%;
+  left: 0;
+  right: 0;
+  margin-right: 20px;
+  margin-left: 20px;
+  width: auto;
+  border-radius: var(--bm-border-radius);
+
+  svg{
+    font-size: 28px;
+  }
+
+  .bp-messages-placeholder-participant-lost-message-text{
+    display: block;
+    font-size: 18px;
+  }
 }
 
 .bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation {
-    background: #fff;
+    //background: #fff;
     width: 100px;
     height: 100px;
     position: relative;
     margin: 30px auto 0;
-    border-radius: 100% !important;
-    overflow: hidden;
+    //border-radius: 100% !important;
+    //overflow: hidden;
     /* border: solid 5px #fff; */
-    animation: bp-messages-call-play 2s ease infinite;
     -webkit-backface-visibility: hidden;
     -moz-backface-visibility: hidden;
     -ms-backface-visibility: hidden;
@@ -6440,14 +6487,15 @@ body.bp-messages-mobile #yz-profile-navmenu{
     height: 100%;
 }
 
-.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation.bp-messages-animation-pause{
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation.bp-messages-animation-pause img{
     animation: none;
 }
 
 .bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation img {
     width: 100px;
     height: 100px;
-    border-radius: 100%;
+    border-radius: 100% !important;
+    animation: bp-messages-call-play 2s ease infinite;
     position: absolute;
     left: 0;
     top: 0;
@@ -6469,72 +6517,6 @@ body.bp-messages-mobile #yz-profile-navmenu{
     height: 100%;
     object-fit: cover;
 }
-
-.bp-messages-audio-container .bp-messages-main-placeholder{
-    background: gray;
-    width: 100%;
-    height: 100%;
-    display: block;
-    min-height: 400px;
-    padding: 0;
-    overflow: hidden;
-    margin: 0;
-    position: relative;
-
-    .bp-messages-placeholder-no-access-message{
-        display: none;
-        color: white;
-        text-align: center;
-        margin: 30px auto 10px;
-        background: #bd1616;
-        padding: 10px 10px 15px;
-        border-radius: 10px;
-        max-width: 90%;
-        width: 100%;
-
-        .bp-messages-placeholder-no-access-message-icon{
-            font-size: 30px;
-        }
-
-        .bp-messages-placeholder-no-access-message-text{
-            margin-top: 5px;
-            font-size: 18px;
-        }
-    }
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-call-animation{
-    background: #fff;
-    width: 100px;
-    height: 100px;
-    position: relative;
-    margin: 30px auto 0;
-    border-radius: 100% !important;
-    /* border: solid 5px #fff; */
-    animation: bp-messages-call-play 2s ease infinite;
-    -webkit-backface-visibility: hidden;
-    -moz-backface-visibility: hidden;
-    -ms-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-call-animation img{
-    width: 100px;
-    height: 100px;
-    border-radius: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-placeholder-message {
-    position: relative;
-    text-align: center;
-    color: white;
-    margin-top: 20px;
-}
-
 
 @keyframes bp-messages-call-play {
 
@@ -7858,6 +7840,7 @@ a.bpbm-join-to-chat-button:hover{
 
     .bp-messages-call-container{
         border-left: 1px solid rgba(var(--bm-border-color), 0.62);
+        height: 100%;
     }
 
     &:hover > .bpbm-switch-chat{
@@ -7886,8 +7869,6 @@ a.bpbm-join-to-chat-button:hover{
             opacity: 1;
         }
     }
-
-
 
     .bp-messages-video-container{
         display: block;
@@ -8353,6 +8334,15 @@ a.bpbm-join-to-chat-button:hover{
                 .bpbm-switch-chat svg{
                     transform: rotate(180deg);
                 }
+
+
+                .bp-messages-call-container,
+                .bp-messages-group-call-controls-v2{
+                  border-left: 0;
+                }
+
+
+
             }
         }
 
@@ -8719,8 +8709,12 @@ a.bpbm-join-to-chat-button:hover{
 
     .bp-messages-group-audio-call-container{
         height: 100%;
-        max-height: calc(100% - 44px);
+        //max-height: calc(100% - 44px);
         overflow: auto;
+
+        .bp-messages-group-call-container{
+          overflow: hidden;
+        }
 
         .bm-connection-control{
         }
@@ -8738,9 +8732,12 @@ a.bpbm-join-to-chat-button:hover{
             position: relative;
             box-sizing: border-box;
             padding: 5px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: calc(100% - 44px);
 
             > .bp-messages-group-call-input-audio{
-                position: absolute;
+                //position: absolute;
                 display: block;
                 z-index: 1;
                 width: calc( 100% - 10px );
@@ -8748,16 +8745,17 @@ a.bpbm-join-to-chat-button:hover{
 
                 .bp-messages-group-call-input-audio-screen{
                     .bp-messages-group-call-input-audio-screen-wrapper{
-                        position: relative;
-                        width: 100%;
-                        height: 0;
-                        padding-bottom: 60%;
+                        //position: relative;
+                        //width: 100%;
+                        //height: 0;
+                        //padding-bottom: 60%;
                         background: gray;
+                        line-height: 0;
 
                         video{
-                            position: absolute;
+                            position: relative;
                             width: 100%;
-                            height: 100%;
+                            height: auto;
                         }
                     }
                 }
@@ -8771,6 +8769,7 @@ a.bpbm-join-to-chat-button:hover{
                     color: rgba(var(--bm-text-color), 1);
                     border-radius: 3px;
                     overflow: hidden;
+                    transition: box-shadow 0.15s ease-in-out;
 
                     .bp-messages-group-call-input-audio-inner-info{
                         padding: 5px;
@@ -8804,6 +8803,10 @@ a.bpbm-join-to-chat-button:hover{
                                 align-items: center;
                                 margin-left: auto;
                                 padding-right: 10px;
+
+                                .bpbm-mic-status{
+                                  line-height: 0;
+                                }
 
                                 > .bpbm-admin-controls{
                                     display: flex;
@@ -8959,23 +8962,36 @@ a.bpbm-join-to-chat-button:hover{
         .bp-messages-group-call-videos-grid{
             position: relative;
             box-sizing: border-box;
-            padding: 5px;
+            width: 100%;
+            width: calc(100% - 4px);
+            margin: auto;
+            transition: height 0.5s ease;
+            //padding: 5px;
             //display: flex;
             //flex-wrap: wrap;
             //padding-left: 0;
 
-            > .bp-messages-group-call-input-video{
+            .bp-messages-group-call-videos-grid-primary{
+                position: relative;
+                transition: height 0.5s ease;
+            }
+
+            .bp-messages-group-call-videos-grid-secondary{
+                position: relative;
+                transition: height 0.5s ease;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .bp-messages-group-call-input-video{
                 display: block;
                 position: absolute;
                 z-index: 1;
                 color: #fff;
-                width: 300px;
-                height: 300px;
                 overflow: hidden;
-                padding: 2.5px;
-
-                &.bpbm-active-speaker{
-                }
+                margin-top: 2px;
+                padding: 2px;
+                transition: top 0.5s ease, left 0.5s ease, height 0.5s ease, width 0.5s ease;
 
                 &.bpbm-cover-video{
                     > .bp-messages-group-call-input-video-inner {
@@ -8990,10 +9006,28 @@ a.bpbm-join-to-chat-button:hover{
                     width: 100%;
                     height: 100%;
                     background: gray;
-                    border-radius: 5px;
+                    border-radius: var(--bm-border-radius);
                     background-repeat: no-repeat;
                     background-position: center;
                     transition: box-shadow 0.15s ease-in-out;
+
+                    .bpbm-caller-status{
+                      text-align: right;
+                      position: absolute;
+                      right: 0;
+                      top: 0;
+                      padding-right: 5px;
+                      padding-top: 5px;
+                      z-index: 2;
+                      background: rgba(0, 0, 0, 0.1098039216);
+                      border-radius: 0 0 0 var(--bm-border-radius);
+
+
+                      > span {
+                        margin-left: 5px;
+                        //display: none;
+                      }
+                    }
 
                     .bpbm-media-container{
                         transform: translate3d(0, 0, 0);
@@ -9006,6 +9040,7 @@ a.bpbm-join-to-chat-button:hover{
                         justify-content: center;
                         align-items: center;
                         overflow: hidden;
+                        border-radius: var(--bm-border-radius);
 
                         &.bpbm-screen-shared{
                             video[datatype="camera"]{
@@ -9035,6 +9070,30 @@ a.bpbm-join-to-chat-button:hover{
 
                     audio{
                         display: none !important;
+                    }
+
+                    .bpbm-admin-controls{
+                      display: none;
+                      text-align: right;
+                      position: absolute;
+                      left: 0;
+                      top: 0;
+                      padding-left: 5px;
+                      padding-top: 5px;
+                      padding-bottom: 5px;
+                      z-index: 2;
+                      background: #0000001c;
+                      border-radius: 0 0 var(--bm-border-radius) 0;
+
+                      > span {
+                        text-align: center;
+                        position: relative;
+                        display: block;
+                        cursor: pointer;
+                        margin-right: 5px;
+                        width: 15px;
+                        height: 15px;
+                      }
                     }
 
                     &:hover .bpbm-admin-controls{
@@ -9098,29 +9157,6 @@ a.bpbm-join-to-chat-button:hover{
 
                                 a{
                                     color: white !important;
-                                }
-                            }
-
-                            .bpbm-admin-controls{
-                                display: none;
-                                margin-left: 5px;
-
-                                > span {
-                                    text-align: center;
-                                    position: relative;
-                                    display: block;
-                                    cursor: pointer;
-                                    margin-right: 5px;
-                                    width: 15px;
-                                    height: 15px;
-                                }
-                            }
-
-                            .bpbm-caller-status{
-                                text-align: right;
-                                > span {
-                                    margin-left: 5px;
-                                    //display: none;
                                 }
                             }
                         }

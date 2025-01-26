@@ -34,6 +34,8 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 add_action( 'better_messages_register_script_dependencies', array($this, 'load_scripts'), 10, 1);
                 add_filter( 'bp_better_messages_script_variable', array( $this, 'attachments_script_vars' ), 10, 1 );
             }
+
+            add_action( 'bp_better_chat_settings_updated', array($this, 'create_index_file') );
         }
 
         public $scripts_loaded = false;
@@ -402,6 +404,22 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             exit;
         }
 
+        public function create_index_file()
+        {
+            try {
+                add_filter('upload_dir', array( $this, 'upload_dir'));
+                $upload_dir = wp_upload_dir();
+                $path = trailingslashit($upload_dir['path']);
+                $index = $path . 'index.php';
+
+                if ( ! file_exists($index) ) {
+                    file_put_contents($index, "<?php\n // Silence is golden.");
+                }
+            } finally {
+                remove_filter('upload_dir', array( $this, 'upload_dir'));
+            }
+        }
+
         public function upload_dir($dir){
             $dirName = apply_filters('bp_better_messages_upload_dir_name', 'bp-better-messages');
 
@@ -471,9 +489,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 $name = wp_basename($file['name']);
 
-                if( Better_Messages()->settings['attachmentsRandomName'] === '1'){
-                    $_FILES['file']['name'] = Better_Messages()->functions->random_string(20) . '.' . $extension;
-                }
+                $_FILES['file']['name'] = Better_Messages()->functions->random_string(20) . '.' . $extension;
 
                 if( ! in_array( strtolower($extension), $extensions ) ){
                     return new WP_Error(

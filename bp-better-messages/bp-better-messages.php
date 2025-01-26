@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.6.7
+    Version: 2.7.0
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.1
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.6.7';
+        public $version = '2.7.0';
 
         public $db_version = '1.0.4';
 
@@ -471,6 +471,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             $script_variables = array(
                 'hash'               => md5( $hash ),
                 'user_id'            => get_current_user_id(),
+                'version'            => $this->version,
                 'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
                 'restUrl'            => esc_url_raw( get_rest_url( null, '/better-messages/v1/' ) ),
                 'nonce'              => wp_create_nonce( 'wp_rest' ),
@@ -537,7 +538,6 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'listStatus'         => ( $this->realtime && $this->settings['messagesStatusList'] ? '1' : '0' ),
                 'statusDetails'      => ( $this->realtime && $this->settings['messagesStatusDetailed'] ? '1' : '0' ),
                 'combinedView'       => ( $this->settings['combinedView'] == '1' ? '1' : '0' ),
-                'offlineCalls'       => ( $this->settings['offlineCallsAllowed'] == '1' ? '1' : '0' ),
                 'onSiteNotification' => ( $this->settings['disableOnSiteNotification'] == '1' ? '0' : '1' ),
                 'onsitePosition'     => ( $this->settings['onsitePosition'] === 'right' ? 'right' : 'left' ),
                 'titleNotifications' => ( $this->settings['titleNotifications'] == '1' ? '1' : '0' ),

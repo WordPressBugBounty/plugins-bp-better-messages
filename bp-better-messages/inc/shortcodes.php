@@ -81,7 +81,7 @@ class Better_Messages_Shortcodes
         }
 
         if( isset( $args['subject'] ) ) {
-            $attrs .= ' data-subject="' . $args['subject'] . '"';
+            $attrs .= ' data-subject="' . urlencode($args['subject']) . '"';
         }
 
         if( isset( $args['target'] ) ) {

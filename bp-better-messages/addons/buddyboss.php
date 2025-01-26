@@ -67,6 +67,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             if( ! is_admin() ){
                 add_filter( 'bp_disable_group_messages', '__return_false' );
             }
+
             /**
              * BuddyBoss Pushs
              */
@@ -106,7 +107,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             $url = Better_Messages()->url . "addons/onesignal/sub-update{$suffix}.js";
 
-            echo '<script src="' . $url . '?ver=0.1"></script>';
+            echo '<script src="' . $url . '?ver=0.2"></script>';
         }
 
         public function update_subscription( WP_REST_Request $request )
@@ -299,7 +300,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             $online = [];
 
-            if( Better_Messages()->websocket ) {
+            if( Better_Messages()->websocket && apply_filters('better_messages_bb_app_push_only_online', true) ) {
                 $online = Better_Messages()->websocket->get_online_users();
             }
 

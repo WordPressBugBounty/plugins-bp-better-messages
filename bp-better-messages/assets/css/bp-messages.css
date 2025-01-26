@@ -11545,15 +11545,6 @@ body.bp-messages-mobile #yz-profile-navmenu {
   list-style: none !important;
 }
 
-.bp-messages-wrap .bp-messages-audio-container {
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  min-height: 200px;
-  z-index: 5;
-}
-
 .bp-messages-group-call-controls-v2 {
   position: absolute;
   z-index: 2;
@@ -11570,6 +11561,9 @@ body.bp-messages-mobile #yz-profile-navmenu {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons {
+  white-space: nowrap;
 }
 .bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons > span {
   position: relative;
@@ -11850,9 +11844,7 @@ body.bp-messages-mobile #yz-profile-navmenu {
   margin: 0 5px;
 }
 
-.bpbm-switch-camera-select-wrap,
-.bpbm-switch-audio-select-wrap,
-.bpbm-switch-mic-select-wrap {
+.bpbm-switch-device-select-wrap {
   display: grid;
   grid-template-areas: "select";
   align-items: center;
@@ -11868,16 +11860,10 @@ body.bp-messages-mobile #yz-profile-navmenu {
   background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
   pointer-events: auto;
 }
-.bpbm-switch-camera-select-wrap select, .bpbm-switch-camera-select-wrap::after,
-.bpbm-switch-audio-select-wrap select,
-.bpbm-switch-audio-select-wrap::after,
-.bpbm-switch-mic-select-wrap select,
-.bpbm-switch-mic-select-wrap::after {
+.bpbm-switch-device-select-wrap select, .bpbm-switch-device-select-wrap::after {
   grid-area: select;
 }
-.bpbm-switch-camera-select-wrap:not(.select--multiple)::after,
-.bpbm-switch-audio-select-wrap:not(.select--multiple)::after,
-.bpbm-switch-mic-select-wrap:not(.select--multiple)::after {
+.bpbm-switch-device-select-wrap:not(.select--multiple)::after {
   content: "";
   justify-self: end;
   width: 0.8em;
@@ -11885,9 +11871,7 @@ body.bp-messages-mobile #yz-profile-navmenu {
   background-color: #777;
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
-.bpbm-switch-camera-select-wrap select,
-.bpbm-switch-audio-select-wrap select,
-.bpbm-switch-mic-select-wrap select {
+.bpbm-switch-device-select-wrap select {
   appearance: none;
   background-color: transparent;
   border: none;
@@ -11895,7 +11879,7 @@ body.bp-messages-mobile #yz-profile-navmenu {
   margin: 0;
   width: 100%;
   font-family: inherit;
-  font-size: inherit;
+  font-size: inherit !important;
   cursor: inherit;
   line-height: inherit;
   z-index: 1;
@@ -11903,9 +11887,7 @@ body.bp-messages-mobile #yz-profile-navmenu {
   background: none;
   visibility: visible !important;
 }
-.bpbm-switch-camera-select-wrap select::-ms-expand,
-.bpbm-switch-audio-select-wrap select::-ms-expand,
-.bpbm-switch-mic-select-wrap select::-ms-expand {
+.bpbm-switch-device-select-wrap select::-ms-expand {
   display: none;
 }
 
@@ -12011,17 +11993,68 @@ body.bp-messages-mobile #yz-profile-navmenu {
   margin-top: 5px;
   font-size: 18px;
 }
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-placeholder-no-source-message {
+  margin-top: 40px;
+  text-align: center;
+  background: black;
+  color: white;
+  opacity: 0.7;
+  padding: 15px;
+  margin-right: 20px;
+  margin-left: 20px;
+  width: auto;
+  border-radius: var(--bm-border-radius);
+}
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-placeholder-no-source-message {
+  margin-top: 40px;
+  text-align: center;
+  background: black;
+  color: white;
+  opacity: 0.7;
+  padding: 15px;
+  margin-right: 20px;
+  margin-left: 20px;
+  width: auto;
+  border-radius: var(--bm-border-radius);
+}
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-placeholder-no-source-message svg {
+  font-size: 28px;
+}
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-placeholder-no-source-message .bp-messages-placeholder-participant-no-source-message-text {
+  display: block;
+  font-size: 18px;
+}
+
+.bp-messages-placeholder-participant-lost-message {
+  position: absolute;
+  margin: auto;
+  text-align: center;
+  background: black;
+  color: white;
+  opacity: 0.7;
+  padding: 15px;
+  bottom: 44%;
+  left: 0;
+  right: 0;
+  margin-right: 20px;
+  margin-left: 20px;
+  width: auto;
+  border-radius: var(--bm-border-radius);
+}
+.bp-messages-placeholder-participant-lost-message svg {
+  font-size: 28px;
+}
+.bp-messages-placeholder-participant-lost-message .bp-messages-placeholder-participant-lost-message-text {
+  display: block;
+  font-size: 18px;
+}
 
 .bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation {
-  background: #fff;
   width: 100px;
   height: 100px;
   position: relative;
   margin: 30px auto 0;
-  border-radius: 100% !important;
-  overflow: hidden;
   /* border: solid 5px #fff; */
-  animation: bp-messages-call-play 2s ease infinite;
   -webkit-backface-visibility: hidden;
   -moz-backface-visibility: hidden;
   -ms-backface-visibility: hidden;
@@ -12034,14 +12067,15 @@ body.bp-messages-mobile #yz-profile-navmenu {
   height: 100%;
 }
 
-.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation.bp-messages-animation-pause {
+.bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation.bp-messages-animation-pause img {
   animation: none;
 }
 
 .bp-messages-video-container .bp-messages-main-placeholder .bp-messages-call-animation img {
   width: 100px;
   height: 100px;
-  border-radius: 100%;
+  border-radius: 100% !important;
+  animation: bp-messages-call-play 2s ease infinite;
   position: absolute;
   left: 0;
   top: 0;
@@ -12066,67 +12100,6 @@ body.bp-messages-mobile #yz-profile-navmenu {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder {
-  background: gray;
-  width: 100%;
-  height: 100%;
-  display: block;
-  min-height: 400px;
-  padding: 0;
-  overflow: hidden;
-  margin: 0;
-  position: relative;
-}
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-placeholder-no-access-message {
-  display: none;
-  color: white;
-  text-align: center;
-  margin: 30px auto 10px;
-  background: #bd1616;
-  padding: 10px 10px 15px;
-  border-radius: 10px;
-  max-width: 90%;
-  width: 100%;
-}
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-placeholder-no-access-message .bp-messages-placeholder-no-access-message-icon {
-  font-size: 30px;
-}
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-placeholder-no-access-message .bp-messages-placeholder-no-access-message-text {
-  margin-top: 5px;
-  font-size: 18px;
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-call-animation {
-  background: #fff;
-  width: 100px;
-  height: 100px;
-  position: relative;
-  margin: 30px auto 0;
-  border-radius: 100% !important;
-  /* border: solid 5px #fff; */
-  animation: bp-messages-call-play 2s ease infinite;
-  -webkit-backface-visibility: hidden;
-  -moz-backface-visibility: hidden;
-  -ms-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-call-animation img {
-  width: 100px;
-  height: 100px;
-  border-radius: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.bp-messages-audio-container .bp-messages-main-placeholder .bp-messages-placeholder-message {
-  position: relative;
-  text-align: center;
-  color: white;
-  margin-top: 20px;
 }
 
 @keyframes bp-messages-call-play {
@@ -13372,6 +13345,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 }
 .bp-messages-call-wrap .bp-messages-call-container {
   border-left: 1px solid rgba(var(--bm-border-color), 0.62);
+  height: 100%;
 }
 .bp-messages-call-wrap:hover > .bpbm-switch-chat {
   opacity: 0.5;
@@ -13739,6 +13713,10 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 .bp-messages-wrap .bpbm-chat-content.bpbm-call-view.bpbm-hide-chat .bpbm-switch-chat svg {
   transform: rotate(180deg);
 }
+.bp-messages-wrap .bpbm-chat-content.bpbm-call-view.bpbm-hide-chat .bp-messages-call-container,
+.bp-messages-wrap .bpbm-chat-content.bpbm-call-view.bpbm-hide-chat .bp-messages-group-call-controls-v2 {
+  border-left: 0;
+}
 .bp-messages-wrap .bpbm-chat-content.bpbm-call-audio-view .bp-messages-call-wrap {
   width: 100%;
   max-width: 350px;
@@ -14032,8 +14010,10 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container {
   height: 100%;
-  max-height: calc(100% - 44px);
   overflow: auto;
+}
+.bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-container {
+  overflow: hidden;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bpbm-call-settings {
   position: absolute;
@@ -14047,25 +14027,24 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   position: relative;
   box-sizing: border-box;
   padding: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: calc(100% - 44px);
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio {
-  position: absolute;
   display: block;
   z-index: 1;
   width: calc(100% - 10px);
   margin: 5px;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-screen .bp-messages-group-call-input-audio-screen-wrapper {
-  position: relative;
-  width: 100%;
-  height: 0;
-  padding-bottom: 60%;
   background: gray;
+  line-height: 0;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-screen .bp-messages-group-call-input-audio-screen-wrapper video {
-  position: absolute;
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-inner {
   padding: 0;
@@ -14076,6 +14055,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   color: rgba(var(--bm-text-color), 1);
   border-radius: 3px;
   overflow: hidden;
+  transition: box-shadow 0.15s ease-in-out;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-inner .bp-messages-group-call-input-audio-inner-info {
   padding: 5px;
@@ -14107,6 +14087,9 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   align-items: center;
   margin-left: auto;
   padding-right: 10px;
+}
+.bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-inner .bp-messages-group-call-input-audio-inner-info .bpbm-caller-info .bpbm-caller-actions .bpbm-mic-status {
+  line-height: 0;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-inner .bp-messages-group-call-input-audio-inner-info .bpbm-caller-info .bpbm-caller-actions > .bpbm-admin-controls {
   display: flex;
@@ -14222,32 +14205,59 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid {
   position: relative;
   box-sizing: border-box;
-  padding: 5px;
+  width: 100%;
+  width: calc(100% - 4px);
+  margin: auto;
+  transition: height 0.5s ease;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-videos-grid-primary {
+  position: relative;
+  transition: height 0.5s ease;
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-videos-grid-secondary {
+  position: relative;
+  transition: height 0.5s ease;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video {
   display: block;
   position: absolute;
   z-index: 1;
   color: #fff;
-  width: 300px;
-  height: 300px;
   overflow: hidden;
-  padding: 2.5px;
+  margin-top: 2px;
+  padding: 2px;
+  transition: top 0.5s ease, left 0.5s ease, height 0.5s ease, width 0.5s ease;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video.bpbm-cover-video > .bp-messages-group-call-input-video-inner video {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video.bpbm-cover-video > .bp-messages-group-call-input-video-inner video {
   object-fit: cover;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner {
   position: relative;
   width: 100%;
   height: 100%;
   background: gray;
-  border-radius: 5px;
+  border-radius: var(--bm-border-radius);
   background-repeat: no-repeat;
   background-position: center;
   transition: box-shadow 0.15s ease-in-out;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-caller-status {
+  text-align: right;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding-right: 5px;
+  padding-top: 5px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.1098039216);
+  border-radius: 0 0 0 var(--bm-border-radius);
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-caller-status > span {
+  margin-left: 5px;
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container {
   transform: translate3d(0, 0, 0);
   position: absolute;
   z-index: 1;
@@ -14258,8 +14268,9 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  border-radius: var(--bm-border-radius);
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera] {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera] {
   position: absolute;
   bottom: 5px;
   right: 5px;
@@ -14268,10 +14279,10 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   transition: opacity 0.15s ease-in-out;
   cursor: grab;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera]:hover {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera]:hover {
   opacity: 1;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner video {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner video {
   position: relative;
   display: block;
   max-width: 100%;
@@ -14279,22 +14290,44 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   height: 100%;
   object-fit: contain;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner audio {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner audio {
   display: none !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner:hover .bpbm-admin-controls {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-admin-controls {
+  display: none;
+  text-align: right;
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding-left: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.1098039216);
+  border-radius: 0 0 var(--bm-border-radius) 0;
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-admin-controls > span {
+  text-align: center;
+  position: relative;
+  display: block;
+  cursor: pointer;
+  margin-right: 5px;
+  width: 15px;
+  height: 15px;
+}
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner:hover .bpbm-admin-controls {
   display: flex !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary:hover .bpbm-caller-status {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary:hover .bpbm-caller-status {
   display: none !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary .bpbm-info-name .bpbm-name {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary .bpbm-info-name .bpbm-name {
   display: none !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary .bpbm-info-name .bpbm-admin-controls {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner.bp-messages-group-call-video-secondary .bpbm-info-name .bpbm-admin-controls {
   margin-left: 0 !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info {
   transform: translate3d(0, 0, 0);
   position: absolute;
   bottom: 0;
@@ -14309,20 +14342,20 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   align-content: center;
   justify-content: space-between;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-info-avatar {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-info-avatar {
   display: none;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info {
   display: flex;
   align-content: center;
   justify-content: space-between;
   align-items: center;
   padding: 0 10px;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info > * {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info > * {
   padding: 5px 0;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name {
   display: flex;
   flex-direction: row;
   align-content: center;
@@ -14330,27 +14363,8 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   align-items: center;
   color: white;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name a {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name a {
   color: white !important;
-}
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-admin-controls {
-  display: none;
-  margin-left: 5px;
-}
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-admin-controls > span {
-  text-align: center;
-  position: relative;
-  display: block;
-  cursor: pointer;
-  margin-right: 5px;
-  width: 15px;
-  height: 15px;
-}
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-caller-status {
-  text-align: right;
-}
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid > .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-caller-status > span {
-  margin-left: 5px;
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bpbm-call-settings {
   position: absolute;

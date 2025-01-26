@@ -90,7 +90,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
         {
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $notifications_interval > 0 ) {
-                if (! wp_next_scheduled('bp_better_messages_send_notifications')) {
+                if ( ! wp_next_scheduled('bp_better_messages_send_notifications') ) {
                     wp_schedule_event(time(), 'bp_better_messages_notifications', 'bp_better_messages_send_notifications');
                 }
             } else {

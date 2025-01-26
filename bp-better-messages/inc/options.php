@@ -31,7 +31,6 @@ class Better_Messages_Options
             'attachmentsRetention'        => 365,
             'attachmentsEnable'           => '0',
             'attachmentsHide'             => '1',
-            'attachmentsRandomName'       => '1',
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'miniChatsEnable'             => '0',
@@ -88,7 +87,6 @@ class Better_Messages_Options
             'allowMuteThreads'            => '1',
             'callsRevertIcons'            => '0',
             'callRequestTimeLimit'        => '30',
-            'offlineCallsNotifications'   => '0',
             'callsLimitFriends'           => '0',
             'stopBPNotifications'         => '0',
             'restrictThreadsDeleting'     => '0',
@@ -183,7 +181,6 @@ class Better_Messages_Options
             'restrictBlockUsers'            => [],
             'restrictBlockUsersImmun'       => [],
             'messagesViewer'                => '1',
-            'offlineCallsAllowed'           => '0',
             'enableReactions'               => '1',
             'enableReactionsPopup'          => '1',
             'peepsoHeader'                  => '1',
@@ -501,9 +498,6 @@ class Better_Messages_Options
         if ( !isset( $settings['attachmentsHide'] ) ) {
             $settings['attachmentsHide'] = '0';
         }
-        if ( !isset( $settings['attachmentsRandomName'] ) ) {
-            $settings['attachmentsRandomName'] = '0';
-        }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';
         }
@@ -632,9 +626,6 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['mobilePopupLocationBottom'] ) ) {
             $settings['mobilePopupLocationBottom'] = '0';
-        }
-        if ( !isset( $settings['offlineCallsNotifications'] ) ) {
-            $settings['offlineCallsNotifications'] = '0';
         }
         if ( !isset( $settings['callsLimitFriends'] ) ) {
             $settings['callsLimitFriends'] = '0';
@@ -835,10 +826,6 @@ class Better_Messages_Options
 
         if( ! isset( $settings['messagesViewer'] ) ) {
             $settings['messagesViewer'] = '0';
-        }
-
-        if( ! isset( $settings['offlineCallsAllowed'] ) ) {
-            $settings['offlineCallsAllowed'] = '0';
         }
 
         if( ! isset( $settings['enableReactions'] ) ) {
