@@ -1904,6 +1904,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         }
                     }
                 }
+
+                if( class_exists('Better_Messages_Fluent_Community_Spaces') ) {
+                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+
+                    if ( !! $group_id ) {
+                        $has_access  = Better_Messages_Fluent_Community_Spaces::instance()->user_has_access( $group_id, $user_id );
+
+                        if ( ! Better_Messages()->functions->can_send_message_filter( $has_access, $user_id, $thread_id ) ) {
+                            $errors[] = _x( 'Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages' );
+                        }
+                    }
+                }
+
             } else {
                 if ( ! Better_Messages()->functions->can_send_message_filter( $has_access, $user_id, $thread_id ) ) {
                     global $bp_better_messages_restrict_send_message;

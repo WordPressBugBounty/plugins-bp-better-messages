@@ -76,6 +76,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             $settings['updateTime'] = time();
             update_option( 'bp-better-chat-settings', $settings );
 
+            do_action('better_messages_reset_database');
+
             wp_send_json("Database was reset");
         }
 

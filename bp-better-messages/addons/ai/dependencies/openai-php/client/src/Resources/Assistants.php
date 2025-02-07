@@ -1,16 +1,10 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
 namespace BetterMessages\OpenAI\Resources;
 
 use BetterMessages\OpenAI\Contracts\Resources\AssistantsContract;
-use BetterMessages\OpenAI\Contracts\Resources\AssistantsFilesContract;
 use BetterMessages\OpenAI\Responses\Assistants\AssistantDeleteResponse;
 use BetterMessages\OpenAI\Responses\Assistants\AssistantListResponse;
 use BetterMessages\OpenAI\Responses\Assistants\AssistantResponse;
@@ -24,7 +18,7 @@ final class Assistants implements AssistantsContract
     /**
      * Create an assistant with a model and instructions.
      *
-     * @see https://platform.openai.com/docs/api-reference/assistants/object
+     * @see https://platform.openai.com/docs/api-reference/assistants/createAssistant
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -32,7 +26,7 @@ final class Assistants implements AssistantsContract
     {
         $payload = Payload::create('assistants', $parameters);
 
-        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'retrieval'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, file_ids: array<int, string>, metadata: array<string, string>}> $response */
+        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'file_search'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, tool_resources: array{code_interpreter?: array{file_ids: array<int,string>}, file_search?: array{vector_store_ids: array<int,string>}}, metadata: array<string, string>, temperature: ?float, top_p: ?float, response_format: string|array{type: 'text'|'json_object'}}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return AssistantResponse::from($response->data(), $response->meta());
@@ -47,7 +41,7 @@ final class Assistants implements AssistantsContract
     {
         $payload = Payload::retrieve('assistants', $id);
 
-        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'retrieval'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, file_ids: array<int, string>, metadata: array<string, string>}> $response */
+        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'file_search'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, tool_resources: array{code_interpreter?: array{file_ids: array<int,string>}, file_search?: array{vector_store_ids: array<int,string>}}, metadata: array<string, string>, temperature: ?float, top_p: ?float, response_format: string|array{type: 'text'|'json_object'}}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return AssistantResponse::from($response->data(), $response->meta());
@@ -64,7 +58,7 @@ final class Assistants implements AssistantsContract
     {
         $payload = Payload::modify('assistants', $id, $parameters);
 
-        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'retrieval'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, file_ids: array<int, string>, metadata: array<string, string>}> $response */
+        /** @var Response<array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'file_search'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, tool_resources: array{code_interpreter?: array{file_ids: array<int,string>}, file_search?: array{vector_store_ids: array<int,string>}}, metadata: array<string, string>, temperature: ?float, top_p: ?float, response_format: string|array{type: 'text'|'json_object'}}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return AssistantResponse::from($response->data(), $response->meta());
@@ -96,19 +90,9 @@ final class Assistants implements AssistantsContract
     {
         $payload = Payload::list('assistants', $parameters);
 
-        /** @var Response<array{object: string, data: array<int, array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'retrieval'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, file_ids: array<int, string>, metadata: array<string, string>}>, first_id: ?string, last_id: ?string, has_more: bool}> $response */
+        /** @var Response<array{object: string, data: array<int, array{id: string, object: string, created_at: int, name: ?string, description: ?string, model: string, instructions: ?string, tools: array<int, array{type: 'code_interpreter'}|array{type: 'file_search'}|array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}>, tool_resources: array{code_interpreter?: array{file_ids: array<int,string>}, file_search?: array{vector_store_ids: array<int,string>}}, metadata: array<string, string>, temperature: ?float, top_p: ?float, response_format: string|array{type: 'text'|'json_object'}}>, first_id: ?string, last_id: ?string, has_more: bool}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return AssistantListResponse::from($response->data(), $response->meta());
-    }
-
-    /**
-     * Manage files attached to an assistant.
-     *
-     * @see https://platform.openai.com/docs/api-reference/assistants
-     */
-    public function files(): AssistantsFilesContract
-    {
-        return new AssistantsFiles($this->transporter);
     }
 }

@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Testing\Responses\Fixtures\Threads\Runs;
 
@@ -32,10 +27,18 @@ final class ThreadRunListResponseFixture
                         'type' => 'code_interpreter',
                     ],
                 ],
-                'file_ids' => [
-                    'file-6EsV79Y261TEmi0PY5iHbZdS',
-                ],
                 'metadata' => [],
+                'incomplete_details' => null,
+                'temperature' => 1,
+                'top_p' => 1,
+                'max_prompt_tokens' => 600,
+                'max_completion_tokens' => 500,
+                'truncation_strategy' => [
+                    'type' => 'auto',
+                    'last_messages' => null,
+                ],
+                'tool_choice' => 'none',
+                'response_format' => 'auto',
             ],
         ],
         'first_id' => 'run_4RCYyYzX9m41WQicoJtUQAb8',

@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -14,8 +9,7 @@ final class CreateResponseChoice
     private function __construct(
         public readonly string $text,
         public readonly int $index,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{text: string, index: int}  $attributes

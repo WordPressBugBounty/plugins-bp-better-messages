@@ -25,6 +25,7 @@ class Better_Messages_Mini_List
     public function setup_actions()
     {
         add_action('wp_footer', array( $this, 'html' ), 199);
+        add_action('fluent_community/portal_footer', array( $this, 'html' ), 199);
     }
 
 

@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -30,16 +25,16 @@ class Promise implements PromiseInterface
      * @param callable $cancelFn Fn that when invoked cancels the promise.
      */
     public function __construct(
-        callable $waitFn = null,
-        callable $cancelFn = null
+        ?callable $waitFn = null,
+        ?callable $cancelFn = null
     ) {
         $this->waitFn = $waitFn;
         $this->cancelFn = $cancelFn;
     }
 
     public function then(
-        callable $onFulfilled = null,
-        callable $onRejected = null
+        ?callable $onFulfilled = null,
+        ?callable $onRejected = null
     ): PromiseInterface {
         if ($this->state === self::PENDING) {
             $p = new Promise(null, [$this, 'cancel']);

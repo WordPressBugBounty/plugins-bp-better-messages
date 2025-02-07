@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Socket;
 
@@ -17,8 +12,17 @@ final class TimeoutConnector implements ConnectorInterface
     private $timeout;
     private $loop;
 
-    public function __construct(ConnectorInterface $connector, $timeout, LoopInterface $loop = null)
+    /**
+     * @param ConnectorInterface $connector
+     * @param float $timeout
+     * @param ?LoopInterface $loop
+     */
+    public function __construct(ConnectorInterface $connector, $timeout, $loop = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #3 ($loop) expected null|BetterMessages\React\EventLoop\LoopInterface');
+        }
+
         $this->connector = $connector;
         $this->timeout = $timeout;
         $this->loop = $loop ?: Loop::get();

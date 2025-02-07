@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -19,8 +14,7 @@ final class CreateResponseMessage
         public readonly ?string $content,
         public readonly array $toolCalls,
         public readonly ?CreateResponseFunctionCall $functionCall,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{role: string, content: ?string, function_call: ?array{name: string, arguments: string}, tool_calls: ?array<int, array{id: string, type: string, function: array{name: string, arguments: string}}>}  $attributes

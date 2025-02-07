@@ -427,15 +427,22 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
                 if (class_exists('PeepSoGroupsPlugin')) {
                     $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
-                    if (!!$group_id) {
+                    if ( !! $group_id ) {
                         return Better_Messages_Peepso_Groups::instance()->user_can_moderate( $group_id, $user_id );
                     }
                 }
 
                 if ( class_exists('UM_Groups')) {
                     $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'um_group_id');
-                    if (!!$group_id) {
+                    if ( !! $group_id ) {
                         return Better_Messages_Ultimate_Member_Groups::instance()->user_can_moderate( $group_id, $user_id );
+                    }
+                }
+
+                if( class_exists('Better_Messages_Fluent_Community_Spaces') ) {
+                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+                    if( !! $group_id ){
+                        return Better_Messages_Fluent_Community_Spaces::instance()->user_can_moderate( $group_id, $user_id );
                     }
                 }
             }
@@ -457,7 +464,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                             WHERE `thread_id` = %d 
                             AND   `sender_id` != '0'
                             ORDER BY `" . bm_get_table('messages') . "`.`created_at` ASC
-                            LIMIT 0,1
+                            LIMIT 0, 1
                         ", $thread_id ));
 
                         Better_Messages()->functions->add_moderator( $thread_id, $admin_user );
@@ -1086,7 +1093,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             AND `postmeta`.`meta_key` = 'thread_ids'
             AND `postmeta`.`meta_value` REGEXP '^[0-9]+$'";
 
-            $threads_excluded = rtrim($wpdb->get_var($query_exclude), ',');
+            $threads_excluded = $wpdb->get_var($query_exclude);
+
+            if ($threads_excluded !== null) {
+                $threads_excluded = rtrim($threads_excluded, ',');
+            }
 
             if (empty($threads_excluded)) {
                 $threads_excluded = '0';
@@ -1722,6 +1733,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         if( get_post( $group_id ) ){
                             $thread_type =  'group';
                         }
+                    }
+                } else if( class_exists('Better_Messages_Fluent_Community_Spaces') ) {
+                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+
+                    if( !!$group_id ){
+                        $thread_type = 'group';
                     }
                 }
             } else {
@@ -2659,6 +2676,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                            $message->mobile_push = false;
                        }
                    }
+
+                   if( Better_Messages()->settings['FCenableGroupsPushs'] !== '1' ){
+                       $group_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'fluentcommunity_group_id');
+
+                       if ( ! empty( $group_id) ) {
+                           $message->send_push = false;
+                           $message->mobile_push = false;
+                       }
+                   }
                }
             }
 
@@ -3079,6 +3105,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_moderators( $thread_id ){
             $moderators = $this->get_thread_meta( $thread_id, 'moderators' );
+
             if( ! is_array( $moderators ) ){
                 $moderators = [];
             }

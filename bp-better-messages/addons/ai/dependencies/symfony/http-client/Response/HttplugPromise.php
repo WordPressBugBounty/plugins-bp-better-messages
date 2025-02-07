@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Response;
@@ -25,11 +23,9 @@ use BetterMessages\Psr\Http\Message\ResponseInterface as Psr7ResponseInterface;
  */
 final class HttplugPromise implements HttplugPromiseInterface
 {
-    private GuzzlePromiseInterface $promise;
-
-    public function __construct(GuzzlePromiseInterface $promise)
-    {
-        $this->promise = $promise;
+    public function __construct(
+        private GuzzlePromiseInterface $promise,
+    ) {
     }
 
     public function then(?callable $onFulfilled = null, ?callable $onRejected = null): self

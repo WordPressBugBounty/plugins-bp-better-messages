@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Response;
@@ -29,24 +27,23 @@ final class AsyncContext
 {
     /** @var callable|null */
     private $passthru;
-    private HttpClientInterface $client;
     private ResponseInterface $response;
     private array $info = [];
-    /** @var resource|null */
-    private $content;
-    private int $offset;
 
     /**
      * @param resource|null $content
      */
-    public function __construct(?callable &$passthru, HttpClientInterface $client, ResponseInterface &$response, array &$info, $content, int $offset)
-    {
+    public function __construct(
+        ?callable &$passthru,
+        private HttpClientInterface $client,
+        ResponseInterface &$response,
+        array &$info,
+        private $content,
+        private int $offset,
+    ) {
         $this->passthru = &$passthru;
-        $this->client = $client;
         $this->response = &$response;
         $this->info = &$info;
-        $this->content = $content;
-        $this->offset = $offset;
     }
 
     /**
@@ -169,7 +166,7 @@ final class AsyncContext
         }
         if (0 < ($info['max_duration'] ?? 0) && 0 < ($info['total_time'] ?? 0)) {
             if (0 >= $options['max_duration'] = $info['max_duration'] - $info['total_time']) {
-                throw new TransportException(sprintf('Max duration was reached for "%s".', $info['url']));
+                throw new TransportException(\sprintf('Max duration was reached for "%s".', $info['url']));
             }
         }
 

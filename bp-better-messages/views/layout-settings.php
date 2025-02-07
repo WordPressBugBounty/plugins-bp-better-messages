@@ -19,6 +19,12 @@ $roles['bm-guest'] = [
 $all_roles['bm-guest'] = [
     'name' => _x('Guests', 'Settings page', 'bp-better-messages' )
 ];
+$roles['bm-bot'] = [
+    'name' => _x('AI Chat Bots', 'Settings page', 'bp-better-messages' )
+];
+$all_roles['bm-bot'] = [
+    'name' => _x('AI Chat Bots', 'Settings page', 'bp-better-messages' )
+];
 ?>
 <style type="text/css">
     .bpbm-tab{
@@ -2749,9 +2755,10 @@ $all_roles['bm-guest'] = [
         $active_integration = 'integrations_bm-buddypress';
         if( defined('ultimatemember_version') ){
             $active_integration = 'integrations_bm-ultimate-member';
-        }
-        if( class_exists('PeepSo') ){
+        } else if( class_exists('PeepSo') ){
             $active_integration = 'integrations_bm-peepso';
+        } else if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){
+            $active_integration = 'integrations_bm-fluentcommunity';
         }
         ?>
         <div id="integrations" class="bpbm-tab">
@@ -2759,12 +2766,129 @@ $all_roles['bm-guest'] = [
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-buddypress') echo 'nav-tab-active'; ?>" id="integrations_bm-buddypress-tab" href="#integrations_bm-buddypress">BuddyPress & BuddyBoss</a>
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-ultimate-member') echo 'nav-tab-active'; ?>" id="integrations_bm-ultimate-member-tab" href="#integrations_bm-ultimate-member">Ultimate Member</a>
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-peepso') echo 'nav-tab-active'; ?>" id="integrations_bm-peepso-tab" href="#integrations_bm-peepso">PeepSo</a>
+                <a class="nav-tab <?php if($active_integration === 'integrations_bm-fluentcommunity') echo 'nav-tab-active'; ?>" id="integrations_bm-fluentcommunity-tab" href="#integrations_bm-fluentcommunity">FluentCommunity</a>
                 <a class="nav-tab" id="integrations_other-plugins-tab" href="#integrations_bm-other-plugins"><?php _ex( 'Other Plugins', 'Settings page', 'bp-better-messages' ); ?></a>
                 <a class="nav-tab" id="integrations_openai-tab" href="#integrations_openai">Open AI</a>
                 <a class="nav-tab" id="integrations_mycred-tab" href="#integrations_mycred">MyCRED</a>
                 <a class="nav-tab" id="integrations_gamipress-tab" href="#integrations_gamipress">GamiPress</a>
                 <a class="nav-tab" id="integrations_stickers-tab" href="#integrations_stickers"><?php _ex( 'GIFs & Stickers', 'Settings page', 'bp-better-messages' ); ?></a>
                 <a class="nav-tab" id="integrations_emojies-tab" href="#integrations_bm-emojies"><?php _ex( 'Emojis', 'Settings page','bp-better-messages' ); ?></a>
+            </div>
+
+            <div id="integrations_bm-fluentcommunity" class="bpbm-subtab <?php if($active_integration === 'integrations_bm-fluentcommunity') echo 'active'; ?>">
+                <?php if( ! defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){ ?>
+                    <div class="bp-better-messages-connection-check bpbm-error" style="margin: 20px 0;">
+                        <p><?php echo sprintf(esc_html_x('Website must to have %s plugin to be installed.', 'Settings page', 'bp-better-messages'), '<a href="https://www.wordplus.org/fluentcommunity" target="_blank">FluentCommunity</a>'); ?></p>
+                        <p><small><?php echo esc_attr_x('This notice will be hidden when FluentCommunity plugin is installed', 'Settings page', 'bp-better-messages'); ?></small></p>
+                    </div>
+                <?php } ?>
+
+                <table class="form-table">
+                    <tbody>
+
+                    <tr>
+                        <th scope="row">
+                            <?php _ex( 'FluentCommunity Profile Pages', 'Settings page','bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <input name="FCenableMessageButton" type="checkbox" <?php checked( $this->settings[ 'FCenableMessageButton' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Private Message button in user profile', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add private message button to user profile', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td>
+                                            <input name="FCProfileVideoCall" type="checkbox" <?php checked( $this->settings[ 'FCProfileVideoCall' ], '1' ); ?> value="1" <?php  if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Video Call button in user profile', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add video call button to user profile', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php Better_Messages()->functions->license_proposal(); ?>
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <input name="FCProfileAudioCall" type="checkbox" <?php checked( $this->settings[ 'FCProfileAudioCall' ], '1' ); ?> value="1" <?php  if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Audio Call button in user profile', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add audio call button to user profile', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php Better_Messages()->functions->license_proposal(); ?>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <?php _ex( 'FluentCommunity Spaces', 'Settings page','bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <input name="FCenableGroups" type="checkbox" <?php checked( $this->settings[ 'FCenableGroups' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Enable Messages', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Enable messages for FluentCommunity Spaces', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <input name="FCenableGroupsFiles" type="checkbox" <?php checked( $this->settings[ 'FCenableGroupsFiles' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Enable file uploading', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Enable file uploading in Spaces Messages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input name="FCenableGroupsEmails" type="checkbox" <?php checked( $this->settings[ 'FCenableGroupsEmails' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Enable Email Notifications', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled users will receive email notifications for Spaces Messages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <input name="FCenableGroupsPushs" type="checkbox" <?php checked( $this->settings[ 'FCenableGroupsPushs' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Push Notifications', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled users will receive push notifications for Spaces Messages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php Better_Messages()->functions->license_proposal(); ?>
+                                        </th>
+                                    </tr>
+
+
+
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div id="integrations_bm-peepso" class="bpbm-subtab <?php if($active_integration === 'integrations_bm-peepso') echo 'active'; ?>">
@@ -3410,8 +3534,12 @@ $all_roles['bm-guest'] = [
                                             }
                                         }
 
-                                        uksort($sorted_first, function($key1, $key2) use ($order) {
+                                        /*uksort($sorted_first, function($key1, $key2) use ($order) {
                                             return (array_search($key1, $order) > array_search($key2, $order));
+                                        });*/
+
+                                        uksort($sorted_first, function($key1, $key2) use ($order) {
+                                            return array_search($key1, $order) - array_search($key2, $order);
                                         });
 
                                         $emojies = $sorted_first + $emojies;
@@ -4540,7 +4668,7 @@ $all_roles['bm-guest'] = [
 
 
                 <?php
-                $tables = Better_Messages_Rest_Api_DB_Migrate()->get_tables();
+                $tables = apply_filters( 'better_messages_tables_list', Better_Messages_Rest_Api_DB_Migrate()->get_tables() );
                 ?>
                 <tr valign="top" class="">
                     <th scope="row" valign="top" style="width: 150px;">

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-if (!function_exists('trigger_deprecation')) {
+if (!function_exists('bettermessages_trigger_deprecation')) {
     /**
      * Triggers a silenced deprecation notice.
      *
@@ -20,7 +20,7 @@ if (!function_exists('trigger_deprecation')) {
      *
      * @author Nicolas Grekas <p@tchwork.com>
      */
-    function trigger_deprecation(string $package, string $version, string $message, mixed ...$args): void
+    function bettermessages_trigger_deprecation(string $package, string $version, string $message, mixed ...$args): void
     {
         @trigger_error(($package || $version ? "Since $package $version: " : '').($args ? vsprintf($message, $args) : $message), \E_USER_DEPRECATED);
     }

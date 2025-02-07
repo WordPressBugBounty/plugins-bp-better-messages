@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -22,8 +17,7 @@ final class CreateResponseChoiceLogprobs
         public readonly array $tokenLogprobs,
         public readonly ?array $topLogprobs,
         public readonly array $textOffset,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}  $attributes

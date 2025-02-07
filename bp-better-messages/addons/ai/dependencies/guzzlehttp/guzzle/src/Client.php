@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\GuzzleHttp;
 
@@ -57,7 +52,7 @@ class Client implements ClientInterface, \BetterMessages\Psr\Http\Client\ClientI
      *
      * @param array $config Client configuration settings.
      *
-     * @see \BetterMessages\GuzzleHttp\RequestOptions for a list of available request options.
+     * @see RequestOptions for a list of available request options.
      */
     public function __construct(array $config = [])
     {
@@ -207,7 +202,7 @@ class Client implements ClientInterface, \BetterMessages\Psr\Http\Client\ClientI
      *
      * @deprecated Client::getConfig will be removed in guzzlehttp/guzzle:8.0.
      */
-    public function getConfig(string $option = null)
+    public function getConfig(?string $option = null)
     {
         return $option === null
             ? $this->config

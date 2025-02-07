@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -14,12 +9,12 @@ use BetterMessages\OpenAI\Responses\Concerns\ArrayAccessible;
 use BetterMessages\OpenAI\Testing\Responses\Concerns\Fakeable;
 
 /**
- * @implements ResponseContract<array{type: string, function: array{description: string, name: string, parameters: array<string, mixed>}}>
+ * @implements ResponseContract<array{type: string, function: array{description: ?string, name: string, parameters: array<string, mixed>}}>
  */
 final class AssistantResponseToolFunction implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{type: string, function: array{description: string, name: string, parameters: array<string, mixed>}}>
+     * @use ArrayAccessible<array{type: string, function: array{description: ?string, name: string, parameters: array<string, mixed>}}>
      */
     use ArrayAccessible;
 
@@ -28,13 +23,12 @@ final class AssistantResponseToolFunction implements ResponseContract
     private function __construct(
         public string $type,
         public AssistantResponseToolFunctionFunction $function,
-    ) {
-    }
+    ) {}
 
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{type: 'function', function: array{description: string, name: string, parameters: array<string, mixed>}}  $attributes
+     * @param  array{type: 'function', function: array{description: ?string, name: string, parameters: array<string, mixed>}}  $attributes
      */
     public static function from(array $attributes): self
     {

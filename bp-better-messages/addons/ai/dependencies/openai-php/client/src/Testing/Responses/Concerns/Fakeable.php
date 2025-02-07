@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -40,12 +35,8 @@ trait Fakeable
             unset($override[$key]);
         }
 
-        // we are going to append all remaining overrides with numeric keys
+        // we are going to append all remaining overrides
         foreach ($override as $key => $value) {
-            if (! is_numeric($key)) {
-                continue;
-            }
-
             $new[$key] = $value;
         }
 

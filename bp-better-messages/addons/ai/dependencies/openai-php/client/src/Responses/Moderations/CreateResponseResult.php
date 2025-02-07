@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -32,6 +27,10 @@ final class CreateResponseResult
         $categories = [];
 
         foreach (Category::cases() as $category) {
+            if (! isset($attributes['category_scores'][$category->value])) {
+                continue;
+            }
+
             $categories[$category->value] = CreateResponseCategory::from([
                 'category' => $category->value,
                 'violated' => $attributes['categories'][$category->value],

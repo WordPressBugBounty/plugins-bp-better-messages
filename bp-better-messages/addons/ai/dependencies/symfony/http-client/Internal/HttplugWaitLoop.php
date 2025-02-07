@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Internal;
@@ -32,20 +30,15 @@ use BetterMessages\Symfony\Contracts\HttpClient\ResponseInterface;
  */
 final class HttplugWaitLoop
 {
-    private HttpClientInterface $client;
-    private ?\SplObjectStorage $promisePool;
-    private ResponseFactoryInterface $responseFactory;
-    private StreamFactoryInterface $streamFactory;
-
     /**
      * @param \SplObjectStorage<ResponseInterface, array{Psr7RequestInterface, Promise}>|null $promisePool
      */
-    public function __construct(HttpClientInterface $client, ?\SplObjectStorage $promisePool, ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory)
-    {
-        $this->client = $client;
-        $this->promisePool = $promisePool;
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
+    public function __construct(
+        private HttpClientInterface $client,
+        private ?\SplObjectStorage $promisePool,
+        private ResponseFactoryInterface $responseFactory,
+        private StreamFactoryInterface $streamFactory,
+    ) {
     }
 
     public function wait(?ResponseInterface $pendingResponse, ?float $maxDuration = null, ?float $idleTimeout = null): int
@@ -147,7 +140,11 @@ final class HttplugWaitLoop
         }
 
         if ($body->isSeekable()) {
-            $body->seek(0);
+            try {
+                $body->seek(0);
+            } catch (\RuntimeException) {
+                // ignore
+            }
         }
 
         return $psrResponse->withBody($body);

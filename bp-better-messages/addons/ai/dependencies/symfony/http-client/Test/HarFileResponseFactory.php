@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Test;
@@ -36,7 +34,7 @@ class HarFileResponseFactory
     public function __invoke(string $method, string $url, array $options): ResponseInterface
     {
         if (!is_file($this->archiveFile)) {
-            throw new \InvalidArgumentException(sprintf('Invalid file path provided: "%s".', $this->archiveFile));
+            throw new \InvalidArgumentException(\sprintf('Invalid file path provided: "%s".', $this->archiveFile));
         }
 
         $json = json_decode(json: file_get_contents($this->archiveFile), associative: true, flags: \JSON_THROW_ON_ERROR);
@@ -79,7 +77,7 @@ class HarFileResponseFactory
             return new MockResponse($body, $info);
         }
 
-        throw new TransportException(sprintf('File "%s" does not contain a response for HTTP request "%s" "%s".', $this->archiveFile, $method, $url));
+        throw new TransportException(\sprintf('File "%s" does not contain a response for HTTP request "%s" "%s".', $this->archiveFile, $method, $url));
     }
 
     /**
@@ -93,7 +91,7 @@ class HarFileResponseFactory
         return match ($encoding) {
             'base64' => base64_decode($text),
             null => $text,
-            default => throw new \InvalidArgumentException(sprintf('Unsupported encoding "%s", currently only base64 is supported.', $encoding)),
+            default => throw new \InvalidArgumentException(\sprintf('Unsupported encoding "%s", currently only base64 is supported.', $encoding)),
         };
     }
 }

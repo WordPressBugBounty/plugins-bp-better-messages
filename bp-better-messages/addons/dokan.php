@@ -19,10 +19,11 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
         }
 
         public function __construct(){
+            add_shortcode( 'better_messages_dokan_product_button',   array( &$this, 'product_page_contact_button_shortcode' ) );
+
             if( Better_Messages()->settings['dokanIntegration'] !== '1' ) return;
 
             add_action( 'woocommerce_single_product_summary',   array( &$this, 'product_page_contact_button' ), 35 );
-            add_shortcode( 'better_messages_dokan_product_button',   array( &$this, 'product_page_contact_button_shortcode' ) );
 
             add_action( 'dokan_settings_before_store_email', array( $this, 'store_settings_output' ), 10, 2 );
             add_filter( 'dokan_store_profile_settings_args', array( $this, 'store_settings_save' ), 10, 2 );
@@ -158,7 +159,7 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
             return $item;
         }
 
-        public function thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
+        public function     thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
             if( $thread_type !== 'thread'){
                 return $thread_item;
             }

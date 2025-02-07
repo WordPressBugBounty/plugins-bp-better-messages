@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Http\Io;
 
@@ -13,7 +8,6 @@ use BetterMessages\React\EventLoop\LoopInterface;
 use BetterMessages\React\Http\Client\Client as HttpClient;
 use BetterMessages\React\Promise\PromiseInterface;
 use BetterMessages\React\Promise\Deferred;
-use BetterMessages\React\Socket\Connector;
 use BetterMessages\React\Socket\ConnectorInterface;
 use BetterMessages\React\Stream\ReadableStreamInterface;
 
@@ -53,12 +47,8 @@ class Sender
      * @param ConnectorInterface|null $connector
      * @return self
      */
-    public static function createFromLoop(LoopInterface $loop, ConnectorInterface $connector = null)
+    public static function createFromLoop(LoopInterface $loop, ConnectorInterface $connector)
     {
-        if ($connector === null) {
-            $connector = new Connector(array(), $loop);
-        }
-
         return new self(new HttpClient(new ClientConnectionManager($connector, $loop)));
     }
 

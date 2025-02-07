@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\Http\Discovery;
 
@@ -38,6 +33,13 @@ class Psr18Client extends Psr17Factory implements ClientInterface
         ?UploadedFileFactoryInterface $uploadedFileFactory = null,
         ?UriFactoryInterface $uriFactory = null
     ) {
+        $requestFactory ?? $requestFactory = $client instanceof RequestFactoryInterface ? $client : null;
+        $responseFactory ?? $responseFactory = $client instanceof ResponseFactoryInterface ? $client : null;
+        $serverRequestFactory ?? $serverRequestFactory = $client instanceof ServerRequestFactoryInterface ? $client : null;
+        $streamFactory ?? $streamFactory = $client instanceof StreamFactoryInterface ? $client : null;
+        $uploadedFileFactory ?? $uploadedFileFactory = $client instanceof UploadedFileFactoryInterface ? $client : null;
+        $uriFactory ?? $uriFactory = $client instanceof UriFactoryInterface ? $client : null;
+
         parent::__construct($requestFactory, $responseFactory, $serverRequestFactory, $streamFactory, $uploadedFileFactory, $uriFactory);
 
         $this->client = $client ?? Psr18ClientDiscovery::find();

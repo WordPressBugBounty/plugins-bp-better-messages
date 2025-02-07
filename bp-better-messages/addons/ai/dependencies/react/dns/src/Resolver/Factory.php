@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Dns\Resolver;
 
@@ -41,8 +36,12 @@ final class Factory
      * @throws \InvalidArgumentException for invalid DNS server address
      * @throws \UnderflowException when given DNS Config object has an empty list of nameservers
      */
-    public function create($config, LoopInterface $loop = null)
+    public function create($config, $loop = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|BetterMessages\React\EventLoop\LoopInterface');
+        }
+
         $executor = $this->decorateHostsFileExecutor($this->createExecutor($config, $loop ?: Loop::get()));
 
         return new Resolver($executor);
@@ -64,8 +63,16 @@ final class Factory
      * @throws \InvalidArgumentException for invalid DNS server address
      * @throws \UnderflowException when given DNS Config object has an empty list of nameservers
      */
-    public function createCached($config, LoopInterface $loop = null, CacheInterface $cache = null)
+    public function createCached($config, $loop = null, $cache = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|BetterMessages\React\EventLoop\LoopInterface');
+        }
+
+        if ($cache !== null && !$cache instanceof CacheInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #3 ($cache) expected null|BetterMessages\React\Cache\CacheInterface');
+        }
+
         // default to keeping maximum of 256 responses in cache unless explicitly given
         if (!($cache instanceof CacheInterface)) {
             $cache = new ArrayCache(256);

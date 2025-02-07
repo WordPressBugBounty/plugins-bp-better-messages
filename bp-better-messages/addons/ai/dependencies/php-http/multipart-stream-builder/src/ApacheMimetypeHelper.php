@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\Http\Message\MultipartStream;
 
@@ -118,6 +113,7 @@ class ApacheMimetypeHelper implements MimetypeHelper
             'ttf' => 'application/x-font-ttf',
             'txt' => 'text/plain',
             'wav' => 'audio/x-wav',
+            'webp' => 'image/webp',
             'webm' => 'video/webm',
             'wma' => 'audio/x-ms-wma',
             'wmv' => 'video/x-ms-wmv',

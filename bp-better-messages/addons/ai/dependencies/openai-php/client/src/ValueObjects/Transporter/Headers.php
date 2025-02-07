@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -64,6 +59,17 @@ final class Headers
         return new self([
             ...$this->headers,
             'OpenAI-Organization' => $organization,
+        ]);
+    }
+
+    /**
+     * Creates a new Headers value object, with the given project, and the existing headers.
+     */
+    public function withProject(string $project): self
+    {
+        return new self([
+            ...$this->headers,
+            'OpenAI-Project' => $project,
         ]);
     }
 

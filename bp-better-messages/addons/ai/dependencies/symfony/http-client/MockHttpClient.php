@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient;
@@ -80,7 +78,7 @@ class MockHttpClient implements HttpClientInterface, ResetInterface
         ++$this->requestsCount;
 
         if (!$response instanceof ResponseInterface) {
-            throw new TransportException(sprintf('The response factory passed to MockHttpClient must return/yield an instance of ResponseInterface, "%s" given.', get_debug_type($response)));
+            throw new TransportException(\sprintf('The response factory passed to MockHttpClient must return/yield an instance of ResponseInterface, "%s" given.', get_debug_type($response)));
         }
 
         return MockResponse::fromRequest($method, $url, $options, $response);

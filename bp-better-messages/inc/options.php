@@ -183,13 +183,21 @@ class Better_Messages_Options
             'messagesViewer'                => '1',
             'enableReactions'               => '1',
             'enableReactionsPopup'          => '1',
-            'peepsoHeader'                  => '1',
-            'peepsoProfileVideoCall'        => '0',
-            'peepsoProfileAudioCall'        => '0',
+
             'UMminiFriendsEnable'           => '0',
             'UMcombinedFriendsEnable'       => '0',
             'UMmobileFriendsEnable'         => '0',
+            'UMenableGroups'                => '0',
+            'UMenableGroupsFiles'           => '0',
+            'UMenableGroupsEmails'          => '0',
+            'UMenableGroupsPushs'           => '0',
+            'UMminiGroupsEnable'            => '0',
+            'UMcombinedGroupsEnable'        => '0',
+            'UMmobileGroupsEnable'          => '0',
 
+            'peepsoHeader'                  => '1',
+            'peepsoProfileVideoCall'        => '0',
+            'peepsoProfileAudioCall'        => '0',
             'PSonlyFriendsMode'             => '0',
             'PSminiFriendsEnable'           => '0',
             'PScombinedFriendsEnable'       => '0',
@@ -201,13 +209,15 @@ class Better_Messages_Options
             'PSminiGroupsEnable'            => '0',
             'PScombinedGroupsEnable'        => '0',
             'PSmobileGroupsEnable'          => '0',
-            'UMenableGroups'                => '0',
-            'UMenableGroupsFiles'           => '0',
-            'UMenableGroupsEmails'          => '0',
-            'UMenableGroupsPushs'           => '0',
-            'UMminiGroupsEnable'            => '0',
-            'UMcombinedGroupsEnable'        => '0',
-            'UMmobileGroupsEnable'          => '0',
+
+            'FCenableMessageButton'         => '1',
+            'FCProfileVideoCall'            => '0',
+            'FCProfileAudioCall'            => '0',
+            'FCenableGroups'                => '1',
+            'FCenableGroupsFiles'           => '0',
+            'FCenableGroupsEmails'          => '0',
+            'FCenableGroupsPushs'           => '0',
+
             'privateThreadInvite'           => '0',
             'reactionsEmojies'              => Better_Messages_Reactions::get_default_reactions(),
             'bpForceMiniChat'               => '0',
@@ -491,6 +501,33 @@ class Better_Messages_Options
             $settings['UMmobileFriendsEnable'] = '0';
         }
 
+        if ( ! isset( $settings['FCenableMessageButton'] ) ) {
+            $settings['FCenableMessageButton'] = '0';
+        }
+
+        if ( ! isset( $settings['FCProfileVideoCall'] ) ) {
+            $settings['FCProfileVideoCall'] = '0';
+        }
+
+        if ( ! isset( $settings['FCProfileAudioCall'] ) ) {
+            $settings['FCProfileAudioCall'] = '0';
+        }
+
+        if ( ! isset( $settings['FCenableGroups'] ) ) {
+            $settings['FCenableGroups'] = '0';
+        }
+
+        if ( ! isset( $settings['FCenableGroupsFiles'] ) ) {
+            $settings['FCenableGroupsFiles'] = '0';
+        }
+
+        if ( ! isset( $settings['FCenableGroupsEmails'] ) ) {
+            $settings['FCenableGroupsEmails'] = '0';
+        }
+
+        if ( ! isset( $settings['FCenableGroupsPushs'] ) ) {
+            $settings['FCenableGroupsPushs'] = '0';
+        }
 
         if ( !isset( $settings['attachmentsEnable'] ) ) {
             $settings['attachmentsEnable'] = '0';

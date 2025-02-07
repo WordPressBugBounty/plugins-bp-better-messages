@@ -7,12 +7,11 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient;
 
+use BetterMessages\Symfony\Component\HttpClient\Chunk\DataChunk;
 use BetterMessages\Symfony\Component\HttpClient\Chunk\ServerSentEvent;
 use BetterMessages\Symfony\Component\HttpClient\Exception\EventSourceException;
 use BetterMessages\Symfony\Component\HttpClient\Response\AsyncContext;
@@ -33,12 +32,11 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
         AsyncDecoratorTrait::withOptions insteadof HttpClientTrait;
     }
 
-    private float $reconnectionTime;
-
-    public function __construct(?HttpClientInterface $client = null, float $reconnectionTime = 10.0)
-    {
+    public function __construct(
+        ?HttpClientInterface $client = null,
+        private float $reconnectionTime = 10.0,
+    ) {
         $this->client = $client ?? HttpClient::create();
-        $this->reconnectionTime = $reconnectionTime;
     }
 
     public function connect(string $url, array $options = [], string $method = 'GET'): ResponseInterface
@@ -54,7 +52,7 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
 
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
-        $state = new class() {
+        $state = new class {
             public ?string $buffer = null;
             public ?string $lastEventId = null;
             public float $reconnectionTime;
@@ -111,7 +109,7 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
                 if (preg_match('/^text\/event-stream(;|$)/i', $context->getHeaders()['content-type'][0] ?? '')) {
                     $state->buffer = '';
                 } elseif (null !== $lastError || (null !== $state->buffer && 200 === $context->getStatusCode())) {
-                    throw new EventSourceException(sprintf('Response content-type is "%s" while "text/event-stream" was expected for "%s".', $context->getHeaders()['content-type'][0] ?? '', $context->getInfo('url')));
+                    throw new EventSourceException(\sprintf('Response content-type is "%s" while "text/event-stream" was expected for "%s".', $context->getHeaders()['content-type'][0] ?? '', $context->getInfo('url')));
                 } else {
                     $context->passthru();
                 }
@@ -123,17 +121,30 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
                 return;
             }
 
-            $rx = '/((?:\r\n|[\r\n]){2,})/';
-            $content = $state->buffer.$chunk->getContent();
-
             if ($chunk->isLast()) {
-                $rx = substr_replace($rx, '|$', -2, 0);
+                if ('' !== $content = $state->buffer) {
+                    $state->buffer = '';
+                    yield new DataChunk(-1, $content);
+                }
+
+                yield $chunk;
+
+                return;
             }
-            $events = preg_split($rx, $content, -1, \PREG_SPLIT_DELIM_CAPTURE);
+
+            $content = $state->buffer.$chunk->getContent();
+            $events = preg_split('/((?:\r\n){2,}|\r{2,}|\n{2,})/', $content, -1, \PREG_SPLIT_DELIM_CAPTURE);
             $state->buffer = array_pop($events);
 
             for ($i = 0; isset($events[$i]); $i += 2) {
-                $event = new ServerSentEvent($events[$i].$events[1 + $i]);
+                $content = $events[$i].$events[1 + $i];
+                if (!preg_match('/(?:^|\r\n|[\r\n])[^:\r\n]/', $content)) {
+                    yield new DataChunk(-1, $content);
+
+                    continue;
+                }
+
+                $event = new ServerSentEvent($content);
 
                 if ('' !== $event->getId()) {
                     $context->setInfo('last_event_id', $state->lastEventId = $event->getId());
@@ -144,17 +155,6 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
                 }
 
                 yield $event;
-            }
-
-            if (preg_match('/^(?::[^\r\n]*+(?:\r\n|[\r\n]))+$/m', $state->buffer)) {
-                $content = $state->buffer;
-                $state->buffer = '';
-
-                yield $context->createChunk($content);
-            }
-
-            if ($chunk->isLast()) {
-                yield $chunk;
             }
         });
     }

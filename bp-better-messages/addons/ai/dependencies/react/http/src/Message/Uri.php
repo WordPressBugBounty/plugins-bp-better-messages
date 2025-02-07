@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Http\Message;
 
@@ -60,7 +55,7 @@ final class Uri implements UriInterface
         }
         // @codeCoverageIgnoreEnd
 
-        if ($parts === false || (isset($parts['scheme']) && !\preg_match('#^[a-z]+$#i', $parts['scheme'])) || (isset($parts['host']) && \preg_match('#[\s_%+]#', $parts['host']))) {
+        if ($parts === false || (isset($parts['scheme']) && !\preg_match('#^[a-z]+$#i', $parts['scheme'])) || (isset($parts['host']) && \preg_match('#[\s%+]#', $parts['host']))) {
             throw new \InvalidArgumentException('Invalid URI given');
         }
 
@@ -178,7 +173,7 @@ final class Uri implements UriInterface
             return $this;
         }
 
-        if (\preg_match('#[\s_%+]#', $host) || ($host !== '' && \parse_url('http://' . $host, \PHP_URL_HOST) !== $host)) {
+        if (\preg_match('#[\s%+]#', $host) || ($host !== '' && \parse_url('http://' . $host, \PHP_URL_HOST) !== $host)) {
             throw new \InvalidArgumentException('Invalid URI host given');
         }
 

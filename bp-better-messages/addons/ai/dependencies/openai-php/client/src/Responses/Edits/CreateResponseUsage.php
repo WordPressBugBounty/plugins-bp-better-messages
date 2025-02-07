@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -15,8 +10,7 @@ final class CreateResponseUsage
         public readonly int $promptTokens,
         public readonly int $completionTokens,
         public readonly int $totalTokens,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{prompt_tokens: int, completion_tokens: int, total_tokens: int}  $attributes

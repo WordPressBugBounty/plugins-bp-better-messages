@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\Http\Discovery\Composer;
 
@@ -457,12 +452,21 @@ EOPHP
 
     private function updateComposerLock(Composer $composer, IOInterface $io)
     {
+        if (false === $composer->getConfig()->get('lock')) {
+            return;
+        }
+
         $lock = substr(Factory::getComposerFile(), 0, -4).'lock';
         $composerJson = file_get_contents(Factory::getComposerFile());
         $lockFile = new JsonFile($lock, null, $io);
         $locker = ClassDiscovery::safeClassExists(RepositorySet::class)
             ? new Locker($io, $lockFile, $composer->getInstallationManager(), $composerJson)
             : new Locker($io, $lockFile, $composer->getRepositoryManager(), $composer->getInstallationManager(), $composerJson);
+
+        if (!$locker->isLocked()) {
+            return;
+        }
+
         $lockData = $locker->getLockData();
         $lockData['content-hash'] = Locker::getContentHash($composerJson);
         $lockFile->write($lockData);

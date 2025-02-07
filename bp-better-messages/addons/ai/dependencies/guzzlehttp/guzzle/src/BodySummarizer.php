@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\GuzzleHttp;
 
@@ -16,7 +11,7 @@ final class BodySummarizer implements BodySummarizerInterface
      */
     private $truncateAt;
 
-    public function __construct(int $truncateAt = null)
+    public function __construct(?int $truncateAt = null)
     {
         $this->truncateAt = $truncateAt;
     }
@@ -27,7 +22,7 @@ final class BodySummarizer implements BodySummarizerInterface
     public function summarize(MessageInterface $message): ?string
     {
         return $this->truncateAt === null
-            ? \BetterMessages\GuzzleHttp\Psr7\Message::bodySummary($message)
-            : \BetterMessages\GuzzleHttp\Psr7\Message::bodySummary($message, $this->truncateAt);
+            ? Psr7\Message::bodySummary($message)
+            : Psr7\Message::bodySummary($message, $this->truncateAt);
     }
 }

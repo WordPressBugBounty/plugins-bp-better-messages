@@ -1,14 +1,10 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Testing\Resources;
 
 use BetterMessages\OpenAI\Contracts\Resources\ThreadsMessagesContract;
 use BetterMessages\OpenAI\Resources\ThreadsMessages;
+use BetterMessages\OpenAI\Responses\Threads\Messages\ThreadMessageDeleteResponse;
 use BetterMessages\OpenAI\Responses\Threads\Messages\ThreadMessageListResponse;
 use BetterMessages\OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
 use BetterMessages\OpenAI\Testing\Resources\Concerns\Testable;
@@ -37,13 +33,13 @@ final class ThreadsMessagesTestResource implements ThreadsMessagesContract
         return $this->record(__FUNCTION__, func_get_args());
     }
 
-    public function list(string $threadId, array $parameters = []): ThreadMessageListResponse
+    public function delete(string $threadId, string $messageId): ThreadMessageDeleteResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
     }
 
-    public function files(): ThreadsMessagesFilesTestResource
+    public function list(string $threadId, array $parameters = []): ThreadMessageListResponse
     {
-        return new ThreadsMessagesFilesTestResource($this->fake);
+        return $this->record(__FUNCTION__, func_get_args());
     }
 }

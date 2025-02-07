@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Socket;
 
@@ -80,7 +75,7 @@ final class FdServer extends EventEmitter implements ServerInterface
      * @throws \InvalidArgumentException if the listening address is invalid
      * @throws \RuntimeException if listening on this address fails (already in use etc.)
      */
-    public function __construct($fd, LoopInterface $loop = null)
+    public function __construct($fd, $loop = null)
     {
         if (\preg_match('#^php://fd/(\d+)$#', $fd, $m)) {
             $fd = (int) $m[1];
@@ -90,6 +85,10 @@ final class FdServer extends EventEmitter implements ServerInterface
                 'Invalid FD number given (EINVAL)',
                 \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : (\defined('PCNTL_EINVAL') ? \PCNTL_EINVAL : 22)
             );
+        }
+
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|BetterMessages\React\EventLoop\LoopInterface');
         }
 
         $this->loop = $loop ?: Loop::get();

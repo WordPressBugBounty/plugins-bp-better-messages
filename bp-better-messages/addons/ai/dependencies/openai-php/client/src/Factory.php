@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI;
 
@@ -32,6 +27,11 @@ final class Factory
      * The organization for the requests.
      */
     private ?string $organization = null;
+
+    /**
+     * The project for the requests.
+     */
+    private ?string $project = null;
 
     /**
      * The HTTP client for the requests.
@@ -75,6 +75,16 @@ final class Factory
     public function withOrganization(?string $organization): self
     {
         $this->organization = $organization;
+
+        return $this;
+    }
+
+    /**
+     * Sets the project for the requests.
+     */
+    public function withProject(?string $project): self
+    {
+        $this->project = $project;
 
         return $this;
     }
@@ -144,6 +154,10 @@ final class Factory
 
         if ($this->organization !== null) {
             $headers = $headers->withOrganization($this->organization);
+        }
+
+        if ($this->project !== null) {
+            $headers = $headers->withProject($this->project);
         }
 
         foreach ($this->headers as $name => $value) {

@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Http;
 
@@ -15,6 +10,7 @@ use BetterMessages\React\Http\Io\Transaction;
 use BetterMessages\React\Http\Message\Request;
 use BetterMessages\React\Http\Message\Uri;
 use BetterMessages\React\Promise\PromiseInterface;
+use BetterMessages\React\Socket\Connector;
 use BetterMessages\React\Socket\ConnectorInterface;
 use BetterMessages\React\Stream\ReadableStreamInterface;
 use InvalidArgumentException;
@@ -93,7 +89,7 @@ class Browser
 
         $loop = $loop ?: Loop::get();
         $this->transaction = new Transaction(
-            Sender::createFromLoop($loop, $connector),
+            Sender::createFromLoop($loop, $connector ?: new Connector(array(), $loop)),
             $loop
         );
     }

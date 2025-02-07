@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Testing\Responses\Fixtures\Threads\Runs\Steps;
 
@@ -28,6 +23,11 @@ final class ThreadRunStepResponseFixture
             'message_creation' => [
                 'message_id' => 'msg_i404PxKbB92d0JAmdOIcX7vA',
             ],
+        ],
+        'usage' => [
+            'prompt_tokens' => 123,
+            'completion_tokens' => 456,
+            'total_tokens' => 579,
         ],
     ];
 }

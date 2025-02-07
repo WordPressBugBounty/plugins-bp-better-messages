@@ -7,14 +7,14 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Contracts\Service\Test;
 
 use PHPUnit\Framework\TestCase;
+use BetterMessages\Psr\Container\ContainerExceptionInterface;
 use BetterMessages\Psr\Container\ContainerInterface;
+use BetterMessages\Psr\Container\NotFoundExceptionInterface;
 use BetterMessages\Symfony\Contracts\Service\ServiceLocatorTrait;
 
 abstract class ServiceLocatorTestCase extends TestCase
@@ -68,26 +68,28 @@ abstract class ServiceLocatorTestCase extends TestCase
 
     public function testThrowsOnUndefinedInternalService()
     {
-        if (!$this->getExpectedException()) {
-            $this->expectException(\BetterMessages\Psr\Container\NotFoundExceptionInterface::class);
-            $this->expectExceptionMessage('The service "foo" has a dependency on a non-existent service "bar". This locator only knows about the "foo" service.');
-        }
         $locator = $this->getServiceLocator([
             'foo' => function () use (&$locator) { return $locator->get('bar'); },
         ]);
+
+        if (!$this->getExpectedException()) {
+            $this->expectException(NotFoundExceptionInterface::class);
+            $this->expectExceptionMessage('The service "foo" has a dependency on a non-existent service "bar". This locator only knows about the "foo" service.');
+        }
 
         $locator->get('foo');
     }
 
     public function testThrowsOnCircularReference()
     {
-        $this->expectException(\BetterMessages\Psr\Container\ContainerExceptionInterface::class);
-        $this->expectExceptionMessage('Circular reference detected for service "bar", path: "bar -> baz -> bar".');
         $locator = $this->getServiceLocator([
             'foo' => function () use (&$locator) { return $locator->get('bar'); },
             'bar' => function () use (&$locator) { return $locator->get('baz'); },
             'baz' => function () use (&$locator) { return $locator->get('bar'); },
         ]);
+
+        $this->expectException(ContainerExceptionInterface::class);
+        $this->expectExceptionMessage('Circular reference detected for service "bar", path: "bar -> baz -> bar".');
 
         $locator->get('foo');
     }

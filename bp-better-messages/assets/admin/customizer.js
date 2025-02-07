@@ -291,9 +291,9 @@
     } );
 
     wp.customize( 'bm-modern-left-side-bg', function( value ) {
-        updateDarkCssRule( 'bm-modern-left-side-bg', '--left-message-bg-color: ' + hexToRgb(value()) );
+        updateCssRule( 'bm-modern-left-side-bg', '--left-message-bg-color: ' + hexToRgb(value()) );
         value.bind( function( newval ) {
-            updateDarkCssRule( 'bm-modern-left-side-bg', '--left-message-bg-color: ' + hexToRgb(newval) );
+            updateCssRule( 'bm-modern-left-side-bg', '--left-message-bg-color: ' + hexToRgb(newval) );
         } );
     } );
 

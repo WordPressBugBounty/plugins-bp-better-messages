@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Socket;
 
@@ -18,8 +13,16 @@ final class TcpConnector implements ConnectorInterface
     private $loop;
     private $context;
 
-    public function __construct(LoopInterface $loop = null, array $context = array())
+    /**
+     * @param ?LoopInterface $loop
+     * @param array $context
+     */
+    public function __construct($loop = null, array $context = array())
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #1 ($loop) expected null|BetterMessages\React\EventLoop\LoopInterface');
+        }
+
         $this->loop = $loop ?: Loop::get();
         $this->context = $context;
     }

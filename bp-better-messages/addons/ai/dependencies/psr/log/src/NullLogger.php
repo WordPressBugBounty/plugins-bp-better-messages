@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\Psr\Log;
 
@@ -20,11 +15,7 @@ class NullLogger extends AbstractLogger
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed  $level
-     * @param string|\Stringable $message
-     * @param array $context
-     *
-     * @return void
+     * @param mixed[] $context
      *
      * @throws \BetterMessages\Psr\Log\InvalidArgumentException
      */

@@ -1,14 +1,10 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Contracts;
 
 use BetterMessages\OpenAI\Contracts\Resources\AssistantsContract;
 use BetterMessages\OpenAI\Contracts\Resources\AudioContract;
+use BetterMessages\OpenAI\Contracts\Resources\BatchesContract;
 use BetterMessages\OpenAI\Contracts\Resources\ChatContract;
 use BetterMessages\OpenAI\Contracts\Resources\CompletionsContract;
 use BetterMessages\OpenAI\Contracts\Resources\EditsContract;
@@ -20,6 +16,7 @@ use BetterMessages\OpenAI\Contracts\Resources\ImagesContract;
 use BetterMessages\OpenAI\Contracts\Resources\ModelsContract;
 use BetterMessages\OpenAI\Contracts\Resources\ModerationsContract;
 use BetterMessages\OpenAI\Contracts\Resources\ThreadsContract;
+use BetterMessages\OpenAI\Contracts\Resources\VectorStoresContract;
 
 interface ClientContract
 {
@@ -92,7 +89,7 @@ interface ClientContract
     public function fineTunes(): FineTunesContract;
 
     /**
-     * Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
+     * Given an input text, outputs if the model classifies it as violating OpenAI's content policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations
      */
@@ -118,4 +115,18 @@ interface ClientContract
      * @see https://platform.openai.com/docs/api-reference/threads
      */
     public function threads(): ThreadsContract;
+
+    /**
+     * Create large batches of API requests for asynchronous processing. The Batch API returns completions within 24 hours.
+     *
+     * @see https://platform.openai.com/docs/api-reference/batch
+     */
+    public function batches(): BatchesContract;
+
+    /**
+     * Create and update vector stores that assistants can interact with
+     *
+     * @see https://platform.openai.com/docs/api-reference/vector-stores
+     */
+    public function vectorStores(): VectorStoresContract;
 }

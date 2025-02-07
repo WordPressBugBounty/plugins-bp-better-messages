@@ -331,6 +331,15 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 continue;
                             }
                         }
+
+                        if( Better_Messages()->settings['FCenableGroupsEmails'] !== '1' ){
+                            $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+
+                            if ( ! empty( $group_id) ) {
+                                $this->update_last_email( $user_id, $thread_id, $thread->last_date );
+                                continue;
+                            }
+                        }
                     }
 
                     if( $type === 'chat-room' ) {

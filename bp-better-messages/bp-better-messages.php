@@ -5,10 +5,10 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.7.0
+    Version: 2.7.1
     Author: WordPlus
     Author URI: https://www.wordplus.org
-    Requires PHP: 7.1
+    Requires PHP: 7.4
     Requires at least: 5.9.0
     License: GPLv3
     Text Domain: bp-better-messages
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.7.0';
+        public $version = '2.7.1';
 
         public $db_version = '1.0.4';
 

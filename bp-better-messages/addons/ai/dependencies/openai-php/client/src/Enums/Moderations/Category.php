@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -15,6 +10,8 @@ enum Category: string
     case HateThreatening = 'hate/threatening';
     case Harassment = 'harassment';
     case HarassmentThreatening = 'harassment/threatening';
+    case Illicit = 'illicit';
+    case IllicitViolent = 'illicit/violent';
     case SelfHarm = 'self-harm';
     case SelfHarmIntent = 'self-harm/intent';
     case SelfHarmInstructions = 'self-harm/instructions';

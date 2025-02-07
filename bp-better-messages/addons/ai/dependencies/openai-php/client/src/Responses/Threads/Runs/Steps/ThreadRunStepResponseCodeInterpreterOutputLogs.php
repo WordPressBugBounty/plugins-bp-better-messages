@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -14,22 +9,24 @@ use BetterMessages\OpenAI\Responses\Concerns\ArrayAccessible;
 use BetterMessages\OpenAI\Testing\Responses\Concerns\Fakeable;
 
 /**
- * @implements ResponseContract<array{type: string, logs: string}>
+ * @implements ResponseContract<array{type: 'logs', logs: string}>
  */
 final class ThreadRunStepResponseCodeInterpreterOutputLogs implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{type: string, logs: string}>
+     * @use ArrayAccessible<array{type: 'logs', logs: string}>
      */
     use ArrayAccessible;
 
     use Fakeable;
 
+    /**
+     * @param  'logs'  $type
+     */
     private function __construct(
         public string $type,
         public string $logs,
-    ) {
-    }
+    ) {}
 
     /**
      * Acts as static factory, and returns a new Response instance.

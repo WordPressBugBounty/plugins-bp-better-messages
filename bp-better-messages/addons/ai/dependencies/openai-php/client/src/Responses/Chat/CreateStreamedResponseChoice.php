@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -15,17 +10,16 @@ final class CreateStreamedResponseChoice
         public readonly int $index,
         public readonly CreateStreamedResponseDelta $delta,
         public readonly ?string $finishReason,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param  array{index: int, delta: array{role?: string, content?: string}, finish_reason: string|null}  $attributes
+     * @param  array{index: int, delta?: array{role?: string, content?: string}, finish_reason: string|null}  $attributes
      */
     public static function from(array $attributes): self
     {
         return new self(
             $attributes['index'],
-            CreateStreamedResponseDelta::from($attributes['delta']),
+            CreateStreamedResponseDelta::from($attributes['delta'] ?? []),
             $attributes['finish_reason'] ?? null,
         );
     }

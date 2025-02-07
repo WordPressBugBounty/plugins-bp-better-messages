@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -11,9 +6,11 @@ namespace BetterMessages\OpenAI;
 
 use BetterMessages\OpenAI\Contracts\ClientContract;
 use BetterMessages\OpenAI\Contracts\Resources\ThreadsContract;
+use BetterMessages\OpenAI\Contracts\Resources\VectorStoresContract;
 use BetterMessages\OpenAI\Contracts\TransporterContract;
 use BetterMessages\OpenAI\Resources\Assistants;
 use BetterMessages\OpenAI\Resources\Audio;
+use BetterMessages\OpenAI\Resources\Batches;
 use BetterMessages\OpenAI\Resources\Chat;
 use BetterMessages\OpenAI\Resources\Completions;
 use BetterMessages\OpenAI\Resources\Edits;
@@ -25,6 +22,7 @@ use BetterMessages\OpenAI\Resources\Images;
 use BetterMessages\OpenAI\Resources\Models;
 use BetterMessages\OpenAI\Resources\Moderations;
 use BetterMessages\OpenAI\Resources\Threads;
+use BetterMessages\OpenAI\Resources\VectorStores;
 
 final class Client implements ClientContract
 {
@@ -130,7 +128,7 @@ final class Client implements ClientContract
     }
 
     /**
-     * Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
+     * Given an input text, outputs if the model classifies it as violating OpenAI's content policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations
      */
@@ -167,5 +165,25 @@ final class Client implements ClientContract
     public function threads(): ThreadsContract
     {
         return new Threads($this->transporter);
+    }
+
+    /**
+     * Create large batches of API requests for asynchronous processing. The Batch API returns completions within 24 hours.
+     *
+     * @see https://platform.openai.com/docs/api-reference/batch
+     */
+    public function batches(): Batches
+    {
+        return new Batches($this->transporter);
+    }
+
+    /**
+     * Create and update vector stores that assistants can interact with
+     *
+     * @see https://platform.openai.com/docs/api-reference/vector-stores
+     */
+    public function vectorStores(): VectorStoresContract
+    {
+        return new VectorStores($this->transporter);
     }
 }

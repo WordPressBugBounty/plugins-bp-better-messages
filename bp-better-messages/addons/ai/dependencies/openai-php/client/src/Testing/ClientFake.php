@@ -1,19 +1,16 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Testing;
 
 use BetterMessages\OpenAI\Contracts\ClientContract;
+use BetterMessages\OpenAI\Contracts\Resources\VectorStoresContract;
 use BetterMessages\OpenAI\Contracts\ResponseContract;
 use BetterMessages\OpenAI\Contracts\ResponseStreamContract;
 use BetterMessages\OpenAI\Responses\StreamResponse;
 use BetterMessages\OpenAI\Testing\Requests\TestRequest;
 use BetterMessages\OpenAI\Testing\Resources\AssistantsTestResource;
 use BetterMessages\OpenAI\Testing\Resources\AudioTestResource;
+use BetterMessages\OpenAI\Testing\Resources\BatchesTestResource;
 use BetterMessages\OpenAI\Testing\Resources\ChatTestResource;
 use BetterMessages\OpenAI\Testing\Resources\CompletionsTestResource;
 use BetterMessages\OpenAI\Testing\Resources\EditsTestResource;
@@ -25,6 +22,7 @@ use BetterMessages\OpenAI\Testing\Resources\ImagesTestResource;
 use BetterMessages\OpenAI\Testing\Resources\ModelsTestResource;
 use BetterMessages\OpenAI\Testing\Resources\ModerationsTestResource;
 use BetterMessages\OpenAI\Testing\Resources\ThreadsTestResource;
+use BetterMessages\OpenAI\Testing\Resources\VectorStoresTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Throwable;
 
@@ -38,9 +36,7 @@ class ClientFake implements ClientContract
     /**
      * @param  array<array-key, ResponseContract|StreamResponse|string>  $responses
      */
-    public function __construct(protected array $responses = [])
-    {
-    }
+    public function __construct(protected array $responses = []) {}
 
     /**
      * @param  array<array-key, Response>  $responses
@@ -199,5 +195,15 @@ class ClientFake implements ClientContract
     public function threads(): ThreadsTestResource
     {
         return new ThreadsTestResource($this);
+    }
+
+    public function batches(): BatchesTestResource
+    {
+        return new BatchesTestResource($this);
+    }
+
+    public function vectorStores(): VectorStoresContract
+    {
+        return new VectorStoresTestResource($this);
     }
 }

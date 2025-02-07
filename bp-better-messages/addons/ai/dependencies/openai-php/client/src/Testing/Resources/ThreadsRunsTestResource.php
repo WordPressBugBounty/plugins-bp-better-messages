@@ -1,14 +1,10 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Testing\Resources;
 
 use BetterMessages\OpenAI\Contracts\Resources\ThreadsRunsContract;
 use BetterMessages\OpenAI\Resources\ThreadsRuns;
+use BetterMessages\OpenAI\Responses\StreamResponse;
 use BetterMessages\OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
 use BetterMessages\OpenAI\Responses\Threads\Runs\ThreadRunResponse;
 use BetterMessages\OpenAI\Testing\Resources\Concerns\Testable;
@@ -27,6 +23,11 @@ final class ThreadsRunsTestResource implements ThreadsRunsContract
         return $this->record(__FUNCTION__, func_get_args());
     }
 
+    public function createStreamed(string $threadId, array $parameters): StreamResponse
+    {
+        return $this->record(__FUNCTION__, func_get_args());
+    }
+
     public function retrieve(string $threadId, string $runId): ThreadRunResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
@@ -38,6 +39,11 @@ final class ThreadsRunsTestResource implements ThreadsRunsContract
     }
 
     public function submitToolOutputs(string $threadId, string $runId, array $parameters): ThreadRunResponse
+    {
+        return $this->record(__FUNCTION__, func_get_args());
+    }
+
+    public function submitToolOutputsStreamed(string $threadId, string $runId, array $parameters): StreamResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
     }

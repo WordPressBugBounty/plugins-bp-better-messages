@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 declare(strict_types=1);
 
@@ -15,12 +10,13 @@ final class BetterMessages_OpenAI
     /**
      * Creates a new Open AI Client with the given API token.
      */
-    public static function client(string $apiKey, ?string $organization = null): Client
+    public static function client(string $apiKey, ?string $organization = null, ?string $project = null): Client
     {
         return self::factory()
             ->withApiKey($apiKey)
             ->withOrganization($organization)
-            ->withHttpHeader('BetterMessages_OpenAI-Beta', 'assistants=v1')
+            ->withProject($project)
+            ->withHttpHeader('BetterMessages_OpenAI-Beta', 'assistants=v2')
             ->make();
     }
 
@@ -29,6 +25,6 @@ final class BetterMessages_OpenAI
      */
     public static function factory(): Factory
     {
-        return new Factory();
+        return new Factory;
     }
 }

@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\OpenAI\Responses\Meta;
 
@@ -14,8 +9,7 @@ final class MetaInformationOpenAI
         public readonly ?string $organization,
         public readonly ?string $version,
         public readonly ?int $processingMs,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{model: ?string, organization: ?string, version: ?string, processingMs: ?int}  $attributes

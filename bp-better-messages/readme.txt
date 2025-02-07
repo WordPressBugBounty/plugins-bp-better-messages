@@ -3,8 +3,8 @@ Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
-Requires PHP: 7.1
-Stable tag: 2.7.0
+Requires PHP: 7.4
+Stable tag: 2.7.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,6 +64,7 @@ https://www.youtube.com/watch?v=WdsZb8SB0S8
 * [BuddyPress](https://wordpress.org/plugins/buddypress)
 * [Ultimate Member](https://wordpress.org/plugins/ultimate-member)
 * [PeepSo](https://www.wordplus.org/peepso)
+* [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/)
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
@@ -169,6 +170,14 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.1 =
+* Initial version of [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) integration
+* Fixed double sound echoes twice when sharing screen in group call after latest update
+* Added mobile application database tables to settings page
+* Added AI Chat Bots as dedicated user role to Better Messages Restriction settings page
+* Minimum required PHP version is now 7.4
+* Other minor bugfixes and improvements
 
 = 2.7.0 =
 * Private & Group Video Calls review and improvements

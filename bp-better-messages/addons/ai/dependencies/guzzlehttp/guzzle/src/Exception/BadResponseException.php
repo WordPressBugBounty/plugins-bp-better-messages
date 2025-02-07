@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\GuzzleHttp\Exception;
 
@@ -19,7 +14,7 @@ class BadResponseException extends RequestException
         string $message,
         RequestInterface $request,
         ResponseInterface $response,
-        \Throwable $previous = null,
+        ?\Throwable $previous = null,
         array $handlerContext = []
     ) {
         parent::__construct($message, $request, $response, $previous, $handlerContext);

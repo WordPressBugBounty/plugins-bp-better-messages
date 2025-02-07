@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\GuzzleHttp\Exception;
 
@@ -30,7 +25,7 @@ class ConnectException extends TransferException implements NetworkExceptionInte
     public function __construct(
         string $message,
         RequestInterface $request,
-        \Throwable $previous = null,
+        ?\Throwable $previous = null,
         array $handlerContext = []
     ) {
         parent::__construct($message, 0, $previous);

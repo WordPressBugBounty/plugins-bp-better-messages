@@ -1,9 +1,4 @@
 <?php
-/**
- * @license MIT
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
- */
 
 namespace BetterMessages\React\Dns\Query;
 
@@ -41,7 +36,7 @@ interface ExecutorInterface
      * ```
      *
      * @param Query $query
-     * @return \BetterMessages\React\Promise\PromiseInterface<\React\Dns\Model\Message>
+     * @return \BetterMessages\React\Promise\PromiseInterface<\BetterMessages\React\Dns\Model\Message>
      *     resolves with response message on success or rejects with an Exception on error
      */
     public function query(Query $query);

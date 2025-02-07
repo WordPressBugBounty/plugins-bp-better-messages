@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Chunk;
@@ -25,14 +23,13 @@ use BetterMessages\Symfony\Contracts\HttpClient\ChunkInterface;
 class ErrorChunk implements ChunkInterface
 {
     private bool $didThrow = false;
-    private int $offset;
     private string $errorMessage;
     private ?\Throwable $error = null;
 
-    public function __construct(int $offset, \Throwable|string $error)
-    {
-        $this->offset = $offset;
-
+    public function __construct(
+        private int $offset,
+        \Throwable|string $error,
+    ) {
         if (\is_string($error)) {
             $this->errorMessage = $error;
         } else {

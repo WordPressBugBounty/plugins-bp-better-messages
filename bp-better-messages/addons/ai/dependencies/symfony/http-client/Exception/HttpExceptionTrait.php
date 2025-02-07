@@ -7,8 +7,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * Modified by __root__ on 08-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace BetterMessages\Symfony\Component\HttpClient\Exception;
@@ -22,14 +20,12 @@ use BetterMessages\Symfony\Contracts\HttpClient\ResponseInterface;
  */
 trait HttpExceptionTrait
 {
-    private ResponseInterface $response;
-
-    public function __construct(ResponseInterface $response)
-    {
-        $this->response = $response;
+    public function __construct(
+        private ResponseInterface $response,
+    ) {
         $code = $response->getInfo('http_code');
         $url = $response->getInfo('url');
-        $message = sprintf('HTTP %d returned for "%s".', $code, $url);
+        $message = \sprintf('HTTP %d returned for "%s".', $code, $url);
 
         $httpCodeFound = false;
         $isJson = false;
@@ -39,7 +35,7 @@ trait HttpExceptionTrait
                     break;
                 }
 
-                $message = sprintf('%s returned for "%s".', $h, $url);
+                $message = \sprintf('%s returned for "%s".', $h, $url);
                 $httpCodeFound = true;
             }
 

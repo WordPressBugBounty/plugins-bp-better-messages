@@ -319,6 +319,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_OneSignal::instance();
             }
 
+            if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){
+                require_once Better_Messages()->path . 'addons/fluent-community/fluent-community.php';
+                Better_Messages_Fluent_Community::instance();
+            }
+
             add_action('template_redirect', array( $this, 'redirect_to_messages') );
 
             if( Better_Messages()->settings['redirectUnlogged'] === '1' ){
@@ -1775,27 +1780,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! is_user_logged_in() ) return;
             if( ! isset($_SERVER['QUERY_STRING']) ) return;
 
-            $requested_page_slug = array_reverse(explode( "/", trim(rtrim(str_replace($_SERVER['QUERY_STRING'], '', $_SERVER['REQUEST_URI']), '?'), '/')));
-
-            $settings_page_slug = array_reverse(explode( "?", str_replace(site_url('').'/', '', Better_Messages()->functions->get_link())));
-            $settings_page_slug = array_reverse(array_filter(explode( "/", end($settings_page_slug))));
-            $is_bp_profile_page = (function_exists ('bp_is_my_profile')) ? bp_is_my_profile() : false;
-
-            $slug_match = true;
-
-            foreach( $settings_page_slug as $index => $val ){
-                if( ! isset($requested_page_slug[$index]) || $requested_page_slug[$index] !== $val ){
-                    $slug_match = false;
-                    break;
-                }
-            }
-
             if(
                 isset($_GET['bm-fast-start'])
                 && isset($_GET['to'])
                 && ! empty($_GET['bm-fast-start'])
                 && ! empty($_GET['to'])
-                && ( $slug_match || $is_bp_profile_page )
             ){
                 $getTo = sanitize_text_field($_GET['to']);
 
