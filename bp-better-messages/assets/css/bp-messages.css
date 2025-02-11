@@ -14390,6 +14390,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   flex-direction: column;
   align-content: center;
   justify-content: space-between;
+  pointer-events: none;
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-info-avatar {
   display: none;
@@ -14403,6 +14404,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info > * {
   padding: 5px 0;
+  pointer-events: auto;
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name {
   display: flex;

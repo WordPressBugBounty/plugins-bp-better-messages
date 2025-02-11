@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.7.1
+Stable tag: 2.7.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -171,12 +171,20 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.1 =
+= 2.7.3 =
+* Fixed not english characters was not working properly in black list of words
+* Fixed errors was shown in some cases when it's not supposed to be shown
+* Launching video servers at multiple continents to improve calls connection quality and latency wolrdwide
+* Group Video and Audio calls banner was not displayed when call is active, but there is only 2 participants in group chat
+* Other minor bugfixes and improvements
+
+= 2.7.1 - 2.7.2 =
 * Initial version of [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) integration
 * Fixed double sound echoes twice when sharing screen in group call after latest update
 * Added mobile application database tables to settings page
 * Added AI Chat Bots as dedicated user role to Better Messages Restriction settings page
 * Minimum required PHP version is now 7.4
+* (2.7.2) Detecting the inability to play audio without user interaction in private and group calls and showing message with instructions to click on it to allow audio playback
 * Other minor bugfixes and improvements
 
 = 2.7.0 =

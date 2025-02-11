@@ -891,7 +891,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $message = strip_tags($args['content']);
 
                 foreach ($words_list as $word) {
-                    if ( preg_match('/\b' . $word . '\b/i', $message ) ) {
+                    if ( preg_match('/\b' . $word . '\b/iu', $message ) ) {
                         $contains_word = true;
                         break;
                     }
@@ -911,7 +911,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $message = strip_tags($args['content']);
 
             foreach ($words_list as $word) {
-                if ( preg_match('/\b' . $word . '\b/i', $message ) ) {
+                if ( preg_match('/\b' . $word . '\b/iu', $message ) ) {
                     $contains_word = true;
                     break;
                 }
