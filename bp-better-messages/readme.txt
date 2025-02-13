@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.7.3
+Stable tag: 2.7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -171,7 +171,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.3 =
+= 2.7.3 - 2.7.4 =
 * Fixed not english characters was not working properly in black list of words
 * Fixed errors was shown in some cases when it's not supposed to be shown
 * Launching video servers at multiple continents to improve calls connection quality and latency wolrdwide

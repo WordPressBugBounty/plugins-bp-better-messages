@@ -3483,10 +3483,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             if ( isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP'])) {
                 $ip = $_SERVER['HTTP_CLIENT_IP'];
             } elseif ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'] )) {
-                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+                $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
             } else if( isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'] ) ){
                 $ip = $_SERVER['REMOTE_ADDR'];
             }
+
+            #$ip = '121.135.97.254'; #ASIA IP
+            #$ip = '100.255.255.255'; #USA IP
 
             return $ip;
         }
