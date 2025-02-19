@@ -47,18 +47,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             add_filter( 'bp_has_message_threads', array( $this, 'has_message_threads' ), 10, 3 );
 
-            if ( class_exists( 'BP_Core_Notification_Abstract' ) ) {
-                add_action('bb_register_notification_preferences', array( $this, 'remove_bb_notification_settings') );
-
-                require_once trailingslashit( dirname( __FILE__ ) ) . 'buddyboss/notifications/new-message.php';
-                BetterMessagesNewMessageNotification::instance();
-
-                add_filter( 'better_messages_is_user_web_push_enabled', array( $this, 'overwrite_user_web_push_enabled' ), 10, 2 );
-
-                if( Better_Messages()->settings['bpAppPush'] === '1' && function_exists('bbapp_send_push_notification') && function_exists('bbapp_is_active') && bbapp_is_active( 'push_notification' ) ){
-                    add_action('better_messages_message_sent', array( $this, 'send_bb_app_push' ), 10, 1 );
-                }
-            }
+            add_action( 'init', array( $this, 'register_bb_notifications' ) );
 
             if( Better_Messages()->settings['enableGroups'] === '1' ) {
                 add_filter('better_messages_can_send_message', array($this, 'group_restrictions'), 20, 3);
@@ -85,6 +74,22 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             }
 
             add_action('wp_footer', array($this, 'override_messages_list'), 199 );
+        }
+
+        public function register_bb_notifications()
+        {
+            if ( class_exists( 'BP_Core_Notification_Abstract' ) ) {
+                add_action('bb_register_notification_preferences', array( $this, 'remove_bb_notification_settings') );
+
+                require_once trailingslashit( dirname( __FILE__ ) ) . 'buddyboss/notifications/new-message.php';
+                BetterMessagesNewMessageNotification::instance();
+
+                add_filter( 'better_messages_is_user_web_push_enabled', array( $this, 'overwrite_user_web_push_enabled' ), 10, 2 );
+
+                if( Better_Messages()->settings['bpAppPush'] === '1' && function_exists('bbapp_send_push_notification') && function_exists('bbapp_is_active') && bbapp_is_active( 'push_notification' ) ){
+                    add_action('better_messages_message_sent', array( $this, 'send_bb_app_push' ), 10, 1 );
+                }
+            }
         }
 
         public function rest_api_init()

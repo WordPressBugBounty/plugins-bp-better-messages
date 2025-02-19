@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.7.4
+Stable tag: 2.7.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,6 +170,13 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.5 =
+* Improved displaying of messages, when user is not allowed to start a call
+* Fixed issue when old messages in conversations was not displayed properly in some cases
+* Fixed php notice about too early translations when using with BuddyBoss
+* Added wp_http_validate_url check to the url parser to improve security
+* Other minor bugfixes and improvements
 
 = 2.7.3 - 2.7.4 =
 * Fixed not english characters was not working properly in black list of words

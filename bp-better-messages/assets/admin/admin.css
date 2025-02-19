@@ -634,6 +634,13 @@ table.build-info-table button {
   padding-top: 5px;
   padding-bottom: 5px;
 }
+.bm-users-table tbody tr td.bm-more-actions {
+  width: 1px;
+  white-space: nowrap;
+}
+.bm-users-table tbody tr td.bm-more-actions > span {
+  cursor: pointer;
+}
 .bm-users-table tbody tr td.user-td {
   display: flex;
   align-content: center;

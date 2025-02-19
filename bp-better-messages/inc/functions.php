@@ -3488,9 +3488,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $ip = $_SERVER['REMOTE_ADDR'];
             }
 
-            #$ip = '121.135.97.254'; #ASIA IP
-            #$ip = '100.255.255.255'; #USA IP
-
             return $ip;
         }
 

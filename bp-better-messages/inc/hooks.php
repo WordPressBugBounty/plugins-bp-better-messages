@@ -1103,9 +1103,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 echo '<a href="' . $link .'">' . __('Private Message', 'bp-better-messages') . ' </a>';
             } else {
                 $messages_total = Better_Messages()->functions->get_total_threads_for_user( $user_id,  'unread' );
-                $class = ( 0 === $messages_total ) ? 'no-count' : 'count';
+                $class = 'bp-better-messages-unread';
+                $class .= ( 0 === $messages_total ) ? ' no-count' : ' count';
 
-                $title = sprintf( _x( 'Messages <span class="%s bp-better-messages-unread">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
+                $title = sprintf( _x( 'Messages <span class="%s">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
 
                 $link = $asgarosforum->get_link('profile', $user_id) . 'messages/';
 

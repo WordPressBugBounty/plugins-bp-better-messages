@@ -765,6 +765,15 @@ table.build-info-table{
       td{
         padding-top: 5px;
         padding-bottom: 5px;
+
+        &.bm-more-actions{
+          width: 1px;
+          white-space: nowrap;
+
+          > span{
+            cursor: pointer;
+          }
+        }
       }
 
       td.user-td{
@@ -811,6 +820,8 @@ table.build-info-table{
     }
   }
 }
+
+
 
 .bm-pagination{
   ul{

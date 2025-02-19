@@ -785,7 +785,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     $time_diff = Better_Messages()->functions->get_microtime() - (int) $temp_time;
 
                     if( $time_diff < 600000 && $time_diff > -600000 ) {
-                        $args['date_sent'] = gmdate( 'Y-m-d H:i:s',  (int) $temp_time / 10000 );
+                        $args['date_sent'] = gmdate( 'Y-m-d H:i:s', (int) ($temp_time / 10000) );
                         $args['created_at'] = $temp_time;
                         $args['updated_at'] = $temp_time;
                     }

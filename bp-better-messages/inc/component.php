@@ -36,7 +36,7 @@ class Better_Messages_Component extends BP_Component
     {
         parent::start(
             'bp_better_messages_tab',
-            __( 'Messages', 'bp-better-messages' ),
+            'Messages', //__( 'Messages', 'bp-better-messages' ),
             '',
             array(
                 'adminbar_myaccount_order' => 50
@@ -122,9 +122,10 @@ class Better_Messages_Component extends BP_Component
         if ( ! is_user_logged_in() ) return;
 
         $messages_total = Better_Messages()->functions->get_total_threads_for_user( Better_Messages()->functions->get_current_user_id(), 'unread' );
-        $class = ( 0 === $messages_total ) ? 'no-count' : '';
+        $class = 'bp-better-messages-unread count';
+        $class .= ( 0 === $messages_total ) ? ' no-count' : '';
 
-        $title = sprintf( _x( 'Messages <span class="%s bp-better-messages-unread count">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
+        $title = sprintf( _x( 'Messages <span class="%s">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
 
         $wp_admin_nav[] = array(
             'parent' => buddypress()->my_account_menu_id,

@@ -44,6 +44,10 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
             if( empty( $valid_url ) ) return false;
 
+            $valid_url = wp_http_validate_url( $valid_url );
+
+            if( ! $valid_url ) return false;
+
             $parts = parse_url( $valid_url );
 
             if( isset($parts['port']) ){

@@ -92,6 +92,15 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             add_filter('better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
 
             add_action( 'better_messages_mobile_app_auth', array( $this, 'mobile_app_auth' ), 10, 2 );
+
+            if ( function_exists( 'Better_Messages_Tab' ) ) {
+                $this->register_component();
+            }
+        }
+
+        public function register_component()
+        {
+            Better_Messages()->tab = Better_Messages_Tab();
         }
 
         public function mobile_app_auth( $user_id, $device )
