@@ -33,6 +33,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             if( Better_Messages()->settings['chatPage'] === '0' ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
                 add_action('admin_init', array( $this, 'admin_init' ) );
+                add_filter('fluent_community/app_route_paths', array( $this, 'app_route_paths' ), 10, 1 );
             }
 
             $spaces_messages_enabled = Better_Messages()->settings['FCenableGroups'] === '1';
@@ -44,6 +45,15 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             add_filter( 'fluent_community/profile_view_data', array( $this, 'profile_button' ), 10, 2 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
+        }
+
+        public function app_route_paths( $paths = [] )
+        {
+            if( is_array($paths) ) {
+                $paths[] = 'messages';
+            }
+
+            return $paths;
         }
 
         public function admin_init(){

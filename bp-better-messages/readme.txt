@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.7.5
+Stable tag: 2.7.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,6 +170,15 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.6 =
+* Fixed FluentCommunity integration when community is used without slug
+* Prevent mobile devices from going to sleep while listening audio message
+* Fixed replies not worked if message was send from files uploader popup
+* Fixed possible issue when conversation was not possible to recover after deleting
+* Added/documented new possibilities for developers
+    * [set_user_unread_count_for_thread](https://www.better-messages.com/docs/development/php-functions/set_user_unread_count_for_thread)
+* Other minor bugfixes and improvements
 
 = 2.7.5 =
 * Improved displaying of messages, when user is not allowed to start a call

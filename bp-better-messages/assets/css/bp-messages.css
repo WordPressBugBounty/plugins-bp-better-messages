@@ -10937,6 +10937,7 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   background: none !important;
   cursor: default !important;
   font-size: 15px;
+  float: none;
 }
 .bp-messages-user-list .user .threads-list-item-note {
   font-size: 13px;

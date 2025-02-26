@@ -805,6 +805,10 @@ table.build-info-table{
 .bm-users-filters{
   padding: 0 10px 5px 0 !important;
 
+  .bm-add-participant{
+    float: right;
+  }
+
   > span{
     display: inline-block;
     border: 1px solid #ccc;

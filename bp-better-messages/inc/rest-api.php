@@ -713,7 +713,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 FROM " . bm_get_table('recipients') . "
                 WHERE `thread_id`  = %d
                 AND   `user_id`    = %d
-                AND   `is_deleted` = 1
             ", $thread_id, $user_id ) );
 
             if ( ! $has_access ) {

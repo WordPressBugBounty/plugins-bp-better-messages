@@ -12,8 +12,8 @@ _x('Private message button shortcode', 'AI Chat Bots (WP Admin)', 'bp-better-mes
 _x('Model', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
 _x('Instruction', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
 _x('Provide instruction to AI Chat Bot of how to act with user', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
+_x('Add participant(s)', 'WP Admin', 'bp-better-messages');
 _x('User', 'WP Admin', 'bp-better-messages');
-_x('Add new participant(s)', 'WP Admin', 'bp-better-messages');
 _x('next', 'WP Admin', 'bp-better-messages');
 _x('previous', 'WP Admin', 'bp-better-messages');
 _x('Shortcode', 'Chat rooms settings page', 'bp-better-messages');

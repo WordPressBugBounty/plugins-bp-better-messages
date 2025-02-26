@@ -2908,6 +2908,19 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return (int) $wpdb->get_var($wpdb->prepare( "SELECT SUM(unread_count) FROM  " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 ", $user_id ));
         }
 
+        public function set_user_unread_count_for_thread( $user_id, $thread_id, $unread_count = 0 )
+        {
+            if( $unread_count < 0 ) $unread_count = 0;
+
+            global $wpdb;
+
+            $wpdb->query( $wpdb->prepare( "UPDATE " . bm_get_table('recipients') . " SET unread_count = %d WHERE user_id = %d AND thread_id = %d", $unread_count, $user_id, $thread_id ) );
+
+            do_action('better_messages_set_user_thread_unread_count', $user_id, $thread_id, $unread_count );
+
+            Better_Messages()->functions->thread_updated_for_user($thread_id, $user_id);
+        }
+
         public function check_chat_room_access( $thread_id, $user_id, $type ){
             if( $type === 'reply' ){
                 $recipients = $this->get_recipients( $thread_id );

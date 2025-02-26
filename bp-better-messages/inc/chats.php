@@ -1000,11 +1000,10 @@ class Better_Messages_Chats
                 $not_exclude_roles[] = $wpdb->prepare('%s', $role );
             }
 
-            $users_hash_sql = $wpdb->prepare("
-            SELECT MD5(GROUP_CONCAT(DISTINCT(`roles`.`user_id`))) as users_hash
+            $users_hash_sql = "SELECT MD5(GROUP_CONCAT(DISTINCT(`roles`.`user_id`))) as users_hash
             FROM `" . bm_get_table('roles') . "` `roles`
             WHERE `roles`.`role` IN (". implode(',', $not_exclude_roles ) .")
-            ORDER BY `roles`.`user_id` ASC");
+            ORDER BY `roles`.`user_id` ASC";
 
             $users_hash = $wpdb->get_var($users_hash_sql);
 

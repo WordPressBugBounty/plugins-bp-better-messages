@@ -663,6 +663,9 @@ table.build-info-table button {
 .bm-users-filters {
   padding: 0 10px 5px 0 !important;
 }
+.bm-users-filters .bm-add-participant {
+  float: right;
+}
 .bm-users-filters > span {
   display: inline-block;
   border: 1px solid #ccc;
