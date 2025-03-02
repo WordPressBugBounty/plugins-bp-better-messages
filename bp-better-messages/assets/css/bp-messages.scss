@@ -1236,6 +1236,14 @@ body.bp-messages-mobile {
                   display: block;
                 }
 
+                &.bm-message-pending{
+                  opacity: 0.5;
+
+                  &:hover{
+                    opacity: 1;
+                  }
+                }
+
                 .bm-reactions-selector {
                   display: none;
                   position: absolute;

@@ -22,10 +22,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function __construct()
         {
             add_action( 'init',      array( $this, 'register_post_type' ) );
+
             add_filter( 'better_messages_rest_thread_item', array( $this, 'rest_thread_item'), 20, 5 );
+
             add_filter('better_messages_get_user_roles', array($this, 'get_user_roles'), 10, 2 );
 
-            if (version_compare(phpversion(), '8.1', '>=') ) {
+            if ( version_compare(phpversion(), '8.1', '>=') ) {
                 // Requires PHP 8.1+
                 require_once "dependencies/autoload.php";
                 require_once "api/open-ai.php";
@@ -42,7 +44,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 add_action( 'bp_better_messages_new_thread_created', array( $this, 'on_new_thread_created'), 10, 2 );
                 add_filter( 'better_messages_can_send_message', array( $this, 'block_reply_if_needed' ), 20, 3 );
                 add_action( 'better_messages_before_new_thread',  array( $this, 'restrict_new_thread_if_needed'), 10, 2 );
-
 
                 add_action('better_messages_ai_bot_ensure_completion', array( $this, 'ai_bot_ensure_completion'), 10, 2 );
             }

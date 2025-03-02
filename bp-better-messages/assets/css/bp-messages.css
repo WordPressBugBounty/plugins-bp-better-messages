@@ -7282,6 +7282,12 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content:hover .bm-reactions-selector {
   display: block;
 }
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content.bm-message-pending {
+  opacity: 0.5;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content.bm-message-pending:hover {
+  opacity: 1;
+}
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content .bm-reactions-selector {
   display: none;
   position: absolute;

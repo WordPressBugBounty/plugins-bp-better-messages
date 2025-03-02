@@ -775,7 +775,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 'error_type'   => 'wp_error'
             );
 
-            $meta     = (array) $request->get_param('meta');
+            $meta = (array) $request->get_param('meta');
 
             if( ! empty( $temp_id ) ) {
                 $args['temp_id'] = $temp_id;
@@ -827,7 +827,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
-            if( ! empty($errors) ) {
+            if( ! empty( $errors ) ) {
                 do_action( 'better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
 
                 $redirect = 'refresh';
@@ -846,6 +846,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 );
             } else {
                 $update = false;
+
                 if( ! isset( $args['temp_id'] ) ) {
                     $update = $this->get_messages($thread_id, [$message_id]);
                     $get_threads = Better_Messages()->api->get_threads([$thread_id], false, false, true);
@@ -1012,6 +1013,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             if( ! is_array( $user_ids ) || count( $user_ids ) === 0 ){
                 $total_to_get = 12;
+
                 $friends = Better_Messages()->functions->get_friends_sorted( Better_Messages()->functions->get_current_user_id(), $total_to_get );
 
                 $user_ids = [];

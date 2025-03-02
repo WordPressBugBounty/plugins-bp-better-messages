@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.7.7
+Stable tag: 2.7.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -171,7 +171,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.6 - 2.7.7 =
+= 2.7.6 - 2.7.10 =
 * Fixed FluentCommunity integration when community is used without slug
 * Prevent mobile devices from going to sleep while listening audio message
 * Fixed replies not worked if message was send from files uploader popup
