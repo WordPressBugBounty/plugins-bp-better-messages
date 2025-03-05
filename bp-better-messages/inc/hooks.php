@@ -324,7 +324,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Fluent_Community::instance();
             }
 
-            add_action('template_redirect', array( $this, 'redirect_to_messages') );
+            add_action('template_redirect', array( $this, 'redirect_to_messages'), 0 );
 
             if( Better_Messages()->settings['redirectUnlogged'] === '1' ){
                 add_filter( 'template_redirect', array( $this, 'redirect_unlogged') );
@@ -479,17 +479,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function redirect_to_messages(){
             if( isset( $_GET['bm-redirect-to-messages'] ) ) {
-                if(  is_user_logged_in() ) {
-                    $link = Better_Messages()->functions->get_user_messages_url(get_current_user_id());
 
-                    if ( isset( $_GET['thread-id'] ) ) {
-                        $link = Better_Messages()->functions->get_user_messages_url(get_current_user_id(), intval($_GET['thread-id']));
-                    }
+                $redirect_url = Better_Messages()->functions->get_user_messages_url(get_current_user_id());
 
-                    wp_redirect($link);
-
-                    exit;
+                if ( isset( $_GET['thread-id'] ) ) {
+                    $redirect_url = Better_Messages()->functions->get_user_messages_url(get_current_user_id(), intval($_GET['thread-id']));
                 }
+
+                wp_redirect($redirect_url);
+
+                exit;
             }
         }
 

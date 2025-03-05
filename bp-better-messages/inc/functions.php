@@ -726,7 +726,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_link( $user_id = false )
         {
-            if( ! is_user_logged_in() && ! wp_doing_cron() ) {
+            if( ! is_user_logged_in() && ! Better_Messages()->notifications->is_sending_notifications() ) {
                 if( ! is_numeric( Better_Messages()->settings['chatPage'] ) || Better_Messages()->settings['chatPage'] === '0' ) {
                     return apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg([]) ) );
                 }
@@ -746,7 +746,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return $url_overwritten;
             }
 
-            if( is_user_logged_in() || wp_doing_cron() ) {
+            if( is_user_logged_in() || Better_Messages()->notifications->is_sending_notifications() ) {
                 if (class_exists('AsgarosForum') && Better_Messages()->settings['chatPage'] === 'asgaros-forum') {
                     global $asgarosforum;
                     $link = $asgarosforum->get_link('profile', $user_id) . 'messages/';

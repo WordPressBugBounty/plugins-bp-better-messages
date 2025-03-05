@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.10
+Stable tag: 2.7.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,6 +170,12 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.11 =
+* FluentCommunity: Fixed disappearing header in mobile view
+* FluentCommunity: Properly handle email redirection to login page from email links
+* FluentCommunity: Removing bottom menu at mobile when reply area is focused
+* Tested up to WordPress 6.8
 
 = 2.7.6 - 2.7.10 =
 * Fixed FluentCommunity integration when community is used without slug

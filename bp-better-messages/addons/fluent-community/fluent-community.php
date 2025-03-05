@@ -34,6 +34,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
                 add_action('admin_init', array( $this, 'admin_init' ) );
                 add_filter('fluent_community/app_route_paths', array( $this, 'app_route_paths' ), 10, 1 );
+                add_filter( 'better_messages_login_url', array( $this, 'login_url' ), 5, 1 );
             }
 
             $spaces_messages_enabled = Better_Messages()->settings['FCenableGroups'] === '1';
@@ -45,6 +46,11 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             add_filter( 'fluent_community/profile_view_data', array( $this, 'profile_button' ), 10, 2 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
+        }
+
+        public function login_url( $url )
+        {
+            return Helper::baseUrl('?fcom_action=auth');
         }
 
         public function app_route_paths( $paths = [] )
@@ -113,6 +119,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             ?>
             <style type="text/css">
+                body.bp-messages-mobile[data-route="better_messages"] .fluent_com{
+                    min-height: auto;
+                }
+
                 .fcom_better_messages_menu_li a:hover{
                     background-color: unset !important;
                 }
@@ -157,6 +167,12 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     top: var(--fcom-header-height);
                     height: calc(100% - var(--bm-fcom-footer-height, 41px) - var(--fcom-header-height));
                     z-index: 10;
+                }
+
+                body.bm-reply-area-focused{
+                    .bp-messages-wrap-main.bp-messages-mobile, .bp-messages-wrap-group.bp-messages-mobile, .bp-messages-chat-wrap.bp-messages-mobile, .bp-messages-single-thread-wrap.bp-messages-mobile{
+                        height: calc(100% - var(--fcom-header-height)) !important;
+                    }
                 }
 
                 @media screen and (max-width: 1024px) {
@@ -231,6 +247,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
         }
 
         public function message_page_url( $url, $user_id ){
+            if( Better_Messages()->notifications->is_sending_notifications() ){
+                return Better_Messages()->functions->redirect_to_messages_link( Better_Messages()->notifications->get_sending_thread_id() );
+            }
+
             return Helper::baseUrl('messages');
         }
 
