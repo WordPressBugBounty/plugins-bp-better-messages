@@ -535,6 +535,20 @@ $all_roles['bm-bot'] = [
             })
         })
     });
+
+    function warningMessageDeleting(element) {
+        var value = parseInt(element.value);
+
+        if (isNaN(value) || value <= 0) {
+            value = 0;
+        }
+
+        if( value === 0 ){
+            alert('After saving settings messages will not be deleted automatically from your website');
+        } else {
+            alert('After saving settings messages older than ' + value + ' days will be deleted automatically from your website');
+        }
+    }
 </script>
 <div class="wrap">
     <h1><?php _ex( 'Better Messages', 'Settings page', 'bp-better-messages' ); ?></h1>
@@ -1385,6 +1399,40 @@ $all_roles['bm-bot'] = [
                                     <th>
                                         <?php _ex( 'Delete user messages when his account is deleted from website', 'Settings page','bp-better-messages' ); ?>
                                     </th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        <?php _ex( 'Deleting of old messages', 'Settings page','bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Enables automatic deleting of old messages', 'Settings page','bp-better-messages' ); ?></p>
+                    </th>
+
+                    <td>
+                        <fieldset>
+                            <table class="widefat bm-switcher-table" style="max-width: 500px;width: 100%;">
+                                <tbody>
+                                <tr valign="top">
+                                    <td style="padding-bottom: 0px;white-space: normal;">
+                                        <?php _ex( 'Sets the days amount after which message will be automatically completely removed from your website and database.', 'Settings page','bp-better-messages' ); ?>
+                                        <br/><br/>
+                                        <?php _ex( 'Set to 0 to not delete any messages automatically.', 'Settings page','bp-better-messages' ); ?>
+                                    </td>
+                                </tr>
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input type="number" name="deleteOldMessages" value="<?php echo esc_attr( $this->settings[ 'deleteOldMessages' ] ); ?>" onblur="warningMessageDeleting(this)">
+                                        <?php _ex( 'Days', 'Settings page','bp-better-messages' ); ?>
+                                    </td>
+                                </tr>
+                                <tr valign="top">
+                                    <td style="padding-top: 0px;white-space: normal;">
+                                        <?php _ex( 'Please be careful with this setting', 'Settings page','bp-better-messages' ); ?>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>

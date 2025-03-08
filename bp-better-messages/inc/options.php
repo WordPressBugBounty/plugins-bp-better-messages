@@ -240,7 +240,9 @@ class Better_Messages_Options
             'redirectUnlogged'              => '0',
             'wpJobManagerIntegration'       => '0',
             'pinnedMessages'                => '0',
-            'openAiApiKey'                  => ''
+            'openAiApiKey'                  => '',
+
+            'deleteOldMessages'             => 0
         );
 
         $args = get_option( 'bp-better-chat-settings', array() );
@@ -998,7 +1000,8 @@ class Better_Messages_Options
             'callSound'                 => 0,
             'dialingSound'              => 0,
             'modernBorderRadius'        => 0,
-            'attachmentsMaxNumber'      => 0
+            'attachmentsMaxNumber'      => 0,
+            'deleteOldMessages'         => 0
         ];
 
         $arrays = [

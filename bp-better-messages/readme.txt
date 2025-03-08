@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.11
+Stable tag: 2.7.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,6 +170,12 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.12 =
+* Prevent scrolling of conversations list to top when pinning conversation and other actions
+* Added option to automatically delete old messages from database which are older than specified amount of days
+* Added automatic cleaning of old temp ids in messages table
+* Other minor bugfixes and improvements
 
 = 2.7.11 =
 * FluentCommunity: Fixed disappearing header in mobile view
