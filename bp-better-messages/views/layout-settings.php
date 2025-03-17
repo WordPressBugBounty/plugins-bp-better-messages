@@ -2688,7 +2688,7 @@ $has_late_message = ob_get_clean();
 
         <div id="group-calls" class="bpbm-tab">
             <h3><?php _ex( 'Group Video Chat', 'Settings page', 'bp-better-messages' ); ?></h3>
-            <p><?php _ex( 'Group audio chat allows to start high definition video & voice group chat up to 16 people per 1 conversation.', 'Settings page', 'bp-better-messages' ); ?></p>
+            <p><?php _ex( 'Group audio chat allows to start high definition video & voice group chat up to 50 participants per 1 conversation.', 'Settings page', 'bp-better-messages' ); ?></p>
 
             <table class="form-table">
                 <tbody>

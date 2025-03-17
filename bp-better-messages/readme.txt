@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.13
+Stable tag: 2.7.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,7 +168,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.13 =
+= 2.7.14 =
 * Added option to show "Suggested conversations" in conversations list for new users when they do not have conversations yet
 * Added warning banner to settings page if plugin detects that WP Cron is not working properly
 * Open AI Chat Bots: Added support for Voice Models using Voice Messages add-on

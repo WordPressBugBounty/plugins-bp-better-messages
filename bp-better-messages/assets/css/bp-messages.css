@@ -6891,6 +6891,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-messages-list .bm-list.bm-inverted.bm-not-full-height [data-overlayscrollbars-contents] {
   justify-content: flex-end;
 }
+.bp-messages-wrap .bm-messages-list .bm-list.bm-date-position-stack .bm-voice-message {
+  padding-bottom: 20px;
+}
 .bp-messages-wrap .bm-messages-list .bm-list .bm-list-content {
   padding-top: 15px;
   padding-bottom: 1px;
