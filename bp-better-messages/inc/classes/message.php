@@ -61,6 +61,24 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $count_unread = true;
 
+        public $send_push = true;
+
+        public $bulk_hide = false;
+
+        public $send_global = true;
+
+        public $show_on_site = true;
+
+        public $mobile_push = true;
+
+        public $meta = false;
+
+        public $notification = false;
+
+        public $is_update = false;
+
+        public $new_thread = false;
+
         /**
          * Constructor.
          *

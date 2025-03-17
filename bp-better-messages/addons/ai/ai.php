@@ -68,9 +68,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         }
 
         public function restrict_new_thread_if_needed( &$args, &$errors ){
-            // User who creating thread
-            $user_id = Better_Messages()->functions->get_current_user_id();
-
             // Get array with recipients user ids, which user trying to start conversation with
             $recipients = $args['recipients'];
 
@@ -285,10 +282,18 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             wp_nonce_field( 'bm-save-ai-chat-bot-settings-' . $post->ID, 'bm_save_ai_chat_bot_nonce' );
 
             $bot = $this->get_bot_user( $post->ID );
+            $voices = $this->get_voices();
             $bot_user_id = $bot ? absint($bot->id) * -1 : 0;
 
             $openai_error = get_option( 'better_messages_openai_error', false );
             $api_key_exists = ! empty(Better_Messages()->settings['openAiApiKey']) && empty($openai_error);
+
+            $voice_messages_banner = '';
+            if( ! class_exists('BP_Better_Messages_Voice_Messages') ){
+                $voice_messages_banner = '<div class="bp-better-messages-banner bm-error">';
+                $voice_messages_banner .= sprintf(_x('<a href="%s" target="_blank">Voice Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages'), admin_url('admin.php?page=bp-better-messages-addons') );
+                $voice_messages_banner .= '</div>';
+            }
 
             if (version_compare(phpversion(), '8.1', '<')) { ?>
             <div class="bm-admin-error" style="font-size: 150%;margin: 10px 0">
@@ -299,20 +304,51 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     <?php echo sprintf(_x('Website must have valid Open AI Api Key, setup key at <a href="%s">settings page</a>.', 'Settings page', 'bp-better-messages'), add_query_arg( 'page', 'bp-better-messages', admin_url('admin.php') ) . '#integrations_openai' ); ?>
                 </div>
             <?php } else  { ?>
-            <div class="bm-ai-chat-bot-settings" data-bot-id="<?php echo esc_attr($post->ID); ?>" data-bot-user-id="<?php echo $bot_user_id; ?>" data-settings="<?php echo esc_attr(json_encode($settings)); ?>" data-roles="<?php echo esc_attr(json_encode($roles)); ?>">
+            <div class="bm-ai-chat-bot-settings"
+                 data-bot-id="<?php echo esc_attr($post->ID); ?>"
+                 data-bot-user-id="<?php echo $bot_user_id; ?>"
+                 data-settings="<?php echo esc_attr(json_encode($settings)); ?>"
+                 data-roles="<?php echo esc_attr(json_encode($roles)); ?>"
+                 data-voices="<?php echo esc_attr(json_encode($voices)); ?>"
+                 data-voice-messages-banner="<?php echo esc_attr($voice_messages_banner); ?>">
                 <p style="text-align: center"><?php _ex( 'Loading',  'WP Admin', 'bp-better-messages' ); ?></p>
             </div>
             <?php
             }
         }
 
-        public function get_bot_settings( $bot_id )
+        public function get_default_settings()
         {
+            $voices = $this->get_voices();
+
             $defaults = array(
                 "enabled" => "0",
+                "images"  => "0",
                 "model"   => "",
                 "instruction" => _x( 'You are a helpful assistant', 'AI Chat Bots (WP Admin)', 'bp-better-messages' ),
+                "voice" => $voices[0]
             );
+
+            return $defaults;
+        }
+
+        public function get_voices()
+        {
+            return [
+                'alloy',
+                'ash',
+                'ballad',
+                'coral',
+                'echo',
+                'sage',
+                'shimmer',
+                'verse'
+            ];
+        }
+
+        public function get_bot_settings( $bot_id )
+        {
+            $defaults = $this->get_default_settings();
 
             $args = get_post_meta( $bot_id, 'bm-ai-chat-bot-settings', true );
 
@@ -320,9 +356,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $args = array();
             }
 
-            $result = wp_parse_args( $args, $defaults );
+            if( ! isset( $args['images'] ) && ! empty($args['model'] )  ){
+                $args['images'] = str_contains($args['model'], 'gpt-4-turbo') || str_contains($args['model'], 'gpt-4o') ? '1' : '0';
+            }
 
-            $result['support_images'] = str_contains($result['model'], 'gpt-4-turbo') || str_contains($result['model'], 'gpt-4o');
+            if( isset( $args['voice'] ) ){
+                $voices = $this->get_voices();
+
+                if( ! in_array( $args['voice'], $voices ) ){
+                    $args['voice'] = $defaults['voice'];
+                }
+            }
+
+            $result = wp_parse_args( $args, $defaults );
 
             return $result;
         }
@@ -344,11 +390,16 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             if( isset( $_POST['bm'] ) && is_array($_POST['bm']) ){
                 $old_settings = $this->get_bot_settings( $post->ID );
+
                 $settings = (array) $_POST['bm'];
 
                 if( ! $settings['model'] ){
                     $settings['model'] = $old_settings['model'];
                 }
+
+                $defaults = $this->get_default_settings();
+
+                $settings = wp_parse_args( $settings, $defaults );
 
                 update_post_meta( $post->ID, 'bm-ai-chat-bot-settings', $settings );
 
@@ -432,11 +483,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                                 $thread_item['permissions']['canDeleteAllMessages'] = false;
                                 $thread_item['permissions']['canInvite'] = false;
                                 $thread_item['permissions']['preventReplies'] = true;
-                                $thread_item['permissions']['preventVoiceMessages'] = true;
+
+                                $thread_item['permissions']['preventVoiceMessages'] = ( ! str_contains($settings['model'], '-audio-') || ! class_exists('BP_Better_Messages_Voice_Messages') );
 
                                 if (isset($thread_item['permissions']['canUpload'])) {
-                                    $support_images = $settings['support_images'];
-                                    $thread_item['permissions']['canUpload'] = $support_images;
+                                    $support_images = $settings['images'];
+                                    $thread_item['permissions']['canUpload'] = (bool) $support_images;
 
                                     if ($support_images) {
                                         $thread_item['permissions']['canUploadExtensions'] = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];

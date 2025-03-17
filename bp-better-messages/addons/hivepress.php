@@ -387,7 +387,6 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
                 echo '<a href="#user_login_modal" class="hp-listing__action hp-listing__action--bm-message" title="' . $btn_label . '"><span class="bm-button-text"><i class="hp-icon fas fa-comment"></i></span></a>';
             } else {
                 $listing_id = get_the_ID();
-                $current_user_id = Better_Messages()->functions->get_current_user_id();
                 $user_id = (int) get_the_author_meta('ID');
                 $post_type = get_post_type();
                 $subject = esc_attr( sprintf( _x('Question about listing "%s"', 'HivePress Integration (Listing page)', 'bp-better-messages'), get_the_title()));
@@ -405,7 +404,17 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
                             $user_id = (int) $listing->post_author;
                         }
                     }
+                } else if( $post_type !== 'hp_listing' ){
+                    $listing = hivepress()->request->get_context('listing');
+                    if( $listing ) {
+                        $listing_id = $listing->get_id();
+                        $subject = esc_attr( sprintf( _x('Question about listing "%s"', 'HivePress Integration (Listing page)', 'bp-better-messages'), get_the_title( $listing_id )));
+                        $unique_tag = 'hivepress_listing_chat_' . $listing_id;
+                        $user = $listing->get_user();
+                        $user_id = $user->get_id();
+                    }
                 }
+
 
                 echo do_shortcode('[better_messages_live_chat_button
                 type="link"

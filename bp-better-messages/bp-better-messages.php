@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.7.12
+    Version: 2.7.13
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.7.12';
+        public $version = '2.7.13';
 
         public $db_version = '1.0.4';
 
@@ -547,6 +547,10 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'guests'             => ( Better_Messages()->guests->guest_access_enabled() ? '1' : '0' ),
                 'reports'            => ( $this->settings['allowReports'] == '1' ? '1' : '0' ),
             );
+            $suggested_conversations = apply_filters( 'better_messages_suggested_conversations', $this->settings['suggestedConversations'], get_current_user_id() );
+            if ( !empty( $suggested_conversations ) ) {
+                $script_variables['suggestedConversations'] = $suggested_conversations;
+            }
             if ( !is_user_logged_in() && get_option( 'users_can_register' ) ) {
                 $script_variables['registerUrl'] = apply_filters( 'better_messages_registration_url', wp_registration_url() );
             }
@@ -727,8 +731,8 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     require_once trailingslashit( dirname( __FILE__ ) ) . 'addons/automatorwp/automatorwp.php';
     add_action( 'plugins_loaded', 'Better_Messages_Init', 20 );
     require_once trailingslashit( dirname( __FILE__ ) ) . 'inc/install.php';
-    register_activation_hook( __FILE__, 'bp_better_messages_activation' );
-    register_deactivation_hook( __FILE__, 'bp_better_messages_deactivation' );
+    register_activation_hook( __FILE__, 'better_messages_activation' );
+    register_deactivation_hook( __FILE__, 'better_messages_deactivation' );
     if ( !function_exists( 'bpbm_fs' ) ) {
         // Create a helper function for easy SDK access.
         function bpbm_fs() {

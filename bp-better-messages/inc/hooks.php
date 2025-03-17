@@ -1660,6 +1660,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_non_friends_reply( $allowed, $user_id, $thread_id ){
+            $type = Better_Messages()->functions->get_thread_type( $thread_id );
+            if( $type !== 'thread' ) return $allowed;
+
             $participants = Better_Messages()->functions->get_participants($thread_id);
             if( count($participants['recipients']) !== 1) return $allowed;
             reset($participants['recipients']);

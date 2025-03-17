@@ -242,7 +242,8 @@ class Better_Messages_Options
             'pinnedMessages'                => '0',
             'openAiApiKey'                  => '',
 
-            'deleteOldMessages'             => 0
+            'deleteOldMessages'             => 0,
+            'suggestedConversations'        => []
         );
 
         $args = get_option( 'bp-better-chat-settings', array() );
@@ -963,6 +964,12 @@ class Better_Messages_Options
             $settings['restrictRoleType'] = 'allow';
         }
 
+        if( ! isset( $settings['suggestedConversations'] ) ) {
+            $settings['suggestedConversations'] = [];
+        } else {
+            $settings['suggestedConversations'] = array_map('intval', $settings['suggestedConversations']);
+        }
+
         $links_allowed = [
             'restrictBadWordsList',
             'restrictCallsMessage',
@@ -1013,7 +1020,8 @@ class Better_Messages_Options
             'GamiPressNewMessageCharge',
             'GamiPressNewThreadCharge',
             'GamiPressCallPricing',
-            'reactionsEmojies'
+            'reactionsEmojies',
+            'suggestedConversations'
         ];
 
         foreach ( $settings as $key => $value ) {
@@ -1060,7 +1068,7 @@ class Better_Messages_Options
 
         $this->settings['updateTime'] = time();
 
-        wp_unschedule_hook('bp_better_messages_send_notifications');
+        wp_unschedule_hook('better_messages_send_notifications');
 
         update_option( 'bp-better-chat-settings', $this->settings );
         Better_Messages()->settings = $this->settings;

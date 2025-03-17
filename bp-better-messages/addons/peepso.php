@@ -218,6 +218,9 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 return $allowed;
             }
 
+            $type = Better_Messages()->functions->get_thread_type( $thread_id );
+            if( $type !== 'thread' ) return $allowed;
+
             $participants = Better_Messages()->functions->get_participants($thread_id);
             if( count($participants['recipients']) !== 1) return $allowed;
             reset($participants['recipients']);

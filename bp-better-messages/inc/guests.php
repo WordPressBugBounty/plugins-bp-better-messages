@@ -315,10 +315,18 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $data = [];
 
-            $name = sanitize_text_field( $request->get_param('name') );
+            $name = trim(sanitize_text_field( $request->get_param('name') ));
 
             if( ! empty( $name ) ){
                 $data['name'] = $name;
+
+                if( $this->check_if_name_already_used( $name ) ){
+                    return new WP_Error(
+                        'rest_forbidden',
+                        _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),
+                        array( 'status' => 403 )
+                    );
+                }
             }
 
             $return = false;
@@ -348,6 +356,13 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             return $return;
         }
 
+        public function check_if_name_already_used($name)
+        {
+            global $wpdb;
+            $sql = $wpdb->prepare("SELECT COUNT(*) FROM `{$this->table}` WHERE `name` LIKE %s", $name );
+            return (bool) $wpdb->get_var( $sql );
+        }
+
         public function register( WP_REST_Request $request ){
 
             global $wpdb;
@@ -372,13 +387,30 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             if( $registerData ){
                 if( isset( $registerData['name'] ) ){
-                    $name = sanitize_text_field( $registerData['name'] );
+                    $name = trim( sanitize_text_field( $registerData['name'] ) );
+
+                    if( $name && $this->check_if_name_already_used( $name ) ){
+                        return new WP_Error(
+                            'rest_forbidden',
+                            _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),
+                            array( 'status' => 403 )
+                        );
+                    }
+
                 }
             }
 
             if( ! $name ) {
                 $generator = new \BetterMessages\RandomNameGenerator\Alliteration();
-                $name = apply_filters('better_messages_generated_guest_name', $generator->getName());
+                $generated_name = apply_filters('better_messages_generated_guest_name', $generator->getName());
+
+                $name = $generated_name;
+                $index = 0;
+
+                while ( $this->check_if_name_already_used( $name ) ){
+                    $index++;
+                    $name = $generated_name . ' ' . $index;
+                }
             }
 
             $email = '';

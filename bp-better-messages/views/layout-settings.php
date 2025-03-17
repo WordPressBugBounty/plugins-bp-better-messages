@@ -25,6 +25,57 @@ $roles['bm-bot'] = [
 $all_roles['bm-bot'] = [
     'name' => _x('AI Chat Bots', 'Settings page', 'bp-better-messages' )
 ];
+
+$last_sync = get_option('bm_sync_user_roles_index_finish', false);
+$last_sync = ( $last_sync ) ? date('d-m-Y H:i:m', $last_sync) : '-';
+
+$next_sync = wp_next_scheduled( 'better_messages_sync_user_index_weekly' );
+$next_sync = ( $next_sync ) ? date('d-m-Y H:i:m', $next_sync) : '-';
+
+$jobs_list = [
+    'better_messages_sync_unread',
+    'better_messages_cleaner_job',
+    'better_messages_send_notifications',
+    'better_messages_sync_user_index_weekly'
+];
+
+$events = _get_cron_array();
+
+$job_events = [];
+$time = time();
+$has_late = false;
+
+foreach ( $events as $timestamp => $event ) {
+    foreach ( $event as $hook => $details ) {
+        if ( in_array( $hook, $jobs_list ) ) {
+
+            $is_late = $timestamp - ( $time - ( 10 * MINUTE_IN_SECONDS ) ) < 0;
+
+            if ( $is_late ) {
+                $has_late = true;
+            }
+
+            $job_events[ $hook ] = [
+                'timestamp' => $timestamp,
+                'is_late' => $is_late,
+                'time_diff' => human_time_diff( $timestamp, $time ) . ( $is_late ? ' ago' : '' )
+            ];
+        }
+    }
+}
+
+ob_start() ;
+if( $has_late ){ ?>
+<div class="bp-better-messages-connection-check bpbm-error">
+    <p style="margin-top:0;font-weight:bold;font-size:110%">WP Cron Jobs does not working properly at this website</p>
+    That can cause problems with email notifications and other features, which are running in background.<br/>
+    <br/>
+    <strong>Its recommended to fix this issue as soon as possible.</strong><br/>
+    <br/>
+    You can try to install <a href="https://wordpress.org/plugins/wp-crontrol/" target="_blank">WP Crontrol</a> plugin to get more detailed information about WP Cron system at your website and check <a href="https://www.wordplus.org/cron-help" target="_blank">possible issues and fixes</a>.<br/>
+</div>
+<?php }
+$has_late_message = ob_get_clean();
 ?>
 <style type="text/css">
     .bpbm-tab{
@@ -892,6 +943,8 @@ $all_roles['bm-bot'] = [
                         <span class="dashicons dashicons-translation"></span> <?php _ex('Translate Better Messages', 'Settings page', 'bp-better-messages'); ?>
                     </a>
 
+                    <?php echo $has_late_message; ?>
+
                     <?php
                     if( ! bpbm_fs()->is_trial_utilized() && ! Better_Messages()->functions->can_use_premium_code() ){
                         $url = bpbm_fs()->get_trial_url();
@@ -1101,6 +1154,45 @@ $all_roles['bm-bot'] = [
                                         </th>
                                     </tr>
                                 <?php } ?>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        <?php _ex( 'Suggested conversations', 'Settings page','bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <fieldset>
+                            <table class="widefat bm-switcher-table" style="max-width: 600px;width: 100%;">
+                                <tbody>
+                                    <tr valign="top" class="">
+                                        <td style="white-space:normal">
+                                            <p style="margin-top:0"><?php _ex( 'If a user or guest has no conversations yet, display a list of specified users instead of an empty conversation list.', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </td>
+                                    </tr>
+
+                                    <tr valign="top">
+                                        <td style="padding-top:0">
+                                            <?php
+                                            $suggestedUsers = [];
+                                            if( is_array( $this->settings['suggestedConversations'] ) && count( $this->settings['suggestedConversations'] ) > 0 ){
+                                                foreach( $this->settings['suggestedConversations'] as $suggestedUser ){
+                                                    if( Better_Messages()->functions->is_user_exists( $suggestedUser ) ) {
+                                                        $user = Better_Messages()->functions->rest_user_item($suggestedUser);
+                                                        $suggestedUsers[] = [
+                                                            'value' => $user['user_id'],
+                                                            'label' => $user['name']
+                                                        ];
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            <div class="bm-user-selector" data-field="suggestedConversations[]" data-initial="<?php echo esc_attr(json_encode( $suggestedUsers )); ?>"></div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </fieldset>
@@ -4630,6 +4722,140 @@ $all_roles['bm-bot'] = [
         <div id="tools" class="bpbm-tab">
             <table class="form-table">
                 <tbody>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" style="width: 150px;">
+                        <?php _ex( 'WP Cron Jobs', 'Settings page','bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <?php echo $has_late_message; ?>
+
+                        <table class="widefat widefat-standard " style="padding: 10px">
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <?php _ex( 'Name', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                                <th>
+                                    <?php _ex( 'Next Run', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                            </tr>
+                            <?php foreach( $job_events as $hook => $data ){
+                                $style = $data['is_late'] ? 'color:red' : 'color:green';
+                                ?>
+                                <tr>
+                                    <td><?php echo $hook; ?></td>
+                                    <td style="<?php echo $style; ?>"><?php echo $data['time_diff']; ?></td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                <?php
+                $tables = apply_filters( 'better_messages_tables_list', Better_Messages_Rest_Api_DB_Migrate()->get_tables() );
+                ?>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" style="width: 150px;">
+                        <?php _ex( 'Database', 'Settings page','bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <table class="widefat widefat-standard " style="padding: 10px">
+                            <tbody>
+                            <tr>
+                                <th colspan="2">
+                                    <?php _ex( 'Database info', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <?php _ex( 'UTF8MB4 Encoding', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                                <td><?php
+                                    if( $wpdb->has_cap( 'utf8mb4' ) ){
+                                        echo '<span style="color:green">';
+                                        _ex('Supported', 'Settings page','bp-better-messages' );
+                                        echo '</span>';
+                                    } else {
+                                        echo '<span style="color:red">';
+                                        _ex('Not Supported', 'Settings page','bp-better-messages' );
+                                        echo '</span>';
+                                    }
+                                    ?></td>
+                            </tr>
+                            <tr>
+                                <th colspan="2">
+                                    <?php _ex( 'Database tables', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                            </tr>
+                            <?php foreach( $tables as $table ){
+                                $exists = false;
+                                $collation = '';
+                                $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) );
+
+                                if ( $wpdb->get_var( $query ) == $table ) {
+                                    $exists = true;
+
+                                    $table_info = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS WHERE NAME LIKE %s;', $table));
+                                    if( $table_info && isset( $table_info->Collation ) ){
+                                        $collation = $table_info->Collation;
+                                    }
+                                }
+                                ?>
+                                <tr>
+                                    <th><?php echo $table; ?></th>
+                                    <td><?php
+                                        if( $exists ){
+                                            echo '<span style="color:green">';
+                                            _ex('Table exists', 'Settings page','bp-better-messages' );
+                                            if( $collation ){
+                                                echo ' (' . $collation . ')';
+                                            }
+                                            echo '</span>';
+                                        } else {
+                                            echo '<span style="color:red">';
+                                            _ex('Table not exists', 'Settings page','bp-better-messages' );
+                                            echo '</span>';
+                                        }
+                                        ?></td>
+                                </tr>
+                            <?php } ?>
+                            <tr>
+                                <th>
+                                    <?php _ex( 'User Index', 'Settings page','bp-better-messages' ); ?>
+                                </th>
+                                <td>
+                                    <p><?php _ex( 'Last full synchronization', 'Settings page','bp-better-messages' ); ?>: <?php echo $last_sync; ?></p>
+                                    <p><?php _ex( 'Next full synchronization', 'Settings page','bp-better-messages' ); ?>: <?php echo $next_sync; ?></p>
+
+                                    <p><span id="bm-sync-users" class="button"><?php _ex( 'Synchronize now', 'Settings page','bp-better-messages' ); ?></span></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <?php _ex( 'Convert to UTF8MB4', 'Settings page','bp-better-messages' ); ?>
+                                    <p style="font-weight:normal;font-size:13px"><?php _ex( 'Convert database tables to utf8mb4. You do not need to do this if your database tables are already converted to utf8mb4.', 'Settings page','bp-better-messages' ); ?></p>
+                                </th>
+                                <td>
+                                    <span id="bm-convert-database" class="button"><?php _ex( 'Convert', 'Settings page','bp-better-messages' ); ?></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <?php _ex( 'Reset Database', 'Settings page','bp-better-messages' ); ?>
+                                    <p style="font-weight:normal;font-size:13px"><?php _ex( 'Complete delete database data and reinstall the tables', 'Settings page','bp-better-messages' ); ?></p>
+                                </th>
+                                <td>
+                                    <span id="bm-reset-database" class="button" style="color:#d63638;border-color:#d63638;"><?php _ex( 'Reset Database', 'Settings page','bp-better-messages' ); ?></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+
                 <tr valign="top" class="">
                     <th scope="row" valign="top" style="width: 150px;">
                         <?php _ex( 'Export Settings', 'Settings page', 'bp-better-messages' ); ?>
@@ -4711,116 +4937,6 @@ $all_roles['bm-bot'] = [
                                 }
                             });
                         </script>
-                    </td>
-                </tr>
-
-
-                <?php
-                $tables = apply_filters( 'better_messages_tables_list', Better_Messages_Rest_Api_DB_Migrate()->get_tables() );
-                ?>
-                <tr valign="top" class="">
-                    <th scope="row" valign="top" style="width: 150px;">
-                        <?php _ex( 'Database', 'Settings page','bp-better-messages' ); ?>
-                    </th>
-                    <td>
-                        <table class="widefat widefat-standard " style="padding: 10px">
-                            <tbody>
-                            <tr>
-                                <th colspan="2">
-                                    <?php _ex( 'Database info', 'Settings page','bp-better-messages' ); ?>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <?php _ex( 'UTF8MB4 Encoding', 'Settings page','bp-better-messages' ); ?>
-                                </th>
-                                <td><?php
-                                    if( $wpdb->has_cap( 'utf8mb4' ) ){
-                                        echo '<span style="color:green">';
-                                        _ex('Supported', 'Settings page','bp-better-messages' );
-                                        echo '</span>';
-                                    } else {
-                                        echo '<span style="color:red">';
-                                        _ex('Not Supported', 'Settings page','bp-better-messages' );
-                                        echo '</span>';
-                                    }
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <?php _ex( 'Database tables', 'Settings page','bp-better-messages' ); ?>
-                                </th>
-                            </tr>
-                            <?php foreach( $tables as $table ){
-                                $exists = false;
-                                $collation = '';
-                                $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) );
-
-                                if ( $wpdb->get_var( $query ) == $table ) {
-                                    $exists = true;
-
-                                    $table_info = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS WHERE NAME LIKE %s;', $table));
-                                    if( $table_info && isset( $table_info->Collation ) ){
-                                        $collation = $table_info->Collation;
-                                    }
-                                }
-                                ?>
-                                <tr>
-                                    <th><?php echo $table; ?></th>
-                                    <td><?php
-                                        if( $exists ){
-                                            echo '<span style="color:green">';
-                                            _ex('Table exists', 'Settings page','bp-better-messages' );
-                                            if( $collation ){
-                                                echo ' (' . $collation . ')';
-                                            }
-                                            echo '</span>';
-                                        } else {
-                                            echo '<span style="color:red">';
-                                            _ex('Table not exists', 'Settings page','bp-better-messages' );
-                                            echo '</span>';
-                                        }
-                                        ?></td>
-                                </tr>
-                            <?php } ?>
-                            <?php
-                            $last_sync = get_option('bm_sync_user_roles_index_finish', false);
-                            $last_sync = ( $last_sync ) ? date('d-m-Y H:i:m', $last_sync) : '-';
-
-                            $next_sync = wp_next_scheduled( 'better_messages_sync_user_index_weekly' );
-                            $next_sync = ( $next_sync ) ? date('d-m-Y H:i:m', $next_sync) : '-';
-                            ?>
-                            <tr>
-                                <th>
-                                    <?php _ex( 'User Index', 'Settings page','bp-better-messages' ); ?>
-                                </th>
-                                <td>
-                                    <p><?php _ex( 'Last full synchronization', 'Settings page','bp-better-messages' ); ?>: <?php echo $last_sync; ?></p>
-                                    <p><?php _ex( 'Next full synchronization', 'Settings page','bp-better-messages' ); ?>: <?php echo $next_sync; ?></p>
-
-                                    <p><span id="bm-sync-users" class="button"><?php _ex( 'Synchronize now', 'Settings page','bp-better-messages' ); ?></span></p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <?php _ex( 'Convert to UTF8MB4', 'Settings page','bp-better-messages' ); ?>
-                                    <p style="font-weight:normal;font-size:13px"><?php _ex( 'Convert database tables to utf8mb4. You do not need to do this if your database tables are already converted to utf8mb4.', 'Settings page','bp-better-messages' ); ?></p>
-                                </th>
-                                <td>
-                                    <span id="bm-convert-database" class="button"><?php _ex( 'Convert', 'Settings page','bp-better-messages' ); ?></span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <?php _ex( 'Reset Database', 'Settings page','bp-better-messages' ); ?>
-                                    <p style="font-weight:normal;font-size:13px"><?php _ex( 'Complete delete database data and reinstall the tables', 'Settings page','bp-better-messages' ); ?></p>
-                                </th>
-                                <td>
-                                    <span id="bm-reset-database" class="button" style="color:#d63638;border-color:#d63638;"><?php _ex( 'Reset Database', 'Settings page','bp-better-messages' ); ?></span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
                     </td>
                 </tr>
                 </tbody>

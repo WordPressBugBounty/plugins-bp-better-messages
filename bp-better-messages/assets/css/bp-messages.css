@@ -7396,6 +7396,15 @@ body.bp-messages-mobile #better-messages-modals-container input {
   margin-top: 5px;
   min-height: 30px;
 }
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content .bm-voice-message .bm-voice-message-duration {
+  position: absolute;
+  bottom: 0;
+  color: gray !important;
+  font-size: 11px;
+  white-space: nowrap;
+  left: 35px;
+  cursor: default;
+}
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content .bm-voice-message .bm-voice-message-play {
   width: 35px;
   font-size: 30px;
@@ -14989,6 +14998,10 @@ html[dir=rtl] .bp-messages-wrap .expandingButtons .bpbm-dropdown-menu .bpbm-drop
 }
 html[dir=rtl] .bp-messages-wrap .bm-voice-message-play {
   transform: rotate(180deg);
+}
+html[dir=rtl] .bp-messages-wrap .bm-voice-message-duration {
+  left: auto;
+  right: 35px;
 }
 html[dir=rtl] .bp-messages-wrap .chat-header.side-header {
   border-left: none;

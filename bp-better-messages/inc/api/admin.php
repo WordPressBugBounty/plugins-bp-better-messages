@@ -45,9 +45,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
-            register_rest_route('better-messages/v1/admin', '/getUsers', array(
+            register_rest_route('better-messages/v1/admin', '/searchUsers', array(
                 'methods' => 'GET',
-                'callback' => array($this, 'get_users'),
+                'callback' => array($this, 'search_users'),
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
@@ -280,6 +280,37 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             }
 
             return true;
+        }
+
+        public function search_users( WP_REST_Request $request )
+        {
+            global $wpdb;
+
+            $search = $request->get_param('search');
+
+            if( empty( $search ) ) {
+                return [];
+            }
+
+            $sql = $wpdb->prepare("
+            SELECT ID FROM `" . bm_get_table('users') . "`
+            WHERE ( ID = %s
+            OR `user_nicename` LIKE %s
+            OR `display_name` LIKE %s 
+            OR `first_name` LIKE %s
+            OR `last_name` LIKE %s
+            OR `nickname` LIKE %s )
+            LIMIT 0, 10", $search, '%' . $search . '%', '%' . $search . '%', '%' . $search . '%', '%' . $search . '%', '%' . $search . '%');
+
+            $search_results = $wpdb->get_col( $sql );
+
+            $return = [];
+
+            foreach( $search_results as $user_id ){
+                $return[] = Better_Messages()->functions->rest_user_item( $user_id );
+            }
+
+            return $return;
         }
 
         public function search_senders( WP_REST_Request $request ){

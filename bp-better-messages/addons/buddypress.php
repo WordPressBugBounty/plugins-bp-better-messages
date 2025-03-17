@@ -213,7 +213,6 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                 && isset( $buttons['private_message'] )
             ) {
                 $buttons['private_message']['button_attr']['data-user-id'] = bp_displayed_user_id();
-                #print_r($buttons['private_message']);
             }
 
             return $buttons;

@@ -512,6 +512,32 @@ table.build-info-table{
   border-color:#d63638 !important;
 }
 
+.bm-user-selector{
+  .bm-user-selector-select{
+    input {
+      box-shadow: none !important;
+
+      &[type="text"]{
+        width: 100%;
+        border-color: hsl(0, 0%, 80%);
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
+    }
+  }
+
+  table{
+    td, th{
+      color: black;
+    }
+
+    td{
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+  }
+}
+
 .bm-filters{
   margin: 15px -5px;
   display: flex;
@@ -919,6 +945,27 @@ table.build-info-table{
   }
 }
 
+.bp-better-messages-banner{
+  display: block;
+  margin: 10px 0;
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #f9e4a6;
+  padding: 15px;
+  line-height: 24px;
+  max-width: 550px;
+}
+.bp-better-messages-banner.bm-error{
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+.bp-better-messages-banner.bm-ok{
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
 
 .bm-ai-chat-bot-settings {
   .bm-help-icon {
@@ -948,7 +995,7 @@ table.build-info-table{
       }
 
       th {
-        width: 100px;
+        width: 120px;
       }
 
       td {

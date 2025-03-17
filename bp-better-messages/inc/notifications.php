@@ -29,7 +29,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
             if( $notifications_interval > 0 ) {
                 add_action( 'bp_send_email', array( $this, 'bp_on_send_email' ), 10, 4 );
-                add_action( 'bp_better_messages_send_notifications', array($this, 'notifications_sender'));
+                add_action( 'better_messages_send_notifications', array($this, 'notifications_sender'));
                 add_filter( 'bp_get_email_args', array( $this, 'suppress_post_type_filters' ), 10, 2 );
             }
         }
@@ -96,12 +96,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
         {
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $notifications_interval > 0 ) {
-                if ( ! wp_next_scheduled('bp_better_messages_send_notifications') ) {
-                    wp_schedule_event(time(), 'bp_better_messages_notifications', 'bp_better_messages_send_notifications');
+                if ( ! wp_next_scheduled('better_messages_send_notifications') ) {
+                    wp_schedule_event(time(), 'bp_better_messages_notifications', 'better_messages_send_notifications');
                 }
             } else {
-                if ( wp_next_scheduled('bp_better_messages_send_notifications') ) {
-                    wp_unschedule_event( wp_next_scheduled( 'bp_better_messages_send_notifications' ), 'bp_better_messages_send_notifications' );
+                if ( wp_next_scheduled('better_messages_send_notifications') ) {
+                    wp_unschedule_event( wp_next_scheduled( 'better_messages_send_notifications' ), 'better_messages_send_notifications' );
                 }
             }
         }

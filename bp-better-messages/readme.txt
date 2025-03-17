@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.12
+Stable tag: 2.7.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -22,12 +22,17 @@ Live chat functionality allow creating chat rooms or just private conversations 
 
 **[Translate Better Messages to your language](https://www.wordplus.org/bm-translate/)**
 
-https://www.youtube.com/watch?v=WdsZb8SB0S8
+https://www.youtube.com/watch?v=jMHx97QsXj8
 
-**Improved features comparing to standard system:**
+**Better Messages providing following features out of the box:**
 
 * AJAX or WebSocket powered realtime conversations
-* Reworked email notifications
+* Private Conversations
+* Multiple Users Conversations
+* Subjects
+* Searching
+* Mark messages as favorite
+* Email notifications
 * Fully new concept and design
 * Files Uploading
 * Embedded links with thumbnail, title, etc...
@@ -43,21 +48,13 @@ https://www.youtube.com/watch?v=WdsZb8SB0S8
 * Bad words filter
 * Block user feature
 * Reactions to messages
-* Messages for BuddyPress Groups, PeepSo Groups, Ultimate Member Groups
+* Messages for BuddyPress Groups, PeepSo Groups, Ultimate Member Groups, FluentCommunity Groups
 * Chat Rooms
 * Voice Messages (available as addon)
 * Pinned conversations feature
 * AI Chat Bots powered by Open AI ChatGPT API
 
 **And many more features not listed here and constantly expanding**
-
-**Supported features from standard messages system:**
-
-* Private Conversations
-* Multiple Users Conversations
-* Subjects
-* Searching
-* Mark messages as favorite
 
 **Compatible plugins:**
 
@@ -170,6 +167,18 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.13 =
+* Added option to show "Suggested conversations" in conversations list for new users when they do not have conversations yet
+* Added warning banner to settings page if plugin detects that WP Cron is not working properly
+* Open AI Chat Bots: Added support for Voice Models using Voice Messages add-on
+* Voice Messages add-on:
+    * Added duration and current play position of voice message
+    * Auto play next voice message in chat when finished playing current one
+* Ensure only friends mode to work only in private conversations
+* HivePress Integration: Fixed send message button in booking add details screen
+* Ensure guest names are unique
+* Other minor bugfixes and improvements
 
 = 2.7.12 =
 * Prevent scrolling of conversations list to top when pinning conversation and other actions

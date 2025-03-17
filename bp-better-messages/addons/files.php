@@ -23,9 +23,8 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             /**
              * Modify message before save
              */
-            add_action( 'init', array($this, 'register_cleaner') );
             add_filter( 'bp_better_messages_pre_format_message', array( $this, 'nice_files' ), 90, 4 );
-            add_action( 'bp_better_messages_clear_attachments', array($this, 'remove_old_attachments') );
+            add_action( 'better_messages_cleaner_job', array($this, 'remove_old_attachments') );
             add_filter( 'better_messages_rest_message_meta', array( $this, 'files_message_meta'), 10, 4 );
 
             if ( Better_Messages()->settings['attachmentsEnable'] === '1' ) {
@@ -162,13 +161,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     ),
                 ),
             ));
-        }
-
-        public function register_cleaner()
-        {
-            if ( ! wp_next_scheduled( 'bp_better_messages_clear_attachments' ) ) {
-                wp_schedule_event( time(), 'fifteen_minutes', 'bp_better_messages_clear_attachments' );
-            }
         }
 
         public function remove_old_attachments(){
@@ -489,7 +481,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 $name = wp_basename($file['name']);
 
-                $_FILES['file']['name'] = Better_Messages()->functions->random_string(20) . '.' . $extension;
+                $_FILES['file']['name'] = Better_Messages()->functions->random_string(30) . '.' . $extension;
 
                 if( ! in_array( strtolower($extension), $extensions ) ){
                     return new WP_Error(

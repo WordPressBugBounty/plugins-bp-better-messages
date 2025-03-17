@@ -314,7 +314,7 @@ class Better_Messages_Chats
         INNER JOIN {$wpdb->postmeta} postmeta 
         ON ( `posts`.`ID` = `postmeta`.`post_id` ) 
         WHERE 1=1  
-        AND ( `postmeta`.`meta_key` = 'bpbm-chat-auto-add' OR `postmeta`.`meta_key` = 'bpbm-chat-can-join' )
+        AND `postmeta`.`meta_key` = 'bpbm-chat-auto-add'
         AND `postmeta`.`meta_value` LIKE '%bm-guest%'
         AND `posts`.`post_type` = 'bpbm-chat'   
         GROUP BY `posts`.ID");

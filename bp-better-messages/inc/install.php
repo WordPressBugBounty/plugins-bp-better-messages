@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'bp_better_messages_activation', 'bp_install_email_templates' );
+add_action( 'better_messages_activation', 'bp_install_email_templates' );
 
 function bp_install_email_templates()
 {
@@ -48,7 +48,7 @@ function bp_install_email_templates()
     }
 }
 
-add_action( 'bp_better_messages_activation', 'bm_install_tables' );
+add_action( 'better_messages_activation', 'bm_install_tables' );
 function bm_install_tables(){
     require_once("api/db-migrate.php");
 
@@ -56,26 +56,25 @@ function bm_install_tables(){
     Better_Messages_Rest_Api_DB_Migrate::instance()->migrations();
 }
 
-add_action( 'bp_better_messages_deactivation', 'bp_better_messages_unschedule_cron' );
+add_action( 'better_messages_deactivation', 'better_messages_unschedule_cron' );
 
-function bp_better_messages_unschedule_cron()
+function better_messages_unschedule_cron()
 {
-	wp_unschedule_event( wp_next_scheduled( 'bp_better_messages_send_notifications' ), 'bp_better_messages_send_notifications' );
-	wp_unschedule_event( wp_next_scheduled( 'bp_better_messages_clear_attachments' ), 'bp_better_messages_clear_attachments' );
+	wp_unschedule_event( wp_next_scheduled( 'better_messages_send_notifications' ), 'better_messages_send_notifications' );
 }
 
 
-function bp_better_messages_activation()
+function better_messages_activation()
 {
     require_once trailingslashit( dirname(__FILE__) ) . 'api/db-migrate.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'users.php';
     Better_Messages_Rest_Api_DB_Migrate()->install_tables();
     Better_Messages_Rest_Api_DB_Migrate()->migrations();
 
-    do_action( 'bp_better_messages_activation' );
+    do_action( 'better_messages_activation' );
 }
 
-function bp_better_messages_deactivation()
+function better_messages_deactivation()
 {
-    do_action( 'bp_better_messages_deactivation' );
+    do_action( 'better_messages_deactivation' );
 }

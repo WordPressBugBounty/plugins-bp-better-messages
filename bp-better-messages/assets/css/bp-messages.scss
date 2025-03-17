@@ -1377,6 +1377,16 @@ body.bp-messages-mobile {
                   margin-top: 5px;
                   min-height: 30px;
 
+                  .bm-voice-message-duration{
+                    position: absolute;
+                    bottom: 0;
+                    color: gray !important;
+                    font-size: 11px;
+                    white-space: nowrap;
+                    left: 35px;
+                    cursor: default;
+                  }
+
                   .bm-voice-message-play{
                     width: 35px;
                     font-size: 30px;
@@ -9932,6 +9942,11 @@ html[dir="rtl"]{
 
     .bm-voice-message-play{
       transform: rotate(180deg);
+    }
+
+    .bm-voice-message-duration{
+      left: auto;
+      right: 35px;
     }
 
     .chat-header{
