@@ -20,6 +20,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
 
         public function __construct(){
             if(  Better_Messages()->settings['UMenableGroups'] === '1' ) {
+                add_filter('better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
                 add_filter('um_groups_tabs', array($this, 'add_group_tab'), 20, 3);
                 add_action('um_groups_single_page_content__messages', array($this, 'group_tab_content'));
                 add_action('update_post_meta', array( $this, 'catch_members_update' ), 10 , 4);
@@ -37,6 +38,23 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
                 add_filter('better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
                 add_filter('better_messages_thread_url',   array( $this, 'group_thread_url' ), 10, 3 );
             }
+        }
+
+        public function is_valid_group( $is_valid_group, $thread_id )
+        {
+            $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
+
+            if ( !! $group_id || ! class_exists('UM_Groups') ) {
+                $group = get_post( (int) $group_id );
+
+                if( !! $group && $group->post_type === 'um_groups' ) {
+                    if ( $this->is_group_messages_enabled($group_id) === 'enabled') {
+                        $is_valid_group = true;
+                    }
+                }
+            }
+
+            return $is_valid_group;
         }
 
         /**

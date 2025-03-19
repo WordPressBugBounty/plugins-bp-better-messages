@@ -33,12 +33,29 @@ class Better_Messages_Group extends BP_Group_Extension
     public function __construct()
     {
         if( Better_Messages()->settings['enableGroups'] === '1' ){
+            add_filter('better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
             add_action('bp_ready', array( $this, 'init_group' ), 20 );
 
             add_filter('better_messages_thread_title', array( $this, 'group_thread_title' ), 10, 3 );
             add_filter('better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
             add_filter('better_messages_thread_url',   array( $this, 'group_thread_url' ), 10, 3 );
         }
+    }
+
+    public function is_valid_group( $is_valid_group, $thread_id )
+    {
+        $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'group_id');
+
+        if ( !! $group_id ) {
+            $group = new BP_Groups_Group( (int) $group_id );
+            if( $group->id > 0 ) {
+                if (Better_Messages()->groups->is_group_messages_enabled($group_id) === 'enabled') {
+                    $is_valid_group = true;
+                }
+            }
+        }
+
+        return $is_valid_group;
     }
 
     public function init_group(){

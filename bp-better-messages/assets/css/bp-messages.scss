@@ -277,6 +277,9 @@ body.bp-messages-mobile {
   line-height: normal;
   font-weight: normal;
 
+  .ps-vip__icon{
+    transform: none;
+  }
   .bm-deleted-message{
     opacity: 0.5;
   }
@@ -2379,6 +2382,10 @@ body.bp-messages-mobile {
                 a {
                   color: rgba(var(--bm-text-color), 1) !important;
                 }
+
+                > * {
+                  margin-left: 5px;
+                }
               }
 
               .sub-name{
@@ -3923,6 +3930,10 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel{
   flex-direction: row;
   justify-content: flex-start;
 
+  > * {
+    margin-left: 5px;
+  }
+
   .bm-thread-icon{
     margin-left: 5px;
     color: rgba( var( --bm-text-color ), 0.6);
@@ -4809,7 +4820,7 @@ body:not(.bm-mobile-device) .bp-messages-wrap .bm-messages-list .bm-list .bm-mes
     border: 0 !important;
     border-radius: 0 !important;
     > .bp-messages-threads-wrapper{
-        height: 100% !important;
+      height: 100% !important;
     }
   }
 
@@ -5358,7 +5369,10 @@ body.bm-mobile-device {
   background: rgba( var(--bm-hover-bg), 1 ) !important;
   cursor: pointer !important;
 }
-.bp-messages-user-list .user > *{
+.bp-messages-user-list .user > *:not(.pic){
+  margin-left: 5px;
+}
+.bp-messages-user-list .user > *:not(img){
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -9884,6 +9898,8 @@ body.bm-mobile-device-android{
 }
 
 html[dir="rtl"]{
+  .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name>*,
+  .bp-messages-wrap .threads-list .thread .bm-info .name>*,
   .bm-name-verified{
     margin-right: 5px;
     margin-left: 0;
@@ -10266,6 +10282,11 @@ html[dir="rtl"]{
   .bp-messages-group-list .group .actions{
     margin-left: 0;
     margin-right: auto;
+  }
+
+  .bp-messages-user-list .user>*:not(.pic){
+    margin-left: 0;
+    margin-right: 5px;
   }
 
   .bm-before-message-list .bpbm-group-call-in-progress .bpbm-group-call-in-progress-info svg{

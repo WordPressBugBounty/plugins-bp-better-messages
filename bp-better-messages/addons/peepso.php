@@ -62,7 +62,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             add_filter('bp_better_messages_script_variable', array( $this, 'script_variables' ) );
 
-            add_filter('better_messages_is_verified', array( $this, 'user_verified' ), 20, 2 );
+            //add_filter('better_messages_is_verified', array( $this, 'user_verified' ), 20, 2 );
             add_filter('better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
         }
 
@@ -72,7 +72,36 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             $user = PeepSoUser::get_instance( $user_id );
 
             if( $user ){
-                $item['name'] = $user->get_fullname();
+                $name = $user->get_fullname();
+
+                if(class_exists('PeepSoVIP') ){
+                    $vip = PeepSoVIP::get_instance();
+                    $icons = $vip->get_user_icons( $user_id );
+                    if( is_array( $icons ) && count($icons) > 0 ) {
+                        //$display = PeepSo::get_option('vipso_where_to_display', 1);
+                        $limit = PeepSo::get_option('vipso_display_how_many', 10);
+
+                        $icons_html = '';
+                        $i = 0;
+                        foreach ($icons as $icon) {
+                            if (intval($icon->published) == 1) {
+                                if( $i >= $limit) {
+                                    break;
+                                }
+
+                                $icons_html .= ' <img src="' . esc_url($icon->icon_url) . '" alt="'.esc_attr($icon->title).'" title="'.esc_attr($icon->title) .'" class="ps-vip__icon ps-js-vip-badge" data-id="'.esc_attr($user_id).'"> ';
+
+                                $i++;
+                            }
+                        }
+
+                        if( ! empty( $icons_html ) ) {
+                            $name = $name . $icons_html;
+                        }
+                    }
+                }
+
+                $item['name'] = $name;
                 $item['url']  = $user->get_profileurl();
                 $avatar = $user->get_avatar();
 

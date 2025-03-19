@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.14
+Stable tag: 2.7.15
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -167,6 +167,11 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.7.15 =
+* PeepSo Integration: Added toggle to enable or disable group chat in PeepSo Group Settings (thanks to [@jaworskimatt](https://profiles.wordpress.org/jaworskimatt/) from [PeepSo](https://www.wordplus.org/peepso))
+* PeepSo Integration: Displaying PeepSo VIP icons in usernames instead of verified badge
+* Other minor bugfixes and improvements
 
 = 2.7.14 =
 * Added option to show "Suggested conversations" in conversations list for new users when they do not have conversations yet

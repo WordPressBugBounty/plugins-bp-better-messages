@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.7.14
+    Version: 2.7.15
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.7.14';
+        public $version = '2.7.15';
 
         public $db_version = '1.0.4';
 
@@ -523,8 +523,6 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'touchEnter'         => ( $this->settings['disableEnterForTouch'] == '1' ? '0' : '1' ),
                 'loginUrl'           => apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg( [] ) ) ),
                 'total_unread'       => (int) $unread_count,
-                'enableGroups'       => ( $this->settings['enableGroups'] == '1' || $this->settings['PSenableGroups'] ? '1' : '0' ),
-                'groupsSlug'         => $this->settings['bpGroupSlug'],
                 'disableEnter'       => ( $this->settings['disableEnterForDesktop'] == '1' ? '1' : '0' ),
                 'miniClose'          => ( $this->settings['enableMiniCloseButton'] ? '1' : '0' ),
                 'miniChats'          => ( $this->realtime && $this->settings['miniChatsEnable'] ? '1' : '0' ),

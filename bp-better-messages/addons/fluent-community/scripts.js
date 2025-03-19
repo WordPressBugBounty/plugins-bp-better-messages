@@ -35,6 +35,7 @@ document.addEventListener("fluentCommunityUtilReady", function () {
 
                     var container = document.querySelector('.bp-messages-wrap-main');
                     if( container ){
+                        if( container.reactRoot ) container.reactRoot.unmount()
                         container.remove();
                     }
 

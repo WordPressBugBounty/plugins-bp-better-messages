@@ -24,6 +24,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
 
         public function __construct()
         {
+            add_filter('better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
+
             add_filter('fluent_community/space_header_links', array( $this, 'group_link_to_chat' ), 10, 2);
             add_filter('better_messages_has_access_to_group_chat', array( $this, 'has_access_to_group_chat'), 10, 3 );
 
@@ -41,6 +43,23 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             if (Better_Messages()->settings[ 'FCenableGroupsFiles' ] === '0') {
                 add_action('bp_better_messages_user_can_upload_files', array($this, 'disable_upload_files'), 10, 3);
             }
+        }
+
+        public function is_valid_group( $is_valid_group, $thread_id )
+        {
+            $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+
+            if ( !! $group_id ) {
+                $group = Space::find( $group_id );
+
+                if( $group ) {
+                    if ( $this->is_group_messages_enabled($group_id) === 'enabled') {
+                        $is_valid_group = true;
+                    }
+                }
+            }
+
+            return $is_valid_group;
         }
 
         public function disable_upload_files( $can_upload, $user_id, $thread_id ){

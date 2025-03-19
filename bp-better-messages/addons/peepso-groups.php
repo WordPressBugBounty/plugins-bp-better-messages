@@ -20,8 +20,12 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
 
         public function __construct(){
             if( class_exists( 'PeepSoGroupsPlugin' ) && Better_Messages()->settings['PSenableGroups'] === '1' ) {
+                add_filter('better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
 
-                add_filter( 'better_messages_groups_active', array($this, 'enabled') );
+                add_action('peepso_action_render_group_settings_form_after', array( $this, 'render_group_settings_form_after' ), 10, 2 );
+                add_action('peepso_action_group_update_unknown_property', array( $this, 'update_unknown_property'),10 ,3 );
+
+                add_filter('better_messages_groups_active', array($this, 'enabled') );
                 add_filter('better_messages_has_access_to_group_chat', array( $this, 'has_access_to_group_chat'), 10, 3 );
                 add_filter('better_messages_can_send_message', array( $this, 'can_reply_to_group_chat'), 10, 3 );
 
@@ -51,6 +55,92 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             }
         }
 
+        function update_unknown_property($key, $value, $group) {
+            if($key == 'bpbm_messages') {
+                $group_user = new PeepSoGroupUser($group->id);
+
+                if($group_user->can('manage_group') && in_array($value, ["enabled","disabled"])) {
+                    update_post_meta($group->id, 'bpbm_messages', $value);
+                }
+
+                return true;
+            }
+        }
+
+        public function render_group_settings_form_after( $group, $group_user )
+        {
+            if( $group instanceof PeepSoGroup && $group_user instanceof PeepSoGroupUser && $group_user->can('manage_group') ) {
+                $setting_key = 'bpbm_messages';
+                $setting = get_post_meta($group->id, $setting_key, true);
+                $setting = $setting ? $setting : 'enabled';
+                ?>
+                <div class="ps-group__edit-field ps-group__edit-field--bpbm_messages ps-js-group-bpbm_messages">
+                    <div class="ps-group__edit-field-row">
+                        <div class="ps-group__edit-field-header">
+                            <div class="ps-group__edit-field-title">
+                                <?php echo esc_html_x( 'Group Chat', 'PeepSo Integration', 'bp-better-messages' ); ?>
+                            </div>
+
+
+                            <div class="ps-group__edit-field-edit">
+                                <button class="ps-btn ps-btn--xs ps-btn--app ps-js-btn-edit" onclick="ps_group.edit_property(this, <?php echo $group->id; ?>, 'bpbm_messages');">
+                                    <?php echo __('Edit','groupso');?>
+                                </button>
+                            </div>
+
+                            <div class="ps-group__edit-field-actions">
+                                <button type="button" class="ps-btn ps-btn--xs ps-btn--app ps-js-btn-cancel"><?php echo __('Cancel', 'groupso'); ?></button>
+
+                                <button type="button" class="ps-btn ps-btn--xs ps-btn--action ps-js-btn-submit">
+                                    <img src="<?php echo PeepSo::get_asset('images/ajax-loader.gif'); ?>" class="ps-js-loading" alt="loading" style="display:none" />
+                                    <?php echo __('Save', 'groupso'); ?>
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="ps-group__edit-field-static">
+                            <div class="ps-group__edit-field-data ps-js-text">
+                                <?php if($setting === 'disabled') {
+                                    echo esc_html__( 'Disabled', 'bp-better-messages' );
+                                } else {
+                                    echo esc_html__( 'Enabled', 'bp-better-messages' );
+                                }
+                                ?>
+                            </div>
+                        </div>
+
+                        <?php if ( $group_user->can('manage_group') ) { ?>
+                            <div class="ps-group__edit-field-form ps-js-editor" style="display:none">
+                                <div class="ps-input__wrapper">
+                                    <select name="bpbm_messages" class="ps-input ps-input--sm ps-input--select">
+                                        <option value="enabled" <?php if($setting=='enabled') echo "selected";?>><?php echo esc_html__( 'Enabled', 'bp-better-messages' ); ?></option>
+                                        <option value="disabled" <?php if($setting=='disabled') echo "selected";?>><?php echo esc_html__( 'Disabled', 'bp-better-messages' ); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+                <?php
+            }
+        }
+
+        public function is_valid_group( $is_valid_group, $thread_id ) {
+            $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
+
+            if ( !! $group_id && class_exists('PeepSoGroup') ) {
+                $group = new PeepSoGroup( $group_id );
+
+                if( !! $group->id ) {
+                    if ( $this->is_group_messages_enabled($group_id) === 'enabled') {
+                        $is_valid_group = true;
+                    }
+                }
+            }
+
+            return $is_valid_group;
+        }
         /**
          * @param string $title
          * @param int $thread_id

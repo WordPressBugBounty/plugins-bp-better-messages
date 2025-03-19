@@ -1712,34 +1712,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $thread_type = 'thread';
 
             if( $thread->type === 'group' ) {
-                if (Better_Messages()->settings['enableGroups'] === '1') {
-                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'group_id');
+                $is_valid_group = apply_filters( 'better_messages_is_valid_group', false, $thread_id );
 
-                    if (!!$group_id && bm_bp_is_active('groups')) {
-                        if (Better_Messages()->groups->is_group_messages_enabled($group_id) === 'enabled') {
-                            $thread_type =  'group';
-                        }
-                    }
-                } else if ( class_exists( 'PeepSoGroupsPlugin' ) &&  Better_Messages()->settings['PSenableGroups'] === '1' ) {
-                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
-
-                    if (!!$group_id) {
-                        $thread_type = 'group';
-                    }
-                } else if (function_exists('UM') && Better_Messages()->settings['UMenableGroups'] === '1') {
-                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'um_group_id');
-
-                    if (!!$group_id) {
-                        if( get_post( $group_id ) ){
-                            $thread_type =  'group';
-                        }
-                    }
-                } else if( class_exists('Better_Messages_Fluent_Community_Spaces') ) {
-                    $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
-
-                    if( !!$group_id ){
-                        $thread_type = 'group';
-                    }
+                if( $is_valid_group ){
+                    $thread_type = 'group';
                 }
             } else {
                 $chat_id = Better_Messages()->functions->get_thread_meta($thread_id, 'chat_id');

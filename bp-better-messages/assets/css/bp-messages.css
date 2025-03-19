@@ -6483,6 +6483,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
    * Animations
    */
 }
+.bp-messages-wrap .ps-vip__icon {
+  transform: none;
+}
 .bp-messages-wrap .bm-deleted-message {
   opacity: 0.5;
 }
@@ -8198,6 +8201,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name a {
   color: rgba(var(--bm-text-color), 1) !important;
 }
+.bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > * {
+  margin-left: 5px;
+}
 .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .sub-name {
   font-size: 12px;
   line-height: 14px;
@@ -9613,6 +9619,9 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   flex-direction: row;
   justify-content: flex-start;
 }
+.bp-messages-wrap .threads-list .thread .bm-info .name > * {
+  margin-left: 5px;
+}
 .bp-messages-wrap .threads-list .thread .bm-info .name .bm-thread-icon {
   margin-left: 5px;
   color: rgba(var(--bm-text-color), 0.6);
@@ -10985,7 +10994,11 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   cursor: pointer !important;
 }
 
-.bp-messages-user-list .user > * {
+.bp-messages-user-list .user > *:not(.pic) {
+  margin-left: 5px;
+}
+
+.bp-messages-user-list .user > *:not(img) {
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -14950,6 +14963,8 @@ span.bm-user > *, a.bm-user > * {
   padding-top: 1rem;
 }
 
+html[dir=rtl] .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > *,
+html[dir=rtl] .bp-messages-wrap .threads-list .thread .bm-info .name > *,
 html[dir=rtl] .bm-name-verified {
   margin-right: 5px;
   margin-left: 0;
@@ -15189,6 +15204,10 @@ html[dir=rtl] .bp-messages-user-list .user .actions,
 html[dir=rtl] .bp-messages-group-list .group .actions {
   margin-left: 0;
   margin-right: auto;
+}
+html[dir=rtl] .bp-messages-user-list .user > *:not(.pic) {
+  margin-left: 0;
+  margin-right: 5px;
 }
 html[dir=rtl] .bm-before-message-list .bpbm-group-call-in-progress .bpbm-group-call-in-progress-info svg {
   margin-left: 5px;
