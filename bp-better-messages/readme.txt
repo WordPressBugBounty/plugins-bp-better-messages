@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.15
+Stable tag: 2.7.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -106,9 +106,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 WebSocket version is a paid option, you can get license key on our website.
 
-We are using our server to implement websockets communications between your site and users.
+We are using our server to implement WebSockets communications between your site and users.
 
-Our websockets servers are completely private and do not store or track any private data.
+Our WebSockets servers are completely private and do not store or track any private data.
 
 * **Significantly** reduces the load on your server
 * **Instant** conversations and notifications
@@ -168,7 +168,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.15 =
+= 2.7.15 - 2.7.16 =
 * PeepSo Integration: Added toggle to enable or disable group chat in PeepSo Group Settings (thanks to [@jaworskimatt](https://profiles.wordpress.org/jaworskimatt/) from [PeepSo](https://www.wordplus.org/peepso))
 * PeepSo Integration: Displaying PeepSo VIP icons in usernames instead of verified badge
 * Other minor bugfixes and improvements

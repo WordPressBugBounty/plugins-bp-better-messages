@@ -7811,7 +7811,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .chat-header .thread-info .thread-info-data .sub-name {
   font-size: 12px;
   line-height: 14px;
-  min-height: 12px;
+  min-height: 14px;
   text-overflow: ellipsis;
   max-width: 100%;
   overflow: hidden;
@@ -8201,13 +8201,13 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name a {
   color: rgba(var(--bm-text-color), 1) !important;
 }
-.bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > * {
+.bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > *:not(strong) {
   margin-left: 5px;
 }
 .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .sub-name {
   font-size: 12px;
   line-height: 14px;
-  min-height: 12px;
+  min-height: 14px;
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 100%;
@@ -9619,7 +9619,7 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   flex-direction: row;
   justify-content: flex-start;
 }
-.bp-messages-wrap .threads-list .thread .bm-info .name > * {
+.bp-messages-wrap .threads-list .thread .bm-info .name > *:not(strong) {
   margin-left: 5px;
 }
 .bp-messages-wrap .threads-list .thread .bm-info .name .bm-thread-icon {
@@ -14963,8 +14963,8 @@ span.bm-user > *, a.bm-user > * {
   padding-top: 1rem;
 }
 
-html[dir=rtl] .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > *,
-html[dir=rtl] .bp-messages-wrap .threads-list .thread .bm-info .name > *,
+html[dir=rtl] .bp-messages-wrap.bp-better-messages-mini .chats .chat .head .thread-info .thread-info-data .name > *:not(strong),
+html[dir=rtl] .bp-messages-wrap .threads-list .thread .bm-info .name > *:not(strong),
 html[dir=rtl] .bm-name-verified {
   margin-right: 5px;
   margin-left: 0;

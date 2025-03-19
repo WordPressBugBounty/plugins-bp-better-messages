@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.7.15\n"
+"Project-Id-Version: Better Messages 2.7.16\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-03-19T15:05:58+00:00\n"
+"POT-Creation-Date: 2025-03-19T21:45:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: bp-better-messages\n"
@@ -267,7 +267,7 @@ msgstr ""
 
 #: addons/calls.php:198
 #: addons/calls.php:251
-#: addons/calls.php:441
+#: addons/calls.php:442
 msgctxt "Private Call - Rest API Error"
 msgid "Conversation not found"
 msgstr ""
@@ -283,117 +283,117 @@ msgid "This is not a call"
 msgstr ""
 
 #: addons/calls.php:305
-#: addons/calls.php:506
+#: addons/calls.php:507
 msgctxt "Private Call - Message Entry"
 msgid "Video call"
 msgstr ""
 
 #: addons/calls.php:308
-#: addons/calls.php:509
+#: addons/calls.php:510
 msgctxt "Private Call - Web Push"
 msgid "Incoming video call from %s"
 msgstr ""
 
 #: addons/calls.php:309
-#: addons/calls.php:510
+#: addons/calls.php:511
 msgctxt "Private Call - Web Push"
 msgid "You have incoming video call from %s"
 msgstr ""
 
 #: addons/calls.php:317
-#: addons/calls.php:518
+#: addons/calls.php:519
 msgctxt "Private Call - Message Entry"
 msgid "Audio call"
 msgstr ""
 
 #: addons/calls.php:320
-#: addons/calls.php:521
+#: addons/calls.php:522
 msgctxt "Private Call - Web Push"
 msgid "Incoming audio call from %s"
 msgstr ""
 
 #: addons/calls.php:321
-#: addons/calls.php:522
+#: addons/calls.php:523
 msgctxt "Private Call - Web Push"
 msgid "You have incoming audio call from %s"
 msgstr ""
 
-#: addons/calls.php:450
+#: addons/calls.php:451
 msgctxt "Private Call - Rest API Error"
 msgid "You can make private call only in private conversation"
 msgstr ""
 
-#: addons/calls.php:457
+#: addons/calls.php:458
 msgctxt "Private Call - Rest API Error"
 msgid "Something went wrong. Member you tried to call not found in this conversation."
 msgstr ""
 
-#: addons/calls.php:611
-#: addons/calls.php:696
+#: addons/calls.php:612
+#: addons/calls.php:697
 msgctxt "Private Call - Message Entry"
 msgid "Audio call accepted <span class=\"bpbm-call-duration\">(%s)</span>"
 msgstr ""
 
-#: addons/calls.php:640
-#: addons/calls.php:694
+#: addons/calls.php:641
+#: addons/calls.php:695
 msgctxt "Private Call - Message Entry"
 msgid "Video call accepted <span class=\"bpbm-call-duration\">(%s)</span>"
 msgstr ""
 
-#: addons/calls.php:758
-#: addons/calls.php:799
-#: addons/calls.php:851
-#: addons/calls.php:946
-#: addons/calls.php:1027
+#: addons/calls.php:759
+#: addons/calls.php:800
+#: addons/calls.php:852
+#: addons/calls.php:947
+#: addons/calls.php:1028
 #: inc/shortcodes.php:322
 msgid "Audio Call"
 msgstr ""
 
-#: addons/calls.php:759
-#: addons/calls.php:811
-#: addons/calls.php:862
-#: addons/calls.php:967
-#: addons/calls.php:1051
+#: addons/calls.php:760
+#: addons/calls.php:812
+#: addons/calls.php:863
+#: addons/calls.php:968
+#: addons/calls.php:1052
 #: inc/shortcodes.php:272
 msgid "Video Call"
 msgstr ""
 
-#: addons/calls.php:1126
+#: addons/calls.php:1127
 msgctxt "Private Call - Message Entry"
 msgid "I tried to make an audio call, but you were offline"
 msgstr ""
 
-#: addons/calls.php:1144
+#: addons/calls.php:1145
 msgctxt "Private Call - Message Entry"
 msgid "I tried to make a video call, but you were offline"
 msgstr ""
 
-#: addons/calls.php:1197
+#: addons/calls.php:1198
 msgctxt "Private Call - Message Entry"
 msgid "Missed audio call <span class=\"bpbm-call-duration\">(%s)</span>"
 msgstr ""
 
-#: addons/calls.php:1200
+#: addons/calls.php:1201
 msgctxt "Private Call - Web Push"
 msgid "Missed audio call from %s"
 msgstr ""
 
-#: addons/calls.php:1201
+#: addons/calls.php:1202
 msgctxt "Private Call - Web Push"
 msgid "You have missed audio call from %s"
 msgstr ""
 
-#: addons/calls.php:1231
+#: addons/calls.php:1232
 msgctxt "Private Call - Message Entry"
 msgid "Missed video call <span class=\"bpbm-call-duration\">(%s)</span>"
 msgstr ""
 
-#: addons/calls.php:1234
+#: addons/calls.php:1235
 msgctxt "Private Call - Web Push"
 msgid "Missed video call from %s"
 msgstr ""
 
-#: addons/calls.php:1235
+#: addons/calls.php:1236
 msgctxt "Private Call - Web Push"
 msgid "You have missed video call from %s"
 msgstr ""
@@ -434,10 +434,10 @@ msgstr ""
 #: inc/api/admin.php:474
 #: assets/js/bp-messages-app.js:41975
 #: assets/js/bp-messages-app.js:42043
-#: assets/js/bp-messages.js:55896
+#: assets/js/bp-messages.js:55894
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55963
+#: assets/js/bp-messages.js:55961
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Voice Message"
@@ -747,10 +747,10 @@ msgstr ""
 #: inc/notifications.php:420
 #: assets/js/bp-messages-app.js:41961
 #: assets/js/bp-messages-app.js:42029
-#: assets/js/bp-messages.js:55882
+#: assets/js/bp-messages.js:55880
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55949
+#: assets/js/bp-messages.js:55947
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Sticker"
@@ -1528,7 +1528,7 @@ msgstr ""
 
 #: inc/functions.php:2584
 #: assets/js/bp-messages-app.js:30770
-#: assets/js/bp-messages.js:44702
+#: assets/js/bp-messages.js:44700
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User tried to send message with no recipients"
@@ -1545,7 +1545,7 @@ msgstr ""
 #: assets/js/bp-messages.js:28746
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55116
+#: assets/js/bp-messages.js:55114
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Display Name"
@@ -1830,7 +1830,7 @@ msgstr ""
 
 #: inc/rest-api.php:808
 #: assets/js/bp-messages-app.js:30466
-#: assets/js/bp-messages.js:44401
+#: assets/js/bp-messages.js:44399
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User tried to send empty message error"
@@ -5938,7 +5938,7 @@ msgstr ""
 #: assets/admin/admin.js:5000
 #: assets/admin/admin.min.js:1
 #: assets/js/bp-messages-app.js:41814
-#: assets/js/bp-messages.js:55707
+#: assets/js/bp-messages.js:55705
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "This message was deleted"
@@ -6188,10 +6188,10 @@ msgstr ""
 #: assets/js/bp-messages.js:21918
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:46043
+#: assets/js/bp-messages.js:46041
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:46175
+#: assets/js/bp-messages.js:46173
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -6360,10 +6360,10 @@ msgstr ""
 #: assets/js/bp-messages.js:21913
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:46040
+#: assets/js/bp-messages.js:46038
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:46089
+#: assets/js/bp-messages.js:46087
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -6492,7 +6492,7 @@ msgstr ""
 #: assets/js/bp-messages.js:21930
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:59965
+#: assets/js/bp-messages.js:59963
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -6600,7 +6600,7 @@ msgstr ""
 #: assets/js/bp-messages.js:22003
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:59973
+#: assets/js/bp-messages.js:59971
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -7299,7 +7299,7 @@ msgstr ""
 #: assets/js/bp-messages.js:32995
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55109
+#: assets/js/bp-messages.js:55107
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Login"
@@ -7311,7 +7311,7 @@ msgstr ""
 #: assets/js/bp-messages.js:32997
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55112
+#: assets/js/bp-messages.js:55110
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Register"
@@ -7615,7 +7615,7 @@ msgstr ""
 #: assets/js/bp-messages.js:30820
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:39873
+#: assets/js/bp-messages.js:39871
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "New threads screen"
@@ -7673,9 +7673,6 @@ msgid "Deleted user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:16796
-#: assets/js/bp-messages.js:30201
-#: assets/js/bp-messages-premium.min.js:1
-#: assets/js/bp-messages-free.min.js:1
 msgctxt "Group Thread Online Count"
 msgid "%s participant"
 msgid_plural "%s participants"
@@ -8055,7 +8052,7 @@ msgstr ""
 #: assets/js/bp-messages.js:32140
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55116
+#: assets/js/bp-messages.js:55114
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue as guest"
@@ -8543,10 +8540,10 @@ msgstr ""
 #: assets/js/bp-messages.js:34877
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:39675
+#: assets/js/bp-messages.js:39673
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:39684
+#: assets/js/bp-messages.js:39682
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Links tooltip"
@@ -8625,7 +8622,7 @@ msgid "Participants"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22069
-#: assets/js/bp-messages.js:35427
+#: assets/js/bp-messages.js:35429
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (private conversation)"
@@ -8633,7 +8630,7 @@ msgid "typing"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22069
-#: assets/js/bp-messages.js:35427
+#: assets/js/bp-messages.js:35429
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (Username 1, Username 2 typing)"
@@ -8643,7 +8640,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:22069
-#: assets/js/bp-messages.js:35427
+#: assets/js/bp-messages.js:35429
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (3 or more typing)"
@@ -8653,7 +8650,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:22220
-#: assets/js/bp-messages.js:35577
+#: assets/js/bp-messages.js:35579
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8661,7 +8658,7 @@ msgid "Failed to add %{smart_count} file due to an internal error"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22221
-#: assets/js/bp-messages.js:35578
+#: assets/js/bp-messages.js:35580
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8669,7 +8666,7 @@ msgid "Failed to add %{smart_count} files due to internal errors"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22224
-#: assets/js/bp-messages.js:35581
+#: assets/js/bp-messages.js:35583
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8677,7 +8674,7 @@ msgid "You can only upload %{smart_count} file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22225
-#: assets/js/bp-messages.js:35582
+#: assets/js/bp-messages.js:35584
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8685,7 +8682,7 @@ msgid "You can only upload %{smart_count} files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22227
-#: assets/js/bp-messages.js:35584
+#: assets/js/bp-messages.js:35586
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8693,7 +8690,7 @@ msgid "%{file} exceeds maximum allowed size of %{size}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22228
-#: assets/js/bp-messages.js:35585
+#: assets/js/bp-messages.js:35587
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8701,7 +8698,7 @@ msgid "Missing required meta fields"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22229
-#: assets/js/bp-messages.js:35586
+#: assets/js/bp-messages.js:35588
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8709,7 +8706,7 @@ msgid "Missing required meta fields in %{fileName}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22230
-#: assets/js/bp-messages.js:35587
+#: assets/js/bp-messages.js:35589
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8717,7 +8714,7 @@ msgid "This file is smaller than the allowed size of %{size}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22231
-#: assets/js/bp-messages.js:35588
+#: assets/js/bp-messages.js:35590
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8725,7 +8722,7 @@ msgid "You can only upload: %{types}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22232
-#: assets/js/bp-messages.js:35589
+#: assets/js/bp-messages.js:35591
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8733,7 +8730,7 @@ msgid "Cannot add more files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22233
-#: assets/js/bp-messages.js:35590
+#: assets/js/bp-messages.js:35592
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8741,7 +8738,7 @@ msgid "Cannot add the duplicate file '%{fileName}', it already exists"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22234
-#: assets/js/bp-messages.js:35591
+#: assets/js/bp-messages.js:35593
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8749,7 +8746,7 @@ msgid "Authentication aborted"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22235
-#: assets/js/bp-messages.js:35592
+#: assets/js/bp-messages.js:35594
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8757,7 +8754,7 @@ msgid "Failed to upload %{file}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22236
-#: assets/js/bp-messages.js:35593
+#: assets/js/bp-messages.js:35595
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8766,10 +8763,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:22238
 #: assets/js/bp-messages-app.js:22239
-#: assets/js/bp-messages.js:35595
+#: assets/js/bp-messages.js:35597
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:35596
+#: assets/js/bp-messages.js:35598
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8777,7 +8774,7 @@ msgid "Select %{smart_count}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22241
-#: assets/js/bp-messages.js:35598
+#: assets/js/bp-messages.js:35600
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8785,7 +8782,7 @@ msgid "All files from folder %{name}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22242
-#: assets/js/bp-messages.js:35599
+#: assets/js/bp-messages.js:35601
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8793,7 +8790,7 @@ msgid "Open folder %{name}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22243
-#: assets/js/bp-messages.js:35600
+#: assets/js/bp-messages.js:35602
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8801,7 +8798,7 @@ msgid "Cancel"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22244
-#: assets/js/bp-messages.js:35601
+#: assets/js/bp-messages.js:35603
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8809,7 +8806,7 @@ msgid "Loading..."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22245
-#: assets/js/bp-messages.js:35602
+#: assets/js/bp-messages.js:35604
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8817,7 +8814,7 @@ msgid "No files were added from empty folder"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22246
-#: assets/js/bp-messages.js:35603
+#: assets/js/bp-messages.js:35605
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8825,7 +8822,7 @@ msgid "The folder \"%{folder}\" was already added"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22248
-#: assets/js/bp-messages.js:35605
+#: assets/js/bp-messages.js:35607
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8833,7 +8830,7 @@ msgid "Added %{smart_count} file from %{folder}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22249
-#: assets/js/bp-messages.js:35606
+#: assets/js/bp-messages.js:35608
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8841,7 +8838,7 @@ msgid "Added %{smart_count} files from %{folder}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22251
-#: assets/js/bp-messages.js:35608
+#: assets/js/bp-messages.js:35610
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8849,7 +8846,7 @@ msgid "Adding more files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22252
-#: assets/js/bp-messages.js:35609
+#: assets/js/bp-messages.js:35611
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8857,7 +8854,7 @@ msgid "Add more"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22253
-#: assets/js/bp-messages.js:35610
+#: assets/js/bp-messages.js:35612
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8865,7 +8862,7 @@ msgid "Add more files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22254
-#: assets/js/bp-messages.js:35611
+#: assets/js/bp-messages.js:35613
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8873,7 +8870,7 @@ msgid "In order to take pictures or record video with your camera, please allow 
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22255
-#: assets/js/bp-messages.js:35612
+#: assets/js/bp-messages.js:35614
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8881,7 +8878,7 @@ msgid "Please allow access to your camera"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22256
-#: assets/js/bp-messages.js:35613
+#: assets/js/bp-messages.js:35615
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8889,7 +8886,7 @@ msgid "In order to record audio, please allow microphone access for this site."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22257
-#: assets/js/bp-messages.js:35614
+#: assets/js/bp-messages.js:35616
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8897,7 +8894,7 @@ msgid "Please allow access to your microphone"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22258
-#: assets/js/bp-messages.js:35615
+#: assets/js/bp-messages.js:35617
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8905,7 +8902,7 @@ msgid "Back"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22259
-#: assets/js/bp-messages.js:35616
+#: assets/js/bp-messages.js:35618
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8913,7 +8910,7 @@ msgid "browse"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22260
-#: assets/js/bp-messages.js:35617
+#: assets/js/bp-messages.js:35619
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8921,7 +8918,7 @@ msgid "browse files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22261
-#: assets/js/bp-messages.js:35618
+#: assets/js/bp-messages.js:35620
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8929,7 +8926,7 @@ msgid "browse folders"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22262
-#: assets/js/bp-messages.js:35619
+#: assets/js/bp-messages.js:35621
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8937,7 +8934,7 @@ msgid "Cancel upload"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22263
-#: assets/js/bp-messages.js:35620
+#: assets/js/bp-messages.js:35622
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8945,7 +8942,7 @@ msgid "Choose files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22264
-#: assets/js/bp-messages.js:35621
+#: assets/js/bp-messages.js:35623
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8953,7 +8950,7 @@ msgid "Close Modal"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22265
-#: assets/js/bp-messages.js:35622
+#: assets/js/bp-messages.js:35624
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8961,7 +8958,7 @@ msgid "Discard recorded file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22266
-#: assets/js/bp-messages.js:35623
+#: assets/js/bp-messages.js:35625
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8969,7 +8966,7 @@ msgid "Done"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22267
-#: assets/js/bp-messages.js:35624
+#: assets/js/bp-messages.js:35626
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8978,7 +8975,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:22268
 #: assets/js/bp-messages-app.js:22744
-#: assets/js/bp-messages.js:35625
+#: assets/js/bp-messages.js:35627
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 #: assets/js/bp-messages.js:36101
@@ -8989,7 +8986,7 @@ msgid "Drop your files here"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22269
-#: assets/js/bp-messages.js:35626
+#: assets/js/bp-messages.js:35628
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -8997,7 +8994,7 @@ msgid "Drop files here, %{browseFiles} or %{browseFolders}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22270
-#: assets/js/bp-messages.js:35627
+#: assets/js/bp-messages.js:35629
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9005,7 +9002,7 @@ msgid "Drop files here or %{browseFiles}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22271
-#: assets/js/bp-messages.js:35628
+#: assets/js/bp-messages.js:35630
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9013,7 +9010,7 @@ msgid "Drop files here or %{browseFolders}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22272
-#: assets/js/bp-messages.js:35629
+#: assets/js/bp-messages.js:35631
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9021,7 +9018,7 @@ msgid "Drop files here, %{browseFiles}, %{browseFolders} or import from:"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22273
-#: assets/js/bp-messages.js:35630
+#: assets/js/bp-messages.js:35632
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9029,7 +9026,7 @@ msgid "Drop files here, %{browseFiles} or import from:"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22274
-#: assets/js/bp-messages.js:35631
+#: assets/js/bp-messages.js:35633
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9037,7 +9034,7 @@ msgid "Drop files here, %{browseFolders} or import from:"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22275
-#: assets/js/bp-messages.js:35632
+#: assets/js/bp-messages.js:35634
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9045,7 +9042,7 @@ msgid "Edit file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22276
-#: assets/js/bp-messages.js:35633
+#: assets/js/bp-messages.js:35635
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9053,7 +9050,7 @@ msgid "Edit file %{file}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22277
-#: assets/js/bp-messages.js:35634
+#: assets/js/bp-messages.js:35636
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9061,7 +9058,7 @@ msgid "Editing %{file}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22278
-#: assets/js/bp-messages.js:35635
+#: assets/js/bp-messages.js:35637
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9069,7 +9066,7 @@ msgid "Finish editing file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22279
-#: assets/js/bp-messages.js:35636
+#: assets/js/bp-messages.js:35638
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9077,7 +9074,7 @@ msgid "Generating thumbnails..."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22280
-#: assets/js/bp-messages.js:35637
+#: assets/js/bp-messages.js:35639
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9085,7 +9082,7 @@ msgid "Microphone access denied by user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22282
-#: assets/js/bp-messages.js:35639
+#: assets/js/bp-messages.js:35641
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9093,7 +9090,7 @@ msgid "Missing required meta field: %{fields}."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22283
-#: assets/js/bp-messages.js:35640
+#: assets/js/bp-messages.js:35642
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9101,7 +9098,7 @@ msgid "Missing required meta fields: %{fields}."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22285
-#: assets/js/bp-messages.js:35642
+#: assets/js/bp-messages.js:35644
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9109,7 +9106,7 @@ msgid "My Device"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22286
-#: assets/js/bp-messages.js:35643
+#: assets/js/bp-messages.js:35645
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9117,7 +9114,7 @@ msgid "In order to record audio, please connect a microphone or another audio in
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22287
-#: assets/js/bp-messages.js:35644
+#: assets/js/bp-messages.js:35646
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9125,7 +9122,7 @@ msgid "Microphone Not Available"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22288
-#: assets/js/bp-messages.js:35645
+#: assets/js/bp-messages.js:35647
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9133,7 +9130,7 @@ msgid "In order to take pictures or record video, please connect a camera device
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22289
-#: assets/js/bp-messages.js:35646
+#: assets/js/bp-messages.js:35648
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9141,7 +9138,7 @@ msgid "Camera Not Available"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22290
-#: assets/js/bp-messages.js:35647
+#: assets/js/bp-messages.js:35649
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9149,7 +9146,7 @@ msgid "Audio"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22291
-#: assets/js/bp-messages.js:35648
+#: assets/js/bp-messages.js:35650
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9157,7 +9154,7 @@ msgid "Camera"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22293
-#: assets/js/bp-messages.js:35650
+#: assets/js/bp-messages.js:35652
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9165,7 +9162,7 @@ msgid "Processing %{smart_count} file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22294
-#: assets/js/bp-messages.js:35651
+#: assets/js/bp-messages.js:35653
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9173,7 +9170,7 @@ msgid "Processing %{smart_count} files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22296
-#: assets/js/bp-messages.js:35653
+#: assets/js/bp-messages.js:35655
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9181,7 +9178,7 @@ msgid "Recording"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22297
-#: assets/js/bp-messages.js:35654
+#: assets/js/bp-messages.js:35656
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9189,7 +9186,7 @@ msgid "Recording length %{recording_length}"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22298
-#: assets/js/bp-messages.js:35655
+#: assets/js/bp-messages.js:35657
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9197,7 +9194,7 @@ msgid "Record Video"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22299
-#: assets/js/bp-messages.js:35656
+#: assets/js/bp-messages.js:35658
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9205,7 +9202,7 @@ msgid "Remove file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22300
-#: assets/js/bp-messages.js:35657
+#: assets/js/bp-messages.js:35659
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9213,7 +9210,7 @@ msgid "Save"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22301
-#: assets/js/bp-messages.js:35658
+#: assets/js/bp-messages.js:35660
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9221,7 +9218,7 @@ msgid "Save changes"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22302
-#: assets/js/bp-messages.js:35659
+#: assets/js/bp-messages.js:35661
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9229,7 +9226,7 @@ msgid "Begin audio recording"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22303
-#: assets/js/bp-messages.js:35660
+#: assets/js/bp-messages.js:35662
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9237,7 +9234,7 @@ msgid "Begin screen capturing"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22304
-#: assets/js/bp-messages.js:35661
+#: assets/js/bp-messages.js:35663
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9245,7 +9242,7 @@ msgid "Begin video recording"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22305
-#: assets/js/bp-messages.js:35662
+#: assets/js/bp-messages.js:35664
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9253,7 +9250,7 @@ msgid "Stop audio recording"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22306
-#: assets/js/bp-messages.js:35663
+#: assets/js/bp-messages.js:35665
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9261,7 +9258,7 @@ msgid "Stop screen capturing"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22307
-#: assets/js/bp-messages.js:35664
+#: assets/js/bp-messages.js:35666
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9269,7 +9266,7 @@ msgid "Stop video recording"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22308
-#: assets/js/bp-messages.js:35665
+#: assets/js/bp-messages.js:35667
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9277,7 +9274,7 @@ msgid "Submit recorded file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22309
-#: assets/js/bp-messages.js:35666
+#: assets/js/bp-messages.js:35668
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9285,7 +9282,7 @@ msgid "Take a picture"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22310
-#: assets/js/bp-messages.js:35667
+#: assets/js/bp-messages.js:35669
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9293,7 +9290,7 @@ msgid "Take Picture"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22311
-#: assets/js/bp-messages.js:35668
+#: assets/js/bp-messages.js:35670
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9301,7 +9298,7 @@ msgid "Upload stalled for %{seconds} seconds, aborting."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22312
-#: assets/js/bp-messages.js:35669
+#: assets/js/bp-messages.js:35671
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9309,7 +9306,7 @@ msgid "Upload"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22313
-#: assets/js/bp-messages.js:35670
+#: assets/js/bp-messages.js:35672
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9317,7 +9314,7 @@ msgid "Upload complete"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22314
-#: assets/js/bp-messages.js:35671
+#: assets/js/bp-messages.js:35673
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9326,10 +9323,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:22316
 #: assets/js/bp-messages-app.js:22317
-#: assets/js/bp-messages.js:35673
+#: assets/js/bp-messages.js:35675
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:35674
+#: assets/js/bp-messages.js:35676
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9337,7 +9334,7 @@ msgid "Send Now"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22320
-#: assets/js/bp-messages.js:35677
+#: assets/js/bp-messages.js:35679
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9345,7 +9342,7 @@ msgid "Upload +%{smart_count} file"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22321
-#: assets/js/bp-messages.js:35678
+#: assets/js/bp-messages.js:35680
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9353,7 +9350,7 @@ msgid "Upload +%{smart_count} files"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22324
-#: assets/js/bp-messages.js:35681
+#: assets/js/bp-messages.js:35683
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9361,7 +9358,7 @@ msgid "%{smart_count} file selected"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22325
-#: assets/js/bp-messages.js:35682
+#: assets/js/bp-messages.js:35684
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9369,7 +9366,7 @@ msgid "%{smart_count} files selected"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22327
-#: assets/js/bp-messages.js:35684
+#: assets/js/bp-messages.js:35686
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9377,7 +9374,7 @@ msgid "Reset"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22328
-#: assets/js/bp-messages.js:35685
+#: assets/js/bp-messages.js:35687
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9385,7 +9382,7 @@ msgid "Rotate 90°"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22329
-#: assets/js/bp-messages.js:35686
+#: assets/js/bp-messages.js:35688
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9393,7 +9390,7 @@ msgid "Zoom in"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22330
-#: assets/js/bp-messages.js:35687
+#: assets/js/bp-messages.js:35689
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9401,7 +9398,7 @@ msgid "Zoom out"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22331
-#: assets/js/bp-messages.js:35688
+#: assets/js/bp-messages.js:35690
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9409,7 +9406,7 @@ msgid "Flip horizontally"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22332
-#: assets/js/bp-messages.js:35689
+#: assets/js/bp-messages.js:35691
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9417,7 +9414,7 @@ msgid "Crop square"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22333
-#: assets/js/bp-messages.js:35690
+#: assets/js/bp-messages.js:35692
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9425,7 +9422,7 @@ msgid "Crop landscape (16:9)"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:22334
-#: assets/js/bp-messages.js:35691
+#: assets/js/bp-messages.js:35693
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -9543,7 +9540,13 @@ msgid "No friends found"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:24332
+#: assets/js/bp-messages.js:30201
+#: assets/js/bp-messages-premium.min.js:1
+#: assets/js/bp-messages-free.min.js:1
 #: assets/js/bp-messages.js:37944
+#: assets/js/bp-messages-premium.min.js:1
+#: assets/js/bp-messages-free.min.js:1
+#: assets/js/bp-messages.js:39665
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Group Thread Participants Count"
@@ -9765,7 +9768,7 @@ msgid "Add <strong>%s</strong>"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25798
-#: assets/js/bp-messages.js:39725
+#: assets/js/bp-messages.js:39723
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chat"
@@ -9773,7 +9776,7 @@ msgid "Open Full Screen"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25806
-#: assets/js/bp-messages.js:39733
+#: assets/js/bp-messages.js:39731
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chat"
@@ -9781,7 +9784,7 @@ msgid "Open in Messages"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25833
-#: assets/js/bp-messages.js:39760
+#: assets/js/bp-messages.js:39758
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -9789,7 +9792,7 @@ msgid "Start a video call"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25847
-#: assets/js/bp-messages.js:39774
+#: assets/js/bp-messages.js:39772
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -9797,7 +9800,7 @@ msgid "Start a voice call"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25862
-#: assets/js/bp-messages.js:39789
+#: assets/js/bp-messages.js:39787
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -9807,13 +9810,13 @@ msgstr ""
 #: assets/js/bp-messages-app.js:25869
 #: assets/js/bp-messages-app.js:25883
 #: assets/js/bp-messages-app.js:25950
-#: assets/js/bp-messages.js:39796
+#: assets/js/bp-messages.js:39794
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:39810
+#: assets/js/bp-messages.js:39808
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:39876
+#: assets/js/bp-messages.js:39874
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -9821,7 +9824,7 @@ msgid "Close"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:25876
-#: assets/js/bp-messages.js:39803
+#: assets/js/bp-messages.js:39801
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -9829,7 +9832,7 @@ msgid "Open"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26758
-#: assets/js/bp-messages.js:40679
+#: assets/js/bp-messages.js:40677
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -9838,10 +9841,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:26778
 #: assets/js/bp-messages-app.js:26790
-#: assets/js/bp-messages.js:40699
+#: assets/js/bp-messages.js:40697
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:40711
+#: assets/js/bp-messages.js:40709
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -9849,7 +9852,7 @@ msgid "Error while blocking user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26799
-#: assets/js/bp-messages.js:40720
+#: assets/js/bp-messages.js:40718
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -9857,7 +9860,7 @@ msgid "Blocking user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26808
-#: assets/js/bp-messages.js:40729
+#: assets/js/bp-messages.js:40727
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -9865,7 +9868,7 @@ msgid "This user has been blocked"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26894
-#: assets/js/bp-messages.js:40814
+#: assets/js/bp-messages.js:40812
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -9874,10 +9877,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:26914
 #: assets/js/bp-messages-app.js:26926
-#: assets/js/bp-messages.js:40834
+#: assets/js/bp-messages.js:40832
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:40846
+#: assets/js/bp-messages.js:40844
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -9885,7 +9888,7 @@ msgid "Error while unblocking user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26935
-#: assets/js/bp-messages.js:40855
+#: assets/js/bp-messages.js:40853
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -9893,7 +9896,7 @@ msgid "Unblocking user"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:26944
-#: assets/js/bp-messages.js:40864
+#: assets/js/bp-messages.js:40862
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -9901,7 +9904,7 @@ msgid "This user has been unblocked"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27201
-#: assets/js/bp-messages.js:41118
+#: assets/js/bp-messages.js:41116
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -9910,10 +9913,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:27242
 #: assets/js/bp-messages-app.js:27254
-#: assets/js/bp-messages.js:41159
+#: assets/js/bp-messages.js:41157
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:41171
+#: assets/js/bp-messages.js:41169
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -9921,7 +9924,7 @@ msgid "Error while deleting message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27260
-#: assets/js/bp-messages.js:41177
+#: assets/js/bp-messages.js:41175
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -9929,7 +9932,7 @@ msgid "Deleting message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27269
-#: assets/js/bp-messages.js:41186
+#: assets/js/bp-messages.js:41184
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -9937,7 +9940,7 @@ msgid "Message deleted"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27377
-#: assets/js/bp-messages.js:41293
+#: assets/js/bp-messages.js:41291
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -9945,7 +9948,7 @@ msgid "Deleting conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27386
-#: assets/js/bp-messages.js:41302
+#: assets/js/bp-messages.js:41300
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -9953,7 +9956,7 @@ msgid "Conversation deleted"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27391
-#: assets/js/bp-messages.js:41307
+#: assets/js/bp-messages.js:41305
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -9962,10 +9965,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:27774
 #: assets/js/bp-messages-app.js:27786
-#: assets/js/bp-messages.js:41688
+#: assets/js/bp-messages.js:41686
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:41700
+#: assets/js/bp-messages.js:41698
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -9973,7 +9976,7 @@ msgid "Error while deleting conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27794
-#: assets/js/bp-messages.js:41708
+#: assets/js/bp-messages.js:41706
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -9981,7 +9984,7 @@ msgid "Deleting conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:27803
-#: assets/js/bp-messages.js:41717
+#: assets/js/bp-messages.js:41715
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -9990,10 +9993,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:28942
 #: assets/js/bp-messages-app.js:28954
-#: assets/js/bp-messages.js:42893
+#: assets/js/bp-messages.js:42891
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:42905
+#: assets/js/bp-messages.js:42903
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -10001,7 +10004,7 @@ msgid "Error while adding participants"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:28962
-#: assets/js/bp-messages.js:42913
+#: assets/js/bp-messages.js:42911
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -10009,7 +10012,7 @@ msgid "Adding participants"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:28971
-#: assets/js/bp-messages.js:42922
+#: assets/js/bp-messages.js:42920
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -10017,7 +10020,7 @@ msgid "Participants added"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29300
-#: assets/js/bp-messages.js:43246
+#: assets/js/bp-messages.js:43244
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -10025,7 +10028,7 @@ msgid "Error while clearing messages"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29322
-#: assets/js/bp-messages.js:43268
+#: assets/js/bp-messages.js:43266
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -10033,7 +10036,7 @@ msgid "Clearing messages"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29330
-#: assets/js/bp-messages.js:43276
+#: assets/js/bp-messages.js:43274
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -10041,7 +10044,7 @@ msgid "Messages cleared"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29420
-#: assets/js/bp-messages.js:43365
+#: assets/js/bp-messages.js:43363
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -10050,10 +10053,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:29436
 #: assets/js/bp-messages-app.js:29448
-#: assets/js/bp-messages.js:43381
+#: assets/js/bp-messages.js:43379
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:43393
+#: assets/js/bp-messages.js:43391
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -10061,7 +10064,7 @@ msgid "Error while leaving conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29456
-#: assets/js/bp-messages.js:43401
+#: assets/js/bp-messages.js:43399
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -10069,7 +10072,7 @@ msgid "Leaving conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29465
-#: assets/js/bp-messages.js:43410
+#: assets/js/bp-messages.js:43408
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -10077,7 +10080,7 @@ msgid "You left the conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29564
-#: assets/js/bp-messages.js:43508
+#: assets/js/bp-messages.js:43506
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -10086,10 +10089,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:29581
 #: assets/js/bp-messages-app.js:29593
-#: assets/js/bp-messages.js:43525
+#: assets/js/bp-messages.js:43523
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:43537
+#: assets/js/bp-messages.js:43535
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -10097,7 +10100,7 @@ msgid "Error while making moderator"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29602
-#: assets/js/bp-messages.js:43546
+#: assets/js/bp-messages.js:43544
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -10105,7 +10108,7 @@ msgid "Making %s moderator"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29611
-#: assets/js/bp-messages.js:43555
+#: assets/js/bp-messages.js:43553
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -10113,7 +10116,7 @@ msgid "%s is moderator now"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29821
-#: assets/js/bp-messages.js:43762
+#: assets/js/bp-messages.js:43760
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove user from the conversation"
@@ -10122,10 +10125,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:29838
 #: assets/js/bp-messages-app.js:29850
-#: assets/js/bp-messages.js:43779
+#: assets/js/bp-messages.js:43777
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:43791
+#: assets/js/bp-messages.js:43789
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -10133,7 +10136,7 @@ msgid "Error while removing participant"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29859
-#: assets/js/bp-messages.js:43800
+#: assets/js/bp-messages.js:43798
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -10141,7 +10144,7 @@ msgid "Removing participant"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29868
-#: assets/js/bp-messages.js:43809
+#: assets/js/bp-messages.js:43807
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -10149,7 +10152,7 @@ msgid "Participant removed"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:29966
-#: assets/js/bp-messages.js:43906
+#: assets/js/bp-messages.js:43904
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -10158,10 +10161,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:29983
 #: assets/js/bp-messages-app.js:29995
-#: assets/js/bp-messages.js:43923
+#: assets/js/bp-messages.js:43921
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:43935
+#: assets/js/bp-messages.js:43933
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -10169,7 +10172,7 @@ msgid "Error while unmaking moderator"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30004
-#: assets/js/bp-messages.js:43944
+#: assets/js/bp-messages.js:43942
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -10177,7 +10180,7 @@ msgid "Unmaking %s moderator"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30013
-#: assets/js/bp-messages.js:43953
+#: assets/js/bp-messages.js:43951
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -10185,7 +10188,7 @@ msgid "%s is not moderator anymore"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30156
-#: assets/js/bp-messages.js:44094
+#: assets/js/bp-messages.js:44092
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10193,7 +10196,7 @@ msgid "Are you sure you want to pin this message?"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30186
-#: assets/js/bp-messages.js:44124
+#: assets/js/bp-messages.js:44122
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10201,7 +10204,7 @@ msgid "Error while pinning message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30192
-#: assets/js/bp-messages.js:44130
+#: assets/js/bp-messages.js:44128
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10209,7 +10212,7 @@ msgid "Pinning message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30199
-#: assets/js/bp-messages.js:44137
+#: assets/js/bp-messages.js:44135
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -10217,7 +10220,7 @@ msgid "Message pinned"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30371
-#: assets/js/bp-messages.js:44307
+#: assets/js/bp-messages.js:44305
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread restoring"
@@ -10225,7 +10228,7 @@ msgid "Restoring conversation"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:30380
-#: assets/js/bp-messages.js:44316
+#: assets/js/bp-messages.js:44314
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread restoring"
@@ -10233,21 +10236,21 @@ msgid "Conversation restored"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31256
-#: assets/js/bp-messages.js:45184
+#: assets/js/bp-messages.js:45182
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Are you sure you want to mute this conversation?"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31285
-#: assets/js/bp-messages.js:45213
+#: assets/js/bp-messages.js:45211
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Are you sure you want to unmute this conversation?"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31449
-#: assets/js/bp-messages.js:45375
+#: assets/js/bp-messages.js:45373
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10255,7 +10258,7 @@ msgid "Are you sure you want to unpin this message?"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31479
-#: assets/js/bp-messages.js:45405
+#: assets/js/bp-messages.js:45403
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10263,7 +10266,7 @@ msgid "Error while unpinning message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31485
-#: assets/js/bp-messages.js:45411
+#: assets/js/bp-messages.js:45409
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10271,7 +10274,7 @@ msgid "Unpinning message"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31492
-#: assets/js/bp-messages.js:45418
+#: assets/js/bp-messages.js:45416
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -10279,7 +10282,7 @@ msgid "Message unpinned"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31985
-#: assets/js/bp-messages.js:45921
+#: assets/js/bp-messages.js:45919
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device Name when error triggered"
@@ -10287,7 +10290,7 @@ msgid "Camera or Microphone"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31989
-#: assets/js/bp-messages.js:45925
+#: assets/js/bp-messages.js:45923
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device not found error"
@@ -10295,7 +10298,7 @@ msgid "%s not found"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31992
-#: assets/js/bp-messages.js:45928
+#: assets/js/bp-messages.js:45926
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device no permission error"
@@ -10303,7 +10306,7 @@ msgid "No permission to access %s. Please ensure access to %s is allowed in your
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31995
-#: assets/js/bp-messages.js:45931
+#: assets/js/bp-messages.js:45929
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device already in use error"
@@ -10311,7 +10314,7 @@ msgid "%s is already in use. Ensure that its not used by other application or se
 msgstr ""
 
 #: assets/js/bp-messages-app.js:31997
-#: assets/js/bp-messages.js:45933
+#: assets/js/bp-messages.js:45931
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device unknown error"
@@ -10319,7 +10322,7 @@ msgid "Unknown error while trying to access %s"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:32203
-#: assets/js/bp-messages.js:46138
+#: assets/js/bp-messages.js:46136
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -10327,7 +10330,7 @@ msgid "Screen"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:37934
-#: assets/js/bp-messages.js:51780
+#: assets/js/bp-messages.js:51778
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Shortcode error"
@@ -10335,7 +10338,7 @@ msgid "You can not make a call to yourself"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:37936
-#: assets/js/bp-messages.js:51782
+#: assets/js/bp-messages.js:51780
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Shortcode error"
@@ -10345,13 +10348,13 @@ msgstr ""
 #: assets/js/bp-messages-app.js:37979
 #: assets/js/bp-messages-app.js:38079
 #: assets/js/bp-messages-app.js:41294
-#: assets/js/bp-messages.js:51825
+#: assets/js/bp-messages.js:51823
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:51925
+#: assets/js/bp-messages.js:51923
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55179
+#: assets/js/bp-messages.js:55177
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Authorization required"
@@ -10359,10 +10362,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:39971
 #: assets/js/bp-messages-app.js:39998
-#: assets/js/bp-messages.js:53871
+#: assets/js/bp-messages.js:53869
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:53898
+#: assets/js/bp-messages.js:53896
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -10370,7 +10373,7 @@ msgid "Successfully subscribed to Web Push notifications"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:39990
-#: assets/js/bp-messages.js:53890
+#: assets/js/bp-messages.js:53888
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -10378,7 +10381,7 @@ msgid "Failed to subscribe to Web Push notifications. Please ensure that your we
 msgstr ""
 
 #: assets/js/bp-messages-app.js:40049
-#: assets/js/bp-messages.js:53949
+#: assets/js/bp-messages.js:53947
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -10386,21 +10389,21 @@ msgid "Successfully unsubscribed from Web Push notifications"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:41218
-#: assets/js/bp-messages.js:55104
+#: assets/js/bp-messages.js:55102
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue with account"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:41238
-#: assets/js/bp-messages.js:55124
+#: assets/js/bp-messages.js:55122
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:41956
-#: assets/js/bp-messages.js:55877
+#: assets/js/bp-messages.js:55875
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages from blocked user"
@@ -10409,10 +10412,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:41982
 #: assets/js/bp-messages-app.js:42050
-#: assets/js/bp-messages.js:55903
+#: assets/js/bp-messages.js:55901
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:55970
+#: assets/js/bp-messages.js:55968
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversations list item"
@@ -10422,7 +10425,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:46417
-#: assets/js/bp-messages.js:58197
+#: assets/js/bp-messages.js:58195
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -10430,7 +10433,7 @@ msgid "User you are trying to call is already in call. Please try later."
 msgstr ""
 
 #: assets/js/bp-messages-app.js:48197
-#: assets/js/bp-messages.js:59964
+#: assets/js/bp-messages.js:59962
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call - On Site Message"
@@ -10438,7 +10441,7 @@ msgid "Incoming Video Call"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:48197
-#: assets/js/bp-messages.js:59964
+#: assets/js/bp-messages.js:59962
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call - On Site Message"
@@ -10446,7 +10449,7 @@ msgid "Incoming Audio Call"
 msgstr ""
 
 #: assets/js/bp-messages-app.js:48849
-#: assets/js/bp-messages.js:60745
+#: assets/js/bp-messages.js:60743
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Rest API Error"
@@ -10454,7 +10457,7 @@ msgid "Authorization failed. Please check if you are still authorized at this we
 msgstr ""
 
 #: assets/js/bp-messages-app.js:60200
-#: assets/js/bp-messages.js:71934
+#: assets/js/bp-messages.js:71932
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Onsite notifications"
@@ -10489,21 +10492,21 @@ msgctxt "Mini Widgets"
 msgid "Start a new conversation"
 msgstr ""
 
-#: assets/js/bp-messages.js:60523
+#: assets/js/bp-messages.js:60521
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"
 msgid "Enable browser push notifications to receive private messages when you are offline?"
 msgstr ""
 
-#: assets/js/bp-messages.js:60547
+#: assets/js/bp-messages.js:60545
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"
 msgid "Enable"
 msgstr ""
 
-#: assets/js/bp-messages.js:60555
+#: assets/js/bp-messages.js:60553
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"

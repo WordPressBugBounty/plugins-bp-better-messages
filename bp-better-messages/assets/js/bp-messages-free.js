@@ -171,7 +171,6 @@ _x('Bulk Messages', 'Bulk messaging screen', 'bp-better-messages');
 _x('Settings', 'User settings screen', 'bp-better-messages');
 __('Conversation information', 'bp-better-messages');
 __('Deleted user', 'bp-better-messages');
-_nx('%s participant', '%s participants', variable, 'Group Thread Online Count', 'bp-better-messages');
 _x('Close', '"Close" Button Tooltip', 'bp-better-messages');
 _x('Select a conversation to display messages', 'Starting Messages Screen (No threads selected)', 'bp-better-messages');
 _x('or', 'Starting Messages Screen (No threads selected)', 'bp-better-messages');
