@@ -903,16 +903,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function get_name($user_id){
-            $user = get_userdata($user_id);
+            if( $user_id >= 0 ) {
+                $user = get_userdata($user_id);
 
-            if ( is_object( $user ) ) {
-                $name = (!empty($user->fullname)) ? $user->fullname : $user->display_name;
+                if (is_object($user)) {
+                    $name = (!empty($user->fullname)) ? $user->fullname : $user->display_name;
+                } else {
+                    $name = __('Deleted User', 'bp-better-messages');
+                    $user_id = 0;
+                }
+
+                return apply_filters( 'bp_better_messages_display_name', $name, $user_id );
             } else {
-                $name    = __('Deleted User', 'bp-better-messages');
-                $user_id = 0;
+                return apply_filters( 'better_messages_guest_display_name', "", $user_id );
             }
-
-            return apply_filters( 'bp_better_messages_display_name', $name, $user_id );
         }
 
 

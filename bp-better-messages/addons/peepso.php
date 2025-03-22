@@ -64,6 +64,102 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             //add_filter('better_messages_is_verified', array( $this, 'user_verified' ), 20, 2 );
             add_filter('better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
+
+            if( class_exists('PeepSoBlockUsers' ) && PeepSo::get_option('user_blocking_enable', 0) === 1 ) {
+                add_filter('better_messages_can_send_message', array($this, 'disable_blocked_replies'), 20, 3);
+                add_action('better_messages_before_new_thread', array($this, 'disable_start_thread_for_blocked_users'), 20, 2);
+                add_filter( 'better_messages_rest_user_item', array( $this, 'blocked_user_item'), 10, 4 );
+            }
+
+            add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 10, 4 );
+        }
+
+        public function blocked_user_item( $item, $user_id, $include_personal ){
+            if( $include_personal && Better_Messages()->functions->get_current_user_id() !== $user_id ){
+                $PeepSoBlockUsers = new PeepSoBlockUsers();
+                $item['blocked'] = (int) $PeepSoBlockUsers->is_user_blocking( Better_Messages()->functions->get_current_user_id(), $user_id );
+            }
+
+            return $item;
+        }
+
+        public function disable_start_thread_for_blocked_users(&$args, &$errors){
+            if( current_user_can('manage_options' ) ) {
+                return null;
+            }
+
+            $recipients = $args['recipients'];
+            if( ! is_array( $recipients ) ) $recipients = [ $recipients ];
+
+            $PeepSoBlockUsers = new PeepSoBlockUsers();
+
+            foreach($recipients as $user_id) {
+                if(  Better_Messages()->functions->is_valid_user_id( $user_id ) ) {
+                    $is_blocked_1 = $PeepSoBlockUsers->is_user_blocking(Better_Messages()->functions->get_current_user_id(), $user_id );
+                    if ($is_blocked_1) {
+                        $errors[] = sprintf(_x('%s blocked by you', 'Error when starting new thread but user blocked', 'bp-better-messages'), Better_Messages()->functions->get_name($user_id));
+                        continue;
+                    }
+
+                    $is_blocked_2 = $PeepSoBlockUsers->is_user_blocking($user_id, Better_Messages()->functions->get_current_user_id());
+                    if ($is_blocked_2) {
+                        $errors[] = sprintf(_x('%s blocked you', 'Error when starting new thread but user blocked', 'bp-better-messages'), Better_Messages()->functions->get_name($user_id));
+                        continue;
+                    }
+                }
+            }
+        }
+
+        public function disable_blocked_replies( $allowed, $user_id, $thread_id ){
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( ! Better_Messages()->functions->is_valid_user_id( $user_id ) ) {
+                return $allowed;
+            }
+
+            $roles = Better_Messages()->functions->get_user_roles( $current_user_id );
+
+            if( in_array( 'administrator', $roles ) ){
+                return $allowed;
+            }
+
+            $type = Better_Messages()->functions->get_thread_type( $thread_id );
+
+            if( $type !== 'thread' ) return $allowed;
+
+            $participants = Better_Messages()->functions->get_participants($thread_id);
+
+            if( count($participants['recipients']) !== 1) return $allowed;
+
+            $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
+            if( $thread_type !== 'thread' ) return $allowed;
+
+            $user_id_2 = array_pop($participants['recipients']);
+
+            $PeepSoBlockUsers = new PeepSoBlockUsers();
+
+            /**
+             *  Current user blocked other
+             */
+            $is_blocked_1 = $PeepSoBlockUsers->is_user_blocking( Better_Messages()->functions->get_current_user_id(), $user_id_2 );
+            if( $is_blocked_1 ) {
+                global $bp_better_messages_restrict_send_message;
+                $bp_better_messages_restrict_send_message['user_blocked_messages'] = _x("You can't send message to user who was blocked by you", 'Message when user cant send message to user blocked by him' ,'bp-better-messages');
+                return false;
+            }
+
+            /**
+             *  Other user blocked current user
+             */
+            $is_blocked_2 = $PeepSoBlockUsers->is_user_blocking( $user_id_2, Better_Messages()->functions->get_current_user_id() );
+
+            if( $is_blocked_2 ) {
+                global $bp_better_messages_restrict_send_message;
+                $bp_better_messages_restrict_send_message['user_blocked_messages'] = _x("You can't send message to user who blocked you", 'Message when user cant send message to user who blocked him' ,'bp-better-messages');
+                return false;
+            }
+
+            return $allowed;
         }
 
         function rest_user_item( $item, $user_id, $include_personal ){

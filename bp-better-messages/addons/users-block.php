@@ -123,12 +123,11 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
                 return $allowed;
             }
 
-            $participants = Better_Messages()->functions->get_participants($thread_id);
-
-            if( count($participants['recipients']) !== 1) return $allowed;
-
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'thread' ) return $allowed;
+
+            $participants = Better_Messages()->functions->get_participants($thread_id);
+            if( count($participants['recipients']) !== 1) return $allowed;
 
             $user_id_2 = array_pop($participants['recipients']);
 

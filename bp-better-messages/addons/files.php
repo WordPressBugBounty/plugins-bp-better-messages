@@ -238,7 +238,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     return true;
                 }
 
-                $content = str_replace($message_attachments[$attachment_id], '', $message->content);
+                $content = str_replace( $message_attachments[$attachment_id], '', $message->message );
 
                 if( empty( trim( $content ) ) ){
                     Better_Messages()->functions->delete_all_message_meta($message_id);

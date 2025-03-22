@@ -34,9 +34,22 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             add_filter('better_messages_rest_is_user_authorized', array($this, 'guest_auth'), 10, 2);
             add_filter('better_messages_rest_user_item', array($this, 'guest_user_item'), 30, 3);
             add_filter('better_messages_guest_user_id', array( $this, 'guest_user_id' ) );
+            add_filter('better_messages_guest_display_name', array( $this, 'guest_display_name' ), 10, 2 );
 
             add_filter( 'better_messages_user_config', array( $this, 'user_config'), 10 );
         }
+
+        public function guest_display_name( $retval, $user_id )
+        {
+            $guest_user = $this->get_guest_user( $user_id );
+
+            if( $guest_user ){
+                return $guest_user->name;
+            }
+
+            return $retval;
+        }
+
 
         public function user_config( $settings ){
             $user_id = Better_Messages()->functions->get_current_user_id();

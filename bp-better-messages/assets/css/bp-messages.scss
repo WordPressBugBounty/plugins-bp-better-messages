@@ -1120,6 +1120,7 @@ body.bp-messages-mobile {
                 display: block;
                 float: right;
                 margin-left: 10px;
+                user-select: none;
 
                 &.bm-message-info-no-margin{
                   margin-left: 0;
