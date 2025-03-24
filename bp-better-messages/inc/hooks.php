@@ -584,7 +584,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! is_array( $recipients ) ) return false;
             if( count($recipients) === 0 ) return false;
 
-            $restrict_to = Better_Messages()->functions->get_restrict_to_roles( get_current_user_id() );
+            $restrict_to = Better_Messages()->functions->get_restrict_to_roles( Better_Messages()->functions->get_current_user_id() );
 
             $is_restricted = true;
             $restricted_message = Better_Messages()->settings['restrictRoleMessage'];
@@ -613,7 +613,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! is_array( $recipients ) ) return false;
             if( count($recipients) === 0 ) return false;
 
-            $restrict_to = Better_Messages()->functions->get_restrict_to_roles( get_current_user_id() );
+            $restrict_to = Better_Messages()->functions->get_restrict_to_roles( Better_Messages()->functions->get_current_user_id() );
 
             $is_restricted = false;
             $restricted_message = false;
@@ -646,22 +646,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $restricted_message = false;
 
             if( count( $restrict_to ) > 0 ){
-                $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'group_id');
+                $type = Better_Messages()->functions->get_thread_type( $thread_id );
 
-                /**
-                 * Disable restrictions for group threads
-                 */
-                if( ! empty( $group_id ) ) {
-                    return $allowed;
-                }
-
-                /**
-                 * Disable restrictions for chat threads
-                 */
-                $chat_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'chat_id' );
-                if( ! empty( $chat_id ) ) {
-                    return $allowed;
-                }
+                if( $type !== 'thread' ) return $allowed;
 
                 $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
@@ -703,22 +690,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $is_restricted = true;
             $restricted_message = Better_Messages()->settings['restrictRoleMessage'];
 
-            $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'group_id');
+            $type = Better_Messages()->functions->get_thread_type( $thread_id );
 
-            /**
-             * Disable restrictions for group threads
-             */
-            if( ! empty( $group_id ) ) {
-                return $allowed;
-            }
-
-            /**
-             * Disable restrictions for chat threads
-             */
-            $chat_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'chat_id' );
-            if( ! empty( $chat_id ) ) {
-                return $allowed;
-            }
+            if( $type !== 'thread' ) return $allowed;
 
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 

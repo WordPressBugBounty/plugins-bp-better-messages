@@ -21,13 +21,9 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
         public function __construct(){
             add_filter( 'better_messages_can_send_message', array( $this, 'disable_blocked_replies' ), 20, 3);
             add_action( 'better_messages_before_new_thread', array( $this, 'disable_start_thread_for_blocked_users' ), 20, 2 );
-
-            add_action( 'bp_better_messages_user_options_bottom', array( $this, 'block_users_settings' ) );
-
             add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
             add_filter( 'better_messages_rest_thread_item', array( $this, 'rest_thread_item'), 10, 4 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 10, 4 );
-
             add_filter( 'better_messages_user_config', array( $this, 'user_config_filter'), 11, 1 );
         }
 
