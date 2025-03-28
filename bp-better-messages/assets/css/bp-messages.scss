@@ -707,6 +707,12 @@ body.bp-messages-mobile {
       }
     }
 
+    &.bm-template-standard{
+      .bm-voice-message{
+        padding-bottom: 20px;
+      }
+    }
+
     .bm-list{
       height: 100%;
       text-align: center;

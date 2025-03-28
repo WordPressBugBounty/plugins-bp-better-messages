@@ -35,8 +35,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             add_action('wp_footer', array( $this, 'messages_list_popup' ) );
 
-            //add_filter('get_avatar_url', array($this, 'get_avatar_data'), 10, 3);
-
             if (Better_Messages()->settings['peepsoHeader'] === '1' && !wp_doing_ajax()) {
                 add_action('bp_better_messages_before_main_template_rendered', array($this, 'before_main_template_rendered'));
                 add_action('bp_better_messages_after_main_template_rendered', array($this, 'after_main_template_rendered'));
@@ -384,39 +382,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             echo PeepSoTemplate::get_after_markup();
         }
 
-        public function get_avatar_data( $url, $id_or_email, $args ){
-            $user = false;
-
-            if ( is_numeric( $id_or_email ) ) {
-                $user = get_user_by( 'id', absint( $id_or_email ) );
-            } elseif ( is_string( $id_or_email ) ) {
-                $user = get_user_by('email', $id_or_email );
-            } elseif ( $id_or_email instanceof WP_User ) {
-                // User object.
-                $user = $id_or_email;
-            } elseif ( $id_or_email instanceof WP_Post ) {
-                // Post object.
-                $user = get_user_by( 'id', (int) $id_or_email->post_author );
-            } else {
-                return $url;
-            }
-
-            if( ! $user ) {
-                return $url;
-            }
-
-            remove_filter('get_avatar_url', array($this, 'get_avatar_data'), 10, 3);
-            $avatar = $user->get_avatar();
-
-            if( ! $avatar ) {
-                return $url;
-            }
-
-            add_filter('get_avatar_url', array($this, 'get_avatar_data'), 10, 3);
-
-            return $avatar;
-        }
-
         /**
          * Add the send message button when a user is viewing the friends list
          * @param  array $options
@@ -562,8 +527,9 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             $inbox_url = Better_Messages()->functions->get_user_messages_url( get_current_user_id() );
             ob_start(); ?>
             <script type="text/javascript">
-                var headerButton = document.querySelector('.ps-navbar__notifications .ps-notif--better-messages');
-                if( headerButton ){
+                var headerButtons = document.querySelectorAll('.ps-notif--better-messages');
+
+                headerButtons.forEach( function(headerButton) {
                     var html =
                         '<div class="ps-notif__box" style="display:none;">' +
                         '<div class="ps-notif__box-header">' +
@@ -572,7 +538,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                         '<a href="#" onclick="event.preventDefault();BetterMessages.openNewConversationWidget();"><?php echo esc_attr_x('New message', 'PeepSo Integration', 'bp-better-messages'); ?></a>' +
                         '</div>' +
                         '</div>' +
-                        '<div class="ps-notifications ps-notifications--empty" style="max-height: 40vh; overflow: auto;">' +
+                        '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
                         '<div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>' +
                         '</div>' +
                         '<div class="ps-notif__box-footer"><a href="<?php echo $inbox_url; ?>"><?php echo esc_attr_x('View All', 'PeepSo Integration', 'bp-better-messages'); ?></a>' +
@@ -582,14 +548,33 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                     headerButton.innerHTML += html;
 
                     var popup = headerButton.querySelector('.ps-notif__box');
-                    var link = headerButton.querySelector('.ps-navbar__menu-link');
-                    link.onclick = function( event ){
-                        event.preventDefault();
-                        jQuery(popup).slideToggle();
-                    };
+                    var link = jQuery(headerButton).find('> a');
 
-                    jQuery(document).trigger("bp-better-messages-init-scrollers");
-                }
+                    function handleClickOutside(event) {
+                        if (!popup.contains(event.target) && !headerButton.contains(event.target)) {
+                            if (jQuery(popup).is(':visible')) {
+                                jQuery(popup).slideToggle();
+                                document.removeEventListener('click', handleClickOutside);
+                            }
+                        }
+                    }
+
+
+                    if( link[0] ) {
+                        link[0].onclick = function (event) {
+                            event.preventDefault();
+                            jQuery(popup).slideToggle();
+
+                            if (jQuery(popup).is(':visible')) {
+                                document.addEventListener('click', handleClickOutside);
+                            } else {
+                                document.removeEventListener('click', handleClickOutside);
+                            }
+                        };
+                    }
+                });
+
+                jQuery(document).trigger("bp-better-messages-init-scrollers");
             </script>
             <?php
             $script = ob_get_clean();

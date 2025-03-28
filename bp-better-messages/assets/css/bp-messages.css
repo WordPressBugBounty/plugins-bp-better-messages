@@ -6879,6 +6879,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
   box-shadow: 0 0 3px 0 rgba(var(--main-bm-color), 1);
   opacity: 1;
 }
+.bp-messages-wrap .bm-messages-list.bm-template-standard .bm-voice-message {
+  padding-bottom: 20px;
+}
 .bp-messages-wrap .bm-messages-list .bm-list {
   height: 100%;
   text-align: center;
