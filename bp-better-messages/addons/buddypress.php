@@ -235,7 +235,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
 
         public function pm_link( $user_id = false )
         {
-            if( ! $user_id ) {
+            if( ! $user_id  || ! is_numeric($user_id) ) {
                 $user_id = Better_Messages()->functions->get_member_id();
             }
 

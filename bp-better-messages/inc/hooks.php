@@ -39,7 +39,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             add_action( 'admin_notices', array( $this, 'admin_notice') );
 
             //if( Better_Messages()->settings['fastStart'] == '1' ) {
-            add_action('template_redirect', array($this, 'catch_fast_thread'));
+            add_action( 'template_redirect', array($this, 'catch_fast_thread'), 0 );
             //}
 
             if( Better_Messages()->settings['friendsMode'] == '1' && function_exists('friends_check_friendship') ) {

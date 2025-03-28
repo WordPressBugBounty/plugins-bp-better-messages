@@ -74,6 +74,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             }
 
             add_action('wp_footer', array($this, 'override_messages_list'), 199 );
+            add_action('wp_footer', array($this, 'javascript_injects'), 200 );
         }
 
         public function register_bb_notifications()
@@ -167,6 +168,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
         public function override_messages_list()
         {
             if( ! is_user_logged_in() ) return;
+            ob_start();
             ?>
             <script type="text/javascript">
                 let bmnd = document.querySelectorAll('#header-messages-dropdown-elem .notification-dropdown .notification-list');
@@ -176,14 +178,74 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                         el.innerHTML = <?php echo json_encode(Better_Messages()->functions->get_conversations_layout()) ?>;
                         el.style.padding = '0';
                         el.style.margin = '0';
-                        el.classList.remove('notification-list')
-                        el.classList.add('bm-notification-list')
+                        el.classList.remove('notification-list');
+                        el.classList.add('bm-notification-list');
                     });
 
                     jQuery(document).trigger("bp-better-messages-init-scrollers");
                 }
             </script>
             <?php
+            $script = ob_get_clean();
+
+            echo Better_Messages()->functions->minify_js( $script );
+        }
+
+        public function javascript_injects()
+        {
+            if( ! is_user_logged_in() ) return;
+            ob_start();
+            ?>
+            <script type="text/javascript">
+                if ('MutationObserver' in window) {
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'href' ){
+                                const target = mutation.target;
+
+                                if( target.matches('a.card-button.send-message') && target.hasAttribute('href') && target.getAttribute('href').trim() !== '') {
+                                    const profileCard = target.closest('#profile-card');
+                                    const userId = profileCard.getAttribute('data-bp-item-id');
+
+                                    if( userId ) {
+                                        target.classList.add('bpbm-pm-button', 'bm-no-style', 'bm-no-loader', 'open-mini-chat', 'bm-user-' + userId);
+                                        target.style.minWidth = target.offsetWidth + 'px';
+                                        target.style.minHeight = target.offsetHeight + 'px';
+                                        target.style.display = 'block';
+
+                                        target.innerHTML = '<span class="bm-loader-container">' + target.innerHTML + '</span>';
+
+                                        if( target.href.endsWith('?&to') ){
+                                            target.href += '=' + userId;
+                                        } else if( target.href.endsWith('?bm-fast-start=1') ){
+                                            target.href += '&to=' + userId;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+
+                    // Observe changes in the body
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['href']
+                    });
+                }
+
+                wp.hooks.addFilter('better_messages_avatar_attributes', 'better_messages_bb_hooks', function(attributes, user){
+                    if( user && user.id ) {
+                        attributes['data-bb-hp-profile'] = user.id;
+                    }
+
+                    return attributes;
+                });
+            </script>
+            <?php
+            $script = ob_get_clean();
+            echo Better_Messages()->functions->minify_js( $script );
         }
 
         public function group_restrictions( $allowed, $user_id, $thread_id ){

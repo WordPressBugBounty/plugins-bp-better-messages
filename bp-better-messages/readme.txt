@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.19
+Stable tag: 2.7.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,7 +168,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.15 - 2.7.19 =
+= 2.7.15 - 2.7.20 =
+* BuddyBoss Integration: Added support with new hover pop-ups introduced in BuddyBoss Platform Version 2.8.20
 * PeepSo Integration: Added toggle to enable or disable group chat in PeepSo Group Settings (thanks to [@jaworskimatt](https://profiles.wordpress.org/jaworskimatt/) from [PeepSo](https://www.wordplus.org/peepso))
 * PeepSo Integration: Displaying PeepSo VIP icons in usernames instead of verified badge
 * PeepSo Integration: Do not allow to send messages when user is blocked in PeepSo
