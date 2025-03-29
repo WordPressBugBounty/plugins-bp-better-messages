@@ -342,7 +342,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 SET unread_count = GREATEST(unread_count - 1, 0), 
                     last_update = %d
                 WHERE `thread_id` = %d
-                AND `last_read` < ( SELECT CONCAT(UNIX_TIMESTAMP(date_sent), '0000') as timestamp FROM `" . bm_get_table('messages') . "` WHERE `id` = %d )", $time, $thread_id, $message_id );
+                AND `last_read` < ( SELECT date_sent FROM `" . bm_get_table('messages') . "` WHERE `id` = %d )", $time, $thread_id, $message_id );
+
                 $wpdb->query( $sql );
 
                 $sql = $wpdb->prepare("DELETE FROM `" . bm_get_table('messages') . "` WHERE id = %d", $message_id);

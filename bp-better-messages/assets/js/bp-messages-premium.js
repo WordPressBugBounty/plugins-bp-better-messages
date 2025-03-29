@@ -499,6 +499,8 @@ _x('Incoming Video Call', 'Private Call - On Site Message', 'bp-better-messages'
 _x('Incoming Audio Call', 'Private Call - On Site Message', 'bp-better-messages');
 _x('Authorization failed. Please check if you are still authorized at this website.', 'Rest API Error', 'bp-better-messages');
 _x('Close all notifications', 'Onsite notifications', 'bp-better-messages');
+_x('Import from %{name}', 'File Uploader', 'bp-better-messages');
+_x('Edit image', 'File Uploader', 'bp-better-messages');
 _x('Messages', 'Mini Widgets - Head', 'bp-better-messages');
 _x('Friends', 'Mini Widgets - Head', 'bp-better-messages');
 _x('Groups', 'Mini Widgets - Head', 'bp-better-messages');

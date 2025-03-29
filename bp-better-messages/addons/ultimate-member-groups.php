@@ -42,7 +42,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
 
         public function is_valid_group( $is_valid_group, $thread_id )
         {
-            $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
+            $group_id = (int) Better_Messages()->functions->get_thread_meta($thread_id, 'um_group_id');
 
             if ( !! $group_id || ! class_exists('UM_Groups') ) {
                 $group = get_post( (int) $group_id );

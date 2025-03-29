@@ -9623,7 +9623,7 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   flex-direction: row;
   justify-content: flex-start;
 }
-.bp-messages-wrap .threads-list .thread .bm-info .name > *:not(strong) {
+.bp-messages-wrap .threads-list .thread .bm-info .name > *:not(strong, .bm-placeholder-wrapper) {
   margin-left: 5px;
 }
 .bp-messages-wrap .threads-list .thread .bm-info .name .bm-thread-icon {

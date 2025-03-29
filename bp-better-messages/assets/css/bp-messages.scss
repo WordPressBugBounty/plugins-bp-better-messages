@@ -3937,7 +3937,7 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel{
   flex-direction: row;
   justify-content: flex-start;
 
-  > *:not(strong) {
+  > *:not(strong,.bm-placeholder-wrapper) {
     margin-left: 5px;
   }
 
