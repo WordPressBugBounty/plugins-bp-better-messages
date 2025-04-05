@@ -75,6 +75,23 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             add_action('wp_footer', array($this, 'override_messages_list'), 199 );
             add_action('wp_footer', array($this, 'javascript_injects'), 200 );
+
+            add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts') );
+
+        }
+
+        public function enqueue_scripts()
+        {
+            $script = "wp.hooks.addFilter('better_messages_avatar_attributes', 'better_messages_bb_hooks', function(attributes, user){
+                    if( user && user.id ) {
+                        attributes['data-bb-hp-profile'] = user.id;
+                    }
+
+                    return attributes;
+            });";
+
+
+            wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js($script), 'before' );
         }
 
         public function register_bb_notifications()
@@ -193,7 +210,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
         public function javascript_injects()
         {
-            if( ! is_user_logged_in() ) return;
+            if( ! is_user_logged_in() ) return '';
             ob_start();
             ?>
             <script type="text/javascript">
@@ -234,14 +251,6 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                         attributeFilter: ['href']
                     });
                 }
-
-                wp.hooks.addFilter('better_messages_avatar_attributes', 'better_messages_bb_hooks', function(attributes, user){
-                    if( user && user.id ) {
-                        attributes['data-bb-hp-profile'] = user.id;
-                    }
-
-                    return attributes;
-                });
             </script>
             <?php
             $script = ob_get_clean();

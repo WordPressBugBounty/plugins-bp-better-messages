@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.7.21
+Stable tag: 2.7.23
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,7 +168,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.7.15 - 2.7.21 =
+= 2.7.15 - 2.7.23 =
+* Fixed guest registration button was not working when WordPress Permalinks settings was set to "Plain"
 * Improved behaviour when links was not able to be paste if was copied mobile safari url bar
 * Added few missed strings for translations in file uploader screen
 * BuddyBoss Integration: Added support with new hover pop-ups introduced in BuddyBoss Platform Version 2.8.20

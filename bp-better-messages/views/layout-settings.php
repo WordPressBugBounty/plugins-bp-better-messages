@@ -67,7 +67,7 @@ foreach ( $events as $timestamp => $event ) {
 ob_start() ;
 if( $has_late ){ ?>
 <div class="bp-better-messages-connection-check bpbm-error">
-    <p style="margin-top:0;font-weight:bold;font-size:110%">WP Cron Jobs does not working properly at this website</p>
+    <p style="margin-top:0;font-weight:bold;font-size:110%">WP Cron Jobs does not work properly at this website</p>
     That can cause problems with email notifications and other features, which are running in background.<br/>
     <br/>
     <strong>Its recommended to fix this issue as soon as possible.</strong><br/>
@@ -972,7 +972,25 @@ $has_late_message = ob_get_clean();
                             <p><?php echo sprintf(_x('Seems like this website has active WebSocket License, but you are still using free version of plugin. If you already have WebSocket version installed, then delete free version completely. Try to download and install plugin from <a href="%s">your account</a> page.', 'Settings page', 'bp-better-messages'), $url); ?></p>
                         </div>
                     <?php
-                    } else { ?>
+                    } else {
+                        $user = bpbm_fs()->get_user();
+                        $site = bpbm_fs()->get_site();
+
+                        if( $user && $site ){
+                            $check = [
+                                'domain'      => Better_Messages_WebSocket()->site_id,
+                                'license_key' => base64_encode( Better_Messages_WebSocket()->secret_key ),
+                                'site'        => $site->id
+                            ];
+
+                            $lock = [
+                                'domain'      => Better_Messages_WebSocket()->site_id,
+                                'license_key' => base64_encode( Better_Messages_WebSocket()->secret_key ),
+                                'site'        => $site->id,
+                                'user'        => $user->id,
+                                'auth'        => hash('sha256', $user->secret_key)
+                            ];
+                        ?>
                         <div class="bp-better-messages-connection-check">
                             <p><?php echo sprintf(_x('This website has domain name <b>%s</b>',  'Settings page','bp-better-messages'), Better_Messages_WebSocket()->site_id); ?></p>
                             <p class="bpbm-checking-sync"><span class="dashicons dashicons-update-alt" style="animation:bpbm-spin 4s linear infinite;"></span> <?php _ex('Double-checking if WebSocket server know about this domain and sync is fine', 'Settings page', 'bp-better-messages'); ?></p>
@@ -980,68 +998,115 @@ $has_late_message = ob_get_clean();
                         <script type="text/javascript">
                             jQuery(document).ready(function($){
                                 var checking = $('.bpbm-checking-sync');
-                                $.post('https://license.bpbettermessages.com/checksyncv4.php', {
-                                    site_id    : '<?php
-                                        $site = bpbm_fs()->get_site();
-                                        if( $site) {
-                                            echo bpbm_fs()->get_site()->id;
-                                        } else {
-                                            echo 'false';
-                                        } ?>',
-                                    domain     : '<?php echo Better_Messages_WebSocket()->site_id; ?>',
-                                    secret_key : '<?php echo base64_encode(Better_Messages_WebSocket()->secret_key); ?>'
-                                }, function(response){
-                                    if( response.success ){
-                                        checking.parent().addClass('bpbm-ok');
-                                        var message = '<span class="dashicons dashicons-yes-alt"></span> <?php echo esc_attr_x('All good, WebSocket server know about this domain, all should be working good.', 'Settings page', 'bp-better-messages'); ?>';
-                                    } else {
-                                        checking.parent().addClass('bpbm-error');
 
-                                        var message = '<span class="dashicons dashicons-dismiss"></span> <?php echo esc_attr_x('WebSocket server dont know about this domain, realtime functionality will not work. If you just activated the license at this website need to wait some time for system to sync your license with websocket servers. It usually takes up to 15 minutes, but in some cases can take longer.', 'Settings page', 'bp-better-messages'); ?>';
+                                function checkLicense() {
+                                    checking.parent().removeClass('bpbm-ok bpbm-error');
 
-                                        if( response.data.license_attached !== false ){
-                                            message += '<br><br>This license is currently attached to <strong>' + response.data.license_attached + '</strong>';
-                                        }
-                                    }
+                                    $.post({
+                                        url: 'https://license.better-messages.com/api/license/check',
+                                        data: <?php echo json_encode($check); ?>,
+                                        beforeSend: function (xhr) {
+                                            xhr.setRequestHeader('Accept', 'application/json');
+                                        },
+                                        success: function (response) {
+                                            let code = response.code;
 
-                                    if( response.data.locked_to !== false ){
-                                        message += '<br><br>This license is currently locked to <strong>' + response.data.locked_to + '</strong>';
-                                        message += '<br><br> <span class="button bpbm-unlock-license" data-domain="' + response.data.locked_to + '">Unlock license from ' + response.data.locked_to + '</span>';
-                                    } else {
-                                        message += '<br><br>This license is currently not locked. Its recommended to lock your license to your live domain.';
-                                        message += '<br><br> <span class="button bpbm-lock-license">Lock license to <?php echo Better_Messages_WebSocket()->site_id; ?></span>';
-                                    }
+                                            var showLocked = true;
+                                            if (code === 'license_valid') {
+                                                checking.parent().addClass('bpbm-ok');
+                                                var message = '<span class="dashicons dashicons-yes-alt"></span> <?php echo esc_attr_x('All good, WebSocket server know about this domain, all should be working good.', 'Settings page', 'bp-better-messages'); ?>';
+                                            } else {
+                                                checking.parent().addClass('bpbm-error');
 
-                                    checking.html( message );
+                                                var message = '<span class="dashicons dashicons-dismiss"></span> <?php echo esc_attr_x('WebSocket server does not know about this domain, realtime functionality will not work. Please ensure that license is attached properly to this website.', 'Settings page', 'bp-better-messages'); ?>';
 
-                                    $('.bpbm-unlock-license').click(function(event){
-                                        var domain = $('.bpbm-unlock-license').attr('data-domain');
-                                        if( confirm( 'Confirm the unlock of license from ' + domain ) ) {
-                                            $.post('https://license.bpbettermessages.com/changeLock.php', {
-                                                domain: domain,
-                                                secret_key: '<?php echo base64_encode(Better_Messages_WebSocket()->secret_key); ?>',
-                                                action: 'unlock'
-                                            }, function (response) {
-                                                location.reload();
+                                                if (code === 'license_valid_but_not_for_domain') {
+                                                    if (Array.isArray(response.domains) && response.domains.length > 0) {
+                                                        message += '<br><br> This license is attached to the following domains: <strong>' + response.domains.join(', ') + '</strong>';
+                                                    } else if (response.domains) {
+                                                        message += '<br><br> This license is attached to the following domain: <strong>' + response.domains + '</strong>';
+                                                    } else {
+                                                        message += '<br><br> This license is not attached to any domain.';
+                                                    }
+                                                }
+
+                                                if (code === 'license_expired') {
+                                                    showLocked = false;
+                                                    message += '<br><br> This license is expired.';
+                                                }
+
+                                                if (code === 'license_not_found') {
+                                                    showLocked = false;
+                                                    message += '<br><br> This license is not found. Please check your license key.';
+                                                }
+
+
+                                                //message += '<br><br> Error code: <strong>' + code + '</strong>';
+                                            }
+
+                                            if (showLocked) {
+                                                if (response.locked_domain) {
+                                                    message += '<br><br> This license is currently locked to <strong>' + response.locked_domain + '</strong>';
+                                                    message += '<br><br> <span class="button bpbm-unlock-license" data-domain="' + response.locked_domain + '">Unlock license from ' + response.locked_domain + '</span>';
+                                                } else {
+                                                    message += '<br><br>This license is currently not locked. Its recommended to lock your license to your live domain.';
+                                                    message += '<br><br> <span class="button bpbm-lock-license">Lock license to <?php echo Better_Messages_WebSocket()->site_id; ?></span>';
+                                                }
+                                            }
+                                            checking.html(message);
+
+                                            $('.bpbm-unlock-license').click(function (event) {
+                                                var domain = $('.bpbm-unlock-license').attr('data-domain');
+                                                if (confirm('Confirm the unlock of license from ' + domain)) {
+                                                    $.post({
+                                                        url: 'https://license.better-messages.com/api/license/unlock',
+                                                        data: <?php echo json_encode($lock); ?>,
+                                                        beforeSend: function (xhr) {
+                                                            xhr.setRequestHeader('Accept', 'application/json');
+                                                        },
+                                                        success: function (response) {
+                                                            var success = response.success;
+                                                            if (!success) {
+                                                                if (response.message) {
+                                                                    alert(response.message);
+                                                                }
+                                                            } else {
+                                                                checkLicense();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                            $('.bpbm-lock-license').click(function (event) {
+                                                if (confirm('Confirm the lock of license to <?php echo Better_Messages_WebSocket()->site_id; ?>')) {
+                                                    $.post({
+                                                        url: 'https://license.better-messages.com/api/license/lock',
+                                                        data: <?php echo json_encode($lock); ?>,
+                                                        beforeSend: function (xhr) {
+                                                            xhr.setRequestHeader('Accept', 'application/json');
+                                                        },
+                                                        success: function (response) {
+                                                            var success = response.success;
+                                                            if (!success) {
+                                                                if (response.message) {
+                                                                    alert(response.message);
+                                                                }
+                                                            } else {
+                                                                checkLicense();
+                                                            }
+                                                        }
+                                                    });
+                                                }
                                             });
                                         }
                                     });
+                                }
 
-                                    $('.bpbm-lock-license').click(function(event){
-                                        if( confirm( 'Confirm the lock of license to <?php echo Better_Messages_WebSocket()->site_id; ?>' ) ) {
-                                            $.post('https://license.bpbettermessages.com/changeLock.php', {
-                                                domain: '<?php echo Better_Messages_WebSocket()->site_id; ?>',
-                                                secret_key: '<?php echo base64_encode(Better_Messages_WebSocket()->secret_key); ?>',
-                                                action: 'lock'
-                                            }, function (response) {
-                                                location.reload();
-                                            });
-                                        }
-                                    });
-                                });
+                                checkLicense();
                             });
                         </script>
-                    <?php } } ?>
+                    <?php } } } ?>
                 </div>
             </div>
         </div>

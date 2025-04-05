@@ -173,7 +173,6 @@ _x('Select', 'WP Admin', 'bp-better-messages');
 _x('.p12 file', 'WP Admin', 'bp-better-messages');
 _x('Certificate Password', 'WP Admin', 'bp-better-messages');
 _x('iOS', 'WP Admin (Mobile App)', 'bp-better-messages');
-_x('Android', 'WP Admin (Mobile App)', 'bp-better-messages');
 _x('No users selected', 'WP Admin', 'bp-better-messages');
 _x('Selected users', 'WP Admin', 'bp-better-messages');
 _x('Add user', 'WP Admin', 'bp-better-messages');

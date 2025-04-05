@@ -413,6 +413,16 @@ table.build-info-table button {
   border-color: #d63638 !important;
 }
 
+.bm-select input {
+  box-shadow: none !important;
+}
+.bm-select input[type=text] {
+  width: 100%;
+  border-color: hsl(0deg, 0%, 80%);
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
 .bm-user-selector .bm-user-selector-select input {
   box-shadow: none !important;
 }
@@ -828,6 +838,30 @@ table.build-info-table button {
   background-color: #f8d7da;
   padding: 15px;
   line-height: 24px;
+}
+
+.bm-admin-columns {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+.bm-info-banner {
+  display: block;
+  margin: 10px 0;
+  border: 1px solid #dcdcdc;
+  color: #313131;
+  background-color: #f8f9fa;
+  padding: 15px;
+  line-height: 24px;
+}
+.bm-info-banner p {
+  margin: 0;
+}
+
+.better-messages-location-select {
+  max-width: 350px;
 }
 
 /*# sourceMappingURL=admin.css.map */

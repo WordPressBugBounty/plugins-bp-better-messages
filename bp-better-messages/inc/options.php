@@ -339,7 +339,7 @@ class Better_Messages_Options
                 array($this, 'settings_page_new_html'),
                 0
             );
-        } */
+        }*/
 
         //if( ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0' ) {
 
@@ -403,9 +403,11 @@ class Better_Messages_Options
     public function settings_page_new_html()
     { ?>
         <div class="wrap">
-            <h1><?php _ex( 'Settings', 'WP Admin','bp-better-messages' ); ?></h1>
+            <h1>Settings</h1>
 
-            <div id="messages-settings"></div>
+            <div id="messages-settings">
+                Loading
+            </div>
         </div>
         <?php
     }

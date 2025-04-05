@@ -2461,15 +2461,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             #add_filter( 'the_content', 'convert_smilies', 20 );
         }
 
-        public function array_map_recursive($callback, $array)
-        {
-            $func = function ($item) use (&$func, &$callback) {
-                return is_array($item) ? array_map($func, $item) : call_user_func($callback, $item);
-            };
-
-            return array_map($func, $array);
-        }
-
         public function archive_thread( $user_id, $thread_id ){
             global $wpdb;
             /**
