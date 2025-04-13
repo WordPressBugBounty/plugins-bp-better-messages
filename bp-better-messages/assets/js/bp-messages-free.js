@@ -499,6 +499,7 @@ _x('Successfully unsubscribed from Web Push notifications', 'Push Notifications'
 __('Continue with account', 'bp-better-messages');
 __('Continue', 'bp-better-messages');
 _x('Message hidden', 'Messages from blocked user', 'bp-better-messages');
+__('Rich Content', 'bp-better-messages');
 _nx('%s attachment', '%s attachments', variable, 'Conversations list item', 'bp-better-messages');
 _x('User you are trying to call is already in call. Please try later.', 'Private Call Screen', 'bp-better-messages');
 _x('Incoming Video Call', 'Private Call - On Site Message', 'bp-better-messages');

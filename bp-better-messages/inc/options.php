@@ -39,6 +39,7 @@ class Better_Messages_Options
             'disableEnterForTouch'        => '1',
             'autoFullScreen'              => '1',
             'tapToOpenMsg'                => '1',
+            'mobileSwipeBack'             => '1',
             'mobilePopup'                 => '0',
             'mobileFullScreen'            => '1',
             'chatPage'                    => '0',
@@ -596,6 +597,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['tapToOpenMsg'] ) ) {
             $settings['tapToOpenMsg'] = '0';
+        }
+        if ( !isset( $settings['mobileSwipeBack'] ) ) {
+            $settings['mobileSwipeBack'] = '0';
         }
         if ( !isset( $settings['oEmbedEnable'] ) ) {
             $settings['oEmbedEnable'] = '0';

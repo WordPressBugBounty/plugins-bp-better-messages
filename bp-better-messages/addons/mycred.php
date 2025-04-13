@@ -32,7 +32,7 @@ if ( !class_exists( 'Better_Messages_MyCred' ) ) {
             if( $caller_user_id <= 0 || ! Better_Messages()->calls ) return;
 
             // User role not charged for video call
-            $user_charge_rate = $this->get_user_mycred_call_charge_rate( $caller_user_id );
+            $user_charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $this->get_user_mycred_call_charge_rate( $caller_user_id ), $message_id, $thread_id, $caller_user_id );
             if( $user_charge_rate === 0 ) return;
 
             // Charge only when at least 20KB of traffic is transferred
@@ -64,7 +64,7 @@ if ( !class_exists( 'Better_Messages_MyCred' ) ) {
         public function is_call_allowed( $error, $thread_id, $caller_user_id, $target_user_id ){
             if( ! empty( $error ) ) return $error;
 
-            $user_charge_rate = $this->get_user_mycred_call_charge_rate( $caller_user_id );
+            $user_charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $this->get_user_mycred_call_charge_rate( $caller_user_id ), 0, $thread_id, $caller_user_id );
 
             if( $user_charge_rate === 0 ){
                 return $error;
@@ -193,7 +193,7 @@ if ( !class_exists( 'Better_Messages_MyCred' ) ) {
                 return $allowed;
             }
 
-            $user_charge_rate = $this->get_user_mycred_charge_rate( $user_id );
+            $user_charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $this->get_user_mycred_charge_rate( $user_id ), 0, $thread_id, $user_id );
 
             if( $user_charge_rate === 0 ) return $allowed;
 
@@ -238,7 +238,8 @@ if ( !class_exists( 'Better_Messages_MyCred' ) ) {
 
             $user_id = (int) $message->sender_id;
 
-            $user_charge_rate = $this->get_user_mycred_charge_rate( $user_id );
+            $user_charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $this->get_user_mycred_charge_rate( $user_id ), 0, $message->thread_id, $user_id );
+
             if( $user_charge_rate === 0 ) return false;
 
             $amount_to_deduct = 0 - $user_charge_rate;

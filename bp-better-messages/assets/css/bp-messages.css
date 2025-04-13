@@ -14366,7 +14366,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   overflow: hidden;
   border-radius: var(--bm-border-radius);
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera] {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared .bm-small-video {
   position: absolute;
   bottom: 5px;
   right: 5px;
@@ -14375,7 +14375,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   transition: opacity 0.15s ease-in-out;
   cursor: grab;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared video[datatype=camera]:hover {
+.bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-media-container.bpbm-screen-shared .bm-small-video:hover {
   opacity: 1;
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner video {
@@ -15464,6 +15464,10 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   overflow: hidden !important;
 }
 
+#buddypress .bp-messages-wrap div {
+  border-radius: 0 !important;
+}
+
 .bm-loading-background {
   position: absolute;
   top: 0;
@@ -15519,6 +15523,44 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   text-align: center;
   font-size: 18px;
   margin: 10px 0 15px;
+}
+
+.bm-smart-container .bm-draggable-handle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: move;
+  z-index: 2;
+}
+.bm-smart-container .bm-resizable-handle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  opacity: 0;
+  z-index: 3;
+}
+.bm-smart-container .bm-resizable-handle.bm-resizable-handle-top-left {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+.bm-smart-container .bm-resizable-handle.bm-resizable-handle-top-right {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+.bm-smart-container .bm-resizable-handle.bm-resizable-handle-bottom-left {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+.bm-smart-container .bm-resizable-handle.bm-resizable-handle-bottom-right {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
 }
 
 .bm-guest-login {

@@ -529,7 +529,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             });
 
             if( Better_Messages()->websocket ) {
-                $socket_server = apply_filters('bp_better_messages_realtime_server', 'https://realtime-cloud.bpbettermessages.com/');
+                $socket_server = apply_filters('bp_better_messages_realtime_server', 'https://cloud.better-messages.com/');
                 $bm_endpoint = $socket_server . 'streamMessage';
 
                 $browser->post($bm_endpoint, [

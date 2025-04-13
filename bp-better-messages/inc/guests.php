@@ -462,8 +462,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
         public function html_element(){
             if( is_user_logged_in() ) return;
-
-            echo '<div id="bm-guest-chat-container"></div>';
+            echo '<div id="bm-support-chat-container"></div>';
         }
 
         public function register_new_guest(){

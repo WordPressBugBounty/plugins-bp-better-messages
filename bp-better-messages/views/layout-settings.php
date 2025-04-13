@@ -1727,12 +1727,16 @@ $has_late_message = ob_get_clean();
                                             jQuery('input[name="mobileFullScreen"]').on('change', function(event){
                                                 var autoFullScreen = jQuery('input[name="autoFullScreen"]');
                                                 var tapToOpen = jQuery('input[name="tapToOpenMsg"]');
+                                                var mobileSwipeBack = jQuery('input[name="mobileSwipeBack"]');
+
                                                 if( event.target.checked ){
                                                     autoFullScreen.prop('disabled', false);
                                                     tapToOpen.prop('disabled', false);
+                                                    mobileSwipeBack.prop('disabled', false);
                                                 } else {
                                                     autoFullScreen.prop('disabled', true);
                                                     tapToOpen.prop('disabled', true);
+                                                    mobileSwipeBack.prop('disabled', true);
                                                 }
                                             })
                                         </script>
@@ -1760,6 +1764,15 @@ $has_late_message = ob_get_clean();
                                     <th>
                                         <?php _ex( 'Tap To Open Message', 'Settings page', 'bp-better-messages' ); ?>
                                         <p style="font-size: 10px;"><?php _ex( 'Add "Tap to open" message to message container', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input name="mobileSwipeBack" type="checkbox" <?php checked( $this->settings[ 'mobileSwipeBack' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Swipe to go back', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Enable swipe to left for mobile devices, which allow go back to main screen', 'Settings page', 'bp-better-messages' ); ?></p>
                                     </th>
                                 </tr>
                                 </tbody>
