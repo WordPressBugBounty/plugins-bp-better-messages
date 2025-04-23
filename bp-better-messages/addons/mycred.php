@@ -238,7 +238,7 @@ if ( !class_exists( 'Better_Messages_MyCred' ) ) {
 
             $user_id = (int) $message->sender_id;
 
-            $user_charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $this->get_user_mycred_charge_rate( $user_id ), 0, $message->thread_id, $user_id );
+            $user_charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $this->get_user_mycred_charge_rate( $user_id ), $message->id, $message->thread_id, $user_id );
 
             if( $user_charge_rate === 0 ) return false;
 

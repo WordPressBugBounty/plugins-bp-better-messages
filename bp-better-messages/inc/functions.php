@@ -3335,6 +3335,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function get_current_user_id(){
+            $forced_user_id = apply_filters( 'better_messages_forced_current_user_id', null );
+
+            if( $forced_user_id !== null ){
+                return $forced_user_id;
+            }
+
             if( is_user_logged_in() ){
                 return apply_filters('better_messages_logged_in_user_id', get_current_user_id() );
             } else {
