@@ -2866,7 +2866,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $recipients = $this->get_recipients( $thread_id );
 
-            //if ( isset( $recipients[ $user_id ] ) && 0 == $recipients[ $user_id ]->is_deleted ) {
+            $is_overridden = apply_filters('better_messages_check_access_override', null, $thread_id, $user_id, $acccess_type );
+
+            if( ! is_null( $is_overridden ) ){
+                return $is_overridden;
+            }
+
             if ( isset( $recipients[ $user_id ] ) ) {
                 return true;
             } else {

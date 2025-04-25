@@ -446,8 +446,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 global $wpdb;
 
                 $result = $wpdb->insert( bm_get_table('guests'), [
-                    'ip' => "ai-chat-bot-" . $bot_id,
-                    'name' => $name
+                    'ip'     => "ai-chat-bot-" . $bot_id,
+                    'name'   => $name,
+                    'secret' => ''
                 ] );
 
                 if( $result ) {

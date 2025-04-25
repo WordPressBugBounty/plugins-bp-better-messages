@@ -384,7 +384,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                     'exclude' => [ $user_id ]
                 ));
 
-                if( count( $friends ) > 0 ) {
+                if ( is_countable( $friends ) && count( $friends ) > 0 ) {
                     foreach ( $friends as $friend ){
                         $result[] = intval($friend->user_id);
                     }
