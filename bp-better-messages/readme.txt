@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.8.3
+Stable tag: 2.8.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,11 +168,12 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.8.0 - 2.8.3 =
+= 2.8.0 - 2.8.4 =
 * Upgrading plugin to new generation of ReactJS 19
 * Added setting to disable swipe back for mobile devices
 * Improved compatibility with strict MySQL setups
 * Fixed infinite loading when navigating to specific message in some cases
+* Compatibility with CSS changes in FluentCommunity latest update
 * Other minor bugfixes and improvements
 
 = 2.7.15 - 2.7.23 =

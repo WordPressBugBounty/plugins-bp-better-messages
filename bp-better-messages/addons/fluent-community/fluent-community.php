@@ -123,13 +123,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     min-height: auto;
                 }
 
-                .fcom_better_messages_menu_li a:hover{
-                    background-color: unset !important;
-                }
-                .fcom_better_messages_menu{
-                    padding: 0 !important;
-                }
-
                 .fcom_mobile_menu .focm_menu_item span.bm-unread-badge{
                     background: var(--el-color-danger);
                     width: 15px;
@@ -147,7 +140,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 }
 
                 .better_messages_icon .el-icon{
-                    width: 20px;height: 20px;margin-top: 5px;
+                    width: 20px;height: 20px;
                 }
 
                 .better_messages_icon .el-icon svg{
