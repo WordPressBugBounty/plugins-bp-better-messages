@@ -1500,6 +1500,38 @@ $has_late_message = ob_get_clean();
 
                 <tr>
                     <th scope="row">
+                        <?php _ex( 'Unread counter', 'Settings page','bp-better-messages' ); ?>
+                    </th>
+
+                    <td>
+                        <fieldset>
+                            <table class="widefat bm-switcher-table">
+                                <tbody>
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="unreadCounter" type="radio" <?php checked( $this->settings[ 'unreadCounter' ], 'messages' ); ?> value="messages" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Show number of unread messages', 'Settings page', 'bp-better-messages' ); ?>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="unreadCounter" type="radio" <?php checked( $this->settings[ 'unreadCounter' ], 'conversations' ); ?> value="conversations" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Show number of unread conversations', 'Settings page', 'bp-better-messages' ); ?>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
                         <?php _ex( 'Deleted conversations', 'Settings page','bp-better-messages' ); ?>
                     </th>
 

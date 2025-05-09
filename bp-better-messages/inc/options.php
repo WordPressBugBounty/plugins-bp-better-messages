@@ -122,6 +122,7 @@ class Better_Messages_Options
             'dialingSound'                => 50,
             'modernLayout'                => 'left',
             'deletedBehaviour'            => 'ignore',
+            'unreadCounter'               => 'messages',
             'allowEditMessages'           => '0',
             'enableNiceLinks'             => '1',
             'userStatuses'                => '0',

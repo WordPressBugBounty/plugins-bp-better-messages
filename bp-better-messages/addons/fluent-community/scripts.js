@@ -6,6 +6,7 @@ document.addEventListener("fluentCommunityUtilReady", function () {
 
         unreadCounters.forEach(function( counter ){
             counter.innerHTML = unread;
+
             if( unread > 0 ){
                 counter.style.display = '';
             } else {
