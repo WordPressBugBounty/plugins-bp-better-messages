@@ -15425,6 +15425,7 @@ body.buddyboss-theme.bb-template-v1:not(.wcfm-dashboard-page) #buddypress .bb_mo
   font-size: 15px;
   font-weight: bold;
   margin-bottom: 3px;
+  text-wrap: auto;
 }
 .bm-thread-info .bm-product-info .bm-product-details .bm-product-subtitle {
   white-space: normal;

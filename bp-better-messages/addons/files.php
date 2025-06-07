@@ -246,7 +246,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 } else {
                     unset($message_attachments[$attachment_id]);
                     Better_Messages()->functions->update_message_meta($message_id, 'attachments', $message_attachments);
-                    $wpdb->update($table, array('content' => $content), array('id' => $message_id));
+                    $wpdb->update($table, array('message' => $content), array('id' => $message_id));
                 }
             }
 
