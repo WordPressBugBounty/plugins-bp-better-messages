@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.8.9
+Stable tag: 2.8.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,7 +168,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.8.0 - 2.8.9 =
+= 2.8.0 - 2.8.10 =
 * Upgrading plugin to new generation of ReactJS 19
 * Added option to select if unread counter should display number of unread messages or number of unread conversations
 * Added setting to disable swipe back for mobile devices
@@ -176,6 +176,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Fixed infinite loading when navigating to specific message in some cases
 * Compatibility with CSS changes in FluentCommunity latest update
 * Added ability to send message with Shift+Enter key combination when send on Enter is disabled
+* FluentCommunity Integration: Added support for FluentCommunity Spaces allowing to disable messages in spaces
 * Updated Freemius SDK to 2.12.0
 * Other minor bugfixes and improvements
 

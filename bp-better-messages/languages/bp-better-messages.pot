@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.8.9\n"
+"Project-Id-Version: Better Messages 2.8.10\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-06-07T18:56:33+00:00\n"
+"POT-Creation-Date: 2025-06-18T19:42:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -136,11 +136,11 @@ msgstr ""
 #: assets/admin/admin.min.js:1
 #: assets/admin/admin.js:2071
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2415
+#: assets/admin/admin.js:2426
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4923
+#: assets/admin/admin.js:5175
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5195
+#: assets/admin/admin.js:5447
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Loading"
@@ -488,7 +488,17 @@ msgctxt "File Uploader Error"
 msgid "Sorry, you are not allowed to upload files"
 msgstr ""
 
-#: addons/fluent-community/fluent-community-spaces.php:167
+#: addons/fluent-community/fluent-community-spaces.php:54
+msgctxt "FluentCommunity Integration (Spaces Settings)"
+msgid "Group Messages"
+msgstr ""
+
+#: addons/fluent-community/fluent-community-spaces.php:61
+msgctxt "FluentCommunity Integration (Spaces Settings)"
+msgid "Enable group messages for this space members"
+msgstr ""
+
+#: addons/fluent-community/fluent-community-spaces.php:206
 msgctxt "FluentCommunity Integration (Button in Spaces)"
 msgid "Messages"
 msgstr ""
@@ -750,8 +760,8 @@ msgstr ""
 #: inc/guests.php:314
 #: inc/guests.php:324
 #: inc/guests.php:394
-#: inc/mobile-app/inc/android.php:579
-#: inc/mobile-app/inc/options.php:189
+#: inc/mobile-app/inc/android.php:672
+#: inc/mobile-app/inc/options.php:249
 #: inc/moderation.php:106
 #: inc/moderation.php:131
 #: inc/moderation.php:157
@@ -915,7 +925,7 @@ msgid "Description is too long. Maximum length is %d characters"
 msgstr ""
 
 #: addons/user-reports/user-reports.php:178
-#: assets/admin/admin.js:5324
+#: assets/admin/admin.js:5576
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Message reported"
@@ -1097,15 +1107,15 @@ msgid "Use as chat thumbnail"
 msgstr ""
 
 #: inc/chats.php:524
-#: assets/admin/admin.js:2665
+#: assets/admin/admin.js:2676
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3506
+#: assets/admin/admin.js:3758
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3536
+#: assets/admin/admin.js:3788
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3702
+#: assets/admin/admin.js:3954
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3732
+#: assets/admin/admin.js:3984
 #: assets/admin/admin.min.js:1
 msgid "Loading"
 msgstr ""
@@ -1535,7 +1545,7 @@ msgid "Access restricted"
 msgstr ""
 
 #: inc/functions.php:1750
-#: inc/mobile-app/inc/pushs.php:485
+#: inc/mobile-app/inc/pushs.php:491
 #: assets/js/bp-messages.js:21447
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
@@ -1725,150 +1735,157 @@ msgctxt "WP Admin"
 msgid "Mobile App"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:114
+#: inc/mobile-app/inc/android.php:111
 msgctxt "Rest API Error"
 msgid "ZipArchive class is not available"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:155
+#: inc/mobile-app/inc/android.php:152
 msgctxt "Rest API Error"
 msgid "Error creating ZIP file"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:162
+#: inc/mobile-app/inc/android.php:159
 msgctxt "Rest API Error"
 msgid "Keystore information is not available"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:175
+#: inc/mobile-app/inc/android.php:172
 msgctxt "Rest API Error"
 msgid "No file was uploaded"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:185
+#: inc/mobile-app/inc/android.php:182
 msgctxt "Rest API Error"
 msgid "File upload error: "
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:197
+#: inc/mobile-app/inc/android.php:194
 msgctxt "Rest API Error"
 msgid "Key store password is required"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:205
-#: inc/mobile-app/inc/android.php:320
+#: inc/mobile-app/inc/android.php:202
+#: inc/mobile-app/inc/android.php:319
 msgctxt "Rest API Error"
 msgid "Key alias is required"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:213
+#: inc/mobile-app/inc/android.php:210
 msgctxt "Rest API Error"
 msgid "Key password is required"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:225
+#: inc/mobile-app/inc/android.php:222
 msgctxt "Rest API Error"
 msgid "cURL is not available"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:257
+#: inc/mobile-app/inc/android.php:256
 msgctxt "Rest API Error"
 msgid "Failed to connect to the key store validation service: "
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:277
+#: inc/mobile-app/inc/android.php:276
 msgctxt "Rest API Error"
 msgid "Invalid key store file"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:312
+#: inc/mobile-app/inc/android.php:311
 msgctxt "Rest API Error"
 msgid "Key store password must be at least 8 characters"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:332
+#: inc/mobile-app/inc/android.php:331
 msgctxt "Rest API Error"
 msgid "Key password must be at least 8 characters"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:342
+#: inc/mobile-app/inc/android.php:341
 msgctxt "Rest API Error"
 msgid "Certificate First and Last Name is required"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:352
+#: inc/mobile-app/inc/android.php:351
 msgctxt "Rest API Error"
 msgid "Certificate Country Code is required"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:360
+#: inc/mobile-app/inc/android.php:359
 msgctxt "Rest API Error"
 msgid "Certificate Country Code must be 2 characters"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:390
+#: inc/mobile-app/inc/android.php:391
 msgctxt "Rest API Error"
 msgid "Failed to connect to the key store generation service"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:402
+#: inc/mobile-app/inc/android.php:403
 msgctxt "Rest API Error"
 msgid "Failed to generate key store"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:412
+#: inc/mobile-app/inc/android.php:413
 msgctxt "Rest API Error"
 msgid "Failed to decode key store"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:457
+#: inc/mobile-app/inc/android.php:471
+#: inc/mobile-app/inc/android.php:507
 msgctxt "Rest API Error"
 msgid "Incorrect JSON file"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:464
-#: inc/mobile-app/inc/android.php:593
-#: inc/mobile-app/inc/android.php:603
+#: inc/mobile-app/inc/android.php:478
+#: inc/mobile-app/inc/android.php:538
+#: inc/mobile-app/inc/android.php:686
+#: inc/mobile-app/inc/android.php:696
 msgctxt "Rest API Error"
 msgid "Invalid JSON file"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:473
-#: inc/mobile-app/inc/android.php:491
+#: inc/mobile-app/inc/android.php:531
+msgctxt "Rest API Error"
+msgid "JWT encode error: "
+msgstr ""
+
+#: inc/mobile-app/inc/android.php:550
+#: inc/mobile-app/inc/android.php:584
 msgctxt "Rest API Error"
 msgid "Invalid key"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:571
+#: inc/mobile-app/inc/android.php:664
 msgctxt "Rest API Error"
 msgid "Invalid package name"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:625
+#: inc/mobile-app/inc/android.php:718
 msgctxt "Rest API Error"
 msgid "Failed to response from oauth server "
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:635
-#: inc/mobile-app/inc/android.php:722
+#: inc/mobile-app/inc/android.php:728
+#: inc/mobile-app/inc/android.php:815
 msgctxt "Rest API Error"
 msgid "Failed to get access token"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:652
-#: inc/mobile-app/inc/android.php:712
-#: inc/mobile-app/inc/android.php:739
+#: inc/mobile-app/inc/android.php:745
+#: inc/mobile-app/inc/android.php:805
+#: inc/mobile-app/inc/android.php:832
 msgctxt "Rest API Error"
 msgid "Failed to get response from Google Developer API"
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:663
-#: inc/mobile-app/inc/android.php:750
+#: inc/mobile-app/inc/android.php:756
+#: inc/mobile-app/inc/android.php:843
 msgctxt "Rest API Error"
 msgid "Google Developer API returned an error: "
 msgstr ""
 
-#: inc/mobile-app/inc/android.php:688
+#: inc/mobile-app/inc/android.php:781
 msgctxt "Rest API Error"
 msgid "No connection data found"
 msgstr ""
@@ -1883,27 +1900,27 @@ msgctxt "Mobile App Authorization"
 msgid "The username and password are required"
 msgstr ""
 
-#: inc/mobile-app/inc/options.php:206
-#: inc/mobile-app/inc/options.php:227
+#: inc/mobile-app/inc/options.php:266
+#: inc/mobile-app/inc/options.php:287
 msgctxt "Rest API Error"
 msgid "Not possible to determine image size"
 msgstr ""
 
-#: inc/mobile-app/inc/options.php:217
-#: inc/mobile-app/inc/options.php:238
+#: inc/mobile-app/inc/options.php:277
+#: inc/mobile-app/inc/options.php:298
 #, php-format
 msgctxt "Rest API Error"
 msgid "Image must be equal height and at least %s"
 msgstr ""
 
 #: inc/mobile-app/inc/pushs.php:114
-#: inc/mobile-app/inc/pushs.php:317
+#: inc/mobile-app/inc/pushs.php:323
 msgctxt "Private Call - Mobile App Push"
 msgid "Incoming video call"
 msgstr ""
 
 #: inc/mobile-app/inc/pushs.php:115
-#: inc/mobile-app/inc/pushs.php:318
+#: inc/mobile-app/inc/pushs.php:324
 msgctxt "Private Call - Mobile App Push"
 msgid "You have incoming video call"
 msgstr ""
@@ -1918,11 +1935,11 @@ msgctxt "Private Call - Mobile App Push"
 msgid "You have incoming voice call"
 msgstr ""
 
-#: inc/mobile-app/inc/pushs.php:468
+#: inc/mobile-app/inc/pushs.php:474
 msgid "New message"
 msgstr ""
 
-#: inc/mobile-app/inc/pushs.php:470
+#: inc/mobile-app/inc/pushs.php:476
 msgid "You have new message"
 msgstr ""
 
@@ -1971,7 +1988,7 @@ msgstr ""
 
 #: inc/options.php:326
 #: inc/options.php:327
-#: assets/admin/admin.js:2686
+#: assets/admin/admin.js:2697
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Settings"
@@ -4917,7 +4934,7 @@ msgstr ""
 
 #: assets/admin/admin.js:343
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4950
+#: assets/admin/admin.js:5202
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "User"
@@ -4925,9 +4942,9 @@ msgstr ""
 
 #: assets/admin/admin.js:359
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5030
+#: assets/admin/admin.js:5282
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5406
+#: assets/admin/admin.js:5658
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "next"
@@ -4935,9 +4952,9 @@ msgstr ""
 
 #: assets/admin/admin.js:364
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5035
+#: assets/admin/admin.js:5287
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5411
+#: assets/admin/admin.js:5663
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "previous"
@@ -5208,9 +5225,9 @@ msgstr ""
 
 #: assets/admin/admin.js:1131
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3943
+#: assets/admin/admin.js:4195
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4266
+#: assets/admin/admin.js:4518
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Upload"
@@ -5218,11 +5235,17 @@ msgstr ""
 
 #: assets/admin/admin.js:1137
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2799
+#: assets/admin/admin.js:2817
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2917
+#: assets/admin/admin.js:2890
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5402
+#: assets/admin/admin.js:2987
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3162
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3235
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:5654
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Delete"
@@ -5245,7 +5268,7 @@ msgstr ""
 
 #: assets/admin/admin.js:1770
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2689
+#: assets/admin/admin.js:2700
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Builds"
@@ -5311,7 +5334,7 @@ msgstr ""
 
 #: assets/admin/admin.js:1900
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3624
+#: assets/admin/admin.js:3876
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Team ID"
@@ -5333,11 +5356,13 @@ msgstr ""
 
 #: assets/admin/admin.js:1900
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2767
+#: assets/admin/admin.js:2781
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3498
+#: assets/admin/admin.js:3126
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3694
+#: assets/admin/admin.js:3750
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3946
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Application Name"
@@ -5345,7 +5370,7 @@ msgstr ""
 
 #: assets/admin/admin.js:1900
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3131
+#: assets/admin/admin.js:3383
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Application Icon"
@@ -5353,19 +5378,23 @@ msgstr ""
 
 #: assets/admin/admin.js:1904
 #: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2102
+#: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Package Name"
 msgstr ""
 
 #: assets/admin/admin.js:1904
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2449
+#: assets/admin/admin.js:2460
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2820
+#: assets/admin/admin.js:2838
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3506
+#: assets/admin/admin.js:3183
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3702
+#: assets/admin/admin.js:3758
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3954
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Application Identifier"
@@ -5379,9 +5408,9 @@ msgstr ""
 
 #: assets/admin/admin.js:1920
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3536
+#: assets/admin/admin.js:3788
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3732
+#: assets/admin/admin.js:3984
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Notification Service Identifier"
@@ -5407,6 +5436,8 @@ msgstr ""
 
 #: assets/admin/admin.js:2082
 #: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2102
+#: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Result"
 msgstr ""
@@ -5419,11 +5450,15 @@ msgstr ""
 
 #: assets/admin/admin.js:2085
 #: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2105
+#: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Install to Device"
 msgstr ""
 
 #: assets/admin/admin.js:2093
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2113
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Installation Link"
@@ -5441,858 +5476,936 @@ msgctxt "WP Admin (Mobile App)"
 msgid "Upload"
 msgstr ""
 
-#: assets/admin/admin.js:2108
+#: assets/admin/admin.js:2105
+#: assets/admin/admin.min.js:1
+msgctxt "WP Admin (Mobile App)"
+msgid "Download APK"
+msgstr ""
+
+#: assets/admin/admin.js:2105
+#: assets/admin/admin.min.js:1
+msgctxt "WP Admin (Mobile App)"
+msgid "Download AAB"
+msgstr ""
+
+#: assets/admin/admin.js:2119
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to delete this build?"
 msgstr ""
 
-#: assets/admin/admin.js:2115
+#: assets/admin/admin.js:2126
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Delete Build"
 msgstr ""
 
-#: assets/admin/admin.js:2177
+#: assets/admin/admin.js:2188
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Not Started"
 msgstr ""
 
-#: assets/admin/admin.js:2177
+#: assets/admin/admin.js:2188
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "In Queue"
 msgstr ""
 
-#: assets/admin/admin.js:2177
+#: assets/admin/admin.js:2188
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Uploading"
 msgstr ""
 
-#: assets/admin/admin.js:2184
+#: assets/admin/admin.js:2195
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Uploaded"
 msgstr ""
 
-#: assets/admin/admin.js:2186
+#: assets/admin/admin.js:2197
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Failed"
 msgstr ""
 
-#: assets/admin/admin.js:2188
+#: assets/admin/admin.js:2199
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Error while checking the status"
 msgstr ""
 
-#: assets/admin/admin.js:2194
+#: assets/admin/admin.js:2205
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Retry"
 msgstr ""
 
-#: assets/admin/admin.js:2203
+#: assets/admin/admin.js:2214
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to upload this build to Test Flight?"
 msgstr ""
 
-#: assets/admin/admin.js:2210
+#: assets/admin/admin.js:2221
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Upload to Test Flight"
 msgstr ""
 
-#: assets/admin/admin.js:2213
+#: assets/admin/admin.js:2224
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to retry the upload to Test Flight?"
 msgstr ""
 
-#: assets/admin/admin.js:2224
+#: assets/admin/admin.js:2235
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Retry upload to Test Flight"
 msgstr ""
 
-#: assets/admin/admin.js:2407
+#: assets/admin/admin.js:2418
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2692
+#: assets/admin/admin.js:2703
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Devices"
 msgstr ""
 
-#: assets/admin/admin.js:2417
+#: assets/admin/admin.js:2428
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "No devices found"
 msgstr ""
 
-#: assets/admin/admin.js:2423
+#: assets/admin/admin.js:2434
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "User"
 msgstr ""
 
-#: assets/admin/admin.js:2423
+#: assets/admin/admin.js:2434
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Device"
 msgstr ""
 
-#: assets/admin/admin.js:2423
+#: assets/admin/admin.js:2434
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Application"
 msgstr ""
 
-#: assets/admin/admin.js:2423
+#: assets/admin/admin.js:2434
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Notifications"
 msgstr ""
 
-#: assets/admin/admin.js:2425
+#: assets/admin/admin.js:2436
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Last Active"
 msgstr ""
 
-#: assets/admin/admin.js:2444
+#: assets/admin/admin.js:2455
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5275
+#: assets/admin/admin.js:5527
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5291
+#: assets/admin/admin.js:5543
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5341
+#: assets/admin/admin.js:5593
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "User ID"
 msgstr ""
 
-#: assets/admin/admin.js:2453
+#: assets/admin/admin.js:2464
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Subscribed"
 msgstr ""
 
-#: assets/admin/admin.js:2457
+#: assets/admin/admin.js:2468
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Not Subscribed"
 msgstr ""
 
-#: assets/admin/admin.js:2764
+#: assets/admin/admin.js:2778
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3493
+#: assets/admin/admin.js:3745
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Development Build"
 msgstr ""
 
-#: assets/admin/admin.js:2768
+#: assets/admin/admin.js:2782
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3499
+#: assets/admin/admin.js:3127
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3695
+#: assets/admin/admin.js:3751
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3947
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "This name will be used as primary mobile application name.</br>Application name is limited to 30 characters, but only 12 characters will show under the icon at the mobile device applications list."
 msgstr ""
 
-#: assets/admin/admin.js:2775
+#: assets/admin/admin.js:2793
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3138
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
-msgid "Firebase Service JSON file"
+msgid "Firebase SDK Configuration File"
 msgstr ""
 
-#: assets/admin/admin.js:2776
+#: assets/admin/admin.js:2794
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3139
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
-msgid "This file is used to connect your mobile application to Firebase services. You can download it from your Firebase console."
+msgid "google-services.json file which is used to connect your mobile application to Firebase services. You can download it from your Firebase console."
 msgstr ""
 
-#: assets/admin/admin.js:2783
+#: assets/admin/admin.js:2801
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3822
+#: assets/admin/admin.js:2874
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3146
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3219
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:4074
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Uploaded"
 msgstr ""
 
-#: assets/admin/admin.js:2789
+#: assets/admin/admin.js:2807
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2880
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3152
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3225
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to delete Firebase Service JSON file?"
 msgstr ""
 
-#: assets/admin/admin.js:2827
+#: assets/admin/admin.js:2838
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:2911
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3183
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3256
+#: assets/admin/admin.min.js:1
+msgctxt "WP Admin"
+msgid "Upload file"
+msgstr ""
+
+#: assets/admin/admin.js:2845
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3190
+#: assets/admin/admin.min.js:1
+msgctxt "WP Admin (Mobile App)"
+msgid "Select Application Identifier"
+msgstr ""
+
+#: assets/admin/admin.js:2848
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3193
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Firebase Project ID"
 msgstr ""
 
-#: assets/admin/admin.js:2834
+#: assets/admin/admin.js:2855
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3200
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Firebase Project Number"
 msgstr ""
 
-#: assets/admin/admin.js:2850
+#: assets/admin/admin.js:2866
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3575
+#: assets/admin/admin.js:3211
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3771
+msgctxt "WP Admin (Mobile App)"
+msgid "Firebase Admin SDK File"
+msgstr ""
+
+#: assets/admin/admin.js:2867
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3212
+#: assets/admin/admin.min.js:1
+msgctxt "WP Admin (Mobile App)"
+msgid "Firebase Admin SDK file which is used to send push notifications to your mobile application to Firebase services. You can download it from your Firebase console."
+msgstr ""
+
+#: assets/admin/admin.js:2920
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3265
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:3827
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:4023
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Save Changes"
 msgstr ""
 
-#: assets/admin/admin.js:2898
+#: assets/admin/admin.js:2968
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Android Keystore"
 msgstr ""
 
-#: assets/admin/admin.js:2903
+#: assets/admin/admin.js:2973
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin (Mobile App)"
 msgid "KeyStore with %s alias is uploaded"
 msgstr ""
 
-#: assets/admin/admin.js:2909
+#: assets/admin/admin.js:2979
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to delete KeyStore file?"
 msgstr ""
 
-#: assets/admin/admin.js:2917
+#: assets/admin/admin.js:2987
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Download KeyStore"
 msgstr ""
 
-#: assets/admin/admin.js:2938
+#: assets/admin/admin.js:3008
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Download"
 msgstr ""
 
-#: assets/admin/admin.js:2945
+#: assets/admin/admin.js:3015
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "To build Android apps, Google requires developers to sign their apps with a KeyStore to verify their identity."
 msgstr ""
 
-#: assets/admin/admin.js:2945
+#: assets/admin/admin.js:3015
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Use the tool below to generate a KeyStore on our servers or upload already created key manually."
 msgstr ""
 
-#: assets/admin/admin.js:2945
+#: assets/admin/admin.js:3015
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:2950
+#: assets/admin/admin.js:3020
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Generate KeyStore"
 msgstr ""
 
-#: assets/admin/admin.js:2953
+#: assets/admin/admin.js:3023
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4165
+#: assets/admin/admin.js:4417
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Generate"
 msgstr ""
 
-#: assets/admin/admin.js:2953
+#: assets/admin/admin.js:3023
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "KeyStore File"
 msgstr ""
 
-#: assets/admin/admin.js:2966
+#: assets/admin/admin.js:3036
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin (Mobile App)"
 msgid "File extension must be %s"
 msgstr ""
 
-#: assets/admin/admin.js:2966
+#: assets/admin/admin.js:3036
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4037
+#: assets/admin/admin.js:4289
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "KeyStore Password"
 msgstr ""
 
-#: assets/admin/admin.js:2972
+#: assets/admin/admin.js:3042
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "KeyStore Alias"
 msgstr ""
 
-#: assets/admin/admin.js:2978
+#: assets/admin/admin.js:3048
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "KeyStore Key Password"
 msgstr ""
 
-#: assets/admin/admin.js:2994
+#: assets/admin/admin.js:3064
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Please fill all fields"
 msgstr ""
 
-#: assets/admin/admin.js:3013
+#: assets/admin/admin.js:3083
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Upload KeyStore"
 msgstr ""
 
-#: assets/admin/admin.js:3128
+#: assets/admin/admin.js:3123
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4310
+msgctxt "WP Admin (Mobile App)"
+msgid "Production Build"
+msgstr ""
+
+#: assets/admin/admin.js:3380
+#: assets/admin/admin.min.js:1
+#: assets/admin/admin.js:4562
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Appearance"
 msgstr ""
 
-#: assets/admin/admin.js:3132
+#: assets/admin/admin.js:3384
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "This image will be used as primary mobile application icon.<br/>The image must be in .png format with size 1024x1024px."
 msgstr ""
 
-#: assets/admin/admin.js:3138
+#: assets/admin/admin.js:3390
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Application Splash Screen"
 msgstr ""
 
-#: assets/admin/admin.js:3139
+#: assets/admin/admin.js:3391
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "This image will be used as splash screen for the mobile application.<br/>The image must be in .png format with size 2732x2732px."
 msgstr ""
 
-#: assets/admin/admin.js:3145
+#: assets/admin/admin.js:3397
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Logo at login page"
 msgstr ""
 
-#: assets/admin/admin.js:3146
+#: assets/admin/admin.js:3398
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "This image will be used at login page.<br/>The image must be in .png or .svg format with transparent background."
 msgstr ""
 
-#: assets/admin/admin.js:3154
+#: assets/admin/admin.js:3406
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Terms and Conditions URL"
 msgstr ""
 
-#: assets/admin/admin.js:3155
+#: assets/admin/admin.js:3407
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "App Store require app to have Terms and Conditions, which user must to accept before using the application"
 msgstr ""
 
-#: assets/admin/admin.js:3174
+#: assets/admin/admin.js:3426
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Save Changes"
 msgstr ""
 
-#: assets/admin/admin.js:3312
+#: assets/admin/admin.js:3564
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin (Mobile App)"
 msgid "Please check <a href=\"%s\" target=\"_blank\">iOS Application Documentation Page</a>, if you have any questions still, please contact support"
 msgstr ""
 
-#: assets/admin/admin.js:3394
+#: assets/admin/admin.js:3646
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Are you sure you want to disconnect from Apple Developer Account?"
 msgstr ""
 
-#: assets/admin/admin.js:3405
+#: assets/admin/admin.js:3657
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Connection to Apple Developer Account"
 msgstr ""
 
-#: assets/admin/admin.js:3406
+#: assets/admin/admin.js:3658
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "To authorize and be able to create and use provisioning profiles, signing application code and upload production application to your apple developer account we need to authorize to Apple App Store via API."
 msgstr ""
 
-#: assets/admin/admin.js:3406
+#: assets/admin/admin.js:3658
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin (Mobile App)"
 msgid "For that you need to <a href=\"%s\" target=\"_blank\">Get API Key</a> from App Store Connect and upload it using form below."
 msgstr ""
 
-#: assets/admin/admin.js:3408
+#: assets/admin/admin.js:3660
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "API Key"
 msgstr ""
 
-#: assets/admin/admin.js:3414
+#: assets/admin/admin.js:3666
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3445
+#: assets/admin/admin.js:3697
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Key ID"
 msgstr ""
 
-#: assets/admin/admin.js:3420
+#: assets/admin/admin.js:3672
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3438
+#: assets/admin/admin.js:3690
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Issuer ID"
 msgstr ""
 
-#: assets/admin/admin.js:3436
+#: assets/admin/admin.js:3688
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Connect"
 msgstr ""
 
-#: assets/admin/admin.js:3445
+#: assets/admin/admin.js:3697
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Disconnect"
 msgstr ""
 
-#: assets/admin/admin.js:3447
+#: assets/admin/admin.js:3699
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Checking connection to Apple Developer Account"
 msgstr ""
 
-#: assets/admin/admin.js:3449
+#: assets/admin/admin.js:3701
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Connection to Apple Developer Account established successfully"
 msgstr ""
 
-#: assets/admin/admin.js:3451
+#: assets/admin/admin.js:3703
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Connection to Apple Developer Account failed"
 msgstr ""
 
-#: assets/admin/admin.js:3496
+#: assets/admin/admin.js:3748
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3622
+#: assets/admin/admin.js:3874
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3692
+#: assets/admin/admin.js:3944
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3818
+#: assets/admin/admin.js:4070
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Apple developer account connection required"
 msgstr ""
 
-#: assets/admin/admin.js:3517
+#: assets/admin/admin.js:3769
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3547
+#: assets/admin/admin.js:3799
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3713
+#: assets/admin/admin.js:3965
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3743
+#: assets/admin/admin.js:3995
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Not selected"
 msgstr ""
 
-#: assets/admin/admin.js:3533
+#: assets/admin/admin.js:3785
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3563
+#: assets/admin/admin.js:3815
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3729
+#: assets/admin/admin.js:3981
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3759
+#: assets/admin/admin.js:4011
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Refresh list"
 msgstr ""
 
-#: assets/admin/admin.js:3536
+#: assets/admin/admin.js:3788
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3566
+#: assets/admin/admin.js:3818
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3732
+#: assets/admin/admin.js:3984
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:3762
+#: assets/admin/admin.js:4014
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Create New Identifier"
 msgstr ""
 
-#: assets/admin/admin.js:3619
+#: assets/admin/admin.js:3871
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "General"
 msgstr ""
 
-#: assets/admin/admin.js:3633
+#: assets/admin/admin.js:3885
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Where to find Developer Team ID?"
 msgstr ""
 
-#: assets/admin/admin.js:3689
+#: assets/admin/admin.js:3941
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Distribution Build"
 msgstr ""
 
-#: assets/admin/admin.js:3815
+#: assets/admin/admin.js:4067
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Push Notifications"
 msgstr ""
 
-#: assets/admin/admin.js:3820
+#: assets/admin/admin.js:4072
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Push Notification Key"
 msgstr ""
 
-#: assets/admin/admin.js:3824
+#: assets/admin/admin.js:4076
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Not uploaded"
 msgstr ""
 
-#: assets/admin/admin.js:3829
+#: assets/admin/admin.js:4081
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Upload Push Notification Key"
 msgstr ""
 
-#: assets/admin/admin.js:3832
+#: assets/admin/admin.js:4084
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Upload new push notification key"
 msgstr ""
 
-#: assets/admin/admin.js:3905
+#: assets/admin/admin.js:4157
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Step 1"
 msgstr ""
 
-#: assets/admin/admin.js:3909
+#: assets/admin/admin.js:4161
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin (Mobile App)"
 msgid "Go to <a %s>Register a New Key</a> page at Apple Developer Portal and create new <strong>Apple Push Notifications service (APNs)</strong> Key and download the certificate file."
 msgstr ""
 
-#: assets/admin/admin.js:3909
+#: assets/admin/admin.js:4161
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Step 2"
 msgstr ""
 
-#: assets/admin/admin.js:3913
+#: assets/admin/admin.js:4165
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Enter your account <strong>Team ID</strong>"
 msgstr ""
 
-#: assets/admin/admin.js:3922
+#: assets/admin/admin.js:4174
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Enter created <strong>Key ID</strong>"
 msgstr ""
 
-#: assets/admin/admin.js:3931
+#: assets/admin/admin.js:4183
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Upload downloaded from Apple Developer Portal .p8 certificate file"
 msgstr ""
 
-#: assets/admin/admin.js:4033
+#: assets/admin/admin.js:4285
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Credentials Information"
 msgstr ""
 
-#: assets/admin/admin.js:4041
+#: assets/admin/admin.js:4293
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4065
+#: assets/admin/admin.js:4317
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Leave empty to generate automatically"
 msgstr ""
 
-#: assets/admin/admin.js:4050
+#: assets/admin/admin.js:4302
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Key Alias"
 msgstr ""
 
-#: assets/admin/admin.js:4061
+#: assets/admin/admin.js:4313
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Key Password"
 msgstr ""
 
-#: assets/admin/admin.js:4082
+#: assets/admin/admin.js:4334
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Certificate Information"
 msgstr ""
 
-#: assets/admin/admin.js:4086
+#: assets/admin/admin.js:4338
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "First and Last Name"
 msgstr ""
 
-#: assets/admin/admin.js:4098
+#: assets/admin/admin.js:4350
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Organization"
 msgstr ""
 
-#: assets/admin/admin.js:4109
+#: assets/admin/admin.js:4361
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Organization Unit"
 msgstr ""
 
-#: assets/admin/admin.js:4120
+#: assets/admin/admin.js:4372
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "City"
 msgstr ""
 
-#: assets/admin/admin.js:4131
+#: assets/admin/admin.js:4383
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "State"
 msgstr ""
 
-#: assets/admin/admin.js:4142
+#: assets/admin/admin.js:4394
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "Country Code (XX)"
 msgstr ""
 
-#: assets/admin/admin.js:4157
+#: assets/admin/admin.js:4409
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "After the KeyStore is generated, it will be saved to your website's database."
 msgstr ""
 
-#: assets/admin/admin.js:4157
+#: assets/admin/admin.js:4409
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "You must download and back it up immediately."
 msgstr ""
 
-#: assets/admin/admin.js:4157
+#: assets/admin/admin.js:4409
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "If you lose your KeyStore — for example, due to a website migration or server issue — you won’t be able to publish updates to your Android app on the Google Play Store. To prevent this, make sure to store a copy of your KeyStore in a secure location outside your website."
 msgstr ""
 
-#: assets/admin/admin.js:4237
+#: assets/admin/admin.js:4489
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Certificates"
 msgstr ""
 
-#: assets/admin/admin.js:4237
+#: assets/admin/admin.js:4489
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Loading..."
 msgstr ""
 
-#: assets/admin/admin.js:4246
+#: assets/admin/admin.js:4498
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Select"
 msgstr ""
 
-#: assets/admin/admin.js:4251
+#: assets/admin/admin.js:4503
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid ".p12 file"
 msgstr ""
 
-#: assets/admin/admin.js:4254
+#: assets/admin/admin.js:4506
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Certificate Password"
 msgstr ""
 
-#: assets/admin/admin.js:4313
+#: assets/admin/admin.js:4565
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin (Mobile App)"
 msgid "iOS"
 msgstr ""
 
-#: assets/admin/admin.js:4392
+#: assets/admin/admin.js:4644
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "No users selected"
 msgstr ""
 
-#: assets/admin/admin.js:4397
+#: assets/admin/admin.js:4649
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Selected users"
 msgstr ""
 
-#: assets/admin/admin.js:4428
+#: assets/admin/admin.js:4680
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Add user"
 msgstr ""
 
-#: assets/admin/admin.js:4433
+#: assets/admin/admin.js:4685
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "No users found"
 msgstr ""
 
-#: assets/admin/admin.js:4433
+#: assets/admin/admin.js:4685
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Start typing to search"
 msgstr ""
 
-#: assets/admin/admin.js:4462
+#: assets/admin/admin.js:4714
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Add"
 msgstr ""
 
-#: assets/admin/admin.js:4468
+#: assets/admin/admin.js:4720
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Cancel"
 msgstr ""
 
-#: assets/admin/admin.js:4784
+#: assets/admin/admin.js:5036
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:4954
+#: assets/admin/admin.js:5206
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Messages"
 msgstr ""
 
-#: assets/admin/admin.js:4791
+#: assets/admin/admin.js:5043
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Guests"
 msgstr ""
 
-#: assets/admin/admin.js:4888
+#: assets/admin/admin.js:5140
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5464
+#: assets/admin/admin.js:5716
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin"
 msgid "Are you sure you want to delete %s account(s)?"
 msgstr ""
 
-#: assets/admin/admin.js:4904
+#: assets/admin/admin.js:5156
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5160
+#: assets/admin/admin.js:5412
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Search"
 msgstr ""
 
-#: assets/admin/admin.js:4911
+#: assets/admin/admin.js:5163
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Number of users"
 msgstr ""
 
-#: assets/admin/admin.js:4928
+#: assets/admin/admin.js:5180
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "No guests found"
 msgstr ""
 
-#: assets/admin/admin.js:4950
+#: assets/admin/admin.js:5202
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5222
+#: assets/admin/admin.js:5474
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "ID"
 msgstr ""
 
-#: assets/admin/admin.js:4958
+#: assets/admin/admin.js:5210
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Conversations"
 msgstr ""
 
-#: assets/admin/admin.js:5026
+#: assets/admin/admin.js:5278
 #: assets/admin/admin.min.js:1
-#: assets/admin/admin.js:5473
+#: assets/admin/admin.js:5725
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Delete Account"
 msgstr ""
 
-#: assets/admin/admin.js:5135
+#: assets/admin/admin.js:5387
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin"
 msgid "Are you sure you want to delete %s message(s)?"
 msgstr ""
 
-#: assets/admin/admin.js:5149
+#: assets/admin/admin.js:5401
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Filter by Sender"
 msgstr ""
 
-#: assets/admin/admin.js:5169
+#: assets/admin/admin.js:5421
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Conversation ID"
 msgstr ""
 
-#: assets/admin/admin.js:5170
+#: assets/admin/admin.js:5422
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Enter Conversation ID Number"
 msgstr ""
 
-#: assets/admin/admin.js:5178
+#: assets/admin/admin.js:5430
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Number of messages"
 msgstr ""
 
-#: assets/admin/admin.js:5183
+#: assets/admin/admin.js:5435
 #: assets/admin/admin.min.js:1
 #, js-format
 msgctxt "WP Admin"
@@ -6301,43 +6414,43 @@ msgid_plural "%s reported messages are available"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/admin.js:5200
+#: assets/admin/admin.js:5452
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "No messages found"
 msgstr ""
 
-#: assets/admin/admin.js:5222
+#: assets/admin/admin.js:5474
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Sender"
 msgstr ""
 
-#: assets/admin/admin.js:5222
+#: assets/admin/admin.js:5474
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Receiver"
 msgstr ""
 
-#: assets/admin/admin.js:5222
+#: assets/admin/admin.js:5474
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Message"
 msgstr ""
 
-#: assets/admin/admin.js:5222
+#: assets/admin/admin.js:5474
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Info"
 msgstr ""
 
-#: assets/admin/admin.js:5292
+#: assets/admin/admin.js:5544
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Participants Count:"
 msgstr ""
 
-#: assets/admin/admin.js:5297
+#: assets/admin/admin.js:5549
 #: assets/admin/admin.min.js:1
 #: assets/js/bp-messages.js:40330
 #: assets/js/bp-messages-premium.min.js:1
@@ -6345,25 +6458,25 @@ msgstr ""
 msgid "This message was deleted"
 msgstr ""
 
-#: assets/admin/admin.js:5304
+#: assets/admin/admin.js:5556
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Conversation ID:"
 msgstr ""
 
-#: assets/admin/admin.js:5311
+#: assets/admin/admin.js:5563
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Click to filter by this conversation"
 msgstr ""
 
-#: assets/admin/admin.js:5315
+#: assets/admin/admin.js:5567
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "View conversation"
 msgstr ""
 
-#: assets/admin/admin.js:5326
+#: assets/admin/admin.js:5578
 #: assets/admin/admin.min.js:1
 #: assets/js/bp-messages.js:13351
 #: assets/js/bp-messages-premium.min.js:1
@@ -6372,7 +6485,7 @@ msgctxt "User Reports"
 msgid "Reason"
 msgstr ""
 
-#: assets/admin/admin.js:5326
+#: assets/admin/admin.js:5578
 #: assets/admin/admin.min.js:1
 #: assets/js/bp-messages.js:13367
 #: assets/js/bp-messages-premium.min.js:1
@@ -6381,79 +6494,79 @@ msgctxt "User Reports"
 msgid "Description"
 msgstr ""
 
-#: assets/admin/admin.js:5326
+#: assets/admin/admin.js:5578
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Reported by"
 msgstr ""
 
-#: assets/admin/admin.js:5342
+#: assets/admin/admin.js:5594
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Time"
 msgstr ""
 
-#: assets/admin/admin.js:5350
+#: assets/admin/admin.js:5602
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Are you sure you want to delete this report?"
 msgstr ""
 
-#: assets/admin/admin.js:5372
+#: assets/admin/admin.js:5624
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Delete report"
 msgstr ""
 
-#: assets/admin/admin.js:5375
+#: assets/admin/admin.js:5627
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Are you sure you want to delete this message?"
 msgstr ""
 
-#: assets/admin/admin.js:5388
+#: assets/admin/admin.js:5640
 #: assets/admin/admin.min.js:1
 msgctxt "User Reports"
 msgid "Delete message"
 msgstr ""
 
-#: assets/admin/admin.js:5457
+#: assets/admin/admin.js:5709
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Guest Info"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Display Name"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Messages sent"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Participant of conversations"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Email Address"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Last IP Address"
 msgstr ""
 
-#: assets/admin/admin.js:5458
+#: assets/admin/admin.js:5710
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
 msgid "Registered at"

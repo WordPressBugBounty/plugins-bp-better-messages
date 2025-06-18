@@ -43,6 +43,45 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             if (Better_Messages()->settings[ 'FCenableGroupsFiles' ] === '0') {
                 add_action('bp_better_messages_user_can_upload_files', array($this, 'disable_upload_files'), 10, 3);
             }
+
+            add_action('fluent_community/on_wp_init', array( $this, 'on_wp_init' ), 10, 1 );
+        }
+
+        public function on_wp_init( $app ){
+            $api = \FluentCommunity\App\Functions\Utility::extender();
+
+            $api->addMetaBox('better_messages_space_settings', [
+                'section_title'   => _x('Group Messages', 'FluentCommunity Integration (Spaces Settings)', 'bp-better-messages'),
+                'fields_callback' => function ($space) {
+                    return [
+                        'enabled' => [
+                            'true_value'     => 'yes',
+                            'false_value'    => 'no',
+                            'type'           => 'inline_checkbox',
+                            'checkbox_label' => _x('Enable group messages for this space members', 'FluentCommunity Integration (Spaces Settings)', 'bp-better-messages'),
+                        ]
+                    ];
+                },
+                'data_callback'   => function ($space) {
+                    $settings = $space->getCustomMeta('better_messages_space_settings', []);
+
+                    $defaults = [
+                        'enabled'      => apply_filters('better_messages_fluent_community_group_chat_enabled', 'yes', $space->id )
+                    ];
+
+                    $settings = wp_parse_args($settings, $defaults);
+
+                    return $settings;
+                },
+                'save_callback'   => function ($settings, $space) {
+                    if ( ! is_array($settings) ) {
+                        return;
+                    }
+
+                    $space->updateCustomMeta('better_messages_space_settings', $settings);
+                }
+            ], ['space']);
+
         }
 
         public function is_valid_group( $is_valid_group, $thread_id )
@@ -53,7 +92,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
                 $group = Space::find( $group_id );
 
                 if( $group ) {
-                    if ( $this->is_group_messages_enabled($group_id) === 'enabled') {
+                    if ( $this->is_group_messages_enabled($group_id)) {
                         $is_valid_group = true;
                     }
                 }
@@ -172,7 +211,19 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
         }
 
         public function is_group_messages_enabled( $group_id ){
-            return apply_filters('better_messages_fluent_community_group_chat_enabled', true, $group_id );
+            $group = Space::find($group_id);
+
+            if( ! $group ){
+                return  false;
+            }
+
+            $defaults = [
+                'enabled'      => apply_filters('better_messages_fluent_community_group_chat_enabled', 'yes', $group_id )
+            ];
+
+            $settings = $group->getCustomMeta('better_messages_space_settings', $defaults );
+
+            return $settings['enabled'] === 'yes';
         }
 
         public function user_has_access( $group_id, $user_id ){
