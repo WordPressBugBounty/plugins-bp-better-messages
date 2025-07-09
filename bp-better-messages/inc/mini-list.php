@@ -40,7 +40,14 @@ class Better_Messages_Mini_List
         $groups  = is_user_logged_in() && isset( Better_Messages()->script_variables['miniGroups'] ) && Better_Messages()->script_variables['miniGroups'];
 
         if( $threads || $friends || $groups ) {
-            echo '<div class="bp-messages-wrap bp-better-messages-list"></div>';
+            $class = "bp-messages-wrap bp-better-messages-list";
+
+            $mod = get_theme_mod('bm-mini-widgets-bottom', 0 );
+
+            if( $mod > 0 ) {
+                $class .= ' bm-widget-not-at-bottom';
+            }
+            echo '<div class="' . $class . '"></div>';
         }
     }
 }

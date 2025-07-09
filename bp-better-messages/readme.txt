@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.8.11
+Stable tag: 2.8.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,7 +168,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.8.0 - 2.8.11 =
+= 2.8.0 - 2.8.13 =
+* Added ability to set Indent from bottom for mini widgets and mini chats
 * Upgrading plugin to new generation of ReactJS 19
 * Improved reply to specific message speed in WebSocket version
 * Added option to select if unread counter should display number of unread messages or number of unread conversations
@@ -179,6 +180,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Added ability to send message with Shift+Enter key combination when send on Enter is disabled
 * FluentCommunity Integration: Added support for FluentCommunity Spaces allowing to disable messages in spaces
 * Updated Freemius SDK to 2.12.0
+* Fixed issue with Mini Chats not working properly in some cases
 * Other minor bugfixes and improvements
 
 = 2.7.15 - 2.7.23 =

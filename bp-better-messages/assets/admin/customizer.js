@@ -81,7 +81,7 @@
             if( value === 'right' ){
                 return '';
             } else {
-                return '.bp-better-messages-list{right: auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-mini{left:70px;right: auto}.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset);}';
+                return '.bp-messages-wrap.bp-better-messages-list .bm-mini-widgets-button{right:auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-list{right: auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-mini{left:70px;right: auto}.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset);}';
             }
         }
 
@@ -156,9 +156,9 @@
     } );
 
     wp.customize( 'bm-widgets-border-radius', function( value ) {
-        updateCssRule( 'bm-widgets-border-radius', '--bm-mini-chats-border-radius: ' + value() + 'px ' + value() + 'px 0 0' );
+        updateCssRule( 'bm-widgets-border-radius', '--bm-mini-chats-border-radius: ' + value() + 'px' );
         value.bind( function( newval ) {
-            updateCssRule( 'bm-widgets-border-radius', '--bm-mini-chats-border-radius: ' + newval + 'px ' + newval + 'px 0 0' );
+            updateCssRule( 'bm-widgets-border-radius', '--bm-mini-chats-border-radius: ' + newval + 'px' );
         } );
     } );
 
@@ -458,6 +458,26 @@
         value.bind( function( newval ) {
             updateCssRule( 'bm-mini-widgets-indent', '--bm-mini-widgets-offset: ' + newval + 'px' );
         } );
+    } );
+
+    wp.customize( 'bm-mini-widgets-bottom', function( value ) {
+      var widgets = jQuery('.bp-better-messages-mini,.bp-better-messages-list')
+      updateCssRule( 'bm-mini-widgets-bottom', '--bm-mini-widgets-offset-bottom: ' + value() + 'px' );
+
+      if( value() > 0 ){
+        widgets.addClass('bm-widget-not-at-bottom');
+      } else {
+        widgets.removeClass('bm-widget-not-at-bottom');
+      }
+
+      value.bind( function( newval ) {
+        updateCssRule( 'bm-mini-widgets-bottom', '--bm-mini-widgets-offset-bottom: ' + newval + 'px' );
+        if( newval > 0 ){
+          widgets.addClass('bm-widget-not-at-bottom');
+        } else {
+          widgets.removeClass('bm-widget-not-at-bottom');
+        }
+      } );
     } );
 
 

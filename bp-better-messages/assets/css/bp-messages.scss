@@ -2227,13 +2227,20 @@ body.bp-messages-mobile {
 
   &.bp-better-messages-mini {
 
+    &.bm-widget-not-at-bottom{
+      .chats{
+        .chat{
+          border-radius: var(--bm-mini-chats-border-radius);
+        }
+      }
+    }
     .chats {
       display: block;
       //height: 500px;
 
       .chat {
         position: relative;
-        border-radius: var(--bm-mini-chats-border-radius);
+        border-radius: var(--bm-mini-chats-border-radius) var(--bm-mini-chats-border-radius) 0 0;
         overflow: hidden;
         display: inline-block;
         vertical-align: bottom;
@@ -4720,7 +4727,7 @@ body:not(.bm-mobile-device) .bp-messages-wrap .bm-messages-list .bm-list .bm-mes
 
 .bp-better-messages-mini {
   position: fixed;
-  bottom: 0;
+  bottom: var(--bm-mini-widgets-offset-bottom);
   right: 70px;
   box-shadow: none !important;
   border: 0 !important;
@@ -5083,21 +5090,30 @@ body.bm-mobile-device {
 
 
 .bp-better-messages-list{
+  display: flex;
   position: fixed;
-  border-radius: var(--bm-mini-chats-border-radius) !important;
+  border-radius: var(--bm-mini-chats-border-radius) var(--bm-mini-chats-border-radius) 0 0 !important;
   overflow: hidden !important;
-  bottom: 0;
-  border: 1px solid rgba(var(--bm-border-secondary-color), 1);
+  bottom: var(--bm-mini-widgets-offset-bottom);
   overflow: unset;
   z-index: 800;
   right: var( --bm-mini-widgets-offset );
   width: var(--bm-mini-widgets-width);
   max-width: 100%;
   background: rgba( var(--bm-bg-color), 1 );
-  box-shadow: 0 0 3px 1px rgba(var(--bm-border-secondary-color), 1);
-  display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
+  border: 1px solid rgba(var(--bm-border-secondary-color), 1);
+  box-shadow: 0 0 3px 1px rgba(var(--bm-border-secondary-color), 1);
+
+  &:empty{
+    border: none;
+    box-shadow: none;
+  }
+
+  &.bm-widget-not-at-bottom{
+    border-radius: var(--bm-mini-chats-border-radius) !important;
+  }
 
   &.bm-opened{
     height: var(--bm-mini-widgets-height);
@@ -5152,7 +5168,6 @@ body.bm-mobile-device {
   height: 35px;
   border-radius: 5px 5px 0 0;
   background: rgba( var(--bm-bg-color), 1 );
-  border-bottom: 1px solid rgba( var(--bm-border-color), 0.62 );
   font-size: 13px;
   box-sizing: content-box !important;
   /* box-shadow: 0 0 3px 1px #d7d8db; */
@@ -5160,6 +5175,10 @@ body.bm-mobile-device {
   align-items: center;
   justify-content: flex-start;
   flex-flow: nowrap;
+}
+
+.bp-better-messages-list.bm-opened .tabs{
+  border-bottom: 1px solid rgba( var(--bm-border-color), 0.62 );
 }
 
 .bp-better-messages-list .tabs > div{

@@ -1237,6 +1237,28 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             );
 
             $wp_customize->add_setting(
+                'bm-mini-widgets-bottom',
+                array(
+                    'section'    => 'better_messages_mini_widgets',
+                    'transport'  => 'postMessage',
+                    'default'    => 0
+                )
+            );
+
+            $wp_customize->add_control(
+                'bm-mini-widgets-bottom',
+                array(
+                    //'label'   => _x( 'Indent of Mini Widgets 2', 'WP Customizer', 'bp-better-messages' ),
+                    'section' => 'better_messages_mini_widgets',
+                    'description' => _x('Indent of mini widgets from the bottom of window',  'WP Customizer', 'bp-better-messages' ),
+                    'type' => 'number',
+                    'input_attrs' => array(
+                        'min' => 0
+                    )
+                )
+            );
+
+            $wp_customize->add_setting(
                 'bm-mini-chats-width',
                 array(
                     'section'    => 'better_messages_mini_widgets',
@@ -1309,7 +1331,7 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             echo '--bm-border-radius:' . $mod . 'px;';
 
             $mod = get_theme_mod('bm-widgets-border-radius', 0);
-            echo '--bm-mini-chats-border-radius:' . $mod . 'px ' . $mod . 'px 0 0;';
+            echo '--bm-mini-chats-border-radius:' . $mod . 'px;';
 
             $mod = get_theme_mod('bm-widgets-button-radius', 5);
             echo '--bm-widgets-button-radius:' . $mod . 'px;';
@@ -1328,6 +1350,9 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
 
             $mod = get_theme_mod('bm-mini-widgets-indent', 20 );
             echo '--bm-mini-widgets-offset:'. $mod . 'px;';
+
+            $mod = get_theme_mod('bm-mini-widgets-bottom', 0 );
+            echo '--bm-mini-widgets-offset-bottom:'. $mod . 'px;';
 
             $mod = get_theme_mod('bm-modern-radius', 2 );
             echo '--bm-message-border-radius:'. $mod . 'px;';
