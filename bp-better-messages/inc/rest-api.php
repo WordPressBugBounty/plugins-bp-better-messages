@@ -1922,7 +1922,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 if ( ! Better_Messages()->functions->can_send_message_filter( $has_access, $user_id, $thread_id ) ) {
                     global $bp_better_messages_restrict_send_message;
 
-                    if( count( $bp_better_messages_restrict_send_message ) > 0 ){
+                    if( is_array( $bp_better_messages_restrict_send_message ) && count( $bp_better_messages_restrict_send_message ) > 0 ){
                         $errors = array_merge($errors, array_values($bp_better_messages_restrict_send_message));
                     } else {
                         $errors[] = _x( 'Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages' );
