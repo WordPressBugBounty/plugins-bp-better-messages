@@ -379,6 +379,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
                     continue;
                 }
 
+                if( in_array( $user_id, $user_ids ) ) continue;
+
                 $user_ids[] = $user_id;
 
                 $array[] = [
