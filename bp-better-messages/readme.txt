@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.0
+Stable tag: 2.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -118,6 +118,7 @@ Our WebSockets servers are completely private and do not store or track any priv
 * **NEW** Group Audio Chats
 * **NEW** Screen Share feature
 * **NEW** Web Push feature
+* **NEW** iOS and Android Mobile Apps
 * Messages Delivery Status (sent, delivered, seen)
 * Typing indicator (indicates if another participant writing message at the moment)
 * Online indicator
@@ -168,8 +169,9 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 =
+= 2.9.0 - 2.9.1 =
 * Added Android Mobile App (WebSocket version only)
+* Fix for scrolling broken in some cases in FluentCommunity at mobile devices
 * Other minor bugfixes and improvements
 
 = 2.8.0 - 2.8.16 =

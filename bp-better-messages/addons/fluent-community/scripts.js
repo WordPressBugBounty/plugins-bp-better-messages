@@ -34,6 +34,8 @@ document.addEventListener("fluentCommunityUtilReady", function () {
                         return false;
                     }
 
+                    document.body.classList.remove('bp-messages-mobile');
+
                     var container = document.querySelector('.bp-messages-wrap-main');
                     if( container ){
                         if( container.reactRoot ) container.reactRoot.unmount()
