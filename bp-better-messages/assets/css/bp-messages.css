@@ -12664,8 +12664,8 @@ body.bp-messages-mobile {
   border: 1px solid rgba(var(--bm-border-color), 0.62);
 }
 .bp-messages-wrap .bulk-message ul {
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   list-style: none;
 }
 .bp-messages-wrap .bulk-message ul > li {
@@ -15478,7 +15478,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   overflow: hidden !important;
 }
 
-#buddypress .bp-messages-wrap div {
+#buddypress .bp-messages-wrap div:not(.bm-sticky-date) {
   border-radius: 0 !important;
 }
 

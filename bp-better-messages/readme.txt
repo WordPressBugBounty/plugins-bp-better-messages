@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.8.16
+Stable tag: 2.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -167,6 +167,10 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.9.0 =
+* Added Android Mobile App (WebSocket version only)
+* Other minor bugfixes and improvements
 
 = 2.8.0 - 2.8.16 =
 * Added ability to set Indent from bottom for mini widgets and mini chats

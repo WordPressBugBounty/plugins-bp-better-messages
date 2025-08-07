@@ -138,6 +138,13 @@ table.build-info-table button {
   padding-top: 5px;
   padding-bottom: 5px;
 }
+.bm-builds-create .bm-builds-create-info .bm-edit-icon {
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: middle;
+  font-size: 12px;
+  cursor: pointer;
+}
 
 .bm-builds-list {
   border-radius: 3px;

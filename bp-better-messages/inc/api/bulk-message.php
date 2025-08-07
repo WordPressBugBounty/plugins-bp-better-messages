@@ -98,8 +98,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             return $thread_id;
         }
 
+        private array $disabled_thread_reply = [];
+
         public function disabled_thread_reply( $allowed, $user_id, $thread_id ){
             global $wpdb;
+
+            if( isset( $this->disabled_thread_reply[$thread_id] ) ){
+                if( $this->disabled_thread_reply[$thread_id] ){
+                    global $bp_better_messages_restrict_send_message;
+                    $bp_better_messages_restrict_send_message['disable_bulk_replies'] = __('Admin disabled replies to this conversation', 'bp-better-messages');
+
+                    return false;
+                } else {
+                    return $allowed;
+                }
+            }
 
             $reports = $wpdb->get_col( $wpdb->prepare("
             SELECT `posts`.`ID`
@@ -113,10 +126,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             if( isset( $reports[0] ) ){
                 $disableReply = get_post_meta($reports[0], 'disableReply', true);
                 if($disableReply === '1') {
+                    $this->disabled_thread_reply[$thread_id] = true;
                     $allowed = false;
                     global $bp_better_messages_restrict_send_message;
                     $bp_better_messages_restrict_send_message['disable_bulk_replies'] = __('Admin disabled replies to this conversation', 'bp-better-messages');
                 }
+            }
+
+            if( ! isset( $this->disabled_thread_reply[$thread_id] ) ){
+                $this->disabled_thread_reply[$thread_id] = false;
             }
 
             return $allowed;
