@@ -22,15 +22,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             add_action( 'wp_ajax_better_messages_admin_save_settings', array( $this, 'save_settings' ) );
         }
 
-        public function user_is_admin(){
-            return current_user_can('manage_options');
+        public function user_can_admin(){
+            return current_user_can('bm_can_administrate');
         }
+
 
         public function rest_api_init(){
             register_rest_route('better-messages/v1/admin', '/getMessages', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'get_messages'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             /* register_rest_route('better-messages/v1/admin', '/getThreads', array(
@@ -42,37 +43,37 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             register_rest_route('better-messages/v1/admin', '/searchSenders', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'search_senders'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/searchUsers', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'search_users'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/getGuests', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'get_guests'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/deleteMessages', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'delete_messages'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/deleteAccount', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'deleteAccount'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/deleteAccountMessages', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'deleteAccountMessages'),
-                'permission_callback' => array($this, 'user_is_admin'),
+                'permission_callback' => array($this, 'user_can_admin'),
             ));
         }
 

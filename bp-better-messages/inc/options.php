@@ -343,20 +343,18 @@ class Better_Messages_Options
             );
         }*/
 
-        //if( ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0' ) {
-
         add_submenu_page(
             'bp-better-messages',
             $administration_title,
             $menu_title,
-            'manage_options',
+            'bm_can_administrate',
             'better-messages-viewer',
             array($this, 'viewer_page_html'),
             10
         );
         //}
 
-        /*add_submenu_page(
+        /* add_submenu_page(
             'bp-better-messages',
             _x('System', 'WP Admin', 'bp-better-messages'),
             _x('System', 'WP Admin', 'bp-better-messages'),

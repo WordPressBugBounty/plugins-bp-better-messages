@@ -178,7 +178,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function can_erase_thread( $user_id, $thread_id ){
             $can_erase = false;
 
-            if( user_can( $user_id, 'manage_options' ) ){
+            if( user_can( $user_id, 'bm_can_administrate' ) ){
                 $can_erase = true;
             }
 
@@ -188,7 +188,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function can_clear_thread( $user_id, $thread_id ){
             $can_erase = false;
 
-            if( user_can( $user_id, 'manage_options' ) ){
+            if( user_can( $user_id, 'bm_can_administrate' ) ){
                 $can_erase = true;
             }
 
@@ -401,7 +401,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function is_thread_super_moderator($user_id, $thread_id, $include_admin = true ){
-            if( $include_admin && user_can( $user_id, 'manage_options') ) {
+            if( $include_admin && user_can( $user_id, 'bm_can_administrate') ) {
                 return true;
             }
 

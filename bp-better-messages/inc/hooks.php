@@ -89,7 +89,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 isset(Better_Messages()->settings['restrictRoleBlock'])
                 && is_array(Better_Messages()->settings['restrictRoleBlock'])
                 && count(Better_Messages()->settings['restrictRoleBlock']) > 0
-                && ! current_user_can('manage_options')
             ) {
                 add_filter( 'better_messages_can_send_message',          array( $this, 'disable_replied_role_to_role_block' ), 10, 3 );
                 add_filter( 'better_messages_before_new_thread',         array( $this, 'disable_start_thread_role_to_role_block' ), 10, 2 );
@@ -97,7 +96,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
 
-            if(  Better_Messages()->settings['restrictRoleType'] === 'disallow' && ! current_user_can('manage_options') ){
+            if(  Better_Messages()->settings['restrictRoleType'] === 'disallow' ){
                 add_filter( 'better_messages_can_send_message',          array( $this, 'disable_replied_role_to_role_allow' ), 10, 3 );
                 add_filter( 'better_messages_before_new_thread',         array( $this, 'disable_start_thread_role_to_role_allow' ), 10, 2 );
                 add_filter( 'better_messages_search_user_sql_condition', array( $this, 'role_to_role_allow_search_user_sql_condition'), 10, 4 );
@@ -400,6 +399,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $rules[] = '#bp-better-messages-mini-mobile-open{bottom:' . $bottom . 'px!important}';
             }
 
+            $rules = apply_filters( 'better_messages_css_customizations', $rules );
+
             ob_start();
 
             if( count( $rules ) > 0 ) {
@@ -534,6 +535,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function role_to_role_allow_search_user_sql_condition( $sql_array, $user_ids, $search, $user_id )
         {
+            if( user_can($user_id, 'manage_options') ){
+                return $sql_array;
+            }
+
             global $wpdb;
 
             $restrict_to = Better_Messages()->functions->get_restrict_to_roles( $user_id );
@@ -558,6 +563,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function role_to_role_block_search_user_sql_condition( $sql_array, $user_ids, $search, $user_id ){
+            if( user_can($user_id, 'manage_options') ){
+                return $sql_array;
+            }
+
             global $wpdb;
 
             $restrict_to = Better_Messages()->functions->get_restrict_to_roles( $user_id );
@@ -580,6 +589,12 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_start_thread_role_to_role_allow(&$args, &$errors){
+            $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( user_can($user_id, 'manage_options') ){
+                return null;
+            }
+
             $recipients = $args['recipients'];
             if( ! is_array( $recipients ) ) return false;
             if( count($recipients) === 0 ) return false;
@@ -609,6 +624,12 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_start_thread_role_to_role_block(&$args, &$errors){
+            $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( user_can($user_id, 'manage_options') ){
+                return null;
+            }
+
             $recipients = $args['recipients'];
             if( ! is_array( $recipients ) ) return false;
             if( count($recipients) === 0 ) return false;
@@ -639,6 +660,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function disable_replied_role_to_role_block( $allowed, $user_id, $thread_id ){
             $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( user_can($user_id, 'manage_options') ){
+                return $allowed;
+            }
 
             $restrict_to = Better_Messages()->functions->get_restrict_to_roles( $user_id );
 
@@ -684,6 +709,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function disable_replied_role_to_role_allow( $allowed, $user_id, $thread_id ){
             $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( user_can($user_id, 'manage_options') ){
+                return $allowed;
+            }
 
             $restrict_to = Better_Messages()->functions->get_restrict_to_roles( $user_id );
 

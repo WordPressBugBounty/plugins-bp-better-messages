@@ -46,11 +46,10 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
                 'methods' => 'POST',
                 'callback' => array( $this, 'delete_report' ),
                 'permission_callback' => function () {
-                    return current_user_can( 'manage_options' );
+                    return current_user_can( 'bm_can_administrate' );
                 }
             ) );
 
-            //reports/deleteReport
         }
 
         public function delete_report( WP_REST_Request $request )

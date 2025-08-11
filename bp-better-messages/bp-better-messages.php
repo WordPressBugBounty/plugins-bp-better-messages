@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.9.1
+    Version: 2.9.4
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.9.1';
+        public $version = '2.9.4';
 
         public $db_version = '1.0.4';
 
@@ -94,6 +94,9 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
         /** @var Better_Messages_Cleaner $cleaner */
         public $cleaner;
 
+        /** @var Better_Messages_Capabilities $capabilities */
+        public $capabilities;
+
         /** @var Better_Messages_WebSocket $functions */
         public $websocket = false;
 
@@ -165,6 +168,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/user-config.php';
             require_once 'inc/shortcodes.php';
             require_once 'inc/rest-api.php';
+            require_once 'inc/capabilities.php';
             require_once 'inc/cleaner.php';
             require_once 'inc/moderation.php';
             require_once 'inc/guests.php';
@@ -199,6 +203,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             if ( $this->settings['searchAllUsers'] === '1' && !defined( 'BP_MESSAGES_AUTOCOMPLETE_ALL' ) ) {
                 define( 'BP_MESSAGES_AUTOCOMPLETE_ALL', true );
             }
+            $this->capabilities = Better_Messages_Capabilities();
             $this->urls = Better_Messages_Urls();
             $this->emoji = Better_Messages_Emojis();
             $this->mentions = Better_Messages_Mentions();
