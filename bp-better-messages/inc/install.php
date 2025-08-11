@@ -68,6 +68,8 @@ function better_messages_activation()
 {
     require_once trailingslashit( dirname(__FILE__) ) . 'api/db-migrate.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'users.php';
+    require_once trailingslashit( dirname(__FILE__) ) . 'capabilities.php';
+
     Better_Messages_Rest_Api_DB_Migrate()->install_tables();
     Better_Messages_Rest_Api_DB_Migrate()->migrations();
 
