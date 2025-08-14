@@ -15478,7 +15478,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   overflow: hidden !important;
 }
 
-#buddypress .bp-messages-wrap div:not(.bm-sticky-date) {
+#buddypress .bp-messages-wrap div:not(.bm-sticky-date, .bm-reactions-selector, .bm-message-content) {
   border-radius: 0 !important;
 }
 
