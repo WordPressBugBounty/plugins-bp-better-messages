@@ -1304,6 +1304,21 @@ $has_late_message = ob_get_clean();
                                         <p style="font-size: 10px;"><?php _ex( 'Users will be able to select messages to reply', 'Settings page', 'bp-better-messages' ); ?></p>
                                     </th>
                                 </tr>
+                                <tr valign="top">
+                                    <td style="padding:0"></td>
+                                    <th style="padding:0">
+                                        <table>
+                                            <tbody>
+                                            <tr>
+                                                <td style="padding:0">
+                                                    <input id="enable_self_replies" style="vertical-align: middle;" name="enableSelfReplies" type="checkbox" <?php checked( $this->settings[ 'enableSelfReplies' ], '1' ); ?> value="1" />
+                                                    <label for="enable_self_replies" style="padding-left:5px"><?php _ex( 'Allow replies to own messages', 'Settings page', 'bp-better-messages' ); ?></label>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </th>
+                                </tr>
                                 <tr valign="top" class="">
                                     <td>
                                         <input name="allowEditMessages" type="checkbox" <?php checked( $this->settings[ 'allowEditMessages' ], '1' ); ?> value="1" />

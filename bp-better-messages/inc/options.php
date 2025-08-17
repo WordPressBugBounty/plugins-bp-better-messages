@@ -113,6 +113,7 @@ class Better_Messages_Options
             'giphyContentRating'          => 'g',
             'giphyLanguage'               => 'en',
             'enableReplies'               => '1',
+            'enableSelfReplies'           => '0',
             'messagesMinHeight'           => 450,
             'messagesHeight'              => 650,
             'sideThreadsWidth'            => 320,
@@ -735,6 +736,10 @@ class Better_Messages_Options
 
         if ( !isset( $settings['enableReplies'] ) ) {
             $settings['enableReplies'] = '0';
+        }
+
+        if ( !isset( $settings['enableSelfReplies'] ) ) {
+            $settings['enableSelfReplies'] = '0';
         }
 
         if ( !isset( $settings['allowEditMessages'] ) ) {
