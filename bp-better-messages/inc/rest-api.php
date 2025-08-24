@@ -1105,7 +1105,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
-            $suggestions = Better_Messages_Search()->get_users_results( $search, $current_user_id, $exclude, $exclude_current_user );
+            $count = apply_filters('better_messages_search_users_limit', 50 );
+
+            $suggestions = Better_Messages_Search()->get_users_results( $search, $current_user_id, $exclude, $exclude_current_user, $count );
 
             $users = [];
 

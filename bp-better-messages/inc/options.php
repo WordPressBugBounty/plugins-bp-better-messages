@@ -243,6 +243,7 @@ class Better_Messages_Options
             'redirectUnlogged'              => '0',
             'wpJobManagerIntegration'       => '0',
             'pinnedMessages'                => '0',
+            'privateReplies'                => '0',
             'openAiApiKey'                  => '',
 
             'deleteOldMessages'             => 0,
@@ -968,6 +969,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['pinnedMessages'] ) ) {
             $settings['pinnedMessages'] = '0';
+        }
+
+        if( ! isset( $settings['privateReplies'] ) ) {
+            $settings['privateReplies'] = '0';
         }
 
         if( ! isset( $settings['restrictRoleType'] ) || $settings['restrictRoleType'] !== 'disallow' ) {

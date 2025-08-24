@@ -1342,6 +1342,16 @@ $has_late_message = ob_get_clean();
 
                                 <tr valign="top" class="">
                                     <td>
+                                        <input name="privateReplies" type="checkbox" <?php checked( $this->settings[ 'privateReplies' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Add "Private Message" button to message context menu', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Enables easy way to send message to specific user in group conversations by opening his message context menu', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
                                         <input name="allowDeleteMessages" type="checkbox" <?php checked( $this->settings[ 'allowDeleteMessages' ], '1' ); ?> value="1" />
                                     </td>
                                     <th>

@@ -113,6 +113,7 @@ _x('Loading', 'Frontend Scripts', 'bp-better-messages');
 _x('Text copied to clipboard', 'Message context menu', 'bp-better-messages');
 _x('Message hidden (User blocked)', 'Messages from blocked user', 'bp-better-messages');
 _x('Reply', 'Message context menu', 'bp-better-messages');
+_x('Private Message', 'Message context menu', 'bp-better-messages');
 _x('Edit', 'Message context menu', 'bp-better-messages');
 _x('Unpin Message', 'Message context menu', 'bp-better-messages');
 _x('Pin Message', 'Message context menu', 'bp-better-messages');

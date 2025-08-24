@@ -82,7 +82,7 @@ if ( !class_exists( 'Better_Messages_Search' ) ):
             return apply_filters( 'better_messages_search_results', $return, $search, $user_id );
         }
 
-        public function get_users_results( $search, $user_id, $excluded_ids = [], $exclude_current_user = true ){
+        public function get_users_results( $search, $user_id, $excluded_ids = [], $exclude_current_user = true, $limit = 10 ){
             $all_users = [];
 
             global $wpdb;
@@ -144,7 +144,7 @@ if ( !class_exists( 'Better_Messages_Search' ) ):
                     {$exclude}
                 " . implode(' ', $additional_sql_condition ) . "
                 ORDER BY `last_activity` DESC
-                LIMIT 0, 10
+                LIMIT 0, {$limit}
                 ", $search_sql, $search_sql, $search_sql, $search_sql, $search_sql, $exclude_current_user ? $user_id : 0 );
 
                 $users = $wpdb->get_col($sql);
