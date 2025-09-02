@@ -199,6 +199,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $api_key_exists = ! empty(Better_Messages()->settings['openAiApiKey']);
 
             if( $api_key_exists ){
+                $this->api->update_api_key();
                 $this->api->check_api_key();
             } else {
                 delete_option( 'better_messages_openai_error' );

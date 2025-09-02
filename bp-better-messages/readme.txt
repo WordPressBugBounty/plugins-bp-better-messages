@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.8
+Stable tag: 2.9.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,15 +169,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.8 =
+= 2.9.0 - 2.9.9 =
 * Added Android Mobile App (WebSocket version only)
-* Search results on New Conversation screen does not have height limit anymore and contains more results if available
+* Fixed issue with file upload in AI Chat Bots conversations in some cases
+* Search results on New Conversation screen does not have height limit anymore at desktop devices and contains more results if available
 * Added new option which allows to send private message to user from message context menu in group conversations
 * Added option to enable possibility to send replies to own messages
 * Added New capability `bm_can_administrate`. This capability can be assigned to any user or role (via the User Role Editor plugin or similar) to grant moderator privileges. Users with this capability can view all conversations and messages on the site, as well as delete messages and entire conversations.
 * Fix for scrolling broken in some cases in FluentCommunity at mobile devices
 * Added Mobile App Splash Screen Background Color setting
 * Added Mobile App Login logo height setting
+* Fixed missed translations for Mobile App
 * Minor fixes for functionality related to pasting links and screen snapshots from clipboard
 * Other minor bugfixes and improvements
 

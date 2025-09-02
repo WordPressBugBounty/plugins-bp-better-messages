@@ -604,7 +604,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $user_id   = intval( $request->get_param('user_id') );
             $create    = boolval( $request->get_param('create') );
             $subject   = trim( sanitize_text_field( urldecode( $request->get_param('subject') ) ) );
-            $uniqueKey = trim( sanitize_text_field( urldecode( $request->get_param('uniqueKey') ) ) );
+
+            $uniqueKeyParam = $request->get_param('uniqueKey');
+            $uniqueKey = $uniqueKeyParam !== null ? trim( sanitize_text_field( urldecode( $request->get_param('uniqueKey') ) ) ) : '';
 
             if( empty( $uniqueKey ) ){
                 $result = Better_Messages()->functions->get_pm_thread_id( $user_id, Better_Messages()->functions->get_current_user_id(), $create, $subject );

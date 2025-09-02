@@ -1,4 +1,6 @@
 <?php
+
+use BetterMessages\GuzzleHttp\Exception\GuzzleException;
 use BetterMessages\React\EventLoop\Loop;
 use BetterMessages\React\Http\Browser;
 use BetterMessages\React\Stream\ThroughStream;
@@ -28,6 +30,11 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             $this->api_key = Better_Messages()->settings['openAiApiKey'];
         }
 
+        public function update_api_key()
+        {
+            $this->api_key = Better_Messages()->settings['openAiApiKey'];
+        }
+
         public function get_api_key()
         {
             return $this->api_key;
@@ -52,29 +59,44 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
         public function check_api_key()
         {
-            $api = $this->get_api();
+            $client = $this->get_client();
 
             try {
-                $api->models()->list();
+                $client->request('GET', 'models');
                 delete_option('better_messages_openai_error');
-                return true;
-            } catch (Exception $e) {
-                update_option( 'better_messages_openai_error', $e->getMessage(), false );
-                return $e->getMessage();
+            } catch ( GuzzleException $e ) {
+                $fullError = $e->getMessage();
+
+                if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
+                    $fullError = $e->getResponse()->getBody()->getContents();
+
+                    try{
+                        $data = json_decode($fullError, true);
+                        if( isset($data['error']['message']) ){
+                            $fullError = $data['error']['message'];
+                        }
+                    } catch ( Exception $exception ){}
+                }
+
+                update_option( 'better_messages_openai_error', $fullError, false );
             }
         }
 
         public function get_models()
         {
-            $api = $this->get_api();
+            $client = $this->get_client();
 
             try{
-                $response = $api->models()->list();
+                $response = $client->request('GET', 'models');
+
+                $body = $response->getBody();
+                $data = json_decode($body, true);
 
                 $models = [];
 
-                foreach ($response->data as $result) {
-                    $model_id = $result->id;
+                foreach ($data['data'] as $result) {
+                    $model_id = $result['id'];
+
                     if( str_contains($model_id, 'gpt') && ! str_contains($model_id, '-realtime-') ) {
                         $models[] = $model_id;
                     }
@@ -83,7 +105,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 sort($models);
 
                 return $models;
-            } catch (Exception $e) {
+            } catch (GuzzleException $e) {
                 return new WP_Error( 'openai_error', $e->getMessage() );
             }
         }
@@ -287,7 +309,18 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 }
 
             } catch (\BetterMessages\GuzzleHttp\Exception\GuzzleException $e) {
-                $error = 'Request failed: ' . $e->getMessage() . ' - Response: ' . $e->getResponse()->getBody()->getContents();
+                $error = $e->getMessage();
+
+                if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
+                    $error = $e->getResponse()->getBody()->getContents();
+
+                    try{
+                        $data = json_decode($error, true);
+                        if( isset($data['error']['message']) ){
+                            $error = $data['error']['message'];
+                        }
+                    } catch ( Exception $exception ){}
+                }
 
                 $args =  [
                     'sender_id'    => $ai_message->sender_id,
@@ -307,10 +340,16 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        function chatProvider( $bot_id, $bot_user, $message ) {
+
+       function responseProvider( $bot_id, $bot_user, $message )
+       {
             global $wpdb;
 
-            $client = $this->get_api();
+
+       }
+
+        function chatProvider( $bot_id, $bot_user, $message ) {
+            global $wpdb;
 
             $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
 
@@ -368,29 +407,104 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 ];
             }
 
-            try{
-                $params = [
-                    'model' => $bot_settings['model'],
-                    'messages' => $request_messages,
-                    'user' => $message->sender_id
-                ];
+            $params = [
+                'model' => $bot_settings['model'],
+                'messages' => $request_messages,
+                'user' => $message->sender_id,
+                'stream' => true
+            ];
 
-                $stream = $client->chat()->createStreamed( $params );
+            $client = $this->get_client();
 
-                foreach($stream as $response){
-                    $text = $response->choices[0]->delta->content;
-                    yield $text;
+            try {
+                $response = $client->post('chat/completions', [
+                    'json' => $params,
+                    'stream' => true
+                ]);
+
+                $body = $response->getBody();
+                $buffer = '';
+
+                $request_id = '';
+                $model = '';
+                $service_tier = '';
+                $system_fingerprint = '';
+
+                while (!$body->eof()) {
+                    $chunk = $body->read(1024);
+                    if ($chunk === '') {
+                        continue;
+                    }
+
+                    $buffer .= $chunk;
+
+                    // Process full lines
+                    while (($pos = strpos($buffer, "\n")) !== false) {
+                        $line = trim(substr($buffer, 0, $pos));
+                        $buffer = substr($buffer, $pos + 1);
+
+                        if ($line === '') {
+                            continue;
+                        }
+
+                        if (strpos($line, 'data: ') === 0) {
+                            $json = substr($line, 6);
+
+                            if ($json === '[DONE]') {
+                                yield ['finish', [
+                                    'request_id' => $request_id,
+                                    'model' => $model,
+                                    'service_tier' => $service_tier,
+                                    'system_fingerprint' => $system_fingerprint
+                                ]];
+
+                                return; // end of stream
+                            }
+
+                            $data = json_decode($json, true);
+
+                            if( isset($data['id']) ) {
+                                $request_id = $data['id'];
+                            }
+
+                            if( isset( $data['model'] ) ){
+                                $model = $data['model'];
+                            }
+
+                            if( isset( $data['service_tier'] ) ){
+                                $service_tier = $data['service_tier'];
+                            }
+
+                            if( isset( $data['system_fingerprint'] ) ){
+                                $system_fingerprint = $data['system_fingerprint'];
+                            }
+
+                            if (isset($data['choices'][0]['delta']['content'])) {
+                                yield $data['choices'][0]['delta']['content'];
+                            }
+                        }
+                    }
+                }
+            } catch (GuzzleException $e) {
+                $fullError = $e->getMessage();
+
+                if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
+                    $fullError = $e->getResponse()->getBody()->getContents();
+
+                    try{
+                        $data = json_decode($fullError, true);
+                        if( isset($data['error']['message']) ){
+                            $fullError = $data['error']['message'];
+                        }
+                    } catch ( Exception $exception ){}
                 }
 
-                yield ['meta', json_encode($stream->meta())];
-            } catch (Exception $e) {
-                yield ['error', $e->getMessage()];
+                yield ['error', $fullError];
             }
         }
 
         function process_reply( $bot_id, $message_id )
         {
-
             if( wp_get_scheduled_event( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message_id ] ) ){
                 wp_clear_scheduled_hook( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message_id ] );
             }
@@ -453,6 +567,8 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 return;
             }
 
+
+
             $loop = Loop::get();
 
             $browser = new Browser($loop);
@@ -494,8 +610,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                         return;
                     }
 
-
-                    if( is_array($part) && $part[0] === 'meta' ){
+                    if( is_array($part) && $part[0] === 'finish' ){
                         $stream->end();
                         $loop->cancelTimer($timer);
                         $loop->stop();
@@ -509,7 +624,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                         Better_Messages()->functions->update_message( $args );
 
-                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'openai_meta', $part[1] );
+                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'openai_meta', json_encode($part[1]) );
                         Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_finish', time() );
                         Better_Messages()->functions->delete_message_meta( $message_id, 'ai_waiting_for_response' );
                         Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
@@ -548,7 +663,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
         public function reply_to_message( WP_REST_Request $request )
         {
             ignore_user_abort(true);
-            set_time_limit(60);
+            set_time_limit(120);
 
             $bot_id     = (int) $request->get_param( 'bot_id' );
             $message_id = (int) $request->get_param( 'message_id' );
