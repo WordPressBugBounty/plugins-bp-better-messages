@@ -527,7 +527,7 @@ $has_late_message = ob_get_clean();
             let jsonObject = {};
 
             for (const [key, value] of formData.entries()) {
-                if( key.endsWith("[]") ){
+                if( key.slice(-2) === "[]" ){
                     let lastKey = key.replace(/\[\]$/, "");
 
                     if( ! jsonObject[lastKey] ){
@@ -542,7 +542,6 @@ $has_late_message = ob_get_clean();
 
                 let lastKey = keys.pop();
                 let obj = jsonObject;
-
 
                 keys.forEach(k => {
                     if ( ! obj[k] ) {

@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.9
+Stable tag: 2.9.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,7 +169,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.9 =
+= 2.9.0 - 2.9.10 =
 * Added Android Mobile App (WebSocket version only)
 * Fixed issue with file upload in AI Chat Bots conversations in some cases
 * Search results on New Conversation screen does not have height limit anymore at desktop devices and contains more results if available
@@ -181,6 +181,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Added Mobile App Login logo height setting
 * Fixed missed translations for Mobile App
 * Minor fixes for functionality related to pasting links and screen snapshots from clipboard
+* Removed request aborted error displaying in some cases
+* Fixed admin settings does not save correctly in some cases because of conflict with other plugins
 * Other minor bugfixes and improvements
 
 = 2.8.0 - 2.8.16 =

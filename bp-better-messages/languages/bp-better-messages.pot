@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.9.9\n"
+"Project-Id-Version: Better Messages 2.9.10\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-02T12:17:38+00:00\n"
+"POT-Creation-Date: 2025-09-06T16:11:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -114,7 +114,7 @@ msgid "<a href=\"%s\" target=\"_blank\">Voice Messages</a> add-on is required to
 msgstr ""
 
 #: addons/ai/ai.php:301
-#: views/layout-settings.php:4432
+#: views/layout-settings.php:4431
 #, php-format
 msgctxt "Settings page"
 msgid "Website must to have PHP version %s or higher, currently PHP version %s is used."
@@ -2194,1355 +2194,2387 @@ msgctxt "Settings page"
 msgid "AI Chat Bots"
 msgstr ""
 
-#: views/layout-settings.php:605
+#: views/layout-settings.php:604
 msgctxt "Settings page"
 msgid "Better Messages"
 msgstr ""
 
-#: views/layout-settings.php:607
+#: views/layout-settings.php:606
 msgctxt "Settings page"
 msgid "General"
 msgstr ""
 
-#: views/layout-settings.php:608
+#: views/layout-settings.php:607
 msgctxt "Settings page"
 msgid "Messaging"
 msgstr ""
 
-#: views/layout-settings.php:609
+#: views/layout-settings.php:608
 msgctxt "Settings page"
 msgid "Integrations"
 msgstr ""
 
-#: views/layout-settings.php:610
+#: views/layout-settings.php:609
 msgctxt "Settings page"
 msgid "Mini Widgets"
 msgstr ""
 
-#: views/layout-settings.php:611
+#: views/layout-settings.php:610
 msgctxt "Settings page"
 msgid "Mobile"
 msgstr ""
 
-#: views/layout-settings.php:612
+#: views/layout-settings.php:611
 msgctxt "Settings page"
 msgid "Attachments"
 msgstr ""
 
-#: views/layout-settings.php:613
+#: views/layout-settings.php:612
 msgctxt "Settings page"
 msgid "Notifications"
 msgstr ""
 
-#: views/layout-settings.php:614
+#: views/layout-settings.php:613
 msgctxt "Settings page"
 msgid "Restrictions"
 msgstr ""
 
-#: views/layout-settings.php:615
+#: views/layout-settings.php:614
 msgctxt "Settings page"
 msgid "Calls"
 msgstr ""
 
-#: views/layout-settings.php:616
+#: views/layout-settings.php:615
 msgctxt "Settings page"
 msgid "Group Calls"
 msgstr ""
 
-#: views/layout-settings.php:617
-#: views/layout-settings.php:851
-#: views/layout-settings.php:1674
-#: views/layout-settings.php:2916
+#: views/layout-settings.php:616
+#: views/layout-settings.php:850
+#: views/layout-settings.php:1673
+#: views/layout-settings.php:2915
 msgctxt "Settings page"
 msgid "Customization"
 msgstr ""
 
-#: views/layout-settings.php:619
+#: views/layout-settings.php:618
 msgctxt "Settings page"
 msgid "Shortcodes"
 msgstr ""
 
-#: views/layout-settings.php:620
+#: views/layout-settings.php:619
 msgctxt "Settings page"
 msgid "Tools"
 msgstr ""
 
-#: views/layout-settings.php:631
+#: views/layout-settings.php:630
 msgctxt "Settings page"
 msgid "Better Messages Location"
 msgstr ""
 
-#: views/layout-settings.php:632
+#: views/layout-settings.php:631
 msgctxt "Settings page"
 msgid "Choose the page where Better Messages will be located"
 msgstr ""
 
-#: views/layout-settings.php:650
+#: views/layout-settings.php:649
 msgctxt "Settings page"
 msgid "Select page"
 msgstr ""
 
-#: views/layout-settings.php:653
+#: views/layout-settings.php:652
 msgctxt "Settings page"
 msgid "Show in BuddyPress profile"
 msgstr ""
 
-#: views/layout-settings.php:655
+#: views/layout-settings.php:654
 msgctxt "Settings page"
 msgid "Show in Ultimate Member profile"
 msgstr ""
 
-#: views/layout-settings.php:708
+#: views/layout-settings.php:707
 #, php-format
 msgctxt "Settings page"
 msgid "You can use <code>%s</code> shortcode to place chat in specific place of your selected page, if you not used this shortcode all page content will be replaced."
 msgstr ""
 
-#: views/layout-settings.php:709
+#: views/layout-settings.php:708
 #, php-format
 msgctxt "Settings page"
 msgid "If first shortcode does not work (this can happen when using some page builders) - use <code>%s</code> shortcode instead."
 msgstr ""
 
-#: views/layout-settings.php:715
+#: views/layout-settings.php:714
 msgctxt "Settings page"
 msgid "Redirect unlogged-in users to Login Page"
 msgstr ""
 
-#: views/layout-settings.php:716
+#: views/layout-settings.php:715
 msgctxt "Settings page"
 msgid "Redirect unlogged-in users to Login page when they are visiting Better Messages Location page"
 msgstr ""
 
-#: views/layout-settings.php:727
-#: views/layout-settings.php:733
+#: views/layout-settings.php:726
+#: views/layout-settings.php:732
 msgctxt "Settings page"
 msgid "Refresh mechanism"
 msgstr ""
 
-#: views/layout-settings.php:734
+#: views/layout-settings.php:733
 msgctxt "Settings page"
 msgid "AJAX"
 msgstr ""
 
-#: views/layout-settings.php:738
+#: views/layout-settings.php:737
 msgctxt "Settings page"
 msgid "WebSocket"
 msgstr ""
 
-#: views/layout-settings.php:749
-#: views/layout-settings.php:755
-#: views/layout-settings.php:770
+#: views/layout-settings.php:748
+#: views/layout-settings.php:754
+#: views/layout-settings.php:769
 msgctxt "Settings page"
 msgid "Conversation Refresh Interval"
 msgstr ""
 
-#: views/layout-settings.php:750
+#: views/layout-settings.php:749
 msgctxt "Settings page"
 msgid "AJAX refresh interval on open conversation"
 msgstr ""
 
-#: views/layout-settings.php:764
+#: views/layout-settings.php:763
 msgctxt "Settings page"
 msgid "Site Refresh Interval"
 msgstr ""
 
-#: views/layout-settings.php:765
+#: views/layout-settings.php:764
 msgctxt "Settings page"
 msgid "AJAX refresh interval on other sites pages"
 msgstr ""
 
-#: views/layout-settings.php:778
+#: views/layout-settings.php:777
 msgctxt "Settings page"
 msgid "Enable Encryption"
 msgstr ""
 
-#: views/layout-settings.php:779
+#: views/layout-settings.php:778
 msgctxt "Settings page"
 msgid "Encrypts all sensitive content before transfer to websocket server and decrypt on client site with special secret keys not known by our side."
 msgstr ""
 
-#: views/layout-settings.php:790
+#: views/layout-settings.php:789
 msgctxt "Settings page"
 msgid "Enable Browser Database Encryption"
 msgstr ""
 
-#: views/layout-settings.php:791
+#: views/layout-settings.php:790
 msgctxt "Settings page"
 msgid "Encrypts all sensitive content in local browser database to enhance the security"
 msgstr ""
 
-#: views/layout-settings.php:803
+#: views/layout-settings.php:802
 msgctxt "Settings page"
 msgid "Messages styling"
 msgstr ""
 
-#: views/layout-settings.php:809
+#: views/layout-settings.php:808
 msgctxt "Settings page"
 msgid "Standard"
 msgstr ""
 
-#: views/layout-settings.php:813
+#: views/layout-settings.php:812
 msgctxt "Settings page"
 msgid "Modern"
 msgstr ""
 
-#: views/layout-settings.php:822
+#: views/layout-settings.php:821
 msgctxt "Settings page"
 msgid "Modern messages layout"
 msgstr ""
 
-#: views/layout-settings.php:828
+#: views/layout-settings.php:827
 msgctxt "Settings page"
 msgid "My messages at left side"
 msgstr ""
 
-#: views/layout-settings.php:832
+#: views/layout-settings.php:831
 msgctxt "Settings page"
 msgid "My messages at right side"
 msgstr ""
 
-#: views/layout-settings.php:836
+#: views/layout-settings.php:835
 msgctxt "Settings page"
 msgid "All messages at left side"
 msgstr ""
 
-#: views/layout-settings.php:845
+#: views/layout-settings.php:844
 msgctxt "Settings page"
 msgid "More customization options"
 msgstr ""
 
-#: views/layout-settings.php:857
+#: views/layout-settings.php:856
 msgctxt "Settings page"
 msgid "User Statuses"
 msgstr ""
 
-#: views/layout-settings.php:858
+#: views/layout-settings.php:857
 msgctxt "Settings page"
 msgid "Allow users to set their status: Online, Away or Do not disturb"
 msgstr ""
 
-#: views/layout-settings.php:872
-#: views/layout-settings.php:3269
-#: views/layout-settings.php:3351
-#: views/layout-settings.php:3973
-#: views/layout-settings.php:4058
-#: views/layout-settings.php:4287
-#: views/layout-settings.php:4348
+#: views/layout-settings.php:871
+#: views/layout-settings.php:3268
+#: views/layout-settings.php:3350
+#: views/layout-settings.php:3972
+#: views/layout-settings.php:4057
+#: views/layout-settings.php:4286
+#: views/layout-settings.php:4347
 msgctxt "Settings page"
 msgid "Combined View"
 msgstr ""
 
-#: views/layout-settings.php:873
+#: views/layout-settings.php:872
 msgctxt "Settings page"
 msgid "Always show conversation list on left side of conversation"
 msgstr ""
 
-#: views/layout-settings.php:882
+#: views/layout-settings.php:881
 msgctxt "Settings page"
 msgid "Full Screen Mode"
 msgstr ""
 
-#: views/layout-settings.php:883
+#: views/layout-settings.php:882
 msgctxt "Settings page"
 msgid "Show full screen button for desktop browsers"
 msgstr ""
 
-#: views/layout-settings.php:892
+#: views/layout-settings.php:891
 msgctxt "Settings page"
 msgid "Guest Chat"
 msgstr ""
 
-#: views/layout-settings.php:893
+#: views/layout-settings.php:892
 msgctxt "Settings page"
 msgid "Enable Guest Chat functionality for not logged in users which allow to use private messaging system as logged in users"
 msgstr ""
 
-#: views/layout-settings.php:899
+#: views/layout-settings.php:898
 msgctxt "Settings page"
 msgid "Please select WordPress page as Better Messages Location for Guest Chat to work properly"
 msgstr ""
 
-#: views/layout-settings.php:906
+#: views/layout-settings.php:905
 msgctxt "Settings page"
 msgid "Show My Profile Button"
 msgstr ""
 
-#: views/layout-settings.php:907
+#: views/layout-settings.php:906
 msgctxt "Settings page"
 msgid "Show my profile button in the messages interface"
 msgstr ""
 
-#: views/layout-settings.php:917
+#: views/layout-settings.php:916
 msgctxt "Settings page"
 msgid "Enable Messages Viewer"
 msgstr ""
 
-#: views/layout-settings.php:918
+#: views/layout-settings.php:917
 msgctxt "Settings page"
 msgid "Enable messages viewer in administration page in WordPress admin"
 msgstr ""
 
-#: views/layout-settings.php:927
+#: views/layout-settings.php:926
 msgctxt "Settings page"
 msgid "Message Reports"
 msgstr ""
 
-#: views/layout-settings.php:928
+#: views/layout-settings.php:927
 msgctxt "Settings page"
 msgid "Allow users to report messages, which will appear at Messages Viewer"
 msgstr ""
 
-#: views/layout-settings.php:943
+#: views/layout-settings.php:942
 msgctxt "Settings page"
 msgid "Translate Better Messages"
 msgstr ""
 
-#: views/layout-settings.php:966
+#: views/layout-settings.php:965
 msgctxt "Settings page"
 msgid "This website using WebSocket plugin version, but has no active license attached."
 msgstr ""
 
-#: views/layout-settings.php:967
+#: views/layout-settings.php:966
 #, php-format
 msgctxt "Settings page"
 msgid "If you have license, and it must be attached to this website, try to press sync button in <a href=\"%s\">your account</a>."
 msgstr ""
 
-#: views/layout-settings.php:972
+#: views/layout-settings.php:971
 #, php-format
 msgctxt "Settings page"
 msgid "Seems like this website has active WebSocket License, but you are still using free version of plugin. If you already have WebSocket version installed, then delete free version completely. Try to download and install plugin from <a href=\"%s\">your account</a> page."
 msgstr ""
 
-#: views/layout-settings.php:995
+#: views/layout-settings.php:994
 #, php-format
 msgctxt "Settings page"
 msgid "This website has domain name <b>%s</b>"
 msgstr ""
 
-#: views/layout-settings.php:996
+#: views/layout-settings.php:995
 msgctxt "Settings page"
 msgid "Double-checking if WebSocket server know about this domain and sync is fine"
 msgstr ""
 
-#: views/layout-settings.php:1017
+#: views/layout-settings.php:1016
 msgctxt "Settings page"
 msgid "All good, WebSocket server know about this domain, all should be working good."
 msgstr ""
 
-#: views/layout-settings.php:1021
+#: views/layout-settings.php:1020
 msgctxt "Settings page"
 msgid "WebSocket server does not know about this domain, realtime functionality will not work. Please ensure that license is attached properly to this website."
 msgstr ""
 
-#: views/layout-settings.php:1119
+#: views/layout-settings.php:1118
 msgctxt "Settings page"
 msgid "Starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:1120
+#: views/layout-settings.php:1119
 msgctxt "Settings page"
 msgid "Settings related to starting new conversations by website members"
 msgstr ""
 
-#: views/layout-settings.php:1131
+#: views/layout-settings.php:1130
 msgctxt "Settings page"
 msgid "Fast Start"
 msgstr ""
 
-#: views/layout-settings.php:1132
+#: views/layout-settings.php:1131
 msgctxt "Settings page"
 msgid "When clicking the Private Message button user will be immediately redirected to new conversation instead of new conversation screen"
 msgstr ""
 
-#: views/layout-settings.php:1140
+#: views/layout-settings.php:1139
 msgctxt "Settings page"
 msgid "Prevent creating multiple conversations with same member"
 msgstr ""
 
-#: views/layout-settings.php:1141
+#: views/layout-settings.php:1140
 msgctxt "Settings page"
 msgid "This will not allow members to create new private conversation if member already have conversation with recipient"
 msgstr ""
 
-#: views/layout-settings.php:1149
+#: views/layout-settings.php:1148
 msgctxt "Settings page"
 msgid "Force creating new conversation even if its already exists with member"
 msgstr ""
 
-#: views/layout-settings.php:1150
+#: views/layout-settings.php:1149
 msgctxt "Settings page"
 msgid "This will not allow members to continue the existing conversation from New Conversation screen"
 msgstr ""
 
-#: views/layout-settings.php:1159
+#: views/layout-settings.php:1158
 msgctxt "Settings page"
 msgid "Disable Conversations with multiple participants"
 msgstr ""
 
-#: views/layout-settings.php:1160
+#: views/layout-settings.php:1159
 msgctxt "Settings page"
 msgid "Don`t allow to create conversations with multiple participants"
 msgstr ""
 
-#: views/layout-settings.php:1169
+#: views/layout-settings.php:1168
 msgctxt "Settings page"
 msgid "Disable subject"
 msgstr ""
 
-#: views/layout-settings.php:1170
+#: views/layout-settings.php:1169
 msgctxt "Settings page"
 msgid "Disable subject when starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:1181
+#: views/layout-settings.php:1180
 msgctxt "Settings page"
 msgid "Searching users"
 msgstr ""
 
-#: views/layout-settings.php:1182
+#: views/layout-settings.php:1181
 msgctxt "Settings page"
 msgid "Settings related to searching users while starting the conversation"
 msgstr ""
 
-#: views/layout-settings.php:1194
+#: views/layout-settings.php:1193
 msgctxt "Settings page"
 msgid "Disable users search"
 msgstr ""
 
-#: views/layout-settings.php:1195
+#: views/layout-settings.php:1194
 msgctxt "Settings page"
 msgid "Disables suggestions when starting new conversation. (Admins can search all users even if this option is disabled)."
 msgstr ""
 
-#: views/layout-settings.php:1204
+#: views/layout-settings.php:1203
 msgctxt "Settings page"
 msgid "Users suggestions"
 msgstr ""
 
-#: views/layout-settings.php:1205
+#: views/layout-settings.php:1204
 msgctxt "Settings page"
 msgid "Enable users suggestions on new conversations screen for the fast selection of users"
 msgstr ""
 
-#: views/layout-settings.php:1206
+#: views/layout-settings.php:1205
 msgctxt "Settings page"
 msgid "Friends are listed first, after that listed lastly active users"
 msgstr ""
 
-#: views/layout-settings.php:1216
+#: views/layout-settings.php:1215
 msgctxt "Settings page"
 msgid "Search all users"
 msgstr ""
 
-#: views/layout-settings.php:1217
+#: views/layout-settings.php:1216
 msgctxt "Settings page"
 msgid "Enable search among all users when starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:1218
+#: views/layout-settings.php:1217
 msgctxt "Settings page"
 msgid "Otherwise search works only within friends. (Admins can search all users even if this option is disabled)."
 msgstr ""
 
-#: views/layout-settings.php:1230
+#: views/layout-settings.php:1229
 msgctxt "Settings page"
 msgid "Suggested conversations"
 msgstr ""
 
-#: views/layout-settings.php:1238
+#: views/layout-settings.php:1237
 msgctxt "Settings page"
 msgid "If a user or guest has no conversations yet, display a list of specified users instead of an empty conversation list."
 msgstr ""
 
-#: views/layout-settings.php:1269
+#: views/layout-settings.php:1268
 msgctxt "Settings page"
 msgid "Conversations functions"
 msgstr ""
 
-#: views/layout-settings.php:1281
+#: views/layout-settings.php:1280
 msgctxt "Settings page"
 msgid "Enable Pinned Conversations"
 msgstr ""
 
-#: views/layout-settings.php:1282
+#: views/layout-settings.php:1281
 msgctxt "Settings page"
 msgid "Users will be able to pin specific conversations to the top of conversations list"
 msgstr ""
 
-#: views/layout-settings.php:1291
+#: views/layout-settings.php:1290
 msgctxt "Settings page"
 msgid "Messages functions"
 msgstr ""
 
-#: views/layout-settings.php:1303
+#: views/layout-settings.php:1302
 msgctxt "Settings page"
 msgid "Enable Replies"
 msgstr ""
 
-#: views/layout-settings.php:1304
+#: views/layout-settings.php:1303
 msgctxt "Settings page"
 msgid "Users will be able to select messages to reply"
 msgstr ""
 
-#: views/layout-settings.php:1315
+#: views/layout-settings.php:1314
 msgctxt "Settings page"
 msgid "Allow replies to own messages"
 msgstr ""
 
-#: views/layout-settings.php:1328
+#: views/layout-settings.php:1327
 msgctxt "Settings page"
 msgid "Allow users to edit messages"
 msgstr ""
 
-#: views/layout-settings.php:1329
+#: views/layout-settings.php:1328
 msgctxt "Settings page"
 msgid "Allow users to edit their messages only"
 msgstr ""
 
-#: views/layout-settings.php:1338
+#: views/layout-settings.php:1337
 msgctxt "Settings page"
 msgid "Allow users to pin messages"
 msgstr ""
 
-#: views/layout-settings.php:1339
+#: views/layout-settings.php:1338
 msgctxt "Settings page"
 msgid "Allow conversation moderators to pin messages to the top of messages list"
 msgstr ""
 
-#: views/layout-settings.php:1348
+#: views/layout-settings.php:1347
 msgctxt "Settings page"
 msgid "Add \"Private Message\" button to message context menu"
 msgstr ""
 
-#: views/layout-settings.php:1349
+#: views/layout-settings.php:1348
 msgctxt "Settings page"
 msgid "Enables easy way to send message to specific user in group conversations by opening his message context menu"
 msgstr ""
 
-#: views/layout-settings.php:1358
+#: views/layout-settings.php:1357
 msgctxt "Settings page"
 msgid "Allow users to delete messages"
 msgstr ""
 
-#: views/layout-settings.php:1359
+#: views/layout-settings.php:1358
 msgctxt "Settings page"
 msgid "Allow users to delete their messages only"
 msgstr ""
 
-#: views/layout-settings.php:1371
+#: views/layout-settings.php:1370
 msgctxt "Settings page"
 msgid "Delete message completely"
 msgstr ""
 
-#: views/layout-settings.php:1372
+#: views/layout-settings.php:1371
 msgctxt "Settings page"
 msgid "Delete message completely so it will dissapear from messages list"
 msgstr ""
 
-#: views/layout-settings.php:1380
+#: views/layout-settings.php:1379
 msgctxt "Settings page"
 msgid "Replace message content"
 msgstr ""
 
-#: views/layout-settings.php:1381
+#: views/layout-settings.php:1380
 msgctxt "Settings page"
 msgid "Replace message content with \"This message was deleted\" label"
 msgstr ""
 
-#: views/layout-settings.php:1394
+#: views/layout-settings.php:1393
 msgctxt "Settings page"
 msgid "Enable oEmbed for popular services"
 msgstr ""
 
-#: views/layout-settings.php:1395
+#: views/layout-settings.php:1394
 msgctxt "Settings page"
 msgid "oEmbed YouTube, Vimeo, VideoPress, Flickr, DailyMotion, Kickstarter, Meetup.com, Mixcloud, SoundCloud and more"
 msgstr ""
 
-#: views/layout-settings.php:1403
+#: views/layout-settings.php:1402
 msgctxt "Settings page"
 msgid "Enable link previews"
 msgstr ""
 
-#: views/layout-settings.php:1404
+#: views/layout-settings.php:1403
 msgctxt "Settings page"
 msgid "Nice links finds link in user messages, fetching title and description if available and shows it at the bottom of message"
 msgstr ""
 
-#: views/layout-settings.php:1415
+#: views/layout-settings.php:1414
 msgctxt "Settings page"
 msgid "Messages reactions"
 msgstr ""
 
-#: views/layout-settings.php:1428
+#: views/layout-settings.php:1427
 msgctxt "Settings page"
 msgid "Enable Reactions"
 msgstr ""
 
-#: views/layout-settings.php:1429
+#: views/layout-settings.php:1428
 msgctxt "Settings page"
 msgid "Users will be able to react messages with emojis"
 msgstr ""
 
-#: views/layout-settings.php:1430
+#: views/layout-settings.php:1429
 msgctxt "Settings page"
 msgid "You can select reactions in Integrations -> Emojis Tab"
 msgstr ""
 
-#: views/layout-settings.php:1438
+#: views/layout-settings.php:1437
 msgctxt "Settings page"
 msgid "Detailed Reactions"
 msgstr ""
 
-#: views/layout-settings.php:1439
+#: views/layout-settings.php:1438
 msgctxt "Settings page"
 msgid "Users will be able to see who reacted to the message"
 msgstr ""
 
-#: views/layout-settings.php:1449
+#: views/layout-settings.php:1448
 msgctxt "Settings page"
 msgid "Messages status"
 msgstr ""
 
-#: views/layout-settings.php:1461
+#: views/layout-settings.php:1460
 msgctxt "Settings page"
 msgid "Messages Status"
 msgstr ""
 
-#: views/layout-settings.php:1462
+#: views/layout-settings.php:1461
 msgctxt "Settings page"
 msgid "Enable messages status functionality, which show if your message was sent, delivered or seen"
 msgstr ""
 
-#: views/layout-settings.php:1471
+#: views/layout-settings.php:1470
 msgctxt "Settings page"
 msgid "Messages Status in Conversation list"
 msgstr ""
 
-#: views/layout-settings.php:1472
+#: views/layout-settings.php:1471
 msgctxt "Settings page"
 msgid "Show messages statuses in conversation list"
 msgstr ""
 
-#: views/layout-settings.php:1481
+#: views/layout-settings.php:1480
 msgctxt "Settings page"
 msgid "Detailed Messages Status"
 msgstr ""
 
-#: views/layout-settings.php:1482
+#: views/layout-settings.php:1481
 msgctxt "Settings page"
 msgid "Allow to see who seen the message in group conversations"
 msgstr ""
 
-#: views/layout-settings.php:1494
+#: views/layout-settings.php:1493
 msgctxt "Settings page"
 msgid "Multiple participants functions"
 msgstr ""
 
-#: views/layout-settings.php:1506
+#: views/layout-settings.php:1505
 msgctxt "Settings page"
 msgid "Allow invite more participants to private conversations"
 msgstr ""
 
-#: views/layout-settings.php:1507
+#: views/layout-settings.php:1506
 msgctxt "Settings page"
 msgid "Allow users to invite more participants to private conversations converting them to group conversation"
 msgstr ""
 
-#: views/layout-settings.php:1508
+#: views/layout-settings.php:1507
 msgctxt "Settings page"
 msgid "(admins can add more participants even if this option is disabled)"
 msgstr ""
 
-#: views/layout-settings.php:1516
+#: views/layout-settings.php:1515
 msgctxt "Settings page"
 msgid "Allow users to leave conversations with multiple participants"
 msgstr ""
 
-#: views/layout-settings.php:1517
+#: views/layout-settings.php:1516
 msgctxt "Settings page"
 msgid "Allow users to leave conversations with multiple participants (creator can`t leave conversation he started)"
 msgstr ""
 
-#: views/layout-settings.php:1528
+#: views/layout-settings.php:1527
 msgctxt "Settings page"
 msgid "Unread counter"
 msgstr ""
 
-#: views/layout-settings.php:1540
+#: views/layout-settings.php:1539
 msgctxt "Settings page"
 msgid "Show number of unread messages"
 msgstr ""
 
-#: views/layout-settings.php:1549
+#: views/layout-settings.php:1548
 msgctxt "Settings page"
 msgid "Show number of unread conversations"
 msgstr ""
 
-#: views/layout-settings.php:1560
+#: views/layout-settings.php:1559
 msgctxt "Settings page"
 msgid "Deleted conversations"
 msgstr ""
 
-#: views/layout-settings.php:1572
+#: views/layout-settings.php:1571
 msgctxt "Settings page"
 msgid "Ignore when starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:1573
+#: views/layout-settings.php:1572
 msgctxt "Settings page"
 msgid "The user will not be proposed to continue deleted conversation"
 msgstr ""
 
-#: views/layout-settings.php:1582
+#: views/layout-settings.php:1581
 msgctxt "Settings page"
 msgid "Include when starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:1583
+#: views/layout-settings.php:1582
 msgctxt "Settings page"
 msgid "If the user already has conversation with the selected recipient, but its deleted, it will be proposed to continue conversation by restoring it"
 msgstr ""
 
-#: views/layout-settings.php:1594
+#: views/layout-settings.php:1593
 msgctxt "Settings page"
 msgid "Miscellaneous"
 msgstr ""
 
-#: views/layout-settings.php:1606
+#: views/layout-settings.php:1605
 msgctxt "Settings page"
 msgid "Disable Send on Enter for Desktop devices"
 msgstr ""
 
-#: views/layout-settings.php:1614
+#: views/layout-settings.php:1613
 msgctxt "Settings page"
 msgid "Delete user messages when his account is deleted from website"
 msgstr ""
 
-#: views/layout-settings.php:1625
+#: views/layout-settings.php:1624
 msgctxt "Settings page"
 msgid "Deleting of old messages"
 msgstr ""
 
-#: views/layout-settings.php:1626
+#: views/layout-settings.php:1625
 msgctxt "Settings page"
 msgid "Enables automatic deleting of old messages"
 msgstr ""
 
-#: views/layout-settings.php:1635
+#: views/layout-settings.php:1634
 msgctxt "Settings page"
 msgid "Sets the days amount after which message will be automatically completely removed from your website and database."
 msgstr ""
 
-#: views/layout-settings.php:1637
+#: views/layout-settings.php:1636
 msgctxt "Settings page"
 msgid "Set to 0 to not delete any messages automatically."
 msgstr ""
 
-#: views/layout-settings.php:1643
+#: views/layout-settings.php:1642
 msgctxt "Settings page"
 msgid "Days"
 msgstr ""
 
-#: views/layout-settings.php:1648
+#: views/layout-settings.php:1647
 msgctxt "Settings page"
 msgid "Please be careful with this setting"
 msgstr ""
 
-#: views/layout-settings.php:1666
+#: views/layout-settings.php:1665
 msgctxt "Settings page"
 msgid "Widgets"
 msgstr ""
 
-#: views/layout-settings.php:1686
-#: views/layout-settings.php:2644
+#: views/layout-settings.php:1685
+#: views/layout-settings.php:2643
 msgctxt "Settings page"
 msgid "Mini Conversations"
 msgstr ""
 
-#: views/layout-settings.php:1687
+#: views/layout-settings.php:1686
 msgctxt "Settings page"
 msgid "Enables mini conversation list widget fixed to the bottom of browser window"
 msgstr ""
 
-#: views/layout-settings.php:1696
-#: views/layout-settings.php:1719
+#: views/layout-settings.php:1695
+#: views/layout-settings.php:1718
 msgctxt "Settings page"
 msgid "Mini Chats"
 msgstr ""
 
-#: views/layout-settings.php:1697
+#: views/layout-settings.php:1696
 msgctxt "Settings page"
 msgid "Enables mini chats fixed to the bottom of browser window"
 msgstr ""
 
-#: views/layout-settings.php:1706
+#: views/layout-settings.php:1705
 msgctxt "Settings page"
 msgid "Add close button"
 msgstr ""
 
-#: views/layout-settings.php:1707
+#: views/layout-settings.php:1706
 msgctxt "Settings page"
 msgid "Adds additional close button when widgets are opened"
 msgstr ""
 
-#: views/layout-settings.php:1731
-#: views/layout-settings.php:5258
+#: views/layout-settings.php:1730
+#: views/layout-settings.php:5257
 msgctxt "Settings page"
 msgid "Audio Call Button"
 msgstr ""
 
-#: views/layout-settings.php:1732
+#: views/layout-settings.php:1731
 msgctxt "Settings page"
 msgid "Add audio call button to the mini chats"
 msgstr ""
 
-#: views/layout-settings.php:1741
-#: views/layout-settings.php:5237
+#: views/layout-settings.php:1740
+#: views/layout-settings.php:5236
 msgctxt "Settings page"
 msgid "Video Call Button"
 msgstr ""
 
-#: views/layout-settings.php:1742
+#: views/layout-settings.php:1741
 msgctxt "Settings page"
 msgid "Add video call button to the mini chats"
 msgstr ""
 
-#: views/layout-settings.php:1751
+#: views/layout-settings.php:1750
 msgctxt "Settings page"
 msgid "Disable Sync Between Tabs"
 msgstr ""
 
-#: views/layout-settings.php:1752
+#: views/layout-settings.php:1751
 msgctxt "Settings page"
 msgid "Disable synchronization of mini chats between browser tabs."
 msgstr ""
 
-#: views/layout-settings.php:1753
+#: views/layout-settings.php:1752
 msgctxt "Settings page"
 msgid "If enabled the open mini chats will not be saved and will not be synced between browser tabs"
 msgstr ""
 
-#: views/layout-settings.php:1773
+#: views/layout-settings.php:1772
 msgctxt "Settings page"
 msgid "Mobile Mode"
 msgstr ""
 
-#: views/layout-settings.php:1802
+#: views/layout-settings.php:1801
 msgctxt "Settings page"
 msgid "Enable Full Screen Mode"
 msgstr ""
 
-#: views/layout-settings.php:1803
+#: views/layout-settings.php:1802
 msgctxt "Settings page"
 msgid "Enable full screen mode for Mobile Devices"
 msgstr ""
 
-#: views/layout-settings.php:1804
-#: views/layout-settings.php:1814
+#: views/layout-settings.php:1803
+#: views/layout-settings.php:1813
 msgctxt "Settings page"
 msgid "Recommended"
 msgstr ""
 
-#: views/layout-settings.php:1812
+#: views/layout-settings.php:1811
 msgctxt "Settings page"
 msgid "Auto open Full Screen Mode"
 msgstr ""
 
-#: views/layout-settings.php:1813
+#: views/layout-settings.php:1812
 msgctxt "Settings page"
 msgid "Auto open full screen mode when opening messages page"
 msgstr ""
 
-#: views/layout-settings.php:1822
+#: views/layout-settings.php:1821
 msgctxt "Settings page"
 msgid "Tap To Open Message"
 msgstr ""
 
-#: views/layout-settings.php:1823
+#: views/layout-settings.php:1822
 msgctxt "Settings page"
 msgid "Add \"Tap to open\" message to message container"
 msgstr ""
 
-#: views/layout-settings.php:1831
+#: views/layout-settings.php:1830
 msgctxt "Settings page"
 msgid "Swipe to go back"
 msgstr ""
 
-#: views/layout-settings.php:1832
+#: views/layout-settings.php:1831
 msgctxt "Settings page"
 msgid "Enable swipe to left for mobile devices, which allow go back to main screen"
 msgstr ""
 
-#: views/layout-settings.php:1844
+#: views/layout-settings.php:1843
 msgctxt "Settings page"
 msgid "Mobile Chat at Any Page"
 msgstr ""
 
-#: views/layout-settings.php:1856
+#: views/layout-settings.php:1855
 msgctxt "Settings page"
 msgid "Enable"
 msgstr ""
 
-#: views/layout-settings.php:1857
+#: views/layout-settings.php:1856
 msgctxt "Settings page"
 msgid "Enable Mobile Chat at Any Page"
 msgstr ""
 
-#: views/layout-settings.php:1858
+#: views/layout-settings.php:1857
 msgctxt "Settings page"
 msgid "Adds button fixed to the right corner on mobile devices, on click fully featured messaging will appear in full screen mode"
 msgstr ""
 
-#: views/layout-settings.php:1863
-#: views/layout-settings.php:1899
+#: views/layout-settings.php:1862
+#: views/layout-settings.php:1898
 msgctxt "Settings page"
 msgid "Position"
 msgstr ""
 
-#: views/layout-settings.php:1871
-#: views/layout-settings.php:2168
+#: views/layout-settings.php:1870
+#: views/layout-settings.php:2167
 msgctxt "Settings page"
 msgid "Left"
 msgstr ""
 
-#: views/layout-settings.php:1875
-#: views/layout-settings.php:2164
+#: views/layout-settings.php:1874
+#: views/layout-settings.php:2163
 msgctxt "Settings page"
 msgid "Right"
 msgstr ""
 
-#: views/layout-settings.php:1890
+#: views/layout-settings.php:1889
 msgctxt "Settings page"
 msgid "Mobile Onsite Notifications"
 msgstr ""
 
-#: views/layout-settings.php:1903
+#: views/layout-settings.php:1902
 msgctxt "Settings page"
 msgid "Automatic position"
 msgstr ""
 
-#: views/layout-settings.php:1904
+#: views/layout-settings.php:1903
 msgctxt "Settings page"
 msgid "Show popup notifications on bottom, but in conversation screen shows it on top to not overlay over the reply area."
 msgstr ""
 
-#: views/layout-settings.php:1908
+#: views/layout-settings.php:1907
 msgctxt "Settings page"
 msgid "Always on Top"
 msgstr ""
 
-#: views/layout-settings.php:1909
+#: views/layout-settings.php:1908
 msgctxt "Settings page"
 msgid "Always show popup notifications on top"
 msgstr ""
 
-#: views/layout-settings.php:1913
+#: views/layout-settings.php:1912
 msgctxt "Settings page"
 msgid "Always on Bottom"
 msgstr ""
 
-#: views/layout-settings.php:1914
+#: views/layout-settings.php:1913
 msgctxt "Settings page"
 msgid "Always show popup notifications on bottom"
 msgstr ""
 
-#: views/layout-settings.php:1928
+#: views/layout-settings.php:1927
 msgctxt "Settings page"
 msgid "Margin from bottom for Mobile Chat button (px)"
 msgstr ""
 
-#: views/layout-settings.php:1937
+#: views/layout-settings.php:1936
 msgctxt "Settings page"
 msgid "Dont show Mobile Chat button"
 msgstr ""
 
-#: views/layout-settings.php:1938
+#: views/layout-settings.php:1937
 msgctxt "Settings page"
 msgid "Dont show mobile chat button to following roles"
 msgstr ""
 
-#: views/layout-settings.php:1951
+#: views/layout-settings.php:1950
 msgctxt "Settings page"
 msgid "Disable Send on Enter for Mobile Devices"
 msgstr ""
 
-#: views/layout-settings.php:1960
+#: views/layout-settings.php:1959
 msgctxt "Settings page"
 msgid "Hide Possible Overlaying Elements"
 msgstr ""
 
-#: views/layout-settings.php:1961
+#: views/layout-settings.php:1960
 msgctxt "Settings page"
 msgid "If in mobile view something overlaying the messages enable this option"
 msgstr ""
 
-#: views/layout-settings.php:1981
+#: views/layout-settings.php:1980
 msgctxt "Settings page"
 msgid "Enable files"
 msgstr ""
 
-#: views/layout-settings.php:1982
+#: views/layout-settings.php:1981
 msgctxt "Settings page"
 msgid "Enable file sharing between users"
 msgstr ""
 
-#: views/layout-settings.php:1990
+#: views/layout-settings.php:1989
 msgctxt "Settings page"
 msgid "Hide Attachments"
 msgstr ""
 
-#: views/layout-settings.php:1991
+#: views/layout-settings.php:1990
 msgctxt "Settings page"
 msgid "Hides attachments from media gallery"
 msgstr ""
 
-#: views/layout-settings.php:1999
+#: views/layout-settings.php:1998
 msgctxt "Settings page"
 msgid "Allow to capture photos"
 msgstr ""
 
-#: views/layout-settings.php:2000
+#: views/layout-settings.php:1999
 msgctxt "Settings page"
 msgid "Allow to capture photos from user webcam"
 msgstr ""
 
-#: views/layout-settings.php:2001
+#: views/layout-settings.php:2000
 msgctxt "Settings page"
 msgid ".jpg or .png format must be enabled"
 msgstr ""
 
-#: views/layout-settings.php:2009
+#: views/layout-settings.php:2008
 msgctxt "Settings page"
 msgid "Delete attachment after"
 msgstr ""
 
-#: views/layout-settings.php:2010
+#: views/layout-settings.php:2009
 msgctxt "Settings page"
 msgid "Set 0 to not delete attachments"
 msgstr ""
 
-#: views/layout-settings.php:2018
+#: views/layout-settings.php:2017
 msgctxt "Settings page"
 msgid "Max attachment size"
 msgstr ""
 
-#: views/layout-settings.php:2026
+#: views/layout-settings.php:2025
 msgctxt "Settings page"
 msgid "Max number of attachments per message"
 msgstr ""
 
-#: views/layout-settings.php:2027
+#: views/layout-settings.php:2026
 msgctxt "Settings page"
 msgid "Set 0 to not limit"
 msgstr ""
 
-#: views/layout-settings.php:2035
-#: views/layout-settings.php:2040
+#: views/layout-settings.php:2034
+#: views/layout-settings.php:2039
 msgctxt "Settings page"
 msgid "Allowed formats"
 msgstr ""
 
-#: views/layout-settings.php:2068
+#: views/layout-settings.php:2067
 msgctxt "Settings page"
 msgid "Browser Tab Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2069
+#: views/layout-settings.php:2068
 msgctxt "Settings page"
 msgid "Show unread conversations number in website title (browser tab)"
 msgstr ""
 
-#: views/layout-settings.php:2077
+#: views/layout-settings.php:2076
 msgctxt "Settings page"
 msgid "Mute Conversations"
 msgstr ""
 
-#: views/layout-settings.php:2078
+#: views/layout-settings.php:2077
 msgctxt "Settings page"
 msgid "When enabled users will be able to mute conversations"
 msgstr ""
 
-#: views/layout-settings.php:2087
+#: views/layout-settings.php:2086
 msgctxt "Settings page"
 msgid "Send email notifications every (minutes)"
 msgstr ""
 
-#: views/layout-settings.php:2088
-#: views/layout-settings.php:2332
+#: views/layout-settings.php:2087
+#: views/layout-settings.php:2331
 msgctxt "Settings page"
 msgid "Set to 0 to disable"
 msgstr ""
 
-#: views/layout-settings.php:2097
+#: views/layout-settings.php:2096
 msgctxt "Settings page"
 msgid "Send email after user is not online for (minutes)"
 msgstr ""
 
-#: views/layout-settings.php:2098
+#: views/layout-settings.php:2097
 msgctxt "Settings page"
 msgid "Set to 0 to always send email notifications to user"
 msgstr ""
 
-#: views/layout-settings.php:2107
+#: views/layout-settings.php:2106
 msgctxt "Settings page"
 msgid "Stop messages notifications to be added to BuddyPress Notifications Bell"
 msgstr ""
 
-#: views/layout-settings.php:2108
+#: views/layout-settings.php:2107
 msgctxt "Settings page"
 msgid "This will work only with setting above"
 msgstr ""
 
-#: views/layout-settings.php:2116
+#: views/layout-settings.php:2115
 msgctxt "Settings page"
 msgid "Enable Browser Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2117
+#: views/layout-settings.php:2116
 msgctxt "Settings page"
 msgid "Allow users to enable web push notifications, so they can receive messages even with closed website"
 msgstr ""
 
-#: views/layout-settings.php:2118
+#: views/layout-settings.php:2117
 msgctxt "Settings page"
 msgid "Also adds notifications, when user has website opened in other tab"
 msgstr ""
 
-#: views/layout-settings.php:2119
+#: views/layout-settings.php:2118
 msgctxt "Settings page"
 msgid "Supported in all major browsers like: Chrome, Opera, Firefox, IE, Edge and others"
 msgstr ""
 
-#: views/layout-settings.php:2135
+#: views/layout-settings.php:2134
 msgctxt "Settings page"
 msgid "Send Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2143
+#: views/layout-settings.php:2142
 msgctxt "Settings page"
 msgid "When user is offline"
 msgstr ""
 
-#: views/layout-settings.php:2147
+#: views/layout-settings.php:2146
 msgctxt "Settings page"
 msgid "If user is offline or did not read the message during 5 seconds"
 msgstr ""
 
-#: views/layout-settings.php:2158
+#: views/layout-settings.php:2157
 msgctxt "Settings page"
 msgid "Onsite notifications position"
 msgstr ""
 
-#: views/layout-settings.php:2177
+#: views/layout-settings.php:2176
 msgctxt "Settings page"
 msgid "Disable onsite notifications about new messages"
 msgstr ""
 
-#: views/layout-settings.php:2187
+#: views/layout-settings.php:2186
 msgctxt "Settings page"
 msgid "Additional realtime onsite notifications"
 msgstr ""
 
-#: views/layout-settings.php:2188
+#: views/layout-settings.php:2187
 msgctxt "Settings page"
 msgid "How it works?"
 msgstr ""
 
-#: views/layout-settings.php:2201
-#: views/layout-settings.php:4256
+#: views/layout-settings.php:2200
+#: views/layout-settings.php:4255
 msgctxt "Settings page"
 msgid "BuddyPress Friends"
 msgstr ""
 
-#: views/layout-settings.php:2205
-#: views/layout-settings.php:4308
+#: views/layout-settings.php:2204
+#: views/layout-settings.php:4307
 msgctxt "Settings page"
 msgid "BuddyPress Groups"
 msgstr ""
 
-#: views/layout-settings.php:2214
+#: views/layout-settings.php:2213
 msgctxt "Settings page"
 msgid "Auto create BuddyPress Email template if its missing"
 msgstr ""
 
-#: views/layout-settings.php:2216
+#: views/layout-settings.php:2215
 msgctxt "Settings page"
 msgid "You need to disable it only if you modified email template and plugin try to replace it"
 msgstr ""
 
-#: views/layout-settings.php:2226
+#: views/layout-settings.php:2225
 msgctxt "Settings page"
 msgid "Message notification sound volume"
 msgstr ""
 
-#: views/layout-settings.php:2227
-#: views/layout-settings.php:2237
-#: views/layout-settings.php:2247
-#: views/layout-settings.php:2258
+#: views/layout-settings.php:2226
+#: views/layout-settings.php:2236
+#: views/layout-settings.php:2246
+#: views/layout-settings.php:2257
 msgctxt "Settings page"
 msgid "From 0 to 100 (0 to disable)"
 msgstr ""
 
-#: views/layout-settings.php:2236
+#: views/layout-settings.php:2235
 msgctxt "Settings page"
 msgid "Message sent sound volume"
 msgstr ""
 
-#: views/layout-settings.php:2246
+#: views/layout-settings.php:2245
 msgctxt "Settings page"
 msgid "Incoming call sound volume"
 msgstr ""
 
-#: views/layout-settings.php:2257
+#: views/layout-settings.php:2256
 msgctxt "Settings page"
 msgid "Outgoing call sound volume"
 msgstr ""
 
-#: views/layout-settings.php:2275
+#: views/layout-settings.php:2274
 msgctxt "Settings page"
 msgid "Allow users to restrict who can start conversations with them"
 msgstr ""
 
-#: views/layout-settings.php:2276
+#: views/layout-settings.php:2275
 msgctxt "Settings page"
 msgid "Allow users to select who start conversations with them in plugin user settings"
 msgstr ""
 
-#: views/layout-settings.php:2285
+#: views/layout-settings.php:2284
 msgctxt "Settings page"
 msgid "Allow users to block other users"
 msgstr ""
 
-#: views/layout-settings.php:2286
+#: views/layout-settings.php:2285
 msgctxt "Settings page"
 msgid "Allow users to block other users from sending them messages (admins cant be blocked)"
 msgstr ""
 
-#: views/layout-settings.php:2295
+#: views/layout-settings.php:2294
 msgctxt "Settings page"
 msgid "Restrict user role from blocking other users"
 msgstr ""
 
-#: views/layout-settings.php:2296
+#: views/layout-settings.php:2295
 msgctxt "Settings page"
 msgid "Selected roles will not be able to block other users if previous option is enabled"
 msgstr ""
 
-#: views/layout-settings.php:2308
+#: views/layout-settings.php:2307
 msgctxt "Settings page"
 msgid "Roles which can't block other users"
 msgstr ""
 
-#: views/layout-settings.php:2316
+#: views/layout-settings.php:2315
 msgctxt "Settings page"
 msgid "Roles which can't be blocked by other users"
 msgstr ""
 
-#: views/layout-settings.php:2330
+#: views/layout-settings.php:2329
 msgctxt "Settings page"
 msgid "Rate limiting new conversations (seconds)"
 msgstr ""
 
-#: views/layout-settings.php:2331
+#: views/layout-settings.php:2330
 msgctxt "Settings page"
 msgid "Limit new conversations creation to prevent users spam"
 msgstr ""
 
-#: views/layout-settings.php:2341
+#: views/layout-settings.php:2340
 msgctxt "Settings page"
 msgid "Restrict users from deleting conversations"
 msgstr ""
 
-#: views/layout-settings.php:2342
+#: views/layout-settings.php:2341
 msgctxt "Settings page"
 msgid "Disable users from being able to delete conversation (admin always can delete)"
 msgstr ""
 
-#: views/layout-settings.php:2351
+#: views/layout-settings.php:2350
 msgctxt "Settings page"
 msgid "Role to Role restrictions"
 msgstr ""
 
-#: views/layout-settings.php:2352
+#: views/layout-settings.php:2351
 msgctxt "Settings page"
 msgid "Disable users from being able to write each other based on user role"
 msgstr ""
 
-#: views/layout-settings.php:2353
+#: views/layout-settings.php:2352
 msgctxt "Settings page"
 msgid "Resrticted users will not also appear in search results"
 msgstr ""
 
-#: views/layout-settings.php:2357
+#: views/layout-settings.php:2356
 msgctxt "Settings page"
 msgid "By default all users"
 msgstr ""
 
-#: views/layout-settings.php:2362
+#: views/layout-settings.php:2361
 msgctxt "Settings page"
 msgid "Allowed to message everyone"
 msgstr ""
 
-#: views/layout-settings.php:2366
+#: views/layout-settings.php:2365
 msgctxt "Settings page"
 msgid "Not allowed to message everyone"
 msgstr ""
 
-#: views/layout-settings.php:2371
+#: views/layout-settings.php:2370
 msgctxt "Settings page"
 msgid "Users are able to message each other by default, to restrict some roles add the rules below"
 msgstr ""
 
-#: views/layout-settings.php:2375
+#: views/layout-settings.php:2374
 msgctxt "Settings page"
 msgid "Users are not able to message each other by default, add rules below to define roles which will be able to message other users"
 msgstr ""
 
-#: views/layout-settings.php:2378
-#: views/layout-settings.php:2398
+#: views/layout-settings.php:2377
+#: views/layout-settings.php:2397
 msgctxt "Settings page"
 msgid "Message"
 msgstr ""
 
-#: views/layout-settings.php:2388
+#: views/layout-settings.php:2387
 msgctxt "Settings page"
 msgid "No rules added"
 msgstr ""
 
-#: views/layout-settings.php:2396
+#: views/layout-settings.php:2395
 msgctxt "Settings page"
 msgid "From"
 msgstr ""
 
-#: views/layout-settings.php:2397
+#: views/layout-settings.php:2396
 msgctxt "Settings page"
 msgid "To"
 msgstr ""
 
-#: views/layout-settings.php:2429
+#: views/layout-settings.php:2428
 msgctxt "Settings page"
 msgid "Add new rule"
 msgstr ""
 
-#: views/layout-settings.php:2449
+#: views/layout-settings.php:2448
 msgctxt "Settings page"
 msgid "You cannot send messages to this user"
 msgstr ""
 
-#: views/layout-settings.php:2504
+#: views/layout-settings.php:2503
 msgctxt "Settings page"
 msgid "Rate limiting for new replies"
 msgstr ""
 
-#: views/layout-settings.php:2505
+#: views/layout-settings.php:2504
 msgctxt "Settings page"
 msgid "Limit max amount of replies within timeframe"
 msgstr ""
 
+#: views/layout-settings.php:2511
+#: views/layout-settings.php:4479
+#: views/layout-settings.php:4525
+#: views/layout-settings.php:4578
+#: views/layout-settings.php:4689
+#: views/layout-settings.php:4735
+#: views/layout-settings.php:4788
+msgctxt "Settings page"
+msgid "Role"
+msgstr ""
+
 #: views/layout-settings.php:2512
+msgctxt "Settings page"
+msgid "Limitation (0 to disable)"
+msgstr ""
+
+#: views/layout-settings.php:2529
+msgctxt "Settings page"
+msgid "messages per"
+msgstr ""
+
+#: views/layout-settings.php:2531
+msgctxt "Settings page"
+msgid "Hour"
+msgstr ""
+
+#: views/layout-settings.php:2532
+msgctxt "Settings page"
+msgid "Day"
+msgstr ""
+
+#: views/layout-settings.php:2545
+msgctxt "Settings page"
+msgid "Message when rate limit for new replies reached"
+msgstr ""
+
+#: views/layout-settings.php:2554
+msgctxt "Settings page"
+msgid "Restrict the creation of a new conversation"
+msgstr ""
+
+#: views/layout-settings.php:2555
+msgctxt "Settings page"
+msgid "Selected roles will not be allowed to start new conversations"
+msgstr ""
+
+#: views/layout-settings.php:2568
+msgctxt "Settings page"
+msgid "Message when the creation of a new conversation restricted"
+msgstr ""
+
+#: views/layout-settings.php:2577
+msgctxt "Settings page"
+msgid "Remove new conversation button for restricted users"
+msgstr ""
+
+#: views/layout-settings.php:2586
+msgctxt "Settings page"
+msgid "Restrict new replies"
+msgstr ""
+
+#: views/layout-settings.php:2587
+msgctxt "Settings page"
+msgid "Selected roles will not be allowed to reply"
+msgstr ""
+
+#: views/layout-settings.php:2599
+msgctxt "Settings page"
+msgid "Message when new replies are restricted"
+msgstr ""
+
+#: views/layout-settings.php:2608
+msgctxt "Settings page"
+msgid "Restrict from viewing message"
+msgstr ""
+
+#: views/layout-settings.php:2609
+msgctxt "Settings page"
+msgid "Selected roles will see message configured below instead of real message"
+msgstr ""
+
+#: views/layout-settings.php:2621
+msgctxt "Settings page"
+msgid "Content of messages when user is restricted from viewing message"
+msgstr ""
+
+#: views/layout-settings.php:2630
+msgctxt "Settings page"
+msgid "Restrict access to mini widgets"
+msgstr ""
+
+#: views/layout-settings.php:2631
+msgctxt "Settings page"
+msgid "Selected roles will not see selected widgets"
+msgstr ""
+
+#: views/layout-settings.php:2660
+msgctxt "Settings page"
+msgid "Mini Friends"
+msgstr ""
+
+#: views/layout-settings.php:2669
+msgctxt "Settings page"
+msgid "Mini Groups"
+msgstr ""
+
+#: views/layout-settings.php:2683
+msgctxt "Settings page"
+msgid "Bad Words List"
+msgstr ""
+
+#: views/layout-settings.php:2684
+msgctxt "Settings page"
+msgid "One word per line"
+msgstr ""
+
+#: views/layout-settings.php:2693
+msgctxt "Settings page"
+msgid "Message when word from Bad Words List is found in message"
+msgstr ""
+
+#: views/layout-settings.php:2707
+msgctxt "Settings page"
+msgid "Website must to have SSL certificate in order to audio and video calls work."
+msgstr ""
+
+#: views/layout-settings.php:2708
+msgctxt "Settings page"
+msgid "This is security requirements by browsers. Contact your hosting company to enable SSL certificate at your website."
+msgstr ""
+
+#: views/layout-settings.php:2709
+msgctxt "Settings page"
+msgid "This notice will be hidden when website will work via HTTPS"
+msgstr ""
+
+#: views/layout-settings.php:2717
+msgctxt "Settings page"
+msgid "Enable Video Calls"
+msgstr ""
+
+#: views/layout-settings.php:2718
+msgctxt "Settings page"
+msgid "Allow users to make video calls between each other"
+msgstr ""
+
+#: views/layout-settings.php:2719
+msgctxt "Settings page"
+msgid "Video calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower video chats."
+msgstr ""
+
+#: views/layout-settings.php:2728
+msgctxt "Settings page"
+msgid "Enable Audio Calls"
+msgstr ""
+
+#: views/layout-settings.php:2729
+msgctxt "Settings page"
+msgid "Allow users to make audio calls between each other"
+msgstr ""
+
+#: views/layout-settings.php:2730
+msgctxt "Settings page"
+msgid "Audio calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower audio calls."
+msgstr ""
+
+#: views/layout-settings.php:2740
+msgctxt "Settings page"
+msgid "Limit calls only to the friends"
+msgstr ""
+
+#: views/layout-settings.php:2741
+msgctxt "Settings page"
+msgid "Allow only friends to make calls between each other (admins always can call)"
+msgstr ""
+
+#: views/layout-settings.php:2751
+msgctxt "Settings page"
+msgid "Revert Mute Voice & Hide Video icons"
+msgstr ""
+
+#: views/layout-settings.php:2752
+msgctxt "Settings page"
+msgid "Makes mute and hide video icons to appear in reverse way"
+msgstr ""
+
+#: views/layout-settings.php:2761
+msgctxt "Settings page"
+msgid "Call time limit before call marked as missed (seconds)"
+msgstr ""
+
+#: views/layout-settings.php:2766
+msgctxt "Settings page"
+msgid "Call Request Time Limit"
+msgstr ""
+
+#: views/layout-settings.php:2777
+msgctxt "Settings page"
+msgid "Restrict calls"
+msgstr ""
+
+#: views/layout-settings.php:2778
+msgctxt "Settings page"
+msgid "Selected roles will not be allowed to call, but they will be able to receive calls still"
+msgstr ""
+
+#: views/layout-settings.php:2799
+msgctxt "Settings page"
+msgid "Message when call is restricted"
+msgstr ""
+
+#: views/layout-settings.php:2824
+msgctxt "Settings page"
+msgid "Group Video Chat"
+msgstr ""
+
+#: views/layout-settings.php:2825
+msgctxt "Settings page"
+msgid "Group audio chat allows to start high definition video & voice group chat up to 50 participants per 1 conversation."
+msgstr ""
+
+#: views/layout-settings.php:2831
+msgctxt "Settings page"
+msgid "Enable Video Chat for Groups"
+msgstr ""
+
+#: views/layout-settings.php:2832
+msgctxt "Settings page"
+msgid "Allow users to start group video chats in Group Chats"
+msgstr ""
+
+#: views/layout-settings.php:2841
+msgctxt "Settings page"
+msgid "Enable Video Chat for Conversations"
+msgstr ""
+
+#: views/layout-settings.php:2842
+msgctxt "Settings page"
+msgid "Allow users to start group video chats in conversations with many participants"
+msgstr ""
+
+#: views/layout-settings.php:2852
+msgctxt "Settings page"
+msgid "Enable Video Chat for Chat Rooms"
+msgstr ""
+
+#: views/layout-settings.php:2853
+msgctxt "Settings page"
+msgid "Allow users to start group video chats in chat rooms"
+msgstr ""
+
+#: views/layout-settings.php:2863
+msgctxt "Settings page"
+msgid "Group Audio Chat"
+msgstr ""
+
+#: views/layout-settings.php:2864
+msgctxt "Settings page"
+msgid "Group audio chat allowing your user to start high definition voice only group chat up to 50 people per 1 conversation."
+msgstr ""
+
+#: views/layout-settings.php:2871
+msgctxt "Settings page"
+msgid "Enable Audio Chat for Groups"
+msgstr ""
+
+#: views/layout-settings.php:2872
+msgctxt "Settings page"
+msgid "Allow users to start group audio chats in Group Chats"
+msgstr ""
+
+#: views/layout-settings.php:2881
+msgctxt "Settings page"
+msgid "Enable Audio Chat for Conversations"
+msgstr ""
+
+#: views/layout-settings.php:2882
+msgctxt "Settings page"
+msgid "Allow users to start group audio chats in conversations with many participants"
+msgstr ""
+
+#: views/layout-settings.php:2892
+msgctxt "Settings page"
+msgid "Enable Audio Chat for Chat Rooms"
+msgstr ""
+
+#: views/layout-settings.php:2893
+msgctxt "Settings page"
+msgid "Allow users to start group audio chats in chat rooms"
+msgstr ""
+
+#: views/layout-settings.php:2909
+msgctxt "Settings page"
+msgid "Colors"
+msgstr ""
+
+#: views/layout-settings.php:2920
+msgctxt "Settings page"
+msgid "Messenger Height"
+msgstr ""
+
+#: views/layout-settings.php:2929
+msgctxt "Settings page"
+msgid "Fixed Header Height"
+msgstr ""
+
+#: views/layout-settings.php:2930
+msgctxt "Settings page"
+msgid "If your website has fixed header specify its height in pixels."
+msgstr ""
+
+#: views/layout-settings.php:2931
+msgctxt "Settings page"
+msgid "This needed for correct scrolling in some cases"
+msgstr ""
+
+#: views/layout-settings.php:2940
+msgctxt "Settings page"
+msgid "Min Height of Messages Container"
+msgstr ""
+
+#: views/layout-settings.php:2941
+msgctxt "Settings page"
+msgid "Min Height of Messages Container in pixels"
+msgstr ""
+
+#: views/layout-settings.php:2950
+msgctxt "Settings page"
+msgid "Max Height of Messages Container"
+msgstr ""
+
+#: views/layout-settings.php:2951
+msgctxt "Settings page"
+msgid "Max Height of Messages Container in pixels"
+msgstr ""
+
+#: views/layout-settings.php:2952
+msgctxt "Settings page"
+msgid "Set 9999 to use all available window height"
+msgstr ""
+
+#: views/layout-settings.php:2961
+msgctxt "Settings page"
+msgid "Side conversation list width"
+msgstr ""
+
+#: views/layout-settings.php:2962
+msgctxt "Settings page"
+msgid "Side conversation list width when Combined View is enabled in pixels"
+msgstr ""
+
+#: views/layout-settings.php:2977
+msgctxt "Settings page"
+msgid "Allow to disable sound notification"
+msgstr ""
+
+#: views/layout-settings.php:2978
+msgctxt "Settings page"
+msgid "Allow user disable sound notifications in their user settings"
+msgstr ""
+
+#: views/layout-settings.php:2987
+msgctxt "Settings page"
+msgid "Disable Search"
+msgstr ""
+
+#: views/layout-settings.php:2988
+msgctxt "Settings page"
+msgid "Disables search functionality"
+msgstr ""
+
+#: views/layout-settings.php:2997
+msgctxt "Settings page"
+msgid "Disable Favorite Messages"
+msgstr ""
+
+#: views/layout-settings.php:2998
+msgctxt "Settings page"
+msgid "Disables favorite messages functionality"
+msgstr ""
+
+#: views/layout-settings.php:3007
+msgctxt "Settings page"
+msgid "Disable User Settings"
+msgstr ""
+
+#: views/layout-settings.php:3008
+msgctxt "Settings page"
+msgid "Disables user settings button"
+msgstr ""
+
+#: views/layout-settings.php:3017
+msgctxt "Settings page"
+msgid "Disable New Conversation Screen"
+msgstr ""
+
+#: views/layout-settings.php:3018
+msgctxt "Settings page"
+msgid "Disables new conversation button and screen (admin will always see it)"
+msgstr ""
+
+#: views/layout-settings.php:3044
+msgctxt "Settings page"
+msgid "Other Plugins"
+msgstr ""
+
+#: views/layout-settings.php:3048
+msgctxt "Settings page"
+msgid "GIFs & Stickers"
+msgstr ""
+
+#: views/layout-settings.php:3049
+msgctxt "Settings page"
+msgid "Emojis"
+msgstr ""
+
+#: views/layout-settings.php:3055
+#: views/layout-settings.php:3171
+#: views/layout-settings.php:3889
+#: views/layout-settings.php:4183
+#: views/layout-settings.php:4463
+#: views/layout-settings.php:4647
+#: views/layout-settings.php:4674
+#, php-format
+msgctxt "Settings page"
+msgid "Website must to have %s plugin to be installed."
+msgstr ""
+
+#: views/layout-settings.php:3056
+msgctxt "Settings page"
+msgid "This notice will be hidden when FluentCommunity plugin is installed"
+msgstr ""
+
+#: views/layout-settings.php:3065
+msgctxt "Settings page"
+msgid "FluentCommunity Profile Pages"
+msgstr ""
+
+#: views/layout-settings.php:3076
+msgctxt "Settings page"
+msgid "Private Message button in user profile"
+msgstr ""
+
+#: views/layout-settings.php:3077
+msgctxt "Settings page"
+msgid "Add private message button to user profile"
+msgstr ""
+
+#: views/layout-settings.php:3087
+#: views/layout-settings.php:3213
+#: views/layout-settings.php:4223
+msgctxt "Settings page"
+msgid "Video Call button in user profile"
+msgstr ""
+
+#: views/layout-settings.php:3088
+#: views/layout-settings.php:3214
+#: views/layout-settings.php:4224
+msgctxt "Settings page"
+msgid "Add video call button to user profile"
+msgstr ""
+
+#: views/layout-settings.php:3098
+#: views/layout-settings.php:3223
+#: views/layout-settings.php:4213
+msgctxt "Settings page"
+msgid "Audio Call button in user profile"
+msgstr ""
+
+#: views/layout-settings.php:3099
+#: views/layout-settings.php:3224
+#: views/layout-settings.php:4214
+msgctxt "Settings page"
+msgid "Add audio call button to user profile"
+msgstr ""
+
+#: views/layout-settings.php:3111
+msgctxt "Settings page"
+msgid "FluentCommunity Spaces"
+msgstr ""
+
+#: views/layout-settings.php:3122
+#: views/layout-settings.php:3300
+#: views/layout-settings.php:4003
+#: views/layout-settings.php:4319
+msgctxt "Settings page"
+msgid "Enable Messages"
+msgstr ""
+
+#: views/layout-settings.php:3123
+msgctxt "Settings page"
+msgid "Enable messages for FluentCommunity Spaces"
+msgstr ""
+
+#: views/layout-settings.php:3132
+#: views/layout-settings.php:3310
+#: views/layout-settings.php:4015
+msgctxt "Settings page"
+msgid "Enable file uploading"
+msgstr ""
+
+#: views/layout-settings.php:3133
+msgctxt "Settings page"
+msgid "Enable file uploading in Spaces Messages"
+msgstr ""
+
+#: views/layout-settings.php:3141
+#: views/layout-settings.php:3319
+#: views/layout-settings.php:4025
+msgctxt "Settings page"
+msgid "Enable Email Notifications"
+msgstr ""
+
+#: views/layout-settings.php:3142
+msgctxt "Settings page"
+msgid "When enabled users will receive email notifications for Spaces Messages"
+msgstr ""
+
+#: views/layout-settings.php:3151
+#: views/layout-settings.php:3329
+#: views/layout-settings.php:4036
+#: views/layout-settings.php:4374
+msgctxt "Settings page"
+msgid "Push Notifications"
+msgstr ""
+
+#: views/layout-settings.php:3152
+msgctxt "Settings page"
+msgid "When enabled users will receive push notifications for Spaces Messages"
+msgstr ""
+
+#: views/layout-settings.php:3172
+msgctxt "Settings page"
+msgid "This notice will be hidden when PeepSo plugin is installed"
+msgstr ""
+
+#: views/layout-settings.php:3180
+msgctxt "Settings page"
+msgid "PeepSo Integration"
+msgstr ""
+
+#: views/layout-settings.php:3192
+msgctxt "Settings page"
+msgid "Enable PeepSo Header at Messages Page"
+msgstr ""
+
+#: views/layout-settings.php:3201
+#: views/layout-settings.php:3908
+#: views/layout-settings.php:4202
+msgctxt "Settings page"
+msgid "Advanced Mini Chats"
+msgstr ""
+
+#: views/layout-settings.php:3202
+#: views/layout-settings.php:3909
+#: views/layout-settings.php:4203
+msgctxt "Settings page"
+msgid "Open mini chat instead of redirecting to standalone messages page, when clicking private messages button in members directory or member profile"
+msgstr ""
+
+#: views/layout-settings.php:3203
+#: views/layout-settings.php:3910
+#: views/layout-settings.php:4204
+#, php-format
+msgctxt "Settings page"
+msgid "Mini Chats must be enabled. Ensure they are enabled <a href=\"%s\">here</a>"
+msgstr ""
+
+#: views/layout-settings.php:3247
+#: views/layout-settings.php:3951
+#: views/layout-settings.php:4266
+msgctxt "Settings page"
+msgid "Only Friends Mode"
+msgstr ""
+
+#: views/layout-settings.php:3248
+#: views/layout-settings.php:3952
+#: views/layout-settings.php:4267
+msgctxt "Settings page"
+msgid "Allow only friends to send messages each other"
+msgstr ""
+
+#: views/layout-settings.php:3249
+#: views/layout-settings.php:3953
+#: views/layout-settings.php:4268
+msgctxt "Settings page"
+msgid "This will also remove not friends users from search results."
+msgstr ""
+
+#: views/layout-settings.php:3250
+#: views/layout-settings.php:3302
+#: views/layout-settings.php:3381
+#: views/layout-settings.php:3418
+#: views/layout-settings.php:3456
+#: views/layout-settings.php:3493
+#: views/layout-settings.php:3530
+#: views/layout-settings.php:3555
+#: views/layout-settings.php:3954
+#: views/layout-settings.php:4005
+#: views/layout-settings.php:4080
+#, php-format
+msgctxt "Settings page"
+msgid "%s must be installed"
+msgstr ""
+
+#: views/layout-settings.php:3258
+#: views/layout-settings.php:3340
+#: views/layout-settings.php:3962
+#: views/layout-settings.php:4047
+#: views/layout-settings.php:4276
+#: views/layout-settings.php:4338
+msgctxt "Settings page"
+msgid "Mini Widget"
+msgstr ""
+
+#: views/layout-settings.php:3260
+#: views/layout-settings.php:3964
+#: views/layout-settings.php:4278
+msgctxt "Settings page"
+msgid "Enables mini friends list widget fixed to the bottom of browser window"
+msgstr ""
+
+#: views/layout-settings.php:3269
+#: views/layout-settings.php:3973
+#: views/layout-settings.php:4287
+msgctxt "Settings page"
+msgid "Shows Friends in left column of Combined view"
+msgstr ""
+
+#: views/layout-settings.php:3277
+#: views/layout-settings.php:3359
+#: views/layout-settings.php:3981
+#: views/layout-settings.php:4066
+#: views/layout-settings.php:4295
+#: views/layout-settings.php:4356
+msgctxt "Settings page"
+msgid "Mobile View"
+msgstr ""
+
+#: views/layout-settings.php:3278
+#: views/layout-settings.php:3982
+#: views/layout-settings.php:4296
+msgctxt "Settings page"
+msgid "Shows Friends as tab at bottom of Mobile View"
+msgstr ""
+
+#: views/layout-settings.php:3301
+msgctxt "Settings page"
+msgid "Enable messages for PeepSo groups"
+msgstr ""
+
+#: views/layout-settings.php:3311
+msgctxt "Settings page"
+msgid "Enable file uploading PeepSo group messages"
+msgstr ""
+
+#: views/layout-settings.php:3320
+#: views/layout-settings.php:4366
+msgctxt "Settings page"
+msgid "When enabled users will receive email notifications for Group Chats"
+msgstr ""
+
+#: views/layout-settings.php:3330
+#: views/layout-settings.php:4037
+#: views/layout-settings.php:4375
+msgctxt "Settings page"
+msgid "When enabled users will receive push notifications for Group Chats"
+msgstr ""
+
+#: views/layout-settings.php:3342
+#: views/layout-settings.php:4049
+msgctxt "Settings page"
+msgid "Enables mini groups list widget fixed to the bottom of browser window"
+msgstr ""
+
+#: views/layout-settings.php:3351
+#: views/layout-settings.php:4058
+#: views/layout-settings.php:4348
+msgctxt "Settings page"
+msgid "Shows Groups in left column of Combined view"
+msgstr ""
+
+#: views/layout-settings.php:3360
+#: views/layout-settings.php:4067
+#: views/layout-settings.php:4357
+msgctxt "Settings page"
+msgid "Shows Groups as tab at bottom of Mobile View"
+msgstr ""
+
+#: views/layout-settings.php:3378
+#: views/layout-settings.php:3415
+#: views/layout-settings.php:3453
+#: views/layout-settings.php:3490
+#: views/layout-settings.php:3527
+#: views/layout-settings.php:3552
+#, php-format
+msgctxt "Settings page"
+msgid "%s Integration"
+msgstr ""
+
+#: views/layout-settings.php:3394
+#: views/layout-settings.php:3431
+#: views/layout-settings.php:3506
+msgctxt "Settings page"
+msgid "Enable Live Chat for Vendors"
+msgstr ""
+
+#: views/layout-settings.php:3395
+#: views/layout-settings.php:3507
+msgctxt "Settings page"
+msgid "When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat"
+msgstr ""
+
+#: views/layout-settings.php:3402
+#: views/layout-settings.php:3514
+msgctxt "Settings page"
+msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page"
+msgstr ""
+
+#: views/layout-settings.php:3432
+msgctxt "Settings page"
+msgid "When enabled visitors will be able to contact vendors easily using Send Message button at the listing page and Vendors profile"
+msgstr ""
+
+#: views/layout-settings.php:3441
+msgctxt "Settings page"
+msgid "Add messages item to HivePress User Menu"
+msgstr ""
+
+#: views/layout-settings.php:3442
+msgctxt "Settings page"
+msgid "When enabled messages menu item will be added to HivePress User Menu and unread messages counter will be shown in it"
+msgstr ""
+
+#: views/layout-settings.php:3469
+msgctxt "Settings page"
+msgid "Enable Live Chat for Job Listings"
+msgstr ""
+
+#: views/layout-settings.php:3470
+msgctxt "Settings page"
+msgid "When enabled visitors will be able to contact job listing authors easily using Send Message button at the listing page"
+msgstr ""
+
+#: views/layout-settings.php:3477
+msgctxt "Settings page"
+msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your job listing page"
+msgstr ""
+
+#: views/layout-settings.php:3542
+msgctxt "Settings page"
+msgid "Show link in bbPress author details"
+msgstr ""
+
+#: views/layout-settings.php:3570
+msgctxt "Settings page"
+msgid "Use Avatars"
+msgstr ""
+
+#: views/layout-settings.php:3571
+msgctxt "Settings page"
+msgid "Avatars from Jet Engine Profile Builder will be displayed in Better Messages interface"
+msgstr ""
+
+#: views/layout-settings.php:3635
+msgctxt "Settings page"
+msgid "Emojis Set"
+msgstr ""
+
+#: views/layout-settings.php:3678
+msgctxt "Settings page"
+msgid "Emojis for Reactions"
+msgstr ""
+
+#: views/layout-settings.php:3704
+msgctxt "Settings page"
+msgid "Add new reaction"
+msgstr ""
+
+#: views/layout-settings.php:3712
+msgctxt "Settings page"
+msgid "Select Emoji for new reaction"
+msgstr ""
+
+#: views/layout-settings.php:3781
+msgctxt "Settings page"
+msgid "Emojis for Selector"
+msgstr ""
+
+#: views/layout-settings.php:3784
+msgctxt "Settings page"
+msgid "Click on emoji to enable or disable it, drag it to change it position in emoji selector"
+msgstr ""
+
+#: views/layout-settings.php:3890
+msgctxt "Settings page"
+msgid "This notice will be hidden when Ultimate Member plugin is installed"
+msgstr ""
+
+#: views/layout-settings.php:3897
+msgctxt "Settings page"
+msgid "Ultimate Member Integration"
+msgstr ""
+
+#: views/layout-settings.php:3919
+msgctxt "Settings page"
+msgid "User Profile - Private Message Button"
+msgstr ""
+
+#: views/layout-settings.php:3920
+msgctxt "Settings page"
+msgid "Show Private Message button in user profiles"
+msgstr ""
+
+#: views/layout-settings.php:3928
+#: views/layout-settings.php:4233
+msgctxt "Settings page"
+msgid "Show Private Message Link at Members List"
+msgstr ""
+
+#: views/layout-settings.php:3929
+msgctxt "Settings page"
+msgid "You can enable this to show private message button at your members list"
+msgstr ""
+
+#: views/layout-settings.php:4004
+msgctxt "Settings page"
+msgid "Enable messages for Ultimate Member Groups"
+msgstr ""
+
+#: views/layout-settings.php:4016
+msgctxt "Settings page"
+msgid "Enable file uploading in Ultimate Member Groups messages"
+msgstr ""
+
+#: views/layout-settings.php:4026
+msgctxt "Settings page"
+msgid "When enabled users will receive email notifications for Group Messages"
+msgstr ""
+
+#: views/layout-settings.php:4078
+msgctxt "Settings page"
+msgid "Only Followers Mode"
+msgstr ""
+
+#: views/layout-settings.php:4079
+msgctxt "Settings page"
+msgid "Allow only send message if user following the user or followed by the user"
+msgstr ""
+
+#: views/layout-settings.php:4107
+msgctxt "Settings page"
+msgid "GIPHY API Key"
+msgstr ""
+
+#: views/layout-settings.php:4108
+msgctxt "Settings page"
+msgid "Leave this field empty to disable giphy"
+msgstr ""
+
+#: views/layout-settings.php:4109
+msgctxt "Settings page"
+msgid "How to create GIPHY API key"
+msgstr ""
+
+#: views/layout-settings.php:4117
+msgctxt "Settings page"
+msgid "GIPHY Content rating"
+msgstr ""
+
+#: views/layout-settings.php:4118
+#, php-format
+msgctxt "Settings page"
+msgid "GIPHY Content Rating <a href=\"%s\" target=\"_blank\">Learn more</a>"
+msgstr ""
+
+#: views/layout-settings.php:4126
+msgctxt "Settings page"
+msgid "GIPHY Language"
+msgstr ""
+
+#: views/layout-settings.php:4127
+#, php-format
+msgctxt "Settings page"
+msgid "GIPHY Language <a href=\"%s\" target=\"_blank\">Learn more</a>"
+msgstr ""
+
+#: views/layout-settings.php:4159
+msgctxt "Settings page"
+msgid "Stipop.io API Key"
+msgstr ""
+
+#: views/layout-settings.php:4160
+msgctxt "Settings page"
+msgid "Leave this field empty to disable stickers"
+msgstr ""
+
+#: views/layout-settings.php:4168
+msgctxt "Settings page"
+msgid "Language"
+msgstr ""
+
+#: views/layout-settings.php:4169
+msgctxt "Settings page"
+msgid "Two letter language code for showing stickers which best fits this language"
+msgstr ""
+
+#: views/layout-settings.php:4170
+msgctxt "Settings page"
+msgid "For example (en, ko, es)"
+msgstr ""
+
+#: views/layout-settings.php:4184
+msgctxt "Settings page"
+msgid "This notice will be hidden when BuddyPress plugin is installed"
+msgstr ""
+
+#: views/layout-settings.php:4191
+msgctxt "Settings page"
+msgid "BuddyPress Integration"
+msgstr ""
+
+#: views/layout-settings.php:4234
+msgctxt "Settings page"
+msgid "Some themes does not shows private message button automatically."
+msgstr ""
+
+#: views/layout-settings.php:4235
+msgctxt "Settings page"
+msgid "You can enable this to show private message button at your members list if its missing"
+msgstr ""
+
+#: views/layout-settings.php:4242
+msgctxt "Settings page"
+msgid "Change messages tab URL slug in BuddyPress profile (\"messages\" slug is not allowed)"
+msgstr ""
+
+#: views/layout-settings.php:4320
+msgctxt "Settings page"
+msgid "Enable messages for BuddyPress groups"
+msgstr ""
+
+#: views/layout-settings.php:4329
+msgctxt "Settings page"
+msgid "Enable File Uploading"
+msgstr ""
+
+#: views/layout-settings.php:4330
+msgctxt "Settings page"
+msgid "Enable file uploading in BuddyPress Groups Messages"
+msgstr ""
+
+#: views/layout-settings.php:4339
+msgctxt "Settings page"
+msgid "Enables mini groups widget fixed to the bottom of browser window"
+msgstr ""
+
+#: views/layout-settings.php:4365
+msgctxt "Settings page"
+msgid "Email Notifications"
+msgstr ""
+
+#: views/layout-settings.php:4381
+msgctxt "Settings page"
+msgid "URL Slug"
+msgstr ""
+
+#: views/layout-settings.php:4382
+msgctxt "Settings page"
+msgid "Change messages tab URL slug in BuddyPress group"
+msgstr ""
+
+#: views/layout-settings.php:4394
+msgctxt "Settings page"
+msgid "Other"
+msgstr ""
+
+#: views/layout-settings.php:4406
+msgctxt "Settings page"
+msgid "Enable BuddyBoss App Push Notifications"
+msgstr ""
+
+#: views/layout-settings.php:4407
+msgctxt "Settings page"
+msgid "Enable push notifications on new messages in BuddyBoss application when user is offline."
+msgstr ""
+
+#: views/layout-settings.php:4416
+msgctxt "Settings page"
+msgid "Enable fallback when sending new message"
+msgstr ""
+
+#: views/layout-settings.php:4417
+msgctxt "Settings page"
+msgid "Enable fallback when sending function with buddypress native messages_new_message function."
+msgstr ""
+
+#: views/layout-settings.php:4418
+msgctxt "Settings page"
+msgid "This is disabled by default as it can cause issues with some plugins."
+msgstr ""
+
+#: views/layout-settings.php:4447
+msgctxt "Settings page"
+msgid "API Key"
+msgstr ""
+
+#: views/layout-settings.php:4449
+msgctxt "Settings page"
+msgid "Get License Key"
+msgstr ""
+
+#: views/layout-settings.php:4464
+msgctxt "Settings page"
+msgid "This notice will be hidden when MyCRED plugin is installed"
+msgstr ""
+
+#: views/layout-settings.php:4471
+#: views/layout-settings.php:4681
+msgctxt "Settings page"
+msgid "Price for new message in the conversation"
+msgstr ""
+
+#: views/layout-settings.php:4472
+#: views/layout-settings.php:4518
+#: views/layout-settings.php:4564
+#: views/layout-settings.php:4682
+#: views/layout-settings.php:4728
+#: views/layout-settings.php:4774
+msgctxt "Settings page"
+msgid "Use 0 if this is free"
+msgstr ""
+
 #: views/layout-settings.php:4480
 #: views/layout-settings.php:4526
 #: views/layout-settings.php:4579
@@ -3550,1348 +4582,316 @@ msgstr ""
 #: views/layout-settings.php:4736
 #: views/layout-settings.php:4789
 msgctxt "Settings page"
-msgid "Role"
-msgstr ""
-
-#: views/layout-settings.php:2513
-msgctxt "Settings page"
-msgid "Limitation (0 to disable)"
-msgstr ""
-
-#: views/layout-settings.php:2530
-msgctxt "Settings page"
-msgid "messages per"
-msgstr ""
-
-#: views/layout-settings.php:2532
-msgctxt "Settings page"
-msgid "Hour"
-msgstr ""
-
-#: views/layout-settings.php:2533
-msgctxt "Settings page"
-msgid "Day"
-msgstr ""
-
-#: views/layout-settings.php:2546
-msgctxt "Settings page"
-msgid "Message when rate limit for new replies reached"
-msgstr ""
-
-#: views/layout-settings.php:2555
-msgctxt "Settings page"
-msgid "Restrict the creation of a new conversation"
-msgstr ""
-
-#: views/layout-settings.php:2556
-msgctxt "Settings page"
-msgid "Selected roles will not be allowed to start new conversations"
-msgstr ""
-
-#: views/layout-settings.php:2569
-msgctxt "Settings page"
-msgid "Message when the creation of a new conversation restricted"
-msgstr ""
-
-#: views/layout-settings.php:2578
-msgctxt "Settings page"
-msgid "Remove new conversation button for restricted users"
-msgstr ""
-
-#: views/layout-settings.php:2587
-msgctxt "Settings page"
-msgid "Restrict new replies"
-msgstr ""
-
-#: views/layout-settings.php:2588
-msgctxt "Settings page"
-msgid "Selected roles will not be allowed to reply"
-msgstr ""
-
-#: views/layout-settings.php:2600
-msgctxt "Settings page"
-msgid "Message when new replies are restricted"
-msgstr ""
-
-#: views/layout-settings.php:2609
-msgctxt "Settings page"
-msgid "Restrict from viewing message"
-msgstr ""
-
-#: views/layout-settings.php:2610
-msgctxt "Settings page"
-msgid "Selected roles will see message configured below instead of real message"
-msgstr ""
-
-#: views/layout-settings.php:2622
-msgctxt "Settings page"
-msgid "Content of messages when user is restricted from viewing message"
-msgstr ""
-
-#: views/layout-settings.php:2631
-msgctxt "Settings page"
-msgid "Restrict access to mini widgets"
-msgstr ""
-
-#: views/layout-settings.php:2632
-msgctxt "Settings page"
-msgid "Selected roles will not see selected widgets"
-msgstr ""
-
-#: views/layout-settings.php:2661
-msgctxt "Settings page"
-msgid "Mini Friends"
-msgstr ""
-
-#: views/layout-settings.php:2670
-msgctxt "Settings page"
-msgid "Mini Groups"
-msgstr ""
-
-#: views/layout-settings.php:2684
-msgctxt "Settings page"
-msgid "Bad Words List"
-msgstr ""
-
-#: views/layout-settings.php:2685
-msgctxt "Settings page"
-msgid "One word per line"
-msgstr ""
-
-#: views/layout-settings.php:2694
-msgctxt "Settings page"
-msgid "Message when word from Bad Words List is found in message"
-msgstr ""
-
-#: views/layout-settings.php:2708
-msgctxt "Settings page"
-msgid "Website must to have SSL certificate in order to audio and video calls work."
-msgstr ""
-
-#: views/layout-settings.php:2709
-msgctxt "Settings page"
-msgid "This is security requirements by browsers. Contact your hosting company to enable SSL certificate at your website."
-msgstr ""
-
-#: views/layout-settings.php:2710
-msgctxt "Settings page"
-msgid "This notice will be hidden when website will work via HTTPS"
-msgstr ""
-
-#: views/layout-settings.php:2718
-msgctxt "Settings page"
-msgid "Enable Video Calls"
-msgstr ""
-
-#: views/layout-settings.php:2719
-msgctxt "Settings page"
-msgid "Allow users to make video calls between each other"
-msgstr ""
-
-#: views/layout-settings.php:2720
-msgctxt "Settings page"
-msgid "Video calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower video chats."
-msgstr ""
-
-#: views/layout-settings.php:2729
-msgctxt "Settings page"
-msgid "Enable Audio Calls"
-msgstr ""
-
-#: views/layout-settings.php:2730
-msgctxt "Settings page"
-msgid "Allow users to make audio calls between each other"
-msgstr ""
-
-#: views/layout-settings.php:2731
-msgctxt "Settings page"
-msgid "Audio calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower audio calls."
-msgstr ""
-
-#: views/layout-settings.php:2741
-msgctxt "Settings page"
-msgid "Limit calls only to the friends"
-msgstr ""
-
-#: views/layout-settings.php:2742
-msgctxt "Settings page"
-msgid "Allow only friends to make calls between each other (admins always can call)"
-msgstr ""
-
-#: views/layout-settings.php:2752
-msgctxt "Settings page"
-msgid "Revert Mute Voice & Hide Video icons"
-msgstr ""
-
-#: views/layout-settings.php:2753
-msgctxt "Settings page"
-msgid "Makes mute and hide video icons to appear in reverse way"
-msgstr ""
-
-#: views/layout-settings.php:2762
-msgctxt "Settings page"
-msgid "Call time limit before call marked as missed (seconds)"
-msgstr ""
-
-#: views/layout-settings.php:2767
-msgctxt "Settings page"
-msgid "Call Request Time Limit"
-msgstr ""
-
-#: views/layout-settings.php:2778
-msgctxt "Settings page"
-msgid "Restrict calls"
-msgstr ""
-
-#: views/layout-settings.php:2779
-msgctxt "Settings page"
-msgid "Selected roles will not be allowed to call, but they will be able to receive calls still"
-msgstr ""
-
-#: views/layout-settings.php:2800
-msgctxt "Settings page"
-msgid "Message when call is restricted"
-msgstr ""
-
-#: views/layout-settings.php:2825
-msgctxt "Settings page"
-msgid "Group Video Chat"
-msgstr ""
-
-#: views/layout-settings.php:2826
-msgctxt "Settings page"
-msgid "Group audio chat allows to start high definition video & voice group chat up to 50 participants per 1 conversation."
-msgstr ""
-
-#: views/layout-settings.php:2832
-msgctxt "Settings page"
-msgid "Enable Video Chat for Groups"
-msgstr ""
-
-#: views/layout-settings.php:2833
-msgctxt "Settings page"
-msgid "Allow users to start group video chats in Group Chats"
-msgstr ""
-
-#: views/layout-settings.php:2842
-msgctxt "Settings page"
-msgid "Enable Video Chat for Conversations"
-msgstr ""
-
-#: views/layout-settings.php:2843
-msgctxt "Settings page"
-msgid "Allow users to start group video chats in conversations with many participants"
-msgstr ""
-
-#: views/layout-settings.php:2853
-msgctxt "Settings page"
-msgid "Enable Video Chat for Chat Rooms"
-msgstr ""
-
-#: views/layout-settings.php:2854
-msgctxt "Settings page"
-msgid "Allow users to start group video chats in chat rooms"
-msgstr ""
-
-#: views/layout-settings.php:2864
-msgctxt "Settings page"
-msgid "Group Audio Chat"
-msgstr ""
-
-#: views/layout-settings.php:2865
-msgctxt "Settings page"
-msgid "Group audio chat allowing your user to start high definition voice only group chat up to 50 people per 1 conversation."
-msgstr ""
-
-#: views/layout-settings.php:2872
-msgctxt "Settings page"
-msgid "Enable Audio Chat for Groups"
-msgstr ""
-
-#: views/layout-settings.php:2873
-msgctxt "Settings page"
-msgid "Allow users to start group audio chats in Group Chats"
-msgstr ""
-
-#: views/layout-settings.php:2882
-msgctxt "Settings page"
-msgid "Enable Audio Chat for Conversations"
-msgstr ""
-
-#: views/layout-settings.php:2883
-msgctxt "Settings page"
-msgid "Allow users to start group audio chats in conversations with many participants"
-msgstr ""
-
-#: views/layout-settings.php:2893
-msgctxt "Settings page"
-msgid "Enable Audio Chat for Chat Rooms"
-msgstr ""
-
-#: views/layout-settings.php:2894
-msgctxt "Settings page"
-msgid "Allow users to start group audio chats in chat rooms"
-msgstr ""
-
-#: views/layout-settings.php:2910
-msgctxt "Settings page"
-msgid "Colors"
-msgstr ""
-
-#: views/layout-settings.php:2921
-msgctxt "Settings page"
-msgid "Messenger Height"
-msgstr ""
-
-#: views/layout-settings.php:2930
-msgctxt "Settings page"
-msgid "Fixed Header Height"
-msgstr ""
-
-#: views/layout-settings.php:2931
-msgctxt "Settings page"
-msgid "If your website has fixed header specify its height in pixels."
-msgstr ""
-
-#: views/layout-settings.php:2932
-msgctxt "Settings page"
-msgid "This needed for correct scrolling in some cases"
-msgstr ""
-
-#: views/layout-settings.php:2941
-msgctxt "Settings page"
-msgid "Min Height of Messages Container"
-msgstr ""
-
-#: views/layout-settings.php:2942
-msgctxt "Settings page"
-msgid "Min Height of Messages Container in pixels"
-msgstr ""
-
-#: views/layout-settings.php:2951
-msgctxt "Settings page"
-msgid "Max Height of Messages Container"
-msgstr ""
-
-#: views/layout-settings.php:2952
-msgctxt "Settings page"
-msgid "Max Height of Messages Container in pixels"
-msgstr ""
-
-#: views/layout-settings.php:2953
-msgctxt "Settings page"
-msgid "Set 9999 to use all available window height"
-msgstr ""
-
-#: views/layout-settings.php:2962
-msgctxt "Settings page"
-msgid "Side conversation list width"
-msgstr ""
-
-#: views/layout-settings.php:2963
-msgctxt "Settings page"
-msgid "Side conversation list width when Combined View is enabled in pixels"
-msgstr ""
-
-#: views/layout-settings.php:2978
-msgctxt "Settings page"
-msgid "Allow to disable sound notification"
-msgstr ""
-
-#: views/layout-settings.php:2979
-msgctxt "Settings page"
-msgid "Allow user disable sound notifications in their user settings"
-msgstr ""
-
-#: views/layout-settings.php:2988
-msgctxt "Settings page"
-msgid "Disable Search"
-msgstr ""
-
-#: views/layout-settings.php:2989
-msgctxt "Settings page"
-msgid "Disables search functionality"
-msgstr ""
-
-#: views/layout-settings.php:2998
-msgctxt "Settings page"
-msgid "Disable Favorite Messages"
-msgstr ""
-
-#: views/layout-settings.php:2999
-msgctxt "Settings page"
-msgid "Disables favorite messages functionality"
-msgstr ""
-
-#: views/layout-settings.php:3008
-msgctxt "Settings page"
-msgid "Disable User Settings"
-msgstr ""
-
-#: views/layout-settings.php:3009
-msgctxt "Settings page"
-msgid "Disables user settings button"
-msgstr ""
-
-#: views/layout-settings.php:3018
-msgctxt "Settings page"
-msgid "Disable New Conversation Screen"
-msgstr ""
-
-#: views/layout-settings.php:3019
-msgctxt "Settings page"
-msgid "Disables new conversation button and screen (admin will always see it)"
-msgstr ""
-
-#: views/layout-settings.php:3045
-msgctxt "Settings page"
-msgid "Other Plugins"
-msgstr ""
-
-#: views/layout-settings.php:3049
-msgctxt "Settings page"
-msgid "GIFs & Stickers"
-msgstr ""
-
-#: views/layout-settings.php:3050
-msgctxt "Settings page"
-msgid "Emojis"
-msgstr ""
-
-#: views/layout-settings.php:3056
-#: views/layout-settings.php:3172
-#: views/layout-settings.php:3890
-#: views/layout-settings.php:4184
-#: views/layout-settings.php:4464
-#: views/layout-settings.php:4648
-#: views/layout-settings.php:4675
-#, php-format
-msgctxt "Settings page"
-msgid "Website must to have %s plugin to be installed."
-msgstr ""
-
-#: views/layout-settings.php:3057
-msgctxt "Settings page"
-msgid "This notice will be hidden when FluentCommunity plugin is installed"
-msgstr ""
-
-#: views/layout-settings.php:3066
-msgctxt "Settings page"
-msgid "FluentCommunity Profile Pages"
-msgstr ""
-
-#: views/layout-settings.php:3077
-msgctxt "Settings page"
-msgid "Private Message button in user profile"
-msgstr ""
-
-#: views/layout-settings.php:3078
-msgctxt "Settings page"
-msgid "Add private message button to user profile"
-msgstr ""
-
-#: views/layout-settings.php:3088
-#: views/layout-settings.php:3214
-#: views/layout-settings.php:4224
-msgctxt "Settings page"
-msgid "Video Call button in user profile"
-msgstr ""
-
-#: views/layout-settings.php:3089
-#: views/layout-settings.php:3215
-#: views/layout-settings.php:4225
-msgctxt "Settings page"
-msgid "Add video call button to user profile"
-msgstr ""
-
-#: views/layout-settings.php:3099
-#: views/layout-settings.php:3224
-#: views/layout-settings.php:4214
-msgctxt "Settings page"
-msgid "Audio Call button in user profile"
-msgstr ""
-
-#: views/layout-settings.php:3100
-#: views/layout-settings.php:3225
-#: views/layout-settings.php:4215
-msgctxt "Settings page"
-msgid "Add audio call button to user profile"
-msgstr ""
-
-#: views/layout-settings.php:3112
-msgctxt "Settings page"
-msgid "FluentCommunity Spaces"
-msgstr ""
-
-#: views/layout-settings.php:3123
-#: views/layout-settings.php:3301
-#: views/layout-settings.php:4004
-#: views/layout-settings.php:4320
-msgctxt "Settings page"
-msgid "Enable Messages"
-msgstr ""
-
-#: views/layout-settings.php:3124
-msgctxt "Settings page"
-msgid "Enable messages for FluentCommunity Spaces"
-msgstr ""
-
-#: views/layout-settings.php:3133
-#: views/layout-settings.php:3311
-#: views/layout-settings.php:4016
-msgctxt "Settings page"
-msgid "Enable file uploading"
-msgstr ""
-
-#: views/layout-settings.php:3134
-msgctxt "Settings page"
-msgid "Enable file uploading in Spaces Messages"
-msgstr ""
-
-#: views/layout-settings.php:3142
-#: views/layout-settings.php:3320
-#: views/layout-settings.php:4026
-msgctxt "Settings page"
-msgid "Enable Email Notifications"
-msgstr ""
-
-#: views/layout-settings.php:3143
-msgctxt "Settings page"
-msgid "When enabled users will receive email notifications for Spaces Messages"
-msgstr ""
-
-#: views/layout-settings.php:3152
-#: views/layout-settings.php:3330
-#: views/layout-settings.php:4037
-#: views/layout-settings.php:4375
-msgctxt "Settings page"
-msgid "Push Notifications"
-msgstr ""
-
-#: views/layout-settings.php:3153
-msgctxt "Settings page"
-msgid "When enabled users will receive push notifications for Spaces Messages"
-msgstr ""
-
-#: views/layout-settings.php:3173
-msgctxt "Settings page"
-msgid "This notice will be hidden when PeepSo plugin is installed"
-msgstr ""
-
-#: views/layout-settings.php:3181
-msgctxt "Settings page"
-msgid "PeepSo Integration"
-msgstr ""
-
-#: views/layout-settings.php:3193
-msgctxt "Settings page"
-msgid "Enable PeepSo Header at Messages Page"
-msgstr ""
-
-#: views/layout-settings.php:3202
-#: views/layout-settings.php:3909
-#: views/layout-settings.php:4203
-msgctxt "Settings page"
-msgid "Advanced Mini Chats"
-msgstr ""
-
-#: views/layout-settings.php:3203
-#: views/layout-settings.php:3910
-#: views/layout-settings.php:4204
-msgctxt "Settings page"
-msgid "Open mini chat instead of redirecting to standalone messages page, when clicking private messages button in members directory or member profile"
-msgstr ""
-
-#: views/layout-settings.php:3204
-#: views/layout-settings.php:3911
-#: views/layout-settings.php:4205
-#, php-format
-msgctxt "Settings page"
-msgid "Mini Chats must be enabled. Ensure they are enabled <a href=\"%s\">here</a>"
-msgstr ""
-
-#: views/layout-settings.php:3248
-#: views/layout-settings.php:3952
-#: views/layout-settings.php:4267
-msgctxt "Settings page"
-msgid "Only Friends Mode"
-msgstr ""
-
-#: views/layout-settings.php:3249
-#: views/layout-settings.php:3953
-#: views/layout-settings.php:4268
-msgctxt "Settings page"
-msgid "Allow only friends to send messages each other"
-msgstr ""
-
-#: views/layout-settings.php:3250
-#: views/layout-settings.php:3954
-#: views/layout-settings.php:4269
-msgctxt "Settings page"
-msgid "This will also remove not friends users from search results."
-msgstr ""
-
-#: views/layout-settings.php:3251
-#: views/layout-settings.php:3303
-#: views/layout-settings.php:3382
-#: views/layout-settings.php:3419
-#: views/layout-settings.php:3457
-#: views/layout-settings.php:3494
-#: views/layout-settings.php:3531
-#: views/layout-settings.php:3556
-#: views/layout-settings.php:3955
-#: views/layout-settings.php:4006
-#: views/layout-settings.php:4081
-#, php-format
-msgctxt "Settings page"
-msgid "%s must be installed"
-msgstr ""
-
-#: views/layout-settings.php:3259
-#: views/layout-settings.php:3341
-#: views/layout-settings.php:3963
-#: views/layout-settings.php:4048
-#: views/layout-settings.php:4277
-#: views/layout-settings.php:4339
-msgctxt "Settings page"
-msgid "Mini Widget"
-msgstr ""
-
-#: views/layout-settings.php:3261
-#: views/layout-settings.php:3965
-#: views/layout-settings.php:4279
-msgctxt "Settings page"
-msgid "Enables mini friends list widget fixed to the bottom of browser window"
-msgstr ""
-
-#: views/layout-settings.php:3270
-#: views/layout-settings.php:3974
-#: views/layout-settings.php:4288
-msgctxt "Settings page"
-msgid "Shows Friends in left column of Combined view"
-msgstr ""
-
-#: views/layout-settings.php:3278
-#: views/layout-settings.php:3360
-#: views/layout-settings.php:3982
-#: views/layout-settings.php:4067
-#: views/layout-settings.php:4296
-#: views/layout-settings.php:4357
-msgctxt "Settings page"
-msgid "Mobile View"
-msgstr ""
-
-#: views/layout-settings.php:3279
-#: views/layout-settings.php:3983
-#: views/layout-settings.php:4297
-msgctxt "Settings page"
-msgid "Shows Friends as tab at bottom of Mobile View"
-msgstr ""
-
-#: views/layout-settings.php:3302
-msgctxt "Settings page"
-msgid "Enable messages for PeepSo groups"
-msgstr ""
-
-#: views/layout-settings.php:3312
-msgctxt "Settings page"
-msgid "Enable file uploading PeepSo group messages"
-msgstr ""
-
-#: views/layout-settings.php:3321
-#: views/layout-settings.php:4367
-msgctxt "Settings page"
-msgid "When enabled users will receive email notifications for Group Chats"
-msgstr ""
-
-#: views/layout-settings.php:3331
-#: views/layout-settings.php:4038
-#: views/layout-settings.php:4376
-msgctxt "Settings page"
-msgid "When enabled users will receive push notifications for Group Chats"
-msgstr ""
-
-#: views/layout-settings.php:3343
-#: views/layout-settings.php:4050
-msgctxt "Settings page"
-msgid "Enables mini groups list widget fixed to the bottom of browser window"
-msgstr ""
-
-#: views/layout-settings.php:3352
-#: views/layout-settings.php:4059
-#: views/layout-settings.php:4349
-msgctxt "Settings page"
-msgid "Shows Groups in left column of Combined view"
-msgstr ""
-
-#: views/layout-settings.php:3361
-#: views/layout-settings.php:4068
-#: views/layout-settings.php:4358
-msgctxt "Settings page"
-msgid "Shows Groups as tab at bottom of Mobile View"
-msgstr ""
-
-#: views/layout-settings.php:3379
-#: views/layout-settings.php:3416
-#: views/layout-settings.php:3454
-#: views/layout-settings.php:3491
-#: views/layout-settings.php:3528
-#: views/layout-settings.php:3553
-#, php-format
-msgctxt "Settings page"
-msgid "%s Integration"
-msgstr ""
-
-#: views/layout-settings.php:3395
-#: views/layout-settings.php:3432
-#: views/layout-settings.php:3507
-msgctxt "Settings page"
-msgid "Enable Live Chat for Vendors"
-msgstr ""
-
-#: views/layout-settings.php:3396
-#: views/layout-settings.php:3508
-msgctxt "Settings page"
-msgid "When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat"
-msgstr ""
-
-#: views/layout-settings.php:3403
-#: views/layout-settings.php:3515
-msgctxt "Settings page"
-msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page"
-msgstr ""
-
-#: views/layout-settings.php:3433
-msgctxt "Settings page"
-msgid "When enabled visitors will be able to contact vendors easily using Send Message button at the listing page and Vendors profile"
-msgstr ""
-
-#: views/layout-settings.php:3442
-msgctxt "Settings page"
-msgid "Add messages item to HivePress User Menu"
-msgstr ""
-
-#: views/layout-settings.php:3443
-msgctxt "Settings page"
-msgid "When enabled messages menu item will be added to HivePress User Menu and unread messages counter will be shown in it"
-msgstr ""
-
-#: views/layout-settings.php:3470
-msgctxt "Settings page"
-msgid "Enable Live Chat for Job Listings"
-msgstr ""
-
-#: views/layout-settings.php:3471
-msgctxt "Settings page"
-msgid "When enabled visitors will be able to contact job listing authors easily using Send Message button at the listing page"
-msgstr ""
-
-#: views/layout-settings.php:3478
-msgctxt "Settings page"
-msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your job listing page"
-msgstr ""
-
-#: views/layout-settings.php:3543
-msgctxt "Settings page"
-msgid "Show link in bbPress author details"
-msgstr ""
-
-#: views/layout-settings.php:3571
-msgctxt "Settings page"
-msgid "Use Avatars"
-msgstr ""
-
-#: views/layout-settings.php:3572
-msgctxt "Settings page"
-msgid "Avatars from Jet Engine Profile Builder will be displayed in Better Messages interface"
-msgstr ""
-
-#: views/layout-settings.php:3636
-msgctxt "Settings page"
-msgid "Emojis Set"
-msgstr ""
-
-#: views/layout-settings.php:3679
-msgctxt "Settings page"
-msgid "Emojis for Reactions"
-msgstr ""
-
-#: views/layout-settings.php:3705
-msgctxt "Settings page"
-msgid "Add new reaction"
-msgstr ""
-
-#: views/layout-settings.php:3713
-msgctxt "Settings page"
-msgid "Select Emoji for new reaction"
-msgstr ""
-
-#: views/layout-settings.php:3782
-msgctxt "Settings page"
-msgid "Emojis for Selector"
-msgstr ""
-
-#: views/layout-settings.php:3785
-msgctxt "Settings page"
-msgid "Click on emoji to enable or disable it, drag it to change it position in emoji selector"
-msgstr ""
-
-#: views/layout-settings.php:3891
-msgctxt "Settings page"
-msgid "This notice will be hidden when Ultimate Member plugin is installed"
-msgstr ""
-
-#: views/layout-settings.php:3898
-msgctxt "Settings page"
-msgid "Ultimate Member Integration"
-msgstr ""
-
-#: views/layout-settings.php:3920
-msgctxt "Settings page"
-msgid "User Profile - Private Message Button"
-msgstr ""
-
-#: views/layout-settings.php:3921
-msgctxt "Settings page"
-msgid "Show Private Message button in user profiles"
-msgstr ""
-
-#: views/layout-settings.php:3929
-#: views/layout-settings.php:4234
-msgctxt "Settings page"
-msgid "Show Private Message Link at Members List"
-msgstr ""
-
-#: views/layout-settings.php:3930
-msgctxt "Settings page"
-msgid "You can enable this to show private message button at your members list"
-msgstr ""
-
-#: views/layout-settings.php:4005
-msgctxt "Settings page"
-msgid "Enable messages for Ultimate Member Groups"
-msgstr ""
-
-#: views/layout-settings.php:4017
-msgctxt "Settings page"
-msgid "Enable file uploading in Ultimate Member Groups messages"
-msgstr ""
-
-#: views/layout-settings.php:4027
-msgctxt "Settings page"
-msgid "When enabled users will receive email notifications for Group Messages"
-msgstr ""
-
-#: views/layout-settings.php:4079
-msgctxt "Settings page"
-msgid "Only Followers Mode"
-msgstr ""
-
-#: views/layout-settings.php:4080
-msgctxt "Settings page"
-msgid "Allow only send message if user following the user or followed by the user"
-msgstr ""
-
-#: views/layout-settings.php:4108
-msgctxt "Settings page"
-msgid "GIPHY API Key"
-msgstr ""
-
-#: views/layout-settings.php:4109
-msgctxt "Settings page"
-msgid "Leave this field empty to disable giphy"
-msgstr ""
-
-#: views/layout-settings.php:4110
-msgctxt "Settings page"
-msgid "How to create GIPHY API key"
-msgstr ""
-
-#: views/layout-settings.php:4118
-msgctxt "Settings page"
-msgid "GIPHY Content rating"
-msgstr ""
-
-#: views/layout-settings.php:4119
-#, php-format
-msgctxt "Settings page"
-msgid "GIPHY Content Rating <a href=\"%s\" target=\"_blank\">Learn more</a>"
-msgstr ""
-
-#: views/layout-settings.php:4127
-msgctxt "Settings page"
-msgid "GIPHY Language"
-msgstr ""
-
-#: views/layout-settings.php:4128
-#, php-format
-msgctxt "Settings page"
-msgid "GIPHY Language <a href=\"%s\" target=\"_blank\">Learn more</a>"
-msgstr ""
-
-#: views/layout-settings.php:4160
-msgctxt "Settings page"
-msgid "Stipop.io API Key"
-msgstr ""
-
-#: views/layout-settings.php:4161
-msgctxt "Settings page"
-msgid "Leave this field empty to disable stickers"
-msgstr ""
-
-#: views/layout-settings.php:4169
-msgctxt "Settings page"
-msgid "Language"
-msgstr ""
-
-#: views/layout-settings.php:4170
-msgctxt "Settings page"
-msgid "Two letter language code for showing stickers which best fits this language"
-msgstr ""
-
-#: views/layout-settings.php:4171
-msgctxt "Settings page"
-msgid "For example (en, ko, es)"
-msgstr ""
-
-#: views/layout-settings.php:4185
-msgctxt "Settings page"
-msgid "This notice will be hidden when BuddyPress plugin is installed"
-msgstr ""
-
-#: views/layout-settings.php:4192
-msgctxt "Settings page"
-msgid "BuddyPress Integration"
-msgstr ""
-
-#: views/layout-settings.php:4235
-msgctxt "Settings page"
-msgid "Some themes does not shows private message button automatically."
-msgstr ""
-
-#: views/layout-settings.php:4236
-msgctxt "Settings page"
-msgid "You can enable this to show private message button at your members list if its missing"
-msgstr ""
-
-#: views/layout-settings.php:4243
-msgctxt "Settings page"
-msgid "Change messages tab URL slug in BuddyPress profile (\"messages\" slug is not allowed)"
-msgstr ""
-
-#: views/layout-settings.php:4321
-msgctxt "Settings page"
-msgid "Enable messages for BuddyPress groups"
-msgstr ""
-
-#: views/layout-settings.php:4330
-msgctxt "Settings page"
-msgid "Enable File Uploading"
-msgstr ""
-
-#: views/layout-settings.php:4331
-msgctxt "Settings page"
-msgid "Enable file uploading in BuddyPress Groups Messages"
-msgstr ""
-
-#: views/layout-settings.php:4340
-msgctxt "Settings page"
-msgid "Enables mini groups widget fixed to the bottom of browser window"
-msgstr ""
-
-#: views/layout-settings.php:4366
-msgctxt "Settings page"
-msgid "Email Notifications"
-msgstr ""
-
-#: views/layout-settings.php:4382
-msgctxt "Settings page"
-msgid "URL Slug"
-msgstr ""
-
-#: views/layout-settings.php:4383
-msgctxt "Settings page"
-msgid "Change messages tab URL slug in BuddyPress group"
-msgstr ""
-
-#: views/layout-settings.php:4395
-msgctxt "Settings page"
-msgid "Other"
-msgstr ""
-
-#: views/layout-settings.php:4407
-msgctxt "Settings page"
-msgid "Enable BuddyBoss App Push Notifications"
-msgstr ""
-
-#: views/layout-settings.php:4408
-msgctxt "Settings page"
-msgid "Enable push notifications on new messages in BuddyBoss application when user is offline."
-msgstr ""
-
-#: views/layout-settings.php:4417
-msgctxt "Settings page"
-msgid "Enable fallback when sending new message"
-msgstr ""
-
-#: views/layout-settings.php:4418
-msgctxt "Settings page"
-msgid "Enable fallback when sending function with buddypress native messages_new_message function."
-msgstr ""
-
-#: views/layout-settings.php:4419
-msgctxt "Settings page"
-msgid "This is disabled by default as it can cause issues with some plugins."
-msgstr ""
-
-#: views/layout-settings.php:4448
-msgctxt "Settings page"
-msgid "API Key"
-msgstr ""
-
-#: views/layout-settings.php:4450
-msgctxt "Settings page"
-msgid "Get License Key"
-msgstr ""
-
-#: views/layout-settings.php:4465
-msgctxt "Settings page"
-msgid "This notice will be hidden when MyCRED plugin is installed"
-msgstr ""
-
-#: views/layout-settings.php:4472
-#: views/layout-settings.php:4682
-msgctxt "Settings page"
-msgid "Price for new message in the conversation"
-msgstr ""
-
-#: views/layout-settings.php:4473
-#: views/layout-settings.php:4519
-#: views/layout-settings.php:4565
-#: views/layout-settings.php:4683
-#: views/layout-settings.php:4729
-#: views/layout-settings.php:4775
-msgctxt "Settings page"
-msgid "Use 0 if this is free"
-msgstr ""
-
-#: views/layout-settings.php:4481
-#: views/layout-settings.php:4527
-#: views/layout-settings.php:4580
-#: views/layout-settings.php:4691
-#: views/layout-settings.php:4737
-#: views/layout-settings.php:4790
-msgctxt "Settings page"
 msgid "Price"
 msgstr ""
 
-#: views/layout-settings.php:4507
-#: views/layout-settings.php:4717
+#: views/layout-settings.php:4506
+#: views/layout-settings.php:4716
 msgctxt "Settings page"
 msgid "Message when user can`t send new reply"
 msgstr ""
 
-#: views/layout-settings.php:4508
-#: views/layout-settings.php:4554
-#: views/layout-settings.php:4608
-#: views/layout-settings.php:4626
-#: views/layout-settings.php:4718
-#: views/layout-settings.php:4764
-#: views/layout-settings.php:4818
-#: views/layout-settings.php:4836
+#: views/layout-settings.php:4507
+#: views/layout-settings.php:4553
+#: views/layout-settings.php:4607
+#: views/layout-settings.php:4625
+#: views/layout-settings.php:4717
+#: views/layout-settings.php:4763
+#: views/layout-settings.php:4817
+#: views/layout-settings.php:4835
 msgctxt "Settings page"
 msgid "HTML Allowed"
+msgstr ""
+
+#: views/layout-settings.php:4516
+#: views/layout-settings.php:4726
+msgctxt "Settings page"
+msgid "Price for new starting new conversation"
 msgstr ""
 
 #: views/layout-settings.php:4517
 #: views/layout-settings.php:4727
 msgctxt "Settings page"
-msgid "Price for new starting new conversation"
-msgstr ""
-
-#: views/layout-settings.php:4518
-#: views/layout-settings.php:4728
-msgctxt "Settings page"
 msgid "The charge will be applied additionally to the message price"
 msgstr ""
 
-#: views/layout-settings.php:4553
-#: views/layout-settings.php:4763
+#: views/layout-settings.php:4552
+#: views/layout-settings.php:4762
 msgctxt "Settings page"
 msgid "Message when user can`t start new conversation"
+msgstr ""
+
+#: views/layout-settings.php:4562
+#: views/layout-settings.php:4772
+msgctxt "Settings page"
+msgid "Price for private calls"
 msgstr ""
 
 #: views/layout-settings.php:4563
 #: views/layout-settings.php:4773
 msgctxt "Settings page"
-msgid "Price for private calls"
-msgstr ""
-
-#: views/layout-settings.php:4564
-#: views/layout-settings.php:4774
-msgctxt "Settings page"
 msgid "The charge will be applied to the caller. Users are billed per minute. First minute is charged immediately after call started."
 msgstr ""
 
-#: views/layout-settings.php:4607
-#: views/layout-settings.php:4817
+#: views/layout-settings.php:4606
+#: views/layout-settings.php:4816
 msgctxt "Settings page"
 msgid "Message when user can`t start new call"
 msgstr ""
 
-#: views/layout-settings.php:4625
-#: views/layout-settings.php:4835
+#: views/layout-settings.php:4624
+#: views/layout-settings.php:4834
 msgctxt "Settings page"
 msgid "Message when user has no enough point to continue call"
 msgstr ""
 
-#: views/layout-settings.php:4649
+#: views/layout-settings.php:4648
 msgctxt "Settings page"
 msgid "This notice will be hidden when GamiPress plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:4657
+#: views/layout-settings.php:4656
 msgctxt "Settings page"
 msgid "Point Type"
 msgstr ""
 
-#: views/layout-settings.php:4863
+#: views/layout-settings.php:4862
 msgctxt "Settings page"
 msgid "WP Cron Jobs"
 msgstr ""
 
-#: views/layout-settings.php:4872
+#: views/layout-settings.php:4871
 msgctxt "Settings page"
 msgid "Name"
 msgstr ""
 
-#: views/layout-settings.php:4875
+#: views/layout-settings.php:4874
 msgctxt "Settings page"
 msgid "Next Run"
 msgstr ""
 
-#: views/layout-settings.php:4896
+#: views/layout-settings.php:4895
 msgctxt "Settings page"
 msgid "Database"
 msgstr ""
 
-#: views/layout-settings.php:4903
+#: views/layout-settings.php:4902
 msgctxt "Settings page"
 msgid "Database info"
 msgstr ""
 
-#: views/layout-settings.php:4908
+#: views/layout-settings.php:4907
 msgctxt "Settings page"
 msgid "UTF8MB4 Encoding"
 msgstr ""
 
-#: views/layout-settings.php:4913
+#: views/layout-settings.php:4912
 msgctxt "Settings page"
 msgid "Supported"
 msgstr ""
 
-#: views/layout-settings.php:4917
+#: views/layout-settings.php:4916
 msgctxt "Settings page"
 msgid "Not Supported"
 msgstr ""
 
-#: views/layout-settings.php:4924
+#: views/layout-settings.php:4923
 msgctxt "Settings page"
 msgid "Database tables"
 msgstr ""
 
-#: views/layout-settings.php:4946
+#: views/layout-settings.php:4945
 msgctxt "Settings page"
 msgid "Table exists"
 msgstr ""
 
-#: views/layout-settings.php:4953
+#: views/layout-settings.php:4952
 msgctxt "Settings page"
 msgid "Table not exists"
 msgstr ""
 
-#: views/layout-settings.php:4961
+#: views/layout-settings.php:4960
 msgctxt "Settings page"
 msgid "User Index"
 msgstr ""
 
-#: views/layout-settings.php:4964
+#: views/layout-settings.php:4963
 msgctxt "Settings page"
 msgid "Last full synchronization"
 msgstr ""
 
-#: views/layout-settings.php:4965
+#: views/layout-settings.php:4964
 msgctxt "Settings page"
 msgid "Next full synchronization"
 msgstr ""
 
-#: views/layout-settings.php:4967
+#: views/layout-settings.php:4966
 msgctxt "Settings page"
 msgid "Synchronize now"
 msgstr ""
 
-#: views/layout-settings.php:4972
+#: views/layout-settings.php:4971
 msgctxt "Settings page"
 msgid "Convert to UTF8MB4"
 msgstr ""
 
-#: views/layout-settings.php:4973
+#: views/layout-settings.php:4972
 msgctxt "Settings page"
 msgid "Convert database tables to utf8mb4. You do not need to do this if your database tables are already converted to utf8mb4."
 msgstr ""
 
-#: views/layout-settings.php:4976
+#: views/layout-settings.php:4975
 msgctxt "Settings page"
 msgid "Convert"
 msgstr ""
 
-#: views/layout-settings.php:4981
-#: views/layout-settings.php:4985
+#: views/layout-settings.php:4980
+#: views/layout-settings.php:4984
 msgctxt "Settings page"
 msgid "Reset Database"
 msgstr ""
 
-#: views/layout-settings.php:4982
+#: views/layout-settings.php:4981
 msgctxt "Settings page"
 msgid "Complete delete database data and reinstall the tables"
 msgstr ""
 
-#: views/layout-settings.php:4996
+#: views/layout-settings.php:4995
 msgctxt "Settings page"
 msgid "Export Settings"
 msgstr ""
 
-#: views/layout-settings.php:4997
+#: views/layout-settings.php:4996
 msgctxt "Settings page"
 msgid "Copy settings, so you can import them later to another website"
 msgstr ""
 
-#: views/layout-settings.php:5009
+#: views/layout-settings.php:5008
 msgctxt "Settings page"
 msgid "Import Settings"
 msgstr ""
 
-#: views/layout-settings.php:5010
+#: views/layout-settings.php:5009
 msgctxt "Settings page"
 msgid "Paste settings copied before"
 msgstr ""
 
-#: views/layout-settings.php:5144
+#: views/layout-settings.php:5143
 msgctxt "Settings page"
 msgid "Unread messages counter"
 msgstr ""
 
-#: views/layout-settings.php:5145
+#: views/layout-settings.php:5144
 msgctxt "Settings page"
 msgid "Show unread messages counter anywhere in your website"
 msgstr ""
 
-#: views/layout-settings.php:5146
+#: views/layout-settings.php:5145
 msgctxt "Settings page"
 msgid "To add this shortcode to your menu item you can use <a href=\"https://wordpress.org/plugins/shortcode-in-menus/\" target=\"_blank\">Shortcode in Menus</a> plugin."
 msgstr ""
 
-#: views/layout-settings.php:5156
+#: views/layout-settings.php:5155
 msgctxt "Settings page"
 msgid "My messages URL"
 msgstr ""
 
-#: views/layout-settings.php:5157
+#: views/layout-settings.php:5156
 msgctxt "Settings page"
 msgid "Return url to logged in user inbox"
 msgstr ""
 
-#: views/layout-settings.php:5161
+#: views/layout-settings.php:5160
 msgctxt "Settings page"
 msgid "For example: "
 msgstr ""
 
-#: views/layout-settings.php:5175
+#: views/layout-settings.php:5174
 msgctxt "Settings page"
 msgid "Private Message Button"
 msgstr ""
 
-#: views/layout-settings.php:5176
+#: views/layout-settings.php:5175
 msgctxt "Settings page"
 msgid "Shows private message button"
 msgstr ""
 
-#: views/layout-settings.php:5177
-#: views/layout-settings.php:5191
+#: views/layout-settings.php:5176
+#: views/layout-settings.php:5190
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Private Message button."
 msgstr ""
 
-#: views/layout-settings.php:5178
-#: views/layout-settings.php:5192
-#: views/layout-settings.php:5219
-#: views/layout-settings.php:5240
-#: views/layout-settings.php:5261
+#: views/layout-settings.php:5177
+#: views/layout-settings.php:5191
+#: views/layout-settings.php:5218
+#: views/layout-settings.php:5239
+#: views/layout-settings.php:5260
 msgctxt "Settings page"
 msgid "You can force user id with user_id=\"1\" attribute."
 msgstr ""
 
-#: views/layout-settings.php:5189
+#: views/layout-settings.php:5188
 msgctxt "Settings page"
 msgid "Live Chat Button"
 msgstr ""
 
-#: views/layout-settings.php:5190
+#: views/layout-settings.php:5189
 msgctxt "Settings page"
 msgid "Universal button for starting new conversation or continue existing conversation with same unique tag with any user on your website"
 msgstr ""
 
-#: views/layout-settings.php:5203
+#: views/layout-settings.php:5202
 msgctxt "Settings page"
 msgid "Single Conversation Display"
 msgstr ""
 
-#: views/layout-settings.php:5204
+#: views/layout-settings.php:5203
 msgctxt "Settings page"
 msgid "Shows single conversation at any page"
 msgstr ""
 
-#: views/layout-settings.php:5215
+#: views/layout-settings.php:5214
 msgctxt "Settings page"
 msgid "Mini Chat Button"
 msgstr ""
 
-#: views/layout-settings.php:5216
+#: views/layout-settings.php:5215
 msgctxt "Settings page"
 msgid "Shows mini chat button (opens mini chat with user on click)"
 msgstr ""
 
-#: views/layout-settings.php:5217
+#: views/layout-settings.php:5216
 msgctxt "Settings page"
 msgid "This button will work only if Mini Chats option is enabled"
 msgstr ""
 
-#: views/layout-settings.php:5218
+#: views/layout-settings.php:5217
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Mini Chat button."
 msgstr ""
 
-#: views/layout-settings.php:5238
+#: views/layout-settings.php:5237
 msgctxt "Settings page"
 msgid "Shows video call button"
 msgstr ""
 
-#: views/layout-settings.php:5239
+#: views/layout-settings.php:5238
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Video Call button."
 msgstr ""
 
-#: views/layout-settings.php:5259
+#: views/layout-settings.php:5258
 msgctxt "Settings page"
 msgid "Shows audio call button"
 msgstr ""
 
-#: views/layout-settings.php:5260
+#: views/layout-settings.php:5259
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Audio Call button."
 msgstr ""
 
-#: views/layout-settings.php:5283
+#: views/layout-settings.php:5282
 msgctxt "Settings page"
 msgid "Save Changes"
 msgstr ""
@@ -11762,18 +11762,18 @@ msgctxt "Private Call - On Site Message"
 msgid "Incoming Audio Call"
 msgstr ""
 
-#: assets/js/bp-messages-app.js:52050
+#: assets/js/bp-messages-app.js:52055
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:45730
+#: assets/js/bp-messages.js:45735
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Rest API Error"
 msgid "Authorization failed. Please check if you are still authorized at this website."
 msgstr ""
 
-#: assets/js/bp-messages-app.js:70360
+#: assets/js/bp-messages-app.js:70375
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:63815
+#: assets/js/bp-messages.js:63830
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Onsite notifications"
