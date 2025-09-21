@@ -323,6 +323,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Fluent_Community::instance();
             }
 
+            if( class_exists('DaftPlug\Progressify\Plugin') ){
+                require_once Better_Messages()->path . 'addons/progressify.php';
+                Better_Messages_Progressify::instance();
+            }
+
             add_action('template_redirect', array( $this, 'redirect_to_messages'), 0 );
 
             if( Better_Messages()->settings['redirectUnlogged'] === '1' ){

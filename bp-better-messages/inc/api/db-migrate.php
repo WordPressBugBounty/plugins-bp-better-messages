@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.6;
+        private $db_version = 1.7;
 
         public static function instance()
         {
@@ -208,7 +208,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       KEY `thread_id` (`thread_id`),
                       KEY `created_at` (`created_at`),
                       KEY `updated_at` (`updated_at`),
-                      KEY `temp_id` (`temp_id`)
+                      KEY `temp_id` (`temp_id`),
+                      KEY `thread_id_created_at` (`thread_id`, `created_at`)
                     ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('meta') ."` (
@@ -505,6 +506,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     function () {
                         Better_Messages_Capabilities()->register_capabilities();
                     }
+                ],
+                '1.7' => [
+                    "ALTER TABLE `" . bm_get_table('messages') ."` ADD INDEX `thread_id_created_at` (`thread_id`, `created_at`);",
                 ]
             ];
 

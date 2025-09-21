@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.10
+Stable tag: 2.9.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -65,6 +65,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
+* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/)
 * [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/)
 * [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/)
 * [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
@@ -169,7 +170,9 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.10 =
+= 2.9.0 - 2.9.12 =
+* Added integration with [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) for push notifications
+* Added thread_id_created_at_index database index to messages table to improve performance in some cases
 * Added Android Mobile App (WebSocket version only)
 * Fixed issue with file upload in AI Chat Bots conversations in some cases
 * Search results on New Conversation screen does not have height limit anymore at desktop devices and contains more results if available
@@ -183,6 +186,9 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Minor fixes for functionality related to pasting links and screen snapshots from clipboard
 * Removed request aborted error displaying in some cases
 * Fixed admin settings does not save correctly in some cases because of conflict with other plugins
+* Ensure that users with bm_can_administrate capability can not be blocked by regular users
+* Fixed mini chats not working properly in some cases
+* Updated 3rd party libraries to latest versions
 * Other minor bugfixes and improvements
 
 = 2.8.0 - 2.8.16 =

@@ -228,7 +228,7 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
                 /**
                  * Administrator can't be blocked
                  */
-                if (in_array('administrator', $blocked_user_roles)) {
+                if ( in_array('administrator', $blocked_user_roles) || user_can( $blocked_id, 'bm_can_administrate' ) ) {
                     $can_block = false;
                 }
 
