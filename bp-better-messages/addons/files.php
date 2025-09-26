@@ -481,7 +481,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 $name = wp_basename($file['name']);
 
-                $_FILES['file']['name'] = Better_Messages()->functions->random_string(30) . '.' . $extension;
+                if( apply_filters('better_messages_attachments_random_file_name', true ) ){
+                    $_FILES['file']['name'] = Better_Messages()->functions->random_string(30) . '.' . $extension;
+                }
 
                 if( ! in_array( strtolower($extension), $extensions ) ){
                     return new WP_Error(
@@ -499,6 +501,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     status_header( 403 );
                     wp_send_json( $result );
                 }
+
                 // These files need to be included as dependencies when on the front end.
                 require_once( ABSPATH . 'wp-admin/includes/image.php' );
                 require_once( ABSPATH . 'wp-admin/includes/file.php' );

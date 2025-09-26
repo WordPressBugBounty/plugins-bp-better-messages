@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.12
+Stable tag: 2.9.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,8 +170,10 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.12 =
+= 2.9.0 - 2.9.13 =
 * Added integration with [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) for push notifications
+* Minor improvements for fullscreen pwa mode
+* Added better_messages_attachments_random_file_name filter to allow developers to disable random file name generation for uploaded files
 * Added thread_id_created_at_index database index to messages table to improve performance in some cases
 * Added Android Mobile App (WebSocket version only)
 * Fixed issue with file upload in AI Chat Bots conversations in some cases

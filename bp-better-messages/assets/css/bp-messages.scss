@@ -10606,6 +10606,7 @@ body.bm-mobile-device .bp-messages-wrap .threads-list .thread .actions .bm-more-
 }
 
 body.bm-mobile-device-pwa.bp-messages-mobile {
+
   .bp-messages-wrap {
     .chat-tabs > div {
       padding-bottom: 20px;
@@ -10619,6 +10620,16 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
     .chat-footer{
       padding-bottom: 20px;
       height: 64px;
+    }
+  }
+
+  &.bm-mobile-device-android{
+    &.bm-mobile-device-pwa-fullscreen{
+      .bp-messages-wrap {
+        .bm-reply{
+          padding-bottom: 50px;
+        }
+      }
     }
   }
 
@@ -10668,7 +10679,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
   width: 100%;
   background: rgb(255,255,255,0.95);
   overflow: auto;
-  z-index: 2;
+  z-index: 1;
 
   .bm-guest-wall-content{
     margin-top: 50px;
@@ -10680,7 +10691,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
     margin-top: 100px;
   }
 }
-
+ 
 .bp-messages-wrap-main{
   .bm-guest-wall-content{
     margin-top: 100px;

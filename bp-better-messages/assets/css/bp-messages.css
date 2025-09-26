@@ -15469,6 +15469,9 @@ body.bm-mobile-device-pwa.bp-messages-mobile .bp-messages-wrap .chat-footer {
   padding-bottom: 20px;
   height: 64px;
 }
+body.bm-mobile-device-pwa.bp-messages-mobile.bm-mobile-device-android.bm-mobile-device-pwa-fullscreen .bp-messages-wrap .bm-reply {
+  padding-bottom: 50px;
+}
 body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-container .chat-footer {
   padding-bottom: 20px;
   height: 64px;
@@ -15512,7 +15515,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   width: 100%;
   background: rgba(255, 255, 255, 0.95);
   overflow: auto;
-  z-index: 2;
+  z-index: 1;
 }
 .bm-guest-wall .bm-guest-wall-content {
   margin-top: 50px;
