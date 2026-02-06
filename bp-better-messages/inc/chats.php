@@ -27,6 +27,7 @@ class Better_Messages_Chats
         add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
 
         add_shortcode( 'bp_better_messages_chat_room', array( $this, 'layout' ) );
+        add_shortcode( 'better_messages_chat_room', array( $this, 'layout' ) );
 
         //add_action( 'messages_message_sent', array( $this, 'on_message_sent' ) );
 

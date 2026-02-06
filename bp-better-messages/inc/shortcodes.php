@@ -159,17 +159,13 @@ class Better_Messages_Shortcodes
         return '<div class="bp-messages-single-thread-wrap" style="height: ' . $initialHeight . 'px" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
     }
 
-    public function bp_better_messages(){
+    public function bp_better_messages( $args ){
         ob_start();
 
         if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ){
             echo Better_Messages()->functions->render_login_form();
         } else {
-            if (function_exists('bp_is_user') && bp_is_user()) {
-                echo Better_Messages()->functions->get_page();
-            } else {
-                echo Better_Messages()->functions->get_page(true);
-            }
+            echo Better_Messages()->functions->get_page( $args );
         }
 
         return ob_get_clean();

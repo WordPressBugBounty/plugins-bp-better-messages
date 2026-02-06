@@ -33,7 +33,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             add_action('wp_head', array($this, 'counter_in_header'));
 
-            add_action('wp_footer', array( $this, 'messages_list_popup' ) );
+            add_action('wp_footer', array( $this, 'messages_js' ) );
 
             if (Better_Messages()->settings['peepsoHeader'] === '1' && !wp_doing_ajax()) {
                 add_action('bp_better_messages_before_main_template_rendered', array($this, 'before_main_template_rendered'));
@@ -390,10 +390,10 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
         public function member_options($options, $user_id)
         {
             $options['bm_message'] = array(
-                'label' => _x('Send Message', 'PeepSo Integration', 'bp-better-messages'),
-                'click'    => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link( $user_id ) . '"); event.preventDefault()',
-                'icon' => 'comment',
-                'loading' => FALSE,
+                    'label' => _x('Send Message', 'PeepSo Integration', 'bp-better-messages'),
+                    'click'    => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link( $user_id ) . '"); event.preventDefault()',
+                    'icon' => 'comment',
+                    'loading' => FALSE,
             );
 
             return ($options);
@@ -413,18 +413,18 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                 if( Better_Messages()->settings['psForceMiniChat'] === '0' ) {
                     $options['bm_message'] = array(
-                        'class' => 'ps-member__action ps-member__action--message',
-                        'click' => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link($user_id) . '"); event.preventDefault()',
-                        'icon' => 'gcir gci-envelope',
-                        'loading' => FALSE,
+                            'class' => 'ps-member__action ps-member__action--message',
+                            'click' => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link($user_id) . '"); event.preventDefault()',
+                            'icon' => 'gcir gci-envelope',
+                            'loading' => FALSE,
                     );
                 } else {
                     $options['bm_message'] = array(
-                        'class' => 'ps-member__action ps-member__action--message bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
-                        'click' => 'event.preventDefault()',
-                        'icon' => 'gcir gci-envelope',
-                        'loading' => FALSE,
-                        'extra' => 'data-user-id="' . $user_id . '"'
+                            'class' => 'ps-member__action ps-member__action--message bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
+                            'click' => 'event.preventDefault()',
+                            'icon' => 'gcir gci-envelope',
+                            'loading' => FALSE,
+                            'extra' => 'data-user-id="' . $user_id . '"'
                     );
                 }
             }
@@ -439,21 +439,21 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             if ($current_user !== $user_id ) {
                 if( Better_Messages()->settings['psForceMiniChat'] === '0' ) {
                     $act['bm_message'] = array(
-                        'icon' => 'gcir gci-envelope',
-                        'class' => 'ps-focus__cover-action',
-                        'title' => _x('Start a conversation', 'PeepSo Integration', 'bp-better-messages'),
-                        'click' => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link($user_id) . '"); event.preventDefault()',
-                        'loading' => FALSE,
-                        'extra' => 'data-user-id="' . $user_id . '"'
+                            'icon' => 'gcir gci-envelope',
+                            'class' => 'ps-focus__cover-action',
+                            'title' => _x('Start a conversation', 'PeepSo Integration', 'bp-better-messages'),
+                            'click' => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link($user_id) . '"); event.preventDefault()',
+                            'loading' => FALSE,
+                            'extra' => 'data-user-id="' . $user_id . '"'
                     );
                 } else {
                     $act['bm_message'] = array(
-                        'icon' => 'gcir gci-envelope',
-                        'class' => 'ps-focus__cover-action bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
-                        'title' => _x('Start a conversation', 'PeepSo Integration', 'bp-better-messages'),
-                        'click' => 'event.preventDefault()',
-                        'loading' => FALSE,
-                        'extra' => 'data-user-id="' . $user_id . '"'
+                            'icon' => 'gcir gci-envelope',
+                            'class' => 'ps-focus__cover-action bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
+                            'title' => _x('Start a conversation', 'PeepSo Integration', 'bp-better-messages'),
+                            'click' => 'event.preventDefault()',
+                            'loading' => FALSE,
+                            'extra' => 'data-user-id="' . $user_id . '"'
                     );
                 }
 
@@ -461,35 +461,35 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                 if( Better_Messages()->settings['peepsoProfileVideoCall'] === '1') {
                     $link = add_query_arg([
-                        'fast-call' => '',
-                        'to' => $user_id,
-                        'type' => 'video'
+                            'fast-call' => '',
+                            'to' => $user_id,
+                            'type' => 'video'
                     ], $base_link);
 
                     $act['bm_video_call'] = array(
-                        'icon' => 'gci gci-video',
-                        'class' => 'ps-focus__cover-action bpbm-pm-button video-call bm-no-style bm-no-loader',
-                        'title' => _x('Video Call', 'PeepSo Integration', 'bp-better-messages'),
-                        'click' => 'event.preventDefault();',
-                        'loading' => FALSE,
-                        'extra' => 'data-user-id="' . $user_id . '" data-url="' . $link . '"'
+                            'icon' => 'gci gci-video',
+                            'class' => 'ps-focus__cover-action bpbm-pm-button video-call bm-no-style bm-no-loader',
+                            'title' => _x('Video Call', 'PeepSo Integration', 'bp-better-messages'),
+                            'click' => 'event.preventDefault();',
+                            'loading' => FALSE,
+                            'extra' => 'data-user-id="' . $user_id . '" data-url="' . $link . '"'
                     );
                 }
 
                 if( Better_Messages()->settings['peepsoProfileAudioCall'] === '1') {
                     $link = add_query_arg([
-                        'fast-call' => '',
-                        'to' => $user_id,
-                        'type' => 'audio'
+                            'fast-call' => '',
+                            'to' => $user_id,
+                            'type' => 'audio'
                     ], $base_link);
 
                     $act['bm_audio_call'] = array(
-                        'icon' => 'gci gci-phone',
-                        'class' => 'ps-focus__cover-action bpbm-pm-button audio-call bm-no-style bm-no-loader',
-                        'title' => _x('Audio Call', 'PeepSo Integration', 'bp-better-messages'),
-                        'click' => 'event.preventDefault();',
-                        'loading' => FALSE,
-                        'extra' => 'data-user-id="' . $user_id . '" data-url="' . $link . '"'
+                            'icon' => 'gci gci-phone',
+                            'class' => 'ps-focus__cover-action bpbm-pm-button audio-call bm-no-style bm-no-loader',
+                            'title' => _x('Audio Call', 'PeepSo Integration', 'bp-better-messages'),
+                            'click' => 'event.preventDefault();',
+                            'loading' => FALSE,
+                            'extra' => 'data-user-id="' . $user_id . '" data-url="' . $link . '"'
                     );
                 }
             }
@@ -499,21 +499,20 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
         public function filter_peepso_navigation($navigation)
         {
-
             $received = array(
-                'href'              => Better_Messages()->functions->get_link(),
-                'icon'              => 'gcis gci-envelope',
-                'class'             => 'ps-notif--better-messages',
-                'title'             => _x('Messages', 'PeepSo Integration', 'bp-better-messages'),
-                'label'             => _x('Messages', 'Peepso Integration', 'bp-better-messages'),
-                'count'             => 0,
-                'primary'           => FALSE,
-                'secondary'         => TRUE,
-                'mobile-primary'    => FALSE,
-                'mobile-secondary'  => TRUE,
-                'widget'            => FALSE,
-                'notifications'     => TRUE,
-                'icon-only'         => TRUE,
+                    'href'              => Better_Messages()->functions->get_link(),
+                    'icon'             => version_compare( PeepSo::PLUGIN_VERSION, '7.1.0.0', '>=' ) ? 'pso-i-messages' : 'gcis gci-envelope',
+                    'class'             => 'ps-notif--better-messages',
+                    'title'             => _x('Messages', 'PeepSo Integration', 'bp-better-messages'),
+                    'label'             => _x('Messages', 'Peepso Integration', 'bp-better-messages'),
+                    'count'             => 0,
+                    'primary'           => FALSE,
+                    'secondary'         => TRUE,
+                    'mobile-primary'    => FALSE,
+                    'mobile-secondary'  => TRUE,
+                    'widget'            => FALSE,
+                    'notifications'     => TRUE,
+                    'icon-only'         => TRUE,
             );
 
             $navigation['better-messages-notification'] = $received;
@@ -521,7 +520,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             return ($navigation);
         }
 
-        public function messages_list_popup(){
+        public function messages_js(){
             if( ! is_user_logged_in() ) return false;
 
             $inbox_url = Better_Messages()->functions->get_user_messages_url( get_current_user_id() );
@@ -530,24 +529,41 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 var headerButtons = document.querySelectorAll('.ps-notif--better-messages');
 
                 headerButtons.forEach( function(headerButton) {
-                    var html =
-                        '<div class="ps-notif__box" style="display:none;">' +
-                        '<div class="ps-notif__box-header">' +
+
+                    var html = '';
+
+                    <?php if( version_compare( PeepSo::PLUGIN_VERSION, '7.1.0.0', '>=' ) ) { ?>
+                    html += '<div class="pso-notifbox" style="display:none;">';
+                    html += '<div class="pso-notifbox__top"><div class="pso-notifbox__head">' +
+                        '<span class="pso-notifbox__title"><?php echo esc_attr_x('Messages', 'PeepSo Integration', 'bp-better-messages'); ?></span>' +
+                        '<a href="#" onclick="event.preventDefault();BetterMessages.openNewConversationWidget();" class="pso-btn pso-btn--link pso-notifbox__settings"><i class="pso-i-comment-alt-medical"></i></a></div></div>';
+
+                    html += '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
+                        '<div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>' +
+                        '</div>' +
+                        '<div class="pso-notifbox__actions"><a class="pso-btn" href="<?php echo $inbox_url; ?>"><?php echo esc_attr_x('View All', 'PeepSo Integration', 'bp-better-messages'); ?></a></div>';
+
+                    <?php } else { ?>
+                    html += '<div class="ps-notif__box">';
+                    html += '<div class="ps-notif__box-header">' +
                         '<div class="ps-notif__box-title"><?php echo esc_attr_x('Messages', 'PeepSo Integration', 'bp-better-messages'); ?></div>' +
                         '<div class="ps-notif__box-actions">' +
                         '<a href="#" onclick="event.preventDefault();BetterMessages.openNewConversationWidget();"><?php echo esc_attr_x('New message', 'PeepSo Integration', 'bp-better-messages'); ?></a>' +
                         '</div>' +
-                        '</div>' +
-                        '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
+                        '</div>';
+
+                    html += '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
                         '<div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>' +
                         '</div>' +
                         '<div class="ps-notif__box-footer"><a href="<?php echo $inbox_url; ?>"><?php echo esc_attr_x('View All', 'PeepSo Integration', 'bp-better-messages'); ?></a>' +
                         '</div>' +
                         '</div>';
+                    <?php } ?>
+
 
                     headerButton.innerHTML += html;
 
-                    var popup = headerButton.querySelector('.ps-notif__box');
+                    var popup = headerButton.querySelector('.ps-notif__box,.pso-notifbox');
                     var link = jQuery(headerButton).find('> a');
 
                     function handleClickOutside(event) {
@@ -558,7 +574,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                             }
                         }
                     }
-
 
                     if( link[0] ) {
                         link[0].onclick = function (event) {
@@ -575,6 +590,35 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 });
 
                 jQuery(document).trigger("bp-better-messages-init-scrollers");
+
+                <?php if( class_exists('PeepSo_Block_Theme_Settings') ) { ?>
+                const config = { attributes: true, attributeFilter: ['class'] };
+
+                // Callback function to execute when mutations are observed
+                const callback = function(mutationsList, observer) {
+                    for(let mutation of mutationsList) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            if( document.body.classList.contains('ps-dark-mode')  ) {
+                                if( ! document.body.classList.contains('bm-messages-dark') ){
+                                    document.body.classList.add('bm-messages-dark');
+                                    document.body.classList.remove('bm-messages-light');
+                                }
+                            } else {
+                                if( ! document.body.classList.contains('bm-messages-light') ) {
+                                    document.body.classList.add('bm-messages-light');
+                                    document.body.classList.remove('bm-messages-dark');
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // Create an observer instance linked to the callback function
+                const observer = new MutationObserver(callback);
+
+                // Start observing the target node for configured mutations
+                observer.observe(document.body, config);
+                <?php } ?>
             </script>
             <?php
             $script = ob_get_clean();

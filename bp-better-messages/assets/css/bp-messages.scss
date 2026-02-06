@@ -68,6 +68,7 @@ body.bm-messages-dark {
 
   .bpbmuc,
   .bp-messages-wrap.bp-better-messages-list .tabs > div .unread-count,
+  .bp-messages-wrap.bp-better-messages-list .chat .close .unread-count,
   .bp-messages-wrap .threads-list .thread .unread-count,
   .bp-messages-wrap .bm-reply .bm-attachment[data-count]:after,
   .bp-messages-wrap .threads-list .thread .unread-mention{
@@ -1242,14 +1243,11 @@ body.bp-messages-mobile {
 
                 a{
                   color: rgba(var(--bm-text-color), 1);
+                  text-decoration: underline !important;
                 }
 
                 &.favorited-page{
                   cursor: pointer;
-                }
-
-                &:hover .bm-reactions-selector {
-                  display: block;
                 }
 
                 &.bm-message-pending{
@@ -1257,56 +1255,6 @@ body.bp-messages-mobile {
 
                   &:hover{
                     opacity: 1;
-                  }
-                }
-
-                .bm-reactions-selector {
-                  display: none;
-                  position: absolute;
-                  padding: 0;
-                  border: none;
-                  box-shadow: 0 1px 3px 0 #b0b0b0;
-                  background: white;
-                  border-radius: 50px !important;
-                  z-index: 900;
-                  bottom: -9px;
-                  right: -9px;
-                  //width: 20px;
-                  //height: 20px;
-
-                  &:hover{
-                    padding: 3px 2px;
-                    //width: 28px;
-                    overflow-y: hidden;
-
-                    .bm-reaction-icon{
-                      display: block;
-                      margin-top: 1px;
-                      margin-bottom: 1px;
-                      padding: 2px;
-
-                      > img{
-                        width: 20px !important;
-                        height: 20px !important;
-                      }
-                    }
-                  }
-
-                  .bm-reaction-icon{
-                    display: none;
-                    cursor: pointer;
-                    padding: 4px;
-
-                    > img{
-                      display: block !important;
-                      margin: 0 !important;
-                      padding: 0 !important;
-                      //transition: width, height 0.2s linear;
-                    }
-
-                    &:last-child{
-                      display: block;
-                    }
                   }
                 }
 
@@ -1493,6 +1441,8 @@ body.bp-messages-mobile {
                       max-width: 300px;
                       overflow: hidden;
                       margin-bottom: 5px;
+                      //margin-left: auto;
+                      //margin-right: auto;
 
                       img{
                         opacity: 0;
@@ -2225,8 +2175,7 @@ body.bp-messages-mobile {
     }
   }
 
-  &.bp-better-messages-mini {
-
+  &.bp-better-messages-mini{
     &.bm-widget-not-at-bottom{
       .chats{
         .chat{
@@ -2234,10 +2183,13 @@ body.bp-messages-mobile {
         }
       }
     }
+
     .chats {
       display: block;
-      //height: 500px;
+    }
+  }
 
+  &.bp-better-messages-mini, &.bp-better-messages-list {
       .chat {
         position: relative;
         border-radius: var(--bm-mini-chats-border-radius) var(--bm-mini-chats-border-radius) 0 0;
@@ -2547,8 +2499,6 @@ body.bp-messages-mobile {
       .chat .head .unread-count.count-0 {
         display: none;
       }
-
-    }
   }
 
   &.bp-better-messages-list .tabs > div .unread-count {
@@ -2838,6 +2788,59 @@ body.bp-messages-mobile {
   }
 }
 
+
+
+.bm-reactions-selector {
+  position: absolute;
+  padding: 0;
+  border: none;
+  box-shadow: 0 1px 3px 0 #b0b0b0;
+  background: white;
+  border-radius: 50px !important;
+  z-index: 10000001;
+
+  &:hover{
+    overflow-y: hidden;
+    display: grid;
+    grid-template-columns: repeat( var(--columns, 1), 1fr );
+    border-radius: 5px !important;
+    padding: 5px;
+
+    &[data-columns="1"]{
+      border-radius: 50px !important;
+      padding: 3px 2px;
+    }
+
+    .bm-reaction-icon{
+      display: block;
+      margin-top: 1px;
+      margin-bottom: 1px;
+      padding: 2px;
+
+      > img{
+        width: 20px !important;
+        height: 20px !important;
+      }
+    }
+  }
+
+  .bm-reaction-icon{
+    display: none;
+    cursor: pointer;
+    padding: 4px;
+
+    > img{
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      //transition: width, height 0.2s linear;
+    }
+
+    &:last-child{
+      display: block;
+    }
+  }
+}
 
 .bm_user_selector{
   position: relative;
@@ -4034,6 +4037,18 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel{
 
 }
 
+@-webkit-keyframes pulse-animation {
+  0% { -webkit-transform: scale(1); }
+  25% { -webkit-transform: scale(1); }
+  50% { -webkit-transform: scale(1.2) }
+  75% { -webkit-transform: scale(1); }
+  100% { -webkit-transform: scale(1); }
+}
+
+.bm-ai-waiting > svg {
+  -webkit-animation: pulse-animation 2s infinite linear;
+}
+
 .bp-messages-wrap .threads-list .thread .bm-info .bm-live-chat-online{
   display: flex;
   font-size: 11px;
@@ -4050,13 +4065,6 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel{
     margin-right: 5px;
   }
 
-  @-webkit-keyframes pulse-animation {
-    0% { -webkit-transform: scale(1); }
-    25% { -webkit-transform: scale(1); }
-    50% { -webkit-transform: scale(1.2) }
-    75% { -webkit-transform: scale(1); }
-    100% { -webkit-transform: scale(1); }
-  }
 }
 
 .bp-messages-wrap .threads-list .thread .bm-info p .avatar {
@@ -5119,6 +5127,29 @@ body.bm-mobile-device {
     height: var(--bm-mini-widgets-height);
   }
 
+  .chat{
+    margin: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+
+    .controls{
+      .close{
+        .unread-count{
+          position: absolute;
+          left: 0;
+          top: -17px;
+          bottom: 0;
+          margin: auto;
+          width: 12px;
+          height: 12px;
+          min-width: 12px;
+          line-height: 12px;
+        }
+      }
+    }
+  }
+
   .bm-thread-emoji{
     font-size: 20px !important;
   }
@@ -5127,6 +5158,7 @@ body.bm-mobile-device {
     position: relative;
     height: 100%;
     min-height: 0;
+    padding: 0;
 
     > div.active{
       height: 100%;
@@ -10221,10 +10253,6 @@ html[dir="rtl"]{
               .bm-reactions{
                 flex-direction: row-reverse !important;
               }
-              .bm-reactions-selector{
-                left: -9px;
-                right: auto !important;
-              }
             }
           }
 
@@ -10691,7 +10719,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
     margin-top: 100px;
   }
 }
- 
+
 .bp-messages-wrap-main{
   .bm-guest-wall-content{
     margin-top: 100px;

@@ -32,6 +32,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 add_action( 'better_messages_send_notifications', array($this, 'notifications_sender'));
                 add_filter( 'bp_get_email_args', array( $this, 'suppress_post_type_filters' ), 10, 2 );
             }
+
+            // Add REST API endpoint for test email and unsubscribe
+            add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+
+            // Display unsubscribe confirmation message
+            add_action( 'wp_footer', array( $this, 'display_unsubscribe_message' ) );
         }
 
         public function suppress_post_type_filters($args, $email_type){
@@ -397,10 +403,11 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 LEFT JOIN " . bm_get_table('meta') . " messagesmeta ON
                                 ( messagesmeta.`bm_message_id` = `messages`.`id` AND messagesmeta.meta_key = 'bpbm_call_accepted' )
                                 WHERE `messages`.`thread_id` = %d
-                                AND `messages`.`date_sent` > %s 
-                                AND `messages`.message != '<!-- BM-DELETED-MESSAGE -->' 
-                                AND `messages`.sender_id != %d 
-                                AND `messages`.sender_id != 0 
+                                AND `messages`.`date_sent` > %s
+                                AND `messages`.message != '<!-- BM-DELETED-MESSAGE -->'
+                                AND `messages`.sender_id != %d
+                                AND `messages`.sender_id != 0
+                                AND `messages`.is_pending = 0
                                 AND ( messagesmeta.meta_id IS NULL )
                                 ORDER BY id DESC
                                 LIMIT 0, %d
@@ -480,10 +487,13 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     $subject = Better_Messages()->functions->clean_no_subject($subject);
                                 }
 
-                                if (function_exists('bp_send_email')) {
-                                    $sender = get_userdata($message->sender_id);
+                                // Check if BuddyPress email should be used
+                                $use_buddypress_email = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
-                                    if ( ! is_object($sender) ){
+                                if ( $use_buddypress_email ) {
+                                    $sender = get_userdata( $message->sender_id );
+
+                                    if ( ! is_object( $sender ) ){
                                         $this->update_last_email( $user_id, $thread_id, $last_date );
                                         continue;
                                     }
@@ -516,159 +526,21 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     if( $subject !== '' ) {
                                         $email_subject = sprintf(_x('You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages'), $subject);
                                     } else {
-                                        $email_subject = _x('You have unread messages:', 'Email notification header for non BuddyPress websites', 'bp-better-messages');
+                                        $email_subject = _x('You have unread messages', 'Email notification header for non BuddyPress websites', 'bp-better-messages');
                                     }
-                                    /**
-                                     * Composing Email HTML
-                                     */
-                                    ob_start(); ?>
-                                    <!doctype html>
-                                    <html>
-                                    <head>
-                                        <meta name="viewport" content="width=device-width">
-                                        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                                        <title><?php echo $email_subject; ?></title>
-                                        <style>
-                                            /* -------------------------------------
-                                                INLINED WITH htmlemail.io/inline
-                                            ------------------------------------- */
-                                            /* -------------------------------------
-                                                RESPONSIVE AND MOBILE FRIENDLY STYLES
-                                            ------------------------------------- */
-                                            @media only screen and (max-width: 620px) {
-                                                table[class=body] h1 {
-                                                    font-size: 28px !important;
-                                                    margin-bottom: 10px !important;
-                                                }
-                                                table[class=body] p,
-                                                table[class=body] ul,
-                                                table[class=body] ol,
-                                                table[class=body] td,
-                                                table[class=body] span,
-                                                table[class=body] a {
-                                                    font-size: 16px !important;
-                                                }
-                                                table[class=body] .wrapper,
-                                                table[class=body] .article {
-                                                    padding: 10px !important;
-                                                }
-                                                table[class=body] .content {
-                                                    padding: 0 !important;
-                                                }
-                                                table[class=body] .container {
-                                                    padding: 0 !important;
-                                                    width: 100% !important;
-                                                }
-                                                table[class=body] .main {
-                                                    border-left-width: 0 !important;
-                                                    border-radius: 0 !important;
-                                                    border-right-width: 0 !important;
-                                                }
-                                                table[class=body] .btn table {
-                                                    width: 100% !important;
-                                                }
-                                                table[class=body] .btn a {
-                                                    width: 100% !important;
-                                                }
-                                                table[class=body] .img-responsive {
-                                                    height: auto !important;
-                                                    max-width: 100% !important;
-                                                    width: auto !important;
-                                                }
-                                            }
 
-                                            /* -------------------------------------
-                                                PRESERVE THESE STYLES IN THE HEAD
-                                            ------------------------------------- */
-                                            @media all {
-                                                .ExternalClass {
-                                                    width: 100%;
-                                                }
-                                                .ExternalClass,
-                                                .ExternalClass p,
-                                                .ExternalClass span,
-                                                .ExternalClass font,
-                                                .ExternalClass td,
-                                                .ExternalClass div {
-                                                    line-height: 100%;
-                                                }
-                                                .apple-link a {
-                                                    color: inherit !important;
-                                                    font-family: inherit !important;
-                                                    font-size: inherit !important;
-                                                    font-weight: inherit !important;
-                                                    line-height: inherit !important;
-                                                    text-decoration: none !important;
-                                                }
-                                                #MessageViewBody a {
-                                                    color: inherit;
-                                                    text-decoration: none;
-                                                    font-size: inherit;
-                                                    font-family: inherit;
-                                                    font-weight: inherit;
-                                                    line-height: inherit;
-                                                }
-                                                .btn-primary table td:hover {
-                                                    background-color: #34495e !important;
-                                                }
-                                                .btn-primary a:hover {
-                                                    background-color: #34495e !important;
-                                                    border-color: #34495e !important;
-                                                }
-                                            }
-                                        </style>
-                                    </head>
-                                    <body class="" style="background-color: #f6f6f6; font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
-                                    <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #f6f6f6;">
-                                        <tr>
-                                            <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>
-                                            <td class="container" style="font-family: sans-serif; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; max-width: 580px; padding: 10px; width: 580px;">
-                                                <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;">
+                                    // Prepare template data
+                                    $template_data = array(
+                                        'user_name'       => $user->display_name,
+                                        'subject'         => $subject,
+                                        'email_subject'   => $email_subject,
+                                        'messages_html'   => $messageHtml,
+                                        'thread_url'      => $thread_url,
+                                        'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $user_id ) : '',
+                                    );
 
-                                                    <!-- START CENTERED WHITE CONTAINER -->
-                                                    <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 3px;">
-
-                                                        <!-- START MAIN CONTENT AREA -->
-                                                        <tr>
-                                                            <td class="wrapper" style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px;">
-                                                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
-                                                                    <tr>
-                                                                        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
-                                                                            <p style="font-family: sans-serif; font-size: 16px; font-weight: bold; margin: 0; Margin-bottom: 15px;"><?php echo sprintf(__('Hi %s,', 'bp-better-messages'), $user->display_name); ?></p>
-                                                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;"><?php echo $email_subject; ?></p>
-                                                                            <?php echo $messageHtml; ?>
-                                                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0;Margin-top: 20px;Margin-bottom: 15px;"><?php echo sprintf(__('<a href="%s">Go to the discussion</a> to reply or catch up on the conversation.', 'bp-better-messages'), $thread_url); ?></p>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-
-                                                        <!-- END MAIN CONTENT AREA -->
-                                                    </table>
-
-                                                    <!-- START FOOTER -->
-                                                    <div class="footer" style="clear: both; Margin-top: 10px; text-align: center; width: 100%;">
-                                                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
-                                                            <tr>
-                                                                <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                                                                    <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;"><a href="<?php echo home_url(); ?>"><?php echo get_bloginfo('name');  ?></a></span>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </div>
-                                                    <!-- END FOOTER -->
-
-                                                    <!-- END CENTERED WHITE CONTAINER -->
-                                                </div>
-                                            </td>
-                                            <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>
-                                        </tr>
-                                    </table>
-                                    </body>
-                                    </html>
-                                    <?php
-                                    $content = ob_get_clean();
+                                    // Get the email content using the customizable template system
+                                    $content = $this->get_email_template( $template_data );
 
                                     add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
                                     wp_mail( $user->user_email, $email_subject, $content );
@@ -781,6 +653,485 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
         public function email_content_type() {
             return 'text/html';
+        }
+
+        /**
+         * Register REST API routes
+         */
+        public function register_rest_routes() {
+            register_rest_route( 'better-messages/v1', '/sendTestEmail', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_send_test_email' ),
+                'permission_callback' => array( $this, 'can_manage_settings' ),
+                'args'                => array(
+                    'email' => array(
+                        'required'          => true,
+                        'type'              => 'string',
+                        'sanitize_callback' => 'sanitize_email',
+                        'validate_callback' => function( $param ) {
+                            return is_email( $param );
+                        },
+                    ),
+                ),
+            ) );
+
+            register_rest_route( 'better-messages/v1', '/unsubscribe', array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_unsubscribe' ),
+                'permission_callback' => '__return_true',
+                'args'                => array(
+                    'user_id' => array(
+                        'required'          => true,
+                        'type'              => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ),
+                    'token' => array(
+                        'required'          => true,
+                        'type'              => 'string',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ),
+                ),
+            ) );
+        }
+
+        /**
+         * Permission callback for settings management
+         */
+        public function can_manage_settings() {
+            return current_user_can( 'manage_options' );
+        }
+
+        /**
+         * REST API handler for sending test email
+         *
+         * @param WP_REST_Request $request
+         * @return WP_REST_Response|WP_Error
+         */
+        public function rest_send_test_email( WP_REST_Request $request ) {
+            $email = $request->get_param( 'email' );
+
+            if ( ! is_email( $email ) ) {
+                return new WP_Error(
+                    'invalid_email',
+                    __( 'Please enter a valid email address.', 'bp-better-messages' ),
+                    array( 'status' => 400 )
+                );
+            }
+
+            $current_user = wp_get_current_user();
+            $subject      = __( 'Test Conversation', 'bp-better-messages' );
+            $email_subject = sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), $subject );
+
+            // Check if BuddyPress email should be used
+            $use_buddypress = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
+
+            if ( $use_buddypress ) {
+                // Send test email via BuddyPress email system
+                $args = array(
+                    'tokens' => array(
+                        'messages.html' => $this->get_test_messages_html(),
+                        'messages.raw'  => __( 'Hello! This is a test message to preview how your emails will look.', 'bp-better-messages' ),
+                        'sender.name'   => $current_user->display_name,
+                        'thread.id'     => 0,
+                        'thread.url'    => home_url(),
+                        'subject'       => $subject,
+                        'unsubscribe'   => '#',
+                    ),
+                );
+
+                try {
+                    // bp_send_email can accept user ID, WP_User object, or email address
+                    bp_send_email( 'messages-unread-group', $email, $args );
+                    $sent = true;
+                } catch ( Exception $e ) {
+                    $sent = false;
+                }
+            } else {
+                // Use custom template system
+                $template_data = array(
+                    'user_name'       => $current_user->display_name,
+                    'subject'         => $subject,
+                    'email_subject'   => $email_subject,
+                    'messages_html'   => $this->get_test_messages_html(),
+                    'thread_url'      => home_url(),
+                    'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $current_user->ID ) : '',
+                );
+
+                // Get the email content using the customizable template system
+                $content = $this->get_email_template( $template_data );
+
+                // Send the test email
+                add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+                $sent = wp_mail( $email, $email_subject, $content );
+                remove_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+            }
+
+            if ( $sent ) {
+                $message = $use_buddypress
+                    ? sprintf( __( 'Test email sent to %s via BuddyPress', 'bp-better-messages' ), $email )
+                    : sprintf( __( 'Test email sent to %s', 'bp-better-messages' ), $email );
+
+                return new WP_REST_Response( array(
+                    'success' => true,
+                    'message' => $message,
+                ), 200 );
+            } else {
+                return new WP_Error(
+                    'email_failed',
+                    __( 'Failed to send test email. Please check your WordPress email configuration.', 'bp-better-messages' ),
+                    array( 'status' => 500 )
+                );
+            }
+        }
+
+        /**
+         * REST API handler for unsubscribing from message email notifications
+         *
+         * @param WP_REST_Request $request
+         * @return WP_REST_Response|WP_Error
+         */
+        public function rest_unsubscribe( WP_REST_Request $request ) {
+            $user_id = $request->get_param( 'user_id' );
+            $token   = $request->get_param( 'token' );
+
+            // Verify the token
+            if ( ! $this->verify_unsubscribe_token( $user_id, $token ) ) {
+                // Redirect to home with error
+                wp_redirect( add_query_arg( 'bm-unsubscribe', 'invalid', home_url() ) );
+                exit;
+            }
+
+            // Disable message email notifications for this user using existing setting
+            $this->user_emails_enabled_update( $user_id, 'no' );
+
+            // Redirect to confirmation page
+            wp_redirect( add_query_arg( 'bm-unsubscribe', 'success', home_url() ) );
+            exit;
+        }
+
+        /**
+         * Generate unsubscribe token for a user
+         *
+         * @param int $user_id User ID
+         * @return string Token
+         */
+        public function generate_unsubscribe_token( $user_id ) {
+            $secret = wp_salt( 'auth' );
+            $data   = $user_id . '|bm_unsubscribe';
+
+            return hash_hmac( 'sha256', $data, $secret );
+        }
+
+        /**
+         * Verify unsubscribe token
+         *
+         * @param int $user_id User ID
+         * @param string $token Token to verify
+         * @return bool True if valid
+         */
+        public function verify_unsubscribe_token( $user_id, $token ) {
+            $expected_token = $this->generate_unsubscribe_token( $user_id );
+
+            return hash_equals( $expected_token, $token );
+        }
+
+        /**
+         * Generate unsubscribe URL for a user
+         *
+         * @param int $user_id User ID
+         * @return string Unsubscribe URL
+         */
+        public function get_unsubscribe_url( $user_id ) {
+            $token = $this->generate_unsubscribe_token( $user_id );
+
+            return rest_url( 'better-messages/v1/unsubscribe' ) . '?' . http_build_query( array(
+                'user_id' => $user_id,
+                'token'   => $token,
+            ) );
+        }
+
+        /**
+         * Display unsubscribe confirmation message in footer
+         */
+        public function display_unsubscribe_message() {
+            if ( ! isset( $_GET['bm-unsubscribe'] ) ) {
+                return;
+            }
+
+            $status = sanitize_text_field( $_GET['bm-unsubscribe'] );
+
+            if ( $status === 'success' ) {
+                $message = __( 'You have been successfully unsubscribed from message email notifications.', 'bp-better-messages' );
+                $type = 'success';
+            } elseif ( $status === 'invalid' ) {
+                $message = __( 'Invalid or expired unsubscribe link.', 'bp-better-messages' );
+                $type = 'error';
+            } else {
+                return;
+            }
+
+            $bg_color = $type === 'success' ? '#d4edda' : '#f8d7da';
+            $border_color = $type === 'success' ? '#c3e6cb' : '#f5c6cb';
+            $text_color = $type === 'success' ? '#155724' : '#721c24';
+
+            ?>
+            <div id="bm-unsubscribe-notice" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999999; padding: 15px 30px; background: <?php echo $bg_color; ?>; border: 1px solid <?php echo $border_color; ?>; border-radius: 5px; color: <?php echo $text_color; ?>; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <?php echo esc_html( $message ); ?>
+                <span onclick="this.parentElement.remove();" style="margin-left: 15px; cursor: pointer; font-weight: bold;">&times;</span>
+            </div>
+            <script>
+                setTimeout(function() {
+                    var notice = document.getElementById('bm-unsubscribe-notice');
+                    if (notice) notice.remove();
+                }, 5000);
+            </script>
+            <?php
+        }
+
+        /**
+         * Generate sample messages HTML for test email
+         *
+         * @return string Sample messages HTML
+         */
+        private function get_test_messages_html() {
+            $messages_html = '<table style="margin:1rem 0!important;width:100%;table-layout: auto !important;"><tbody>';
+
+            // Sample message 1
+            $messages_html .= '<tr><td colspan="2"><b>' . sprintf( __( '%s wrote:', 'bp-better-messages' ), 'Jane Smith' ) . '</b></td></tr>';
+            $messages_html .= '<tr>';
+            $messages_html .= '<td style="padding-right: 10px;">' . __( 'Hello! This is a sample message to test how your email notifications will look.', 'bp-better-messages' ) . '</td>';
+            $messages_html .= '<td style="width:1px;white-space:nowrap;vertical-align:top;text-align:right;text-overflow:ellipsis;overflow:hidden;"><i>' . date_i18n( get_option( 'time_format' ), strtotime( '-5 minutes' ) ) . '</i></td>';
+            $messages_html .= '</tr>';
+
+            // Sample message 2
+            $messages_html .= '<tr><td colspan="2"><b>' . sprintf( __( '%s wrote:', 'bp-better-messages' ), 'John Doe' ) . '</b></td></tr>';
+            $messages_html .= '<tr>';
+            $messages_html .= '<td style="padding-right: 10px;">' . __( 'Thanks for the message! Here is another sample to show how multiple messages appear in the email.', 'bp-better-messages' ) . '</td>';
+            $messages_html .= '<td style="width:1px;white-space:nowrap;vertical-align:top;text-align:right;text-overflow:ellipsis;overflow:hidden;"><i>' . date_i18n( get_option( 'time_format' ), strtotime( '-2 minutes' ) ) . '</i></td>';
+            $messages_html .= '</tr>';
+
+            $messages_html .= '</tbody></table>';
+
+            return $messages_html;
+        }
+
+        /**
+         * Get the email template based on settings
+         *
+         * @param array $data Template data with placeholders
+         * @return string Rendered HTML email
+         */
+        public function get_email_template( $data ) {
+            $settings = Better_Messages()->settings;
+            $mode = isset( $settings['emailTemplateMode'] ) ? $settings['emailTemplateMode'] : 'simple';
+
+            if ( $mode === 'custom' && ! empty( Better_Messages_Options()->get_email_custom_html() ) ) {
+                return $this->render_custom_email_template( $data );
+            }
+
+            return $this->render_simple_email_template( $data );
+        }
+
+        /**
+         * Render email using simple mode settings
+         *
+         * @param array $data Template data
+         * @return string Rendered HTML
+         */
+        public function render_simple_email_template( $data ) {
+            $settings = Better_Messages()->settings;
+
+            // Get colors from settings or use defaults
+            $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
+            $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';
+            $content_bg_color = ! empty( $settings['emailContentBgColor'] ) ? $settings['emailContentBgColor'] : '#ffffff';
+            $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
+
+            // Get custom texts or use defaults
+            $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
+            $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
+            $button_text = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
+
+            // Process header text placeholder
+            if ( empty( $header_text ) ) {
+                $header_text = sprintf( __( 'Hi %s,', 'bp-better-messages' ), $data['user_name'] );
+            } else {
+                $header_text = str_replace( '{{user_name}}', $data['user_name'], $header_text );
+            }
+
+            // Process footer text placeholders
+            if ( empty( $footer_text ) ) {
+                $footer_text = get_bloginfo( 'name' );
+            } else {
+                $footer_text = str_replace(
+                    array( '{{site_name}}', '{{site_url}}' ),
+                    array( get_bloginfo( 'name' ), home_url() ),
+                    $footer_text
+                );
+            }
+
+            // Get logo HTML if logo is set
+            $logo_html = '';
+            if ( ! empty( $settings['emailLogoUrl'] ) ) {
+                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 200px; max-height: 60px;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
+            }
+
+            // Build the email HTML
+            ob_start();
+            ?>
+            <!doctype html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width">
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <title><?php echo esc_html( $data['email_subject'] ); ?></title>
+                <style>
+                    @media only screen and (max-width: 620px) {
+                        table[class=body] h1 { font-size: 28px !important; margin-bottom: 10px !important; }
+                        table[class=body] p, table[class=body] ul, table[class=body] ol, table[class=body] td, table[class=body] span, table[class=body] a { font-size: 16px !important; }
+                        table[class=body] .wrapper, table[class=body] .article { padding: 10px !important; }
+                        table[class=body] .content { padding: 0 !important; }
+                        table[class=body] .container { padding: 0 !important; width: 100% !important; }
+                        table[class=body] .main { border-left-width: 0 !important; border-radius: 0 !important; border-right-width: 0 !important; }
+                        table[class=body] .btn table { width: 100% !important; }
+                        table[class=body] .btn a { width: 100% !important; }
+                        table[class=body] .img-responsive { height: auto !important; max-width: 100% !important; width: auto !important; }
+                    }
+                    @media all {
+                        .ExternalClass { width: 100%; }
+                        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }
+                        .apple-link a { color: inherit !important; font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; text-decoration: none !important; }
+                        #MessageViewBody a { color: inherit; text-decoration: none; font-size: inherit; font-family: inherit; font-weight: inherit; line-height: inherit; }
+                        .btn-primary table td:hover { background-color: <?php echo esc_attr( $this->adjust_brightness( $primary_color, -20 ) ); ?> !important; }
+                        .btn-primary a:hover { background-color: <?php echo esc_attr( $this->adjust_brightness( $primary_color, -20 ) ); ?> !important; border-color: <?php echo esc_attr( $this->adjust_brightness( $primary_color, -20 ) ); ?> !important; }
+                    }
+                </style>
+            </head>
+            <body class="" style="background-color: <?php echo esc_attr( $background_color ); ?>; font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
+            <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: <?php echo esc_attr( $background_color ); ?>;">
+                <tr>
+                    <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>
+                    <td class="container" style="font-family: sans-serif; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; max-width: 580px; padding: 10px; width: 580px;">
+                        <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;">
+                            <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; width: 100%;">
+                                <?php echo $logo_html; ?>
+                            </table>
+                            <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: <?php echo esc_attr( $content_bg_color ); ?>; border-radius: 3px;">
+                                <tr>
+                                    <td class="wrapper" style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
+                                            <tr>
+                                                <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; color: <?php echo esc_attr( $text_color ); ?>;">
+                                                    <p style="font-family: sans-serif; font-size: 16px; font-weight: bold; margin: 0; Margin-bottom: 15px; color: <?php echo esc_attr( $text_color ); ?>;"><?php echo esc_html( $header_text ); ?></p>
+                                                    <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px; color: <?php echo esc_attr( $text_color ); ?>;"><?php echo esc_html( $data['email_subject'] ); ?></p>
+                                                    <?php echo $data['messages_html']; ?>
+                                                    <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box; margin-top: 20px;">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td align="center" style="font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;">
+                                                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                                                                    <tbody>
+                                                                    <tr>
+                                                                        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: <?php echo esc_attr( $primary_color ); ?>; border-radius: 5px; text-align: center;">
+                                                                            <a href="<?php echo esc_url( $data['thread_url'] ); ?>" target="_blank" style="display: inline-block; color: #ffffff; background-color: <?php echo esc_attr( $primary_color ); ?>; border: solid 1px <?php echo esc_attr( $primary_color ); ?>; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: <?php echo esc_attr( $primary_color ); ?>;"><?php echo esc_html( $button_text ); ?></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="footer" style="clear: both; Margin-top: 10px; text-align: center; width: 100%;">
+                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
+                                    <tr>
+                                        <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
+                                            <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;"><a href="<?php echo esc_url( home_url() ); ?>" style="color: <?php echo esc_attr( $primary_color ); ?>; text-decoration: none;"><?php echo esc_html( $footer_text ); ?></a></span>
+                                            <?php if ( ! empty( $data['unsubscribe_url'] ) ) : ?>
+                                            <br>
+                                            <a href="<?php echo esc_url( $data['unsubscribe_url'] ); ?>" style="color: #999999; font-size: 11px; text-decoration: underline;"><?php _ex( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ); ?></a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>
+                </tr>
+            </table>
+            </body>
+            </html>
+            <?php
+            return ob_get_clean();
+        }
+
+        /**
+         * Render email using custom HTML template
+         *
+         * @param array $data Template data
+         * @return string Rendered HTML
+         */
+        public function render_custom_email_template( $data ) {
+            $template = Better_Messages_Options()->get_email_custom_html();
+            $settings = Better_Messages()->settings;
+
+            // Get colors from settings or use defaults
+            $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
+            $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';
+            $content_bg_color = ! empty( $settings['emailContentBgColor'] ) ? $settings['emailContentBgColor'] : '#ffffff';
+            $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
+            $button_text      = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
+
+            // Replace all placeholders
+            $replacements = array(
+                '{{site_name}}'       => get_bloginfo( 'name' ),
+                '{{site_url}}'        => home_url(),
+                '{{user_name}}'       => $data['user_name'],
+                '{{subject}}'         => $data['subject'],
+                '{{email_subject}}'   => $data['email_subject'],
+                '{{messages_html}}'   => $data['messages_html'],
+                '{{thread_url}}'      => $data['thread_url'],
+                '{{unsubscribe_url}}' => isset( $data['unsubscribe_url'] ) ? $data['unsubscribe_url'] : '',
+                '{{primary_color}}'   => $primary_color,
+                '{{background_color}}' => $background_color,
+                '{{content_bg_color}}' => $content_bg_color,
+                '{{text_color}}'      => $text_color,
+                '{{button_text}}'     => $button_text,
+            );
+
+            return str_replace( array_keys( $replacements ), array_values( $replacements ), $template );
+        }
+
+        /**
+         * Adjust color brightness
+         *
+         * @param string $hex Hex color
+         * @param int $steps Steps to adjust (-255 to 255)
+         * @return string Adjusted hex color
+         */
+        private function adjust_brightness( $hex, $steps ) {
+            // Remove # if present
+            $hex = ltrim( $hex, '#' );
+
+            // Convert to RGB
+            $r = hexdec( substr( $hex, 0, 2 ) );
+            $g = hexdec( substr( $hex, 2, 2 ) );
+            $b = hexdec( substr( $hex, 4, 2 ) );
+
+            // Adjust
+            $r = max( 0, min( 255, $r + $steps ) );
+            $g = max( 0, min( 255, $g + $steps ) );
+            $b = max( 0, min( 255, $b + $steps ) );
+
+            // Convert back to hex
+            return '#' . sprintf( '%02x%02x%02x', $r, $g, $b );
         }
     }
 

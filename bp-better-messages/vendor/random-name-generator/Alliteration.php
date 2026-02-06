@@ -23,7 +23,7 @@ class Alliteration extends AbstractGenerator implements Generator
      * @api
      * @param \BetterMessages\Randomizer\Randomizer $randomizer The random number generator.
      */
-    public function __construct(Randomizer $randomizer = null)
+    public function __construct(?Randomizer $randomizer = null)
     {
         $this->_randomizer = $randomizer;
         $this->_adjectives = file(__DIR__ . '/adjectives.txt', FILE_IGNORE_NEW_LINES);

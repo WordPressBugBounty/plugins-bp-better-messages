@@ -86,17 +86,16 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             return true;
         }
 
-
         public function nice_links( $message, $message_id, $context, $user_id )
         {
-
             if ( $context !== 'stack' ) return $message;
             global $processedUrls;
 
             $links = array();
 
-
             $message = preg_replace_callback('~(<a .*?>.*?</a>|<.*?>)~i', function ($match) use (&$links) { return '<' . array_push($links, $match[1]) . '>'; }, $message);
+
+            $message = preg_replace_callback('~!?\[.*?\]\(.*?\)~sU', function ($match) use (&$links) { return '<' . array_push($links, $match[0]) . '>'; }, $message);
 
             $regex = '/\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
             preg_match_all( $regex, $message, $urls );
@@ -104,7 +103,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             if( ! empty( $urls[0] ) ){
                 $urls[0] = array_unique($urls[0]);
             }
-
 
             foreach ( $urls[ 0 ] as $_url ) {
                 $url = strip_tags(html_entity_decode(esc_url( $_url )));
@@ -115,8 +113,8 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 }
 
                 if ( ! isset( $processedUrls[ $message_id ] )
-                    || !in_array( $_url, $processedUrls[ $message_id ] )
-                    || !in_array( $url, $processedUrls[ $message_id ] )
+                        || !in_array( $_url, $processedUrls[ $message_id ] )
+                        || !in_array( $url, $processedUrls[ $message_id ] )
                 ) {
 
                     $url_md5 = md5( $url );
@@ -146,21 +144,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                     }
 
                     if( Better_Messages()->settings['oEmbedEnable'] === '1' ){
-
-                        /*
-                         * https://wordpress.org/support/article/embeds/
-                         *
-                         * Tested
-                         * YouTube
-                         * Vimeo
-                         * VideoPress
-                         * Flickr
-                         * DailyMotion
-                         * Kickstarter
-                         * Meetup.com
-                         * Mixcloud
-                         * SoundCloud
-                         */
 
                         $video_providers = [
                             'youtube',
@@ -194,7 +177,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                                 break;
                             }
                         }
-
 
                         $oembed = new WP_oEmbed();
                         if( $is_excluded ){
@@ -238,7 +220,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                         $message = str_replace( $_url, '<a target="_blank" href="' . $_url . '">' . $_url . '</a>', $message );
                     }
 
-
                     if( isset( $link ) ) {
                         $processedUrls[$message_id][] = $link;
 
@@ -248,10 +229,9 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 }
             }
 
-
             return preg_replace_callback('/<(\d+)>/', function ($match) use (&$links) { return $links[$match[1] - 1]; }, $message);
-
         }
+
 
         public function render_nice_link( $message_id, $url, $info )
         {

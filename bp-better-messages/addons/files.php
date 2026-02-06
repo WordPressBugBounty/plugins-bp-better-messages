@@ -17,7 +17,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $instance;
         }
 
-
         public function __construct()
         {
             /**
@@ -37,7 +36,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             add_action( 'bp_better_chat_settings_updated', array($this, 'create_index_file') );
         }
 
-        public $scripts_loaded = false;
+        private string $subfolder = '';
+
+        public bool $scripts_loaded = false;
 
         public function load_scripts( $context ){
             if( $this->scripts_loaded ) return;
@@ -415,11 +416,15 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         public function upload_dir($dir){
             $dirName = apply_filters('bp_better_messages_upload_dir_name', 'bp-better-messages');
 
+            if( $this->subfolder !== '' ){
+                $dirName .= $this->subfolder;
+            }
+
             return array(
-                    'path'   => $dir['basedir'] . '/' . $dirName,
-                    'url'    => $dir['baseurl'] . '/' . $dirName,
-                    'subdir' => '/' . $dirName
-                ) + $dir;
+                'path'   => $dir['basedir'] . '/' . $dirName,
+                'url'    => $dir['baseurl'] . '/' . $dirName,
+                'subdir' => '/' . $dirName
+            ) + $dir;
         }
 
         public function upload_mimes($mimes, $user){
@@ -447,8 +452,62 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $allowed;
         }
 
+        public function save_file( $file, $message_id, $user_id )
+        {
+            $this->subfolder = '/' . date('Y') . '/' . date('m');
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if( ! $message ){
+                return new WP_Error( 'better_messages_error_message', 'Message does not exist' );
+            }
+
+            $thread_id = $message->thread_id;
+
+            add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
+            add_filter( 'upload_mimes', array( $this, 'upload_mimes' ), 10, 2 );
+
+            try {
+                $errors = array();
+
+                // These files need to be included as dependencies when on the front end.
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                require_once ABSPATH . 'wp-admin/includes/media.php';
+
+                $name = wp_basename($file['name']);
+
+                $file['name'] = Better_Messages()->functions->random_string(30) . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+
+                add_filter('intermediate_image_sizes', '__return_empty_array');
+                $attachment_id = media_handle_sideload($file, 0);
+                remove_filter('intermediate_image_sizes', '__return_empty_array');
+
+                if ( is_wp_error($attachment_id) ) {
+                    return $attachment_id;
+                }
+
+                add_post_meta($attachment_id, 'bp-better-messages-message-id', $message_id, true);
+                add_post_meta($attachment_id, 'bp-better-messages-attachment', true, true);
+                add_post_meta($attachment_id, 'bp-better-messages-thread-id', $thread_id, true);
+                add_post_meta($attachment_id, 'bp-better-messages-uploader-user-id', $user_id, true);
+                add_post_meta($attachment_id, 'bp-better-messages-upload-time', time(), true);
+                add_post_meta($attachment_id, 'bp-better-messages-original-name', $name, true);
+
+                return $attachment_id;
+            } finally {
+                remove_filter( 'upload_dir', array( $this, 'upload_dir' ) );
+                remove_filter( 'upload_mimes', array( $this, 'upload_mimes' ), 10 );
+
+                $this->create_index_file();
+                $this->subfolder = '';
+            }
+        }
+
         public function handle_upload( WP_REST_Request $request )
         {
+            $this->subfolder = '/' . date('Y') . '/' . date('m');
+
             add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
             add_filter( 'upload_mimes', array( $this, 'upload_mimes' ), 10, 2 );
 
@@ -478,7 +537,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     );
                 }
 
-
                 $name = wp_basename($file['name']);
 
                 if( apply_filters('better_messages_attachments_random_file_name', true ) ){
@@ -494,6 +552,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 }
 
                 $maxSizeMb = apply_filters( 'bp_better_messages_attachment_max_size', Better_Messages()->settings['attachmentsMaxSize'], $thread_id, $user_id );
+
                 $maxSize = $maxSizeMb * 1024 * 1024;
 
                 if($file['size'] > $maxSize){
@@ -527,7 +586,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     $result[ 'id' ] = $attachment_id;
 
                     status_header( 200 );
-                    //do_action('better_messages_user_file_uploaded', $attachment_id, $message_id, $thread_id );
                 }
             } else {
                 status_header( 406 );
@@ -536,6 +594,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             remove_filter( 'upload_dir', array( $this, 'upload_dir' ) );
             remove_filter( 'upload_mimes', array( $this, 'upload_mimes' ), 10 );
+
+            $this->create_index_file();
+            $this->subfolder = '';
 
             if( $result['error'] ){
                 return new WP_Error(

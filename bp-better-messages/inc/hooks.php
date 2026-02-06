@@ -72,7 +72,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 add_action( 'better_messages_before_new_thread', array( $this, 'disable_thread_for_blocked_restricted_role' ), 10, 2);
 
                 if( Better_Messages()->settings['restrictNewThreadsRemoveNewThreadButton'] === '1' ){
-                    $this->disable_new_thread_button_if_needed();
+                    add_filter('bp_better_messages_script_variable', array( $this, 'disable_new_thread_button_if_needed' ), 10, 1 );
                 }
             }
 
@@ -798,7 +798,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function woocommerce_messages_content(){
-            echo Better_Messages()->functions->get_page( true );
+            echo Better_Messages()->functions->get_page();
         }
 
         public function reply_message_formatting( $message, $message_id, $context, $user_id ){
@@ -890,6 +890,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_new_thread_with_bad_word( &$args, &$errors ){
+            if( Better_Messages()->settings['badWordsSkipAdmins'] === '1' && current_user_can('manage_options') ){
+                return;
+            }
+
             $words_list = array_map('trim', explode("\n", Better_Messages()->settings['badWordsList']));
 
             $contains_word = false;
@@ -911,6 +915,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_reply_with_bad_word( &$args, &$errors ){
+            if( Better_Messages()->settings['badWordsSkipAdmins'] === '1' && current_user_can('manage_options') ){
+                return;
+            }
+
             $words_list = array_map('trim', explode("\n", Better_Messages()->settings['badWordsList']));
 
             $contains_word = false;
@@ -1085,7 +1093,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     $asgarosforum->profile->show_profile_navigation($userData);
 
                     echo '<div id="profile-content" style="padding: 0">';
-                    echo Better_Messages()->functions->get_page( true );
+                    echo Better_Messages()->functions->get_page();
                     echo '</div>';
                 }
             } else {
@@ -1606,8 +1614,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             return $message;
         }
 
-        public function disable_new_thread_button_if_needed(){
+        public function disable_new_thread_button_if_needed( $vars ){
             $user_id          = Better_Messages()->functions->get_current_user_id();
+
+            if( $user_id > 0 && user_can( $user_id, 'manage_options' ) ) return $vars;
+
             $restricted_roles = (array)  Better_Messages()->settings['restrictNewThreads'];
             $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
 
@@ -1619,8 +1630,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
             if( $is_restricted ) {
-                Better_Messages()->settings['disableNewThread'] = '1';
+                $vars['newThread'] = '0';
             }
+
+            return $vars;
         }
 
         public function disable_new_thread_button_if_disallowed(){
@@ -1890,9 +1903,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 if( ! $hasaccess ) return $content;
             }
 
-            $messages_content = Better_Messages()->functions->get_page( true );
+            $messages_content = Better_Messages()->functions->get_page();
 
-            if( strpos($content, '[bp-better-messages]') !== FALSE ){
+            if( strpos($content, '[bp-better-messages]') !== FALSE || strpos($content, 'wp-block-better-messages-user-inbox') !== FALSE ){
                 $content = str_replace( '[bp-better-messages]', $messages_content, $content );
             } else {
                 $content = $messages_content;
@@ -1979,6 +1992,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $schedules['better_messages_cleaner_job'] = array(
                 'interval' => 60 * 5,
                 'display' => 'Better Messages Cleaner Job Interval',
+            );
+
+            $schedules['better_messages_ai_ensure_completion_job'] = array(
+                'interval' => 60 * 5,
+                'display' => 'Better Messages AI Bots Ensure Completion Interval',
             );
 
             return $schedules;

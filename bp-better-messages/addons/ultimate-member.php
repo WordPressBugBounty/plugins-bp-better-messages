@@ -414,7 +414,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
         }
 
         public function um_content_messages( $args ) {
-            echo Better_Messages()->functions->get_page( true );
+            echo Better_Messages()->functions->get_page();
         }
 
 

@@ -22,7 +22,7 @@ class Vgng extends AbstractGenerator implements Generator
      * @api
      * @param \BetterMessages\Randomizer\Randomizer $randomizer The random number generator.
      */
-    public function __construct(Randomizer $randomizer = null)
+    public function __construct(?Randomizer $randomizer = null)
     {
         $this->_randomizer = $randomizer;
         $this->_definitionSets = array_map(

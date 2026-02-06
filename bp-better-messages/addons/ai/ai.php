@@ -4,9 +4,7 @@ defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages_AI' ) ) {
     class Better_Messages_AI
     {
-
         public $api;
-
         public static function instance()
         {
 
@@ -22,9 +20,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function __construct()
         {
             add_action( 'init',      array( $this, 'register_post_type' ) );
-
             add_filter( 'better_messages_rest_thread_item', array( $this, 'rest_thread_item'), 20, 5 );
-
             add_filter('better_messages_get_user_roles', array($this, 'get_user_roles'), 10, 2 );
 
             if ( version_compare(phpversion(), '8.1', '>=') ) {
@@ -34,18 +30,28 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $this->api = Better_Messages_OpenAI_API::instance();
 
+                add_action( 'admin_init', array( $this, 'register_event' ) );
                 add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
                 add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
 
                 add_action( 'bp_better_chat_settings_updated', array($this, 'check_if_api_key_valid'));
 
                 add_action( 'better_messages_message_sent', array( $this, 'on_message_sent'), 10, 1 );
+                add_action( 'better_messages_before_message_delete', array( $this, 'before_delete_message' ), 10 , 3 );
 
                 add_action( 'bp_better_messages_new_thread_created', array( $this, 'on_new_thread_created'), 10, 2 );
                 add_filter( 'better_messages_can_send_message', array( $this, 'block_reply_if_needed' ), 20, 3 );
                 add_action( 'better_messages_before_new_thread',  array( $this, 'restrict_new_thread_if_needed'), 10, 2 );
 
                 add_action('better_messages_ai_bot_ensure_completion', array( $this, 'ai_bot_ensure_completion'), 10, 2 );
+                add_action('better_messages_ai_ensure_completion_job', array( $this->api, 'ensureResponseCompletionJob' ) );
+            }
+        }
+
+        public function register_event()
+        {
+            if ( ! wp_next_scheduled( 'better_messages_ai_ensure_completion_job' ) ) {
+                wp_schedule_event( time(), 'better_messages_ai_ensure_completion_job', 'better_messages_ai_ensure_completion_job' );
             }
         }
 
@@ -174,12 +180,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                                     if ($is_waiting_for_response) {
                                         $time_ago = time() - $is_waiting_for_response;
-                                        $time_limit = 60 * 3; // 3 minutes
+                                        $time_limit = 60 * 5; // 5 minutes
 
                                         if ($time_ago < $time_limit) {
                                             $allowed = false;
                                             global $bp_better_messages_restrict_send_message;
-                                            $bp_better_messages_restrict_send_message['waiting_for_response'] = _x('Please wait until response is completed', 'AI Chat Bots', 'bp-better-messages');
+                                            $bp_better_messages_restrict_send_message['waiting_for_ai_response'] = _x('Please wait until response is completed', 'AI Chat Bots', 'bp-better-messages');
                                         } else {
                                             Better_Messages()->functions->delete_thread_meta( $thread_id, 'ai_waiting_for_response' );
                                         }
@@ -214,11 +220,25 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => '__return_true',
             ));
 
+            register_rest_route('better-messages/v1/ai', '/cancelResponse/(?P<id>\d+)', array(
+                'methods' => 'POST',
+                'callback' => array( $this->api, 'cancel_response'),
+                'permission_callback' => array( Better_Messages()->api, 'check_thread_access' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function($param, $request, $key) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ));
+
             register_rest_route('better-messages/v1/admin/ai', '/getModels', array(
                 'methods' => 'GET',
                 'callback' => array( $this->api, 'get_models'),
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
+
         }
 
         public function user_is_admin(){
@@ -325,6 +345,16 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $defaults = array(
                 "enabled" => "0",
                 "images"  => "0",
+                "imagesGeneration" => "0",
+                "imagesGenerationModel" => "gpt-image-1-mini",
+                "imagesGenerationQuality" => "auto",
+                "imagesGenerationSize" => "auto",
+                "files" => "0",
+                "webSearch" => "0",
+                "webSearchContextSize" => "medium",
+                "fileSearch" => "0",
+                "fileSearchVectorIds" => [],
+                "serviceTier" => "auto",
                 "model"   => "",
                 "instruction" => _x( 'You are a helpful assistant', 'AI Chat Bots (WP Admin)', 'bp-better-messages' ),
                 "voice" => $voices[0]
@@ -396,6 +426,29 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 if( ! $settings['model'] ){
                     $settings['model'] = $old_settings['model'];
+                }
+
+                if( ! empty( $settings['fileSearchVectorIds'] ) ){
+                    $lines = explode( "\n", $settings['fileSearchVectorIds']);
+
+                    $vector_ids = [];
+
+                    $added_lines = 0;
+                    foreach( $lines as $line ){
+                        $line = trim( $line );
+                        if( ! empty( $line ) ){
+                            $vector_ids[] = $line;
+                            $added_lines++;
+                        }
+
+                        if( $added_lines == 2 ){
+                            break;
+                        }
+                    }
+
+                    $settings['fileSearchVectorIds'] = array_unique( $vector_ids );
+                } else {
+                    $settings['fileSearchVectorIds'] = [];
                 }
 
                 $defaults = $this->get_default_settings();
@@ -490,11 +543,28 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                                 if (isset($thread_item['permissions']['canUpload'])) {
                                     $support_images = $settings['images'];
+                                    $support_files = true;
+
                                     $thread_item['permissions']['canUpload'] = (bool) $support_images;
 
-                                    if ($support_images) {
-                                        $thread_item['permissions']['canUploadExtensions'] = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+                                    $formats = [];
+
+                                    if ( $support_images ) {
+                                        $formats[] = '.png';
+                                        $formats[] = '.jpg';
+                                        $formats[] = '.jpeg';
+                                        $formats[] = '.gif';
+                                        $formats[] = '.webp';
+                                    }
+
+                                    if( $support_files ) {
+                                        $formats[] = '.pdf';
+                                    }
+
+                                    if( count($formats) > 0 ){
+                                        $thread_item['permissions']['canUploadExtensions'] = $formats;
                                         $thread_item['permissions']['canUploadMaxSize'] = 20;
+                                        $thread_item['permissions']['totalMaxUploadSize'] = 50;
                                     }
                                 }
                             }
@@ -504,6 +574,43 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
 
             return $thread_item;
+        }
+
+        public function before_delete_message( $message_id, $thread_id, $deleteMethod )
+        {
+            try {
+                $message = Better_Messages()->functions->get_message($message_id);
+
+                if ( $message ) {
+                    if (str_starts_with($message->message, '<!-- BM-AI -->')) {
+                        $open_ai_conversation = Better_Messages_OpenAI_API::instance()->get_open_ai_conversation($message->thread_id);
+
+                        if (is_wp_error($open_ai_conversation)) {
+                            return;
+                        }
+
+                        if (!isset($open_ai_conversation['id'])) {
+                            return;
+                        }
+
+                        $open_ai_conversation_id = $open_ai_conversation['id'];
+
+                        $open_ai_message_id = Better_Messages()->functions->get_message_meta($message_id, 'openai_message_id');
+
+                        if ( ! $open_ai_message_id) {
+                            return;
+                        }
+
+                        $this->api->delete_conversation_message( $open_ai_conversation_id, $open_ai_message_id );
+
+                        if( defined('BM_DEBUG') ) {
+                            file_put_contents(ABSPATH . 'open-ai.log', time() . ' - deleted_message - ' . print_r( "$open_ai_conversation_id, $open_ai_message_id", true ) . "\n", FILE_APPEND | LOCK_EX);
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                // silent fail if happens
+            }
         }
 
         public function on_message_sent( $message )
@@ -528,6 +635,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             $bot_id = (int) str_replace('ai-chat-bot-', '', $guest->ip);
 
                             if( $this->bot_exists( $bot_id ) && ( $this->is_bot_conversation( $bot_id, $message->thread_id ) || $new_thread ) ){
+                                global $wpdb;
+
                                 $bot_settings = $this->get_bot_settings( $bot_id );
                                 Better_Messages()->functions->update_message_meta($message->id, 'ai_bot_id', $bot_id);
                                 Better_Messages()->functions->update_message_meta($message->id, 'ai_waiting_for_response', time());
@@ -536,7 +645,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                                 do_action('better_messages_thread_self_update', $message->thread_id, $sender_id);
                                 do_action('better_messages_thread_updated', $message->thread_id, $sender_id);
 
+                                $table = bm_get_table('messages');
+                                $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET `message` = CONCAT(%s, `message`) WHERE `id` = %d;", '<!-- BM-AI -->', $message->id ) );
+
                                 if ( ! empty( Better_Messages()->settings['openAiApiKey'] ) && ! empty( $bot_settings['model'] ) ) {
+                                    // Ensure create response trigger in case something goes wrong
                                     if( ! wp_get_scheduled_event( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message->id ] ) ){
                                         wp_schedule_single_event( time() + 15, 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message->id ] );
                                     }
@@ -546,10 +659,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                                         'message_id' => $message->id
                                     ], Better_Messages()->functions->get_rest_api_url() . 'ai/createResponse');
 
-                                    wp_remote_get($url, [
+                                    wp_remote_get( $url, [
                                         'blocking' => false,
                                         'timeout' => 0
-                                    ]);
+                                    ] );
                                 }
                             }
                         }

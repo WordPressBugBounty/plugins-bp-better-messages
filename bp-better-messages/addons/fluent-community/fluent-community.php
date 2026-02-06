@@ -27,8 +27,11 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             add_action('better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
 
             add_action('fluent_community/portal_head', [$this, 'load_styles']);
+            add_action('wp_head', [$this, 'load_styles']);
             add_action( 'fluent_community/before_js_loaded', [$this, 'load_javascript'] );
+            add_action( 'wp_head', [$this, 'load_javascript'] );
             add_action( 'fluent_community/before_header_menu_items', [$this, 'add_messages_menu'] );
+            add_action( 'fluent_community/mobile_menu', [$this, 'add_messages_mobile_menu'], 10, 3 );
 
             if( Better_Messages()->settings['chatPage'] === '0' ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
@@ -84,8 +87,15 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             return $item;
         }
 
+        private bool $css_loaded = false;
         public function load_styles()
         {
+            if ( $this->css_loaded ) {
+                return;
+            }
+
+            $this->css_loaded = true;
+
             Better_Messages()->load_scripts();
             wp_styles()->all_deps([ 'better-messages' ]);
 
@@ -117,14 +127,19 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             Better_Messages_Customize()->header_output();
 
+            if( ! doing_action('fluent_community/portal_head') ) return;
             ?>
             <style type="text/css">
                 body.bp-messages-mobile[data-route="better_messages"] .fluent_com{
                     min-height: auto;
                 }
 
+                body[data-route="better_messages"] .feed_layout{
+                    max-height: calc( 100vh - var(--fcom-header-height, 0px) );
+                }
+
                 .fcom_mobile_menu .focm_menu_item span.bm-unread-badge{
-                    background: var(--el-color-danger);
+                    background: var(--el-color-danger, rgb(245, 108, 108));
                     width: 15px;
                     height: 15px;
                     text-align: center;
@@ -152,20 +167,35 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     display: none;
                 }
 
+                .fcom_full_size_container .bp-messages-wrap{
+                    border-radius: 0 !important;
+                    box-shadow: none;
+                    border: none;
+                }
+
                 .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile), .bp-messages-wrap-main .bp-messages-threads-wrapper{
-                    height: calc( var(--bm-fcom-window-height) - var(--bm-fcom-menu-height, 55px) - 60px ) !important;
+                    height: calc( var(--bm-fcom-window-height) - var(--bm-fcom-menu-height, 55px) - var(--bm-fcom-title-height, 0px) - 40px ) !important;
+                }
+
+                .fcom_full_size_container .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile), .fcom_full_size_container .bp-messages-wrap-main .bp-messages-threads-wrapper{
+                    height: calc( var(--bm-fcom-window-height) - var(--bm-fcom-menu-height, 55px) - var(--bm-fcom-title-height, 0px) ) !important;
                 }
 
                 .bp-messages-wrap-main.bp-messages-mobile, .bp-messages-wrap-group.bp-messages-mobile, .bp-messages-chat-wrap.bp-messages-mobile, .bp-messages-single-thread-wrap.bp-messages-mobile{
                     top: var(--fcom-header-height);
-                    height: calc(100% - var(--bm-fcom-footer-height, 41px) - var(--fcom-header-height));
+                    height: calc( 100% - var(--bm-fcom-footer-height, 41px) - var(--fcom-header-height) );
                     z-index: 10;
                 }
 
-                body.bm-reply-area-focused{
-                    .bp-messages-wrap-main.bp-messages-mobile, .bp-messages-wrap-group.bp-messages-mobile, .bp-messages-chat-wrap.bp-messages-mobile, .bp-messages-single-thread-wrap.bp-messages-mobile{
-                        height: calc(100% - var(--fcom-header-height)) !important;
-                    }
+                body.bm-reply-area-focused .bp-messages-wrap-main.bp-messages-mobile,
+                body.bm-reply-area-focused .bp-messages-wrap-group.bp-messages-mobile,
+                body.bm-reply-area-focused .bp-messages-chat-wrap.bp-messages-mobile,
+                body.bm-reply-area-focused .bp-messages-single-thread-wrap.bp-messages-mobile {
+                    height: calc(100% - var(--fcom-header-height)) !important;
+                }
+
+                body.bm-reply-area-focused.bp-messages-mobile .fcom_mobile_menu{
+                    display: none;
                 }
 
                 @media screen and (max-width: 1024px) {
@@ -187,7 +217,15 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             <?php
         }
 
+        private bool $js_loaded = false;
+
         public function load_javascript() {
+            if ( $this->js_loaded ) {
+                return;
+            }
+
+            $this->js_loaded = true;
+
             $version = Better_Messages()->version;
 
             Better_Messages()->load_scripts();
@@ -236,7 +274,14 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             }
 
             $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?=' . $version;
-            echo '<script src="' . $src . '"></script>';
+
+            $vars = [
+                'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
+                'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
+            ];
+
+            echo '<script type="text/javascript">var BM_Fluent_Community=' . wp_json_encode( $vars ) . ';</script>';
+            echo '<script type="text/javascript" src="' . $src . '"></script>';
         }
 
         public function message_page_url( $url, $user_id ){
@@ -263,9 +308,9 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             if( Better_Messages()->settings['fastStart'] == '1' ) {
                 $url = add_query_arg([
-                    'to' => $user_id,
-                    'scrollToContainer' => '',
-                    'bm-fast-start' => 1
+                        'to' => $user_id,
+                        'scrollToContainer' => '',
+                        'bm-fast-start' => 1
                 ], get_site_url());
             } else {
                 $url = Better_Messages()->functions->private_message_link($user_id);
@@ -273,45 +318,45 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             if( Better_Messages()->settings['FCenableMessageButton'] === '1' ){
                 $data['profile_nav_actions'][] = [
-                    'css_class' => $class,
-                    'title'     => _x('Message', 'FluentCommunity Integration', 'bp-better-messages'),
-                    'svg_icon'  => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"></path></svg></span>',
-                    'url'       => $url
+                        'css_class' => $class,
+                        'title'     => _x('Message', 'FluentCommunity Integration', 'bp-better-messages'),
+                        'svg_icon'  => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"></path></svg></span>',
+                        'url'       => $url
                 ];
             }
 
             if( Better_Messages()->functions->can_use_premium_code() ) {
                 if (Better_Messages()->settings['FCProfileVideoCall'] === '1') {
                     $args = [
-                        'fast-call' => '',
-                        'to' => $user_id,
-                        'type' => 'video'
+                            'fast-call' => '',
+                            'to' => $user_id,
+                            'type' => 'video'
                     ];
 
                     $link = add_query_arg($args, get_site_url());
 
                     $data['profile_nav_actions'][] = [
-                        'css_class' => 'fcom_bm_video_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style video-call bm-user-' . $user_id,
-                        'title' => _x('Video Call', 'FluentCommunity Integration', 'bp-better-messages'),
-                        'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M374.79 308.78 457.5 367a16 16 0 0 0 22.5-14.62V159.62A16 16 0 0 0 457.5 145l-82.71 58.22A16 16 0 0 0 368 216.3v79.4a16 16 0 0 0 6.79 13.08z"></path><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M268 384H84a52.15 52.15 0 0 1-52-52V180a52.15 52.15 0 0 1 52-52h184.48A51.68 51.68 0 0 1 320 179.52V332a52.15 52.15 0 0 1-52 52z"></path></svg></span>',
-                        'url' => $link
+                            'css_class' => 'fcom_bm_video_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style video-call bm-user-' . $user_id,
+                            'title' => _x('Video Call', 'FluentCommunity Integration', 'bp-better-messages'),
+                            'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M374.79 308.78 457.5 367a16 16 0 0 0 22.5-14.62V159.62A16 16 0 0 0 457.5 145l-82.71 58.22A16 16 0 0 0 368 216.3v79.4a16 16 0 0 0 6.79 13.08z"></path><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M268 384H84a52.15 52.15 0 0 1-52-52V180a52.15 52.15 0 0 1 52-52h184.48A51.68 51.68 0 0 1 320 179.52V332a52.15 52.15 0 0 1-52 52z"></path></svg></span>',
+                            'url' => $link
                     ];
                 }
 
                 if (Better_Messages()->settings['FCProfileAudioCall'] === '1') {
                     $args = [
-                        'fast-call' => '',
-                        'to' => $user_id,
-                        'type' => 'audio'
+                            'fast-call' => '',
+                            'to' => $user_id,
+                            'type' => 'audio'
                     ];
 
                     $link = add_query_arg($args, get_site_url());
 
                     $data['profile_nav_actions'][] = [
-                        'css_class' => 'fcom_bm_audio_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style audio-call bm-user-' . $user_id,
-                        'title' => _x('Audio Call', 'FluentCommunity Integration', 'bp-better-messages'),
-                        'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M451 374c-15.88-16-54.34-39.35-73-48.76-24.3-12.24-26.3-13.24-45.4.95-12.74 9.47-21.21 17.93-36.12 14.75s-47.31-21.11-75.68-49.39-47.34-61.62-50.53-76.48 5.41-23.23 14.79-36c13.22-18 12.22-21 .92-45.3-8.81-18.9-32.84-57-48.9-72.8C119.9 44 119.9 47 108.83 51.6A160.15 160.15 0 0 0 83 65.37C67 76 58.12 84.83 51.91 98.1s-9 44.38 23.07 102.64 54.57 88.05 101.14 134.49S258.5 406.64 310.85 436c64.76 36.27 89.6 29.2 102.91 23s22.18-15 32.83-31a159.09 159.09 0 0 0 13.8-25.8C465 391.17 468 391.17 451 374z"></path></svg></span>',
-                        'url' => $link
+                            'css_class' => 'fcom_bm_audio_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style audio-call bm-user-' . $user_id,
+                            'title' => _x('Audio Call', 'FluentCommunity Integration', 'bp-better-messages'),
+                            'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M451 374c-15.88-16-54.34-39.35-73-48.76-24.3-12.24-26.3-13.24-45.4.95-12.74 9.47-21.21 17.93-36.12 14.75s-47.31-21.11-75.68-49.39-47.34-61.62-50.53-76.48 5.41-23.23 14.79-36c13.22-18 12.22-21 .92-45.3-8.81-18.9-32.84-57-48.9-72.8C119.9 44 119.9 47 108.83 51.6A160.15 160.15 0 0 0 83 65.37C67 76 58.12 84.83 51.91 98.1s-9 44.38 23.07 102.64 54.57 88.05 101.14 134.49S258.5 406.64 310.85 436c64.76 36.27 89.6 29.2 102.91 23s22.18-15 32.83-31a159.09 159.09 0 0 0 13.8-25.8C465 391.17 468 391.17 451 374z"></path></svg></span>',
+                            'url' => $link
                     ];
                 }
             }
@@ -319,13 +364,36 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             return $data;
         }
 
+        public function add_messages_mobile_menu( $menu, $header_height, $footer_height )
+        {
+            if( ! is_user_logged_in() ) return $menu;
+
+            $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
+
+            $item = [
+                    'permalink' => $url,
+                    'icon_svg' => '<svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"></path></svg>',
+                    'html'     => '<span class="bm-unread-badge" style="display: none;"></span>'
+            ];
+
+            if ( isset($menu[0]) ) {
+                array_splice($menu, 1, 0, [ $item ]);
+            } else {
+                $menu[] = $item;
+            }
+
+            return $menu;
+        }
+
+
         public function add_messages_menu()
         {
             if( ! is_user_logged_in() ) return;
+            $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
             ?>
-            <li class="top_menu_item fcom_better_messages_menu_li  fcom_desktop_only">
-                <a href="<?php echo Helper::baseUrl('messages'); ?>"
-                   class="el-badge fcom_better_messages_menu item el-tooltip__trigger el-tooltip__trigger">
+            <li class="top_menu_item fcom_better_messages_menu_li fcom_countable_notification_holder  fcom_desktop_only">
+                <a href="<?php echo $url; ?>"
+                   class="el-badge fcom_better_messages_menu fcom_theme_button item el-tooltip__trigger el-tooltip__trigger">
                     <div class="better_messages_icon">
                         <i class="el-icon">
                             <svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg">

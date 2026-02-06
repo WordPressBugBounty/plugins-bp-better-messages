@@ -19,9 +19,7 @@ $roles['bm-guest'] = [
 $all_roles['bm-guest'] = [
     'name' => _x('Guests', 'Settings page', 'bp-better-messages' )
 ];
-$roles['bm-bot'] = [
-    'name' => _x('AI Chat Bots', 'Settings page', 'bp-better-messages' )
-];
+
 $all_roles['bm-bot'] = [
     'name' => _x('AI Chat Bots', 'Settings page', 'bp-better-messages' )
 ];
@@ -33,9 +31,10 @@ $next_sync = wp_next_scheduled( 'better_messages_sync_user_index_weekly' );
 $next_sync = ( $next_sync ) ? date('d-m-Y H:i:m', $next_sync) : '-';
 
 $jobs_list = [
+     'better_messages_send_notifications',
     'better_messages_sync_unread',
     'better_messages_cleaner_job',
-    'better_messages_send_notifications',
+    'better_messages_ai_ensure_completion_job',
     'better_messages_sync_user_index_weekly'
 ];
 
@@ -70,7 +69,7 @@ if( $has_late ){ ?>
     <p style="margin-top:0;font-weight:bold;font-size:110%">WP Cron Jobs does not work properly at this website</p>
     That can cause problems with email notifications and other features, which are running in background.<br/>
     <br/>
-    <strong>Its recommended to fix this issue as soon as possible.</strong><br/>
+    <strong>It's recommended to fix this issue as soon as possible.</strong><br/>
     <br/>
     You can try to install <a href="https://wordpress.org/plugins/wp-crontrol/" target="_blank">WP Crontrol</a> plugin to get more detailed information about WP Cron system at your website and check <a href="https://www.wordplus.org/cron-help" target="_blank">possible issues and fixes</a>.<br/>
 </div>
@@ -437,17 +436,53 @@ $has_late_message = ob_get_clean();
         }
 
 
-        var messageViewer = $('input[name="messagesViewer"]');
+        var messageViewer = $('#bpbm-messages-viewer');
+        var allowReports = $('#bpbm-allow-reports');
+        var messagesPremoderation = $('#bpbm-premoderation');
+
         messageViewer.on('change', changeMessageViewer);
+        messagesPremoderation.on('change', changePremoderation);
+        allowReports.on('change', changeModerationNotificationEmails);
 
         changeMessageViewer();
+        changePremoderation();
+        changeModerationNotificationEmails();
 
         function changeMessageViewer(){
-            if( messageViewer.is(':checked') ){
-                $('input[name="allowReports"]').attr('disabled', false);
-            } else {
-                $('input[name="allowReports"]').attr('disabled', true);
-            }
+            var viewerEnabled = messageViewer.is(':checked');
+
+            allowReports.attr('disabled', !viewerEnabled);
+            messagesPremoderation.attr('disabled', !viewerEnabled);
+
+            changePremoderation();
+            changeModerationNotificationEmails();
+        }
+
+        function changePremoderation(){
+            var viewerEnabled = messageViewer.is(':checked');
+            var premoderationEnabled = messagesPremoderation.is(':checked') && viewerEnabled;
+
+            var firstTimeInput = $('#bpbm-premoderation-first-time');
+            var rolesListWrapper = $('#bpbm-premoderation-roles-list');
+
+            firstTimeInput.attr('disabled', !premoderationEnabled);
+            rolesListWrapper.find('input').attr('disabled', !premoderationEnabled);
+            rolesListWrapper.css('opacity', premoderationEnabled ? '1' : '0.5');
+
+            changeModerationNotificationEmails();
+        }
+
+        function changeModerationNotificationEmails(){
+            var viewerEnabled = messageViewer.is(':checked');
+            var premoderationEnabled = messagesPremoderation.is(':checked') && viewerEnabled;
+            var reportsEnabled = allowReports.is(':checked') && viewerEnabled;
+
+            // Notification emails should be enabled if either premoderation OR reports is enabled
+            var notificationEmailsEnabled = premoderationEnabled || reportsEnabled;
+
+            var notificationEmailsTextarea = $('#bpbm-notification-emails');
+            notificationEmailsTextarea.attr('disabled', !notificationEmailsEnabled);
+            notificationEmailsTextarea.css('opacity', notificationEmailsEnabled ? '1' : '0.5');
         }
 
         function changeReactionStatuses(){
@@ -496,6 +531,24 @@ $has_late_message = ob_get_clean();
 
         changeUsersSearch();
         disableUsersSearch.on('change', changeUsersSearch);
+
+        var miniConversations = $('input[name="miniThreadsEnable"]');
+        var miniChats = $('input[name="miniChatsEnable"]');
+        var combinedChats = $('input[name="combinedChatsEnable"]');
+
+        function controlCombinedChats(){
+            if( miniConversations.is(':checked') && miniChats.is(':checked') ){
+                combinedChats.attr('disabled', false);
+            } else {
+                combinedChats.attr('disabled', true);
+                combinedChats.prop('checked', false);
+            }
+        }
+
+        controlCombinedChats();
+        miniChats.on('change', controlCombinedChats);
+        miniConversations.on('change', controlCombinedChats);
+
 
         var singleThreadCheckbox = $('input[name="singleThreadMode"]');
         var newThreadCheckbox = $('input[name="newThreadMode"]');
@@ -611,10 +664,9 @@ $has_late_message = ob_get_clean();
         <a class="nav-tab" id="attachments-tab" href="#attachments"><?php _ex( 'Attachments', 'Settings page', 'bp-better-messages' ); ?></a>
         <a class="nav-tab" id="notifications-tab" href="#notifications"><?php _ex( 'Notifications', 'Settings page', 'bp-better-messages' ); ?></a>
         <a class="nav-tab" id="rules-tab" href="#rules"><?php _ex( 'Restrictions', 'Settings page', 'bp-better-messages' ); ?></a>
+        <a class="nav-tab" id="moderation-tab" href="#moderation"><?php _ex( 'Moderation', 'Settings page', 'bp-better-messages' ); ?></a>
         <a class="nav-tab" id="calls-tab" href="#calls"><?php _ex( 'Calls', 'Settings page', 'bp-better-messages' ); ?></a>
         <a class="nav-tab" id="group-calls-tab" href="#group-calls"><?php _ex( 'Group Calls', 'Settings page', 'bp-better-messages' ); ?></a>
-        <a class="nav-tab" id="customization-tab" href="#customization"><?php _ex( 'Customization', 'Settings page', 'bp-better-messages' ); ?></a>
-
         <a class="nav-tab" id="shortcodes-tab" href="#shortcodes"><?php _ex( 'Shortcodes', 'Settings page', 'bp-better-messages' ); ?></a>
         <a class="nav-tab" id="tools-tab" href="#tools"><?php _ex( 'Tools', 'Settings page', 'bp-better-messages' ); ?></a>
     </div>
@@ -908,26 +960,6 @@ $has_late_message = ob_get_clean();
                             </th>
                             <td>
                                 <input name="myProfileButton" type="checkbox" <?php checked( $this->settings[ 'myProfileButton' ], '1' ); ?> value="1" />
-                            </td>
-                        </tr>
-
-                        <tr valign="top" class="">
-                            <th scope="row" valign="top">
-                                <?php _ex( 'Enable Messages Viewer', 'Settings page', 'bp-better-messages' ); ?>
-                                <p style="font-size: 10px;"><?php _ex( 'Enable messages viewer in administration page in WordPress admin', 'Settings page', 'bp-better-messages' ); ?></p>
-                            </th>
-                            <td>
-                                <input name="messagesViewer" type="checkbox" <?php checked( $this->settings[ 'messagesViewer' ], '1' ); ?> value="1" />
-                            </td>
-                        </tr>
-
-                        <tr valign="top" class="">
-                            <th scope="row" valign="top">
-                                <?php _ex( 'Message Reports', 'Settings page', 'bp-better-messages' ); ?>
-                                <p style="font-size: 10px;"><?php _ex( 'Allow users to report messages, which will appear at Messages Viewer', 'Settings page', 'bp-better-messages' ); ?></p>
-                            </th>
-                            <td>
-                                <input name="allowReports" type="checkbox" <?php checked( $this->settings[ 'allowReports' ], '1' ); ?> value="1" />
                             </td>
                         </tr>
                         </tbody>
@@ -1613,12 +1645,128 @@ $has_late_message = ob_get_clean();
                                         <?php _ex( 'Delete user messages when his account is deleted from website', 'Settings page','bp-better-messages' ); ?>
                                     </th>
                                 </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="allowSoundDisable" type="checkbox" <?php checked( $this->settings[ 'allowSoundDisable' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Allow to disable sound notification', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Allow user disable sound notifications in their user settings', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="disableSearch" type="checkbox" <?php checked( $this->settings[ 'disableSearch' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Disable Search', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Disables search functionality', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="disableFavoriteMessages" type="checkbox" <?php checked( $this->settings[ 'disableFavoriteMessages' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Disable Favorite Messages', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Disables favorite messages functionality', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="disableUserSettings" type="checkbox" <?php checked( $this->settings[ 'disableUserSettings' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Disable User Settings', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Disables user settings button', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="disableNewThread" type="checkbox" <?php checked( $this->settings[ 'disableNewThread' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Disable New Conversation Screen', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Disables new conversation button and screen (admin will always see it)', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
                                 </tbody>
                             </table>
                         </fieldset>
                     </td>
                 </tr>
 
+                <tr>
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Colors', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <?php $url = Better_Messages()->customize->customization_link([
+                                'panel' => 'better_messages'
+                        ]); ?>
+                        <a href="<?php echo $url; ?>"  class="button bm-customize-btn" target="_blank"><?php _ex( 'Customization', 'Settings page','bp-better-messages' ); ?> <span class="dashicons dashicons-external"></span></a>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Messenger Height', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+
+                    <td>
+                        <fieldset>
+                            <table class="widefat bm-switcher-table">
+                                <tbody>
+                                <tr valign="top" class="">
+                                    <th scope="row" valign="top" class="th-left-pd">
+                                        <?php _ex( 'Fixed Header Height', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'If your website has fixed header specify its height in pixels.', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        <p style="font-size: 10px;"><?php _ex( 'This needed for correct scrolling in some cases', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                    <td>
+                                        <input type="number" name="fixedHeaderHeight" value="<?php echo esc_attr( $this->settings[ 'fixedHeaderHeight' ] ); ?>">
+                                    </td>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <th scope="row" valign="top" class="th-left-pd">
+                                        <?php _ex( 'Min Height of Messages Container', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Min Height of Messages Container in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                    <td>
+                                        <input type="number" name="messagesMinHeight" value="<?php echo esc_attr( $this->settings[ 'messagesMinHeight' ] ); ?>">
+                                    </td>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <th scope="row" valign="top" class="th-left-pd">
+                                        <?php _ex( 'Max Height of Messages Container', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Max Height of Messages Container in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        <p style="font-size: 10px;"><?php _ex( 'Set 9999 to use all available window height', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                    <td>
+                                        <input type="number" name="messagesHeight" value="<?php echo esc_attr( $this->settings[ 'messagesHeight' ] ); ?>">
+                                    </td>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <th scope="row" valign="top" class="th-left-pd">
+                                        <?php _ex( 'Side conversation list width', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Side conversation list width when Combined View is enabled in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                    <td>
+                                        <input type="number" name="sideThreadsWidth" value="<?php echo esc_attr( $this->settings[ 'sideThreadsWidth' ] ); ?>">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </td>
+                </tr>
                 <tr>
                     <th scope="row">
                         <?php _ex( 'Deleting of old messages', 'Settings page','bp-better-messages' ); ?>
@@ -1694,6 +1842,17 @@ $has_late_message = ob_get_clean();
                                     <th>
                                         <?php _ex( 'Mini Chats', 'Settings page', 'bp-better-messages' ); ?>
                                         <p style="font-size: 10px;"><?php _ex( 'Enables mini chats fixed to the bottom of browser window', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        <?php Better_Messages()->functions->license_proposal(); ?>
+                                    </th>
+                                </tr>
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input type="checkbox" name="combinedChatsEnable" <?php checked( $this->settings[ 'combinedChatsEnable' ], '1' ); ?> value="1" <?php if(! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() || $this->settings[ 'mechanism' ] == 'ajax') echo 'disabled'; ?>>
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Combined Mini Conversations & Mini Chats', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Mini chats will replace the Mini Conversations widget when conversation is opened instead of showing as separated widget at the bottom of the screen.', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        <p style="font-size: 10px;"><?php _ex( 'Mini Chats and Mini Conversations options must be enabled.', 'Settings page', 'bp-better-messages' ); ?></p>
                                         <?php Better_Messages()->functions->license_proposal(); ?>
                                     </th>
                                 </tr>
@@ -2208,6 +2367,42 @@ $has_late_message = ob_get_clean();
                     </td>
                 </tr>
 
+                <!-- Email Template Customization Section -->
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" colspan="2">
+                        <h3 style="margin: 20px 0 10px; padding-top: 20px; border-top: 1px solid #ddd;">
+                            <?php _ex( 'Email Template Customization', 'Settings page', 'bp-better-messages' ); ?>
+                        </h3>
+                        <p style="font-size: 12px; font-weight: normal; color: #666;">
+                            <?php _ex( 'Customize the appearance of message email notifications sent to users.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </th>
+                </tr>
+
+                <?php if ( function_exists( 'bp_send_email' ) ) : ?>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Email Template Source', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;">
+                            <?php _ex( 'Choose whether to use BuddyPress email templates or custom templates for message notifications.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </th>
+                    <td>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="radio" name="emailTemplateSource" value="buddypress" <?php checked( $this->settings['emailTemplateSource'], 'buddypress' ); ?> onchange="toggleEmailTemplateSource()">
+                            <?php _ex( 'BuddyPress Email Template', 'Settings page', 'bp-better-messages' ); ?>
+                            <span style="color: #666; font-size: 11px;"><?php _ex( '(uses your BuddyPress email customizations)', 'Settings page', 'bp-better-messages' ); ?></span>
+                        </label>
+                        <label style="display: block;">
+                            <input type="radio" name="emailTemplateSource" value="custom" <?php checked( $this->settings['emailTemplateSource'], 'custom' ); ?> onchange="toggleEmailTemplateSource()">
+                            <?php _ex( 'Custom Template', 'Settings page', 'bp-better-messages' ); ?>
+                            <span style="color: #666; font-size: 11px;"><?php _ex( '(use the simple or custom HTML template below)', 'Settings page', 'bp-better-messages' ); ?></span>
+                        </label>
+                    </td>
+                </tr>
+                <?php endif; ?>
+
+                <tbody id="emailBuddyPressAutoCreate" style="<?php echo ( function_exists( 'bp_send_email' ) && $this->settings['emailTemplateSource'] === 'buddypress' ) ? '' : 'display: none;'; ?>">
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
                         <?php _ex( 'Auto create BuddyPress Email template if its missing', 'Settings page', 'bp-better-messages' ); ?>
@@ -2216,8 +2411,674 @@ $has_late_message = ob_get_clean();
                         </p>
                     </th>
                     <td>
-                        <input name="createEmailTemplate" type="checkbox" <?php checked( $this->settings[ 'createEmailTemplate' ], '1' ); ?> <?php  if( ! function_exists('bp_send_email') ) echo 'disabled'; ?> value="1" />
+                        <input name="createEmailTemplate" type="checkbox" <?php checked( $this->settings[ 'createEmailTemplate' ], '1' ); ?> value="1" />
                     </td>
+                </tr>
+                </tbody>
+
+                <tbody id="emailTemplateCustomOptions" style="<?php echo ( function_exists( 'bp_send_email' ) && $this->settings['emailTemplateSource'] === 'buddypress' ) ? 'display: none;' : ''; ?>">
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Template Mode', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <label style="margin-right: 20px;">
+                            <input type="radio" name="emailTemplateMode" value="simple" <?php checked( $this->settings['emailTemplateMode'], 'simple' ); ?> onchange="toggleEmailTemplateMode()">
+                            <?php _ex( 'Simple', 'Settings page', 'bp-better-messages' ); ?>
+                        </label>
+                        <label>
+                            <input type="radio" name="emailTemplateMode" value="custom" <?php checked( $this->settings['emailTemplateMode'], 'custom' ); ?> onchange="toggleEmailTemplateMode()">
+                            <?php _ex( 'Custom HTML', 'Settings page', 'bp-better-messages' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                </tbody>
+
+                <?php
+                // Determine if custom template options should be hidden (BP source selected)
+                $hideCustomOptions = function_exists( 'bp_send_email' ) && $this->settings['emailTemplateSource'] === 'buddypress';
+                ?>
+
+                <!-- Simple Mode Settings -->
+                <tbody id="emailTemplateSimpleSettings" style="<?php echo ( $hideCustomOptions || $this->settings['emailTemplateMode'] === 'custom' ) ? 'display: none;' : ''; ?>">
+                    <?php
+                    $emailLogoId = $this->settings['emailLogoId'];
+                    $emailLogoUrl = $this->settings['emailLogoUrl'];
+                    $hasEmailLogo = ! empty( $emailLogoId ) && ! empty( $emailLogoUrl );
+                    ?>
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Email Logo', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Recommended size: 200x50 pixels', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <div style="margin: 10px 0 0;">
+                                <span class="button button-secondary" onclick="selectEmailLogo()"><?php _ex( 'Select Logo', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span id="emailLogoReset" class="button bm-destructive-button <?php if( ! $hasEmailLogo ) echo 'hidden'; ?>" onclick="resetEmailLogo()"><?php _ex( 'Remove Logo', 'Settings page', 'bp-better-messages' ); ?></span>
+                            </div>
+                            <div id="emailLogoPreview" style="margin-top: 10px; <?php if( ! $hasEmailLogo ) echo 'display: none;'; ?>">
+                                <img src="<?php echo esc_attr( $emailLogoUrl ); ?>" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; padding: 5px; background: #fff;">
+                            </div>
+                            <input type="hidden" name="emailLogoId" id="emailLogoId" value="<?php echo esc_attr( $emailLogoId ); ?>">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Primary Color', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Used for buttons and links', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailPrimaryColor" id="emailPrimaryColor" value="<?php echo esc_attr( $this->settings['emailPrimaryColor'] ); ?>" class="bm-color-picker" data-default-color="#21759b">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Background Color', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Email outer background', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailBackgroundColor" id="emailBackgroundColor" value="<?php echo esc_attr( $this->settings['emailBackgroundColor'] ); ?>" class="bm-color-picker" data-default-color="#f6f6f6">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Content Background Color', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Main content area background', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailContentBgColor" id="emailContentBgColor" value="<?php echo esc_attr( $this->settings['emailContentBgColor'] ); ?>" class="bm-color-picker" data-default-color="#ffffff">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Text Color', 'Settings page', 'bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <input type="text" name="emailTextColor" id="emailTextColor" value="<?php echo esc_attr( $this->settings['emailTextColor'] ); ?>" class="bm-color-picker" data-default-color="#333333">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Header Text', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Use {{user_name}} for recipient name. Leave empty for default "Hi {{user_name}},"', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailHeaderText" value="<?php echo esc_attr( $this->settings['emailHeaderText'] ); ?>" style="width: 100%; max-width: 400px;" placeholder="<?php _ex( 'Hi {{user_name}},', 'Settings page', 'bp-better-messages' ); ?>">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Footer Text', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Custom footer text. Use {{site_name}} and {{site_url}} placeholders.', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailFooterText" value="<?php echo esc_attr( $this->settings['emailFooterText'] ); ?>" style="width: 100%; max-width: 400px;" placeholder="<?php echo esc_attr( get_bloginfo('name') ); ?>">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Button Text', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px;">
+                                <?php _ex( 'Text for the "View Conversation" button. Leave empty for default.', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <input type="text" name="emailButtonText" value="<?php echo esc_attr( $this->settings['emailButtonText'] ); ?>" style="width: 100%; max-width: 400px;" placeholder="<?php _ex( 'View Conversation', 'Settings page', 'bp-better-messages' ); ?>">
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Preview', 'Settings page', 'bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <span class="button button-secondary" onclick="previewEmailTemplate()"><?php _ex( 'Preview Email Template', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span class="button" onclick="resetEmailTemplateColors()"><?php _ex( 'Reset Colors to Default', 'Settings page', 'bp-better-messages' ); ?></span>
+                        </td>
+                    </tr>
+                </tbody>
+
+                <!-- Custom HTML Mode Settings -->
+                <tbody id="emailTemplateCustomSettings" style="<?php echo ( $hideCustomOptions || $this->settings['emailTemplateMode'] === 'simple' ) ? 'display: none;' : ''; ?>">
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Available Placeholders', 'Settings page', 'bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <code style="display: inline-block; margin: 2px;">{{site_name}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{site_url}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{user_name}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{subject}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{messages_html}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{thread_url}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{email_subject}}</code>
+                            <code style="display: inline-block; margin: 2px;">{{unsubscribe_url}}</code>
+                        </td>
+                    </tr>
+
+                    <tr valign="top" class="">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Custom HTML Template', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-size: 10px; font-weight: normal;">
+                                <?php _ex( 'Enter your complete HTML email template. Make sure to include the placeholders where you want the dynamic content to appear.', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <textarea name="emailCustomHtml" id="emailCustomHtml" rows="20" style="width: 100%; font-family: monospace; font-size: 12px;"><?php echo esc_textarea( Better_Messages_Options()->get_email_custom_html() ); ?></textarea>
+                            <div style="margin-top: 10px;">
+                                <span class="button button-secondary" onclick="loadDefaultEmailTemplate()"><?php _ex( 'Load Default Template', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span class="button button-secondary" onclick="previewCustomEmailTemplate()"><?php _ex( 'Preview Custom Template', 'Settings page', 'bp-better-messages' ); ?></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+
+                <!-- Unsubscribe Link Setting (hidden when using BuddyPress email template) -->
+                <tbody id="emailUnsubscribeLinkSetting" style="<?php echo $hideCustomOptions ? 'display: none;' : ''; ?>">
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Unsubscribe Link', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;">
+                            <?php _ex( 'Add an unsubscribe link to message notification emails. Users can click it to stop receiving message email notifications.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </th>
+                    <td>
+                        <input name="emailUnsubscribeLink" type="checkbox" <?php checked( $this->settings['emailUnsubscribeLink'], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+                </tbody>
+
+                <!-- Test Email Section -->
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Send Test Email', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;">
+                            <?php _ex( 'Send a test email to verify your template looks correct. Save settings first to test any changes.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </th>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <input type="email" id="bmTestEmailAddress" value="<?php echo esc_attr( wp_get_current_user()->user_email ); ?>" style="width: 250px;" placeholder="<?php _ex( 'Enter email address', 'Settings page', 'bp-better-messages' ); ?>">
+                            <span class="button button-primary" id="bmSendTestEmail" onclick="sendTestEmail()"><?php _ex( 'Send Test Email', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span id="bmTestEmailStatus" style="display: none;"></span>
+                        </div>
+                    </td>
+                </tr>
+                <!-- End Email Template Customization Section -->
+
+                <script type="text/javascript">
+                    function selectCustomSound( elementId ) {
+                        var selectFrame = wp.media({
+                            title: 'Select MP3 file',
+                            library: { type: 'audio', post_mime_type: 'audio/mpeg' },
+                            multiple: false
+                        });
+
+                        selectFrame.on('open', function() {
+                            var library = selectFrame.state().get('library');
+                            if (library && library.props) {
+                                library.props.set({ post_mime_type: 'audio/mpeg' });
+                            }
+                        });
+
+                        selectFrame.on('select', function() {
+                            var attachment = selectFrame.state().get('selection').first().toJSON();
+                            var mime = attachment && (attachment.mime || attachment.post_mime_type || '');
+                            if (mime !== 'audio/mpeg') {
+                                return;
+                            }
+
+                            var id = attachment.id;
+                            var url = attachment.url;
+                            var resetBtn = document.querySelector('#' + elementId + 'Reset');
+                            var inputElement = document.querySelector('input[name="' + elementId + 'Id"]');
+                            var audioElement = document.querySelector('#' + elementId );
+
+                            if( url.slice(-4) === '.mp3' ){
+                                audioElement.src = url;
+                                inputElement.value = id;
+                                resetBtn.classList.remove('hidden');
+                            } else {
+                                inputElement.value = '0';
+                                audioElement.src = audioElement.dataset.default;
+                                resetBtn.classList.add('hidden');
+                                alert('Please select only .mp3 files');
+                                return false;
+                            }
+                        });
+
+                        selectFrame.open()
+                    }
+
+                    function playSound( btn, elementId ) {
+                        var audioElement = document.querySelector('#' + elementId );
+                        audioElement.play();
+                    }
+
+                    function resetSound( elementId ) {
+                        if( ! confirm('Are you sure you want to reset to default sound?') ) return;
+                        var inputElement = document.querySelector('input[name="' + elementId + 'Id"]');
+                        var audioElement = document.querySelector('#' + elementId );
+                        var resetBtn = document.querySelector('#' + elementId + 'Reset');
+                        audioElement.src = audioElement.dataset.default;
+                        inputElement.value = '0';
+                        resetBtn.classList.add('hidden');
+                    }
+                </script>
+
+                <!-- Email Template JavaScript -->
+                <script type="text/javascript">
+                    // Toggle between BuddyPress and custom template source
+                    function toggleEmailTemplateSource() {
+                        var sourceRadio = document.querySelector('input[name="emailTemplateSource"]:checked');
+                        var source = sourceRadio ? sourceRadio.value : 'custom';
+                        var customOptions = document.getElementById('emailTemplateCustomOptions');
+                        var simpleSettings = document.getElementById('emailTemplateSimpleSettings');
+                        var customSettings = document.getElementById('emailTemplateCustomSettings');
+                        var unsubscribeSetting = document.getElementById('emailUnsubscribeLinkSetting');
+                        var bpAutoCreate = document.getElementById('emailBuddyPressAutoCreate');
+
+                        if (source === 'buddypress') {
+                            if (customOptions) customOptions.style.display = 'none';
+                            if (simpleSettings) simpleSettings.style.display = 'none';
+                            if (customSettings) customSettings.style.display = 'none';
+                            if (unsubscribeSetting) unsubscribeSetting.style.display = 'none';
+                            if (bpAutoCreate) bpAutoCreate.style.display = '';
+                        } else {
+                            if (customOptions) customOptions.style.display = '';
+                            if (unsubscribeSetting) unsubscribeSetting.style.display = '';
+                            if (bpAutoCreate) bpAutoCreate.style.display = 'none';
+                            // Also respect the template mode setting
+                            toggleEmailTemplateMode();
+                        }
+                    }
+
+                    // Toggle between simple and custom template modes
+                    function toggleEmailTemplateMode() {
+                        var mode = document.querySelector('input[name="emailTemplateMode"]:checked').value;
+                        var simpleSettings = document.getElementById('emailTemplateSimpleSettings');
+                        var customSettings = document.getElementById('emailTemplateCustomSettings');
+
+                        if (mode === 'simple') {
+                            simpleSettings.style.display = '';
+                            customSettings.style.display = 'none';
+                        } else {
+                            simpleSettings.style.display = 'none';
+                            customSettings.style.display = '';
+                        }
+                    }
+
+                    // Select email logo from media library
+                    function selectEmailLogo() {
+                        var selectFrame = wp.media({
+                            title: '<?php _ex( 'Select Email Logo', 'Settings page', 'bp-better-messages' ); ?>',
+                            library: { type: 'image' },
+                            multiple: false
+                        });
+
+                        selectFrame.on('select', function() {
+                            var attachment = selectFrame.state().get('selection').first().toJSON();
+                            var id = attachment.id;
+                            var url = attachment.url;
+
+                            document.getElementById('emailLogoId').value = id;
+                            document.querySelector('#emailLogoPreview img').src = url;
+                            document.getElementById('emailLogoPreview').style.display = 'block';
+                            document.getElementById('emailLogoReset').classList.remove('hidden');
+                        });
+
+                        selectFrame.open();
+                    }
+
+                    // Reset/remove email logo
+                    function resetEmailLogo() {
+                        if (!confirm('<?php _ex( 'Are you sure you want to remove the logo?', 'Settings page', 'bp-better-messages' ); ?>')) return;
+
+                        document.getElementById('emailLogoId').value = '0';
+                        document.getElementById('emailLogoPreview').style.display = 'none';
+                        document.getElementById('emailLogoReset').classList.add('hidden');
+                    }
+
+                    // Reset email colors to defaults
+                    function resetEmailTemplateColors() {
+                        if (!confirm('<?php _ex( 'Are you sure you want to reset colors to default?', 'Settings page', 'bp-better-messages' ); ?>')) return;
+
+                        var defaults = {
+                            'emailPrimaryColor': '#21759b',
+                            'emailBackgroundColor': '#f6f6f6',
+                            'emailContentBgColor': '#ffffff',
+                            'emailTextColor': '#333333'
+                        };
+
+                        for (var key in defaults) {
+                            var input = document.getElementById(key);
+                            if (input) {
+                                input.value = defaults[key];
+                                // Trigger wpColorPicker update if available
+                                if (jQuery && jQuery(input).wpColorPicker) {
+                                    jQuery(input).wpColorPicker('color', defaults[key]);
+                                }
+                            }
+                        }
+                    }
+
+                    // Preview email template (simple mode)
+                    function previewEmailTemplate() {
+                        var primaryColor = document.getElementById('emailPrimaryColor').value || '#21759b';
+                        var backgroundColor = document.getElementById('emailBackgroundColor').value || '#f6f6f6';
+                        var contentBgColor = document.getElementById('emailContentBgColor').value || '#ffffff';
+                        var textColor = document.getElementById('emailTextColor').value || '#333333';
+                        var headerText = document.querySelector('input[name="emailHeaderText"]').value || 'Hi John,';
+                        var footerText = document.querySelector('input[name="emailFooterText"]').value || '<?php echo esc_js( get_bloginfo('name') ); ?>';
+                        var buttonText = document.querySelector('input[name="emailButtonText"]').value || '<?php _ex( 'View Conversation', 'Settings page', 'bp-better-messages' ); ?>';
+                        var logoUrl = '';
+                        var logoPreview = document.querySelector('#emailLogoPreview img');
+                        if (logoPreview && document.getElementById('emailLogoPreview').style.display !== 'none') {
+                            logoUrl = logoPreview.src;
+                        }
+
+                        // Replace placeholder in header text
+                        headerText = headerText.replace('{{user_name}}', 'John');
+
+                        var previewHtml = generateEmailPreview(primaryColor, backgroundColor, contentBgColor, textColor, headerText, footerText, buttonText, logoUrl);
+
+                        var previewWindow = window.open('', '_blank', 'width=700,height=800');
+                        previewWindow.document.write(previewHtml);
+                        previewWindow.document.close();
+                    }
+
+                    // Generate email preview HTML
+                    function generateEmailPreview(primaryColor, backgroundColor, contentBgColor, textColor, headerText, footerText, buttonText, logoUrl) {
+                        var logoHtml = '';
+                        if (logoUrl) {
+                            logoHtml = '<tr><td style="text-align: center; padding: 20px 0;"><img src="' + logoUrl + '" style="max-width: 200px; max-height: 60px;" alt="Logo"></td></tr>';
+                        }
+
+                        return '<!doctype html>' +
+                            '<html>' +
+                            '<head>' +
+                            '<meta name="viewport" content="width=device-width">' +
+                            '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' +
+                            '<title>Email Preview</title>' +
+                            '</head>' +
+                            '<body style="background-color: ' + backgroundColor + '; font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0;">' +
+                            '<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; width: 100%; background-color: ' + backgroundColor + ';">' +
+                            '<tr>' +
+                            '<td>&nbsp;</td>' +
+                            '<td style="display: block; margin: 0 auto; max-width: 580px; padding: 10px; width: 580px;">' +
+                            '<div style="box-sizing: border-box; display: block; margin: 0 auto; max-width: 580px; padding: 10px;">' +
+                            logoHtml +
+                            '<table style="border-collapse: separate; width: 100%; background: ' + contentBgColor + '; border-radius: 3px;">' +
+                            '<tr>' +
+                            '<td style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px; color: ' + textColor + ';">' +
+                            '<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; width: 100%;">' +
+                            '<tr>' +
+                            '<td style="font-family: sans-serif; font-size: 14px; vertical-align: top; color: ' + textColor + ';">' +
+                            '<p style="font-family: sans-serif; font-size: 16px; font-weight: bold; margin: 0; margin-bottom: 15px; color: ' + textColor + ';">' + headerText + '</p>' +
+                            '<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; color: ' + textColor + ';">You have unread messages: "Sample Conversation"</p>' +
+                            '<table style="margin: 1rem 0; width: 100%;"><tbody>' +
+                            '<tr><td colspan="2"><b style="color: ' + textColor + ';">Jane Doe wrote:</b></td></tr>' +
+                            '<tr>' +
+                            '<td style="padding-right: 10px; color: ' + textColor + ';">Hello! This is a sample message to preview how your emails will look.</td>' +
+                            '<td style="width: 1px; white-space: nowrap; vertical-align: top; text-align: right; color: ' + textColor + ';"><i>10:30 AM</i></td>' +
+                            '</tr>' +
+                            '</tbody></table>' +
+                            '<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; width: 100%; margin-top: 20px;">' +
+                            '<tr>' +
+                            '<td style="border-radius: 5px; text-align: center; background-color: ' + primaryColor + ';">' +
+                            '<a href="#" style="display: inline-block; padding: 12px 25px; font-family: sans-serif; font-size: 14px; color: #ffffff; text-decoration: none; border-radius: 5px;">' + buttonText + '</a>' +
+                            '</td>' +
+                            '</tr>' +
+                            '</table>' +
+                            '</td>' +
+                            '</tr>' +
+                            '</table>' +
+                            '</td>' +
+                            '</tr>' +
+                            '</table>' +
+                            '<div style="clear: both; margin-top: 10px; text-align: center; width: 100%;">' +
+                            '<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; width: 100%;">' +
+                            '<tr>' +
+                            '<td style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">' +
+                            '<span style="color: #999999; font-size: 12px; text-align: center;"><a href="#" style="color: ' + primaryColor + ';">' + footerText + '</a></span>' +
+                            (document.querySelector('input[name="emailUnsubscribeLink"]').checked ? '<br><a href="#" style="color: #999999; font-size: 11px; text-decoration: underline;"><?php _ex( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ); ?></a>' : '') +
+                            '</td>' +
+                            '</tr>' +
+                            '</table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</td>' +
+                            '<td>&nbsp;</td>' +
+                            '</tr>' +
+                            '</table>' +
+                            '</body>' +
+                            '</html>';
+                    }
+
+                    // Load default email template into custom HTML textarea
+                    function loadDefaultEmailTemplate() {
+                        if (!confirm('<?php _ex( 'This will replace your current custom template. Continue?', 'Settings page', 'bp-better-messages' ); ?>')) return;
+
+                        // Get current color values from form inputs
+                        var primaryColor = document.querySelector('input[name="emailPrimaryColor"]').value || '#21759b';
+                        var backgroundColor = document.querySelector('input[name="emailBackgroundColor"]').value || '#f6f6f6';
+                        var contentBgColor = document.querySelector('input[name="emailContentBgColor"]').value || '#ffffff';
+                        var textColor = document.querySelector('input[name="emailTextColor"]').value || '#333333';
+
+                        var defaultTemplate = '<!doctype html>\n' +
+'<html>\n' +
+'<head>\n' +
+'    <meta name="viewport" content="width=device-width">\n' +
+'    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">\n' +
+'    <title>{{email_subject}}</title>\n' +
+'    <style>\n' +
+'        @media only screen and (max-width: 620px) {\n' +
+'            table[class=body] h1 { font-size: 28px !important; margin-bottom: 10px !important; }\n' +
+'            table[class=body] p, table[class=body] ul, table[class=body] ol, table[class=body] td, table[class=body] span, table[class=body] a { font-size: 16px !important; }\n' +
+'            table[class=body] .wrapper, table[class=body] .article { padding: 10px !important; }\n' +
+'            table[class=body] .content { padding: 0 !important; }\n' +
+'            table[class=body] .container { padding: 0 !important; width: 100% !important; }\n' +
+'            table[class=body] .main { border-left-width: 0 !important; border-radius: 0 !important; border-right-width: 0 !important; }\n' +
+'            table[class=body] .btn table { width: 100% !important; }\n' +
+'            table[class=body] .btn a { width: 100% !important; }\n' +
+'            table[class=body] .img-responsive { height: auto !important; max-width: 100% !important; width: auto !important; }\n' +
+'        }\n' +
+'        @media all {\n' +
+'            .ExternalClass { width: 100%; }\n' +
+'            .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }\n' +
+'            .apple-link a { color: inherit !important; font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; text-decoration: none !important; }\n' +
+'            #MessageViewBody a { color: inherit; text-decoration: none; font-size: inherit; font-family: inherit; font-weight: inherit; line-height: inherit; }\n' +
+'        }\n' +
+'    </style>\n' +
+'</head>\n' +
+'<body style="background-color: ' + backgroundColor + '; font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">\n' +
+'    <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: ' + backgroundColor + ';">\n' +
+'        <tr>\n' +
+'            <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>\n' +
+'            <td class="container" style="font-family: sans-serif; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; max-width: 580px; padding: 10px; width: 580px;">\n' +
+'                <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;">\n' +
+'                    <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: ' + contentBgColor + '; border-radius: 3px;">\n' +
+'                        <tr>\n' +
+'                            <td class="wrapper" style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px;">\n' +
+'                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">\n' +
+'                                    <tr>\n' +
+'                                        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; color: ' + textColor + ';">\n' +
+'                                            <p style="font-family: sans-serif; font-size: 16px; font-weight: bold; margin: 0; Margin-bottom: 15px; color: ' + textColor + ';">Hi {{user_name}},</p>\n' +
+'                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px; color: ' + textColor + ';">{{email_subject}}</p>\n' +
+'                                            {{messages_html}}\n' +
+'                                            <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box; margin-top: 20px;">\n' +
+'                                                <tbody>\n' +
+'                                                <tr>\n' +
+'                                                    <td align="center" style="font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;">\n' +
+'                                                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">\n' +
+'                                                            <tbody>\n' +
+'                                                            <tr>\n' +
+'                                                                <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: ' + primaryColor + '; border-radius: 5px; text-align: center;">\n' +
+'                                                                    <a href="{{thread_url}}" target="_blank" style="display: inline-block; color: #ffffff; background-color: ' + primaryColor + '; border: solid 1px ' + primaryColor + '; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize;">{{button_text}}</a>\n' +
+'                                                                </td>\n' +
+'                                                            </tr>\n' +
+'                                                            </tbody>\n' +
+'                                                        </table>\n' +
+'                                                    </td>\n' +
+'                                                </tr>\n' +
+'                                                </tbody>\n' +
+'                                            </table>\n' +
+'                                        </td>\n' +
+'                                    </tr>\n' +
+'                                </table>\n' +
+'                            </td>\n' +
+'                        </tr>\n' +
+'                    </table>\n' +
+'                    <div class="footer" style="clear: both; Margin-top: 10px; text-align: center; width: 100%;">\n' +
+'                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">\n' +
+'                            <tr>\n' +
+'                                <td style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">\n' +
+'                                    <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;"><a href="{{site_url}}" style="color: ' + primaryColor + '; text-decoration: none;">{{site_name}}</a></span>\n' +
+'                                    <br><a href="{{unsubscribe_url}}" style="color: #999999; font-size: 11px; text-decoration: underline;">Unsubscribe from email notifications about unread messages</a>\n' +
+'                                </td>\n' +
+'                            </tr>\n' +
+'                        </table>\n' +
+'                    </div>\n' +
+'                </div>\n' +
+'            </td>\n' +
+'            <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">&nbsp;</td>\n' +
+'        </tr>\n' +
+'    </table>\n' +
+'</body>\n' +
+'</html>';
+
+                        document.getElementById('emailCustomHtml').value = defaultTemplate;
+                    }
+
+                    // Preview custom email template
+                    function previewCustomEmailTemplate() {
+                        var template = document.getElementById('emailCustomHtml').value;
+
+                        if (!template.trim()) {
+                            alert('<?php _ex( 'Please enter a custom template first, or load the default template.', 'Settings page', 'bp-better-messages' ); ?>');
+                            return;
+                        }
+
+                        // Get color values from form inputs
+                        var primaryColor = document.querySelector('input[name="emailPrimaryColor"]').value || '#21759b';
+                        var backgroundColor = document.querySelector('input[name="emailBackgroundColor"]').value || '#f6f6f6';
+                        var contentBgColor = document.querySelector('input[name="emailContentBgColor"]').value || '#ffffff';
+                        var textColor = document.querySelector('input[name="emailTextColor"]').value || '#333333';
+                        var buttonText = document.querySelector('input[name="emailButtonText"]').value || '<?php echo esc_js( __( 'View Conversation', 'bp-better-messages' ) ); ?>';
+
+                        // Replace placeholders with sample data
+                        var previewHtml = template
+                            .replace(/\{\{site_name\}\}/g, '<?php echo esc_js( get_bloginfo('name') ); ?>')
+                            .replace(/\{\{site_url\}\}/g, '<?php echo esc_js( home_url() ); ?>')
+                            .replace(/\{\{user_name\}\}/g, 'John Doe')
+                            .replace(/\{\{subject\}\}/g, 'Sample Conversation')
+                            .replace(/\{\{email_subject\}\}/g, 'You have unread messages: "Sample Conversation"')
+                            .replace(/\{\{thread_url\}\}/g, '<?php echo esc_js( home_url() ); ?>')
+                            .replace(/\{\{unsubscribe_url\}\}/g, '#')
+                            .replace(/\{\{messages_html\}\}/g, '<table style="margin:1rem 0!important;width:100%;"><tbody><tr><td colspan="2"><b>Jane Doe wrote:</b></td></tr><tr><td style="padding-right: 10px;">Hello! This is a sample message to preview your custom email template.</td><td style="width:1px;white-space:nowrap;vertical-align:top;text-align:right;"><i>10:30 AM</i></td></tr></tbody></table>')
+                            .replace(/\{\{primary_color\}\}/g, primaryColor)
+                            .replace(/\{\{background_color\}\}/g, backgroundColor)
+                            .replace(/\{\{content_bg_color\}\}/g, contentBgColor)
+                            .replace(/\{\{text_color\}\}/g, textColor)
+                            .replace(/\{\{button_text\}\}/g, buttonText);
+
+                        var previewWindow = window.open('', '_blank', 'width=700,height=800');
+                        previewWindow.document.write(previewHtml);
+                        previewWindow.document.close();
+                    }
+
+                    // Send test email
+                    function sendTestEmail() {
+                        var email = document.getElementById('bmTestEmailAddress').value;
+                        var button = document.getElementById('bmSendTestEmail');
+                        var status = document.getElementById('bmTestEmailStatus');
+
+                        if (!email || !email.includes('@')) {
+                            alert('<?php _ex( 'Please enter a valid email address.', 'Settings page', 'bp-better-messages' ); ?>');
+                            return;
+                        }
+
+                        // Disable button and show loading
+                        button.classList.add('disabled');
+                        button.textContent = '<?php _ex( 'Sending...', 'Settings page', 'bp-better-messages' ); ?>';
+                        status.style.display = 'none';
+
+                        jQuery.ajax({
+                            url: '<?php echo esc_url( rest_url( 'better-messages/v1/sendTestEmail' ) ); ?>',
+                            type: 'POST',
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader('X-WP-Nonce', '<?php echo wp_create_nonce( 'wp_rest' ); ?>');
+                            },
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                email: email
+                            }),
+                            success: function(response) {
+                                button.classList.remove('disabled');
+                                button.textContent = '<?php _ex( 'Send Test Email', 'Settings page', 'bp-better-messages' ); ?>';
+                                status.style.display = 'inline';
+
+                                if (response.success) {
+                                    status.style.color = '#00a32a';
+                                    status.textContent = response.message;
+                                } else {
+                                    status.style.color = '#d63638';
+                                    status.textContent = response.message;
+                                }
+
+                                // Hide status after 5 seconds
+                                setTimeout(function() {
+                                    status.style.display = 'none';
+                                }, 5000);
+                            },
+                            error: function(xhr) {
+                                button.classList.remove('disabled');
+                                button.textContent = '<?php _ex( 'Send Test Email', 'Settings page', 'bp-better-messages' ); ?>';
+                                status.style.display = 'inline';
+                                status.style.color = '#d63638';
+
+                                var errorMessage = '<?php _ex( 'An error occurred. Please try again.', 'Settings page', 'bp-better-messages' ); ?>';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+                                status.textContent = errorMessage;
+                            }
+                        });
+                    }
+
+                    // Initialize color pickers when document is ready
+                    jQuery(document).ready(function($) {
+                        if ($.fn.wpColorPicker) {
+                            $('.bm-color-picker').wpColorPicker();
+                        }
+                    });
+                </script>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" colspan="2">
+                        <h3 style="margin: 20px 0 10px; padding-top: 20px; border-top: 1px solid #ddd;">
+                            <?php _ex( 'Sounds Customization', 'Settings page', 'bp-better-messages' ); ?>
+                        </h3>
+                    </th>
                 </tr>
 
                 <tr valign="top" class="">
@@ -2230,6 +3091,39 @@ $has_late_message = ob_get_clean();
                     </td>
                 </tr>
 
+                <?php
+                $soundsFolder = apply_filters( 'bp_better_messages_sounds_assets', Better_Messages()->url . 'assets/sounds/' );
+
+                $notificationSoundId = $this->settings[ 'notificationSoundId' ];
+                $defaultSound = $soundsFolder . 'notification.mp3';
+                $currentSound = $defaultSound;
+
+                $hasCustom = false;
+
+                if( ! empty( $notificationSoundId ) ){
+                    $attachment_url = wp_get_attachment_url( $notificationSoundId );
+                    if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
+                        $currentSound = $attachment_url;
+                        $hasCustom = true;
+                    }
+                }
+                ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Message notification sound', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <div style="margin: 10px 0 0;">
+                            <span class="button" onclick="playSound(this, 'notificationSound')"><?php _ex( 'Play', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span class="button button-secondary" onclick="selectCustomSound( 'notificationSound' )"><?php _ex( 'Select custom sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span id="notificationSoundReset" class="button bm-destructive-button <?php if( ! $hasCustom ) echo 'hidden'; ?>" onclick="resetSound('notificationSound')"><?php _ex( 'Reset default sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                        </div>
+                        <audio id="notificationSound" src="<?php echo esc_attr($currentSound); ?>" data-default="<?php echo esc_attr($defaultSound) ?>"></audio>
+                        <input type="hidden" name="notificationSoundId" value="<?php echo esc_attr( $this->settings[ 'notificationSoundId' ] ); ?>">
+                    </td>
+                </tr>
+
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
                         <?php _ex( 'Message sent sound volume', 'Settings page', 'bp-better-messages' ); ?>
@@ -2237,6 +3131,37 @@ $has_late_message = ob_get_clean();
                     </th>
                     <td>
                         <input type="number" name="sentSound" min="0" max="100" value="<?php echo esc_attr( $this->settings[ 'sentSound' ] ); ?>">
+                    </td>
+                </tr>
+
+                <?php
+                $sentSoundId = $this->settings[ 'sentSoundId' ];
+                $defaultSound = $soundsFolder . 'sent.mp3';
+                $currentSound = $defaultSound;
+
+                $hasCustom = false;
+
+                if( ! empty( $sentSoundId ) ){
+                    $attachment_url = wp_get_attachment_url( $sentSoundId );
+                    if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
+                        $currentSound = $attachment_url;
+                        $hasCustom = true;
+                    }
+                }
+                ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Message sent sound', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <div style="margin: 10px 0 0;">
+                            <span class="button" onclick="playSound(this, 'sentSound')"><?php _ex( 'Play', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span class="button button-secondary" onclick="selectCustomSound( 'sentSound' )"><?php _ex( 'Select custom sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                            <span id="sentSoundReset" class="button bm-destructive-button <?php if( ! $hasCustom ) echo 'hidden'; ?>" onclick="resetSound('sentSound')"><?php _ex( 'Reset default sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                        </div>
+                        <audio id="sentSound" src="<?php echo esc_attr($currentSound); ?>" data-default="<?php echo esc_attr($defaultSound) ?>"></audio>
+                        <input type="hidden" name="sentSoundId" value="<?php echo esc_attr( $this->settings[ 'sentSoundId' ] ); ?>">
                     </td>
                 </tr>
 
@@ -2251,14 +3176,88 @@ $has_late_message = ob_get_clean();
                     </td>
                 </tr>
 
+                <?php
+                $callSoundId = $this->settings[ 'callSoundId' ];
+                $defaultSound = $soundsFolder . 'calling.mp3';
+                $currentSound = $defaultSound;
+
+                $hasCustom = false;
+
+                if( ! empty( $callSoundId ) ){
+                    $attachment_url = wp_get_attachment_url( $callSoundId );
+                    if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
+                        $currentSound = $attachment_url;
+                        $hasCustom = true;
+                    }
+                }
+                ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Incoming call sound', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <?php  if( Better_Messages()->functions->can_use_premium_code() && bpbm_fs()->is_premium() ) { ?>
+                            <div style="margin: 10px 0 0;">
+                                <span class="button" onclick="playSound(this, 'callSound')"><?php _ex( 'Play', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span class="button button-secondary" onclick="selectCustomSound( 'callSound' )"><?php _ex( 'Select custom sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span id="callSoundReset" class="button bm-destructive-button <?php if( ! $hasCustom ) echo 'hidden'; ?>" onclick="resetSound('callSound')"><?php _ex( 'Reset default sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                            </div>
+                            <audio id="callSound" src="<?php echo esc_attr($currentSound); ?>" data-default="<?php echo esc_attr($defaultSound) ?>"></audio>
+                        <?php }
+
+                        Better_Messages()->functions->license_proposal();
+                        ?>
+                        <input type="hidden" name="callSoundId" value="<?php echo esc_attr( $this->settings[ 'callSoundId' ] ); ?>">
+                    </td>
+                </tr>
+
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
                         <?php _ex( 'Outgoing call sound volume', 'Settings page', 'bp-better-messages' ); ?>
                         <p style="font-size: 10px;"><?php _ex( 'From 0 to 100 (0 to disable)', 'Settings page', 'bp-better-messages' ); ?></p>
                     </th>
                     <td>
-                        <input type="number" name="dialingSound" min="0" max="100" value="<?php echo esc_attr( $this->settings[ 'dialingSound' ] ); ?>" <?php  if( ! Better_Messages()->functions->can_use_premium_code()  || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> >
+                        <input type="number" name="dialingSound" min="0" max="100" value="<?php echo esc_attr( $this->settings[ 'dialingSound' ] ); ?>" <?php if( ! Better_Messages()->functions->can_use_premium_code()  || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> >
                         <?php Better_Messages()->functions->license_proposal(); ?>
+                    </td>
+                </tr>
+
+
+
+                <?php
+                $dialingSoundId = $this->settings[ 'dialingSoundId' ];
+                $defaultSound = $soundsFolder . 'dialing.mp3';
+                $currentSound = $defaultSound;
+
+                $hasCustom = false;
+
+                if( ! empty( $dialingSoundId ) ){
+                    $attachment_url = wp_get_attachment_url( $dialingSoundId );
+                    if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
+                        $currentSound = $attachment_url;
+                        $hasCustom = true;
+                    }
+                }
+                ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Outgoing call sound', 'Settings page', 'bp-better-messages' ); ?>
+                    </th>
+                    <td>
+                        <?php  if( Better_Messages()->functions->can_use_premium_code() && bpbm_fs()->is_premium() ) { ?>
+                            <div style="margin: 10px 0 0;">
+                                <span class="button" onclick="playSound(this, 'dialingSound')"><?php _ex( 'Play', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span class="button button-secondary" onclick="selectCustomSound( 'dialingSound' )"><?php _ex( 'Select custom sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                                <span id="dialingSoundReset" class="button bm-destructive-button <?php if( ! $hasCustom ) echo 'hidden'; ?>" onclick="resetSound('dialingSound')"><?php _ex( 'Reset default sound', 'Settings page', 'bp-better-messages' ); ?></span>
+                            </div>
+                            <audio id="dialingSound" src="<?php echo esc_attr($currentSound); ?>" data-default="<?php echo esc_attr($defaultSound) ?>"></audio>
+                        <?php }
+
+                        Better_Messages()->functions->license_proposal();
+                        ?>
+                        <input type="hidden" name="dialingSoundId" value="<?php echo esc_attr( $this->settings[ 'dialingSoundId' ] ); ?>">
                     </td>
                 </tr>
                 </tbody>
@@ -2690,12 +3689,120 @@ $has_late_message = ob_get_clean();
 
                 <tr valign="top" class="">
                     <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'Disable Bad Words check for Admins', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Allow administrators to bypass bad words filtering', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input id="bpbm-bad-words-skip-admins" name="badWordsSkipAdmins" type="checkbox" <?php checked( $this->settings[ 'badWordsSkipAdmins' ] ?? '0', '1' ); ?> value="1" />
+                    </td>
+                </tr>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" style="width: 320px;">
                         <?php _ex( 'Message when word from Bad Words List is found in message', 'Settings page', 'bp-better-messages' ); ?>
                     </th>
                     <td>
                         <input type="text" style="width: 100%" name="restrictBadWordsList" value="<?php esc_attr_e(wp_unslash($this->settings['restrictBadWordsList'])); ?>">
                     </td>
                 </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div id="moderation" class="bpbm-tab">
+            <table class="form-table">
+                <tbody>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Enable Messages Viewer', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Enable messages viewer in administration page in WordPress admin', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input id="bpbm-messages-viewer" name="messagesViewer" type="checkbox" <?php checked( $this->settings[ 'messagesViewer' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Message Reports', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Allow users to report messages, which will appear at Messages Viewer', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input id="bpbm-allow-reports" name="allowReports" type="checkbox" <?php checked( $this->settings[ 'allowReports' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Messages Pre-Moderation', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Messages pre-moderation allows website administrators to moderate chat messages before they are appeared in the chat', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input id="bpbm-premoderation" name="messagesPremoderation" type="checkbox" <?php checked( $this->settings[ 'messagesPremoderation' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+
+                <tr id="bpbm-premoderation-first-time-row" valign="top" class="">
+                    <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'Pre-Moderate First-Time Senders', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Force moderation for users sending their first message on the website', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input id="bpbm-premoderation-first-time" name="messagesModerateFirstTimeSenders" type="checkbox" <?php checked( $this->settings[ 'messagesModerateFirstTimeSenders' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+
+                <tr id="bpbm-premoderation-roles-row" valign="top" class="">
+                    <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'User Roles for Pre-Moderation', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Configure which user roles should have their new conversations or new replies in existing conversations pre-moderated', 'Settings page', 'bp-better-messages' ); ?></p>
+
+                    </th>
+                    <td>
+                        <div id="bpbm-premoderation-roles-list" class="bp-better-messages-roles-list">
+                            <table class="bp-better-messages-roles-table" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;"><?php _ex( 'Role', 'Settings page', 'bp-better-messages' ); ?></th>
+                                        <th style="text-align: center; padding: 8px; border-bottom: 2px solid #ddd;"><?php _ex( 'New Conversations', 'Settings page', 'bp-better-messages' ); ?></th>
+                                        <th style="text-align: center; padding: 8px; border-bottom: 2px solid #ddd;"><?php _ex( 'Replies', 'Settings page', 'bp-better-messages' ); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $premoderationNewConv = isset($this->settings['messagesPremoderationRolesNewConv']) ? $this->settings['messagesPremoderationRolesNewConv'] : [];
+                                    $premoderationReplies = isset($this->settings['messagesPremoderationRolesReplies']) ? $this->settings['messagesPremoderationRolesReplies'] : [];
+
+                                    foreach( $roles as $slug => $role ){ ?>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #eee;"><?php echo esc_html($role['name']); ?></td>
+                                            <td style="text-align: center; padding: 8px; border-bottom: 1px solid #eee;">
+                                                <input id="<?php echo $slug; ?>_new_conv" type="checkbox" name="messagesPremoderationRolesNewConv[]" value="<?php echo $slug; ?>" <?php if(in_array($slug, $premoderationNewConv)) echo 'checked="checked"'; ?>>
+                                            </td>
+                                            <td style="text-align: center; padding: 8px; border-bottom: 1px solid #eee;">
+                                                <input id="<?php echo $slug; ?>_replies" type="checkbox" name="messagesPremoderationRolesReplies[]" value="<?php echo $slug; ?>" <?php if(in_array($slug, $premoderationReplies)) echo 'checked="checked"'; ?>>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr id="bpbm-notification-emails-row" valign="top" class="">
+                    <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'Moderation Notification Emails', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Email addresses to receive notifications about new pre-moderation messages and reported messages (one per line)', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <textarea id="bpbm-notification-emails" name="messagesModerationNotificationEmails" style="width: 100%; min-height: 100px;" placeholder="admin@example.com&#10;moderator@example.com"><?php echo esc_textarea( $this->settings[ 'messagesModerationNotificationEmails' ] ); ?></textarea>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;"><?php _ex( 'Enter one email address per line. These addresses will be notified when messages require moderation or when messages are reported.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </td>
+                </tr>
+
+
 
                 </tbody>
             </table>
@@ -2901,130 +4008,6 @@ $has_late_message = ob_get_clean();
             </table>
         </div>
 
-        <div id="customization" class="bpbm-tab">
-            <table class="form-table">
-                <tbody>
-                <tr>
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Colors', 'Settings page', 'bp-better-messages' ); ?>
-                    </th>
-                    <td>
-                        <?php $url = Better_Messages()->customize->customization_link([
-                            'panel' => 'better_messages'
-                        ]); ?>
-                        <a href="<?php echo $url; ?>"  class="button bm-customize-btn" target="_blank"><?php _ex( 'Customization', 'Settings page','bp-better-messages' ); ?> <span class="dashicons dashicons-external"></span></a>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Messenger Height', 'Settings page', 'bp-better-messages' ); ?>
-                    </th>
-
-                    <td>
-                        <fieldset>
-                            <table class="widefat bm-switcher-table">
-                                <tbody>
-                                <tr valign="top" class="">
-                                    <th scope="row" valign="top" class="th-left-pd">
-                                        <?php _ex( 'Fixed Header Height', 'Settings page', 'bp-better-messages' ); ?>
-                                        <p style="font-size: 10px;"><?php _ex( 'If your website has fixed header specify its height in pixels.', 'Settings page', 'bp-better-messages' ); ?></p>
-                                        <p style="font-size: 10px;"><?php _ex( 'This needed for correct scrolling in some cases', 'Settings page', 'bp-better-messages' ); ?></p>
-                                    </th>
-                                    <td>
-                                        <input type="number" name="fixedHeaderHeight" value="<?php echo esc_attr( $this->settings[ 'fixedHeaderHeight' ] ); ?>">
-                                    </td>
-                                </tr>
-
-                                <tr valign="top" class="">
-                                    <th scope="row" valign="top" class="th-left-pd">
-                                        <?php _ex( 'Min Height of Messages Container', 'Settings page', 'bp-better-messages' ); ?>
-                                        <p style="font-size: 10px;"><?php _ex( 'Min Height of Messages Container in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
-                                    </th>
-                                    <td>
-                                        <input type="number" name="messagesMinHeight" value="<?php echo esc_attr( $this->settings[ 'messagesMinHeight' ] ); ?>">
-                                    </td>
-                                </tr>
-
-                                <tr valign="top" class="">
-                                    <th scope="row" valign="top" class="th-left-pd">
-                                        <?php _ex( 'Max Height of Messages Container', 'Settings page', 'bp-better-messages' ); ?>
-                                        <p style="font-size: 10px;"><?php _ex( 'Max Height of Messages Container in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
-                                        <p style="font-size: 10px;"><?php _ex( 'Set 9999 to use all available window height', 'Settings page', 'bp-better-messages' ); ?></p>
-                                    </th>
-                                    <td>
-                                        <input type="number" name="messagesHeight" value="<?php echo esc_attr( $this->settings[ 'messagesHeight' ] ); ?>">
-                                    </td>
-                                </tr>
-
-                                <tr valign="top" class="">
-                                    <th scope="row" valign="top" class="th-left-pd">
-                                        <?php _ex( 'Side conversation list width', 'Settings page', 'bp-better-messages' ); ?>
-                                        <p style="font-size: 10px;"><?php _ex( 'Side conversation list width when Combined View is enabled in pixels', 'Settings page', 'bp-better-messages' ); ?></p>
-                                    </th>
-                                    <td>
-                                        <input type="number" name="sideThreadsWidth" value="<?php echo esc_attr( $this->settings[ 'sideThreadsWidth' ] ); ?>">
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </fieldset>
-                    </td>
-                </tr>
-
-
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Allow to disable sound notification', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Allow user disable sound notifications in their user settings', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="allowSoundDisable" type="checkbox" <?php checked( $this->settings[ 'allowSoundDisable' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Disable Search', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Disables search functionality', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="disableSearch" type="checkbox" <?php checked( $this->settings[ 'disableSearch' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Disable Favorite Messages', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Disables favorite messages functionality', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="disableFavoriteMessages" type="checkbox" <?php checked( $this->settings[ 'disableFavoriteMessages' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Disable User Settings', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Disables user settings button', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="disableUserSettings" type="checkbox" <?php checked( $this->settings[ 'disableUserSettings' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-
-                <tr valign="top" class="">
-                    <th scope="row" valign="top">
-                        <?php _ex( 'Disable New Conversation Screen', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Disables new conversation button and screen (admin will always see it)', 'Settings page', 'bp-better-messages' ); ?></p>
-                    </th>
-                    <td>
-                        <input name="disableNewThread" type="checkbox" <?php checked( $this->settings[ 'disableNewThread' ], '1' ); ?> value="1" />
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
         <?php
         $active_integration = 'integrations_bm-buddypress';
         if( defined('ultimatemember_version') ){
@@ -3059,6 +4042,38 @@ $has_late_message = ob_get_clean();
 
                 <table class="form-table">
                     <tbody>
+
+                    <tr>
+                        <th scope="row">
+                            <?php _ex( 'FluentCommunity Messages Page', 'Settings page','bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <input name="FcFullScreen" type="checkbox" <?php checked( $this->settings[ 'FcFullScreen' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Use Full Space in Messages Page', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Removes padding of messages container inside FluentCommunity Messages page and makes it to use all available space', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input name="FcPageTitle" type="checkbox" <?php checked( $this->settings[ 'FcPageTitle' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Add Page Title in Messages Page', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Adds page title to the top of messages page, like in other FluentCommunity Pages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
 
                     <tr>
                         <th scope="row">

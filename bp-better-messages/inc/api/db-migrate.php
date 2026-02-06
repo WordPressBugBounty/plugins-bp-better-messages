@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.7;
+        private $db_version = 1.8;
 
         public static function instance()
         {
@@ -203,13 +203,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       `created_at` bigint(20) NOT NULL DEFAULT '0',
                       `updated_at` bigint(20) NOT NULL DEFAULT '0',
                       `temp_id` varchar(50) DEFAULT NULL,
+                      `is_pending` tinyint(1) NOT NULL DEFAULT '0',
                       PRIMARY KEY (`id`),
                       KEY `sender_id` (`sender_id`),
                       KEY `thread_id` (`thread_id`),
                       KEY `created_at` (`created_at`),
                       KEY `updated_at` (`updated_at`),
                       KEY `temp_id` (`temp_id`),
-                      KEY `thread_id_created_at` (`thread_id`, `created_at`)
+                      KEY `thread_id_created_at` (`thread_id`, `created_at`),
+                      KEY `is_pending_index` (`is_pending`)
                     ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('meta') ."` (
@@ -265,7 +267,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                   `id` bigint(20) NOT NULL AUTO_INCREMENT,
                   `user_id` bigint(20) NOT NULL,
                   `thread_id` bigint(20) NOT NULL,
-                  `type` enum('ban','mute') NOT NULL,
+                  `type` enum('ban','mute','bypass_moderation','force_moderation') NOT NULL,
                   `expiration` datetime NULL DEFAULT NULL,
                   `admin_id` bigint(20) NOT NULL,
                   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -509,6 +511,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 ],
                 '1.7' => [
                     "ALTER TABLE `" . bm_get_table('messages') ."` ADD INDEX `thread_id_created_at` (`thread_id`, `created_at`);",
+                ],
+                '1.8' => [
+                    "ALTER TABLE `" . bm_get_table('moderation') ."` MODIFY COLUMN `type` enum('ban','mute','bypass_moderation','force_moderation') NOT NULL;",
+                    "ALTER TABLE `" . bm_get_table('messages') ."` ADD COLUMN `is_pending` tinyint(1) NOT NULL DEFAULT '0';",
+                    "ALTER TABLE `" . bm_get_table('messages') ."` ADD INDEX `is_pending_index` (`is_pending`);",
                 ]
             ];
 

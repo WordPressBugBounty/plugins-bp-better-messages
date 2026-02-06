@@ -75,6 +75,150 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'callback'            => array($this, 'deleteAccountMessages'),
                 'permission_callback' => array($this, 'user_can_admin'),
             ));
+
+            register_rest_route('better-messages/v1/admin', '/approveMessage', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'approveMessage'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/whitelistUser', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'whitelist_user'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/unwhitelistUser', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'unwhitelist_user'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/getWhitelistedUsers', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_whitelisted_users'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/blacklistUser', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'blacklist_user'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/unblacklistUser', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'unblacklist_user'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/getBlacklistedUsers', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_blacklisted_users'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/getUser', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_user'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/getGuest', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_guest'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/whitelistUserAndApproveAllMessages', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'whitelist_user_and_approve_all_messages'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/blacklistUserAndDeleteAllPendingMessages', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'blacklist_user_and_delete_all_pending_messages'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
+        }
+
+        public function get_user( WP_REST_Request $request ){
+            $user_id = (int) $request->get_param('userId');
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            global $wpdb;
+
+            $messages_count = (int) $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('messages') . "`
+                WHERE `sender_id` = %d", $user_id ));
+
+            $conversations_count = (int) $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('recipients') . "`
+                WHERE `user_id` = %d", $user_id ));
+
+            $moderation_status = Better_Messages()->moderation->get_user_moderation_status( $user_id );
+            $is_admin = user_can( $user_id, 'bm_can_administrate' );
+
+            $user_item = Better_Messages()->functions->rest_user_item( $user_id );
+            $user_item['messagesCount']      = $messages_count;
+            $user_item['conversationsCount'] = $conversations_count;
+            $user_item['moderationStatus']   = $moderation_status;
+            $user_item['isAdmin']            = $is_admin;
+
+            return $user_item;
+        }
+
+        public function get_guest( WP_REST_Request $request ){
+            $guest_id = (int) $request->get_param('guestId');
+
+            if( ! $guest_id ){
+                return new WP_Error( 'invalid_guest', 'Invalid guest ID', array( 'status' => 400 ) );
+            }
+
+            global $wpdb;
+
+            // Get guest data from guests table
+            $guest = $wpdb->get_row( $wpdb->prepare("
+                SELECT id, name, email, ip, created_at
+                FROM `" . bm_get_table('guests') . "`
+                WHERE `id` = %d
+                AND `deleted_at` IS NULL
+            ", $guest_id ), ARRAY_A );
+
+            if( ! $guest ){
+                return new WP_Error( 'guest_not_found', 'Guest not found', array( 'status' => 404 ) );
+            }
+
+            // Guest user ID is negative
+            $guest_user_id = -1 * abs($guest_id);
+
+            $messages_count = (int) $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('messages') . "`
+                WHERE `sender_id` = %d", $guest_user_id ));
+
+            $conversations_count = (int) $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('recipients') . "`
+                WHERE `user_id` = %d", $guest_user_id ));
+
+            $user_item = Better_Messages()->functions->rest_user_item( $guest_user_id );
+            $user_item['id']             = abs( $user_item['id'] );
+            $user_item['email']          = $guest['email'];
+            $user_item['ip']             = $guest['ip'];
+            $user_item['createdAt']      = $guest['created_at'];
+            $user_item['messages']       = $messages_count;
+            $user_item['conversations']  = $conversations_count;
+            $user_item['isWhitelisted']  = Better_Messages_Moderation()->is_user_whitelisted( $guest_user_id );
+            $user_item['isBlacklisted']  = Better_Messages_Moderation()->is_user_blacklisted( $guest_user_id );
+
+            return $user_item;
         }
 
         public function save_settings()
@@ -110,10 +254,23 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             }
         }
 
+        public function approveMessage( WP_REST_Request $request )
+        {
+            $message_id = (int) $request->get_param('messageId');
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if( ! $message ){
+                return new WP_Error( 'message_not_found', 'Message not found', array( 'status' => 404 ) );
+            }
+
+            $result = Better_Messages()->moderation->approve_message( $message_id );
+
+            return $result;
+        }
+
         public function deleteAccountMessages( WP_REST_Request $request ){
             $user_ids = $request->get_param('userIds');
-
-
             //var_dump( $user_ids );
         }
 
@@ -175,13 +332,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             ];
 
             foreach( $user_ids as $user ){
-                $user_item = Better_Messages()->functions->rest_user_item( -1 * abs($user['id']) );
+                $guest_user_id = -1 * abs($user['id']);
+                $user_item = Better_Messages()->functions->rest_user_item( $guest_user_id );
                 $user_item['id']            = abs( $user_item['id'] );
                 $user_item['email']         = $user['email'];
                 $user_item['ip']            = $user['ip'];
                 $user_item['createdAt']      = $user['created_at'];
                 $user_item['messages']      = $user['messages'];
                 $user_item['conversations'] = $user['participants'];
+                $user_item['isWhitelisted']  = Better_Messages_Moderation()->is_user_whitelisted( $guest_user_id );
+                $user_item['isBlacklisted']  = Better_Messages_Moderation()->is_user_blacklisted( $guest_user_id );
 
                 $return['users'][] = $user_item;
             }
@@ -367,6 +527,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             $message_ids = $request->has_param('message_ids') ?  $request->get_param('message_ids' ) : false;
 
             $only_reported = $request->has_param('reported') && intval($request->get_param('reported')) === 1;
+            $only_pending  = $request->has_param('pending') && intval($request->get_param('pending')) === 1;
 
             $sender_sql = $search_sql = $thread_sql = '';
 
@@ -404,7 +565,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 WHERE `created_at` > 0
                     AND `message` != '<!-- BBPM START THREAD -->'
                     AND `id` IN ({$message_ids})";
-            } else if( $only_reported) {
+            } else if( $only_reported ) {
                 $count = (int) $wpdb->get_var( "
                 SELECT COUNT(*)
                 FROM `" . bm_get_table('messages') . "`
@@ -431,6 +592,28 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         FROM `" . bm_get_table('meta') . "`
                         WHERE `meta_key` = 'user_reports'
                     )
+                $sender_sql $search_sql $thread_sql
+                ORDER BY `created_at` DESC
+                LIMIT {$offset}, {$per_page}";
+            } else if( $only_pending ) {
+                $count = (int) $wpdb->get_var( "
+                SELECT COUNT(*)
+                FROM `" . bm_get_table('messages') . "`
+                WHERE `created_at` > 0
+                AND `message` != '<!-- BBPM START THREAD -->'
+                AND `is_pending` = 1
+                $sender_sql $search_sql $thread_sql");
+
+                $sql = "SELECT `messages`.*,
+                `user_reports_meta`.`meta_value` as user_reports,
+                (SELECT COUNT(*)  FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = `messages`.`thread_id`) participants
+                FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                WHERE `created_at` > 0
+                    AND `message` != '<!-- BBPM START THREAD -->'
+                    AND `is_pending` = 1
                 $sender_sql $search_sql $thread_sql
                 ORDER BY `created_at` DESC
                 LIMIT {$offset}, {$per_page}";
@@ -462,6 +645,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             if( class_exists('Better_Messages_User_Reports') ){
                 $return['reported'] = Better_Messages_User_Reports::instance()->get_reported_messages_count();
             }
+
+            $return['pending'] = Better_Messages()->functions->get_pending_messages_count();
 
             if( count( $messages ) > 0 ) {
                 foreach ($messages as $i => $message) {
@@ -499,6 +684,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                     }
 
                     $participants_count = (int) $message['participants'];
+
                     $item = [
                         'id'           => $message['id'],
                         'sender'       => Better_Messages()->functions->rest_user_item( $message['sender_id'] ),
@@ -521,6 +707,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                          }
                     }
 
+                    $is_pending = $message['is_pending'] !== '0';
+
                     if( class_exists('Better_Messages_User_Reports') ){
                         $reports = maybe_unserialize( $message['user_reports'] );
 
@@ -536,11 +724,167 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         }
                     }
 
+                    if( $is_pending ){
+                        $item['is_pending'] = true;
+                    }
+
+                    // Add whitelist/blacklist status for sender (global and thread-specific)
+                    $sender_id = (int) $message['sender_id'];
+                    $thread_id = (int) $message['thread_id'];
+                    if( $sender_id !== 0 ){
+                        // Global status (works for both regular users and guests with negative IDs)
+                        $item['sender_whitelisted'] = Better_Messages()->moderation->is_user_whitelisted( $sender_id );
+                        $item['sender_blacklisted'] = Better_Messages()->moderation->is_user_blacklisted( $sender_id );
+                        // Thread-specific status
+                        if( $thread_id > 0 ){
+                            $item['sender_thread_whitelisted'] = Better_Messages()->moderation->is_user_whitelisted( $sender_id, $thread_id );
+                            $item['sender_thread_blacklisted'] = Better_Messages()->moderation->is_user_blacklisted( $sender_id, $thread_id );
+                        }
+                    }
+
                     $return['messages'][] = $item;
                 }
             }
 
             return $return;
+        }
+
+        public function whitelist_user( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+            $duration  = $request->has_param('duration') ? (int) $request->get_param('duration') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            $result = Better_Messages()->moderation->whitelist_user( $user_id, $thread_id, $duration );
+
+            if( $result ){
+                return array(
+                    'success' => true,
+                    'message' => 'User whitelisted successfully'
+                );
+            }
+
+            return new WP_Error( 'whitelist_failed', 'Failed to whitelist user', array( 'status' => 500 ) );
+        }
+
+        public function unwhitelist_user( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            $result = Better_Messages()->moderation->unwhitelist_user( $user_id, $thread_id );
+
+            if( $result ){
+                return array(
+                    'success' => true,
+                    'message' => 'User removed from whitelist successfully'
+                );
+            }
+
+            return new WP_Error( 'unwhitelist_failed', 'Failed to remove user from whitelist', array( 'status' => 500 ) );
+        }
+
+        public function get_whitelisted_users( WP_REST_Request $request )
+        {
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+
+            $whitelisted = Better_Messages()->moderation->get_whitelisted_users( $thread_id );
+
+            $users = [];
+
+            foreach( $whitelisted as $item ){
+                $user_data = Better_Messages()->functions->rest_user_item( $item['user_id'] );
+                $user_data['expiration'] = $item['expiration'];
+                $user_data['admin_id'] = $item['admin_id'];
+
+                if( $item['admin_id'] ){
+                    $user_data['admin'] = Better_Messages()->functions->rest_user_item( $item['admin_id'] );
+                }
+
+                $users[] = $user_data;
+            }
+
+            return array(
+                'success' => true,
+                'users' => $users
+            );
+        }
+
+        public function blacklist_user( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+            $duration  = $request->has_param('duration') ? (int) $request->get_param('duration') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            $result = Better_Messages()->moderation->blacklist_user( $user_id, $thread_id, $duration );
+
+            if( $result ){
+                return array(
+                    'success' => true,
+                    'message' => 'User blacklisted successfully'
+                );
+            }
+
+            return new WP_Error( 'blacklist_failed', 'Failed to blacklist user', array( 'status' => 500 ) );
+        }
+
+        public function unblacklist_user( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            $result = Better_Messages()->moderation->unblacklist_user( $user_id, $thread_id );
+
+            if( $result ){
+                return array(
+                    'success' => true,
+                    'message' => 'User removed from blacklist successfully'
+                );
+            }
+
+            return new WP_Error( 'unblacklist_failed', 'Failed to remove user from blacklist', array( 'status' => 500 ) );
+        }
+
+        public function get_blacklisted_users( WP_REST_Request $request )
+        {
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+
+            $blacklisted = Better_Messages()->moderation->get_blacklisted_users( $thread_id );
+
+            $users = [];
+
+            foreach( $blacklisted as $item ){
+                $user_data = Better_Messages()->functions->rest_user_item( $item['user_id'] );
+                $user_data['expiration'] = $item['expiration'];
+                $user_data['admin_id'] = $item['admin_id'];
+
+                if( $item['admin_id'] ){
+                    $user_data['admin'] = Better_Messages()->functions->rest_user_item( $item['admin_id'] );
+                }
+
+                $users[] = $user_data;
+            }
+
+            return array(
+                'success' => true,
+                'users' => $users
+            );
         }
 
         public function get_threads( WP_REST_Request $request ){
@@ -587,6 +931,60 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             }
 
             return $return;
+        }
+
+        public function whitelist_user_and_approve_all_messages( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+            $duration  = $request->has_param('duration') ? (int) $request->get_param('duration') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            // First whitelist the user
+            $whitelist_result = Better_Messages()->moderation->whitelist_user( $user_id, $thread_id, $duration );
+
+            if( ! $whitelist_result ){
+                return new WP_Error( 'whitelist_failed', 'Failed to whitelist user', array( 'status' => 500 ) );
+            }
+
+            // Then approve all pending messages from this user
+            $approved_count = Better_Messages()->moderation->approve_all_pending_messages_from_user( $user_id );
+
+            return array(
+                'success'        => true,
+                'message'        => 'User whitelisted and messages approved successfully',
+                'approvedCount'  => $approved_count
+            );
+        }
+
+        public function blacklist_user_and_delete_all_pending_messages( WP_REST_Request $request )
+        {
+            $user_id   = (int) $request->get_param('userId');
+            $thread_id = $request->has_param('threadId') ? (int) $request->get_param('threadId') : null;
+            $duration  = $request->has_param('duration') ? (int) $request->get_param('duration') : null;
+
+            if( ! $user_id ){
+                return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
+            }
+
+            // First delete all pending messages from this user
+            $deleted_count = Better_Messages()->moderation->delete_all_pending_messages_from_user( $user_id );
+
+            // Then blacklist the user
+            $blacklist_result = Better_Messages()->moderation->blacklist_user( $user_id, $thread_id, $duration );
+
+            if( ! $blacklist_result ){
+                return new WP_Error( 'blacklist_failed', 'Failed to blacklist user', array( 'status' => 500 ) );
+            }
+
+            return array(
+                'success'      => true,
+                'message'      => 'User blacklisted and pending messages deleted successfully',
+                'deletedCount' => $deleted_count
+            );
         }
     }
 

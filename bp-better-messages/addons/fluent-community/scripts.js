@@ -1,131 +1,152 @@
 var html = document.querySelector('html');
 
-document.addEventListener("fluentCommunityUtilReady", function () {
-    wp.hooks.addAction('better_messages_update_unread', 'bm_fluent_com', function( unread ){
-        var unreadCounters = document.querySelectorAll('.bm-unread-badge');
+var settings = window.BM_Fluent_Community;
 
-        unreadCounters.forEach(function( counter ){
-            counter.innerHTML = unread;
+const path = '/messages';
 
-            if( unread > 0 ){
-                counter.style.display = '';
-            } else {
-                counter.style.display = 'none';
-            }
-        });
-    });
+function extractPathWithHash(url) {
+  try {
+    const u = new URL(url, window.location.origin);
+    return u.pathname + u.hash;
+  } catch (e) {
+    const m = url.match(/https?:\/\/[^\/]+(\/.*)/);
+    return m ? m[1] : url;
+  }
+}
 
-    updateDynamicCSS();
+wp.hooks.addAction('better_messages_update_unread', 'bm_fluent_com', function( unread ){
+  var unreadCounters = document.querySelectorAll('.bm-unread-badge');
 
-    window.FluentCommunityUtil.hooks.addFilter("fluent_com_portal_routes", "fluent_chat_route", function (a) {
-        return a.push({
-            path: "/messages",
-            name: "better_messages",
-            component: {
-                template: '<div class="fcom_better_messages_wrap" style="padding: 20px;"><div class="bp-messages-wrap-main" style="height: 900px"></div></div>',
-                mounted() {
-                    updateDynamicCSS();
-                    BetterMessages.initialize();
-                    BetterMessages.parseHash();
+  unreadCounters.forEach(function( counter ){
+    counter.innerHTML = unread;
 
-                },
-                beforeRouteLeave(e, n) {
-                    if( BetterMessages.isInCall()){
-                        return false;
-                    }
+    if( unread > 0 ){
+      counter.style.display = '';
+    } else {
+      counter.style.display = 'none';
+    }
+  });
+});
 
-                    document.body.classList.remove('bp-messages-mobile');
+wp.hooks.addFilter('better_messages_navigate_url', 'bm_fluent_com', function( redirected, url ){
+  if( typeof window.fluentFrameworkAppRouter !== 'undefined' && typeof window.fluentFrameworkAppRouter.push === 'function' ) {
+    try {
+      const fcUrl = extractPathWithHash(url);
 
-                    var container = document.querySelector('.bp-messages-wrap-main');
-                    if( container ){
-                        if( container.reactRoot ) container.reactRoot.unmount()
-                        container.remove();
-                    }
+      if( fcUrl.startsWith( path ) ) {
+        window.fluentFrameworkAppRouter.push(fcUrl);
+        return true;
+      }
+    } catch (e){
+      console.error('Fluent Community navigation error:', e);
+    }
+  }
 
-                    BetterMessages.resetMainVisibleThread();
-                }
-            },
-            meta: {active: "better-messages"}
-        }), a;
-    });
+  return redirected;
+});
 
-    installMobileMenuButton();
+
+const isMobile = document.body.classList.contains('bp-messages-mobile');
+const fullSize = ( typeof settings !== 'undefined' && typeof settings.fullScreen !== 'undefined' ) ? settings.fullScreen : false;
+const containerClass = fullSize ? 'fcom_full_size_container' : 'fcom_boxed_container';
+const containerStyle = fullSize ? 'padding: 0;' : 'padding: 20px;';
+const header = ( ! isMobile && typeof settings !== 'undefined' && settings.title !== '' ) ? '<div class="fhr_content_layout_header"><h1 class="fcom_page_title">' + settings.title + '</h1></div>' : '';
+
+document.addEventListener('fluentCommunityUtilReady', function () {
+  updateDynamicCSS();
+
+  window.FluentCommunityUtil.hooks.addFilter("fluent_com_portal_routes", "fluent_chat_route", function (a) {
+    return a.push({
+      path: path,
+      name: "better_messages",
+      component: {
+        template: header +
+          '<div class="fcom_better_messages_wrap ' + containerClass + '" style="' + containerStyle + '">' +
+          '<div class="bp-messages-wrap-main" style="height: 900px"></div>' +
+          '</div>',
+        mounted() {
+          updateDynamicCSS();
+          BetterMessages.initialize();
+          BetterMessages.parseHash();
+
+        },
+        beforeRouteLeave(e, n) {
+          if( BetterMessages.isInCall()){
+            return false;
+          }
+
+          document.body.classList.remove('bp-messages-mobile');
+
+          var container = document.querySelector('.bp-messages-wrap-main');
+          if( container ){
+            if( container.reactRoot ) container.reactRoot.unmount()
+            container.remove();
+          }
+
+          BetterMessages.resetMainVisibleThread();
+        }
+      },
+      meta: {active: "better-messages"}
+    }), a;
+  });
 });
 
 function updateDynamicCSS(){
-        var body = document.body;
+  var body = document.body;
 
-        if( html.classList.contains('dark') ){
-            body.classList.add('bm-messages-dark');
-            body.classList.remove('bm-messages-light');
-        } else {
-            body.classList.add('bm-messages-light');
-            body.classList.remove('bm-messages-dark');
-        }
+  if( html.classList.contains('dark') ){
+    body.classList.add('bm-messages-dark');
+    body.classList.remove('bm-messages-light');
+  } else {
+    body.classList.add('bm-messages-light');
+    body.classList.remove('bm-messages-dark');
+  }
 
-        var style = document.querySelector('#bm-fcom-footer-height-style');
+  var style = document.querySelector('#bm-fcom-footer-height-style');
 
-        if ( ! style ) {
-            style = document.createElement('style');
-            style.id = 'bm-fcom-footer-height-style';
-            document.head.appendChild(style);
-        }
+  if ( ! style ) {
+    style = document.createElement('style');
+    style.id = 'bm-fcom-footer-height-style';
+    document.head.appendChild(style);
+  }
 
-        var css = ':root {';
+  var css = ':root{';
 
-        var windowHeight = window.innerHeight;
-        css += `--bm-fcom-window-height: ${windowHeight}px;`;
+  var windowHeight = window.innerHeight;
+  css += `--bm-fcom-window-height:${windowHeight}px;`;
 
-        var mobileMenu = document.querySelector('.fcom_mobile_menu');
-        if( mobileMenu ) {
-            var height = mobileMenu.offsetHeight;
-            css += `--bm-fcom-footer-height: ${height}px;`;
-        }
+  var mobileMenu = document.querySelector('.fcom_mobile_menu');
+  if( mobileMenu ) {
+    var height = mobileMenu.offsetHeight;
+    css += `--bm-fcom-footer-height:${height}px;`;
+  }
 
-        var topMenu = document.querySelector('.fcom_top_menu');
+  var topMenu = document.querySelector('.fcom_top_menu');
 
-        if( topMenu ) {
-            var topMenuHeight = topMenu.offsetHeight ;
-            css += `--bm-fcom-menu-height: ${topMenuHeight}px;`;
-        }
+  if( topMenu ) {
+    var topMenuHeight = topMenu.offsetHeight ;
+    css += `--bm-fcom-menu-height:${topMenuHeight}px;`;
+  }
 
-        style.innerHTML = css + '}';
-}
+  var headerTitle = document.querySelector('.fhr_content_layout_header');
 
-function installMobileMenuButton(){
-    var mobileMenu = document.querySelector('.fcom_mobile_menu');
-    var betterMessagesHeaderButton = document.querySelector('.fcom_better_messages_menu_li');
+  if( headerTitle ) {
+    var headerTitleHeight = headerTitle.offsetHeight ;
+    css += `--bm-fcom-title-height:${headerTitleHeight}px;`;
+  }
 
-    if( ! mobileMenu || ! betterMessagesHeaderButton ){
-        setTimeout( installMobileMenuButton, 100 );
-    } else {
-        var mobileMenuItems = mobileMenu.querySelector('.focm_menu_items');
-
-        var bmMobileMenuItemIcon = betterMessagesHeaderButton.querySelector('.el-icon').innerHTML;
-        var bmMobileMenuItemHref = betterMessagesHeaderButton.querySelector('a').href;
-
-        var bmMobileMenuItem = document.createElement('div');
-        bmMobileMenuItem.innerHTML = '<a href="' + bmMobileMenuItemHref + '" class="focm_menu_item"><i class="el-icon"><span>' + bmMobileMenuItemIcon + '</span></i><span><span class="bm-unread-badge" style="display: none;"></span></span></a>';
-
-
-        if (mobileMenuItems.children.length >= 1) {
-            mobileMenuItems.insertBefore(bmMobileMenuItem, mobileMenuItems.children[1]);
-        } else {
-            mobileMenuItems.appendChild(bmMobileMenuItem);
-        }
-    }
-
+  style.innerHTML = css + '}';
 }
 
 const config = { attributes: true, attributeFilter: ['class'] };
 
 // Callback function to execute when mutations are observed
 const callback = function(mutationsList, observer) {
-    for(let mutation of mutationsList) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            updateDynamicCSS();
-        }
+  for(let mutation of mutationsList) {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+      updateDynamicCSS();
     }
+  }
 };
 
 // Create an observer instance linked to the callback function

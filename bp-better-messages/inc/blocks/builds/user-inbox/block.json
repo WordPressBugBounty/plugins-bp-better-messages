@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "better-messages/user-inbox",
+  "description": "Personal user inbox, where user can access all conversations which he is participating in",
+  "version": "1.0",
+  "title": "User Inbox",
+  "category": "better-messages",
+  "attributes": {
+    "fullScreen": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "textdomain": "bp-better-messages",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "render": "file:./render.php",
+  "keywords": [
+    "better",
+    "messages",
+    "inbox"
+  ]
+}

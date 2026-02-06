@@ -4,7 +4,7 @@
     'name' => '__root__',
     'pretty_version' => 'dev-master',
     'version' => 'dev-master',
-    'reference' => '236d99ed7b6ad9a42afb07d1bfb8517f6b017217',
+    'reference' => 'e94d2122f95975b19b7a596f7b85b65ffd0dfb05',
     'type' => 'library',
     'install_path' => __DIR__ . '/../',
     'aliases' => 
@@ -172,9 +172,9 @@
     ),
     'react/event-loop' => 
     array (
-      'pretty_version' => 'v1.5.0',
-      'version' => '1.5.0.0',
-      'reference' => 'bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354',
+      'pretty_version' => 'v1.6.0',
+      'version' => '1.6.0.0',
+      'reference' => 'ba276bda6083df7e0050fd9b33f66ad7a4ac747a',
       'type' => 'library',
       'install_path' => __DIR__ . '/../react/event-loop',
       'aliases' => 

@@ -222,11 +222,7 @@ class Better_Messages_Component extends BP_Component
      */
     public function content()
     {
-        if( function_exists('bp_is_user') && bp_is_user() ) {
-            echo Better_Messages()->functions->get_page();
-        } else {
-            echo Better_Messages()->functions->get_page( true );
-        }
+        echo Better_Messages()->functions->get_page();
     }
 
     /**

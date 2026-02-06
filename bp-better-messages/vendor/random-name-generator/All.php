@@ -21,7 +21,7 @@ class All extends AbstractGenerator implements Generator
      * @param array $generators The random generators to use.
      * @param \BetterMessages\Randomizer\Randomizer $randomizer The random number generator.
      */
-    public function __construct(array $generators, Randomizer $randomizer = null)
+    public function __construct(array $generators, ?Randomizer $randomizer = null)
     {
         $this->_generators = $generators;
         $this->_randomizer = $randomizer;
@@ -34,7 +34,7 @@ class All extends AbstractGenerator implements Generator
      * @param \BetterMessages\Randomizer\Randomizer $randomizer The random number generator.
      * @return \BetterMessages\RandomNameGenerator\All The constructed generator.
      */
-    public static function create(Randomizer $randomizer = null)
+    public static function create(?Randomizer $randomizer = null)
     {
         return new self([new Alliteration($randomizer), new Vgng($randomizer)], $randomizer);
     }

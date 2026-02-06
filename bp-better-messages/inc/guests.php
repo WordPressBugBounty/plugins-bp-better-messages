@@ -258,7 +258,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             $guest_user = $this->get_guest_user( $user_id );
 
             if( $guest_user ){
-                $item['name'] = $guest_user->name;
+                $item['name'] = sanitize_user( $guest_user->name );
 
                 if( ! empty( $guest_user->ip ) && str_starts_with($guest_user->ip, 'ai-chat-bot-') ){
                     $item['is_bot'] = 1;
@@ -328,7 +328,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $data = [];
 
-            $name = trim(sanitize_text_field( $request->get_param('name') ));
+            $name = sanitize_user( trim( sanitize_text_field( $request->get_param('name') ) ) );
 
             if( ! empty( $name ) ){
                 $data['name'] = $name;
@@ -430,7 +430,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $result = $wpdb->insert( $this->table, [
                 'secret' => $secret,
-                'name'   => $name,
+                'name'   => sanitize_user($name),
                 'email'  => $email,
                 'ip'     => $this->get_client_ip(),
             ] );

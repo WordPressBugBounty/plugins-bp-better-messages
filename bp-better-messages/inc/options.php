@@ -34,6 +34,7 @@ class Better_Messages_Options
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'miniChatsEnable'             => '0',
+            'combinedChatsEnable'         => '0',
             'searchAllUsers'              => '1',
             'disableSubject'              => '0',
             'disableEnterForTouch'        => '1',
@@ -117,10 +118,23 @@ class Better_Messages_Options
             'messagesMinHeight'           => 450,
             'messagesHeight'              => 650,
             'sideThreadsWidth'            => 320,
+
             'notificationSound'           => 100,
+            'notificationSoundId'         => 0,
+            'notificationSoundUrl'        => '',
+
             'sentSound'                   => 50,
+            'sentSoundId'                 => 0,
+            'sentSoundUrl'                => '',
+
             'callSound'                   => 100,
+            'callSoundId'                 => 0,
+            'callSoundUrl'                => '',
+
             'dialingSound'                => 50,
+            'dialingSoundId'              => 0,
+            'dialingSoundUrl'             => '',
+
             'modernLayout'                => 'left',
             'deletedBehaviour'            => 'ignore',
             'unreadCounter'               => 'messages',
@@ -135,6 +149,7 @@ class Better_Messages_Options
             'mobilePopupLocation'         => 'right',
             'mobileOnsiteLocation'        => 'auto',
             'badWordsList'                => '',
+            'badWordsSkipAdmins'          => '0',
             'groupCallsGroups'            => '0',
             'groupCallsThreads'           => '0',
             'groupCallsChats'             => '0',
@@ -169,6 +184,20 @@ class Better_Messages_Options
             'GamiPressCallPricingStartMessage' => 'Not enough points to start new call',
             'GamiPressCallPricingEndMessage'   => 'Not enough points to continue the call',
             'createEmailTemplate'           => '1',
+            // Email template customization
+            'emailTemplateSource'           => 'buddypress',  // 'buddypress' or 'custom' (for BP sites)
+            'emailTemplateMode'             => 'simple',      // 'simple' or 'custom'
+            'emailLogoId'                   => 0,             // Attachment ID for logo
+            'emailLogoUrl'                  => '',            // URL of the logo
+            'emailPrimaryColor'             => '#21759b',     // Primary/button color
+            'emailBackgroundColor'          => '#f6f6f6',     // Background color
+            'emailContentBgColor'           => '#ffffff',     // Content area background
+            'emailTextColor'                => '#333333',     // Text color
+            'emailHeaderText'               => '',            // Custom header text (empty = default "Hi {name}")
+            'emailFooterText'               => '',            // Custom footer text
+            'emailButtonText'               => '',            // Custom button text (empty = default)
+            'emailCustomHtml'               => '',            // Full custom HTML template
+            'emailUnsubscribeLink'          => '0',           // Show unsubscribe link in message emails
             'notificationsOfflineDelay'     => 15,
             'bbPressAuthorDetailsLink'      => '0',
             'enableGroupsFiles'             => '0',
@@ -213,6 +242,8 @@ class Better_Messages_Options
             'PScombinedGroupsEnable'        => '0',
             'PSmobileGroupsEnable'          => '0',
 
+            'FcFullScreen'                  => '1',
+            'FcPageTitle'                   => '0',
             'FCenableMessageButton'         => '1',
             'FCProfileVideoCall'            => '0',
             'FCProfileAudioCall'            => '0',
@@ -247,7 +278,13 @@ class Better_Messages_Options
             'openAiApiKey'                  => '',
 
             'deleteOldMessages'             => 0,
-            'suggestedConversations'        => []
+            'suggestedConversations'        => [],
+
+            'messagesPremoderation'         => '0',
+            'messagesPremoderationRolesNewConv'    => [],
+            'messagesPremoderationRolesReplies'    => [],
+            'messagesModerateFirstTimeSenders'     => '0',
+            'messagesModerationNotificationEmails' => ''
         );
 
         $args = get_option( 'bp-better-chat-settings', array() );
@@ -255,6 +292,7 @@ class Better_Messages_Options
         if ( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) {
             $args['mechanism'] = 'ajax';
             $args['miniChatsEnable'] = '0';
+            $args['combinedChatsEnable'] = '0';
             $args['messagesStatus'] = '0';
             $args['messagesStatusList'] = '0';
             $args['messagesStatusDetailed'] = '0';
@@ -285,6 +323,25 @@ class Better_Messages_Options
         }
 
         $this->settings = wp_parse_args( $args, $this->defaults );
+
+        // Migrate emailCustomHtml from main settings to separate option if needed
+        if( ! empty( $this->settings['emailCustomHtml'] ) ){
+            $existing = get_option( 'better-messages-email-custom-html', '' );
+            if( empty( $existing ) ){
+                update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
+            }
+            $this->settings['emailCustomHtml'] = ''; // Clear from main settings
+        }
+    }
+
+    /**
+     * Get email custom HTML template (loaded on demand to avoid bloating main settings)
+     *
+     * @return string
+     */
+    public function get_email_custom_html()
+    {
+        return get_option( 'better-messages-email-custom-html', '' );
     }
 
     public function setup_actions()
@@ -301,18 +358,31 @@ class Better_Messages_Options
         $administration_title = $menu_title = _x('Administration', 'WP Admin', 'bp-better-messages');
         $plugin_menu_title = _x( 'Better Messages', 'WP Admin', 'bp-better-messages' );
 
+        $notifications_count = 0;
+
         if( class_exists('Better_Messages_User_Reports') ){
             $reports_count = Better_Messages_User_Reports::instance()->get_reported_messages_count();
 
             if( $reports_count > 0 ){
-                $menu_title .= " <span class='awaiting-mod count-{$reports_count} bm-reports-count'>{$reports_count}</span>";
-                $plugin_menu_title .= " <span class='awaiting-mod count-{$reports_count} bm-reports-count'>{$reports_count}</span>";
-
-                wp_register_style('bm-reports-count', false);
-                wp_add_inline_style('bm-reports-count', '.awaiting-mod.bm-reports-count+.fs-trial{display:none!important}');
-                wp_enqueue_style( 'bm-reports-count' );
+                $notifications_count += $reports_count;
             }
         }
+
+        $pending_count = Better_Messages()->functions->get_pending_messages_count();
+
+        if( $pending_count > 0 ){
+            $notifications_count += $pending_count;
+        }
+
+        if( $notifications_count > 0 ){
+            $menu_title .= " <span class='awaiting-mod count-{$notifications_count} bm-reports-count'>{$notifications_count}</span>";
+            $plugin_menu_title .= " <span class='awaiting-mod count-{$notifications_count} bm-reports-count'>{$notifications_count}</span>";
+
+            wp_register_style('bm-reports-count', false);
+            wp_add_inline_style('bm-reports-count', '.awaiting-mod.bm-reports-count+.fs-trial{display:none!important}');
+            wp_enqueue_style( 'bm-reports-count' );
+        }
+
 
         add_menu_page(
             __( 'Better Messages' ),
@@ -382,6 +452,8 @@ class Better_Messages_Options
 
         if ( $hook === 'toplevel_page_bp-better-messages' && is_admin() ) {
             wp_enqueue_script( 'jquery-ui-sortable' );
+            wp_enqueue_style( 'wp-color-picker' );
+            wp_enqueue_script( 'wp-color-picker' );
         }
 
     }
@@ -389,6 +461,7 @@ class Better_Messages_Options
     public function settings_page_html()
     {
         wp_enqueue_script( 'jquery-ui-sortable' );
+        wp_enqueue_media();
 
         if ( isset( $_POST['_wpnonce'] ) && !empty($_POST['_wpnonce']) && wp_verify_nonce( $_POST['_wpnonce'], 'bp-better-messages-settings' ) ) {
             unset( $_POST['_wpnonce'], $_POST['_wp_http_referer'] );
@@ -512,6 +585,14 @@ class Better_Messages_Options
             $settings['FCenableMessageButton'] = '0';
         }
 
+        if ( ! isset( $settings['FcFullScreen'] ) ) {
+            $settings['FcFullScreen'] = '0';
+        }
+
+        if ( ! isset( $settings['FcPageTitle'] ) ) {
+            $settings['FcPageTitle'] = '0';
+        }
+
         if ( ! isset( $settings['FCProfileVideoCall'] ) ) {
             $settings['FCProfileVideoCall'] = '0';
         }
@@ -544,6 +625,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';
+        }
+        if ( !isset( $settings['combinedChatsEnable'] ) ) {
+            $settings['combinedChatsEnable'] = '0';
         }
         if ( !isset( $settings['searchAllUsers'] ) ) {
             $settings['searchAllUsers'] = '0';
@@ -611,6 +695,23 @@ class Better_Messages_Options
         if ( !isset( $settings['restrictNewThreads'] ) ) {
             $settings['restrictNewThreads'] = [];
         }
+
+        if( ! isset( $settings['messagesPremoderationRolesNewConv'] ) ){
+            $settings['messagesPremoderationRolesNewConv'] = [];
+        }
+
+        if( ! isset( $settings['messagesPremoderationRolesReplies'] ) ){
+            $settings['messagesPremoderationRolesReplies'] = [];
+        }
+
+        if( ! isset( $settings['messagesModerateFirstTimeSenders'] ) ){
+            $settings['messagesModerateFirstTimeSenders'] = '0';
+        }
+
+        if( ! isset( $settings['messagesModerationNotificationEmails'] ) ){
+            $settings['messagesModerationNotificationEmails'] = '';
+        }
+
         if ( !isset( $settings['restrictBlockUsers'] ) ) {
             $settings['restrictBlockUsers'] = [];
         }
@@ -975,6 +1076,20 @@ class Better_Messages_Options
             $settings['privateReplies'] = '0';
         }
 
+        if( ! isset( $settings['messagesPremoderation'] ) ) {
+            $settings['messagesPremoderation'] = '0';
+        }
+
+        // Email template source validation (for BuddyPress sites)
+        if( ! isset( $settings['emailTemplateSource'] ) || ! in_array( $settings['emailTemplateSource'], ['buddypress', 'custom'] ) ) {
+            $settings['emailTemplateSource'] = 'buddypress';
+        }
+
+        // Email template mode validation
+        if( ! isset( $settings['emailTemplateMode'] ) || ! in_array( $settings['emailTemplateMode'], ['simple', 'custom'] ) ) {
+            $settings['emailTemplateMode'] = 'simple';
+        }
+
         if( ! isset( $settings['restrictRoleType'] ) || $settings['restrictRoleType'] !== 'disallow' ) {
             $settings['restrictRoleType'] = 'allow';
         }
@@ -1003,7 +1118,10 @@ class Better_Messages_Options
             'GamiPresslPricingEndMessage'
         ];
 
-        $textareas = [ 'badWordsList' ];
+        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails' ];
+
+        // Fields that need special HTML handling (processed separately with wp_kses)
+        $html_fields = [ 'emailCustomHtml' ];
 
         $int_only = [
             'thread_interval'           => 1,
@@ -1018,12 +1136,17 @@ class Better_Messages_Options
             'notificationsInterval'     => 0,
             'notificationsOfflineDelay' => 0,
             'notificationSound'         => 0,
+            'notificationSoundId'       => 0,
             'sentSound'                 => 0,
+            'sentSoundId'               => 0,
             'callSound'                 => 0,
+            'callSoundId'               => 0,
             'dialingSound'              => 0,
+            'dialingSoundId'            => 0,
             'modernBorderRadius'        => 0,
             'attachmentsMaxNumber'      => 0,
-            'deleteOldMessages'         => 0
+            'deleteOldMessages'         => 0,
+            'emailLogoId'               => 0
         ];
 
         $arrays = [
@@ -1036,7 +1159,9 @@ class Better_Messages_Options
             'GamiPressNewThreadCharge',
             'GamiPressCallPricing',
             'reactionsEmojies',
-            'suggestedConversations'
+            'suggestedConversations',
+            'messagesPremoderationRolesNewConv',
+            'messagesPremoderationRolesReplies'
         ];
 
         foreach ( $settings as $key => $value ) {
@@ -1049,6 +1174,9 @@ class Better_Messages_Options
                 foreach ( $value as $val ) {
                     $this->settings[$key][] = sanitize_text_field( $val );
                 }
+            } else if ( in_array( $key, $html_fields ) ) {
+                // HTML fields are processed separately with wp_kses later
+                $this->settings[$key] = $value;
             } else {
                 if( in_array( $key, $textareas ) ){
                     $this->settings[$key] = sanitize_textarea_field( $value );
@@ -1070,6 +1198,88 @@ class Better_Messages_Options
             }
         }
 
+        $sounds_keys = [
+            'notificationSound',
+            'sentSound',
+            'callSound',
+            'dialingSound'
+        ];
+
+        foreach ( $sounds_keys as $key ) {
+            if(  $this->settings[ $key . 'Id'] > 0 ){
+                $attachment_url = wp_get_attachment_url( $settings[$key . 'Id'] );
+                if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
+                    $this->settings[$key . 'Url'] = $attachment_url;
+                } else {
+                    $this->settings[$key . 'Id'] = 0;
+                    $this->settings[$key . 'Url'] = '';
+                }
+            } else {
+                $this->settings[$key . 'Id'] = 0;
+                $this->settings[$key . 'Url'] = '';
+            }
+        }
+
+        // Process email logo
+        if( $this->settings['emailLogoId'] > 0 ){
+            $attachment_url = wp_get_attachment_url( $this->settings['emailLogoId'] );
+            if( $attachment_url && wp_attachment_is_image( $this->settings['emailLogoId'] ) ){
+                $this->settings['emailLogoUrl'] = $attachment_url;
+            } else {
+                $this->settings['emailLogoId'] = 0;
+                $this->settings['emailLogoUrl'] = '';
+            }
+        } else {
+            $this->settings['emailLogoId'] = 0;
+            $this->settings['emailLogoUrl'] = '';
+        }
+
+        // Validate email colors (hex format)
+        $email_color_keys = ['emailPrimaryColor', 'emailBackgroundColor', 'emailContentBgColor', 'emailTextColor'];
+        $email_color_defaults = [
+            'emailPrimaryColor'     => '#21759b',
+            'emailBackgroundColor'  => '#f6f6f6',
+            'emailContentBgColor'   => '#ffffff',
+            'emailTextColor'        => '#333333'
+        ];
+
+        foreach ( $email_color_keys as $color_key ) {
+            if( isset( $this->settings[$color_key] ) ){
+                $color = $this->settings[$color_key];
+                // Validate hex color format
+                if( ! preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color) ){
+                    $this->settings[$color_key] = $email_color_defaults[$color_key];
+                }
+            }
+        }
+
+        // Handle email custom HTML with allowed tags
+        if( isset( $this->settings['emailCustomHtml'] ) && ! empty( $this->settings['emailCustomHtml'] ) ){
+            // Allow all HTML tags that are needed for email templates
+            $allowed_html = array_merge(
+                wp_kses_allowed_html('post'),
+                array(
+                    'html'   => array( 'lang' => true, 'xmlns' => true ),
+                    'head'   => array(),
+                    'meta'   => array( 'name' => true, 'content' => true, 'http-equiv' => true, 'charset' => true ),
+                    'title'  => array(),
+                    'body'   => array( 'class' => true, 'style' => true ),
+                    'style'  => array( 'type' => true ),
+                    'link'   => array( 'rel' => true, 'href' => true, 'type' => true ),
+                    'center' => array(),
+                    'table'  => array( 'width' => true, 'border' => true, 'cellpadding' => true, 'cellspacing' => true, 'class' => true, 'style' => true, 'align' => true, 'bgcolor' => true, 'role' => true ),
+                    'tr'     => array( 'class' => true, 'style' => true, 'align' => true, 'valign' => true, 'bgcolor' => true ),
+                    'td'     => array( 'width' => true, 'class' => true, 'style' => true, 'align' => true, 'valign' => true, 'colspan' => true, 'rowspan' => true, 'bgcolor' => true ),
+                    'th'     => array( 'width' => true, 'class' => true, 'style' => true, 'align' => true, 'valign' => true, 'colspan' => true, 'rowspan' => true, 'scope' => true ),
+                    'thead'  => array(),
+                    'tbody'  => array(),
+                    'tfoot'  => array(),
+                    'img'    => array( 'src' => true, 'alt' => true, 'width' => true, 'height' => true, 'class' => true, 'style' => true, 'border' => true ),
+                )
+            );
+            $this->settings['emailCustomHtml'] = wp_kses( wp_unslash( $this->settings['emailCustomHtml'] ), $allowed_html );
+        }
+
         $this->settings['bpProfileSlug'] = preg_replace('/\s+/', '', trim( $this->settings['bpProfileSlug'] ) );
         $this->settings['bpGroupSlug'] = preg_replace('/\s+/', '', trim( $this->settings['bpGroupSlug'] ) );
 
@@ -1084,6 +1294,12 @@ class Better_Messages_Options
         $this->settings['updateTime'] = time();
 
         wp_unschedule_hook('better_messages_send_notifications');
+
+        // Save emailCustomHtml to separate option to avoid bloating main settings
+        if( isset( $this->settings['emailCustomHtml'] ) && ! empty( $this->settings['emailCustomHtml'] ) ){
+            update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
+        }
+        $this->settings['emailCustomHtml'] = ''; // Don't store in main settings
 
         update_option( 'bp-better-chat-settings', $this->settings );
         Better_Messages()->settings = $this->settings;

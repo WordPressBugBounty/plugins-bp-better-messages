@@ -52,6 +52,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $temp_id;
 
+        public $is_pending;
+
         /**
          * Message recipients.
          *
@@ -128,6 +130,7 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             $this->created_at = apply_filters( 'better_messages_message_created_at_before_save', $this->created_at, $this->id );
             $this->updated_at = apply_filters( 'better_messages_message_updated_at_before_save', $this->updated_at, $this->id );
             $this->temp_id = apply_filters( 'better_messages_message_temp_id_before_save', $this->temp_id, $this->id );
+            $this->is_pending = apply_filters( 'better_messages_message_is_pending_before_save', $this->is_pending, $this->id );
 
             /**
              * Fires before the current message item gets saved.
@@ -163,7 +166,7 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             }
 
             // First insert the message into the messages table.
-            if ( ! $wpdb->query( $wpdb->prepare( "INSERT INTO " . bm_get_table('messages') . " ( thread_id, sender_id, message, date_sent, created_at, updated_at, temp_id ) VALUES ( %d, %d, %s, %s, %d, %d, %s )", $this->thread_id, $this->sender_id, $this->message, $this->date_sent, $this->created_at, $this->updated_at, $this->temp_id ) ) ) {
+            if ( ! $wpdb->query( $wpdb->prepare( "INSERT INTO " . bm_get_table('messages') . " ( thread_id, sender_id, message, date_sent, created_at, updated_at, temp_id, is_pending ) VALUES ( %d, %d, %s, %s, %d, %d, %s, %d )", $this->thread_id, $this->sender_id, $this->message, $this->date_sent, $this->created_at, $this->updated_at, $this->temp_id, $this->is_pending ) ) ) {
                 return false;
             }
 
@@ -172,7 +175,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             $recipient_ids = array();
 
             $time = Better_Messages()->functions->get_microtime();
-
 
             if ( $new_thread ) {
                 $unread_count = ( $this->count_unread ) ? 1 : 0;

@@ -22,6 +22,9 @@
   --contexify-activeArrow-color: #fff;
 }
 
+.contexify.bm-contexify {
+  z-index: 10000005 !important;
+}
 
 @mixin focus-swag {
   color: white;

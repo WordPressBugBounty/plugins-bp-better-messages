@@ -54,7 +54,12 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
                 return;
             }
 
-            do_action( 'dokan_dashboard_wrap_start' ); ?>
+            $vendor_layout = dokan_get_option( 'vendor_layout_style', 'dokan_appearance', 'legacy' );
+
+            do_action( 'dokan_dashboard_wrap_start' );
+
+            if( $vendor_layout === 'legacy' ){
+            ?>
             <style type="text/css">
                 .dokan-dashboard-content .bp-messages-wrap{
                     border-radius: 0 !important;
@@ -71,6 +76,44 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
                     }
                 }
             </style>
+            <?php } else { ?>
+                   <style type="text/css">
+                       .dokan-dashboard-content .bp-messages-wrap{
+                           border-radius: 0 !important;
+                           border: none !important;
+                       }
+
+                       html{
+                           height: calc(100% - var(--wp-admin--admin-bar--height, 0px));
+                       }
+
+                       body{
+                           height: 100%;
+                       }
+
+                       .dokan-fullwidth-container{
+                           display: flex;
+                           flex-direction: column;
+                           height: 100%;
+                       }
+
+                       .dokan-dashboard-wrap{
+                           height: 100%;
+                       }
+
+                       .dokan-dashboard-content .bp-messages-wrap-main{
+                           height: 100%;
+                       }
+
+                       .dokan-dashboard-content .bp-messages-wrap-main .bp-messages-wrap{
+                           height: 100% !important;
+                       }
+
+                       .dokan-dashboard-content .bp-messages-wrap-main .bp-messages-wrap .bp-messages-threads-wrapper{
+                           height: 100% !important;
+                       }
+                   </style>
+            <?php } ?>
             <div class="dokan-dashboard-wrap">
                 <?php
 
@@ -130,12 +173,27 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
 
         public function dokan_get_dashboard_nav( $nav_menus ){
             if( $this->is_livechat_enabled( get_current_user_id() ) ){
-                $nav_menus['messages'] = array(
-                    'title' => _x('Live Chat', 'Marketplace Integrations', 'bp-better-messages') . ' ' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]'),
+
+                $title = _x('Live Chat', 'Marketplace Integrations', 'bp-better-messages');
+                $vendor_layout = dokan_get_option( 'vendor_layout_style', 'dokan_appearance', 'legacy' );
+
+                if( $vendor_layout === 'legacy' ){
+                    $title .= ' ' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]');
+                }
+
+                $item = array(
+                    'title' => $title,
                     'icon' => '<i class="fas fa-comment"></i>',
                     'url' => dokan_get_navigation_url('messages'),
+                    'icon_name'  => 'MessageCircle',
                     'pos' => 100,
                 );
+
+                if( $vendor_layout !== 'legacy' ){
+                    $item['counts'] = Better_Messages()->functions->get_user_unread_count( get_current_user_id());
+                }
+
+                $nav_menus['messages'] = $item;
             }
 
             return $nav_menus;
@@ -159,7 +217,7 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
             return $item;
         }
 
-        public function     thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
+        public function thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
             if( $thread_type !== 'thread'){
                 return $thread_item;
             }
