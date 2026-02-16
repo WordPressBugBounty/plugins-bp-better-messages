@@ -630,8 +630,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             if( ! is_user_logged_in() ) return false;
             ob_start(); ?>
             <script type="text/javascript">
-                jQuery(document).on('bp-better-messages-update-unread', function( event ) {
-                    var unread = parseInt(event.detail.unread);
+                wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
                     var private_messages = jQuery('.ps-notif--better-messages .js-counter');
 
                     private_messages.each(function(){

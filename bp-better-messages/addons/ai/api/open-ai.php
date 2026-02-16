@@ -226,6 +226,10 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     if( str_replace('<!-- BM-AI -->', '', $_message->message ) === '<!-- BPBM-VOICE-MESSAGE -->' && $attachment_id = Better_Messages()->functions->get_message_meta( $_message->id, 'bpbm_voice_messages', true ) ){
                         $file_path = get_attached_file( $attachment_id );
 
+                        if( ! $file_path || ! file_exists($file_path) || filesize($file_path) > 20 * 1024 * 1024 ){
+                            continue;
+                        }
+
                         $file_content = file_get_contents( $file_path );
 
                         $base64 = base64_encode( $file_content );
@@ -566,7 +570,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                    foreach ($attachments as $id => $url) {
                        $file = get_attached_file( $id );
 
-                       if( $file ){
+                       if( $file && file_exists($file) && filesize($file) <= 20 * 1024 * 1024 ){
                            $file_extension = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
                            $file_name = pathinfo( $file, PATHINFO_BASENAME );
 
@@ -694,6 +698,10 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                            $data = json_decode( $json, true );
 
+                           if( ! is_array($data) || ! isset($data['type']) ){
+                               continue;
+                           }
+
                            if( defined('BM_DEBUG') ) {
                                file_put_contents( ABSPATH . 'open-ai.log', time() . ' - ' . print_r( $data, true ) . "\n", FILE_APPEND | LOCK_EX );
                            }
@@ -794,6 +802,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                                                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'attachments', $attachment_meta );
                                                    } finally {
+                                                       @unlink($temp_path);
                                                        $images_generated[] = $generated_image;
                                                    }
 
@@ -1474,7 +1483,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                 $message = $wpdb->get_row( $query, ARRAY_A );
 
-                if( str_starts_with($message['message'], '<!-- BM-AI -->') ){
+                if( $message && str_starts_with($message['message'], '<!-- BM-AI -->') ){
                     // this is AI message
                     $message_id = $message['id'];
 

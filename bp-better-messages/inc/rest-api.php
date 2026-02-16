@@ -1603,7 +1603,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             }
 
             $return     = $this->get_threads( [ $thread_id ], false );
-            $unread = $request->has_param('unread') ? intval( $request->get_param('unread') ) : (int) $return['threads'][0]['unread'];
 
             Better_Messages()->functions->messages_mark_thread_read( $thread_id, Better_Messages()->functions->get_current_user_id() );
 
@@ -1611,13 +1610,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $return['threads'][0]['mentions'] = [];
 
             $added_user_ids     = array_column($return['users'], 'user_id');
-
-            if( $unread >= 10 ){
-                $first_unread = Better_Messages()->functions->get_message_by_order( $thread_id, $unread );
-                if( $first_unread ){
-                    $return['first_unread'] = $first_unread;
-                }
-            }
 
             $get_messages = $this->get_messages($thread_id, [], $added_user_ids);
 
@@ -1850,7 +1842,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     'moderators'         => $moderators,
                     'url'                => $url,
                     'meta'              => [
-                        'allowInvite' => Better_Messages()->functions->get_thread_meta($thread_id, 'allow_invite') === 'yes'
+                        'allowInvite'              => Better_Messages()->functions->get_thread_meta($thread_id, 'allow_invite') === 'yes',
                     ]
                 ];
 
@@ -1887,11 +1879,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     ];
 
                     $mentions = [];
-
-                    /* if( $unread > 0 ){
-                        //$first_unread = Better_Messages()->functions->get_message_by_order( $thread->thread_id, $thread->unread_count );
-                        //$mentions     = Better_Messages()->mentions->get_mentions_since( $current_user_id, $thread->thread_id, $first_unread );
-                    } */
 
                     $thread_item['mentions'] = $mentions;
                     $thread_item['unread'] = $unread;

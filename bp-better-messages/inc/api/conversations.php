@@ -512,6 +512,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                     do_action( 'better_messages_thread_updated', $thread_id );
                     do_action( 'better_messages_info_changed', $thread_id );
                     break;
+                default:
+                    do_action( 'better_messages_change_thread_meta', $thread_id, $key, $value );
+                    break;
             }
 
             return true;

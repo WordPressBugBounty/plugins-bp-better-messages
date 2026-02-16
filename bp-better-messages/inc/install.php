@@ -3,6 +3,40 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'better_messages_activation', 'bp_install_email_templates' );
 
+if ( ! function_exists( 'bp_bm_get_post_by_title' ) ) {
+    /**
+     * Replacement for deprecated core get_page_by_title().
+     *
+     * @param string       $post_title Exact post title to match.
+     * @param string       $output     OBJECT, ARRAY_A or ARRAY_N.
+     * @param string|array $post_type  Post type or array of post types.
+     *
+     * @return WP_Post|array|null
+     */
+    function bp_bm_get_post_by_title( $post_title, $output = OBJECT, $post_type = 'page' ) {
+        $query = new WP_Query( array(
+            'post_type'              => $post_type,
+            'post_status'            => 'any',
+            'title'                  => $post_title,
+            'posts_per_page'         => 1,
+            'no_found_rows'          => true,
+            'ignore_sticky_posts'    => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'fields'                 => 'ids',
+            'orderby'                => 'ID',
+            'order'                  => 'ASC',
+            'suppress_filters'       => true,
+        ) );
+
+        if ( empty( $query->posts ) ) {
+            return null;
+        }
+
+        return get_post( $query->posts[0], $output );
+    }
+}
+
 function bp_install_email_templates()
 {
     if ( ! function_exists( 'bp_get_email_post_type' ) ) return;
@@ -29,7 +63,7 @@ function bp_install_email_templates()
     foreach ( $emails as $id => $email ) {
         $post_args = bp_parse_args( $email, $defaults, 'install_email_' . $id );
 
-        $template = get_page_by_title( $post_args[ 'post_title' ], OBJECT, bp_get_email_post_type() );
+        $template = bp_bm_get_post_by_title( $post_args[ 'post_title' ], OBJECT, bp_get_email_post_type() );
         if ( $template ) $post_args[ 'ID' ] = $template->ID;
 
         $post_id = wp_insert_post( $post_args );

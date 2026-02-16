@@ -6892,9 +6892,6 @@ body.bp-messages-mobile #better-messages-modals-container input {
   text-align: center;
   overflow: auto;
 }
-.bp-messages-wrap .bm-messages-list .bm-list.bm-inverted .os-scrollbar-vertical {
-  transform: scaleY(-1);
-}
 .bp-messages-wrap .bm-messages-list .bm-list.bm-inverted [data-overlayscrollbars-contents] {
   display: flex;
   flex-direction: column-reverse;
@@ -6918,16 +6915,6 @@ body.bp-messages-mobile #better-messages-modals-container input {
   border-radius: 3px;
   min-height: 30px;
   user-select: none;
-}
-.bp-messages-wrap .bm-messages-list .bm-list .bm-date-stack .bm-unread-messages {
-  background: rgba(var(--main-bm-color), 0.1);
-  color: rgba(var(--bm-text-color), 0.5);
-  height: 20px;
-  width: 100%;
-  text-align: center;
-  font-size: 11px;
-  line-height: 20px;
-  margin-bottom: 10px;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-sticky-date {
   cursor: default;
@@ -7002,6 +6989,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   background: none !important;
   padding: 5px 10px;
   margin: 5px 0;
+  overflow: auto;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack.bm-left-side .bm-content .bm-messages-listing .bm-message .bm-message-content:not(.bm-hide-background) .url-wrap {
   border-color: rgba(var(--left-message-text-color), 1) !important;
@@ -7061,6 +7049,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   background: none !important;
   padding: 5px 10px;
   margin: 5px 0;
+  overflow: auto;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack.bm-right-side .bm-content .bm-messages-listing .bm-message .bm-message-content:not(.bm-hide-background) .url-wrap {
   border-color: rgba(var(--right-message-text-color), 1) !important;
@@ -11652,6 +11641,50 @@ body.bp-messages-mobile #yz-profile-navmenu {
   color: rgba(var(--bm-text-color), 1) !important;
 }
 
+.bp-messages-wrap .bm-thread-options .bm-thread-option-toggle select.bpbm-select {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  min-height: 30px !important;
+  padding: 8px 10px !important;
+  font-size: 13px !important;
+  font-family: inherit !important;
+  line-height: 1.4 !important;
+  color: rgba(var(--bm-text-color), 1) !important;
+  background-color: rgba(var(--bm-bg-color), 1) !important;
+  background-image: none !important;
+  border: 1px solid rgba(var(--bm-border-secondary-color), 1) !important;
+  border-radius: 3px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 12px !important;
+  padding-right: 30px !important;
+}
+
+.bp-messages-wrap .bm-thread-options .bm-thread-option-toggle select.bpbm-select:hover {
+  border-color: rgba(var(--main-bm-color), 0.5) !important;
+}
+
+.bp-messages-wrap .bm-thread-options .bm-thread-option-toggle select.bpbm-select:focus {
+  border-color: rgba(var(--main-bm-color), 1) !important;
+}
+
+.bp-messages-wrap .bm-thread-options .bm-thread-option-toggle select.bpbm-select option {
+  color: rgba(var(--bm-text-color), 1) !important;
+  background-color: rgba(var(--bm-bg-color), 1) !important;
+  padding: 5px !important;
+}
+
 .bp-messages-wrap .bm-thread-options .bm-thread-option-description {
   color: rgba(var(--bm-text-color), 0.9);
   font-size: 80%;
@@ -11675,8 +11708,8 @@ body.bp-messages-mobile #yz-profile-navmenu {
   z-index: 2;
   background: rgba(var(--bm-bg-color), 1);
   width: 100%;
-  height: 44px;
-  padding: 0 10px;
+  min-height: 44px;
+  padding: 5px 10px;
   border-top: 1px solid rgba(var(--bm-border-color), 0.62);
   border-left: 1px solid rgba(var(--bm-border-color), 0.62);
   bottom: 0;
@@ -11688,11 +11721,13 @@ body.bp-messages-mobile #yz-profile-navmenu {
   justify-content: space-between;
 }
 .bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons {
-  white-space: nowrap;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
 }
 .bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons > span {
   position: relative;
-  display: inline-block;
   padding: 0;
   height: 34px;
   width: 34px;
@@ -11703,18 +11738,40 @@ body.bp-messages-mobile #yz-profile-navmenu {
   box-sizing: border-box;
   border-radius: 50px;
   text-transform: uppercase;
-  margin-left: 5px;
   cursor: pointer;
   border: 1px solid #e3e3e3;
-  vertical-align: middle;
 }
 .bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-exit-room {
   background: red;
   color: white;
 }
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-hand-active {
+  background: rgba(255, 193, 7, 0.9) !important;
+  color: #000 !important;
+}
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-unlock-room {
+  background: #ff4444 !important;
+  color: white !important;
+}
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-unmute-all {
+  background: #ff4444 !important;
+  color: white !important;
+}
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-set-participatory-mode {
+  background: rgba(var(--bm-primary-color), 1) !important;
+  color: rgba(var(--bm-primary-text-color), 1) !important;
+}
+.bp-messages-group-call-controls-v2 .bp-messages-group-call-controls-buttons .bpbm-lower-all-hands {
+  font-size: 12px !important;
+}
 .bp-messages-group-call-controls-v2 .bpbm-call-settings {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
   height: auto;
   margin-bottom: 10px;
+  z-index: 3;
 }
 
 .bp-messages-group-call-input-video-inner .bp-messages-group-call-controls {
@@ -14159,14 +14216,6 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-container {
   overflow: hidden;
 }
-.bp-messages-wrap .bp-messages-group-audio-call-container .bpbm-call-settings {
-  position: absolute;
-  bottom: 55px;
-  z-index: 2;
-  left: 0;
-  right: 0;
-  margin: auto;
-}
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid {
   position: relative;
   box-sizing: border-box;
@@ -14199,7 +14248,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   color: rgba(var(--bm-text-color), 1);
   border-radius: 3px;
   overflow: hidden;
-  transition: box-shadow 0.15s ease-in-out;
+  transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
 }
 .bp-messages-wrap .bp-messages-group-audio-call-container .bp-messages-group-call-audios-grid > .bp-messages-group-call-input-audio .bp-messages-group-call-input-audio-inner .bp-messages-group-call-input-audio-inner-info {
   padding: 5px;
@@ -14385,7 +14434,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   border-radius: var(--bm-border-radius);
   background-repeat: no-repeat;
   background-position: center;
-  transition: box-shadow 0.15s ease-in-out;
+  transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
 }
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-caller-status {
   text-align: right;
@@ -14512,14 +14561,80 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 .bp-messages-wrap .bp-messages-call-wrap-group .bp-messages-group-call-videos-grid .bp-messages-group-call-input-video > .bp-messages-group-call-input-video-inner .bpbm-group-call-input-video-inner-info .bpbm-caller-info .bpbm-info-name a {
   color: white !important;
 }
-.bp-messages-wrap .bp-messages-call-wrap-group .bpbm-call-settings {
+.bp-messages-call-wrap .bpbm-hand-raised-status {
+  text-align: right;
   position: absolute;
-  bottom: 55px;
-  z-index: 2;
-  left: 0;
   right: 0;
-  margin: auto;
+  top: 0;
+  padding: 5px;
+  z-index: 2;
 }
+.bp-messages-call-wrap .bpbm-hand-raised-status .bpbm-hand-raised {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 193, 7, 0.9);
+  border-radius: 50%;
+  color: #000;
+  font-size: 14px;
+  animation: bpbm-hand-pulse 1.5s ease-in-out infinite;
+}
+.bp-messages-call-wrap .bpbm-caller-actions .bpbm-hand-raised {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 193, 7, 0.9);
+  border-radius: 50%;
+  color: #000;
+  font-size: 14px;
+  line-height: 30px;
+  animation: bpbm-hand-pulse 1.5s ease-in-out infinite;
+}
+@keyframes bpbm-hand-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+.bp-messages-call-wrap .bp-messages-group-call-input-video-inner .bpbm-viewer-badge {
+  position: absolute;
+  bottom: 28px;
+  right: 5px;
+  z-index: 2;
+}
+.bp-messages-call-wrap .bp-messages-group-call-input-video-inner .bpbm-viewer-badge > span {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.bp-messages-call-wrap .bp-messages-group-call-input-audio-inner .bpbm-viewer-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(var(--bm-text-color), 0.6);
+  border-radius: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 5px;
+}
+.bp-messages-call-wrap .bpbm-promote-highlighted {
+  background: rgba(255, 193, 7, 0.9) !important;
+  color: #000 !important;
+  animation: bpbm-hand-pulse 1.5s ease-in-out infinite;
+}
+
 .tippy-box[data-theme=bpbmtheme][data-animation=fade][data-state=hidden] {
   opacity: 0;
 }

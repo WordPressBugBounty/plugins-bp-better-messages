@@ -217,7 +217,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             register_rest_route('better-messages/v1/ai', '/createResponse', array(
                 'methods' => 'GET',
                 'callback' => array( $this->api, 'reply_to_message'),
-                'permission_callback' => '__return_true',
+                'permission_callback' => function( WP_REST_Request $request ) {
+                    $provided = $request->get_param('secret');
+                    if( ! empty( $provided ) && $provided === $this->get_ai_request_secret() ){
+                        return true;
+                    }
+                    return false;
+                },
             ));
 
             register_rest_route('better-messages/v1/ai', '/cancelResponse/(?P<id>\d+)', array(
@@ -243,6 +249,15 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function user_is_admin(){
             return current_user_can('manage_options');
+        }
+
+        public function get_ai_request_secret(){
+            $secret = get_transient('better_messages_ai_request_secret');
+            if( empty( $secret ) ){
+                $secret = wp_generate_password( 32, false );
+                set_transient( 'better_messages_ai_request_secret', $secret, HOUR_IN_SECONDS );
+            }
+            return $secret;
         }
 
         public function register_post_type(){
@@ -423,6 +438,17 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $old_settings = $this->get_bot_settings( $post->ID );
 
                 $settings = (array) $_POST['bm'];
+
+                // Sanitize all string fields
+                foreach( $settings as $key => $value ){
+                    if( is_string($value) ){
+                        if( $key === 'instruction' ){
+                            $settings[$key] = sanitize_textarea_field( $value );
+                        } else {
+                            $settings[$key] = sanitize_text_field( $value );
+                        }
+                    }
+                }
 
                 if( ! $settings['model'] ){
                     $settings['model'] = $old_settings['model'];
@@ -609,7 +635,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                 }
             } catch (Throwable $e) {
-                // silent fail if happens
+                error_log( 'Better Messages AI: Error in before_delete_message: ' . $e->getMessage() );
             }
         }
 
@@ -656,7 +682,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                                     $url = add_query_arg([
                                         'bot_id' => $bot_id,
-                                        'message_id' => $message->id
+                                        'message_id' => $message->id,
+                                        'secret' => $this->get_ai_request_secret()
                                     ], Better_Messages()->functions->get_rest_api_url() . 'ai/createResponse');
 
                                     wp_remote_get( $url, [

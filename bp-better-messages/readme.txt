@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.11.1
+Stable tag: 2.12.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -74,7 +74,6 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Bad words filter with customizable blacklist
 * Block user feature
 * Role-based access control
-* Moderator capability (bm_can_administrate)
 * User whitelist/blacklist for moderation
 
 **Engagement Features:**
@@ -180,7 +179,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Online/Offline presence indicator
 * User statuses (Online, Away, Do Not Disturb)
 * Mini Chats - chat windows anywhere on your site
-* Mini Threads List widget
+* Mini Conversations widget
 
 **Security:**
 
@@ -236,6 +235,28 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.12.0 =
+* Replaced browser database engine with new lightweight custom solution for better performance and stability
+* Browser database and WebSocket connection is now shared across browser tabs via SharedWorker, improving performance and real-time sync
+* Group Video & Audio Calls improvements:
+    * Added moderator controls: lock room, mute all participants, broadcast mode
+    * Added Promote to Speaker / Demote to Viewer controls in broadcast mode
+    * Added Raise Hand / Lower Hand feature for viewers in broadcast mode
+    * Added Lower All Hands button for moderators
+    * Added option to restrict who can start group calls (anyone or moderators only)
+    * Added default call mode setting (Participatory or Broadcast) in conversation settings
+    * Added group call settings section in conversation information panel
+    * Added visual speaker highlighting during group calls
+    * Improved microphone and camera device switching reliability
+* Improved rendering performance of the messages list, reducing unnecessary updates when receiving new messages
+* Improved auto-recovery when browser database is unexpectedly deleted
+* Fixed calls not starting in some cases
+* Fixed group video call crash when container has zero dimensions during initialization
+* Fixed AI Chat Bot error "You cannot send messages to this user"
+* Fixed scrollbar thumb direction in some browsers
+* Compatibility update for WordPress 6.2+ by replacing deprecated `get_page_by_title()` usage during activation
+* Other minor bugfixes and improvements
 
 = 2.11.0 - 2.11.1 =
 * Added ability to customize the email template for unread messages notifications in WP Admin

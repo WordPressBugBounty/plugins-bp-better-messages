@@ -102,8 +102,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             </div>
             <script type="text/javascript">
                 jQuery(document).trigger("bp-better-messages-init-scrollers");
-                jQuery(document).on('bp-better-messages-update-unread', function( event ) {
-                    var unread = parseInt(event.detail.unread);
+                wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
                     var private_messages = jQuery('#bm-um-header .um-message-live-count');
 
                     if( private_messages.length > 0 ){
@@ -227,8 +226,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             //<span class="um-tab-notifier">1</span>
             ?>
             <script type="text/javascript">
-                jQuery(document).on('bp-better-messages-update-unread', function( event ) {
-                    var unread = parseInt(event.detail.unread);
+                wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
                     var private_messages = jQuery('.um-profile-nav-item.um-profile-nav-messages > a');
 
                     private_messages.each(function(){

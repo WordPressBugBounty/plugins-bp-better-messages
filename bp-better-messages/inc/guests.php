@@ -248,6 +248,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 return $item;
             }
 
+            $item['url']      = false;
             $item['canBlock'] = 0;
             $item['canVideo'] = 0;
             $item['canAudio'] = 0;
