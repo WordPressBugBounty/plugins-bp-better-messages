@@ -1115,6 +1115,11 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $saved_message = Better_Messages()->functions->get_message_meta( $message->id, 'pending_args' );
             Better_Messages()->functions->delete_message_meta( $message->id, 'pending_args' );
 
+            // Clear AI moderation flags since admin has approved the message
+            Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_flagged' );
+            Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_categories' );
+            Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_result' );
+
             if( is_a( $saved_message, 'BM_Messages_Message' ) ){
                 $saved_message->created_at = $new_time;
                 do_action_ref_array( 'better_messages_message_sent', array( &$saved_message ) );
@@ -1241,6 +1246,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $sender_item = Better_Messages()->functions->rest_user_item( $sender_id, false );
             $sender_name = $sender_item['name'];
 
+            $thread_id = $message->thread_id;
             $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
 
             $subject = sprintf(
@@ -1250,13 +1256,32 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $message_content = wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' );
 
-            $email_body = sprintf(
-                _x( "A new message is pending moderation on %s\n\nFrom: %s\nMessage: %s\n\nModeration panel: %s", 'Moderation email body', 'bp-better-messages' ),
-                get_bloginfo( 'name' ),
-                $sender_name,
-                $message_content,
-                $moderation_url
-            );
+            // Determine reason for pending
+            $reason = _x( 'Pre-moderation rules', 'Moderation email', 'bp-better-messages' );
+
+            if( ! empty( $message->ai_moderation_result ) ) {
+                $reason = _x( 'AI Content Moderation', 'Moderation email', 'bp-better-messages' );
+            } else if( Better_Messages()->settings['messagesModerateFirstTimeSenders'] === '1' && $this->is_first_time_sender( $sender_id ) ) {
+                $reason = _x( 'First-time sender', 'Moderation email', 'bp-better-messages' );
+            } else {
+                $moderation_status = $this->get_user_moderation_status( $sender_id, $thread_id );
+                if( $moderation_status === true ) {
+                    $reason = _x( 'User is blacklisted', 'Moderation email', 'bp-better-messages' );
+                }
+            }
+
+            // Build email body
+            $email_body  = sprintf( _x( 'Sender: %s (ID: %d)', 'Moderation email', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
+            $email_body .= sprintf( _x( 'Conversation: #%d', 'Moderation email', 'bp-better-messages' ), $thread_id ) . "\n";
+            $email_body .= sprintf( _x( 'Reason: %s', 'Moderation email', 'bp-better-messages' ), $reason ) . "\n";
+
+            if( ! empty( $message->ai_moderation_result ) && ! empty( $message->ai_moderation_result['flagged_categories'] ) ) {
+                $categories = implode( ', ', $message->ai_moderation_result['flagged_categories'] );
+                $email_body .= sprintf( _x( 'AI Flagged Categories: %s', 'Moderation email', 'bp-better-messages' ), $categories ) . "\n";
+            }
+
+            $email_body .= "\n" . sprintf( _x( 'Message: %s', 'Moderation email', 'bp-better-messages' ), $message_content ) . "\n\n";
+            $email_body .= sprintf( _x( 'Review in moderation panel: %s', 'Moderation email', 'bp-better-messages' ), $moderation_url );
 
             foreach( $emails as $email ){
                 wp_mail( $email, $subject, $email_body );

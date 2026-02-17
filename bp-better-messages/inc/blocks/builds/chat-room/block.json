@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "better-messages/chat-room",
+  "title": "Chat Room",
+  "description": "Embed a Better Messages chat room",
+  "version": "1.0",
+  "category": "better-messages",
+  "attributes": {
+    "chatId": {
+      "type": "integer",
+      "default": 0
+    },
+    "fullScreen": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "textdomain": "bp-better-messages",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "render": "file:./render.php",
+  "keywords": [
+    "better",
+    "messages",
+    "chat",
+    "room"
+  ]
+}

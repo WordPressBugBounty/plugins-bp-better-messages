@@ -439,23 +439,28 @@ $has_late_message = ob_get_clean();
         var messageViewer = $('#bpbm-messages-viewer');
         var allowReports = $('#bpbm-allow-reports');
         var messagesPremoderation = $('#bpbm-premoderation');
+        var aiModerationEnabled = $('#bpbm-ai-moderation');
 
         messageViewer.on('change', changeMessageViewer);
         messagesPremoderation.on('change', changePremoderation);
         allowReports.on('change', changeModerationNotificationEmails);
+        aiModerationEnabled.on('change', changeAiModeration);
 
         changeMessageViewer();
         changePremoderation();
         changeModerationNotificationEmails();
+        changeAiModeration();
 
         function changeMessageViewer(){
             var viewerEnabled = messageViewer.is(':checked');
 
             allowReports.attr('disabled', !viewerEnabled);
             messagesPremoderation.attr('disabled', !viewerEnabled);
+            aiModerationEnabled.attr('disabled', !viewerEnabled);
 
             changePremoderation();
             changeModerationNotificationEmails();
+            changeAiModeration();
         }
 
         function changePremoderation(){
@@ -476,13 +481,25 @@ $has_late_message = ob_get_clean();
             var viewerEnabled = messageViewer.is(':checked');
             var premoderationEnabled = messagesPremoderation.is(':checked') && viewerEnabled;
             var reportsEnabled = allowReports.is(':checked') && viewerEnabled;
+            var aiModEnabled = aiModerationEnabled.is(':checked') && viewerEnabled;
 
-            // Notification emails should be enabled if either premoderation OR reports is enabled
-            var notificationEmailsEnabled = premoderationEnabled || reportsEnabled;
+            // Notification emails should be enabled if either premoderation, reports, or AI moderation is enabled
+            var notificationEmailsEnabled = premoderationEnabled || reportsEnabled || aiModEnabled;
 
             var notificationEmailsTextarea = $('#bpbm-notification-emails');
             notificationEmailsTextarea.attr('disabled', !notificationEmailsEnabled);
             notificationEmailsTextarea.css('opacity', notificationEmailsEnabled ? '1' : '0.5');
+        }
+
+        function changeAiModeration(){
+            var viewerEnabled = messageViewer.is(':checked');
+            var aiModEnabled = aiModerationEnabled.is(':checked') && viewerEnabled;
+
+            var aiModerationRows = $('.bpbm-ai-moderation-row');
+            aiModerationRows.find('input, select').attr('disabled', !aiModEnabled);
+            aiModerationRows.css('opacity', aiModEnabled ? '1' : '0.5');
+
+            changeModerationNotificationEmails();
         }
 
         function changeReactionStatuses(){
@@ -3791,18 +3808,225 @@ $has_late_message = ob_get_clean();
                     </td>
                 </tr>
 
-                <tr id="bpbm-notification-emails-row" valign="top" class="">
-                    <th scope="row" valign="top" style="width: 320px;">
-                        <?php _ex( 'Moderation Notification Emails', 'Settings page', 'bp-better-messages' ); ?>
-                        <p style="font-size: 10px;"><?php _ex( 'Email addresses to receive notifications about new pre-moderation messages and reported messages (one per line)', 'Settings page', 'bp-better-messages' ); ?></p>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" colspan="2" style="padding-top: 30px;">
+                        <h3 style="margin: 0;"><?php _ex( 'AI Content Moderation', 'Settings page', 'bp-better-messages' ); ?></h3>
+                        <p style="font-size: 10px; margin: 5px 0 0;"><?php _ex( 'Automatically analyze messages using OpenAI Moderation API to detect harmful content. The API is free to use.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                </tr>
+
+                <?php if( version_compare(phpversion(), '8.1', '<') || empty( $this->settings['openAiApiKey'] ) ){ ?>
+                <tr valign="top" class="">
+                    <td colspan="2">
+                        <div class="bp-better-messages-connection-check bpbm-error" style="margin: 10px 0;">
+                            <p><?php _ex( 'AI Moderation requires PHP 8.1+ and an OpenAI API key configured in the Integrations tab.', 'Settings page', 'bp-better-messages' ); ?></p>
+                        </div>
+                    </td>
+                </tr>
+                <?php } else { ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Enable AI Moderation', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Analyze messages using OpenAI to detect hate speech, harassment, sexual content, violence, and other harmful content', 'Settings page', 'bp-better-messages' ); ?></p>
                     </th>
                     <td>
-                        <textarea id="bpbm-notification-emails" name="messagesModerationNotificationEmails" style="width: 100%; min-height: 100px;" placeholder="admin@example.com&#10;moderator@example.com"><?php echo esc_textarea( $this->settings[ 'messagesModerationNotificationEmails' ] ); ?></textarea>
-                        <p style="font-size: 11px; color: #666; margin-top: 5px;"><?php _ex( 'Enter one email address per line. These addresses will be notified when messages require moderation or when messages are reported.', 'Settings page', 'bp-better-messages' ); ?></p>
+                        <input id="bpbm-ai-moderation" name="aiModerationEnabled" type="checkbox" <?php checked( $this->settings['aiModerationEnabled'], '1' ); ?> value="1" />
                     </td>
                 </tr>
 
+                <tr valign="top" class="bpbm-ai-moderation-row">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Action for Flagged Messages', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'What happens when AI detects harmful content', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <select name="aiModerationAction">
+                            <option value="hold" <?php selected( $this->settings['aiModerationAction'], 'hold' ); ?>>
+                                <?php _ex( 'Hold for Review', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                            <option value="flag" <?php selected( $this->settings['aiModerationAction'], 'flag' ); ?>>
+                                <?php _ex( 'Flag Only (send normally)', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                        </select>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                            <?php _ex( 'Hold for Review: message requires admin approval before appearing. May slightly increase message sending time due to the AI check. Flag Only: message is sent instantly but flagged for admin review (AI check runs in background).', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </td>
+                </tr>
 
+                <tr valign="top" class="bpbm-ai-moderation-row">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Moderate Images', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Check attached images for harmful content', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <select name="aiModerationImages">
+                            <option value="0" <?php selected( $this->settings['aiModerationImages'], '0' ); ?>>
+                                <?php _ex( 'Disabled', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                            <option value="1" <?php selected( $this->settings['aiModerationImages'], '1' ); ?>>
+                                <?php _ex( 'Enabled', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                        </select>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                            <?php _ex( 'When enabled, attached images are sent to OpenAI for moderation along with the message text using base64 encoding. Image analysis supports sexual, violence, and self-harm categories. Harassment, hate, and illicit categories analyze text only.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr valign="top" class="bpbm-ai-moderation-row">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Content Categories', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Select which content categories to moderate', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <?php
+                        $ai_categories = [
+                            'hate' => [
+                                'label' => _x( 'Hate', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that promotes hate based on race, gender, ethnicity, religion, nationality, sexual orientation, disability, or caste. (text only)', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'hate/threatening' => [
+                                'label' => _x( 'Hate / Threatening', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Hateful content that includes violence or serious harm towards targeted groups. (text only)', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'hate',
+                            ],
+                            'harassment' => [
+                                'label' => _x( 'Harassment', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that expresses, incites, or promotes harassing language towards any target. (text only)', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'harassment/threatening' => [
+                                'label' => _x( 'Harassment / Threatening', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Harassment content that includes violence or serious harm towards any target. (text only)', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'harassment',
+                            ],
+                            'sexual' => [
+                                'label' => _x( 'Sexual Content', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content meant to arouse sexual excitement or that promotes sexual services (excluding sex education and wellness).', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'sexual/minors' => [
+                                'label' => _x( 'Sexual / Minors', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Sexual content that involves individuals under 18 years old.', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'sexual',
+                            ],
+                            'violence' => [
+                                'label' => _x( 'Violence', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that depicts death, violence, or physical injury.', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'violence/graphic' => [
+                                'label' => _x( 'Violence / Graphic', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that depicts death, violence, or physical injury in graphic detail.', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'violence',
+                            ],
+                            'self-harm' => [
+                                'label' => _x( 'Self-Harm', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting, and eating disorders.', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'self-harm/intent' => [
+                                'label' => _x( 'Self-Harm / Intent', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content where the speaker expresses that they are engaging or intend to engage in acts of self-harm.', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'self-harm',
+                            ],
+                            'self-harm/instructions' => [
+                                'label' => _x( 'Self-Harm / Instructions', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that encourages or provides instructions on how to commit acts of self-harm.', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'self-harm',
+                            ],
+                            'illicit' => [
+                                'label' => _x( 'Illicit', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Content that gives advice or instruction on how to commit illicit acts (e.g. fraud, scams). (text only)', 'Settings page', 'bp-better-messages' ),
+                            ],
+                            'illicit/violent' => [
+                                'label' => _x( 'Illicit / Violent', 'Settings page', 'bp-better-messages' ),
+                                'description' => _x( 'Illicit content that also references violence or procurement of weapons. (text only)', 'Settings page', 'bp-better-messages' ),
+                                'parent' => 'illicit',
+                            ],
+                        ];
+                        $enabled_ai_categories = (array) $this->settings['aiModerationCategories'];
+                        foreach( $ai_categories as $key => $category ) {
+                            $is_sub = isset( $category['parent'] );
+                            $indent = $is_sub ? 'margin-left: 24px;' : '';
+                            $parent_attr = $is_sub ? ' data-parent="' . esc_attr( $category['parent'] ) . '"' : '';
+                            $parent_active = $is_sub && in_array( $category['parent'], $enabled_ai_categories );
+                            $is_checked = in_array( $key, $enabled_ai_categories ) || $parent_active;
+                            $is_disabled = $parent_active;
+                        ?>
+                            <label style="display: block; margin-bottom: 4px; <?php echo $indent; ?>">
+                                <input type="checkbox" class="bm-ai-category" name="aiModerationCategories[]" value="<?php echo esc_attr( $key ); ?>"<?php echo $parent_attr; ?><?php if( $is_checked ) echo ' checked="checked"'; ?><?php if( $is_disabled ) echo ' disabled="disabled"'; ?>>
+                                <?php echo esc_html( $category['label'] ); ?>
+                                <span style="font-size: 11px; color: #666;"> — <?php echo esc_html( $category['description'] ); ?></span>
+                            </label>
+                        <?php } ?>
+                        <p style="font-size: 11px; color: #666; margin-top: 8px;">
+                            <?php _ex( 'Selecting a parent category (e.g. Hate) automatically covers its subcategories. Select subcategories individually for more granular control.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                        <script>
+                        jQuery(function($){
+                            function updateSubcategories(){
+                                $('.bm-ai-category[data-parent]').each(function(){
+                                    var $sub = $(this);
+                                    var $parent = $('.bm-ai-category[value="' + $sub.data('parent') + '"]');
+                                    if( $parent.is(':checked') ){
+                                        $sub.prop('checked', true).prop('disabled', true);
+                                    } else {
+                                        $sub.prop('disabled', false);
+                                    }
+                                });
+                            }
+                            $('.bm-ai-category').not('[data-parent]').on('change', updateSubcategories);
+                            updateSubcategories();
+                        });
+                        </script>
+                    </td>
+                </tr>
+
+                <tr valign="top" class="bpbm-ai-moderation-row">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Sensitivity Threshold', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Confidence score threshold for flagging (0-1). Lower values are more sensitive.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input type="number" name="aiModerationThreshold" value="<?php echo esc_attr( $this->settings['aiModerationThreshold'] ); ?>" min="0" max="1" step="0.1" style="width: 100px;">
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;"><?php _ex( '0.5 is recommended. Use 0.3 for stricter moderation, 0.7 for more lenient.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </td>
+                </tr>
+
+                <tr valign="top" class="bpbm-ai-moderation-row">
+                    <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'Bypass Roles', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Messages from users with these roles will not be checked by AI moderation. Administrators always bypass.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <?php
+                        $ai_bypass_roles = (array) $this->settings['aiModerationBypassRoles'];
+                        foreach( $roles as $slug => $role ) { ?>
+                            <label style="display: block; margin-bottom: 4px;">
+                                <input type="checkbox" name="aiModerationBypassRoles[]" value="<?php echo esc_attr( $slug ); ?>" <?php if( in_array( $slug, $ai_bypass_roles ) ) echo 'checked="checked"'; ?>>
+                                <?php echo esc_html( $role['name'] ); ?>
+                            </label>
+                        <?php } ?>
+                    </td>
+                </tr>
+
+                <?php } ?>
+
+                <tr valign="top" class="">
+                    <th scope="row" valign="top" colspan="2" style="padding-top: 30px;">
+                        <h3 style="margin: 0;"><?php _ex( 'Notification Emails', 'Settings page', 'bp-better-messages' ); ?></h3>
+                    </th>
+                </tr>
+
+                <tr id="bpbm-notification-emails-row" valign="top" class="">
+                    <th scope="row" valign="top" style="width: 320px;">
+                        <?php _ex( 'Moderation Notification Emails', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Email addresses to receive notifications about pre-moderation messages, AI flagged messages and reported messages (one per line)', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <textarea id="bpbm-notification-emails" name="messagesModerationNotificationEmails" style="width: 100%; min-height: 100px;" placeholder="admin@example.com&#10;moderator@example.com"><?php echo esc_textarea( $this->settings[ 'messagesModerationNotificationEmails' ] ); ?></textarea>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;"><?php _ex( 'Enter one email address per line. These addresses will be notified when messages require moderation, are flagged by AI moderation, or when messages are reported by users.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </td>
+                </tr>
 
                 </tbody>
             </table>

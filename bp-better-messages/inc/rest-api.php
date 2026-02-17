@@ -872,6 +872,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             Better_Messages()->functions->before_message_send_filter( $args, $errors );
 
+            // Re-read $is_pending from $args, as filters (e.g. AI moderation) may have changed it
+            $is_pending = ! empty( $args['is_pending'] ) ? 1 : 0;
+
             if( empty( $errors ) ){
                 $message_id = Better_Messages()->functions->new_message( $args );
 

@@ -81,6 +81,10 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $new_thread = false;
 
+        public $ai_moderation_result = null;
+
+        public $ai_moderation_deferred = false;
+
         /**
          * Constructor.
          *

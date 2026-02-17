@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.12.0
+Stable tag: 2.12.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -69,6 +69,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **Moderation & Security:**
 
+* AI Content Moderation powered by OpenAI - automatically detect harmful content
 * Pre-Moderated Messages - review messages before delivery
 * Report messages feature
 * Bad words filter with customizable blacklist
@@ -236,9 +237,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.12.0 =
-* Replaced browser database engine with new lightweight custom solution for better performance and stability
-* Browser database and WebSocket connection is now shared across browser tabs via SharedWorker, improving performance and real-time sync
+= 2.12.0 - 2.12.1 =
+* Added AI Content Moderation powered by OpenAI Moderation API
 * Group Video & Audio Calls improvements:
     * Added moderator controls: lock room, mute all participants, broadcast mode
     * Added Promote to Speaker / Demote to Viewer controls in broadcast mode
@@ -249,6 +249,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
     * Added group call settings section in conversation information panel
     * Added visual speaker highlighting during group calls
     * Improved microphone and camera device switching reliability
+* Replaced browser database engine with new lightweight custom solution for better performance and stability
+* Browser database and WebSocket connection is now shared across browser tabs via SharedWorker, improving performance and real-time sync
+* AI Moderation supports two modes: Hold for Review (messages require admin approval) and Flag Only (messages are sent but marked for admin review)
+* AI Moderation includes configurable sensitivity threshold, content category selection, and role-based bypass
+* AI Moderation supports image moderation in addition to text content
+* AI Flagged messages appear in the moderation panel alongside user-reported messages
+* Improved moderation notification emails with detailed reason information (AI moderation, first-time sender, blacklisted user)
+* AI Chat Bots: Added support for OpenAI reasoning models (o-series, GPT-5)
+* AI Chat Bots: Added Temperature, Max Output Tokens, and Reasoning Effort settings
+* Added Chat Room block for WordPress Block Editor (Gutenberg) with full screen auto-open option
+* Added option to hide participants count in chat room header
 * Improved rendering performance of the messages list, reducing unnecessary updates when receiving new messages
 * Improved auto-recovery when browser database is unexpectedly deleted
 * Fixed calls not starting in some cases

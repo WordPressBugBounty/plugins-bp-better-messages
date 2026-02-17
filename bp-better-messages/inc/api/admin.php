@@ -141,6 +141,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'callback'            => array($this, 'blacklist_user_and_delete_all_pending_messages'),
                 'permission_callback' => array($this, 'user_can_admin'),
             ));
+
+            register_rest_route('better-messages/v1/admin', '/dismissAiFlag', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'dismiss_ai_flag'),
+                'permission_callback' => array($this, 'user_can_admin'),
+            ));
         }
 
         public function get_user( WP_REST_Request $request ){
@@ -526,8 +532,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
             $message_ids = $request->has_param('message_ids') ?  $request->get_param('message_ids' ) : false;
 
-            $only_reported = $request->has_param('reported') && intval($request->get_param('reported')) === 1;
-            $only_pending  = $request->has_param('pending') && intval($request->get_param('pending')) === 1;
+            $only_reported    = $request->has_param('reported') && intval($request->get_param('reported')) === 1;
+            $only_pending     = $request->has_param('pending') && intval($request->get_param('pending')) === 1;
 
             $sender_sql = $search_sql = $thread_sql = '';
 
@@ -566,15 +572,23 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                     AND `message` != '<!-- BBPM START THREAD -->'
                     AND `id` IN ({$message_ids})";
             } else if( $only_reported ) {
+                $meta_table = bm_get_table('meta');
+
                 $count = (int) $wpdb->get_var( "
-                SELECT COUNT(*)
-                FROM `" . bm_get_table('messages') . "`
-                WHERE `created_at` > 0
-                AND `message` != '<!-- BBPM START THREAD -->'
-                AND `id` IN (
-                    SELECT `bm_message_id`
-                    FROM `" . bm_get_table('meta') . "`
-                    WHERE `meta_key` = 'user_reports'
+                SELECT COUNT(DISTINCT `messages`.`id`)
+                FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `{$meta_table}` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                LEFT JOIN `{$meta_table}` `ai_flag_meta`
+                    ON `messages`.`id` = `ai_flag_meta`.`bm_message_id`
+                    AND `ai_flag_meta`.`meta_key` = 'ai_moderation_flagged'
+                    AND `ai_flag_meta`.`meta_value` = '1'
+                WHERE `messages`.`created_at` > 0
+                AND `messages`.`message` != '<!-- BBPM START THREAD -->'
+                AND (
+                    `user_reports_meta`.`meta_value` IS NOT NULL
+                    OR ( `ai_flag_meta`.`meta_value` = '1' AND `messages`.`is_pending` = 0 )
                 )
                 $sender_sql $search_sql $thread_sql");
 
@@ -582,18 +596,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 `user_reports_meta`.`meta_value` as user_reports,
                 (SELECT COUNT(*)  FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = `messages`.`thread_id`) participants
                 FROM `" . bm_get_table('messages') . "` `messages`
-                LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
+                LEFT JOIN `{$meta_table}` `user_reports_meta`
                     ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
                     AND `user_reports_meta`.`meta_key` = 'user_reports'
-                WHERE `created_at` > 0
-                    AND `message` != '<!-- BBPM START THREAD -->'
-                    AND `id` IN (
-                        SELECT `bm_message_id`
-                        FROM `" . bm_get_table('meta') . "`
-                        WHERE `meta_key` = 'user_reports'
+                LEFT JOIN `{$meta_table}` `ai_flag_meta`
+                    ON `messages`.`id` = `ai_flag_meta`.`bm_message_id`
+                    AND `ai_flag_meta`.`meta_key` = 'ai_moderation_flagged'
+                    AND `ai_flag_meta`.`meta_value` = '1'
+                WHERE `messages`.`created_at` > 0
+                    AND `messages`.`message` != '<!-- BBPM START THREAD -->'
+                    AND (
+                        `user_reports_meta`.`meta_value` IS NOT NULL
+                        OR ( `ai_flag_meta`.`meta_value` = '1' AND `messages`.`is_pending` = 0 )
                     )
                 $sender_sql $search_sql $thread_sql
-                ORDER BY `created_at` DESC
+                ORDER BY `messages`.`created_at` DESC
                 LIMIT {$offset}, {$per_page}";
             } else if( $only_pending ) {
                 $count = (int) $wpdb->get_var( "
@@ -642,10 +659,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'messages' => [],
             ];
 
-            if( class_exists('Better_Messages_User_Reports') ){
-                $return['reported'] = Better_Messages_User_Reports::instance()->get_reported_messages_count();
-            }
-
+            $return['reported'] = $this->get_reported_count();
             $return['pending'] = Better_Messages()->functions->get_pending_messages_count();
 
             if( count( $messages ) > 0 ) {
@@ -740,6 +754,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                             $item['sender_thread_whitelisted'] = Better_Messages()->moderation->is_user_whitelisted( $sender_id, $thread_id );
                             $item['sender_thread_blacklisted'] = Better_Messages()->moderation->is_user_blacklisted( $sender_id, $thread_id );
                         }
+                    }
+
+                    // Add AI moderation data
+                    $ai_flagged = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_flagged', true );
+                    if( $ai_flagged === '1' ){
+                        $item['ai_moderation_flagged'] = true;
+                        $ai_categories = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_categories', true );
+                        $item['ai_moderation_categories'] = $ai_categories ? json_decode( $ai_categories, true ) : [];
+                        $ai_result = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_result', true );
+                        $result_data = $ai_result ? json_decode( $ai_result, true ) : [];
+                        $item['ai_moderation_scores'] = isset( $result_data['category_scores'] ) ? $result_data['category_scores'] : [];
                     }
 
                     $return['messages'][] = $item;
@@ -859,6 +884,49 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             }
 
             return new WP_Error( 'unblacklist_failed', 'Failed to remove user from blacklist', array( 'status' => 500 ) );
+        }
+
+        public function get_reported_count()
+        {
+            global $wpdb;
+
+            $meta_table = bm_get_table('meta');
+
+            return (int) $wpdb->get_var( "
+                SELECT COUNT(DISTINCT `messages`.`id`)
+                FROM `" . bm_get_table('messages') . "` `messages`
+                LEFT JOIN `{$meta_table}` `user_reports_meta`
+                    ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
+                    AND `user_reports_meta`.`meta_key` = 'user_reports'
+                LEFT JOIN `{$meta_table}` `ai_flag_meta`
+                    ON `messages`.`id` = `ai_flag_meta`.`bm_message_id`
+                    AND `ai_flag_meta`.`meta_key` = 'ai_moderation_flagged'
+                    AND `ai_flag_meta`.`meta_value` = '1'
+                WHERE `messages`.`created_at` > 0
+                AND `messages`.`message` != '<!-- BBPM START THREAD -->'
+                AND (
+                    `user_reports_meta`.`meta_value` IS NOT NULL
+                    OR ( `ai_flag_meta`.`meta_value` = '1' AND `messages`.`is_pending` = 0 )
+                )
+            " );
+        }
+
+        public function dismiss_ai_flag( WP_REST_Request $request )
+        {
+            $message_id = (int) $request->get_param('messageId');
+
+            if( ! $message_id ){
+                return new WP_Error( 'invalid_message', 'Invalid message ID', array( 'status' => 400 ) );
+            }
+
+            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_flagged' );
+            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_categories' );
+            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_result' );
+
+            return array(
+                'success'  => true,
+                'reported' => $this->get_reported_count()
+            );
         }
 
         public function get_blacklisted_users( WP_REST_Request $request )

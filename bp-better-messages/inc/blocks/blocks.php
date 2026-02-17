@@ -30,6 +30,7 @@ class Better_Messages_Blocks {
     public function register_blocks()
     {
         register_block_type(__DIR__ . '/builds/user-inbox');
+        register_block_type(__DIR__ . '/builds/chat-room');
     }
 
     public function register_block_category( $block_categories, $block_editor_context )

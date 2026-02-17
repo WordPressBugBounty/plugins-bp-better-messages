@@ -77,34 +77,83 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        public function moderate()
+        /**
+         * Moderate content using OpenAI Moderation API
+         *
+         * @param string $text Text content to moderate
+         * @param array $image_data_uris Base64 data URIs of images (data:image/...;base64,...)
+         * @return array|WP_Error Moderation result array or WP_Error on failure
+         */
+        public function moderate( $text = '', $image_data_uris = [] )
         {
+            $text = trim( $text );
+            $has_text = ! empty( $text );
+            $has_images = ! empty( $image_data_uris ) && is_array( $image_data_uris );
+
+            if( ! $has_text && ! $has_images ) {
+                return new \WP_Error( 'empty_content', 'No content to moderate' );
+            }
+
             $client = $this->get_client();
 
             try {
                 $input = [];
 
-                $input[] = [
-                    'type' => 'text',
-                    'text' => 'love you'
-                ];
+                if( $has_text ) {
+                    $input[] = [
+                        'type' => 'text',
+                        'text' => $text
+                    ];
+                }
+
+                if( $has_images ) {
+                    foreach( $image_data_uris as $data_uri ) {
+                        $input[] = [
+                            'type' => 'image_url',
+                            'image_url' => [
+                                'url' => $data_uri
+                            ]
+                        ];
+                    }
+                }
 
                 $args = [
                     'model' => 'omni-moderation-latest',
                     'input' => $input
                 ];
 
+                // Images may take longer to process
+                $timeout = $has_images ? 30 : 10;
+
                 $response = $client->post( 'moderations', [
-                    'json' => $args
+                    'json' => $args,
+                    'timeout' => $timeout,
+                    'connect_timeout' => 5
                 ] );
 
                 $body = $response->getBody()->getContents();
-
                 $data = json_decode($body, true);
 
-                print_r( $data );
+                if( isset( $data['results'][0] ) ) {
+                    return $data['results'][0];
+                }
+
+                return new \WP_Error( 'invalid_response', 'Invalid response from OpenAI Moderation API' );
             } catch ( GuzzleException $e ) {
-                print_r( $e->getMessage() );
+                $fullError = $e->getMessage();
+
+                try {
+                    if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
+                        $fullError = $e->getResponse()->getBody()->getContents();
+
+                        $data = json_decode($fullError, true);
+                        if( isset($data['error']['message']) ){
+                            $fullError = $data['error']['message'];
+                        }
+                    }
+                } catch ( \Exception $ignored ) {}
+
+                return new \WP_Error( 'openai_error', $fullError );
             }
         }
 
@@ -124,7 +173,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 foreach ($data['data'] as $result) {
                     $model_id = $result['id'];
 
-                    if( str_contains($model_id, 'gpt') && ! str_contains($model_id, '-realtime-') ) {
+                    if( ( str_contains($model_id, 'gpt') || preg_match('/^o[0-9]/', $model_id) ) && ! str_contains($model_id, '-realtime-') ) {
                         $models[] = $model_id;
                     }
                 }
@@ -272,6 +321,8 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             ];
 
             try {
+                Better_Messages()->functions->update_message_meta( $ai_response_id, 'openai_response_status', 'in_progress' );
+
                 $client = $this->get_client();
 
                 $response = $client->post('chat/completions', [
@@ -311,6 +362,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                             Better_Messages()->functions->update_message_meta($ai_response_id, 'openai_audio_transcript', $transcript);
                             Better_Messages()->functions->update_message_meta($ai_response_id, 'openai_audio_expires_at', $expires_at);
                             Better_Messages()->functions->update_message_meta($ai_response_id, 'openai_audio_voice', $voice);
+                            Better_Messages()->functions->update_message_meta($ai_response_id, 'openai_response_status', 'completed');
                             Better_Messages()->functions->update_message_meta($ai_response_id, 'ai_response_finish', time());
                             Better_Messages()->functions->delete_message_meta($message->id, 'ai_waiting_for_response');
                             Better_Messages()->functions->delete_thread_meta($message->thread_id, 'ai_waiting_for_response');
@@ -329,12 +381,13 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                             'sender_id'    => $ai_message->sender_id,
                             'thread_id'    => $message->thread_id,
                             'message_id'   => $ai_response_id,
-                            'content'      => htmlentities( $content )
+                            'content'      => '<!-- BM-AI -->' . htmlentities( $content )
                         ];
 
                         Better_Messages()->functions->update_message( $args );
 
                         //Better_Messages()->functions->update_message_meta( $ai_response_id, 'openai_meta', $part[1] );
+                        Better_Messages()->functions->update_message_meta( $ai_response_id, 'openai_response_status', 'completed' );
                         Better_Messages()->functions->update_message_meta( $ai_response_id, 'ai_response_finish', time() );
                         Better_Messages()->functions->delete_message_meta( $message->id, 'ai_waiting_for_response' );
                         Better_Messages()->functions->delete_thread_meta( $message->thread_id, 'ai_waiting_for_response' );
@@ -361,11 +414,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     'sender_id'    => $ai_message->sender_id,
                     'thread_id'    => $ai_message->thread_id,
                     'message_id'   => $ai_message->id,
-                    'content'      => $error
+                    'content'      => '<!-- BM-AI -->' . $error
                 ];
 
                 Better_Messages()->functions->update_message( $args );
 
+                Better_Messages()->functions->update_message_meta( $ai_response_id, 'openai_response_status', 'failed' );
                 Better_Messages()->functions->delete_message_meta( $message->id, 'ai_waiting_for_response' );
                 Better_Messages()->functions->delete_thread_meta( $message->thread_id, 'ai_waiting_for_response' );
                 do_action( 'better_messages_thread_self_update', $message->thread_id, $message->sender_id );
@@ -447,7 +501,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                     $data = json_decode($response->getBody()->getContents(), true);
 
-                    print_r( $data );
+                    // Data retrieved successfully
                 } catch ( \Exception $exception ) {
                     $fullError = $exception->getMessage();
 
@@ -642,7 +696,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             $params = [
                 'model' => $bot_settings['model'],
                 'conversation' => $open_ai_conversation['id'],
-                'max_output_tokens' => null, // Control max tokens in response to limit costs
                 'service_tier' => $bot_settings['serviceTier'], // 'flex', 'default', 'priority', or 'auto'
                 'truncation' => 'auto',
                 'tools' => $tools,
@@ -651,6 +704,20 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 'background' => true,
                 'stream' => true
             ];
+
+            if( ! empty( $bot_settings['maxOutputTokens'] ) && intval( $bot_settings['maxOutputTokens'] ) > 0 ){
+                $params['max_output_tokens'] = intval( $bot_settings['maxOutputTokens'] );
+            }
+
+            if( ! empty( $bot_settings['temperature'] ) && is_numeric( $bot_settings['temperature'] ) ){
+                $params['temperature'] = floatval( $bot_settings['temperature'] );
+            }
+
+            if( ! empty( $bot_settings['reasoningEffort'] ) && in_array( $bot_settings['reasoningEffort'], ['low', 'medium', 'high'] ) ){
+                $params['reasoning'] = [
+                    'effort' => $bot_settings['reasoningEffort']
+                ];
+            }
 
             $client = $this->get_client();
 
@@ -977,6 +1044,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                                         Better_Messages()->functions->update_message_meta( $message_id, 'attachments', $attachment_meta );
                                     } finally {
+                                        @unlink($temp_path);
                                         $images_generated[] = $generated_image;
                                     }
                                 }
@@ -1023,6 +1091,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                             Better_Messages()->functions->update_message_meta( $message_id, 'openai_message_id', $meta['message_id'] );
                             Better_Messages()->functions->update_message_meta( $message_id, 'openai_meta', json_encode($meta) );
                             Better_Messages()->functions->update_message_meta( $message_id, 'ai_response_finish', time() );
+                            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_last_ping' );
                             Better_Messages()->functions->delete_thread_meta( $message->thread_id, 'ai_waiting_for_response' );
 
                             $original_message_id = Better_Messages()->functions->get_message_meta( $message_id, 'ai_response_for' );

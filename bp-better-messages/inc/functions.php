@@ -2464,7 +2464,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'temp_id'          => '',
                 'return'           => 'thread_id',
                 'error_type'       => 'bool',
-                'is_update'        => false
+                'is_update'        => false,
+                'ai_moderation_result' => null,
+                'ai_moderation_deferred' => false
             ), 'bm_new_message' );
 
             // Bail if no sender or no content.
@@ -2505,6 +2507,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $message->meta          = $r['meta'];
             $message->notification  = $r['notification'];
             $message->is_update     = $r['is_update'];
+            $message->ai_moderation_result = $r['ai_moderation_result'];
+            $message->ai_moderation_deferred = $r['ai_moderation_deferred'];
 
             $is_pending = $message->is_pending;
             $new_thread = false;

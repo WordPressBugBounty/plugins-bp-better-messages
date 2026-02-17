@@ -45,6 +45,16 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 add_action('better_messages_ai_bot_ensure_completion', array( $this, 'ai_bot_ensure_completion'), 10, 2 );
                 add_action('better_messages_ai_ensure_completion_job', array( $this->api, 'ensureResponseCompletionJob' ) );
+
+                if( Better_Messages()->settings['aiModerationEnabled'] === '1'
+                    && ! empty( Better_Messages()->settings['openAiApiKey'] )
+                ) {
+                    add_action( 'better_messages_before_message_send', array( $this, 'moderate_message_content' ), 15, 2 );
+                    add_action( 'better_messages_before_new_thread', array( $this, 'moderate_message_content' ), 15, 2 );
+                    add_action( 'better_messages_message_sent', array( $this, 'schedule_background_moderation' ), 10, 1 );
+                    add_action( 'better_messages_message_pending', array( $this, 'schedule_background_moderation' ), 10, 1 );
+                    add_action( 'better_messages_ai_moderate_message', array( $this, 'run_background_moderation' ), 10, 1 );
+                }
             }
         }
 
@@ -245,6 +255,18 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
+            register_rest_route('better-messages/v1/ai', '/moderateMessage', array(
+                'methods' => 'GET',
+                'callback' => array( $this, 'rest_moderate_message'),
+                'permission_callback' => function( WP_REST_Request $request ) {
+                    $provided = $request->get_param('secret');
+                    if( ! empty( $provided ) && $provided === $this->get_ai_request_secret() ){
+                        return true;
+                    }
+                    return false;
+                },
+            ));
+
         }
 
         public function user_is_admin(){
@@ -370,6 +392,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 "fileSearch" => "0",
                 "fileSearchVectorIds" => [],
                 "serviceTier" => "auto",
+                "temperature" => "",
+                "maxOutputTokens" => "",
+                "reasoningEffort" => "",
                 "model"   => "",
                 "instruction" => _x( 'You are a helpful assistant', 'AI Chat Bots (WP Admin)', 'bp-better-messages' ),
                 "voice" => $voices[0]
@@ -673,6 +698,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                                 $table = bm_get_table('messages');
                                 $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET `message` = CONCAT(%s, `message`) WHERE `id` = %d;", '<!-- BM-AI -->', $message->id ) );
+                                $message->message = '<!-- BM-AI -->' . $message->message;
 
                                 if ( ! empty( Better_Messages()->settings['openAiApiKey'] ) && ! empty( $bot_settings['model'] ) ) {
                                     // Ensure create response trigger in case something goes wrong
@@ -701,6 +727,408 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function ai_bot_ensure_completion( $bot_id, $message_id )
         {
             $this->api->process_reply( $bot_id, $message_id );
+        }
+
+        /**
+         * Check whether AI moderation should run in background for this message.
+         * Only "flag" mode uses background (message is sent regardless, so no blocking needed).
+         */
+        private function is_background_moderation()
+        {
+            return Better_Messages()->settings['aiModerationAction'] === 'flag';
+        }
+
+        /**
+         * Check if a sender bypasses AI moderation (admin, role bypass, whitelist).
+         */
+        private function sender_bypasses_moderation( $sender_id, $thread_id )
+        {
+            $settings = Better_Messages()->settings;
+
+            // Administrators always bypass
+            if( $sender_id > 0 && user_can( $sender_id, 'bm_can_administrate' ) ) {
+                return true;
+            }
+
+            // Check role-based bypass
+            $bypass_roles = (array) $settings['aiModerationBypassRoles'];
+            if( ! empty( $bypass_roles ) && $sender_id > 0 ) {
+                $user_roles = Better_Messages()->functions->get_user_roles( $sender_id );
+                if( ! empty( $user_roles ) ) {
+                    foreach( $user_roles as $role ) {
+                        if( in_array( $role, $bypass_roles ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Check if user is whitelisted
+            if( $sender_id !== 0 && $thread_id > 0 ) {
+                if( Better_Messages()->moderation->is_user_whitelisted( $sender_id, $thread_id ) ) {
+                    return true;
+                }
+            } else if( $sender_id !== 0 ) {
+                if( Better_Messages()->moderation->is_user_whitelisted( $sender_id ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Get base64 data URIs from attachment IDs, filtering to only image mime types.
+         * Uses base64 encoding so that the site doesn't need to be publicly accessible.
+         */
+        private function get_image_data_uris_from_attachments( $attachment_ids )
+        {
+            $image_data_uris = [];
+
+            if( empty( $attachment_ids ) || ! is_array( $attachment_ids ) ) {
+                return $image_data_uris;
+            }
+
+            foreach( $attachment_ids as $attachment_id ) {
+                $data_uri = $this->get_attachment_base64_data_uri( (int) $attachment_id );
+                if( $data_uri ) {
+                    $image_data_uris[] = $data_uri;
+                }
+            }
+
+            return $image_data_uris;
+        }
+
+        /**
+         * Convert a WordPress image attachment to a base64 data URI.
+         *
+         * @param int $attachment_id
+         * @return string|false Data URI string or false on failure
+         */
+        private function get_attachment_base64_data_uri( $attachment_id )
+        {
+            $mime_type = get_post_mime_type( $attachment_id );
+            if( ! $mime_type || strpos( $mime_type, 'image/' ) !== 0 ) {
+                return false;
+            }
+
+            $file_path = get_attached_file( $attachment_id );
+            if( ! $file_path || ! file_exists( $file_path ) ) {
+                return false;
+            }
+
+            $contents = file_get_contents( $file_path );
+            if( $contents === false ) {
+                return false;
+            }
+
+            return 'data:' . $mime_type . ';base64,' . base64_encode( $contents );
+        }
+
+        /**
+         * Pre-send hook for AI moderation.
+         * In background mode: skips API call, defers to background processing.
+         * In synchronous mode: calls OpenAI API inline (hold mode only).
+         */
+        public function moderate_message_content( &$args, &$errors )
+        {
+            // Skip moderation if an earlier hook already blocked the message
+            if( ! empty( $errors ) ) {
+                return;
+            }
+
+            $sender_id = isset( $args['sender_id'] ) ? (int) $args['sender_id'] : (int) Better_Messages()->functions->get_current_user_id();
+            $thread_id = isset( $args['thread_id'] ) ? (int) $args['thread_id'] : 0;
+
+            if( $this->sender_bypasses_moderation( $sender_id, $thread_id ) ) {
+                return;
+            }
+
+            // Get message content
+            $content = isset( $args['content'] ) ? strip_tags( $args['content'] ) : '';
+            $has_text = ! empty( trim( $content ) );
+
+            // Get image data URIs if image moderation is enabled
+            $settings = Better_Messages()->settings;
+            $image_data_uris = [];
+            if( $settings['aiModerationImages'] === '1' && ! empty( $args['attachments'] ) ) {
+                $image_data_uris = $this->get_image_data_uris_from_attachments( $args['attachments'] );
+            }
+
+            $has_images = ! empty( $image_data_uris );
+
+            // Nothing to moderate
+            if( ! $has_text && ! $has_images ) {
+                return;
+            }
+
+            // Background mode: defer API call, mark for later processing
+            if( $this->is_background_moderation() ) {
+                $args['ai_moderation_deferred'] = true;
+                return;
+            }
+
+            // Synchronous mode (hold only): call OpenAI API inline
+            $result = $this->api->moderate( $content, $image_data_uris );
+
+            // Fail open on API error
+            if( is_wp_error( $result ) ) {
+                error_log( 'Better Messages AI Moderation Error: ' . $result->get_error_message() );
+                return;
+            }
+
+            // Not flagged — nothing to do
+            if( empty( $result['flagged'] ) ) {
+                return;
+            }
+
+            $flagged_categories = $this->get_flagged_categories( $result );
+
+            if( empty( $flagged_categories ) ) {
+                return;
+            }
+
+            // Store full result for meta saving later
+            $args['ai_moderation_result'] = [
+                'flagged'                      => true,
+                'categories'                   => $result['categories'],
+                'category_scores'              => $result['category_scores'],
+                'category_applied_input_types'  => isset( $result['category_applied_input_types'] ) ? $result['category_applied_input_types'] : [],
+                'flagged_categories'           => array_keys( $flagged_categories )
+            ];
+
+            $args['is_pending'] = 1;
+        }
+
+        /**
+         * Filter flagged categories by enabled categories and threshold.
+         */
+        private function get_flagged_categories( $result )
+        {
+            $settings = Better_Messages()->settings;
+            $enabled_categories = (array) $settings['aiModerationCategories'];
+            $threshold = (float) $settings['aiModerationThreshold'];
+            $flagged_categories = [];
+
+            if( isset( $result['categories'] ) && is_array( $result['categories'] ) ) {
+                foreach( $result['categories'] as $category => $is_flagged ) {
+                    if( ! $is_flagged ) continue;
+
+                    // Check if this category or its base category is enabled
+                    $base_category = explode( '/', $category )[0];
+                    if( ! in_array( $base_category, $enabled_categories ) && ! in_array( $category, $enabled_categories ) ) {
+                        continue;
+                    }
+
+                    $score = isset( $result['category_scores'][ $category ] ) ? (float) $result['category_scores'][ $category ] : 0;
+                    if( $score >= $threshold ) {
+                        $flagged_categories[ $category ] = $score;
+                    }
+                }
+            }
+
+            return $flagged_categories;
+        }
+
+        /**
+         * Called after message is saved. Schedules background AI moderation if deferred,
+         * or saves moderation meta inline if result is already available (synchronous mode).
+         */
+        public function schedule_background_moderation( &$message )
+        {
+            // Synchronous mode: result already available, save meta now
+            if( ! empty( $message->ai_moderation_result ) ) {
+                $result = $message->ai_moderation_result;
+
+                Better_Messages()->functions->update_message_meta( $message->id, 'ai_moderation_flagged', '1' );
+                Better_Messages()->functions->update_message_meta( $message->id, 'ai_moderation_categories', json_encode( $result['flagged_categories'] ) );
+                Better_Messages()->functions->update_message_meta( $message->id, 'ai_moderation_result', json_encode( $result ) );
+
+                // Send email notification only for "flag" action (message sent normally).
+                // For "hold" action, notify_pending_message in moderation.php handles the email.
+                if( empty( $message->is_pending ) ){
+                    $this->notify_ai_moderation( $message );
+                }
+                return;
+            }
+
+            // Background mode: schedule the check
+            if( empty( $message->ai_moderation_deferred ) ) {
+                return;
+            }
+
+            $message_id = $message->id;
+
+            // Cron fallback in case the self-request fails
+            if( ! wp_get_scheduled_event( 'better_messages_ai_moderate_message', [ $message_id ] ) ){
+                wp_schedule_single_event( time() + 15, 'better_messages_ai_moderate_message', [ $message_id ] );
+            }
+
+            // Non-blocking self-request for immediate processing
+            $url = add_query_arg([
+                'message_id' => $message_id,
+                'secret'     => $this->get_ai_request_secret()
+            ], Better_Messages()->functions->get_rest_api_url() . 'ai/moderateMessage');
+
+            wp_remote_get( $url, [
+                'blocking' => false,
+                'timeout'  => 0
+            ] );
+        }
+
+        /**
+         * REST endpoint callback for background moderation.
+         */
+        public function rest_moderate_message( WP_REST_Request $request )
+        {
+            $message_id = (int) $request->get_param('message_id');
+
+            if( ! empty( $message_id ) ){
+                $this->run_background_moderation( $message_id );
+            }
+        }
+
+        /**
+         * Run the actual AI moderation check in the background.
+         * Called via self-request or WP-Cron fallback.
+         */
+        public function run_background_moderation( $message_id )
+        {
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if( ! $message ) {
+                return;
+            }
+
+            // Already processed (e.g. cron fired after self-request already handled it)
+            $already_checked = Better_Messages()->functions->get_message_meta( $message_id, 'ai_moderation_checked' );
+            if( ! empty( $already_checked ) ) {
+                return;
+            }
+
+            // Mark as checked to prevent duplicate processing
+            Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_checked', '1' );
+
+            $content = strip_tags( $message->message );
+            $has_text = ! empty( trim( $content ) );
+
+            // Get image data URIs if image moderation is enabled
+            $settings = Better_Messages()->settings;
+            $image_data_uris = [];
+            if( $settings['aiModerationImages'] === '1' ) {
+                $attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
+                if( is_array( $attachments ) && ! empty( $attachments ) ) {
+                    $attachment_ids = array_keys( $attachments );
+                    $image_data_uris = $this->get_image_data_uris_from_attachments( $attachment_ids );
+                }
+            }
+
+            $has_images = ! empty( $image_data_uris );
+
+            // Nothing to moderate
+            if( ! $has_text && ! $has_images ) {
+                return;
+            }
+
+            // Call OpenAI Moderation API
+            $result = $this->api->moderate( $has_text ? $content : '', $image_data_uris );
+
+            // Fail open on API error — message stays as-is
+            if( is_wp_error( $result ) ) {
+                error_log( 'Better Messages AI Moderation Error: ' . $result->get_error_message() );
+                return;
+            }
+
+            // Not flagged — clean up and return
+            if( empty( $result['flagged'] ) ) {
+                Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_checked' );
+                return;
+            }
+
+            $flagged_categories = $this->get_flagged_categories( $result );
+
+            // No categories above threshold — clean up and return
+            if( empty( $flagged_categories ) ) {
+                Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_checked' );
+                return;
+            }
+
+            // Message is flagged — save moderation meta
+            $moderation_result = [
+                'flagged'                      => true,
+                'categories'                   => $result['categories'],
+                'category_scores'              => $result['category_scores'],
+                'category_applied_input_types'  => isset( $result['category_applied_input_types'] ) ? $result['category_applied_input_types'] : [],
+                'flagged_categories'           => array_keys( $flagged_categories )
+            ];
+
+            Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_flagged', '1' );
+            Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_categories', json_encode( $moderation_result['flagged_categories'] ) );
+            Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_result', json_encode( $moderation_result ) );
+
+            // Flag mode: message was already sent, notify admin
+            $message->ai_moderation_result = $moderation_result;
+            $this->notify_ai_moderation( $message );
+        }
+
+        /**
+         * Send email notification for AI-flagged messages.
+         */
+        private function notify_ai_moderation( $message )
+        {
+            $emails = Better_Messages()->settings['messagesModerationNotificationEmails'];
+
+            if( empty( trim( $emails ) ) ) {
+                return;
+            }
+
+            $email_list = array_filter( array_map( 'trim', preg_split( '/[\n,]+/', $emails ) ) );
+
+            if( empty( $email_list ) ) {
+                return;
+            }
+
+            $result = $message->ai_moderation_result;
+            $sender_id = $message->sender_id;
+            $sender_item = Better_Messages()->functions->rest_user_item( $sender_id, false );
+            $sender_name = $sender_item['name'];
+            $thread_id = $message->thread_id;
+
+            // Build categories string with input types (e.g. "sexual (image), violence (text)")
+            $input_types = isset( $result['category_applied_input_types'] ) ? $result['category_applied_input_types'] : [];
+            $category_parts = [];
+            if( isset( $result['flagged_categories'] ) ) {
+                foreach( $result['flagged_categories'] as $cat ) {
+                    $types = isset( $input_types[ $cat ] ) ? $input_types[ $cat ] : [];
+                    if( ! empty( $types ) ) {
+                        $category_parts[] = $cat . ' (' . implode( ', ', $types ) . ')';
+                    } else {
+                        $category_parts[] = $cat;
+                    }
+                }
+            }
+            $categories = implode( ', ', $category_parts );
+
+            $subject = sprintf(
+                _x( '[%s] AI Flagged Message', 'AI Moderation', 'bp-better-messages' ),
+                get_bloginfo( 'name' )
+            );
+
+            $admin_url = admin_url( 'admin.php?page=better-messages-viewer' );
+            $message_preview = wp_trim_words( strip_tags( $message->message ), 50 );
+
+            $body  = sprintf( _x( 'Sender: %s (ID: %d)', 'AI Moderation', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
+            $body .= sprintf( _x( 'Conversation: #%d', 'AI Moderation', 'bp-better-messages' ), $thread_id ) . "\n";
+            $body .= sprintf( _x( 'Flagged Categories: %s', 'AI Moderation', 'bp-better-messages' ), $categories ) . "\n";
+            $body .= "\n" . sprintf( _x( 'Message: %s', 'AI Moderation', 'bp-better-messages' ), $message_preview ) . "\n\n";
+            $body .= _x( 'Note: This message was sent to the recipient but flagged for review.', 'AI Moderation', 'bp-better-messages' ) . "\n\n";
+            $body .= sprintf( _x( 'Review in moderation panel: %s', 'AI Moderation', 'bp-better-messages' ), $admin_url );
+
+            foreach( $email_list as $email ) {
+                if( is_email( $email ) ) {
+                    wp_mail( $email, $subject, $body );
+                }
+            }
         }
     }
 

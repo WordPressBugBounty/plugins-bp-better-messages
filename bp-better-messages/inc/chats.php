@@ -249,6 +249,7 @@ class Better_Messages_Chats
             $thread_item['chatRoom']['isJoined'] = $is_participant;
             $thread_item['chatRoom']['canJoin']  = $this->user_can_join($user_id, $chat_id);
             $thread_item['chatRoom']['hideParticipants'] = ( ! $is_moderator && $settings['hide_participants'] === '1' );
+            $thread_item['chatRoom']['hideParticipantsCount'] = ( ! $is_moderator && $settings['hide_participants_count'] === '1' );
 
             if ( ! $is_participant ) {
                 $thread_item['isHidden'] = 1;
@@ -256,6 +257,7 @@ class Better_Messages_Chats
                 $thread_item['permissions']['canMinimize'] = false;
                 $thread_item['permissions']['canMuteThread'] = false;
                 $thread_item['chatRoom']['hideParticipants'] = true;
+                $thread_item['chatRoom']['hideParticipantsCount'] = true;
             } else {
                 $can_reply = $this->user_can_reply( $user_id, $chat_id );
 
@@ -488,6 +490,7 @@ class Better_Messages_Chats
             'publicly_queryable'   => false,
             'show_ui'              => true,
             'show_in_menu'         => 'bp-better-messages',
+            'show_in_rest'         => true,
             'menu_position'        => 1,
             'query_var'            => false,
             'capability_type'      => 'page',
@@ -539,6 +542,7 @@ class Better_Messages_Chats
             'enable_notifications'            => '0',
             'allow_guests'                    => '0',
             'hide_participants'               => '0',
+            'hide_participants_count'         => '0',
             'enable_files'                    => '0',
             'hide_from_thread_list'           => '1',
             'must_join_message'               => _x('You need to join this chat room to send messages', 'Chat rooms settings page', 'bp-better-messages'),
@@ -601,6 +605,10 @@ class Better_Messages_Chats
 
             if ( ! isset( $settings['hide_participants'] ) ) {
                 $settings['hide_participants'] = '0';
+            }
+
+            if ( ! isset( $settings['hide_participants_count'] ) ) {
+                $settings['hide_participants_count'] = '0';
             }
 
             if ( ! isset( $settings['enable_chat_email_notifications'] ) ) {
@@ -731,6 +739,7 @@ class Better_Messages_Chats
     public function layout( $args ){
         $chat_id = $args['id'];
         $disable_init = isset($args['disable_auto_init']);
+        $full_screen = isset($args['full_screen']) ? $args['full_screen'] : '0';
 
         if (defined('WP_DEBUG') && true === WP_DEBUG) {
             // some debug to add later
@@ -772,7 +781,7 @@ class Better_Messages_Chats
         $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
         $class = 'bp-messages-chat-wrap';
         if( $disable_init ) $class .= ' bm-disable-auto-init';
-        echo '<div class="' . $class . '" style="height: ' . $initialHeight . 'px" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+        echo '<div class="' . $class . '" style="height: ' . $initialHeight . 'px" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '" data-full-screen="' . esc_attr($full_screen) . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
 
         $content = ob_get_clean();
         $content = str_replace( 'loading="lazy"', '', $content );

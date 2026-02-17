@@ -6,8 +6,6 @@ __('Display Name', 'bp-better-messages');
 _x('Anonymous User', 'Not logged-in user', 'bp-better-messages');
 _x('The message you were trying to send was empty', 'User tried to send empty message error', 'bp-better-messages');
 __('This message was deleted', 'bp-better-messages');
-_x('Reason', 'User Reports', 'bp-better-messages');
-_x('Description', 'User Reports', 'bp-better-messages');
 _x('Friends', 'Combined view tabs', 'bp-better-messages');
 _x('Groups', 'Combined view tabs', 'bp-better-messages');
 _x('New Conversation', '"New Conversation" Button Tooltip', 'bp-better-messages');
@@ -193,6 +191,8 @@ _x('Message is not received or seen by anyone yet', 'Message Delivery Status Mod
 _x('Close', 'Close Modal Window', 'bp-better-messages');
 _x('Mute user for', 'Moderation actions', 'bp-better-messages');
 _x('Mute', 'Moderation actions', 'bp-better-messages');
+_x('Reason', 'User Reports', 'bp-better-messages');
+_x('Description', 'User Reports', 'bp-better-messages');
 _x('Report Message', 'User Reports', 'bp-better-messages');
 _x('User profile', 'Users List', 'bp-better-messages');
 _x('No favorited messages yet!', 'Favorited messages screen', 'bp-better-messages');

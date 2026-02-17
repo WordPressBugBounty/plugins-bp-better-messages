@@ -284,7 +284,14 @@ class Better_Messages_Options
             'messagesPremoderationRolesNewConv'    => [],
             'messagesPremoderationRolesReplies'    => [],
             'messagesModerateFirstTimeSenders'     => '0',
-            'messagesModerationNotificationEmails' => ''
+            'messagesModerationNotificationEmails' => '',
+
+            'aiModerationEnabled'           => '0',
+            'aiModerationAction'            => 'hold',
+            'aiModerationImages'            => '0',
+            'aiModerationCategories'        => ['hate', 'harassment', 'sexual', 'violence', 'self-harm', 'illicit'],
+            'aiModerationThreshold'         => '0.5',
+            'aiModerationBypassRoles'       => []
         );
 
         $args = get_option( 'bp-better-chat-settings', array() );
@@ -710,6 +717,53 @@ class Better_Messages_Options
 
         if( ! isset( $settings['messagesModerationNotificationEmails'] ) ){
             $settings['messagesModerationNotificationEmails'] = '';
+        }
+
+        if( ! isset( $settings['aiModerationEnabled'] ) ){
+            $settings['aiModerationEnabled'] = '0';
+        }
+
+        // When AI moderation is disabled, sub-setting inputs are disabled and not submitted.
+        // Preserve existing sub-settings from database to prevent silent reset to defaults.
+        if( $settings['aiModerationEnabled'] !== '1' ) {
+            $existing = $this->settings;
+            if( ! isset( $settings['aiModerationAction'] ) ){
+                $settings['aiModerationAction'] = isset( $existing['aiModerationAction'] ) ? $existing['aiModerationAction'] : 'hold';
+            }
+            if( ! isset( $settings['aiModerationImages'] ) ){
+                $settings['aiModerationImages'] = isset( $existing['aiModerationImages'] ) ? $existing['aiModerationImages'] : '0';
+            }
+            if( ! isset( $settings['aiModerationCategories'] ) ){
+                $settings['aiModerationCategories'] = isset( $existing['aiModerationCategories'] ) ? $existing['aiModerationCategories'] : [];
+            }
+            if( ! isset( $settings['aiModerationThreshold'] ) ){
+                $settings['aiModerationThreshold'] = isset( $existing['aiModerationThreshold'] ) ? $existing['aiModerationThreshold'] : '0.5';
+            }
+            if( ! isset( $settings['aiModerationBypassRoles'] ) ){
+                $settings['aiModerationBypassRoles'] = isset( $existing['aiModerationBypassRoles'] ) ? $existing['aiModerationBypassRoles'] : [];
+            }
+        } else {
+            if( ! isset( $settings['aiModerationAction'] ) ){
+                $settings['aiModerationAction'] = 'hold';
+            }
+            if( ! isset( $settings['aiModerationImages'] ) ){
+                $settings['aiModerationImages'] = '0';
+            }
+            if( ! isset( $settings['aiModerationCategories'] ) ){
+                $settings['aiModerationCategories'] = [];
+            }
+            if( ! isset( $settings['aiModerationThreshold'] ) ){
+                $settings['aiModerationThreshold'] = '0.5';
+            }
+            if( ! isset( $settings['aiModerationBypassRoles'] ) ){
+                $settings['aiModerationBypassRoles'] = [];
+            }
+        }
+
+        // Validate threshold is within 0-1 range
+        if( isset( $settings['aiModerationThreshold'] ) ){
+            $settings['aiModerationThreshold'] = max( 0, min( 1, (float) $settings['aiModerationThreshold'] ) );
+            $settings['aiModerationThreshold'] = (string) $settings['aiModerationThreshold'];
         }
 
         if ( !isset( $settings['restrictBlockUsers'] ) ) {
