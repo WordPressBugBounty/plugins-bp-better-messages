@@ -36,6 +36,7 @@ class Better_Messages_Options
             'attachmentsXAccelPrefix'     => '/bm-files/',
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
+            'attachmentsUploadMethod'     => 'post',
             'miniChatsEnable'             => '0',
             'combinedChatsEnable'         => '0',
             'searchAllUsers'              => '1',
@@ -644,6 +645,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsXAccelPrefix'] ) ) {
             $settings['attachmentsXAccelPrefix'] = '/bm-files/';
+        }
+        if ( !isset( $settings['attachmentsUploadMethod'] ) || !in_array( $settings['attachmentsUploadMethod'], array( 'tus', 'post' ), true ) ) {
+            $settings['attachmentsUploadMethod'] = 'tus';
         }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';

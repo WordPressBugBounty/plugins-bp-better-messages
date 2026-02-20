@@ -12715,7 +12715,7 @@ body.bp-messages-mobile {
 }
 
 .bp-messages-wrap .mejs-button > button {
-  background: transparent url(../ebc94ae1d18edd91c255.svg) !important;
+  background: transparent url(../../../../../wp-includes/js/mediaelement/mejs-controls.svg) !important;
   border: 0 !important;
   cursor: pointer;
   display: block;

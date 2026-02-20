@@ -2364,6 +2364,27 @@ $has_late_message = ob_get_clean();
                 </tr>
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
+                        <?php _ex( 'File Upload Method', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Choose how files are uploaded', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <label style="margin-right: 15px;">
+                            <input type="radio" name="attachmentsUploadMethod" value="post" <?php checked( $this->settings['attachmentsUploadMethod'], 'post' ); ?> />
+                            <?php _ex( 'Standard POST Upload', 'Settings page', 'bp-better-messages' ); ?>
+                        </label>
+                        <label>
+                            <input type="radio" name="attachmentsUploadMethod" value="tus" <?php checked( $this->settings['attachmentsUploadMethod'], 'tus' ); ?> />
+                            <?php _ex( 'TUS (Resumable Upload)', 'Settings page', 'bp-better-messages' ); ?>
+                        </label>
+                        <p style="font-size: 10px; color: #666; margin-top: 4px;">
+                            <?php _ex( 'Standard POST is limited by PHP upload_max_filesize and post_max_size settings.', 'Settings page', 'bp-better-messages' ); ?>
+                            <br/>
+                            <?php _ex( 'TUS bypasses these limits and supports more reliable resumable uploads, but some hosting providers block TUS requests with their firewall (WAF). If file uploads fail with TUS, switch to Standard POST.', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
                         <?php _ex( 'Allow to capture photos', 'Settings page','bp-better-messages' ); ?>
                         <p style="font-size: 10px;"><?php _ex( 'Allow to capture photos from user webcam', 'Settings page','bp-better-messages' ); ?></p>
                         <p style="font-size: 10px;"><?php _ex( '.jpg or .png format must be enabled', 'Settings page','bp-better-messages' ); ?></p>

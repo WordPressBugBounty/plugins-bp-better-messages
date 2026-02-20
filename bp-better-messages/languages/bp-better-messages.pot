@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.12.2\n"
+"Project-Id-Version: Better Messages 2.12.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-20T05:55:00+00:00\n"
+"POT-Creation-Date: 2026-02-20T12:33:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: bp-better-messages\n"
@@ -115,7 +115,7 @@ msgid "<a href=\"%s\" target=\"_blank\">Voice Messages</a> add-on is required to
 msgstr ""
 
 #: addons/ai/ai.php:396
-#: views/layout-settings.php:5863
+#: views/layout-settings.php:5884
 msgctxt "Settings page"
 msgid "Website must to have PHP version %s or higher, currently PHP version %s is used."
 msgstr ""
@@ -477,80 +477,80 @@ msgctxt "Marketplace Integrations"
 msgid "Enable live chat in store"
 msgstr ""
 
-#: addons/files.php:359
+#: addons/files.php:366
 #: inc/api/admin.php:674
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48334
+#: assets/js/bp-messages.js:48511
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:48419
+#: assets/js/bp-messages.js:48596
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Voice Message"
 msgstr ""
 
-#: addons/files.php:378
+#: addons/files.php:385
 msgid "attachments"
 msgstr ""
 
-#: addons/files.php:808
-#: addons/files.php:820
-#: addons/files.php:1439
-#: addons/files.php:1448
-#: addons/files.php:1677
+#: addons/files.php:815
+#: addons/files.php:827
+#: addons/files.php:1452
+#: addons/files.php:1461
+#: addons/files.php:1690
 msgctxt "File Uploader Error"
 msgid "Sorry, you are not allowed to upload this file type"
 msgstr ""
 
-#: addons/files.php:832
+#: addons/files.php:839
 msgctxt "File Uploader Error"
 msgid "%s is too large! Please upload file up to %d MB."
 msgstr ""
 
-#: addons/files.php:865
+#: addons/files.php:878
 msgctxt "File Uploader Error"
 msgid "Your request is empty."
 msgstr ""
 
-#: addons/files.php:911
-#: addons/files.php:1327
+#: addons/files.php:924
+#: addons/files.php:1340
 msgctxt "File Uploader Error"
 msgid "Sorry, you are not allowed to upload files"
 msgstr ""
 
-#: addons/files.php:1035
+#: addons/files.php:1048
 msgctxt "File Proxy Error"
 msgid "Authentication required."
 msgstr ""
 
-#: addons/files.php:1045
+#: addons/files.php:1058
 msgctxt "File Proxy Error"
 msgid "Invalid file access token."
 msgstr ""
 
-#: addons/files.php:1055
-#: addons/files.php:1095
+#: addons/files.php:1068
+#: addons/files.php:1108
 msgctxt "File Proxy Error"
 msgid "File not found."
 msgstr ""
 
-#: addons/files.php:1066
+#: addons/files.php:1079
 msgctxt "File Proxy Error"
 msgid "File access denied."
 msgstr ""
 
-#: addons/files.php:1075
+#: addons/files.php:1088
 msgctxt "File Proxy Error"
 msgid "You do not have access to this conversation."
 msgstr ""
 
-#: addons/files.php:1086
+#: addons/files.php:1099
 msgctxt "File Proxy Error"
 msgid "File not found on disk. It may have been moved to cloud storage."
 msgstr ""
 
-#: addons/files.php:1417
+#: addons/files.php:1430
 msgctxt "File Uploader Error"
 msgid "File is too large! Please upload file up to %d MB."
 msgstr ""
@@ -880,10 +880,10 @@ msgstr ""
 #: inc/notifications.php:427
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48320
+#: assets/js/bp-messages.js:48497
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:48405
+#: assets/js/bp-messages.js:48582
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Sticker"
@@ -1600,7 +1600,7 @@ msgstr ""
 #: inc/mobile-app/inc/pushs.php:514
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24078
+#: assets/js/bp-messages.js:24255
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread Title (when subjects are disabled)"
@@ -1635,7 +1635,7 @@ msgstr ""
 #: inc/functions.php:2539
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31852
+#: assets/js/bp-messages.js:32029
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User tried to send message with no recipients"
@@ -1652,7 +1652,7 @@ msgstr ""
 #: assets/js/bp-messages.js:14004
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:47392
+#: assets/js/bp-messages.js:47569
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Display Name"
@@ -1676,7 +1676,7 @@ msgstr ""
 #: inc/guests.php:184
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25438
+#: assets/js/bp-messages.js:25615
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Not logged-in user"
@@ -2150,7 +2150,7 @@ msgstr ""
 
 #: inc/notifications.php:953
 #: inc/notifications.php:1090
-#: views/layout-settings.php:3196
+#: views/layout-settings.php:3217
 msgid "View Conversation"
 msgstr ""
 
@@ -2159,24 +2159,24 @@ msgid "Hi %s,"
 msgstr ""
 
 #: inc/notifications.php:1058
-#: views/layout-settings.php:3073
+#: views/layout-settings.php:3094
 msgctxt "Email footer"
 msgid "Unsubscribe from email notifications about unread messages"
 msgstr ""
 
-#: inc/options.php:371
+#: inc/options.php:372
 #: views/layout-viewer.php:11
 msgctxt "WP Admin"
 msgid "Administration"
 msgstr ""
 
-#: inc/options.php:372
+#: inc/options.php:373
 msgctxt "WP Admin"
 msgid "Better Messages"
 msgstr ""
 
-#: inc/options.php:411
 #: inc/options.php:412
+#: inc/options.php:413
 #: assets/admin/admin.js:2
 #: assets/admin/admin.min.js:1
 msgctxt "WP Admin"
@@ -2197,7 +2197,7 @@ msgstr ""
 #: inc/rest-api.php:863
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31527
+#: assets/js/bp-messages.js:31704
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User tried to send empty message error"
@@ -2593,12 +2593,12 @@ msgid "Allow users to set their status: Online, Away or Do not disturb"
 msgstr ""
 
 #: views/layout-settings.php:1070
-#: views/layout-settings.php:4700
-#: views/layout-settings.php:4782
-#: views/layout-settings.php:5404
-#: views/layout-settings.php:5489
-#: views/layout-settings.php:5718
-#: views/layout-settings.php:5779
+#: views/layout-settings.php:4721
+#: views/layout-settings.php:4803
+#: views/layout-settings.php:5425
+#: views/layout-settings.php:5510
+#: views/layout-settings.php:5739
+#: views/layout-settings.php:5800
 msgctxt "Settings page"
 msgid "Combined View"
 msgstr ""
@@ -3214,7 +3214,7 @@ msgid "Widgets"
 msgstr ""
 
 #: views/layout-settings.php:1980
-#: views/layout-settings.php:3852
+#: views/layout-settings.php:3873
 msgctxt "Settings page"
 msgid "Mini Conversations"
 msgstr ""
@@ -3261,7 +3261,7 @@ msgid "Adds additional close button when widgets are opened"
 msgstr ""
 
 #: views/layout-settings.php:2036
-#: views/layout-settings.php:6734
+#: views/layout-settings.php:6755
 msgctxt "Settings page"
 msgid "Audio Call Button"
 msgstr ""
@@ -3272,7 +3272,7 @@ msgid "Add audio call button to the mini chats"
 msgstr ""
 
 #: views/layout-settings.php:2046
-#: views/layout-settings.php:6713
+#: views/layout-settings.php:6734
 msgctxt "Settings page"
 msgid "Video Call Button"
 msgstr ""
@@ -3375,13 +3375,13 @@ msgid "Position"
 msgstr ""
 
 #: views/layout-settings.php:2176
-#: views/layout-settings.php:2536
+#: views/layout-settings.php:2557
 msgctxt "Settings page"
 msgid "Left"
 msgstr ""
 
 #: views/layout-settings.php:2180
-#: views/layout-settings.php:2532
+#: views/layout-settings.php:2553
 msgctxt "Settings page"
 msgid "Right"
 msgstr ""
@@ -3548,2285 +3548,2315 @@ msgstr ""
 
 #: views/layout-settings.php:2367
 msgctxt "Settings page"
-msgid "Allow to capture photos"
+msgid "File Upload Method"
 msgstr ""
 
 #: views/layout-settings.php:2368
 msgctxt "Settings page"
-msgid "Allow to capture photos from user webcam"
+msgid "Choose how files are uploaded"
 msgstr ""
 
-#: views/layout-settings.php:2369
+#: views/layout-settings.php:2373
 msgctxt "Settings page"
-msgid ".jpg or .png format must be enabled"
+msgid "Standard POST Upload"
 msgstr ""
 
 #: views/layout-settings.php:2377
 msgctxt "Settings page"
+msgid "TUS (Resumable Upload)"
+msgstr ""
+
+#: views/layout-settings.php:2380
+msgctxt "Settings page"
+msgid "Standard POST is limited by PHP upload_max_filesize and post_max_size settings."
+msgstr ""
+
+#: views/layout-settings.php:2382
+msgctxt "Settings page"
+msgid "TUS bypasses these limits and supports more reliable resumable uploads, but some hosting providers block TUS requests with their firewall (WAF). If file uploads fail with TUS, switch to Standard POST."
+msgstr ""
+
+#: views/layout-settings.php:2388
+msgctxt "Settings page"
+msgid "Allow to capture photos"
+msgstr ""
+
+#: views/layout-settings.php:2389
+msgctxt "Settings page"
+msgid "Allow to capture photos from user webcam"
+msgstr ""
+
+#: views/layout-settings.php:2390
+msgctxt "Settings page"
+msgid ".jpg or .png format must be enabled"
+msgstr ""
+
+#: views/layout-settings.php:2398
+msgctxt "Settings page"
 msgid "Delete attachment after"
 msgstr ""
 
-#: views/layout-settings.php:2378
+#: views/layout-settings.php:2399
 msgctxt "Settings page"
 msgid "Set 0 to not delete attachments"
 msgstr ""
 
-#: views/layout-settings.php:2386
+#: views/layout-settings.php:2407
 msgctxt "Settings page"
 msgid "Max attachment size"
 msgstr ""
 
-#: views/layout-settings.php:2394
+#: views/layout-settings.php:2415
 msgctxt "Settings page"
 msgid "Max number of attachments per message"
 msgstr ""
 
-#: views/layout-settings.php:2395
+#: views/layout-settings.php:2416
 msgctxt "Settings page"
 msgid "Set 0 to not limit"
 msgstr ""
 
-#: views/layout-settings.php:2403
-#: views/layout-settings.php:2408
+#: views/layout-settings.php:2424
+#: views/layout-settings.php:2429
 msgctxt "Settings page"
 msgid "Allowed formats"
 msgstr ""
 
-#: views/layout-settings.php:2436
+#: views/layout-settings.php:2457
 msgctxt "Settings page"
 msgid "Browser Tab Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2437
+#: views/layout-settings.php:2458
 msgctxt "Settings page"
 msgid "Show unread conversations number in website title (browser tab)"
 msgstr ""
 
-#: views/layout-settings.php:2445
+#: views/layout-settings.php:2466
 msgctxt "Settings page"
 msgid "Mute Conversations"
 msgstr ""
 
-#: views/layout-settings.php:2446
+#: views/layout-settings.php:2467
 msgctxt "Settings page"
 msgid "When enabled users will be able to mute conversations"
 msgstr ""
 
-#: views/layout-settings.php:2455
+#: views/layout-settings.php:2476
 msgctxt "Settings page"
 msgid "Send email notifications every (minutes)"
 msgstr ""
 
-#: views/layout-settings.php:2456
-#: views/layout-settings.php:3540
+#: views/layout-settings.php:2477
+#: views/layout-settings.php:3561
 msgctxt "Settings page"
 msgid "Set to 0 to disable"
 msgstr ""
 
-#: views/layout-settings.php:2465
+#: views/layout-settings.php:2486
 msgctxt "Settings page"
 msgid "Send email after user is not online for (minutes)"
 msgstr ""
 
-#: views/layout-settings.php:2466
+#: views/layout-settings.php:2487
 msgctxt "Settings page"
 msgid "Set to 0 to always send email notifications to user"
 msgstr ""
 
-#: views/layout-settings.php:2475
+#: views/layout-settings.php:2496
 msgctxt "Settings page"
 msgid "Stop messages notifications to be added to BuddyPress Notifications Bell"
 msgstr ""
 
-#: views/layout-settings.php:2476
+#: views/layout-settings.php:2497
 msgctxt "Settings page"
 msgid "This will work only with setting above"
 msgstr ""
 
-#: views/layout-settings.php:2484
+#: views/layout-settings.php:2505
 msgctxt "Settings page"
 msgid "Enable Browser Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2485
+#: views/layout-settings.php:2506
 msgctxt "Settings page"
 msgid "Allow users to enable web push notifications, so they can receive messages even with closed website"
 msgstr ""
 
-#: views/layout-settings.php:2486
+#: views/layout-settings.php:2507
 msgctxt "Settings page"
 msgid "Also adds notifications, when user has website opened in other tab"
 msgstr ""
 
-#: views/layout-settings.php:2487
+#: views/layout-settings.php:2508
 msgctxt "Settings page"
 msgid "Supported in all major browsers like: Chrome, Opera, Firefox, IE, Edge and others"
 msgstr ""
 
-#: views/layout-settings.php:2503
+#: views/layout-settings.php:2524
 msgctxt "Settings page"
 msgid "Send Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:2511
+#: views/layout-settings.php:2532
 msgctxt "Settings page"
 msgid "When user is offline"
 msgstr ""
 
-#: views/layout-settings.php:2515
+#: views/layout-settings.php:2536
 msgctxt "Settings page"
 msgid "If user is offline or did not read the message during 5 seconds"
 msgstr ""
 
-#: views/layout-settings.php:2526
+#: views/layout-settings.php:2547
 msgctxt "Settings page"
 msgid "Onsite notifications position"
 msgstr ""
 
-#: views/layout-settings.php:2545
+#: views/layout-settings.php:2566
 msgctxt "Settings page"
 msgid "Disable onsite notifications about new messages"
 msgstr ""
 
-#: views/layout-settings.php:2555
+#: views/layout-settings.php:2576
 msgctxt "Settings page"
 msgid "Additional realtime onsite notifications"
 msgstr ""
 
-#: views/layout-settings.php:2556
+#: views/layout-settings.php:2577
 msgctxt "Settings page"
 msgid "How it works?"
 msgstr ""
 
-#: views/layout-settings.php:2569
-#: views/layout-settings.php:5687
+#: views/layout-settings.php:2590
+#: views/layout-settings.php:5708
 msgctxt "Settings page"
 msgid "BuddyPress Friends"
 msgstr ""
 
-#: views/layout-settings.php:2573
-#: views/layout-settings.php:5739
+#: views/layout-settings.php:2594
+#: views/layout-settings.php:5760
 msgctxt "Settings page"
 msgid "BuddyPress Groups"
 msgstr ""
 
-#: views/layout-settings.php:2584
+#: views/layout-settings.php:2605
 msgctxt "Settings page"
 msgid "Email Template Customization"
 msgstr ""
 
-#: views/layout-settings.php:2587
+#: views/layout-settings.php:2608
 msgctxt "Settings page"
 msgid "Customize the appearance of message email notifications sent to users."
 msgstr ""
 
-#: views/layout-settings.php:2595
+#: views/layout-settings.php:2616
 msgctxt "Settings page"
 msgid "Email Template Source"
 msgstr ""
 
-#: views/layout-settings.php:2597
+#: views/layout-settings.php:2618
 msgctxt "Settings page"
 msgid "Choose whether to use BuddyPress email templates or custom templates for message notifications."
 msgstr ""
 
-#: views/layout-settings.php:2603
+#: views/layout-settings.php:2624
 msgctxt "Settings page"
 msgid "BuddyPress Email Template"
 msgstr ""
 
-#: views/layout-settings.php:2604
+#: views/layout-settings.php:2625
 msgctxt "Settings page"
 msgid "(uses your BuddyPress email customizations)"
 msgstr ""
 
-#: views/layout-settings.php:2608
+#: views/layout-settings.php:2629
 msgctxt "Settings page"
 msgid "Custom Template"
 msgstr ""
 
-#: views/layout-settings.php:2609
+#: views/layout-settings.php:2630
 msgctxt "Settings page"
 msgid "(use the simple or custom HTML template below)"
 msgstr ""
 
-#: views/layout-settings.php:2618
+#: views/layout-settings.php:2639
 msgctxt "Settings page"
 msgid "Auto create BuddyPress Email template if its missing"
 msgstr ""
 
-#: views/layout-settings.php:2620
+#: views/layout-settings.php:2641
 msgctxt "Settings page"
 msgid "You need to disable it only if you modified email template and plugin try to replace it"
 msgstr ""
 
-#: views/layout-settings.php:2632
+#: views/layout-settings.php:2653
 msgctxt "Settings page"
 msgid "Template Mode"
 msgstr ""
 
-#: views/layout-settings.php:2637
+#: views/layout-settings.php:2658
 msgctxt "Settings page"
 msgid "Simple"
 msgstr ""
 
-#: views/layout-settings.php:2641
+#: views/layout-settings.php:2662
 msgctxt "Settings page"
 msgid "Custom HTML"
 msgstr ""
 
-#: views/layout-settings.php:2661
+#: views/layout-settings.php:2682
 msgctxt "Settings page"
 msgid "Email Logo"
 msgstr ""
 
-#: views/layout-settings.php:2663
+#: views/layout-settings.php:2684
 msgctxt "Settings page"
 msgid "Recommended size: 200x50 pixels"
 msgstr ""
 
-#: views/layout-settings.php:2668
+#: views/layout-settings.php:2689
 msgctxt "Settings page"
 msgid "Select Logo"
 msgstr ""
 
-#: views/layout-settings.php:2669
+#: views/layout-settings.php:2690
 msgctxt "Settings page"
 msgid "Remove Logo"
 msgstr ""
 
-#: views/layout-settings.php:2680
+#: views/layout-settings.php:2701
 msgctxt "Settings page"
 msgid "Primary Color"
 msgstr ""
 
-#: views/layout-settings.php:2682
+#: views/layout-settings.php:2703
 msgctxt "Settings page"
 msgid "Used for buttons and links"
 msgstr ""
 
-#: views/layout-settings.php:2692
+#: views/layout-settings.php:2713
 msgctxt "Settings page"
 msgid "Background Color"
 msgstr ""
 
-#: views/layout-settings.php:2694
+#: views/layout-settings.php:2715
 msgctxt "Settings page"
 msgid "Email outer background"
 msgstr ""
 
-#: views/layout-settings.php:2704
+#: views/layout-settings.php:2725
 msgctxt "Settings page"
 msgid "Content Background Color"
 msgstr ""
 
-#: views/layout-settings.php:2706
+#: views/layout-settings.php:2727
 msgctxt "Settings page"
 msgid "Main content area background"
 msgstr ""
 
-#: views/layout-settings.php:2716
+#: views/layout-settings.php:2737
 msgctxt "Settings page"
 msgid "Text Color"
 msgstr ""
 
-#: views/layout-settings.php:2725
+#: views/layout-settings.php:2746
 msgctxt "Settings page"
 msgid "Header Text"
 msgstr ""
 
-#: views/layout-settings.php:2727
+#: views/layout-settings.php:2748
 msgctxt "Settings page"
 msgid "Use {{user_name}} for recipient name. Leave empty for default \"Hi {{user_name}},\""
 msgstr ""
 
-#: views/layout-settings.php:2731
+#: views/layout-settings.php:2752
 msgctxt "Settings page"
 msgid "Hi {{user_name}},"
 msgstr ""
 
-#: views/layout-settings.php:2737
+#: views/layout-settings.php:2758
 msgctxt "Settings page"
 msgid "Footer Text"
 msgstr ""
 
-#: views/layout-settings.php:2739
+#: views/layout-settings.php:2760
 msgctxt "Settings page"
 msgid "Custom footer text. Use {{site_name}} and {{site_url}} placeholders."
 msgstr ""
 
-#: views/layout-settings.php:2749
+#: views/layout-settings.php:2770
 msgctxt "Settings page"
 msgid "Button Text"
 msgstr ""
 
-#: views/layout-settings.php:2751
+#: views/layout-settings.php:2772
 msgctxt "Settings page"
 msgid "Text for the \"View Conversation\" button. Leave empty for default."
 msgstr ""
 
-#: views/layout-settings.php:2755
-#: views/layout-settings.php:3002
+#: views/layout-settings.php:2776
+#: views/layout-settings.php:3023
 msgctxt "Settings page"
 msgid "View Conversation"
 msgstr ""
 
-#: views/layout-settings.php:2761
+#: views/layout-settings.php:2782
 msgctxt "Settings page"
 msgid "Preview"
 msgstr ""
 
-#: views/layout-settings.php:2764
+#: views/layout-settings.php:2785
 msgctxt "Settings page"
 msgid "Preview Email Template"
 msgstr ""
 
-#: views/layout-settings.php:2765
+#: views/layout-settings.php:2786
 msgctxt "Settings page"
 msgid "Reset Colors to Default"
 msgstr ""
 
-#: views/layout-settings.php:2774
+#: views/layout-settings.php:2795
 msgctxt "Settings page"
 msgid "Available Placeholders"
 msgstr ""
 
-#: views/layout-settings.php:2790
+#: views/layout-settings.php:2811
 msgctxt "Settings page"
 msgid "Custom HTML Template"
 msgstr ""
 
-#: views/layout-settings.php:2792
+#: views/layout-settings.php:2813
 msgctxt "Settings page"
 msgid "Enter your complete HTML email template. Make sure to include the placeholders where you want the dynamic content to appear."
 msgstr ""
 
-#: views/layout-settings.php:2798
+#: views/layout-settings.php:2819
 msgctxt "Settings page"
 msgid "Load Default Template"
 msgstr ""
 
-#: views/layout-settings.php:2799
+#: views/layout-settings.php:2820
 msgctxt "Settings page"
 msgid "Preview Custom Template"
 msgstr ""
 
-#: views/layout-settings.php:2809
+#: views/layout-settings.php:2830
 msgctxt "Settings page"
 msgid "Unsubscribe Link"
 msgstr ""
 
-#: views/layout-settings.php:2811
+#: views/layout-settings.php:2832
 msgctxt "Settings page"
 msgid "Add an unsubscribe link to message notification emails. Users can click it to stop receiving message email notifications."
 msgstr ""
 
-#: views/layout-settings.php:2823
-#: views/layout-settings.php:2831
-#: views/layout-settings.php:3247
-#: views/layout-settings.php:3265
+#: views/layout-settings.php:2844
+#: views/layout-settings.php:2852
+#: views/layout-settings.php:3268
+#: views/layout-settings.php:3286
 msgctxt "Settings page"
 msgid "Send Test Email"
 msgstr ""
 
-#: views/layout-settings.php:2825
+#: views/layout-settings.php:2846
 msgctxt "Settings page"
 msgid "Send a test email to verify your template looks correct. Save settings first to test any changes."
 msgstr ""
 
-#: views/layout-settings.php:2830
+#: views/layout-settings.php:2851
 msgctxt "Settings page"
 msgid "Enter email address"
 msgstr ""
 
-#: views/layout-settings.php:2943
+#: views/layout-settings.php:2964
 msgctxt "Settings page"
 msgid "Select Email Logo"
 msgstr ""
 
-#: views/layout-settings.php:2964
+#: views/layout-settings.php:2985
 msgctxt "Settings page"
 msgid "Are you sure you want to remove the logo?"
 msgstr ""
 
-#: views/layout-settings.php:2973
+#: views/layout-settings.php:2994
 msgctxt "Settings page"
 msgid "Are you sure you want to reset colors to default?"
 msgstr ""
 
-#: views/layout-settings.php:3089
+#: views/layout-settings.php:3110
 msgctxt "Settings page"
 msgid "This will replace your current custom template. Continue?"
 msgstr ""
 
-#: views/layout-settings.php:3187
+#: views/layout-settings.php:3208
 msgctxt "Settings page"
 msgid "Please enter a custom template first, or load the default template."
 msgstr ""
 
-#: views/layout-settings.php:3226
+#: views/layout-settings.php:3247
 msgctxt "Settings page"
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: views/layout-settings.php:3232
+#: views/layout-settings.php:3253
 msgctxt "Settings page"
 msgid "Sending..."
 msgstr ""
 
-#: views/layout-settings.php:3269
+#: views/layout-settings.php:3290
 msgctxt "Settings page"
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: views/layout-settings.php:3289
+#: views/layout-settings.php:3310
 msgctxt "Settings page"
 msgid "Sounds Customization"
 msgstr ""
 
-#: views/layout-settings.php:3296
+#: views/layout-settings.php:3317
 msgctxt "Settings page"
 msgid "Message notification sound volume"
 msgstr ""
 
-#: views/layout-settings.php:3297
-#: views/layout-settings.php:3340
-#: views/layout-settings.php:3381
-#: views/layout-settings.php:3428
+#: views/layout-settings.php:3318
+#: views/layout-settings.php:3361
+#: views/layout-settings.php:3402
+#: views/layout-settings.php:3449
 msgctxt "Settings page"
 msgid "From 0 to 100 (0 to disable)"
 msgstr ""
 
-#: views/layout-settings.php:3324
+#: views/layout-settings.php:3345
 msgctxt "Settings page"
 msgid "Message notification sound"
 msgstr ""
 
-#: views/layout-settings.php:3328
-#: views/layout-settings.php:3369
-#: views/layout-settings.php:3412
-#: views/layout-settings.php:3461
+#: views/layout-settings.php:3349
+#: views/layout-settings.php:3390
+#: views/layout-settings.php:3433
+#: views/layout-settings.php:3482
 msgctxt "Settings page"
 msgid "Play"
 msgstr ""
 
-#: views/layout-settings.php:3329
-#: views/layout-settings.php:3370
-#: views/layout-settings.php:3413
-#: views/layout-settings.php:3462
+#: views/layout-settings.php:3350
+#: views/layout-settings.php:3391
+#: views/layout-settings.php:3434
+#: views/layout-settings.php:3483
 msgctxt "Settings page"
 msgid "Select custom sound"
 msgstr ""
 
-#: views/layout-settings.php:3330
-#: views/layout-settings.php:3371
-#: views/layout-settings.php:3414
-#: views/layout-settings.php:3463
+#: views/layout-settings.php:3351
+#: views/layout-settings.php:3392
+#: views/layout-settings.php:3435
+#: views/layout-settings.php:3484
 msgctxt "Settings page"
 msgid "Reset default sound"
 msgstr ""
 
-#: views/layout-settings.php:3339
+#: views/layout-settings.php:3360
 msgctxt "Settings page"
 msgid "Message sent sound volume"
 msgstr ""
 
-#: views/layout-settings.php:3365
+#: views/layout-settings.php:3386
 msgctxt "Settings page"
 msgid "Message sent sound"
 msgstr ""
 
-#: views/layout-settings.php:3380
+#: views/layout-settings.php:3401
 msgctxt "Settings page"
 msgid "Incoming call sound volume"
 msgstr ""
 
-#: views/layout-settings.php:3407
+#: views/layout-settings.php:3428
 msgctxt "Settings page"
 msgid "Incoming call sound"
 msgstr ""
 
-#: views/layout-settings.php:3427
+#: views/layout-settings.php:3448
 msgctxt "Settings page"
 msgid "Outgoing call sound volume"
 msgstr ""
 
-#: views/layout-settings.php:3456
+#: views/layout-settings.php:3477
 msgctxt "Settings page"
 msgid "Outgoing call sound"
 msgstr ""
 
-#: views/layout-settings.php:3483
+#: views/layout-settings.php:3504
 msgctxt "Settings page"
 msgid "Allow users to restrict who can start conversations with them"
 msgstr ""
 
-#: views/layout-settings.php:3484
+#: views/layout-settings.php:3505
 msgctxt "Settings page"
 msgid "Allow users to select who start conversations with them in plugin user settings"
 msgstr ""
 
-#: views/layout-settings.php:3493
+#: views/layout-settings.php:3514
 msgctxt "Settings page"
 msgid "Allow users to block other users"
 msgstr ""
 
-#: views/layout-settings.php:3494
+#: views/layout-settings.php:3515
 msgctxt "Settings page"
 msgid "Allow users to block other users from sending them messages (admins cant be blocked)"
 msgstr ""
 
-#: views/layout-settings.php:3503
+#: views/layout-settings.php:3524
 msgctxt "Settings page"
 msgid "Restrict user role from blocking other users"
 msgstr ""
 
-#: views/layout-settings.php:3504
+#: views/layout-settings.php:3525
 msgctxt "Settings page"
 msgid "Selected roles will not be able to block other users if previous option is enabled"
 msgstr ""
 
-#: views/layout-settings.php:3516
+#: views/layout-settings.php:3537
 msgctxt "Settings page"
 msgid "Roles which can't block other users"
 msgstr ""
 
-#: views/layout-settings.php:3524
+#: views/layout-settings.php:3545
 msgctxt "Settings page"
 msgid "Roles which can't be blocked by other users"
 msgstr ""
 
-#: views/layout-settings.php:3538
+#: views/layout-settings.php:3559
 msgctxt "Settings page"
 msgid "Rate limiting new conversations (seconds)"
 msgstr ""
 
-#: views/layout-settings.php:3539
+#: views/layout-settings.php:3560
 msgctxt "Settings page"
 msgid "Limit new conversations creation to prevent users spam"
 msgstr ""
 
-#: views/layout-settings.php:3549
+#: views/layout-settings.php:3570
 msgctxt "Settings page"
 msgid "Restrict users from deleting conversations"
 msgstr ""
 
-#: views/layout-settings.php:3550
+#: views/layout-settings.php:3571
 msgctxt "Settings page"
 msgid "Disable users from being able to delete conversation (admin always can delete)"
 msgstr ""
 
-#: views/layout-settings.php:3559
+#: views/layout-settings.php:3580
 msgctxt "Settings page"
 msgid "Role to Role restrictions"
 msgstr ""
 
-#: views/layout-settings.php:3560
+#: views/layout-settings.php:3581
 msgctxt "Settings page"
 msgid "Disable users from being able to write each other based on user role"
 msgstr ""
 
-#: views/layout-settings.php:3561
+#: views/layout-settings.php:3582
 msgctxt "Settings page"
 msgid "Resrticted users will not also appear in search results"
 msgstr ""
 
-#: views/layout-settings.php:3565
+#: views/layout-settings.php:3586
 msgctxt "Settings page"
 msgid "By default all users"
 msgstr ""
 
-#: views/layout-settings.php:3570
+#: views/layout-settings.php:3591
 msgctxt "Settings page"
 msgid "Allowed to message everyone"
 msgstr ""
 
-#: views/layout-settings.php:3574
+#: views/layout-settings.php:3595
 msgctxt "Settings page"
 msgid "Not allowed to message everyone"
 msgstr ""
 
-#: views/layout-settings.php:3579
+#: views/layout-settings.php:3600
 msgctxt "Settings page"
 msgid "Users are able to message each other by default, to restrict some roles add the rules below"
 msgstr ""
 
-#: views/layout-settings.php:3583
+#: views/layout-settings.php:3604
 msgctxt "Settings page"
 msgid "Users are not able to message each other by default, add rules below to define roles which will be able to message other users"
 msgstr ""
 
-#: views/layout-settings.php:3586
-#: views/layout-settings.php:3606
+#: views/layout-settings.php:3607
+#: views/layout-settings.php:3627
 msgctxt "Settings page"
 msgid "Message"
 msgstr ""
 
-#: views/layout-settings.php:3596
+#: views/layout-settings.php:3617
 msgctxt "Settings page"
 msgid "No rules added"
 msgstr ""
 
-#: views/layout-settings.php:3604
+#: views/layout-settings.php:3625
 msgctxt "Settings page"
 msgid "From"
 msgstr ""
 
-#: views/layout-settings.php:3605
+#: views/layout-settings.php:3626
 msgctxt "Settings page"
 msgid "To"
 msgstr ""
 
-#: views/layout-settings.php:3637
+#: views/layout-settings.php:3658
 msgctxt "Settings page"
 msgid "Add new rule"
 msgstr ""
 
-#: views/layout-settings.php:3657
+#: views/layout-settings.php:3678
 msgctxt "Settings page"
 msgid "You cannot send messages to this user"
 msgstr ""
 
-#: views/layout-settings.php:3712
+#: views/layout-settings.php:3733
 msgctxt "Settings page"
 msgid "Rate limiting for new replies"
 msgstr ""
 
-#: views/layout-settings.php:3713
+#: views/layout-settings.php:3734
 msgctxt "Settings page"
 msgid "Limit max amount of replies within timeframe"
 msgstr ""
 
-#: views/layout-settings.php:3720
-#: views/layout-settings.php:3977
-#: views/layout-settings.php:5956
-#: views/layout-settings.php:6002
-#: views/layout-settings.php:6055
-#: views/layout-settings.php:6166
-#: views/layout-settings.php:6212
-#: views/layout-settings.php:6265
+#: views/layout-settings.php:3741
+#: views/layout-settings.php:3998
+#: views/layout-settings.php:5977
+#: views/layout-settings.php:6023
+#: views/layout-settings.php:6076
+#: views/layout-settings.php:6187
+#: views/layout-settings.php:6233
+#: views/layout-settings.php:6286
 msgctxt "Settings page"
 msgid "Role"
 msgstr ""
 
-#: views/layout-settings.php:3721
+#: views/layout-settings.php:3742
 msgctxt "Settings page"
 msgid "Limitation (0 to disable)"
 msgstr ""
 
-#: views/layout-settings.php:3738
+#: views/layout-settings.php:3759
 msgctxt "Settings page"
 msgid "messages per"
 msgstr ""
 
-#: views/layout-settings.php:3740
+#: views/layout-settings.php:3761
 msgctxt "Settings page"
 msgid "Hour"
 msgstr ""
 
-#: views/layout-settings.php:3741
+#: views/layout-settings.php:3762
 msgctxt "Settings page"
 msgid "Day"
 msgstr ""
 
-#: views/layout-settings.php:3754
+#: views/layout-settings.php:3775
 msgctxt "Settings page"
 msgid "Message when rate limit for new replies reached"
 msgstr ""
 
-#: views/layout-settings.php:3763
+#: views/layout-settings.php:3784
 msgctxt "Settings page"
 msgid "Restrict the creation of a new conversation"
 msgstr ""
 
-#: views/layout-settings.php:3764
+#: views/layout-settings.php:3785
 msgctxt "Settings page"
 msgid "Selected roles will not be allowed to start new conversations"
 msgstr ""
 
-#: views/layout-settings.php:3777
+#: views/layout-settings.php:3798
 msgctxt "Settings page"
 msgid "Message when the creation of a new conversation restricted"
 msgstr ""
 
-#: views/layout-settings.php:3786
+#: views/layout-settings.php:3807
 msgctxt "Settings page"
 msgid "Remove new conversation button for restricted users"
 msgstr ""
 
-#: views/layout-settings.php:3795
+#: views/layout-settings.php:3816
 msgctxt "Settings page"
 msgid "Restrict new replies"
 msgstr ""
 
-#: views/layout-settings.php:3796
+#: views/layout-settings.php:3817
 msgctxt "Settings page"
 msgid "Selected roles will not be allowed to reply"
 msgstr ""
 
-#: views/layout-settings.php:3808
+#: views/layout-settings.php:3829
 msgctxt "Settings page"
 msgid "Message when new replies are restricted"
 msgstr ""
 
-#: views/layout-settings.php:3817
+#: views/layout-settings.php:3838
 msgctxt "Settings page"
 msgid "Restrict from viewing message"
 msgstr ""
 
-#: views/layout-settings.php:3818
+#: views/layout-settings.php:3839
 msgctxt "Settings page"
 msgid "Selected roles will see message configured below instead of real message"
 msgstr ""
 
-#: views/layout-settings.php:3830
+#: views/layout-settings.php:3851
 msgctxt "Settings page"
 msgid "Content of messages when user is restricted from viewing message"
 msgstr ""
 
-#: views/layout-settings.php:3839
+#: views/layout-settings.php:3860
 msgctxt "Settings page"
 msgid "Restrict access to mini widgets"
 msgstr ""
 
-#: views/layout-settings.php:3840
+#: views/layout-settings.php:3861
 msgctxt "Settings page"
 msgid "Selected roles will not see selected widgets"
 msgstr ""
 
-#: views/layout-settings.php:3869
+#: views/layout-settings.php:3890
 msgctxt "Settings page"
 msgid "Mini Friends"
 msgstr ""
 
-#: views/layout-settings.php:3878
+#: views/layout-settings.php:3899
 msgctxt "Settings page"
 msgid "Mini Groups"
 msgstr ""
 
-#: views/layout-settings.php:3892
+#: views/layout-settings.php:3913
 msgctxt "Settings page"
 msgid "Bad Words List"
 msgstr ""
 
-#: views/layout-settings.php:3893
+#: views/layout-settings.php:3914
 msgctxt "Settings page"
 msgid "One word per line"
 msgstr ""
 
-#: views/layout-settings.php:3902
+#: views/layout-settings.php:3923
 msgctxt "Settings page"
 msgid "Disable Bad Words check for Admins"
 msgstr ""
 
-#: views/layout-settings.php:3903
+#: views/layout-settings.php:3924
 msgctxt "Settings page"
 msgid "Allow administrators to bypass bad words filtering"
 msgstr ""
 
-#: views/layout-settings.php:3912
+#: views/layout-settings.php:3933
 msgctxt "Settings page"
 msgid "Message when word from Bad Words List is found in message"
 msgstr ""
 
-#: views/layout-settings.php:3928
+#: views/layout-settings.php:3949
 msgctxt "Settings page"
 msgid "Enable Messages Viewer"
 msgstr ""
 
-#: views/layout-settings.php:3929
+#: views/layout-settings.php:3950
 msgctxt "Settings page"
 msgid "Enable messages viewer in administration page in WordPress admin"
 msgstr ""
 
-#: views/layout-settings.php:3938
+#: views/layout-settings.php:3959
 msgctxt "Settings page"
 msgid "Message Reports"
 msgstr ""
 
-#: views/layout-settings.php:3939
+#: views/layout-settings.php:3960
 msgctxt "Settings page"
 msgid "Allow users to report messages, which will appear at Messages Viewer"
 msgstr ""
 
-#: views/layout-settings.php:3948
+#: views/layout-settings.php:3969
 msgctxt "Settings page"
 msgid "Messages Pre-Moderation"
 msgstr ""
 
-#: views/layout-settings.php:3949
+#: views/layout-settings.php:3970
 msgctxt "Settings page"
 msgid "Messages pre-moderation allows website administrators to moderate chat messages before they are appeared in the chat"
 msgstr ""
 
-#: views/layout-settings.php:3958
+#: views/layout-settings.php:3979
 msgctxt "Settings page"
 msgid "Pre-Moderate First-Time Senders"
 msgstr ""
 
-#: views/layout-settings.php:3959
+#: views/layout-settings.php:3980
 msgctxt "Settings page"
 msgid "Force moderation for users sending their first message on the website"
 msgstr ""
 
-#: views/layout-settings.php:3968
+#: views/layout-settings.php:3989
 msgctxt "Settings page"
 msgid "User Roles for Pre-Moderation"
 msgstr ""
 
-#: views/layout-settings.php:3969
+#: views/layout-settings.php:3990
 msgctxt "Settings page"
 msgid "Configure which user roles should have their new conversations or new replies in existing conversations pre-moderated"
 msgstr ""
 
-#: views/layout-settings.php:3978
+#: views/layout-settings.php:3999
 msgctxt "Settings page"
 msgid "New Conversations"
 msgstr ""
 
-#: views/layout-settings.php:3979
+#: views/layout-settings.php:4000
 msgctxt "Settings page"
 msgid "Replies"
 msgstr ""
 
-#: views/layout-settings.php:4006
+#: views/layout-settings.php:4027
 msgctxt "Settings page"
 msgid "AI Content Moderation"
 msgstr ""
 
-#: views/layout-settings.php:4007
+#: views/layout-settings.php:4028
 msgctxt "Settings page"
 msgid "Automatically analyze messages using OpenAI Moderation API to detect harmful content. The API is free to use."
 msgstr ""
 
-#: views/layout-settings.php:4015
+#: views/layout-settings.php:4036
 msgctxt "Settings page"
 msgid "AI Moderation requires PHP 8.1+ and an OpenAI API key configured in the Integrations tab."
 msgstr ""
 
-#: views/layout-settings.php:4023
+#: views/layout-settings.php:4044
 msgctxt "Settings page"
 msgid "Enable AI Moderation"
 msgstr ""
 
-#: views/layout-settings.php:4024
+#: views/layout-settings.php:4045
 msgctxt "Settings page"
 msgid "Analyze messages using OpenAI to detect hate speech, harassment, sexual content, violence, and other harmful content"
 msgstr ""
 
-#: views/layout-settings.php:4033
+#: views/layout-settings.php:4054
 msgctxt "Settings page"
 msgid "Action for Flagged Messages"
 msgstr ""
 
-#: views/layout-settings.php:4034
+#: views/layout-settings.php:4055
 msgctxt "Settings page"
 msgid "What happens when AI detects harmful content"
 msgstr ""
 
-#: views/layout-settings.php:4039
+#: views/layout-settings.php:4060
 msgctxt "Settings page"
 msgid "Hold for Review"
 msgstr ""
 
-#: views/layout-settings.php:4042
+#: views/layout-settings.php:4063
 msgctxt "Settings page"
 msgid "Flag Only (send normally)"
 msgstr ""
 
-#: views/layout-settings.php:4046
+#: views/layout-settings.php:4067
 msgctxt "Settings page"
 msgid "Hold for Review: message requires admin approval before appearing. May slightly increase message sending time due to the AI check. Flag Only: message is sent instantly but flagged for admin review (AI check runs in background)."
 msgstr ""
 
-#: views/layout-settings.php:4053
+#: views/layout-settings.php:4074
 msgctxt "Settings page"
 msgid "Moderate Images"
 msgstr ""
 
-#: views/layout-settings.php:4054
+#: views/layout-settings.php:4075
 msgctxt "Settings page"
 msgid "Check attached images for harmful content"
 msgstr ""
 
-#: views/layout-settings.php:4059
+#: views/layout-settings.php:4080
 msgctxt "Settings page"
 msgid "Disabled"
 msgstr ""
 
-#: views/layout-settings.php:4062
+#: views/layout-settings.php:4083
 msgctxt "Settings page"
 msgid "Enabled"
 msgstr ""
 
-#: views/layout-settings.php:4066
+#: views/layout-settings.php:4087
 msgctxt "Settings page"
 msgid "When enabled, attached images are sent to OpenAI for moderation along with the message text. Image analysis supports sexual, violence, and self-harm categories. Harassment, hate, and illicit categories analyze text only."
 msgstr ""
 
-#: views/layout-settings.php:4073
+#: views/layout-settings.php:4094
 msgctxt "Settings page"
 msgid "Content Categories"
 msgstr ""
 
-#: views/layout-settings.php:4074
+#: views/layout-settings.php:4095
 msgctxt "Settings page"
 msgid "Select which content categories to moderate"
 msgstr ""
 
-#: views/layout-settings.php:4080
+#: views/layout-settings.php:4101
 msgctxt "Settings page"
 msgid "Hate"
 msgstr ""
 
-#: views/layout-settings.php:4081
+#: views/layout-settings.php:4102
 msgctxt "Settings page"
 msgid "Content that promotes hate based on race, gender, ethnicity, religion, nationality, sexual orientation, disability, or caste. (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4084
+#: views/layout-settings.php:4105
 msgctxt "Settings page"
 msgid "Hate / Threatening"
 msgstr ""
 
-#: views/layout-settings.php:4085
+#: views/layout-settings.php:4106
 msgctxt "Settings page"
 msgid "Hateful content that includes violence or serious harm towards targeted groups. (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4089
+#: views/layout-settings.php:4110
 msgctxt "Settings page"
 msgid "Harassment"
 msgstr ""
 
-#: views/layout-settings.php:4090
+#: views/layout-settings.php:4111
 msgctxt "Settings page"
 msgid "Content that expresses, incites, or promotes harassing language towards any target. (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4093
+#: views/layout-settings.php:4114
 msgctxt "Settings page"
 msgid "Harassment / Threatening"
 msgstr ""
 
-#: views/layout-settings.php:4094
+#: views/layout-settings.php:4115
 msgctxt "Settings page"
 msgid "Harassment content that includes violence or serious harm towards any target. (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4098
+#: views/layout-settings.php:4119
 msgctxt "Settings page"
 msgid "Sexual Content"
 msgstr ""
 
-#: views/layout-settings.php:4099
+#: views/layout-settings.php:4120
 msgctxt "Settings page"
 msgid "Content meant to arouse sexual excitement or that promotes sexual services (excluding sex education and wellness)."
 msgstr ""
 
-#: views/layout-settings.php:4102
+#: views/layout-settings.php:4123
 msgctxt "Settings page"
 msgid "Sexual / Minors"
 msgstr ""
 
-#: views/layout-settings.php:4103
+#: views/layout-settings.php:4124
 msgctxt "Settings page"
 msgid "Sexual content that involves individuals under 18 years old."
 msgstr ""
 
-#: views/layout-settings.php:4107
+#: views/layout-settings.php:4128
 msgctxt "Settings page"
 msgid "Violence"
 msgstr ""
 
-#: views/layout-settings.php:4108
+#: views/layout-settings.php:4129
 msgctxt "Settings page"
 msgid "Content that depicts death, violence, or physical injury."
 msgstr ""
 
-#: views/layout-settings.php:4111
+#: views/layout-settings.php:4132
 msgctxt "Settings page"
 msgid "Violence / Graphic"
 msgstr ""
 
-#: views/layout-settings.php:4112
+#: views/layout-settings.php:4133
 msgctxt "Settings page"
 msgid "Content that depicts death, violence, or physical injury in graphic detail."
 msgstr ""
 
-#: views/layout-settings.php:4116
+#: views/layout-settings.php:4137
 msgctxt "Settings page"
 msgid "Self-Harm"
 msgstr ""
 
-#: views/layout-settings.php:4117
+#: views/layout-settings.php:4138
 msgctxt "Settings page"
 msgid "Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting, and eating disorders."
 msgstr ""
 
-#: views/layout-settings.php:4120
+#: views/layout-settings.php:4141
 msgctxt "Settings page"
 msgid "Self-Harm / Intent"
 msgstr ""
 
-#: views/layout-settings.php:4121
+#: views/layout-settings.php:4142
 msgctxt "Settings page"
 msgid "Content where the speaker expresses that they are engaging or intend to engage in acts of self-harm."
 msgstr ""
 
-#: views/layout-settings.php:4125
+#: views/layout-settings.php:4146
 msgctxt "Settings page"
 msgid "Self-Harm / Instructions"
 msgstr ""
 
-#: views/layout-settings.php:4126
+#: views/layout-settings.php:4147
 msgctxt "Settings page"
 msgid "Content that encourages or provides instructions on how to commit acts of self-harm."
 msgstr ""
 
-#: views/layout-settings.php:4130
+#: views/layout-settings.php:4151
 msgctxt "Settings page"
 msgid "Illicit"
 msgstr ""
 
-#: views/layout-settings.php:4131
+#: views/layout-settings.php:4152
 msgctxt "Settings page"
 msgid "Content that gives advice or instruction on how to commit illicit acts (e.g. fraud, scams). (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4134
+#: views/layout-settings.php:4155
 msgctxt "Settings page"
 msgid "Illicit / Violent"
 msgstr ""
 
-#: views/layout-settings.php:4135
+#: views/layout-settings.php:4156
 msgctxt "Settings page"
 msgid "Illicit content that also references violence or procurement of weapons. (text only)"
 msgstr ""
 
-#: views/layout-settings.php:4155
+#: views/layout-settings.php:4176
 msgctxt "Settings page"
 msgid "Selecting a parent category (e.g. Hate) automatically covers its subcategories. Select subcategories individually for more granular control."
 msgstr ""
 
-#: views/layout-settings.php:4179
+#: views/layout-settings.php:4200
 msgctxt "Settings page"
 msgid "Sensitivity Threshold"
 msgstr ""
 
-#: views/layout-settings.php:4180
+#: views/layout-settings.php:4201
 msgctxt "Settings page"
 msgid "Confidence score threshold for flagging (0-1). Lower values are more sensitive."
 msgstr ""
 
-#: views/layout-settings.php:4184
+#: views/layout-settings.php:4205
 msgctxt "Settings page"
 msgid "0.5 is recommended. Use 0.3 for stricter moderation, 0.7 for more lenient."
 msgstr ""
 
-#: views/layout-settings.php:4190
+#: views/layout-settings.php:4211
 msgctxt "Settings page"
 msgid "Bypass Roles"
 msgstr ""
 
-#: views/layout-settings.php:4191
+#: views/layout-settings.php:4212
 msgctxt "Settings page"
 msgid "Messages from users with these roles will not be checked by AI moderation. Administrators always bypass."
 msgstr ""
 
-#: views/layout-settings.php:4209
+#: views/layout-settings.php:4230
 msgctxt "Settings page"
 msgid "Notification Emails"
 msgstr ""
 
-#: views/layout-settings.php:4215
+#: views/layout-settings.php:4236
 msgctxt "Settings page"
 msgid "Moderation Notification Emails"
 msgstr ""
 
-#: views/layout-settings.php:4216
+#: views/layout-settings.php:4237
 msgctxt "Settings page"
 msgid "Email addresses to receive notifications about pre-moderation messages, AI flagged messages and reported messages (one per line)"
 msgstr ""
 
-#: views/layout-settings.php:4220
+#: views/layout-settings.php:4241
 msgctxt "Settings page"
 msgid "Enter one email address per line. These addresses will be notified when messages require moderation, are flagged by AI moderation, or when messages are reported by users."
 msgstr ""
 
-#: views/layout-settings.php:4231
+#: views/layout-settings.php:4252
 msgctxt "Settings page"
 msgid "Website must to have SSL certificate in order to audio and video calls work."
 msgstr ""
 
-#: views/layout-settings.php:4232
+#: views/layout-settings.php:4253
 msgctxt "Settings page"
 msgid "This is security requirements by browsers. Contact your hosting company to enable SSL certificate at your website."
 msgstr ""
 
-#: views/layout-settings.php:4233
+#: views/layout-settings.php:4254
 msgctxt "Settings page"
 msgid "This notice will be hidden when website will work via HTTPS"
 msgstr ""
 
-#: views/layout-settings.php:4241
+#: views/layout-settings.php:4262
 msgctxt "Settings page"
 msgid "Enable Video Calls"
 msgstr ""
 
-#: views/layout-settings.php:4242
+#: views/layout-settings.php:4263
 msgctxt "Settings page"
 msgid "Allow users to make video calls between each other"
 msgstr ""
 
-#: views/layout-settings.php:4243
+#: views/layout-settings.php:4264
 msgctxt "Settings page"
 msgid "Video calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower video chats."
 msgstr ""
 
-#: views/layout-settings.php:4252
+#: views/layout-settings.php:4273
 msgctxt "Settings page"
 msgid "Enable Audio Calls"
 msgstr ""
 
-#: views/layout-settings.php:4253
+#: views/layout-settings.php:4274
 msgctxt "Settings page"
 msgid "Allow users to make audio calls between each other"
 msgstr ""
 
-#: views/layout-settings.php:4254
+#: views/layout-settings.php:4275
 msgctxt "Settings page"
 msgid "Audio calls are possible only with websocket version, its using most secure and modern WebRTC technology to empower audio calls."
 msgstr ""
 
-#: views/layout-settings.php:4264
+#: views/layout-settings.php:4285
 msgctxt "Settings page"
 msgid "Limit calls only to the friends"
 msgstr ""
 
-#: views/layout-settings.php:4265
+#: views/layout-settings.php:4286
 msgctxt "Settings page"
 msgid "Allow only friends to make calls between each other (admins always can call)"
 msgstr ""
 
-#: views/layout-settings.php:4275
+#: views/layout-settings.php:4296
 msgctxt "Settings page"
 msgid "Revert Mute Voice & Hide Video icons"
 msgstr ""
 
-#: views/layout-settings.php:4276
+#: views/layout-settings.php:4297
 msgctxt "Settings page"
 msgid "Makes mute and hide video icons to appear in reverse way"
 msgstr ""
 
-#: views/layout-settings.php:4285
+#: views/layout-settings.php:4306
 msgctxt "Settings page"
 msgid "Call time limit before call marked as missed (seconds)"
 msgstr ""
 
-#: views/layout-settings.php:4290
+#: views/layout-settings.php:4311
 msgctxt "Settings page"
 msgid "Call Request Time Limit"
 msgstr ""
 
-#: views/layout-settings.php:4301
+#: views/layout-settings.php:4322
 msgctxt "Settings page"
 msgid "Restrict calls"
 msgstr ""
 
-#: views/layout-settings.php:4302
+#: views/layout-settings.php:4323
 msgctxt "Settings page"
 msgid "Selected roles will not be allowed to call, but they will be able to receive calls still"
 msgstr ""
 
-#: views/layout-settings.php:4323
+#: views/layout-settings.php:4344
 msgctxt "Settings page"
 msgid "Message when call is restricted"
 msgstr ""
 
-#: views/layout-settings.php:4348
+#: views/layout-settings.php:4369
 msgctxt "Settings page"
 msgid "Group Video Chat"
 msgstr ""
 
-#: views/layout-settings.php:4349
+#: views/layout-settings.php:4370
 msgctxt "Settings page"
 msgid "Group audio chat allows to start high definition video & voice group chat up to 50 participants per 1 conversation."
 msgstr ""
 
-#: views/layout-settings.php:4355
+#: views/layout-settings.php:4376
 msgctxt "Settings page"
 msgid "Enable Video Chat for Groups"
 msgstr ""
 
-#: views/layout-settings.php:4356
+#: views/layout-settings.php:4377
 msgctxt "Settings page"
 msgid "Allow users to start group video chats in Group Chats"
 msgstr ""
 
-#: views/layout-settings.php:4365
+#: views/layout-settings.php:4386
 msgctxt "Settings page"
 msgid "Enable Video Chat for Conversations"
 msgstr ""
 
-#: views/layout-settings.php:4366
+#: views/layout-settings.php:4387
 msgctxt "Settings page"
 msgid "Allow users to start group video chats in conversations with many participants"
 msgstr ""
 
-#: views/layout-settings.php:4376
+#: views/layout-settings.php:4397
 msgctxt "Settings page"
 msgid "Enable Video Chat for Chat Rooms"
 msgstr ""
 
-#: views/layout-settings.php:4377
+#: views/layout-settings.php:4398
 msgctxt "Settings page"
 msgid "Allow users to start group video chats in chat rooms"
 msgstr ""
 
-#: views/layout-settings.php:4387
+#: views/layout-settings.php:4408
 msgctxt "Settings page"
 msgid "Group Audio Chat"
 msgstr ""
 
-#: views/layout-settings.php:4388
+#: views/layout-settings.php:4409
 msgctxt "Settings page"
 msgid "Group audio chat allowing your user to start high definition voice only group chat up to 50 people per 1 conversation."
 msgstr ""
 
-#: views/layout-settings.php:4395
+#: views/layout-settings.php:4416
 msgctxt "Settings page"
 msgid "Enable Audio Chat for Groups"
 msgstr ""
 
-#: views/layout-settings.php:4396
+#: views/layout-settings.php:4417
 msgctxt "Settings page"
 msgid "Allow users to start group audio chats in Group Chats"
 msgstr ""
 
-#: views/layout-settings.php:4405
+#: views/layout-settings.php:4426
 msgctxt "Settings page"
 msgid "Enable Audio Chat for Conversations"
 msgstr ""
 
-#: views/layout-settings.php:4406
+#: views/layout-settings.php:4427
 msgctxt "Settings page"
 msgid "Allow users to start group audio chats in conversations with many participants"
 msgstr ""
 
-#: views/layout-settings.php:4416
+#: views/layout-settings.php:4437
 msgctxt "Settings page"
 msgid "Enable Audio Chat for Chat Rooms"
 msgstr ""
 
-#: views/layout-settings.php:4417
+#: views/layout-settings.php:4438
 msgctxt "Settings page"
 msgid "Allow users to start group audio chats in chat rooms"
 msgstr ""
 
-#: views/layout-settings.php:4444
+#: views/layout-settings.php:4465
 msgctxt "Settings page"
 msgid "Other Plugins"
 msgstr ""
 
-#: views/layout-settings.php:4448
+#: views/layout-settings.php:4469
 msgctxt "Settings page"
 msgid "GIFs & Stickers"
 msgstr ""
 
-#: views/layout-settings.php:4449
+#: views/layout-settings.php:4470
 msgctxt "Settings page"
 msgid "Emojis"
 msgstr ""
 
-#: views/layout-settings.php:4455
-#: views/layout-settings.php:4603
-#: views/layout-settings.php:5321
-#: views/layout-settings.php:5615
-#: views/layout-settings.php:5940
-#: views/layout-settings.php:6124
-#: views/layout-settings.php:6151
+#: views/layout-settings.php:4476
+#: views/layout-settings.php:4624
+#: views/layout-settings.php:5342
+#: views/layout-settings.php:5636
+#: views/layout-settings.php:5961
+#: views/layout-settings.php:6145
+#: views/layout-settings.php:6172
 msgctxt "Settings page"
 msgid "Website must to have %s plugin to be installed."
 msgstr ""
 
-#: views/layout-settings.php:4456
+#: views/layout-settings.php:4477
 msgctxt "Settings page"
 msgid "This notice will be hidden when FluentCommunity plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:4465
+#: views/layout-settings.php:4486
 msgctxt "Settings page"
 msgid "FluentCommunity Messages Page"
 msgstr ""
 
-#: views/layout-settings.php:4476
+#: views/layout-settings.php:4497
 msgctxt "Settings page"
 msgid "Use Full Space in Messages Page"
 msgstr ""
 
-#: views/layout-settings.php:4477
+#: views/layout-settings.php:4498
 msgctxt "Settings page"
 msgid "Removes padding of messages container inside FluentCommunity Messages page and makes it to use all available space"
 msgstr ""
 
-#: views/layout-settings.php:4485
+#: views/layout-settings.php:4506
 msgctxt "Settings page"
 msgid "Add Page Title in Messages Page"
 msgstr ""
 
-#: views/layout-settings.php:4486
+#: views/layout-settings.php:4507
 msgctxt "Settings page"
 msgid "Adds page title to the top of messages page, like in other FluentCommunity Pages"
 msgstr ""
 
-#: views/layout-settings.php:4497
+#: views/layout-settings.php:4518
 msgctxt "Settings page"
 msgid "FluentCommunity Profile Pages"
 msgstr ""
 
-#: views/layout-settings.php:4508
+#: views/layout-settings.php:4529
 msgctxt "Settings page"
 msgid "Private Message button in user profile"
 msgstr ""
 
-#: views/layout-settings.php:4509
+#: views/layout-settings.php:4530
 msgctxt "Settings page"
 msgid "Add private message button to user profile"
 msgstr ""
 
-#: views/layout-settings.php:4519
-#: views/layout-settings.php:4645
-#: views/layout-settings.php:5655
+#: views/layout-settings.php:4540
+#: views/layout-settings.php:4666
+#: views/layout-settings.php:5676
 msgctxt "Settings page"
 msgid "Video Call button in user profile"
 msgstr ""
 
-#: views/layout-settings.php:4520
-#: views/layout-settings.php:4646
-#: views/layout-settings.php:5656
+#: views/layout-settings.php:4541
+#: views/layout-settings.php:4667
+#: views/layout-settings.php:5677
 msgctxt "Settings page"
 msgid "Add video call button to user profile"
 msgstr ""
 
-#: views/layout-settings.php:4530
-#: views/layout-settings.php:4655
-#: views/layout-settings.php:5645
+#: views/layout-settings.php:4551
+#: views/layout-settings.php:4676
+#: views/layout-settings.php:5666
 msgctxt "Settings page"
 msgid "Audio Call button in user profile"
 msgstr ""
 
-#: views/layout-settings.php:4531
-#: views/layout-settings.php:4656
-#: views/layout-settings.php:5646
+#: views/layout-settings.php:4552
+#: views/layout-settings.php:4677
+#: views/layout-settings.php:5667
 msgctxt "Settings page"
 msgid "Add audio call button to user profile"
 msgstr ""
 
-#: views/layout-settings.php:4543
+#: views/layout-settings.php:4564
 msgctxt "Settings page"
 msgid "FluentCommunity Spaces"
 msgstr ""
 
-#: views/layout-settings.php:4554
-#: views/layout-settings.php:4732
-#: views/layout-settings.php:5435
-#: views/layout-settings.php:5751
+#: views/layout-settings.php:4575
+#: views/layout-settings.php:4753
+#: views/layout-settings.php:5456
+#: views/layout-settings.php:5772
 msgctxt "Settings page"
 msgid "Enable Messages"
 msgstr ""
 
-#: views/layout-settings.php:4555
+#: views/layout-settings.php:4576
 msgctxt "Settings page"
 msgid "Enable messages for FluentCommunity Spaces"
 msgstr ""
 
-#: views/layout-settings.php:4564
-#: views/layout-settings.php:4742
-#: views/layout-settings.php:5447
+#: views/layout-settings.php:4585
+#: views/layout-settings.php:4763
+#: views/layout-settings.php:5468
 msgctxt "Settings page"
 msgid "Enable file uploading"
 msgstr ""
 
-#: views/layout-settings.php:4565
+#: views/layout-settings.php:4586
 msgctxt "Settings page"
 msgid "Enable file uploading in Spaces Messages"
 msgstr ""
 
-#: views/layout-settings.php:4573
-#: views/layout-settings.php:4751
-#: views/layout-settings.php:5457
+#: views/layout-settings.php:4594
+#: views/layout-settings.php:4772
+#: views/layout-settings.php:5478
 msgctxt "Settings page"
 msgid "Enable Email Notifications"
 msgstr ""
 
-#: views/layout-settings.php:4574
+#: views/layout-settings.php:4595
 msgctxt "Settings page"
 msgid "When enabled users will receive email notifications for Spaces Messages"
 msgstr ""
 
-#: views/layout-settings.php:4583
-#: views/layout-settings.php:4761
-#: views/layout-settings.php:5468
-#: views/layout-settings.php:5806
+#: views/layout-settings.php:4604
+#: views/layout-settings.php:4782
+#: views/layout-settings.php:5489
+#: views/layout-settings.php:5827
 msgctxt "Settings page"
 msgid "Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:4584
+#: views/layout-settings.php:4605
 msgctxt "Settings page"
 msgid "When enabled users will receive push notifications for Spaces Messages"
 msgstr ""
 
-#: views/layout-settings.php:4604
+#: views/layout-settings.php:4625
 msgctxt "Settings page"
 msgid "This notice will be hidden when PeepSo plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:4612
+#: views/layout-settings.php:4633
 msgctxt "Settings page"
 msgid "PeepSo Integration"
 msgstr ""
 
-#: views/layout-settings.php:4624
+#: views/layout-settings.php:4645
 msgctxt "Settings page"
 msgid "Enable PeepSo Header at Messages Page"
 msgstr ""
 
-#: views/layout-settings.php:4633
-#: views/layout-settings.php:5340
-#: views/layout-settings.php:5634
+#: views/layout-settings.php:4654
+#: views/layout-settings.php:5361
+#: views/layout-settings.php:5655
 msgctxt "Settings page"
 msgid "Advanced Mini Chats"
 msgstr ""
 
-#: views/layout-settings.php:4634
-#: views/layout-settings.php:5341
-#: views/layout-settings.php:5635
+#: views/layout-settings.php:4655
+#: views/layout-settings.php:5362
+#: views/layout-settings.php:5656
 msgctxt "Settings page"
 msgid "Open mini chat instead of redirecting to standalone messages page, when clicking private messages button in members directory or member profile"
 msgstr ""
 
-#: views/layout-settings.php:4635
-#: views/layout-settings.php:5342
-#: views/layout-settings.php:5636
+#: views/layout-settings.php:4656
+#: views/layout-settings.php:5363
+#: views/layout-settings.php:5657
 msgctxt "Settings page"
 msgid "Mini Chats must be enabled. Ensure they are enabled <a href=\"%s\">here</a>"
 msgstr ""
 
-#: views/layout-settings.php:4679
-#: views/layout-settings.php:5383
-#: views/layout-settings.php:5698
+#: views/layout-settings.php:4700
+#: views/layout-settings.php:5404
+#: views/layout-settings.php:5719
 msgctxt "Settings page"
 msgid "Only Friends Mode"
 msgstr ""
 
-#: views/layout-settings.php:4680
-#: views/layout-settings.php:5384
-#: views/layout-settings.php:5699
+#: views/layout-settings.php:4701
+#: views/layout-settings.php:5405
+#: views/layout-settings.php:5720
 msgctxt "Settings page"
 msgid "Allow only friends to send messages each other"
 msgstr ""
 
-#: views/layout-settings.php:4681
-#: views/layout-settings.php:5385
-#: views/layout-settings.php:5700
+#: views/layout-settings.php:4702
+#: views/layout-settings.php:5406
+#: views/layout-settings.php:5721
 msgctxt "Settings page"
 msgid "This will also remove not friends users from search results."
 msgstr ""
 
-#: views/layout-settings.php:4682
-#: views/layout-settings.php:4734
-#: views/layout-settings.php:4813
-#: views/layout-settings.php:4850
-#: views/layout-settings.php:4888
-#: views/layout-settings.php:4925
-#: views/layout-settings.php:4962
-#: views/layout-settings.php:4987
-#: views/layout-settings.php:5386
-#: views/layout-settings.php:5437
-#: views/layout-settings.php:5512
+#: views/layout-settings.php:4703
+#: views/layout-settings.php:4755
+#: views/layout-settings.php:4834
+#: views/layout-settings.php:4871
+#: views/layout-settings.php:4909
+#: views/layout-settings.php:4946
+#: views/layout-settings.php:4983
+#: views/layout-settings.php:5008
+#: views/layout-settings.php:5407
+#: views/layout-settings.php:5458
+#: views/layout-settings.php:5533
 msgctxt "Settings page"
 msgid "%s must be installed"
 msgstr ""
 
-#: views/layout-settings.php:4690
-#: views/layout-settings.php:4772
-#: views/layout-settings.php:5394
-#: views/layout-settings.php:5479
-#: views/layout-settings.php:5708
-#: views/layout-settings.php:5770
+#: views/layout-settings.php:4711
+#: views/layout-settings.php:4793
+#: views/layout-settings.php:5415
+#: views/layout-settings.php:5500
+#: views/layout-settings.php:5729
+#: views/layout-settings.php:5791
 msgctxt "Settings page"
 msgid "Mini Widget"
 msgstr ""
 
-#: views/layout-settings.php:4692
-#: views/layout-settings.php:5396
-#: views/layout-settings.php:5710
+#: views/layout-settings.php:4713
+#: views/layout-settings.php:5417
+#: views/layout-settings.php:5731
 msgctxt "Settings page"
 msgid "Enables mini friends list widget fixed to the bottom of browser window"
 msgstr ""
 
-#: views/layout-settings.php:4701
-#: views/layout-settings.php:5405
-#: views/layout-settings.php:5719
+#: views/layout-settings.php:4722
+#: views/layout-settings.php:5426
+#: views/layout-settings.php:5740
 msgctxt "Settings page"
 msgid "Shows Friends in left column of Combined view"
 msgstr ""
 
-#: views/layout-settings.php:4709
-#: views/layout-settings.php:4791
-#: views/layout-settings.php:5413
-#: views/layout-settings.php:5498
-#: views/layout-settings.php:5727
-#: views/layout-settings.php:5788
+#: views/layout-settings.php:4730
+#: views/layout-settings.php:4812
+#: views/layout-settings.php:5434
+#: views/layout-settings.php:5519
+#: views/layout-settings.php:5748
+#: views/layout-settings.php:5809
 msgctxt "Settings page"
 msgid "Mobile View"
 msgstr ""
 
-#: views/layout-settings.php:4710
-#: views/layout-settings.php:5414
-#: views/layout-settings.php:5728
+#: views/layout-settings.php:4731
+#: views/layout-settings.php:5435
+#: views/layout-settings.php:5749
 msgctxt "Settings page"
 msgid "Shows Friends as tab at bottom of Mobile View"
 msgstr ""
 
-#: views/layout-settings.php:4733
+#: views/layout-settings.php:4754
 msgctxt "Settings page"
 msgid "Enable messages for PeepSo groups"
 msgstr ""
 
-#: views/layout-settings.php:4743
+#: views/layout-settings.php:4764
 msgctxt "Settings page"
 msgid "Enable file uploading PeepSo group messages"
 msgstr ""
 
-#: views/layout-settings.php:4752
-#: views/layout-settings.php:5798
+#: views/layout-settings.php:4773
+#: views/layout-settings.php:5819
 msgctxt "Settings page"
 msgid "When enabled users will receive email notifications for Group Chats"
 msgstr ""
 
-#: views/layout-settings.php:4762
-#: views/layout-settings.php:5469
-#: views/layout-settings.php:5807
+#: views/layout-settings.php:4783
+#: views/layout-settings.php:5490
+#: views/layout-settings.php:5828
 msgctxt "Settings page"
 msgid "When enabled users will receive push notifications for Group Chats"
 msgstr ""
 
-#: views/layout-settings.php:4774
-#: views/layout-settings.php:5481
+#: views/layout-settings.php:4795
+#: views/layout-settings.php:5502
 msgctxt "Settings page"
 msgid "Enables mini groups list widget fixed to the bottom of browser window"
 msgstr ""
 
-#: views/layout-settings.php:4783
-#: views/layout-settings.php:5490
-#: views/layout-settings.php:5780
+#: views/layout-settings.php:4804
+#: views/layout-settings.php:5511
+#: views/layout-settings.php:5801
 msgctxt "Settings page"
 msgid "Shows Groups in left column of Combined view"
 msgstr ""
 
-#: views/layout-settings.php:4792
-#: views/layout-settings.php:5499
-#: views/layout-settings.php:5789
+#: views/layout-settings.php:4813
+#: views/layout-settings.php:5520
+#: views/layout-settings.php:5810
 msgctxt "Settings page"
 msgid "Shows Groups as tab at bottom of Mobile View"
 msgstr ""
 
-#: views/layout-settings.php:4810
-#: views/layout-settings.php:4847
-#: views/layout-settings.php:4885
-#: views/layout-settings.php:4922
-#: views/layout-settings.php:4959
-#: views/layout-settings.php:4984
+#: views/layout-settings.php:4831
+#: views/layout-settings.php:4868
+#: views/layout-settings.php:4906
+#: views/layout-settings.php:4943
+#: views/layout-settings.php:4980
+#: views/layout-settings.php:5005
 msgctxt "Settings page"
 msgid "%s Integration"
 msgstr ""
 
-#: views/layout-settings.php:4826
-#: views/layout-settings.php:4863
-#: views/layout-settings.php:4938
+#: views/layout-settings.php:4847
+#: views/layout-settings.php:4884
+#: views/layout-settings.php:4959
 msgctxt "Settings page"
 msgid "Enable Live Chat for Vendors"
 msgstr ""
 
-#: views/layout-settings.php:4827
-#: views/layout-settings.php:4939
+#: views/layout-settings.php:4848
+#: views/layout-settings.php:4960
 msgctxt "Settings page"
 msgid "When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat"
 msgstr ""
 
-#: views/layout-settings.php:4834
-#: views/layout-settings.php:4946
+#: views/layout-settings.php:4855
+#: views/layout-settings.php:4967
 msgctxt "Settings page"
 msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page"
 msgstr ""
 
-#: views/layout-settings.php:4864
+#: views/layout-settings.php:4885
 msgctxt "Settings page"
 msgid "When enabled visitors will be able to contact vendors easily using Send Message button at the listing page and Vendors profile"
 msgstr ""
 
-#: views/layout-settings.php:4873
+#: views/layout-settings.php:4894
 msgctxt "Settings page"
 msgid "Add messages item to HivePress User Menu"
 msgstr ""
 
-#: views/layout-settings.php:4874
+#: views/layout-settings.php:4895
 msgctxt "Settings page"
 msgid "When enabled messages menu item will be added to HivePress User Menu and unread messages counter will be shown in it"
 msgstr ""
 
-#: views/layout-settings.php:4901
+#: views/layout-settings.php:4922
 msgctxt "Settings page"
 msgid "Enable Live Chat for Job Listings"
 msgstr ""
 
-#: views/layout-settings.php:4902
+#: views/layout-settings.php:4923
 msgctxt "Settings page"
 msgid "When enabled visitors will be able to contact job listing authors easily using Send Message button at the listing page"
 msgstr ""
 
-#: views/layout-settings.php:4909
+#: views/layout-settings.php:4930
 msgctxt "Settings page"
 msgid "If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your job listing page"
 msgstr ""
 
-#: views/layout-settings.php:4974
+#: views/layout-settings.php:4995
 msgctxt "Settings page"
 msgid "Show link in bbPress author details"
 msgstr ""
 
-#: views/layout-settings.php:5002
+#: views/layout-settings.php:5023
 msgctxt "Settings page"
 msgid "Use Avatars"
 msgstr ""
 
-#: views/layout-settings.php:5003
+#: views/layout-settings.php:5024
 msgctxt "Settings page"
 msgid "Avatars from Jet Engine Profile Builder will be displayed in Better Messages interface"
 msgstr ""
 
-#: views/layout-settings.php:5067
+#: views/layout-settings.php:5088
 msgctxt "Settings page"
 msgid "Emojis Set"
 msgstr ""
 
-#: views/layout-settings.php:5110
+#: views/layout-settings.php:5131
 msgctxt "Settings page"
 msgid "Emojis for Reactions"
 msgstr ""
 
-#: views/layout-settings.php:5136
+#: views/layout-settings.php:5157
 msgctxt "Settings page"
 msgid "Add new reaction"
 msgstr ""
 
-#: views/layout-settings.php:5144
+#: views/layout-settings.php:5165
 msgctxt "Settings page"
 msgid "Select Emoji for new reaction"
 msgstr ""
 
-#: views/layout-settings.php:5213
+#: views/layout-settings.php:5234
 msgctxt "Settings page"
 msgid "Emojis for Selector"
 msgstr ""
 
-#: views/layout-settings.php:5216
+#: views/layout-settings.php:5237
 msgctxt "Settings page"
 msgid "Click on emoji to enable or disable it, drag it to change it position in emoji selector"
 msgstr ""
 
-#: views/layout-settings.php:5322
+#: views/layout-settings.php:5343
 msgctxt "Settings page"
 msgid "This notice will be hidden when Ultimate Member plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:5329
+#: views/layout-settings.php:5350
 msgctxt "Settings page"
 msgid "Ultimate Member Integration"
 msgstr ""
 
-#: views/layout-settings.php:5351
+#: views/layout-settings.php:5372
 msgctxt "Settings page"
 msgid "User Profile - Private Message Button"
 msgstr ""
 
-#: views/layout-settings.php:5352
+#: views/layout-settings.php:5373
 msgctxt "Settings page"
 msgid "Show Private Message button in user profiles"
 msgstr ""
 
-#: views/layout-settings.php:5360
-#: views/layout-settings.php:5665
+#: views/layout-settings.php:5381
+#: views/layout-settings.php:5686
 msgctxt "Settings page"
 msgid "Show Private Message Link at Members List"
 msgstr ""
 
-#: views/layout-settings.php:5361
+#: views/layout-settings.php:5382
 msgctxt "Settings page"
 msgid "You can enable this to show private message button at your members list"
 msgstr ""
 
-#: views/layout-settings.php:5436
+#: views/layout-settings.php:5457
 msgctxt "Settings page"
 msgid "Enable messages for Ultimate Member Groups"
 msgstr ""
 
-#: views/layout-settings.php:5448
+#: views/layout-settings.php:5469
 msgctxt "Settings page"
 msgid "Enable file uploading in Ultimate Member Groups messages"
 msgstr ""
 
-#: views/layout-settings.php:5458
+#: views/layout-settings.php:5479
 msgctxt "Settings page"
 msgid "When enabled users will receive email notifications for Group Messages"
 msgstr ""
 
-#: views/layout-settings.php:5510
+#: views/layout-settings.php:5531
 msgctxt "Settings page"
 msgid "Only Followers Mode"
 msgstr ""
 
-#: views/layout-settings.php:5511
+#: views/layout-settings.php:5532
 msgctxt "Settings page"
 msgid "Allow only send message if user following the user or followed by the user"
 msgstr ""
 
-#: views/layout-settings.php:5539
+#: views/layout-settings.php:5560
 msgctxt "Settings page"
 msgid "GIPHY API Key"
 msgstr ""
 
-#: views/layout-settings.php:5540
+#: views/layout-settings.php:5561
 msgctxt "Settings page"
 msgid "Leave this field empty to disable giphy"
 msgstr ""
 
-#: views/layout-settings.php:5541
+#: views/layout-settings.php:5562
 msgctxt "Settings page"
 msgid "How to create GIPHY API key"
 msgstr ""
 
-#: views/layout-settings.php:5549
+#: views/layout-settings.php:5570
 msgctxt "Settings page"
 msgid "GIPHY Content rating"
 msgstr ""
 
-#: views/layout-settings.php:5550
+#: views/layout-settings.php:5571
 msgctxt "Settings page"
 msgid "GIPHY Content Rating <a href=\"%s\" target=\"_blank\">Learn more</a>"
 msgstr ""
 
-#: views/layout-settings.php:5558
+#: views/layout-settings.php:5579
 msgctxt "Settings page"
 msgid "GIPHY Language"
 msgstr ""
 
-#: views/layout-settings.php:5559
+#: views/layout-settings.php:5580
 msgctxt "Settings page"
 msgid "GIPHY Language <a href=\"%s\" target=\"_blank\">Learn more</a>"
 msgstr ""
 
-#: views/layout-settings.php:5591
+#: views/layout-settings.php:5612
 msgctxt "Settings page"
 msgid "Stipop.io API Key"
 msgstr ""
 
-#: views/layout-settings.php:5592
+#: views/layout-settings.php:5613
 msgctxt "Settings page"
 msgid "Leave this field empty to disable stickers"
 msgstr ""
 
-#: views/layout-settings.php:5600
+#: views/layout-settings.php:5621
 msgctxt "Settings page"
 msgid "Language"
 msgstr ""
 
-#: views/layout-settings.php:5601
+#: views/layout-settings.php:5622
 msgctxt "Settings page"
 msgid "Two letter language code for showing stickers which best fits this language"
 msgstr ""
 
-#: views/layout-settings.php:5602
+#: views/layout-settings.php:5623
 msgctxt "Settings page"
 msgid "For example (en, ko, es)"
 msgstr ""
 
-#: views/layout-settings.php:5616
+#: views/layout-settings.php:5637
 msgctxt "Settings page"
 msgid "This notice will be hidden when BuddyPress plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:5623
+#: views/layout-settings.php:5644
 msgctxt "Settings page"
 msgid "BuddyPress Integration"
 msgstr ""
 
-#: views/layout-settings.php:5666
+#: views/layout-settings.php:5687
 msgctxt "Settings page"
 msgid "Some themes does not shows private message button automatically."
 msgstr ""
 
-#: views/layout-settings.php:5667
+#: views/layout-settings.php:5688
 msgctxt "Settings page"
 msgid "You can enable this to show private message button at your members list if its missing"
 msgstr ""
 
-#: views/layout-settings.php:5674
+#: views/layout-settings.php:5695
 msgctxt "Settings page"
 msgid "Change messages tab URL slug in BuddyPress profile (\"messages\" slug is not allowed)"
 msgstr ""
 
-#: views/layout-settings.php:5752
+#: views/layout-settings.php:5773
 msgctxt "Settings page"
 msgid "Enable messages for BuddyPress groups"
 msgstr ""
 
-#: views/layout-settings.php:5761
+#: views/layout-settings.php:5782
 msgctxt "Settings page"
 msgid "Enable File Uploading"
 msgstr ""
 
-#: views/layout-settings.php:5762
+#: views/layout-settings.php:5783
 msgctxt "Settings page"
 msgid "Enable file uploading in BuddyPress Groups Messages"
 msgstr ""
 
-#: views/layout-settings.php:5771
+#: views/layout-settings.php:5792
 msgctxt "Settings page"
 msgid "Enables mini groups widget fixed to the bottom of browser window"
 msgstr ""
 
-#: views/layout-settings.php:5797
+#: views/layout-settings.php:5818
 msgctxt "Settings page"
 msgid "Email Notifications"
 msgstr ""
 
-#: views/layout-settings.php:5813
+#: views/layout-settings.php:5834
 msgctxt "Settings page"
 msgid "URL Slug"
 msgstr ""
 
-#: views/layout-settings.php:5814
+#: views/layout-settings.php:5835
 msgctxt "Settings page"
 msgid "Change messages tab URL slug in BuddyPress group"
 msgstr ""
 
-#: views/layout-settings.php:5826
+#: views/layout-settings.php:5847
 msgctxt "Settings page"
 msgid "Other"
 msgstr ""
 
-#: views/layout-settings.php:5838
+#: views/layout-settings.php:5859
 msgctxt "Settings page"
 msgid "Enable BuddyBoss App Push Notifications"
 msgstr ""
 
-#: views/layout-settings.php:5839
+#: views/layout-settings.php:5860
 msgctxt "Settings page"
 msgid "Enable push notifications on new messages in BuddyBoss application when user is offline."
 msgstr ""
 
-#: views/layout-settings.php:5848
+#: views/layout-settings.php:5869
 msgctxt "Settings page"
 msgid "Enable fallback when sending new message"
 msgstr ""
 
-#: views/layout-settings.php:5849
+#: views/layout-settings.php:5870
 msgctxt "Settings page"
 msgid "Enable fallback when sending function with buddypress native messages_new_message function."
 msgstr ""
 
-#: views/layout-settings.php:5850
+#: views/layout-settings.php:5871
 msgctxt "Settings page"
 msgid "This is disabled by default as it can cause issues with some plugins."
 msgstr ""
 
-#: views/layout-settings.php:5879
+#: views/layout-settings.php:5900
 msgctxt "Settings page"
 msgid "API Key"
 msgstr ""
 
-#: views/layout-settings.php:5881
+#: views/layout-settings.php:5902
 msgctxt "Settings page"
 msgid "Get License Key"
 msgstr ""
 
-#: views/layout-settings.php:5890
+#: views/layout-settings.php:5911
 msgctxt "Settings page"
 msgid "Voice Message Transcription"
 msgstr ""
 
-#: views/layout-settings.php:5892
+#: views/layout-settings.php:5913
 msgctxt "Settings page"
 msgid "Transcribe voice messages to text using OpenAI Whisper API"
 msgstr ""
 
-#: views/layout-settings.php:5901
+#: views/layout-settings.php:5922
 msgctxt "Settings page"
 msgid "<a href=\"%s\">Voice Messages</a> add-on is required for this feature."
 msgstr ""
 
-#: views/layout-settings.php:5910
+#: views/layout-settings.php:5931
 msgctxt "Settings page"
 msgid "Transcription Model"
 msgstr ""
 
-#: views/layout-settings.php:5922
+#: views/layout-settings.php:5943
 msgctxt "Settings page"
 msgid "Transcription Prompt"
 msgstr ""
 
-#: views/layout-settings.php:5927
+#: views/layout-settings.php:5948
 msgctxt "Settings page"
 msgid "Optional instructions sent to the transcription model. Specifying the most likely input language improves accuracy and speed."
 msgstr ""
 
-#: views/layout-settings.php:5929
+#: views/layout-settings.php:5950
 msgctxt "Settings page"
 msgid "Example: %s"
 msgstr ""
 
-#: views/layout-settings.php:5941
+#: views/layout-settings.php:5962
 msgctxt "Settings page"
 msgid "This notice will be hidden when MyCRED plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:5948
-#: views/layout-settings.php:6158
+#: views/layout-settings.php:5969
+#: views/layout-settings.php:6179
 msgctxt "Settings page"
 msgid "Price for new message in the conversation"
 msgstr ""
 
-#: views/layout-settings.php:5949
-#: views/layout-settings.php:5995
-#: views/layout-settings.php:6041
-#: views/layout-settings.php:6159
-#: views/layout-settings.php:6205
-#: views/layout-settings.php:6251
+#: views/layout-settings.php:5970
+#: views/layout-settings.php:6016
+#: views/layout-settings.php:6062
+#: views/layout-settings.php:6180
+#: views/layout-settings.php:6226
+#: views/layout-settings.php:6272
 msgctxt "Settings page"
 msgid "Use 0 if this is free"
 msgstr ""
 
-#: views/layout-settings.php:5957
-#: views/layout-settings.php:6003
-#: views/layout-settings.php:6056
-#: views/layout-settings.php:6167
-#: views/layout-settings.php:6213
-#: views/layout-settings.php:6266
+#: views/layout-settings.php:5978
+#: views/layout-settings.php:6024
+#: views/layout-settings.php:6077
+#: views/layout-settings.php:6188
+#: views/layout-settings.php:6234
+#: views/layout-settings.php:6287
 msgctxt "Settings page"
 msgid "Price"
 msgstr ""
 
-#: views/layout-settings.php:5983
-#: views/layout-settings.php:6193
+#: views/layout-settings.php:6004
+#: views/layout-settings.php:6214
 msgctxt "Settings page"
 msgid "Message when user can`t send new reply"
 msgstr ""
 
-#: views/layout-settings.php:5984
-#: views/layout-settings.php:6030
-#: views/layout-settings.php:6084
-#: views/layout-settings.php:6102
-#: views/layout-settings.php:6194
-#: views/layout-settings.php:6240
-#: views/layout-settings.php:6294
-#: views/layout-settings.php:6312
+#: views/layout-settings.php:6005
+#: views/layout-settings.php:6051
+#: views/layout-settings.php:6105
+#: views/layout-settings.php:6123
+#: views/layout-settings.php:6215
+#: views/layout-settings.php:6261
+#: views/layout-settings.php:6315
+#: views/layout-settings.php:6333
 msgctxt "Settings page"
 msgid "HTML Allowed"
 msgstr ""
 
-#: views/layout-settings.php:5993
-#: views/layout-settings.php:6203
+#: views/layout-settings.php:6014
+#: views/layout-settings.php:6224
 msgctxt "Settings page"
 msgid "Price for new starting new conversation"
 msgstr ""
 
-#: views/layout-settings.php:5994
-#: views/layout-settings.php:6204
+#: views/layout-settings.php:6015
+#: views/layout-settings.php:6225
 msgctxt "Settings page"
 msgid "The charge will be applied additionally to the message price"
 msgstr ""
 
-#: views/layout-settings.php:6029
-#: views/layout-settings.php:6239
+#: views/layout-settings.php:6050
+#: views/layout-settings.php:6260
 msgctxt "Settings page"
 msgid "Message when user can`t start new conversation"
 msgstr ""
 
-#: views/layout-settings.php:6039
-#: views/layout-settings.php:6249
+#: views/layout-settings.php:6060
+#: views/layout-settings.php:6270
 msgctxt "Settings page"
 msgid "Price for private calls"
 msgstr ""
 
-#: views/layout-settings.php:6040
-#: views/layout-settings.php:6250
+#: views/layout-settings.php:6061
+#: views/layout-settings.php:6271
 msgctxt "Settings page"
 msgid "The charge will be applied to the caller. Users are billed per minute. First minute is charged immediately after call started."
 msgstr ""
 
-#: views/layout-settings.php:6083
-#: views/layout-settings.php:6293
+#: views/layout-settings.php:6104
+#: views/layout-settings.php:6314
 msgctxt "Settings page"
 msgid "Message when user can`t start new call"
 msgstr ""
 
-#: views/layout-settings.php:6101
-#: views/layout-settings.php:6311
+#: views/layout-settings.php:6122
+#: views/layout-settings.php:6332
 msgctxt "Settings page"
 msgid "Message when user has no enough point to continue call"
 msgstr ""
 
-#: views/layout-settings.php:6125
+#: views/layout-settings.php:6146
 msgctxt "Settings page"
 msgid "This notice will be hidden when GamiPress plugin is installed"
 msgstr ""
 
-#: views/layout-settings.php:6133
+#: views/layout-settings.php:6154
 msgctxt "Settings page"
 msgid "Point Type"
 msgstr ""
 
-#: views/layout-settings.php:6339
+#: views/layout-settings.php:6360
 msgctxt "Settings page"
 msgid "WP Cron Jobs"
 msgstr ""
 
-#: views/layout-settings.php:6348
+#: views/layout-settings.php:6369
 msgctxt "Settings page"
 msgid "Name"
 msgstr ""
 
-#: views/layout-settings.php:6351
+#: views/layout-settings.php:6372
 msgctxt "Settings page"
 msgid "Next Run"
 msgstr ""
 
-#: views/layout-settings.php:6372
+#: views/layout-settings.php:6393
 msgctxt "Settings page"
 msgid "Database"
 msgstr ""
 
-#: views/layout-settings.php:6379
+#: views/layout-settings.php:6400
 msgctxt "Settings page"
 msgid "Database info"
 msgstr ""
 
-#: views/layout-settings.php:6384
+#: views/layout-settings.php:6405
 msgctxt "Settings page"
 msgid "UTF8MB4 Encoding"
 msgstr ""
 
-#: views/layout-settings.php:6389
+#: views/layout-settings.php:6410
 msgctxt "Settings page"
 msgid "Supported"
 msgstr ""
 
-#: views/layout-settings.php:6393
+#: views/layout-settings.php:6414
 msgctxt "Settings page"
 msgid "Not Supported"
 msgstr ""
 
-#: views/layout-settings.php:6400
+#: views/layout-settings.php:6421
 msgctxt "Settings page"
 msgid "Database tables"
 msgstr ""
 
-#: views/layout-settings.php:6422
+#: views/layout-settings.php:6443
 msgctxt "Settings page"
 msgid "Table exists"
 msgstr ""
 
-#: views/layout-settings.php:6429
+#: views/layout-settings.php:6450
 msgctxt "Settings page"
 msgid "Table not exists"
 msgstr ""
 
-#: views/layout-settings.php:6437
+#: views/layout-settings.php:6458
 msgctxt "Settings page"
 msgid "User Index"
 msgstr ""
 
-#: views/layout-settings.php:6440
+#: views/layout-settings.php:6461
 msgctxt "Settings page"
 msgid "Last full synchronization"
 msgstr ""
 
-#: views/layout-settings.php:6441
+#: views/layout-settings.php:6462
 msgctxt "Settings page"
 msgid "Next full synchronization"
 msgstr ""
 
-#: views/layout-settings.php:6443
+#: views/layout-settings.php:6464
 msgctxt "Settings page"
 msgid "Synchronize now"
 msgstr ""
 
-#: views/layout-settings.php:6448
+#: views/layout-settings.php:6469
 msgctxt "Settings page"
 msgid "Convert to UTF8MB4"
 msgstr ""
 
-#: views/layout-settings.php:6449
+#: views/layout-settings.php:6470
 msgctxt "Settings page"
 msgid "Convert database tables to utf8mb4. You do not need to do this if your database tables are already converted to utf8mb4."
 msgstr ""
 
-#: views/layout-settings.php:6452
+#: views/layout-settings.php:6473
 msgctxt "Settings page"
 msgid "Convert"
 msgstr ""
 
-#: views/layout-settings.php:6457
-#: views/layout-settings.php:6461
+#: views/layout-settings.php:6478
+#: views/layout-settings.php:6482
 msgctxt "Settings page"
 msgid "Reset Database"
 msgstr ""
 
-#: views/layout-settings.php:6458
+#: views/layout-settings.php:6479
 msgctxt "Settings page"
 msgid "Complete delete database data and reinstall the tables"
 msgstr ""
 
-#: views/layout-settings.php:6472
+#: views/layout-settings.php:6493
 msgctxt "Settings page"
 msgid "Export Settings"
 msgstr ""
 
-#: views/layout-settings.php:6473
+#: views/layout-settings.php:6494
 msgctxt "Settings page"
 msgid "Copy settings, so you can import them later to another website"
 msgstr ""
 
-#: views/layout-settings.php:6485
+#: views/layout-settings.php:6506
 msgctxt "Settings page"
 msgid "Import Settings"
 msgstr ""
 
-#: views/layout-settings.php:6486
+#: views/layout-settings.php:6507
 msgctxt "Settings page"
 msgid "Paste settings copied before"
 msgstr ""
 
-#: views/layout-settings.php:6620
+#: views/layout-settings.php:6641
 msgctxt "Settings page"
 msgid "Unread messages counter"
 msgstr ""
 
-#: views/layout-settings.php:6621
+#: views/layout-settings.php:6642
 msgctxt "Settings page"
 msgid "Show unread messages counter anywhere in your website"
 msgstr ""
 
-#: views/layout-settings.php:6622
+#: views/layout-settings.php:6643
 msgctxt "Settings page"
 msgid "To add this shortcode to your menu item you can use <a href=\"https://wordpress.org/plugins/shortcode-in-menus/\" target=\"_blank\">Shortcode in Menus</a> plugin."
 msgstr ""
 
-#: views/layout-settings.php:6632
+#: views/layout-settings.php:6653
 msgctxt "Settings page"
 msgid "My messages URL"
 msgstr ""
 
-#: views/layout-settings.php:6633
+#: views/layout-settings.php:6654
 msgctxt "Settings page"
 msgid "Return url to logged in user inbox"
 msgstr ""
 
-#: views/layout-settings.php:6637
+#: views/layout-settings.php:6658
 msgctxt "Settings page"
 msgid "For example: "
 msgstr ""
 
-#: views/layout-settings.php:6651
+#: views/layout-settings.php:6672
 msgctxt "Settings page"
 msgid "Private Message Button"
 msgstr ""
 
-#: views/layout-settings.php:6652
+#: views/layout-settings.php:6673
 msgctxt "Settings page"
 msgid "Shows private message button"
 msgstr ""
 
-#: views/layout-settings.php:6653
-#: views/layout-settings.php:6667
+#: views/layout-settings.php:6674
+#: views/layout-settings.php:6688
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Private Message button."
 msgstr ""
 
-#: views/layout-settings.php:6654
-#: views/layout-settings.php:6668
-#: views/layout-settings.php:6695
+#: views/layout-settings.php:6675
+#: views/layout-settings.php:6689
 #: views/layout-settings.php:6716
 #: views/layout-settings.php:6737
+#: views/layout-settings.php:6758
 msgctxt "Settings page"
 msgid "You can force user id with user_id=\"1\" attribute."
 msgstr ""
 
-#: views/layout-settings.php:6665
+#: views/layout-settings.php:6686
 msgctxt "Settings page"
 msgid "Live Chat Button"
 msgstr ""
 
-#: views/layout-settings.php:6666
+#: views/layout-settings.php:6687
 msgctxt "Settings page"
 msgid "Universal button for starting new conversation or continue existing conversation with same unique tag with any user on your website"
 msgstr ""
 
-#: views/layout-settings.php:6679
+#: views/layout-settings.php:6700
 msgctxt "Settings page"
 msgid "Single Conversation Display"
 msgstr ""
 
-#: views/layout-settings.php:6680
+#: views/layout-settings.php:6701
 msgctxt "Settings page"
 msgid "Shows single conversation at any page"
 msgstr ""
 
-#: views/layout-settings.php:6691
+#: views/layout-settings.php:6712
 msgctxt "Settings page"
 msgid "Mini Chat Button"
 msgstr ""
 
-#: views/layout-settings.php:6692
+#: views/layout-settings.php:6713
 msgctxt "Settings page"
 msgid "Shows mini chat button (opens mini chat with user on click)"
 msgstr ""
 
-#: views/layout-settings.php:6693
+#: views/layout-settings.php:6714
 msgctxt "Settings page"
 msgid "This button will work only if Mini Chats option is enabled"
 msgstr ""
 
-#: views/layout-settings.php:6694
+#: views/layout-settings.php:6715
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Mini Chat button."
 msgstr ""
 
-#: views/layout-settings.php:6714
+#: views/layout-settings.php:6735
 msgctxt "Settings page"
 msgid "Shows video call button"
 msgstr ""
 
-#: views/layout-settings.php:6715
+#: views/layout-settings.php:6736
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Video Call button."
 msgstr ""
 
-#: views/layout-settings.php:6735
+#: views/layout-settings.php:6756
 msgctxt "Settings page"
 msgid "Shows audio call button"
 msgstr ""
 
-#: views/layout-settings.php:6736
+#: views/layout-settings.php:6757
 msgctxt "Settings page"
 msgid "This shortcode will try to find user_id from environment, for example author of post and display Audio Call button."
 msgstr ""
 
-#: views/layout-settings.php:6759
+#: views/layout-settings.php:6780
 msgctxt "Settings page"
 msgid "Save Changes"
 msgstr ""
@@ -7606,7 +7636,7 @@ msgstr ""
 #: assets/admin/admin.min.js:1
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48100
+#: assets/js/bp-messages.js:48277
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "This message was deleted"
@@ -7984,10 +8014,10 @@ msgstr ""
 #: assets/js/bp-messages.js:6515
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:33396
+#: assets/js/bp-messages.js:33573
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:33532
+#: assets/js/bp-messages.js:33709
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -8275,10 +8305,10 @@ msgstr ""
 #: assets/js/bp-messages.js:6510
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:33393
+#: assets/js/bp-messages.js:33570
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:33443
+#: assets/js/bp-messages.js:33620
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -8554,7 +8584,7 @@ msgstr ""
 #: assets/js/bp-messages.js:6527
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:52799
+#: assets/js/bp-messages.js:52976
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -8674,7 +8704,7 @@ msgstr ""
 #: assets/js/bp-messages.js:6600
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:52807
+#: assets/js/bp-messages.js:52984
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -8815,7 +8845,7 @@ msgstr ""
 #: assets/js/bp-messages.js:9629
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25369
+#: assets/js/bp-messages.js:25546
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Unblock user\" Button"
@@ -8836,7 +8866,7 @@ msgstr ""
 #: assets/js/bp-messages.js:9615
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25359
+#: assets/js/bp-messages.js:25536
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Block user\" Button"
@@ -9076,10 +9106,10 @@ msgstr ""
 #: assets/js/bp-messages.js:9899
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:23951
+#: assets/js/bp-messages.js:24128
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25476
+#: assets/js/bp-messages.js:25653
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Additional options\" Button Tooltip"
@@ -9528,7 +9558,7 @@ msgstr ""
 #: assets/js/bp-messages.js:18303
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:47385
+#: assets/js/bp-messages.js:47562
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Login"
@@ -9539,7 +9569,7 @@ msgstr ""
 #: assets/js/bp-messages.js:18305
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:47388
+#: assets/js/bp-messages.js:47565
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Register"
@@ -9789,7 +9819,7 @@ msgstr ""
 #: assets/js/bp-messages.js:14678
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25580
+#: assets/js/bp-messages.js:25757
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -9885,7 +9915,7 @@ msgstr ""
 #: assets/js/bp-messages.js:16162
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26932
+#: assets/js/bp-messages.js:27109
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "New threads screen"
@@ -9935,10 +9965,10 @@ msgstr ""
 #: assets/js/bp-messages.js:15486
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:20384
+#: assets/js/bp-messages.js:20426
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:24058
+#: assets/js/bp-messages.js:24235
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Deleted user"
@@ -9949,10 +9979,10 @@ msgstr ""
 #: assets/js/bp-messages.js:15512
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:24866
+#: assets/js/bp-messages.js:25043
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26719
+#: assets/js/bp-messages.js:26896
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Group Thread Participants Count"
@@ -9984,7 +10014,7 @@ msgstr ""
 #: assets/js/bp-messages.js:15753
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:24596
+#: assets/js/bp-messages.js:24773
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Starting Messages Screen (No threads selected)"
@@ -9996,7 +10026,7 @@ msgstr ""
 #: assets/js/bp-messages.js:15757
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:24600
+#: assets/js/bp-messages.js:24777
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Starting Messages Screen (No threads selected)"
@@ -10374,7 +10404,7 @@ msgstr ""
 #: assets/js/bp-messages.js:17448
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:47392
+#: assets/js/bp-messages.js:47569
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue as guest"
@@ -10746,7 +10776,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19327
+#: assets/js/bp-messages.js:19369
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Reply area placeholder"
@@ -10755,7 +10785,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19405
+#: assets/js/bp-messages.js:19447
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Edit message panel"
@@ -10764,7 +10794,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19435
+#: assets/js/bp-messages.js:19477
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Reply message panel"
@@ -10773,7 +10803,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19464
+#: assets/js/bp-messages.js:19506
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Record Voice Message"
@@ -10781,7 +10811,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19472
+#: assets/js/bp-messages.js:19514
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Send Message"
@@ -10789,7 +10819,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19493
+#: assets/js/bp-messages.js:19535
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Edit message\" button tooltip"
@@ -10798,7 +10828,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19507
+#: assets/js/bp-messages.js:19549
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Edit message\" button tooltip"
@@ -10807,10 +10837,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19606
+#: assets/js/bp-messages.js:19648
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:20852
+#: assets/js/bp-messages.js:20894
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Search input field placeholder"
@@ -10819,7 +10849,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19700
+#: assets/js/bp-messages.js:19742
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Search Results"
@@ -10828,7 +10858,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19704
+#: assets/js/bp-messages.js:19746
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Search Results"
@@ -10837,7 +10867,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19715
+#: assets/js/bp-messages.js:19757
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Search Results"
@@ -10846,7 +10876,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19726
+#: assets/js/bp-messages.js:19768
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Search Results"
@@ -10855,7 +10885,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19832
+#: assets/js/bp-messages.js:19874
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Send Sticker\" button tooltip"
@@ -10864,7 +10894,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:19996
+#: assets/js/bp-messages.js:20038
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10873,7 +10903,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20003
+#: assets/js/bp-messages.js:20045
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10882,7 +10912,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20024
+#: assets/js/bp-messages.js:20066
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10891,7 +10921,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20037
+#: assets/js/bp-messages.js:20079
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector - Search Input Placeholder"
@@ -10900,7 +10930,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20049
+#: assets/js/bp-messages.js:20091
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10909,10 +10939,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20053
+#: assets/js/bp-messages.js:20095
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:20076
+#: assets/js/bp-messages.js:20118
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10921,7 +10951,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20074
+#: assets/js/bp-messages.js:20116
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Stickers selector"
@@ -10930,7 +10960,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20289
+#: assets/js/bp-messages.js:20331
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10939,7 +10969,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20300
+#: assets/js/bp-messages.js:20342
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10948,7 +10978,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20302
+#: assets/js/bp-messages.js:20344
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10957,7 +10987,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20304
+#: assets/js/bp-messages.js:20346
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10966,7 +10996,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20310
+#: assets/js/bp-messages.js:20352
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10975,7 +11005,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20321
+#: assets/js/bp-messages.js:20363
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10984,7 +11014,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20323
+#: assets/js/bp-messages.js:20365
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -10993,7 +11023,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20325
+#: assets/js/bp-messages.js:20367
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -11002,13 +11032,13 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20400
+#: assets/js/bp-messages.js:20442
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26727
+#: assets/js/bp-messages.js:26904
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26736
+#: assets/js/bp-messages.js:26913
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Links tooltip"
@@ -11017,7 +11047,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20442
+#: assets/js/bp-messages.js:20484
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -11026,7 +11056,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20444
+#: assets/js/bp-messages.js:20486
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -11035,7 +11065,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20549
+#: assets/js/bp-messages.js:20591
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "No Subject"
@@ -11043,7 +11073,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20552
+#: assets/js/bp-messages.js:20594
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -11052,7 +11082,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20783
+#: assets/js/bp-messages.js:20825
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -11061,7 +11091,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20793
+#: assets/js/bp-messages.js:20835
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -11070,7 +11100,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20804
+#: assets/js/bp-messages.js:20846
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -11079,7 +11109,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20814
+#: assets/js/bp-messages.js:20856
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -11088,7 +11118,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20836
+#: assets/js/bp-messages.js:20878
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation information"
@@ -11097,7 +11127,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20977
+#: assets/js/bp-messages.js:21019
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (private conversation)"
@@ -11106,7 +11136,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20977
+#: assets/js/bp-messages.js:21019
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (Username 1, Username 2 typing)"
@@ -11117,7 +11147,7 @@ msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:20977
+#: assets/js/bp-messages.js:21019
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Typing indicator (3 or more typing)"
@@ -11128,7 +11158,7 @@ msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21193
+#: assets/js/bp-messages.js:21231
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11137,7 +11167,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21194
+#: assets/js/bp-messages.js:21232
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11146,7 +11176,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21197
+#: assets/js/bp-messages.js:21235
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11155,7 +11185,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21198
+#: assets/js/bp-messages.js:21236
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11164,7 +11194,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21200
+#: assets/js/bp-messages.js:21238
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11173,7 +11203,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21201
+#: assets/js/bp-messages.js:21239
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11182,7 +11212,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21202
+#: assets/js/bp-messages.js:21240
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11191,7 +11221,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21203
+#: assets/js/bp-messages.js:21241
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11200,7 +11230,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21204
+#: assets/js/bp-messages.js:21242
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11209,7 +11239,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21205
+#: assets/js/bp-messages.js:21243
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11218,7 +11248,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21206
+#: assets/js/bp-messages.js:21244
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11227,7 +11257,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21207
+#: assets/js/bp-messages.js:21245
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11236,7 +11266,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21208
+#: assets/js/bp-messages.js:21246
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11245,7 +11275,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21209
+#: assets/js/bp-messages.js:21247
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11254,10 +11284,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21211
+#: assets/js/bp-messages.js:21249
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:21212
+#: assets/js/bp-messages.js:21250
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11266,7 +11296,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21214
+#: assets/js/bp-messages.js:21252
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11275,7 +11305,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21215
+#: assets/js/bp-messages.js:21253
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11284,7 +11314,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21216
+#: assets/js/bp-messages.js:21254
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11293,7 +11323,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21217
+#: assets/js/bp-messages.js:21255
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11302,7 +11332,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21218
+#: assets/js/bp-messages.js:21256
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11311,7 +11341,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21219
+#: assets/js/bp-messages.js:21257
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11320,7 +11350,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21221
+#: assets/js/bp-messages.js:21259
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11329,7 +11359,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21222
+#: assets/js/bp-messages.js:21260
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11338,7 +11368,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21224
+#: assets/js/bp-messages.js:21262
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11347,7 +11377,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21225
+#: assets/js/bp-messages.js:21263
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11356,7 +11386,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21226
+#: assets/js/bp-messages.js:21264
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11365,7 +11395,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21227
+#: assets/js/bp-messages.js:21265
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11374,7 +11404,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21228
+#: assets/js/bp-messages.js:21266
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11383,7 +11413,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21229
+#: assets/js/bp-messages.js:21267
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11392,7 +11422,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21230
+#: assets/js/bp-messages.js:21268
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11401,7 +11431,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21231
+#: assets/js/bp-messages.js:21269
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11410,7 +11440,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21232
+#: assets/js/bp-messages.js:21270
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11419,7 +11449,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21233
+#: assets/js/bp-messages.js:21271
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11428,7 +11458,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21234
+#: assets/js/bp-messages.js:21272
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11437,7 +11467,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21235
+#: assets/js/bp-messages.js:21273
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11446,7 +11476,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21236
+#: assets/js/bp-messages.js:21274
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11455,7 +11485,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21237
+#: assets/js/bp-messages.js:21275
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11464,7 +11494,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21238
+#: assets/js/bp-messages.js:21276
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11473,7 +11503,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21239
+#: assets/js/bp-messages.js:21277
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11482,7 +11512,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21240
+#: assets/js/bp-messages.js:21278
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11491,10 +11521,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21241
+#: assets/js/bp-messages.js:21279
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:21729
+#: assets/js/bp-messages.js:21906
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11503,7 +11533,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21242
+#: assets/js/bp-messages.js:21280
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11512,7 +11542,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21243
+#: assets/js/bp-messages.js:21281
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11521,7 +11551,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21244
+#: assets/js/bp-messages.js:21282
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11530,7 +11560,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21245
+#: assets/js/bp-messages.js:21283
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11539,7 +11569,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21246
+#: assets/js/bp-messages.js:21284
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11548,7 +11578,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21247
+#: assets/js/bp-messages.js:21285
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11557,7 +11587,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21248
+#: assets/js/bp-messages.js:21286
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11566,7 +11596,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21249
+#: assets/js/bp-messages.js:21287
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11575,7 +11605,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21250
+#: assets/js/bp-messages.js:21288
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11584,7 +11614,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21251
+#: assets/js/bp-messages.js:21289
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11593,7 +11623,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21252
+#: assets/js/bp-messages.js:21290
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11602,7 +11632,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21253
+#: assets/js/bp-messages.js:21291
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11611,7 +11641,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21254
+#: assets/js/bp-messages.js:21292
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11620,7 +11650,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21255
+#: assets/js/bp-messages.js:21293
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11629,7 +11659,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21257
+#: assets/js/bp-messages.js:21295
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11638,7 +11668,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21258
+#: assets/js/bp-messages.js:21296
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11647,7 +11677,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21260
+#: assets/js/bp-messages.js:21298
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11656,7 +11686,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21261
+#: assets/js/bp-messages.js:21299
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11665,7 +11695,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21262
+#: assets/js/bp-messages.js:21300
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11674,7 +11704,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21263
+#: assets/js/bp-messages.js:21301
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11683,7 +11713,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21264
+#: assets/js/bp-messages.js:21302
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11692,7 +11722,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21265
+#: assets/js/bp-messages.js:21303
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11701,7 +11731,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21266
+#: assets/js/bp-messages.js:21304
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11710,7 +11740,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21268
+#: assets/js/bp-messages.js:21306
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11719,7 +11749,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21269
+#: assets/js/bp-messages.js:21307
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11728,7 +11758,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21271
+#: assets/js/bp-messages.js:21309
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11737,7 +11767,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21272
+#: assets/js/bp-messages.js:21310
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11746,7 +11776,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21273
+#: assets/js/bp-messages.js:21311
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11755,7 +11785,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21274
+#: assets/js/bp-messages.js:21312
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11764,7 +11794,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21275
+#: assets/js/bp-messages.js:21313
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11773,7 +11803,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21276
+#: assets/js/bp-messages.js:21314
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11782,7 +11812,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21277
+#: assets/js/bp-messages.js:21315
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11791,7 +11821,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21278
+#: assets/js/bp-messages.js:21316
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11800,7 +11830,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21279
+#: assets/js/bp-messages.js:21317
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11809,7 +11839,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21280
+#: assets/js/bp-messages.js:21318
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11818,7 +11848,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21281
+#: assets/js/bp-messages.js:21319
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11827,7 +11857,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21282
+#: assets/js/bp-messages.js:21320
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11836,7 +11866,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21283
+#: assets/js/bp-messages.js:21321
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11845,7 +11875,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21284
+#: assets/js/bp-messages.js:21322
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11854,7 +11884,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21285
+#: assets/js/bp-messages.js:21323
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11863,7 +11893,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21286
+#: assets/js/bp-messages.js:21324
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11872,7 +11902,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21287
+#: assets/js/bp-messages.js:21325
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11881,7 +11911,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21288
+#: assets/js/bp-messages.js:21326
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11890,7 +11920,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21289
+#: assets/js/bp-messages.js:21327
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11899,10 +11929,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21291
+#: assets/js/bp-messages.js:21329
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:21292
+#: assets/js/bp-messages.js:21330
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11911,7 +11941,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21295
+#: assets/js/bp-messages.js:21333
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11920,7 +11950,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21296
+#: assets/js/bp-messages.js:21334
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11929,7 +11959,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21299
+#: assets/js/bp-messages.js:21337
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11938,7 +11968,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21300
+#: assets/js/bp-messages.js:21338
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11947,7 +11977,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21302
+#: assets/js/bp-messages.js:21340
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11956,7 +11986,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21303
+#: assets/js/bp-messages.js:21341
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11965,7 +11995,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21304
+#: assets/js/bp-messages.js:21342
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11974,7 +12004,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21305
+#: assets/js/bp-messages.js:21343
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11983,7 +12013,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21306
+#: assets/js/bp-messages.js:21344
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -11992,7 +12022,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21307
+#: assets/js/bp-messages.js:21345
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -12001,7 +12031,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21308
+#: assets/js/bp-messages.js:21346
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -12010,7 +12040,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21309
+#: assets/js/bp-messages.js:21347
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "File Uploader"
@@ -12019,7 +12049,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21657
+#: assets/js/bp-messages.js:21834
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Add attachment\" button tooltip"
@@ -12028,7 +12058,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:21661
+#: assets/js/bp-messages.js:21838
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "\"Add attachment\" button tooltip with added files"
@@ -12039,7 +12069,7 @@ msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:22121
+#: assets/js/bp-messages.js:22298
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice Messages"
@@ -12048,7 +12078,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:22123
+#: assets/js/bp-messages.js:22300
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice Messages"
@@ -12057,7 +12087,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:22142
+#: assets/js/bp-messages.js:22319
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice Messages"
@@ -12066,10 +12096,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23099
+#: assets/js/bp-messages.js:23276
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:23114
+#: assets/js/bp-messages.js:23291
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12078,7 +12108,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23116
+#: assets/js/bp-messages.js:23293
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12087,7 +12117,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23123
+#: assets/js/bp-messages.js:23300
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12096,7 +12126,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23130
+#: assets/js/bp-messages.js:23307
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12105,7 +12135,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23141
+#: assets/js/bp-messages.js:23318
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12114,7 +12144,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23154
+#: assets/js/bp-messages.js:23331
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12123,7 +12153,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23154
+#: assets/js/bp-messages.js:23331
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12132,7 +12162,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23193
+#: assets/js/bp-messages.js:23370
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12141,7 +12171,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23200
+#: assets/js/bp-messages.js:23377
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12150,7 +12180,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23207
+#: assets/js/bp-messages.js:23384
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Voice recorder"
@@ -12159,7 +12189,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:23931
+#: assets/js/bp-messages.js:24108
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversations list item"
@@ -12168,7 +12198,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24041
+#: assets/js/bp-messages.js:24218
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Frontend Scripts"
@@ -12177,7 +12207,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24044
+#: assets/js/bp-messages.js:24221
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Frontend Scripts"
@@ -12186,7 +12216,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24047
+#: assets/js/bp-messages.js:24224
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Frontend Scripts"
@@ -12195,7 +12225,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24594
+#: assets/js/bp-messages.js:24771
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Starting Messages Screen (No threads selected)"
@@ -12204,7 +12234,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24608
+#: assets/js/bp-messages.js:24785
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Empty thread list"
@@ -12213,7 +12243,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24612
+#: assets/js/bp-messages.js:24789
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Empty thread list"
@@ -12222,10 +12252,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24794
+#: assets/js/bp-messages.js:24971
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:24804
+#: assets/js/bp-messages.js:24981
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Friends list"
@@ -12234,7 +12264,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24811
+#: assets/js/bp-messages.js:24988
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Empty friends list"
@@ -12243,7 +12273,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24813
+#: assets/js/bp-messages.js:24990
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Empty friends list"
@@ -12252,7 +12282,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:24868
+#: assets/js/bp-messages.js:25045
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Group Thread Online Participants Count"
@@ -12261,7 +12291,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25072
+#: assets/js/bp-messages.js:25249
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages List - Avatar Tooltip"
@@ -12270,10 +12300,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25081
+#: assets/js/bp-messages.js:25258
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25088
+#: assets/js/bp-messages.js:25265
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages List - Avatar Alt"
@@ -12282,7 +12312,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25142
+#: assets/js/bp-messages.js:25319
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User online status (was active ago)"
@@ -12291,10 +12321,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25267
+#: assets/js/bp-messages.js:25444
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25276
+#: assets/js/bp-messages.js:25453
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -12303,13 +12333,13 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25292
+#: assets/js/bp-messages.js:25469
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25301
+#: assets/js/bp-messages.js:25478
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25564
+#: assets/js/bp-messages.js:25741
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -12318,13 +12348,13 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25315
+#: assets/js/bp-messages.js:25492
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25324
+#: assets/js/bp-messages.js:25501
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25572
+#: assets/js/bp-messages.js:25749
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -12333,7 +12363,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25348
+#: assets/js/bp-messages.js:25525
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -12342,7 +12372,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25339
+#: assets/js/bp-messages.js:25516
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Users List"
@@ -12351,7 +12381,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25426
+#: assets/js/bp-messages.js:25603
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12360,7 +12390,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25382
+#: assets/js/bp-messages.js:25559
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove user from the conversation"
@@ -12369,7 +12399,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25404
+#: assets/js/bp-messages.js:25581
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12378,10 +12408,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25392
+#: assets/js/bp-messages.js:25569
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25395
+#: assets/js/bp-messages.js:25572
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12390,10 +12420,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25413
+#: assets/js/bp-messages.js:25590
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25416
+#: assets/js/bp-messages.js:25593
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12402,7 +12432,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25448
+#: assets/js/bp-messages.js:25625
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12411,7 +12441,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25458
+#: assets/js/bp-messages.js:25635
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderation actions"
@@ -12420,7 +12450,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25669
+#: assets/js/bp-messages.js:25846
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "My profile button"
@@ -12429,10 +12459,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25906
+#: assets/js/bp-messages.js:26083
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:25936
+#: assets/js/bp-messages.js:26113
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Verifice Icon Tooltip"
@@ -12441,7 +12471,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25927
+#: assets/js/bp-messages.js:26104
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Username Tooltip"
@@ -12450,7 +12480,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25940
+#: assets/js/bp-messages.js:26117
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Moderator Icon Tooltip"
@@ -12459,7 +12489,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:25998
+#: assets/js/bp-messages.js:26175
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "User online status"
@@ -12468,7 +12498,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26064
+#: assets/js/bp-messages.js:26241
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "New threads screen"
@@ -12477,7 +12507,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26650
+#: assets/js/bp-messages.js:26827
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12486,7 +12516,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26777
+#: assets/js/bp-messages.js:26954
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chat"
@@ -12495,7 +12525,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26785
+#: assets/js/bp-messages.js:26962
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chat"
@@ -12504,7 +12534,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26814
+#: assets/js/bp-messages.js:26991
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12513,7 +12543,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26828
+#: assets/js/bp-messages.js:27005
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12522,7 +12552,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26843
+#: assets/js/bp-messages.js:27020
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12531,13 +12561,13 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26850
+#: assets/js/bp-messages.js:27027
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26867
+#: assets/js/bp-messages.js:27044
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:26935
+#: assets/js/bp-messages.js:27112
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12546,7 +12576,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:26860
+#: assets/js/bp-messages.js:27037
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Chats"
@@ -12555,7 +12585,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27725
+#: assets/js/bp-messages.js:27902
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -12564,10 +12594,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27745
+#: assets/js/bp-messages.js:27922
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:27757
+#: assets/js/bp-messages.js:27934
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -12576,7 +12606,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27766
+#: assets/js/bp-messages.js:27943
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -12585,7 +12615,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27775
+#: assets/js/bp-messages.js:27952
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Block user action"
@@ -12594,7 +12624,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27859
+#: assets/js/bp-messages.js:28036
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -12603,10 +12633,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27879
+#: assets/js/bp-messages.js:28056
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:27891
+#: assets/js/bp-messages.js:28068
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -12615,7 +12645,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27900
+#: assets/js/bp-messages.js:28077
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -12624,7 +12654,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:27909
+#: assets/js/bp-messages.js:28086
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unblock user action"
@@ -12633,7 +12663,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28226
+#: assets/js/bp-messages.js:28403
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -12642,10 +12672,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28267
+#: assets/js/bp-messages.js:28444
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:28279
+#: assets/js/bp-messages.js:28456
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -12654,7 +12684,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28285
+#: assets/js/bp-messages.js:28462
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -12663,7 +12693,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28294
+#: assets/js/bp-messages.js:28471
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -12672,7 +12702,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28400
+#: assets/js/bp-messages.js:28577
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -12681,7 +12711,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28409
+#: assets/js/bp-messages.js:28586
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -12690,7 +12720,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28414
+#: assets/js/bp-messages.js:28591
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread deleting"
@@ -12699,10 +12729,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28797
+#: assets/js/bp-messages.js:28974
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:28809
+#: assets/js/bp-messages.js:28986
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -12711,7 +12741,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28817
+#: assets/js/bp-messages.js:28994
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -12720,7 +12750,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:28826
+#: assets/js/bp-messages.js:29003
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Delete Conversation Action"
@@ -12729,10 +12759,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30013
+#: assets/js/bp-messages.js:30190
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:30025
+#: assets/js/bp-messages.js:30202
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -12741,7 +12771,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30033
+#: assets/js/bp-messages.js:30210
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -12750,7 +12780,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30042
+#: assets/js/bp-messages.js:30219
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Add participant action"
@@ -12759,7 +12789,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30232
+#: assets/js/bp-messages.js:30409
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversation Settings"
@@ -12768,7 +12798,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30368
+#: assets/js/bp-messages.js:30545
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -12777,7 +12807,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30391
+#: assets/js/bp-messages.js:30568
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -12786,7 +12816,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30399
+#: assets/js/bp-messages.js:30576
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Clear Messages Action"
@@ -12795,7 +12825,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30487
+#: assets/js/bp-messages.js:30664
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -12804,10 +12834,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30503
+#: assets/js/bp-messages.js:30680
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:30515
+#: assets/js/bp-messages.js:30692
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -12816,7 +12846,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30523
+#: assets/js/bp-messages.js:30700
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -12825,7 +12855,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30532
+#: assets/js/bp-messages.js:30709
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Leave conversation action"
@@ -12834,7 +12864,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30629
+#: assets/js/bp-messages.js:30806
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -12843,10 +12873,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30646
+#: assets/js/bp-messages.js:30823
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:30658
+#: assets/js/bp-messages.js:30835
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -12855,7 +12885,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30667
+#: assets/js/bp-messages.js:30844
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -12864,7 +12894,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30676
+#: assets/js/bp-messages.js:30853
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Making user a moderator in the conversation"
@@ -12873,7 +12903,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30882
+#: assets/js/bp-messages.js:31059
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove user from the conversation"
@@ -12882,10 +12912,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30899
+#: assets/js/bp-messages.js:31076
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:30911
+#: assets/js/bp-messages.js:31088
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -12894,7 +12924,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30920
+#: assets/js/bp-messages.js:31097
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -12903,7 +12933,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:30929
+#: assets/js/bp-messages.js:31106
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Remove participant action"
@@ -12912,7 +12942,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31026
+#: assets/js/bp-messages.js:31203
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -12921,10 +12951,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31043
+#: assets/js/bp-messages.js:31220
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:31055
+#: assets/js/bp-messages.js:31232
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -12933,7 +12963,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31064
+#: assets/js/bp-messages.js:31241
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -12942,7 +12972,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31073
+#: assets/js/bp-messages.js:31250
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Unmaking user a moderator in the conversation"
@@ -12951,7 +12981,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31214
+#: assets/js/bp-messages.js:31391
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -12960,7 +12990,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31244
+#: assets/js/bp-messages.js:31421
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -12969,7 +12999,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31250
+#: assets/js/bp-messages.js:31427
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -12978,7 +13008,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31257
+#: assets/js/bp-messages.js:31434
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages deleting"
@@ -12987,7 +13017,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31434
+#: assets/js/bp-messages.js:31611
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread restoring"
@@ -12996,7 +13026,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:31443
+#: assets/js/bp-messages.js:31620
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Thread restoring"
@@ -13005,7 +13035,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32351
+#: assets/js/bp-messages.js:32528
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Are you sure you want to mute this conversation?"
@@ -13013,7 +13043,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32380
+#: assets/js/bp-messages.js:32557
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Are you sure you want to unmute this conversation?"
@@ -13021,7 +13051,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32708
+#: assets/js/bp-messages.js:32885
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -13030,7 +13060,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32738
+#: assets/js/bp-messages.js:32915
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -13039,7 +13069,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32744
+#: assets/js/bp-messages.js:32921
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -13048,7 +13078,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:32751
+#: assets/js/bp-messages.js:32928
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages pinning"
@@ -13057,7 +13087,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33263
+#: assets/js/bp-messages.js:33440
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device Name when error triggered"
@@ -13066,7 +13096,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33267
+#: assets/js/bp-messages.js:33444
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device not found error"
@@ -13075,7 +13105,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33270
+#: assets/js/bp-messages.js:33447
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device no permission error"
@@ -13084,7 +13114,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33273
+#: assets/js/bp-messages.js:33450
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device already in use error"
@@ -13093,7 +13123,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33275
+#: assets/js/bp-messages.js:33452
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Calling Features - Device unknown error"
@@ -13102,7 +13132,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:33492
+#: assets/js/bp-messages.js:33669
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Media Inputs"
@@ -13111,10 +13141,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:46087
+#: assets/js/bp-messages.js:46264
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:46115
+#: assets/js/bp-messages.js:46292
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -13123,7 +13153,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:46107
+#: assets/js/bp-messages.js:46284
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -13132,7 +13162,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:46167
+#: assets/js/bp-messages.js:46344
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Notifications"
@@ -13141,7 +13171,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:47380
+#: assets/js/bp-messages.js:47557
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue with account"
@@ -13149,7 +13179,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:47400
+#: assets/js/bp-messages.js:47577
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Continue"
@@ -13157,13 +13187,13 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:43975
+#: assets/js/bp-messages.js:44152
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:44074
+#: assets/js/bp-messages.js:44251
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:47455
+#: assets/js/bp-messages.js:47632
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Authorization required"
@@ -13171,7 +13201,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48315
+#: assets/js/bp-messages.js:48492
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Messages from blocked user"
@@ -13180,7 +13210,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48350
+#: assets/js/bp-messages.js:48527
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgid "Rich Content"
@@ -13188,10 +13218,10 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:48356
+#: assets/js/bp-messages.js:48533
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
-#: assets/js/bp-messages.js:48427
+#: assets/js/bp-messages.js:48604
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Conversations list item"
@@ -13202,7 +13232,7 @@ msgstr[1] ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:50597
+#: assets/js/bp-messages.js:50774
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -13211,7 +13241,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:50600
+#: assets/js/bp-messages.js:50777
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call Screen"
@@ -13220,7 +13250,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:52798
+#: assets/js/bp-messages.js:52975
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call - On Site Message"
@@ -13229,7 +13259,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:52798
+#: assets/js/bp-messages.js:52975
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Private Call - On Site Message"
@@ -13238,7 +13268,7 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:53607
+#: assets/js/bp-messages.js:53784
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Rest API Error"
@@ -13247,70 +13277,70 @@ msgstr ""
 
 #: assets/js/bp-messages-app.js:2
 #: assets/js/bp-messages-app.min.js:1
-#: assets/js/bp-messages.js:71773
+#: assets/js/bp-messages.js:71950
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Onsite notifications"
 msgid "Close all notifications"
 msgstr ""
 
-#: assets/js/bp-messages.js:26342
+#: assets/js/bp-messages.js:26519
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Widgets - Head"
 msgid "Messages"
 msgstr ""
 
-#: assets/js/bp-messages.js:26352
+#: assets/js/bp-messages.js:26529
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Widgets - Head"
 msgid "Friends"
 msgstr ""
 
-#: assets/js/bp-messages.js:26361
+#: assets/js/bp-messages.js:26538
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Widgets - Head"
 msgid "Groups"
 msgstr ""
 
-#: assets/js/bp-messages.js:26474
+#: assets/js/bp-messages.js:26651
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Mini Widgets"
 msgid "Start a new conversation"
 msgstr ""
 
-#: assets/js/bp-messages.js:43930
+#: assets/js/bp-messages.js:44107
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Shortcode error"
 msgid "You can not make a call to yourself"
 msgstr ""
 
-#: assets/js/bp-messages.js:43932
+#: assets/js/bp-messages.js:44109
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Shortcode error"
 msgid "You can not start a conversation with yourself"
 msgstr ""
 
-#: assets/js/bp-messages.js:53368
+#: assets/js/bp-messages.js:53545
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"
 msgid "Enable browser push notifications to receive private messages when you are offline?"
 msgstr ""
 
-#: assets/js/bp-messages.js:53392
+#: assets/js/bp-messages.js:53569
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"
 msgid "Enable"
 msgstr ""
 
-#: assets/js/bp-messages.js:53400
+#: assets/js/bp-messages.js:53577
 #: assets/js/bp-messages-premium.min.js:1
 #: assets/js/bp-messages-free.min.js:1
 msgctxt "Push Request Proposal"

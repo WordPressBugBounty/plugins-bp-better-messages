@@ -32,9 +32,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 add_action( 'better_messages_register_script_dependencies', array($this, 'load_scripts'), 10, 1);
                 add_filter( 'bp_better_messages_script_variable', array( $this, 'attachments_script_vars' ), 10, 1 );
 
-                add_filter( 'rest_pre_dispatch', array( $this, 'intercept_tus_requests' ), 10, 3 );
-                add_filter( 'rest_pre_serve_request', array( $this, 'add_tus_headers' ), 10, 4 );
-                add_action( 'better_messages_cleaner_job', array( $this, 'cleanup_stale_uploads' ) );
+                if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
+                    add_filter( 'rest_pre_dispatch', array( $this, 'intercept_tus_requests' ), 10, 3 );
+                    add_filter( 'rest_pre_serve_request', array( $this, 'add_tus_headers' ), 10, 4 );
+                    add_action( 'better_messages_cleaner_job', array( $this, 'cleanup_stale_uploads' ) );
+                }
 
                 if ( Better_Messages()->settings['attachmentsProxy'] === '1' ) {
                     add_filter( 'better_messages_attachment_url', array( $this, 'proxy_attachment_url' ), 10, 4 );
@@ -92,14 +94,16 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 $version
             );
 
-            wp_register_script(
-                'better-messages-files-tus',
-                Better_Messages()->url . "assets/js/addons/files/tus{$suffix}.js",
-                [],
-                $version
-            );
+            if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
+                wp_register_script(
+                    'better-messages-files-tus',
+                    Better_Messages()->url . "assets/js/addons/files/tus{$suffix}.js",
+                    [],
+                    $version
+                );
 
-            $deps[] = 'better-messages-files-tus';
+                $deps[] = 'better-messages-files-tus';
+            }
 
             wp_register_script(
                 'better-messages-files-core',
@@ -168,11 +172,12 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
         public function attachments_script_vars( $vars ){
             $attachments = [
-                'maxSize'      => intval(Better_Messages()->settings['attachmentsMaxSize']),
-                'maxItems'     => intval(Better_Messages()->settings['attachmentsMaxNumber']),
-                'formats'      => array_map(function ($str) { return ".$str"; }, Better_Messages()->settings['attachmentsFormats']),
-                'allowPhoto'   => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
-                'tusEndpoint'  => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
+                'maxSize'        => intval(Better_Messages()->settings['attachmentsMaxSize']),
+                'maxItems'       => intval(Better_Messages()->settings['attachmentsMaxNumber']),
+                'formats'        => array_map(function ($str) { return ".$str"; }, Better_Messages()->settings['attachmentsFormats']),
+                'allowPhoto'     => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
+                'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
+                'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
             ];
 
             $vars['attachments'] = $attachments;
@@ -209,37 +214,39 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 ) );
             }
 
-            // TUS protocol routes
-            register_rest_route( 'better-messages/v1', '/tus/(?P<thread_id>\d+)', array(
-                array(
-                    'methods'             => 'POST',
-                    'callback'            => array( $this, 'handle_tus_creation' ),
-                    'permission_callback' => array( $this, 'check_tus_upload_permission' ),
-                    'args' => array(
-                        'thread_id' => array(
-                            'validate_callback' => function ( $param ) {
-                                return is_numeric( $param );
-                            }
+            // TUS protocol routes (only registered when TUS upload method is active)
+            if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
+                register_rest_route( 'better-messages/v1', '/tus/(?P<thread_id>\d+)', array(
+                    array(
+                        'methods'             => 'POST',
+                        'callback'            => array( $this, 'handle_tus_creation' ),
+                        'permission_callback' => array( $this, 'check_tus_upload_permission' ),
+                        'args' => array(
+                            'thread_id' => array(
+                                'validate_callback' => function ( $param ) {
+                                    return is_numeric( $param );
+                                }
+                            ),
                         ),
                     ),
-                ),
-            ));
+                ));
 
-            register_rest_route( 'better-messages/v1', '/tus(?:/(?P<thread_id>\d+))?(?:/(?P<upload_id>[a-f0-9-]+))?', array(
-                array(
-                    'methods'             => 'OPTIONS',
-                    'callback'            => array( $this, 'handle_tus_options' ),
-                    'permission_callback' => '__return_true',
-                ),
-            ));
+                register_rest_route( 'better-messages/v1', '/tus(?:/(?P<thread_id>\d+))?(?:/(?P<upload_id>[a-f0-9-]+))?', array(
+                    array(
+                        'methods'             => 'OPTIONS',
+                        'callback'            => array( $this, 'handle_tus_options' ),
+                        'permission_callback' => '__return_true',
+                    ),
+                ));
 
-            register_rest_route( 'better-messages/v1', '/tus/(?P<thread_id>\d+)/(?P<upload_id>[a-f0-9-]+)', array(
-                array(
-                    'methods'             => 'DELETE',
-                    'callback'            => array( $this, 'handle_tus_delete_upload' ),
-                    'permission_callback' => array( $this, 'check_tus_upload_permission' ),
-                ),
-            ));
+                register_rest_route( 'better-messages/v1', '/tus/(?P<thread_id>\d+)/(?P<upload_id>[a-f0-9-]+)', array(
+                    array(
+                        'methods'             => 'DELETE',
+                        'callback'            => array( $this, 'handle_tus_delete_upload' ),
+                        'permission_callback' => array( $this, 'check_tus_upload_permission' ),
+                    ),
+                ));
+            }
 
             register_rest_route( 'better-messages/v1/admin', '/testProxyMethod', array(
                 'methods'             => 'POST',
@@ -833,6 +840,12 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                         array( 'status' => 413 )
                     );
                 }
+
+                $upload_meta = array(
+                    'filename' => $name,
+                    'filetype' => $file['type'],
+                );
+                do_action( 'better_messages_post_before_upload', $upload_meta );
 
                 // These files need to be included as dependencies when on the front end.
                 require_once( ABSPATH . 'wp-admin/includes/image.php' );
