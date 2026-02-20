@@ -31,6 +31,9 @@ class Better_Messages_Options
             'attachmentsRetention'        => 365,
             'attachmentsEnable'           => '0',
             'attachmentsHide'             => '1',
+            'attachmentsProxy'            => '0',
+            'attachmentsProxyMethod'      => 'php',
+            'attachmentsXAccelPrefix'     => '/bm-files/',
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'miniChatsEnable'             => '0',
@@ -276,6 +279,9 @@ class Better_Messages_Options
             'pinnedMessages'                => '0',
             'privateReplies'                => '0',
             'openAiApiKey'                  => '',
+            'voiceTranscription'            => '0',
+            'voiceTranscriptionModel'       => 'gpt-4o-mini-transcribe',
+            'voiceTranscriptionPrompt'      => '',
 
             'deleteOldMessages'             => 0,
             'suggestedConversations'        => [],
@@ -629,6 +635,15 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsHide'] ) ) {
             $settings['attachmentsHide'] = '0';
+        }
+        if ( !isset( $settings['attachmentsProxy'] ) ) {
+            $settings['attachmentsProxy'] = '0';
+        }
+        if ( !isset( $settings['attachmentsProxyMethod'] ) || !in_array( $settings['attachmentsProxyMethod'], array( 'php', 'xsendfile', 'xaccel', 'litespeed' ), true ) ) {
+            $settings['attachmentsProxyMethod'] = 'php';
+        }
+        if ( !isset( $settings['attachmentsXAccelPrefix'] ) ) {
+            $settings['attachmentsXAccelPrefix'] = '/bm-files/';
         }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';
@@ -1198,6 +1213,7 @@ class Better_Messages_Options
             'dialingSound'              => 0,
             'dialingSoundId'            => 0,
             'modernBorderRadius'        => 0,
+            'attachmentsMaxSize'        => 1,
             'attachmentsMaxNumber'      => 0,
             'deleteOldMessages'         => 0,
             'emailLogoId'               => 0

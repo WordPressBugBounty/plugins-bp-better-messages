@@ -55,6 +55,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     add_action( 'better_messages_message_pending', array( $this, 'schedule_background_moderation' ), 10, 1 );
                     add_action( 'better_messages_ai_moderate_message', array( $this, 'run_background_moderation' ), 10, 1 );
                 }
+
+                if ( Better_Messages()->settings['voiceTranscription'] === '1'
+                    && ! empty( Better_Messages()->settings['openAiApiKey'] )
+                    && class_exists( 'BP_Better_Messages_Voice_Messages' )
+                ) {
+                    add_filter( 'better_messages_rest_message_meta', array( $this, 'voice_transcription_meta' ), 12, 4 );
+                }
             }
         }
 
@@ -212,6 +219,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function check_if_api_key_valid()
         {
+            // Invalidate cached models list when API key changes
+            delete_transient( 'bm_openai_models' );
+
             $api_key_exists = ! empty(Better_Messages()->settings['openAiApiKey']);
 
             if( $api_key_exists ){
@@ -249,9 +259,37 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 ),
             ));
 
+            if ( Better_Messages()->settings['voiceTranscription'] === '1'
+                && ! empty( Better_Messages()->settings['openAiApiKey'] )
+            ) {
+                register_rest_route('better-messages/v1/ai', '/transcribeVoice/(?P<id>\d+)/(?P<message_id>\d+)', array(
+                    'methods'             => 'POST',
+                    'callback'            => array( $this, 'transcribe_voice_message' ),
+                    'permission_callback' => array( Better_Messages()->api, 'check_thread_access' ),
+                    'args' => array(
+                        'id' => array(
+                            'validate_callback' => function( $param ) {
+                                return is_numeric( $param );
+                            }
+                        ),
+                        'message_id' => array(
+                            'validate_callback' => function( $param ) {
+                                return is_numeric( $param );
+                            }
+                        ),
+                    ),
+                ));
+            }
+
             register_rest_route('better-messages/v1/admin/ai', '/getModels', array(
                 'methods' => 'GET',
                 'callback' => array( $this->api, 'get_models'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin/ai', '/getTranscriptionModels', array(
+                'methods' => 'GET',
+                'callback' => array( $this->api, 'get_transcription_models'),
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
@@ -1129,6 +1167,81 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     wp_mail( $email, $subject, $body );
                 }
             }
+        }
+
+        /**
+         * REST callback: transcribe a voice message via OpenAI Whisper.
+         */
+        public function transcribe_voice_message( WP_REST_Request $request )
+        {
+            $message_id    = intval( $request->get_param( 'message_id' ) );
+            $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+
+            if ( ! $attachment_id ) {
+                return new WP_Error(
+                    'not_voice_message',
+                    _x( 'This message is not a voice message', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 400 )
+                );
+            }
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            // Check cached transcription first (metadata_exists distinguishes "never transcribed" from "empty result")
+            if ( metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
+            }
+
+            // Concurrent request lock — only one Whisper API call per voice message
+            $lock_key = 'bm_transcribing_' . $attachment_id;
+            if ( get_transient( $lock_key ) ) {
+                return new WP_Error(
+                    'already_processing',
+                    _x( 'Transcription is already in progress', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 409 )
+                );
+            }
+
+            set_transient( $lock_key, true, 2 * MINUTE_IN_SECONDS );
+
+            $result = $this->api->transcribe_audio( $attachment_id );
+
+            if ( is_wp_error( $result ) ) {
+                delete_transient( $lock_key );
+                return $result;
+            }
+
+            update_post_meta( $attachment_id, 'bm_voice_transcription', $result );
+            delete_transient( $lock_key );
+
+            // Broadcast updated meta to all thread participants (WebSocket + AJAX paths)
+            if ( $message ) {
+                Better_Messages()->functions->update_message_update_time( $message_id );
+                do_action( 'better_messages_message_meta_updated', (int) $message->thread_id, $message_id, 'bm_voice_transcription', $result );
+            }
+
+            return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
+        }
+
+        /**
+         * Add canTranscribe and cached transcription to voice message meta.
+         */
+        public function voice_transcription_meta( $meta, $message_id, $thread_id, $content )
+        {
+            $is_voice_message = strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->', 0 ) === 0;
+
+            if ( ! $is_voice_message ) {
+                return $meta;
+            }
+
+            $meta['canTranscribe'] = true;
+
+            $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+            if ( $attachment_id && metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                $meta['transcription'] = get_post_meta( $attachment_id, 'bm_voice_transcription', true );
+            }
+
+            return $meta;
         }
     }
 

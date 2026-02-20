@@ -397,6 +397,73 @@ $has_late_message = ob_get_clean();
             }
         }
 
+        changeProxyVisibility();
+
+        $('input[name="attachmentsProxy"]').change(function () {
+            changeProxyVisibility();
+        });
+
+        $('#bpbm-proxy-method').change(function () {
+            changeProxyMethodVisibility();
+        });
+
+        function changeProxyVisibility() {
+            var proxyEnabled = $('input[name="attachmentsProxy"]').is(':checked');
+            if ( proxyEnabled ) {
+                $('.bpbm-proxy-method-row').show();
+                changeProxyMethodVisibility();
+            } else {
+                $('.bpbm-proxy-method-row').hide();
+                $('.bpbm-proxy-xaccel-row').hide();
+            }
+        }
+
+        function changeProxyMethodVisibility() {
+            var proxyEnabled = $('input[name="attachmentsProxy"]').is(':checked');
+            var method = $('#bpbm-proxy-method').val();
+            if ( proxyEnabled && method === 'xaccel' ) {
+                $('.bpbm-proxy-xaccel-row').show();
+            } else {
+                $('.bpbm-proxy-xaccel-row').hide();
+            }
+            $('#bpbm-proxy-test-result').html('');
+        }
+
+        $('#bpbm-test-proxy-method').on('click', function() {
+            var btn = $(this);
+            var result = $('#bpbm-proxy-test-result');
+            var method = $('#bpbm-proxy-method').val();
+            var data = { method: method };
+
+            if ( method === 'xaccel' ) {
+                data.xaccel_prefix = $('input[name="attachmentsXAccelPrefix"]').val();
+            }
+
+            btn.attr('disabled', true);
+            result.html('<span style="color: #666;"><?php _ex( 'Testing...', 'Settings page', 'bp-better-messages' ); ?></span>');
+
+            jQuery.ajax({
+                url: '<?php echo esc_url( get_rest_url( null, 'better-messages/v1/admin/testProxyMethod' ) ); ?>',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                dataType: 'text',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', '<?php echo wp_create_nonce( 'wp_rest' ); ?>');
+                }
+            }).done(function(response) {
+                if ( response.trim() === 'BM_PROXY_TEST_OK' ) {
+                    result.html('<span style="color: #00a32a; font-weight: bold;"><?php _ex( 'Working!', 'Settings page', 'bp-better-messages' ); ?></span>');
+                } else {
+                    result.html('<span style="color: #d63638;"><?php _ex( 'Failed — method not supported by your server', 'Settings page', 'bp-better-messages' ); ?></span>');
+                }
+            }).fail(function() {
+                result.html('<span style="color: #d63638;"><?php _ex( 'Failed — method not supported by your server', 'Settings page', 'bp-better-messages' ); ?></span>');
+            }).always(function() {
+                btn.attr('disabled', false);
+            });
+        });
+
         changeLocation();
 
         $('select[name="chatPage"]').change(function () {
@@ -500,6 +567,69 @@ $has_late_message = ob_get_clean();
             aiModerationRows.css('opacity', aiModEnabled ? '1' : '0.5');
 
             changeModerationNotificationEmails();
+        }
+
+        var voiceTranscription = $('#bpbm-voice-transcription');
+        var voiceTranscriptionModelsLoaded = false;
+
+        voiceTranscription.on('change', changeVoiceTranscription);
+        changeVoiceTranscription();
+
+        // Load transcription models when OpenAI tab becomes visible
+        $('a.nav-tab[href="#integrations_openai"]').on('click touchstart', function(){
+            loadTranscriptionModelsIfNeeded();
+        });
+
+        // Also check on page load if OpenAI tab is already active (direct URL with hash)
+        if( $('#integrations_openai').hasClass('active') ){
+            loadTranscriptionModelsIfNeeded();
+        }
+
+        function changeVoiceTranscription(){
+            var enabled = voiceTranscription.is(':checked');
+            var modelRow = $('.bpbm-voice-transcription-row');
+
+            modelRow.find('select, textarea').attr('disabled', !enabled);
+            modelRow.css('opacity', enabled ? '1' : '0.5');
+
+            // If user enables checkbox while OpenAI tab is visible, load models
+            if( enabled && $('#integrations_openai').hasClass('active') ){
+                loadTranscriptionModelsIfNeeded();
+            }
+        }
+
+        function loadTranscriptionModelsIfNeeded(){
+            if( voiceTranscriptionModelsLoaded ) return;
+            if( ! voiceTranscription.is(':checked') ) return;
+
+            voiceTranscriptionModelsLoaded = true;
+            var modelSelect = $('#bpbm-voice-transcription-model');
+            var currentVal = modelSelect.val();
+
+            modelSelect.prop('disabled', true);
+            modelSelect.html('<option value="' + currentVal + '"><?php _ex( 'Loading...', 'Settings page', 'bp-better-messages' ); ?></option>');
+
+            jQuery.ajax({
+                url: '<?php echo esc_url( get_rest_url( null, 'better-messages/v1/admin/ai/getTranscriptionModels' ) ); ?>',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', '<?php echo wp_create_nonce( 'wp_rest' ); ?>');
+                }
+            }).done(function(models) {
+                modelSelect.empty();
+                if( models && models.length > 0 ){
+                    for( var i = 0; i < models.length; i++ ){
+                        var selected = models[i] === currentVal ? ' selected' : '';
+                        modelSelect.append('<option value="' + models[i] + '"' + selected + '>' + models[i] + '</option>');
+                    }
+                } else {
+                    modelSelect.html('<option value="whisper-1">whisper-1</option>');
+                }
+            }).fail(function() {
+                modelSelect.html('<option value="' + currentVal + '">' + currentVal + '</option>');
+            }).always(function() {
+                modelSelect.prop('disabled', false);
+            });
         }
 
         function changeReactionStatuses(){
@@ -2171,6 +2301,69 @@ $has_late_message = ob_get_clean();
                 </tr>
                 <tr valign="top" class="">
                     <th scope="row" valign="top">
+                        <?php _ex( 'Protect files with proxy', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Serve files through PHP proxy to verify user access. Direct file URLs will be blocked.', 'Settings page', 'bp-better-messages' ); ?></p>
+                        <p style="font-size: 10px; color: #666;"><?php _ex( 'Serving files through PHP may increase server load. Configure the file serving method below to optimize performance.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input name="attachmentsProxy" type="checkbox" <?php checked( $this->settings[ 'attachmentsProxy' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+                <?php
+                $server_capabilities = Better_Messages_Files::detect_server_capabilities();
+                $detected_server = $server_capabilities['server'];
+                ?>
+                <tr valign="top" class="bpbm-proxy-method-row" style="<?php if ( $this->settings['attachmentsProxy'] !== '1' ) echo 'display:none;'; ?>">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'File Serving Method', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Choose how files are served after access is verified. Web server methods significantly reduce PHP memory usage.', 'Settings page', 'bp-better-messages' ); ?></p>
+                        <p style="font-size: 10px; color: #666;">
+                            <?php printf( _x( 'Detected server: %s', 'Settings page', 'bp-better-messages' ), '<strong>' . esc_html( ucfirst( $detected_server ) ) . '</strong>' ); ?>
+                        </p>
+                    </th>
+                    <td>
+                        <select name="attachmentsProxyMethod" id="bpbm-proxy-method">
+                            <option value="php" <?php selected( $this->settings['attachmentsProxyMethod'], 'php' ); ?>>
+                                <?php _ex( 'PHP readfile — Slow', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                            <option value="xsendfile" <?php selected( $this->settings['attachmentsProxyMethod'], 'xsendfile' ); ?>>
+                                <?php _ex( 'X-Sendfile (Apache / LiteSpeed) — Fast', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                            <option value="xaccel" <?php selected( $this->settings['attachmentsProxyMethod'], 'xaccel' ); ?>>
+                                <?php _ex( 'X-Accel-Redirect (Nginx) — Fast', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                            <option value="litespeed" <?php selected( $this->settings['attachmentsProxyMethod'], 'litespeed' ); ?>>
+                                <?php _ex( 'X-LiteSpeed-Location (LiteSpeed) — Fast', 'Settings page', 'bp-better-messages' ); ?>
+                            </option>
+                        </select>
+                        <button type="button" id="bpbm-test-proxy-method" class="button" style="margin-left: 5px;"><?php _ex( 'Test', 'Settings page', 'bp-better-messages' ); ?></button>
+                        <span id="bpbm-proxy-test-result" style="margin-left: 8px;"></span>
+                        <?php if ( $detected_server === 'apache' && ! in_array( 'xsendfile', $server_capabilities['available'], true ) ) : ?>
+                            <p style="font-size: 11px; color: #d63638; margin-top: 5px;">
+                                <?php _ex( 'Apache detected but mod_xsendfile module was not confirmed. You may need to install and enable mod_xsendfile.', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr valign="top" class="bpbm-proxy-xaccel-row" style="<?php if ( $this->settings['attachmentsProxy'] !== '1' || $this->settings['attachmentsProxyMethod'] !== 'xaccel' ) echo 'display:none;'; ?>">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'X-Accel-Redirect Prefix', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'The internal location prefix configured in your Nginx server block.', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input type="text" name="attachmentsXAccelPrefix" value="<?php echo esc_attr( $this->settings['attachmentsXAccelPrefix'] ); ?>" style="width: 300px;" />
+                        <?php $uploads_path = esc_html( trailingslashit( wp_upload_dir()['basedir'] ) ); ?>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                            <?php _ex( 'Example Nginx configuration:', 'Settings page', 'bp-better-messages' ); ?>
+                        </p>
+                        <pre style="background: #f0f0f1; padding: 10px; font-size: 12px; max-width: 550px; overflow-x: auto;">location /bm-files/ {
+    internal;
+    alias <?php echo $uploads_path; ?>;
+}</pre>
+                    </td>
+                </tr>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
                         <?php _ex( 'Allow to capture photos', 'Settings page','bp-better-messages' ); ?>
                         <p style="font-size: 10px;"><?php _ex( 'Allow to capture photos from user webcam', 'Settings page','bp-better-messages' ); ?></p>
                         <p style="font-size: 10px;"><?php _ex( '.jpg or .png format must be enabled', 'Settings page','bp-better-messages' ); ?></p>
@@ -2193,7 +2386,7 @@ $has_late_message = ob_get_clean();
                         <?php _ex( 'Max attachment size', 'Settings page', 'bp-better-messages' ); ?>
                     </th>
                     <td>
-                        <input name="attachmentsMaxSize" type="number" value="<?php esc_attr_e( $this->settings[ 'attachmentsMaxSize' ] ); ?>"/> Mb
+                        <input name="attachmentsMaxSize" type="number" min="1" value="<?php esc_attr_e( $this->settings[ 'attachmentsMaxSize' ] ); ?>"/> Mb
                     </td>
                 </tr>
                 <tr valign="top" class="">
@@ -3870,7 +4063,7 @@ $has_late_message = ob_get_clean();
                             </option>
                         </select>
                         <p style="font-size: 11px; color: #666; margin-top: 5px;">
-                            <?php _ex( 'When enabled, attached images are sent to OpenAI for moderation along with the message text using base64 encoding. Image analysis supports sexual, violence, and self-harm categories. Harassment, hate, and illicit categories analyze text only.', 'Settings page', 'bp-better-messages' ); ?>
+                            <?php _ex( 'When enabled, attached images are sent to OpenAI for moderation along with the message text. Image analysis supports sexual, violence, and self-harm categories. Harassment, hate, and illicit categories analyze text only.', 'Settings page', 'bp-better-messages' ); ?>
                         </p>
                     </td>
                 </tr>
@@ -5690,6 +5883,51 @@ $has_late_message = ob_get_clean();
                         </th>
                         <td>
                             <input name="openAiApiKey" type="text" style="width: 100%"  value="<?php esc_attr_e(wp_unslash($this->settings['openAiApiKey'])); ?>" />
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Voice Message Transcription', 'Settings page', 'bp-better-messages' ); ?>
+                            <p style="font-weight:normal;font-size:12px">
+                                <?php _ex( 'Transcribe voice messages to text using OpenAI Whisper API', 'Settings page', 'bp-better-messages' ); ?>
+                            </p>
+                        </th>
+                        <td>
+                            <?php if ( class_exists('BP_Better_Messages_Voice_Messages') ) { ?>
+                                <input id="bpbm-voice-transcription" name="voiceTranscription" type="checkbox" <?php checked( $this->settings['voiceTranscription'], '1' ); ?> value="1" />
+                            <?php } else { ?>
+                                <div class="bp-better-messages-connection-check bpbm-error" style="margin:0;max-width:100%">
+                                    <?php echo sprintf(
+                                        _x( '<a href="%s">Voice Messages</a> add-on is required for this feature.', 'Settings page', 'bp-better-messages' ),
+                                        esc_url( admin_url('admin.php?page=bp-better-messages-addons') )
+                                    ); ?>
+                                </div>
+                            <?php } ?>
+                        </td>
+                    </tr>
+                    <tr valign="top" class="bpbm-voice-transcription-row">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Transcription Model', 'Settings page', 'bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <select id="bpbm-voice-transcription-model" name="voiceTranscriptionModel" style="width:100%">
+                                <option value="<?php echo esc_attr( $this->settings['voiceTranscriptionModel'] ); ?>">
+                                    <?php echo esc_html( $this->settings['voiceTranscriptionModel'] ); ?>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr valign="top" class="bpbm-voice-transcription-row">
+                        <th scope="row" valign="top">
+                            <?php _ex( 'Transcription Prompt', 'Settings page', 'bp-better-messages' ); ?>
+                        </th>
+                        <td>
+                            <textarea name="voiceTranscriptionPrompt" rows="3" style="width:100%"><?php echo esc_textarea( $this->settings['voiceTranscriptionPrompt'] ); ?></textarea>
+                            <p style="font-size:12px;margin-top:4px">
+                                <?php _ex( 'Optional instructions sent to the transcription model. Specifying the most likely input language improves accuracy and speed.', 'Settings page', 'bp-better-messages' ); ?>
+                                <br>
+                                <?php echo sprintf( _x( 'Example: %s', 'Settings page', 'bp-better-messages' ), '<code>The audio is most likely in English</code>' ); ?>
+                            </p>
                         </td>
                     </tr>
                     </tbody>

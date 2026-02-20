@@ -1,3 +1,6 @@
+/*!***************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[0].use[2]!../assets/admin/admin.scss ***!
+  \***************************************************************************************************************************************************************************/
 @charset "UTF-8";
 .reactions-selector-emojies > span {
   display: inline-block !important;
@@ -454,7 +457,7 @@ table.build-info-table button {
 }
 .bm-select input[type=text] {
   width: 100%;
-  border-color: hsl(0deg, 0%, 80%);
+  border-color: hsl(0, 0%, 80%);
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -464,7 +467,7 @@ table.build-info-table button {
 }
 .bm-user-selector .bm-user-selector-select input[type=text] {
   width: 100%;
-  border-color: hsl(0deg, 0%, 80%);
+  border-color: hsl(0, 0%, 80%);
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -496,7 +499,7 @@ table.build-info-table button {
 }
 .bm-filters .bm-filter input[type=text] {
   width: 100%;
-  border-color: hsl(0deg, 0%, 80%);
+  border-color: hsl(0, 0%, 80%);
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -1048,4 +1051,4 @@ table.build-info-table button {
   margin: 10px 0;
 }
 
-/*# sourceMappingURL=admin.css.map */
+/*# sourceMappingURL=admin.css.map*/

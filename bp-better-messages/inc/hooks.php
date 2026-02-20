@@ -1232,8 +1232,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                         color: <?php echo $main_color; ?> !important;
                     }
 
-                    .uppy-Dashboard-close .UppyIcon{
-                        fill: <?php echo $main_color; ?> !important;
+                    .uppy-Dashboard-close{
+                        color: <?php echo $main_color; ?> !important;
                     }
 
                     .bp-messages-wrap .bp-emojionearea.focused,

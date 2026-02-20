@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
-Tested up to: 6.9
+Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 2.12.1
+Stable tag: 2.12.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -44,6 +44,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 **AI & Automation:**
 
 * AI Chat Bots powered by OpenAI ChatGPT API
+* Voice message transcription powered by OpenAI
 * Web Search capability for AI bots
 * File Search tool for AI bots
 * Image generation with AI
@@ -51,7 +52,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **Media & Content:**
 
-* File sharing (images, videos, documents)
+* File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
 * Voice Messages (available as addon)
 * Embedded links with thumbnails and descriptions
 * oEmbed support for YouTube, Vimeo, Spotify, SoundCloud, Flickr and 20+ services
@@ -236,6 +237,14 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.12.2 =
+* Added voice message transcription powered by OpenAI (requires OpenAI API key)
+* Completely reworked Voice Recorder Add-on UX
+* Added protect files with proxy feature to protect uploaded files from direct access with support for X-Sendfile, X-Accel-Redirect and LiteSpeed optimized serving
+* Added resumable file uploads for improved reliability on slow or unstable connections
+* Improved upload directory structure with per-thread unique subfolders to improve security and keep original filenames
+* Other minor bugfixes and improvements
 
 = 2.12.0 - 2.12.1 =
 * Added AI Content Moderation powered by OpenAI Moderation API

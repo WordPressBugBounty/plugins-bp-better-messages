@@ -157,33 +157,155 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        public function get_models()
+        /**
+         * Transcribe an audio file using OpenAI Whisper API
+         *
+         * @param int $attachment_id WordPress attachment ID
+         * @return string|\WP_Error Transcribed text or WP_Error on failure
+         */
+        public function transcribe_audio( $attachment_id )
         {
-            $client = $this->get_client();
+            $file_path = get_attached_file( $attachment_id );
 
-            try{
-                $response = $client->request('GET', 'models');
+            if ( ! $file_path || ! file_exists( $file_path ) ) {
+                return new \WP_Error( 'file_not_found', 'Audio file not found' );
+            }
 
-                $body = $response->getBody();
+            if ( filesize( $file_path ) > 25 * 1024 * 1024 ) {
+                return new \WP_Error( 'file_too_large', 'Audio file exceeds 25MB limit' );
+            }
 
-                $data = json_decode($body, true);
+            // Create client WITHOUT Content-Type: application/json (multipart needs own boundary)
+            $client = new \BetterMessages\GuzzleHttp\Client([
+                'base_uri' => 'https://api.openai.com/v1/',
+                'headers'  => [ 'Authorization' => 'Bearer ' . $this->get_api_key() ]
+            ]);
 
-                $models = [];
+            try {
+                $multipart = [
+                    [
+                        'name'     => 'file',
+                        'contents' => Utils::tryFopen( $file_path, 'r' ),
+                        'filename' => basename( $file_path )
+                    ],
+                    [
+                        'name'     => 'model',
+                        'contents' => Better_Messages()->settings['voiceTranscriptionModel'] ?: 'gpt-4o-mini-transcribe'
+                    ],
+                    [
+                        'name'     => 'response_format',
+                        'contents' => 'text'
+                    ],
+                ];
 
-                foreach ($data['data'] as $result) {
-                    $model_id = $result['id'];
-
-                    if( ( str_contains($model_id, 'gpt') || preg_match('/^o[0-9]/', $model_id) ) && ! str_contains($model_id, '-realtime-') ) {
-                        $models[] = $model_id;
-                    }
+                $prompt = trim( Better_Messages()->settings['voiceTranscriptionPrompt'] ?? '' );
+                if ( $prompt !== '' ) {
+                    $multipart[] = [
+                        'name'     => 'prompt',
+                        'contents' => $prompt,
+                    ];
                 }
 
-                sort($models);
+                $response = $client->post( 'audio/transcriptions', [
+                    'multipart'       => $multipart,
+                    'timeout'         => 120,
+                    'connect_timeout' => 10,
+                ] );
 
-                return $models;
-            } catch (GuzzleException $e) {
-                return new WP_Error( 'openai_error', $e->getMessage() );
+                return trim( $response->getBody()->getContents() );
+            } catch ( GuzzleException $e ) {
+                $fullError = $e->getMessage();
+
+                try {
+                    if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
+                        $fullError = $e->getResponse()->getBody()->getContents();
+
+                        $data = json_decode( $fullError, true );
+                        if ( isset( $data['error']['message'] ) ) {
+                            $fullError = $data['error']['message'];
+                        }
+                    }
+                } catch ( \Exception $ignored ) {}
+
+                return new \WP_Error( 'openai_error', $fullError );
             }
+        }
+
+        /**
+         * Fetch all model IDs from OpenAI API, cached for 24 hours.
+         *
+         * @return string[]|\WP_Error Sorted array of all model IDs or WP_Error
+         */
+        private function get_all_models_cached()
+        {
+            $cached = get_transient( 'bm_openai_models' );
+
+            if ( $cached !== false ) {
+                return $cached;
+            }
+
+            $client = $this->get_client();
+
+            try {
+                $response   = $client->request( 'GET', 'models' );
+                $data       = json_decode( $response->getBody(), true );
+                $all_models = array_column( $data['data'], 'id' );
+
+                sort( $all_models );
+                set_transient( 'bm_openai_models', $all_models, DAY_IN_SECONDS );
+
+                return $all_models;
+            } catch ( GuzzleException $e ) {
+                return new \WP_Error( 'openai_error', $e->getMessage() );
+            }
+        }
+
+        /**
+         * Get chat/completion models (gpt-*, o1-*, etc.) from cached list.
+         */
+        public function get_models()
+        {
+            $all = $this->get_all_models_cached();
+
+            if ( is_wp_error( $all ) ) {
+                return $all;
+            }
+
+            $models = [];
+
+            foreach ( $all as $model_id ) {
+                if ( ( str_contains( $model_id, 'gpt' ) || preg_match( '/^o[0-9]/', $model_id ) ) && ! str_contains( $model_id, '-realtime-' ) ) {
+                    $models[] = $model_id;
+                }
+            }
+
+            sort( $models );
+
+            return $models;
+        }
+
+        /**
+         * Get transcription-capable models (whisper-*, gpt-4o-transcribe, etc.) from cached list.
+         */
+        public function get_transcription_models()
+        {
+            $all = $this->get_all_models_cached();
+
+            if ( is_wp_error( $all ) ) {
+                return $all;
+            }
+
+            $models = [];
+
+            foreach ( $all as $model_id ) {
+                if ( str_contains( $model_id, 'whisper' ) || str_contains( $model_id, 'transcri' ) ) {
+                    $models[] = $model_id;
+                }
+            }
+
+            sort( $models );
+
+            return $models;
         }
 
         public function audioProvider( $bot_id, $bot_user, $message ) {
