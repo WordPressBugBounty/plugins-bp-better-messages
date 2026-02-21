@@ -6848,6 +6848,149 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bp-messages-user-list .user.threads-list-item .actions {
   padding-right: 10px;
 }
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments {
+  padding: 0;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-subtabs {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(var(--bm-border-secondary-color), 1);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-subtabs .bm-thread-attachments-subtab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: rgba(var(--bm-text-color), 0.6);
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-subtabs .bm-thread-attachments-subtab:hover {
+  color: rgba(var(--bm-text-color), 0.9);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-subtabs .bm-thread-attachments-subtab.bm-thread-attachments-subtab-active {
+  border-bottom-color: rgba(var(--main-bm-color), 1);
+  color: rgba(var(--main-bm-color), 1);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-subtabs .bm-thread-attachments-subtab .bm-thread-attachments-subtab-count {
+  font-size: 10px;
+  opacity: 0.7;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-empty {
+  padding: 20px;
+  text-align: center;
+  color: rgba(var(--bm-text-color), 0.5);
+  font-size: 13px;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-goto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(var(--bm-text-color), 0.4);
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-goto:hover {
+  color: rgba(var(--main-bm-color), 1);
+  background: rgba(var(--main-bm-color), 0.1);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 10px;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image-wrap {
+  position: relative;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image-wrap .bm-thread-attachments-goto {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image-wrap .bm-thread-attachments-goto:hover {
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image-wrap:hover .bm-thread-attachments-goto {
+  opacity: 1;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--bm-border-radius);
+  cursor: pointer;
+  display: block;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-images .bm-thread-attachments-image:hover img {
+  transform: scale(1.05);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(var(--bm-border-secondary-color), 1);
+  border-radius: var(--bm-border-radius);
+  color: rgba(var(--bm-text-color), 1);
+  text-decoration: none;
+  font-size: 13px;
+  gap: 8px;
+  overflow: hidden;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file .bm-thread-attachments-file-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file:hover {
+  background: rgba(var(--bm-bg-color), 0.5);
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file svg {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file .bm-thread-attachments-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.bp-messages-wrap .bm-thread-info-container .bm-thread-info-tabs .bm-thread-attachments .bm-thread-attachments-file .bm-thread-attachments-file-size {
+  flex-shrink: 0;
+  color: rgba(var(--bm-text-color), 0.5);
+  font-size: 11px;
+}
 .bp-messages-wrap.bp-better-messages-mini .bm-messages-list .bm-list .bm-messages-stack .bm-pic {
   width: 20px;
   height: 20px;
@@ -9764,6 +9907,18 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   display: flex;
   align-items: flex-start;
 }
+.bp-messages-wrap .threads-list .thread .bm-info .last-message.bm-draft-indicator .bm-draft-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bp-messages-wrap .threads-list .thread .bm-info .last-message.bm-draft-indicator .bm-draft-label {
+  opacity: 0.7;
+  font-style: italic;
+  margin-right: 4px;
+}
+.bp-messages-wrap .threads-list .thread .bm-info .last-message.bm-draft-indicator .bm-draft-label::after {
+  content: ":";
+}
 .bp-messages-wrap .threads-list .thread .bm-info .last-message .bm-last-message-avatar {
   min-width: 15px;
   max-width: 15px;
@@ -11139,6 +11294,7 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 
 .bp-messages-user-list .user .name {
   font-size: 13px;
+  line-height: 16px;
   word-break: break-word;
 }
 
@@ -11422,6 +11578,7 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 .bm-name .bm-name-moderator,
 .bm-name .bm-name-verified {
   display: inline-flex;
+  margin-inline-start: 4px;
 }
 
 .bm-name-verified {

@@ -37,6 +37,7 @@ class Better_Messages_Options
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'attachmentsUploadMethod'     => 'post',
+            'attachmentsBrowserEnable'    => '1',
             'miniChatsEnable'             => '0',
             'combinedChatsEnable'         => '0',
             'searchAllUsers'              => '1',
@@ -267,6 +268,7 @@ class Better_Messages_Options
             'bpFallback'                    => '0',
             'miniChatDisableSync'           => '0',
             'pinnedThreads'                 => '1',
+            'enableDrafts'                  => '1',
             'bpAppPush'                     => '0',
             'guestChat'                     => '0',
             'deleteMessagesOnUserDelete'    => '0',
@@ -648,6 +650,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsUploadMethod'] ) || !in_array( $settings['attachmentsUploadMethod'], array( 'tus', 'post' ), true ) ) {
             $settings['attachmentsUploadMethod'] = 'tus';
+        }
+        if ( !isset( $settings['attachmentsBrowserEnable'] ) ) {
+            $settings['attachmentsBrowserEnable'] = '0';
         }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';
@@ -1091,6 +1096,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['pinnedThreads'] ) ) {
             $settings['pinnedThreads'] = '0';
+        }
+
+        if( ! isset( $settings['enableDrafts'] ) ) {
+            $settings['enableDrafts'] = '0';
         }
 
         if( ! isset( $settings['bpAppPush'] ) ) {

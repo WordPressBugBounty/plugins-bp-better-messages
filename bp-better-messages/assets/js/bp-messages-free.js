@@ -314,6 +314,16 @@ _x('Search', 'Stickers selector - Search Input Placeholder', 'bp-better-messages
 _x('Search results will display here', 'Stickers selector', 'bp-better-messages');
 _x('No stickers found', 'Stickers selector', 'bp-better-messages');
 _x('You have not used any stickers yet', 'Stickers selector', 'bp-better-messages');
+_x('No attachments in this conversation', 'Conversation information', 'bp-better-messages');
+_x('Photos', 'Conversation information', 'bp-better-messages');
+_x('Videos', 'Conversation information', 'bp-better-messages');
+_x('Audio', 'Conversation information', 'bp-better-messages');
+_x('Files', 'Conversation information', 'bp-better-messages');
+_x('Go to message', 'Conversation information', 'bp-better-messages');
+_x('No photos in this conversation', 'Conversation information', 'bp-better-messages');
+_x('No videos in this conversation', 'Conversation information', 'bp-better-messages');
+_x('No audio files in this conversation', 'Conversation information', 'bp-better-messages');
+_x('No files in this conversation', 'Conversation information', 'bp-better-messages');
 _x('Default group call mode', 'Conversation Settings', 'bp-better-messages');
 _x('Participatory', 'Conversation Settings', 'bp-better-messages');
 _x('Broadcast', 'Conversation Settings', 'bp-better-messages');
@@ -327,6 +337,7 @@ _x('Allow conversation members to invite other members', 'Conversation Settings'
 _x('When enabled, conversation participants will be able to add other users to conversation.', 'Conversation Settings', 'bp-better-messages');
 __('No Subject', 'bp-better-messages');
 _x('Change conversation subject', 'Conversation Settings', 'bp-better-messages');
+_x('Attachments', 'Conversation information', 'bp-better-messages');
 _x('Moderators', 'Users List', 'bp-better-messages');
 _x('Anonymous', 'Users List', 'bp-better-messages');
 _x('Muted', 'Users List', 'bp-better-messages');
@@ -452,6 +463,7 @@ _x('You were mentioned in this conversation', 'Conversations list item', 'bp-bet
 _x('Video', 'Frontend Scripts', 'bp-better-messages');
 _x('Audio', 'Frontend Scripts', 'bp-better-messages');
 _x('Chat Online', 'Frontend Scripts', 'bp-better-messages');
+_x('Draft', 'Thread list draft indicator', 'bp-better-messages');
 _x('Select conversation to display messages', 'Starting Messages Screen (No threads selected)', 'bp-better-messages');
 _x('No conversations yet', 'Empty thread list', 'bp-better-messages');
 _x('Start a new conversation', 'Empty thread list', 'bp-better-messages');

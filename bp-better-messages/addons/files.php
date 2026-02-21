@@ -26,11 +26,12 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             add_action( 'better_messages_cleaner_job', array($this, 'remove_old_attachments') );
             add_filter( 'better_messages_rest_message_meta', array( $this, 'files_message_meta'), 10, 4 );
 
+            add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
+            add_filter( 'bp_better_messages_script_variable', array( $this, 'attachments_script_vars' ), 10, 1 );
+
             if ( Better_Messages()->settings['attachmentsEnable'] === '1' ) {
-                add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
                 add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ), 9 );
                 add_action( 'better_messages_register_script_dependencies', array($this, 'load_scripts'), 10, 1);
-                add_filter( 'bp_better_messages_script_variable', array( $this, 'attachments_script_vars' ), 10, 1 );
 
                 if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
                     add_filter( 'rest_pre_dispatch', array( $this, 'intercept_tus_requests' ), 10, 3 );
@@ -171,21 +172,58 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         }
 
         public function attachments_script_vars( $vars ){
-            $attachments = [
-                'maxSize'        => intval(Better_Messages()->settings['attachmentsMaxSize']),
-                'maxItems'       => intval(Better_Messages()->settings['attachmentsMaxNumber']),
-                'formats'        => array_map(function ($str) { return ".$str"; }, Better_Messages()->settings['attachmentsFormats']),
-                'allowPhoto'     => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
-                'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
-                'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
-            ];
+            $vars['attachmentsBrowserEnable'] = Better_Messages()->settings['attachmentsBrowserEnable'] === '1';
 
-            $vars['attachments'] = $attachments;
+            if ( Better_Messages()->settings['attachmentsEnable'] === '1' ) {
+                $vars['attachments'] = [
+                    'maxSize'        => intval(Better_Messages()->settings['attachmentsMaxSize']),
+                    'maxItems'       => intval(Better_Messages()->settings['attachmentsMaxNumber']),
+                    'formats'        => array_map(function ($str) { return ".$str"; }, Better_Messages()->settings['attachmentsFormats']),
+                    'allowPhoto'     => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
+                    'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
+                    'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
+                ];
+            }
 
             return $vars;
         }
 
         public function rest_api_init(){
+            register_rest_route('better-messages/v1', '/thread/(?P<id>\d+)/attachments', array(
+                'methods' => 'GET',
+                'callback' => array( $this, 'get_thread_attachments' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function ($param, $request, $key) {
+                            return is_numeric($param);
+                        }
+                    ),
+                    'page' => array(
+                        'default' => 1,
+                        'validate_callback' => function ($param) {
+                            return is_numeric($param) && intval($param) >= 1;
+                        },
+                        'sanitize_callback' => 'absint',
+                    ),
+                    'per_page' => array(
+                        'default' => 20,
+                        'validate_callback' => function ($param) {
+                            return is_numeric($param) && intval($param) >= 1 && intval($param) <= 100;
+                        },
+                        'sanitize_callback' => 'absint',
+                    ),
+                    'type' => array(
+                        'default' => '',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ),
+                ),
+            ));
+
+            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) {
+                return;
+            }
+
             register_rest_route('better-messages/v1', '/thread/(?P<id>\d+)/upload', array(
                 'methods' => 'POST',
                 'callback' => array( $this, 'handle_upload' ),
@@ -255,6 +293,177 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     return current_user_can( 'manage_options' );
                 },
             ) );
+        }
+
+        public function get_thread_attachments( WP_REST_Request $request ) {
+            global $wpdb;
+
+            $thread_id   = intval( $request->get_param( 'id' ) );
+            $page        = intval( $request->get_param( 'page' ) );
+            $per_page    = intval( $request->get_param( 'per_page' ) );
+            $type        = $request->get_param( 'type' );
+            $offset      = ( $page - 1 ) * $per_page;
+
+            $active_type = '';
+            $counts_data = null;
+
+            // On first page without type filter: get counts first, auto-detect first non-empty type
+            if ( $page === 1 && empty( $type ) ) {
+                $counts_data = $this->get_thread_attachment_counts( $thread_id );
+
+                $type_order = array( 'photos', 'videos', 'audio', 'files' );
+                foreach ( $type_order as $t ) {
+                    if ( $counts_data[ $t ] > 0 ) {
+                        $active_type = $t;
+                        $type = $t;
+                        break;
+                    }
+                }
+            }
+
+            $type_clause = '';
+            switch ( $type ) {
+                case 'photos':
+                    $type_clause = "AND p.post_mime_type LIKE 'image/%'";
+                    break;
+                case 'videos':
+                    $type_clause = "AND p.post_mime_type LIKE 'video/%'";
+                    break;
+                case 'audio':
+                    $type_clause = "AND p.post_mime_type LIKE 'audio/%'";
+                    break;
+                case 'files':
+                    $type_clause = "AND p.post_mime_type NOT LIKE 'image/%' AND p.post_mime_type NOT LIKE 'video/%' AND p.post_mime_type NOT LIKE 'audio/%'";
+                    break;
+            }
+
+            $files    = array();
+            $has_more = false;
+
+            $attachment_ids = $wpdb->get_col( $wpdb->prepare(
+                "SELECT p.ID
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_thread
+                     ON p.ID = pm_thread.post_id
+                     AND pm_thread.meta_key = 'bp-better-messages-thread-id'
+                     AND pm_thread.meta_value = %d
+                 INNER JOIN {$wpdb->postmeta} pm_attach
+                     ON p.ID = pm_attach.post_id
+                     AND pm_attach.meta_key = 'bp-better-messages-attachment'
+                     AND pm_attach.meta_value = '1'
+                 LEFT JOIN {$wpdb->postmeta} pm_msg
+                     ON p.ID = pm_msg.post_id
+                     AND pm_msg.meta_key = 'bp-better-messages-message-id'
+                 WHERE p.post_type = 'attachment'
+                 AND p.post_status = 'inherit'
+                 {$type_clause}
+                 AND NOT EXISTS (
+                     SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
+                     WHERE bm_meta.bm_message_id = pm_msg.meta_value
+                     AND bm_meta.meta_key = 'bpbm_voice_messages'
+                 )
+                 ORDER BY p.post_date DESC
+                 LIMIT %d OFFSET %d",
+                $thread_id,
+                $per_page + 1,
+                $offset
+            ) );
+
+            $has_more = count( $attachment_ids ) > $per_page;
+            if ( $has_more ) {
+                array_pop( $attachment_ids );
+            }
+
+            foreach ( $attachment_ids as $attachment_id ) {
+                $attachment = get_post( $attachment_id );
+                if ( ! $attachment ) continue;
+
+                $url = wp_get_attachment_url( $attachment_id );
+                $url = apply_filters( 'better_messages_attachment_url', $url, $attachment_id, 0, $thread_id );
+
+                $thumb_url   = wp_get_attachment_image_url( (int) $attachment_id, array( 200, 200 ) );
+                $local_path  = get_attached_file( $attachment_id );
+                $file_exists_locally = $local_path && file_exists( $local_path );
+
+                if ( $file_exists_locally && Better_Messages()->settings['attachmentsProxy'] === '1' ) {
+                    $url       = $this->get_proxy_url( (int) $attachment_id );
+                    $thumb_url = $this->get_proxy_url( (int) $attachment_id );
+                }
+
+                $size         = $file_exists_locally ? filesize( $local_path ) : 0;
+                $original_url = wp_get_attachment_url( $attachment_id );
+                $ext          = pathinfo( $original_url, PATHINFO_EXTENSION );
+                $name         = get_post_meta( $attachment_id, 'bp-better-messages-original-name', true );
+                if ( empty( $name ) ) $name = wp_basename( $original_url );
+
+                $message_id   = (int) get_post_meta( $attachment_id, 'bp-better-messages-message-id', true );
+
+                $files[] = array(
+                    'id'        => (int) $attachment_id,
+                    'url'       => $url,
+                    'thumb'     => $thumb_url,
+                    'mimeType'  => $attachment->post_mime_type,
+                    'name'      => $name,
+                    'size'      => $size,
+                    'ext'       => $ext,
+                    'date'      => $attachment->post_date,
+                    'messageId' => $message_id,
+                );
+            }
+
+            $result = array(
+                'files'   => $files,
+                'hasMore' => $has_more,
+                'page'    => $page,
+            );
+
+            if ( $counts_data !== null ) {
+                $result['counts']     = $counts_data;
+                $result['activeType'] = $active_type;
+            }
+
+            return $result;
+        }
+
+        private function get_thread_attachment_counts( int $thread_id ): array {
+            global $wpdb;
+
+            $counts = $wpdb->get_results( $wpdb->prepare(
+                "SELECT
+                     SUM( CASE WHEN p.post_mime_type LIKE 'image/%%' THEN 1 ELSE 0 END ) AS photos,
+                     SUM( CASE WHEN p.post_mime_type LIKE 'video/%%' THEN 1 ELSE 0 END ) AS videos,
+                     SUM( CASE WHEN p.post_mime_type LIKE 'audio/%%' THEN 1 ELSE 0 END ) AS audio,
+                     SUM( CASE WHEN p.post_mime_type NOT LIKE 'image/%%'
+                                AND p.post_mime_type NOT LIKE 'video/%%'
+                                AND p.post_mime_type NOT LIKE 'audio/%%' THEN 1 ELSE 0 END ) AS files
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_thread
+                     ON p.ID = pm_thread.post_id
+                     AND pm_thread.meta_key = 'bp-better-messages-thread-id'
+                     AND pm_thread.meta_value = %d
+                 INNER JOIN {$wpdb->postmeta} pm_attach
+                     ON p.ID = pm_attach.post_id
+                     AND pm_attach.meta_key = 'bp-better-messages-attachment'
+                     AND pm_attach.meta_value = '1'
+                 LEFT JOIN {$wpdb->postmeta} pm_msg
+                     ON p.ID = pm_msg.post_id
+                     AND pm_msg.meta_key = 'bp-better-messages-message-id'
+                 WHERE p.post_type = 'attachment'
+                 AND p.post_status = 'inherit'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
+                     WHERE bm_meta.bm_message_id = pm_msg.meta_value
+                     AND bm_meta.meta_key = 'bpbm_voice_messages'
+                 )",
+                $thread_id
+            ), ARRAY_A );
+
+            return array(
+                'photos' => (int) ( $counts[0]['photos'] ?? 0 ),
+                'videos' => (int) ( $counts[0]['videos'] ?? 0 ),
+                'audio'  => (int) ( $counts[0]['audio'] ?? 0 ),
+                'files'  => (int) ( $counts[0]['files'] ?? 0 ),
+            );
         }
 
         public function remove_old_attachments(){

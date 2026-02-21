@@ -1460,6 +1460,15 @@ $has_late_message = ob_get_clean();
                                         <p style="font-size: 10px;"><?php _ex( 'Users will be able to pin specific conversations to the top of conversations list', 'Settings page', 'bp-better-messages' ); ?></p>
                                     </th>
                                 </tr>
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="enableDrafts" type="checkbox" <?php checked( $this->settings[ 'enableDrafts' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Enable Draft Messages', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Automatically save unsent messages as drafts and restore them when returning to a conversation', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
                                 </tbody>
                             </table>
                         </fieldset>
@@ -2297,6 +2306,15 @@ $has_late_message = ob_get_clean();
                     </th>
                     <td>
                         <input name="attachmentsHide" type="checkbox" <?php checked( $this->settings[ 'attachmentsHide' ], '1' ); ?> value="1" />
+                    </td>
+                </tr>
+                <tr valign="top" class="">
+                    <th scope="row" valign="top">
+                        <?php _ex( 'Attachments browser', 'Settings page', 'bp-better-messages' ); ?>
+                        <p style="font-size: 10px;"><?php _ex( 'Show "Attachments" tab in conversation details where users can browse all shared photos, videos, audio and files', 'Settings page', 'bp-better-messages' ); ?></p>
+                    </th>
+                    <td>
+                        <input name="attachmentsBrowserEnable" type="checkbox" <?php checked( $this->settings[ 'attachmentsBrowserEnable' ], '1' ); ?> value="1" />
                     </td>
                 </tr>
                 <tr valign="top" class="">

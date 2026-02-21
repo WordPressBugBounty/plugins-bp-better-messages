@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 2.12.3
+Stable tag: 2.12.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -40,6 +40,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Edit sent messages (with edit indicator)
 * Delete messages
 * Mute conversation notifications
+* Message draft autosave with recovery
 
 **AI & Automation:**
 
@@ -238,9 +239,11 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.12.2 - 2.12.3 =
-* Added voice message transcription powered by OpenAI (requires OpenAI API key)
+= 2.12.2 - 2.12.4 =
 * Completely reworked Voice Recorder Add-on UX
+* Added Attachments browser feature which allows browsing all uploaded files in the conversation information panel
+* Added message draft autosave feature — unsent messages are automatically saved and restored when returning to a conversation, with a draft indicator shown in the conversations list
+* Added voice message transcription powered by OpenAI (requires OpenAI API key)
 * Added protect files with proxy feature to protect uploaded files from direct access with support for X-Sendfile, X-Accel-Redirect and LiteSpeed optimized serving
 * Added resumable file uploads for improved reliability on slow or unstable connections
 * Added option to swithc between file upload method (Standard POST Upload or TUS (Resumable Upload)) as some hosting blocks TUS uploads with WAF
