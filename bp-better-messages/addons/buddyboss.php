@@ -130,7 +130,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             $url = Better_Messages()->url . "addons/onesignal/sub-update{$suffix}.js";
 
-            echo '<script src="' . $url . '?ver=0.2"></script>';
+            echo '<script src="' . $url . '?ver=0.3"></script>';
         }
 
         public function update_subscription( WP_REST_Request $request )

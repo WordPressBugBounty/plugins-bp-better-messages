@@ -439,14 +439,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             $query = $wpdb->prepare("
                 SELECT `users`.`ID`
                 FROM `{$wpdb->users}` as users
-                RIGHT JOIN " . bm_get_table('recipients') . " recipients 
+                INNER JOIN " . bm_get_table('recipients') . " recipients
                 ON ( `users`.`ID` = `recipients`.`user_id`
                     AND `recipients`.`thread_id` = %d
                     AND `recipients`.`user_id` != %d
                     AND `recipients`.`is_deleted` = 0)
-                WHERE `user_login` LIKE %s 
-                   OR `user_nicename` LIKE %s 
-                   OR `display_name` LIKE %s 
+                WHERE `user_login` LIKE %s
+                   OR `user_nicename` LIKE %s
+                   OR `display_name` LIKE %s
                 ORDER BY `display_name` ASC
                 LIMIT 0, 50
             ", $thread_id, Better_Messages()->functions->get_current_user_id(), $search, $search, $search );

@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 2.12.5
+Stable tag: 2.12.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -242,9 +242,11 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.12.5 =
+= 2.12.5 - 2.12.6 =
 * Added option to filter conversations list to show only unread conversations
 * Migrated WC Vendors and WCFM Add-ons to the core plugin. WCFM and WC Vendors Add-ons are now deprecated and will be removed, please deactivate them in your website if you are using them.
+* Updated OneSignal Integration code to support the latest OneSignal API changes
+* Mentions search now supports searching usernames with whitespace
 * Other minor bugfixes, improvements and optimizations
 
 = 2.12.2 - 2.12.4 =

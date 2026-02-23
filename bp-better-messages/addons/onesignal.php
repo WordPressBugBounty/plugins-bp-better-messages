@@ -40,7 +40,7 @@ if ( ! class_exists( 'Better_Messages_OneSignal' ) ) {
 
             $url = Better_Messages()->url . "addons/onesignal/sub-update{$suffix}.js";
 
-            echo '<script src="' . $url . '?ver=0.2"></script>';
+            echo '<script src="' . $url . '?ver=0.3"></script>';
         }
 
         public function rest_api_init()
@@ -147,6 +147,10 @@ if ( ! class_exists( 'Better_Messages_OneSignal' ) ) {
         public function add_onesignal_script_variable( $script_variable ){
             if( is_user_logged_in() ){
                 $script_variable['oneSignal'] = '1';
+
+                if( defined('ONESIGNAL_VERSION_V3') || class_exists('OneSignal') ) {
+                    $script_variable['oneSignalSdk'] = 'v16';
+                }
             }
 
             return $script_variable;

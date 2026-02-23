@@ -138,6 +138,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     max-height: calc( 100vh - var(--fcom-header-height, 0px) );
                 }
 
+                body[data-route="better_messages"] #fcom-chat-widget-container{
+                    display: none !important;
+                }
+
                 .fcom_mobile_menu .focm_menu_item span.bm-unread-badge{
                     background: var(--el-color-danger, rgb(245, 108, 108));
                     width: 15px;
@@ -276,8 +280,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?=' . $version;
 
             $vars = [
-                'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
-                'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
+                    'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
+                    'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
             ];
 
             echo '<script type="text/javascript">var BM_Fluent_Community=' . wp_json_encode( $vars ) . ';</script>';

@@ -1,135 +1,135 @@
-var user_id = parseInt(Better_Messages.user_id);
-var timeoutId;
+(function() {
+    var user_id = parseInt(Better_Messages.user_id);
+    var timeoutId;
+    var sdkVersion = Better_Messages.oneSignalSdk || '';
 
-var OneSignalUpdate = (function() {
+    /**
+     * New SDK (v16) branch
+     * Used when OneSignal WP plugin 3.x is active (both V2 and V3 paths)
+     */
+    function initNewSdk() {
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.login(user_id.toString());
 
-    return function() {
-        BetterMessages.getApi().then( function ( api ) {
-            BetterMessages.getSetting( 'oneSignal' ).then( function ( savedOneSignal ) {
-                let updateNeeded = false;
+            checkAndUpdateSubscription(OneSignal);
 
-                OneSignal.getUserId().then( function (subscriptionId) {
-                    if( ! subscriptionId ) return;
-
-                    if( ! savedOneSignal ){
-                        updateNeeded = true;
-                    } else {
-                        if( savedOneSignal.user_id != user_id ){
-                            updateNeeded = true;
-                        }
-
-                        if( savedOneSignal.subscription_id != subscriptionId ){
-                            updateNeeded = true;
-                        }
-                    }
-
-                    if( updateNeeded ){
-                        // Clear the previous timeout
-                        if (timeoutId) {
-                            clearTimeout(timeoutId);
-                        }
-
-                        // Set a new timeout
-                        timeoutId = setTimeout(function() {
-                            api.post( 'oneSignal/updateSubscription', {
-                                subscription_id: subscriptionId
-                            }).then( function ( response ) {
-                                BetterMessages.updateSetting('oneSignal', {
-                                    user_id: user_id,
-                                    subscription_id: subscriptionId
-                                });
-
-                                OneSignal.setExternalUserId(user_id);
-                            }).catch( function ( error ) {
-                                console.error( error );
-                            })
-                        }, 3000 )
-                    }
-                });
-            } )
-        } )
-    }
-})();
-
-
-if( typeof OneSignal !== 'undefined' ) {
-    OneSignal.push(function () {
-        OneSignal.isPushNotificationsEnabled().then( function ( isSubscribed ) {
-            if( isSubscribed ) OneSignalUpdate();
+            OneSignal.User.PushSubscription.addEventListener("change", function(event) {
+                checkAndUpdateSubscription(OneSignal);
+            });
         });
+    }
 
-        OneSignal.on('subscriptionChange', function (isSubscribed) {
-            if( isSubscribed ) OneSignalUpdate();
-        })
-    })
-} else {
-    // New OneSignal SDK
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    function checkAndUpdateSubscription(OneSignal) {
+        var subscriptionId = OneSignal.User.PushSubscription.id;
+        var optedIn = OneSignal.User.PushSubscription.optedIn;
 
-    function initNewSDK( OneSignal ){
-        if( ! OneSignal.initialized ){
-            setTimeout( function() { initNewSDK(OneSignal) }, 1000 );
+        if (!optedIn || !subscriptionId) {
             return;
         }
 
-        updateUser();
+        BetterMessages.getApi().then(function(api) {
+            BetterMessages.getSetting('oneSignal2025').then(function(savedOneSignal) {
+                var updateNeeded = false;
 
-        OneSignal.User.addEventListener('change', function (event) {
-            updateUser();
-        });
-
-        OneSignal.User.PushSubscription.addEventListener("change", function (event) {
-            updateUser();
-        });
-    }
-
-    function updateUser(){
-        BetterMessages.getApi().then( function ( api ) {
-            BetterMessages.getSetting('oneSignal2025').then(function (savedOneSignal) {
-                let updateNeeded = false;
-
-                if (! savedOneSignal ) {
+                if (!savedOneSignal) {
                     updateNeeded = true;
                 } else {
-                    if ( savedOneSignal.user_id != OneSignal.User.externalId ) {
+                    if (savedOneSignal.user_id != user_id) {
                         updateNeeded = true;
                     }
-
-                    if ( savedOneSignal.subscription_id != OneSignal.User.PushSubscription.id ) {
+                    if (savedOneSignal.subscription_id != subscriptionId) {
                         updateNeeded = true;
                     }
                 }
 
-                if( updateNeeded ){
-                    // Clear the previous timeout
+                if (updateNeeded) {
                     if (timeoutId) {
                         clearTimeout(timeoutId);
                     }
 
-                    // Set a new timeout
                     timeoutId = setTimeout(function() {
-                        api.post( 'oneSignal/updateSubscription', {
-                            subscription_id: OneSignal.User.PushSubscription.id
-                        }).then( function ( response ) {
+                        api.post('oneSignal/updateSubscription', {
+                            subscription_id: subscriptionId
+                        }).then(function(response) {
                             BetterMessages.updateSetting('oneSignal2025', {
                                 user_id: user_id,
-                                subscription_id: OneSignal.User.PushSubscription.id
+                                subscription_id: subscriptionId
                             });
-
-                            OneSignal.login(user_id.toString());
-                        }).catch( function ( error ) {
-                            console.error( error );
-                        })
-                    }, 3000 )
+                        }).catch(function(error) {
+                            console.error(error);
+                        });
+                    }, 3000);
                 }
-
             });
         });
-
-
     }
 
-    OneSignalDeferred.push(function(OneSignal) {
-        initNewSDK(OneSignal)
-    });
-}
+    /**
+     * Legacy SDK branch
+     * Kept for backward compatibility with old OneSignal WP plugin versions
+     * that used the pre-v16 SDK
+     */
+    function initLegacySdk() {
+        var OneSignalUpdate = function() {
+            BetterMessages.getApi().then(function(api) {
+                BetterMessages.getSetting('oneSignal').then(function(savedOneSignal) {
+                    var updateNeeded = false;
+
+                    OneSignal.getUserId().then(function(subscriptionId) {
+                        if (!subscriptionId) return;
+
+                        if (!savedOneSignal) {
+                            updateNeeded = true;
+                        } else {
+                            if (savedOneSignal.user_id != user_id) {
+                                updateNeeded = true;
+                            }
+                            if (savedOneSignal.subscription_id != subscriptionId) {
+                                updateNeeded = true;
+                            }
+                        }
+
+                        if (updateNeeded) {
+                            if (timeoutId) {
+                                clearTimeout(timeoutId);
+                            }
+
+                            timeoutId = setTimeout(function() {
+                                api.post('oneSignal/updateSubscription', {
+                                    subscription_id: subscriptionId
+                                }).then(function(response) {
+                                    BetterMessages.updateSetting('oneSignal', {
+                                        user_id: user_id,
+                                        subscription_id: subscriptionId
+                                    });
+                                    OneSignal.setExternalUserId(user_id);
+                                }).catch(function(error) {
+                                    console.error(error);
+                                });
+                            }, 3000);
+                        }
+                    });
+                });
+            });
+        };
+
+        OneSignal.push(function() {
+            OneSignal.isPushNotificationsEnabled().then(function(isSubscribed) {
+                if (isSubscribed) OneSignalUpdate();
+            });
+            OneSignal.on('subscriptionChange', function(isSubscribed) {
+                if (isSubscribed) OneSignalUpdate();
+            });
+        });
+    }
+
+    // SDK version routing
+    if (sdkVersion === 'v16') {
+        initNewSdk();
+    } else if (typeof OneSignal !== 'undefined' && typeof OneSignal.getUserId === 'function') {
+        initLegacySdk();
+    } else {
+        initNewSdk();
+    }
+})();
