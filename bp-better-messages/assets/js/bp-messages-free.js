@@ -199,6 +199,8 @@ _x('No favorited messages yet!', 'Favorited messages screen', 'bp-better-message
 _x('Back', '"Back" Button Tooltip', 'bp-better-messages');
 _x('Favorited messages', 'Favorited messages screen', 'bp-better-messages');
 _x('Mark all as read', '"Mark all as read" Button Tooltip', 'bp-better-messages');
+_x('Show all conversations', '"Show all conversations" Button Tooltip', 'bp-better-messages');
+_x('Show unread only', '"Show unread only" Button Tooltip', 'bp-better-messages');
 _x('Favorited', '"Favorited" Button Tooltip', 'bp-better-messages');
 _x('Search', '"Search" Button Tooltip', 'bp-better-messages');
 _x('Settings', '"User Settings" Button Tooltip', 'bp-better-messages');
@@ -464,6 +466,8 @@ _x('Video', 'Frontend Scripts', 'bp-better-messages');
 _x('Audio', 'Frontend Scripts', 'bp-better-messages');
 _x('Chat Online', 'Frontend Scripts', 'bp-better-messages');
 _x('Draft', 'Thread list draft indicator', 'bp-better-messages');
+_x('No unread conversations', 'Empty unread filter list', 'bp-better-messages');
+_x('Show all conversations', 'Empty unread filter list', 'bp-better-messages');
 _x('Select conversation to display messages', 'Starting Messages Screen (No threads selected)', 'bp-better-messages');
 _x('No conversations yet', 'Empty thread list', 'bp-better-messages');
 _x('Start a new conversation', 'Empty thread list', 'bp-better-messages');

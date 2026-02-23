@@ -99,6 +99,7 @@ class Better_Messages_Options
             'restrictThreadsDeleting'     => '0',
             'disableFavoriteMessages'     => '0',
             'disableSearch'               => '0',
+            'enableUnreadFilter'          => '0',
             'disableUserSettings'         => '0',
             'disableNewThread'            => '0',
             'profileVideoCall'            => '0',
@@ -274,6 +275,8 @@ class Better_Messages_Options
             'deleteMessagesOnUserDelete'    => '0',
             'dokanIntegration'              => '0',
             'MultiVendorXIntegration'       => '0',
+            'wcVendorsIntegration'          => '0',
+            'wcfmIntegration'               => '0',
             'jetEngineAvatars'              => '0',
             'hivepressIntegration'          => '0',
             'hivepressMenuItem'             => '0',
@@ -865,6 +868,9 @@ class Better_Messages_Options
         if ( !isset( $settings['disableFavoriteMessages'] ) ) {
             $settings['disableFavoriteMessages'] = '0';
         }
+        if ( !isset( $settings['enableUnreadFilter'] ) ) {
+            $settings['enableUnreadFilter'] = '0';
+        }
         if ( !isset( $settings['disableSearch'] ) ) {
             $settings['disableSearch'] = '0';
         }
@@ -1116,6 +1122,14 @@ class Better_Messages_Options
 
         if( ! isset( $settings['MultiVendorXIntegration'] ) ) {
             $settings['MultiVendorXIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['wcVendorsIntegration'] ) ) {
+            $settings['wcVendorsIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['wcfmIntegration'] ) ) {
+            $settings['wcfmIntegration'] = '0';
         }
 
         if( ! isset( $settings['jetEngineAvatars'] ) ) {

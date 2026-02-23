@@ -1966,6 +1966,22 @@ body.bp-messages-mobile {
       line-height: 42px;
       text-decoration: none;
       cursor: pointer;
+
+      &.bm-unread-filter.active{
+        color: rgba(var(--main-bm-color), 1);
+
+        &::after{
+          content: '';
+          position: absolute;
+          bottom: 4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 16px;
+          height: 2px;
+          background: rgba(var(--main-bm-color), 1);
+          border-radius: 1px;
+        }
+      }
     }
 
     .thread-info{

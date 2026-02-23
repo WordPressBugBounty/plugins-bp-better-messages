@@ -1834,6 +1834,16 @@ $has_late_message = ob_get_clean();
 
                                 <tr valign="top" class="">
                                     <td>
+                                        <input name="enableUnreadFilter" type="checkbox" <?php checked( $this->settings[ 'enableUnreadFilter' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th scope="row" valign="top">
+                                        <?php _ex( 'Enable Unread Filter', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Enables button to filter conversations list to show only unread conversations', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
                                         <input name="disableUserSettings" type="checkbox" <?php checked( $this->settings[ 'disableUserSettings' ], '1' ); ?> value="1" />
                                     </td>
                                     <th scope="row" valign="top">
@@ -4984,6 +4994,80 @@ $has_late_message = ob_get_clean();
                                             <p style="font-size: 12px;font-weight: 400;">
                                                 <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
                                                 <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_dokan_product_button]">
+                                            </p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/wcvendors" target="_blank">WC Vendors</a>'); ?>
+
+                            <?php if( ! class_exists('WCV_Vendors') ){ ?>
+                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/wcvendors" target="_blank">WC Vendors</a>'); ?></p>
+                            <?php } ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+
+                                    <tr>
+                                        <td>
+                                            <input name="wcVendorsIntegration" type="checkbox" <?php checked( $this->settings[ 'wcVendorsIntegration' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th style="padding-bottom:0;">
+                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th style="padding-top: 0;">
+                                            <p style="font-size: 12px;font-weight: 400;">
+                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
+                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_wc_vendors_product_button]">
+                                            </p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/wcfm" target="_blank">WCFM Marketplace</a>'); ?>
+
+                            <?php if( ! class_exists('WCFM') ){ ?>
+                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/wcfm" target="_blank">WCFM Marketplace</a>'); ?></p>
+                            <?php } ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+
+                                    <tr>
+                                        <td>
+                                            <input name="wcfmIntegration" type="checkbox" <?php checked( $this->settings[ 'wcfmIntegration' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th style="padding-bottom:0;">
+                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th style="padding-top: 0;">
+                                            <p style="font-size: 12px;font-weight: 400;">
+                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
+                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_wcfm_product_button]">
                                             </p>
                                         </th>
                                     </tr>

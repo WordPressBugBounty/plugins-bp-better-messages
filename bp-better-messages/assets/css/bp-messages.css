@@ -7916,6 +7916,20 @@ body.bp-messages-mobile #better-messages-modals-container input {
   text-decoration: none;
   cursor: pointer;
 }
+.bp-messages-wrap .chat-header > .bm-btn.bm-unread-filter.active {
+  color: rgba(var(--main-bm-color), 1);
+}
+.bp-messages-wrap .chat-header > .bm-btn.bm-unread-filter.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  background: rgba(var(--main-bm-color), 1);
+  border-radius: 1px;
+}
 .bp-messages-wrap .chat-header .thread-info {
   display: inline-flex;
   line-height: 15px;

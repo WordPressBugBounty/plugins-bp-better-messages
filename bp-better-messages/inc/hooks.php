@@ -294,6 +294,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_MultiVendorX::instance();
             }
 
+            if( class_exists( 'WooCommerce' ) && function_exists('wcvendors_run') ){
+                require_once Better_Messages()->path . 'addons/wc-vendors.php';
+                Better_Messages_WC_Vendors::instance();
+            }
+
+            if( class_exists( 'WooCommerce' ) && class_exists('WCFM') ){
+                require_once Better_Messages()->path . 'addons/wcfm.php';
+                Better_Messages_WCFM::instance();
+            }
+
             if( function_exists('hivepress') ){
                 require_once Better_Messages()->path . 'addons/hivepress.php';
                 Better_Messages_HivePress::instance();
