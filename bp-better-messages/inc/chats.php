@@ -729,8 +729,10 @@ class Better_Messages_Chats
 
         wp_nonce_field( 'bpbm-save-chat-settings-' . $post->ID, 'bpbm_save_chat_nonce' );
 
-        $settings = $this->get_chat_settings( $post->ID ); ?>
-        <div class="bm-chat-settings" data-chat-id="<?php echo esc_attr($post->ID); ?>" data-settings="<?php echo esc_attr(json_encode($settings)); ?>" data-roles="<?php echo esc_attr(json_encode($roles)); ?>">
+        $settings = $this->get_chat_settings( $post->ID );
+        $thread_id = $this->get_chat_thread_id( $post->ID );
+        $inbox_url = $thread_id ? Better_Messages()->functions->get_user_messages_url( get_current_user_id(), $thread_id ) : ''; ?>
+        <div class="bm-chat-settings" data-chat-id="<?php echo esc_attr($post->ID); ?>" data-thread-id="<?php echo esc_attr($thread_id ? $thread_id : ''); ?>" data-inbox-url="<?php echo esc_attr($inbox_url); ?>" data-settings="<?php echo esc_attr(json_encode($settings)); ?>" data-roles="<?php echo esc_attr(json_encode($roles)); ?>">
             <p style="text-align: center"><?php _ex( 'Loading',  'WP Admin', 'bp-better-messages' ); ?></p>
         </div>
     <?php

@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.12.6
+    Version: 2.12.7
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.12.6';
+        public $version = '2.12.7';
 
         public $db_version = '1.0.4';
 
@@ -93,6 +93,9 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
 
         /** @var Better_Messages_Cleaner $cleaner */
         public $cleaner;
+
+        /** @var Better_Messages_Bulk_Sender $bulk_sender */
+        public $bulk_sender;
 
         /** @var Better_Messages_Capabilities $capabilities */
         public $capabilities;
@@ -173,6 +176,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/rest-api.php';
             require_once 'inc/capabilities.php';
             require_once 'inc/cleaner.php';
+            require_once 'inc/bulk-sender.php';
             require_once 'inc/moderation.php';
             require_once 'inc/guests.php';
             require_once 'addons/urls.php';
@@ -217,6 +221,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             $this->shortcodes = Better_Messages_Shortcodes();
             $this->api = Better_Messages_Rest_Api();
             $this->cleaner = Better_Messages_Cleaner();
+            $this->bulk_sender = Better_Messages_Bulk_Sender();
             $this->moderation = Better_Messages_Moderation();
             $this->ai = Better_Messages_AI();
             $this->blocks = Better_Messages_Blocks();
@@ -320,6 +325,10 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                         } else {
                             if ( str_ends_with( $current_screen->id, 'better-messages-settings' ) ) {
                                 $include_css = true;
+                            } else {
+                                if ( str_ends_with( $current_screen->id, 'better-messages-bulk' ) ) {
+                                    $include_css = true;
+                                }
                             }
                         }
                     }
@@ -355,6 +364,11 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                         } else {
                             if ( str_ends_with( $current_screen->id, 'better-messages-settings' ) ) {
                                 $include_js = true;
+                            } else {
+                                if ( str_ends_with( $current_screen->id, 'better-messages-bulk' ) ) {
+                                    $include_js = true;
+                                    wp_enqueue_editor();
+                                }
                             }
                         }
                     }
@@ -521,6 +535,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'replies'            => ( $this->settings['enableReplies'] == '1' ? '1' : '0' ),
                 'selfReplies'        => ( $this->settings['enableSelfReplies'] == '1' ? '1' : '0' ),
                 'privateReplies'     => ( $this->settings['privateReplies'] == '1' ? '1' : '0' ),
+                'forwardMessages'    => ( $this->settings['enableForwardMessages'] == '1' ? '1' : '0' ),
                 'template'           => $this->settings['template'],
                 'layout'             => $this->settings['modernLayout'],
                 'singleThread'       => ( $this->settings['singleThreadMode'] == '1' ? '1' : '0' ),
@@ -594,6 +609,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             }
             if ( Better_Messages_Rest_Api_Bulk_Message()->has_access() ) {
                 $script_variables['canBulk'] = '1';
+                $script_variables['adminUrl'] = admin_url();
             }
             if ( $this->settings['enableReactions'] == '1' ) {
                 $script_variables['reactions'] = Better_Messages_Reactions::instance()->get_reactions();
@@ -699,6 +715,10 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 case 'roles':
                     return $bp_prefix . 'bm_user_roles_index';
                     break;
+                case 'bulk_jobs':
+                    return $bp_prefix . 'bm_bulk_jobs';
+                case 'bulk_job_threads':
+                    return $bp_prefix . 'bm_bulk_job_threads';
             }
         } else {
             switch ( $table ) {
@@ -733,6 +753,10 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 case 'roles':
                     return $bp_prefix . 'bm_user_roles_index';
                     break;
+                case 'bulk_jobs':
+                    return $bp_prefix . 'bm_bulk_jobs';
+                case 'bulk_job_threads':
+                    return $bp_prefix . 'bm_bulk_job_threads';
             }
         }
         return false;
@@ -785,24 +809,25 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 // Include Freemius SDK.
                 require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
                 $bbm_fs = fs_dynamic_init( array(
-                    'id'             => '1557',
-                    'slug'           => 'bp-better-messages',
-                    'premium_slug'   => 'bp-better-messages-websocket',
-                    'type'           => 'plugin',
-                    'public_key'     => 'pk_8af54172153e9907893f32a4706e2',
-                    'is_premium'     => false,
-                    'premium_suffix' => '- WebSocket Version',
-                    'has_addons'     => true,
-                    'has_paid_plans' => true,
-                    'trial'          => array(
+                    'id'               => '1557',
+                    'slug'             => 'bp-better-messages',
+                    'premium_slug'     => 'bp-better-messages-websocket',
+                    'type'             => 'plugin',
+                    'public_key'       => 'pk_8af54172153e9907893f32a4706e2',
+                    'is_premium'       => false,
+                    'premium_suffix'   => '- WebSocket Version',
+                    'has_addons'       => true,
+                    'has_paid_plans'   => true,
+                    'trial'            => array(
                         'days'               => 3,
                         'is_require_payment' => true,
                     ),
-                    'menu'           => array(
+                    'menu'             => array(
                         'slug'    => 'bp-better-messages',
                         'support' => false,
                     ),
-                    'is_live'        => true,
+                    'is_live'          => true,
+                    'is_org_compliant' => true,
                 ) );
             }
             return $bbm_fs;

@@ -21,6 +21,8 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
             add_action( 'admin_init', array( $this, 'register_event' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_deleted_messages_meta' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_old_messages' ) );
+            add_action( 'better_messages_cleaner_job', array( $this, 'clean_preview_messages' ) );
+            add_action( 'better_messages_cleaner_job', array( $this, 'clean_orphaned_bulk_attachments' ) );
         }
 
         public function register_event(){
@@ -68,6 +70,53 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                         Better_Messages()->functions->delete_message( $message_id, false, true, 'delete');
                     }
                 }
+            }
+        }
+
+        public function clean_orphaned_bulk_attachments(){
+            global $wpdb;
+
+            $two_hours_ago = strtotime('-2 hours');
+
+            $sql = $wpdb->prepare("
+                SELECT `posts`.ID
+                FROM {$wpdb->posts} `posts`
+                INNER JOIN {$wpdb->postmeta} `bulk_meta`
+                    ON `posts`.ID = `bulk_meta`.post_id
+                    AND `bulk_meta`.meta_key = 'bp-better-messages-bulk-attachment'
+                INNER JOIN {$wpdb->postmeta} `time_meta`
+                    ON `posts`.ID = `time_meta`.post_id
+                    AND `time_meta`.meta_key = 'bp-better-messages-upload-time'
+                    AND `time_meta`.meta_value <= %d
+                WHERE `posts`.post_type = 'attachment'
+                LIMIT 50
+            ", $two_hours_ago );
+
+            $orphaned = $wpdb->get_col( $sql );
+
+            if ( ! empty( $orphaned ) ) {
+                foreach ( $orphaned as $attachment_id ) {
+                    wp_delete_attachment( (int) $attachment_id, true );
+                }
+            }
+        }
+
+        public function clean_preview_messages(){
+            global $wpdb;
+
+            $one_hour_ago = Better_Messages()->functions->to_microtime( strtotime('-1 hour') );
+            $table        = bm_get_table('messages');
+            $meta_table   = bm_get_table('meta');
+
+            $ids = $wpdb->get_col( $wpdb->prepare(
+                "SELECT `id` FROM `{$table}` WHERE `thread_id` = 0 AND `created_at` <= %d",
+                $one_hour_ago
+            ) );
+
+            if ( ! empty( $ids ) ) {
+                $placeholders = implode( ',', array_map( 'intval', $ids ) );
+                $wpdb->query( "DELETE FROM `{$meta_table}` WHERE `bm_message_id` IN ({$placeholders})" );
+                $wpdb->query( "DELETE FROM `{$table}` WHERE `id` IN ({$placeholders})" );
             }
         }
     }

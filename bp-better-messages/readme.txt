@@ -1,18 +1,18 @@
-=== Better Messages – Live Chat for WordPress, BuddyPress, PeepSo, Ultimate Member, BuddyBoss ===
+=== Better Messages ===
 Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 2.12.6
+Stable tag: 2.12.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Realtime private messaging, group chats, chat rooms, private and group video & audio calls, AI chatbots, and mobile apps for WordPress.
+Real-time messaging and chat rooms for WordPress ecosystem: private conversations, public and private chat rooms, video & audio calls, and more.
 
 == Description ==
 
-**Better Messages** – is the most feature-rich **realtime private messaging system for WordPress**, with native integrations for **BuddyPress, BuddyBoss Platform, Ultimate Member, PeepSo, FluentCommunity** and any other WordPress powered websites.
+**Better Messages** – is the most feature-rich **realtime private messaging system for WordPress**, with native integrations for **BuddyPress, BuddyBoss Platform, Ultimate Member, PeepSo** and any other WordPress powered websites.
 
 Transform your WordPress site into a powerful communication platform with **private messaging**, **chat rooms**, **video and audio calls**, **group video chats**, **AI chat bots**, and **native mobile apps**.
 
@@ -42,6 +42,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Reply to specific messages
 * Edit sent messages (with edit indicator)
 * Delete messages
+* Forward messages to other conversations
 * Mute conversation notifications
 * Message draft autosave with recovery
 
@@ -86,7 +87,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 * Reactions to messages
 * Mentions (@username)
-* Mass messaging to all users
+* Mass messaging from WP Admin with scheduling, file attachments, and background processing
 * Suggested conversations for new users
 
 **Customization:**
@@ -106,7 +107,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [BuddyPress](https://wordpress.org/plugins/buddypress)
 * [Ultimate Member](https://wordpress.org/plugins/ultimate-member)
 * [PeepSo](https://www.wordplus.org/peepso)
-* [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/)
+* [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
@@ -130,23 +131,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [Youzer](https://www.wordplus.org/youzer) (Youzify)
 * [Paid Memberships Pro](https://www.wordplus.org/pmpro)
 
-**Tested themes:**
+[Full list of integrations](https://www.better-messages.com/docs/category/integrations/)
 
-* [BuddyX](https://www.wordplus.org/buddyx)
-* [SocialV](https://www.wordplus.org/socialv)
-* [Gwangi](https://www.wordplus.org/gwangi)
-* [Vikinger](https://www.wordplus.org/vikinger)
-* [Cera](https://www.wordplus.org/cera)
-* [Gorgo](https://www.wordplus.org/gorgo)
-* [Beehive](https://www.wordplus.org/beehive)
-* [BuddyBoss](https://www.wordplus.org/buddyboss)
-
-**Tested plugins:**
-
-* LocoTranslate
-* WPML
-
-**Feel free to report any incompatibility or request more plugin/theme integrations!**
+**Feel free to report any incompatibility or request more integrations, that is very important to help to improve Better Messages plugin!**
 
 **WebSocket version:**
 
@@ -242,6 +229,27 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
+= 2.12.7 =
+* Added optional feature to enable messages forwarding
+* Reworked bulk messaging
+    * Moved bulk messaging to a dedicated WP Admin screen
+    * Added ability to attach files to bulk messages
+    * Moved bulk messaging sending to a background process instead of frontend processing
+    * Added ability to schedule bulk messages for later
+    * Added ability to pause, resume and cancel bulk jobs
+    * Added follow-up messaging to send additional messages into existing bulk conversations
+    * Added activity filter to target users active within or inactive for a specified number of days
+    * Added ability to send bulk messages as another user
+    * Added ability to send bulk messages to specific users
+    * Added ability to send bulk messages to group members (BuddyPress, PeepSo, Ultimate Member)
+    * Added send rate (batch size) control
+    * Added test/preview for bulk messages before sending
+* Added initial integration with [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
+* Removed jQuery dependency from inline scripts
+* Fixed empty chat rooms to be properly shown in user inbox when user auto added to it
+* Added Thread ID indication and View in inbox button to Chat Rooms settings page in WP Admin
+* Other minor bugfixes, improvements and optimizations
+
 = 2.12.5 - 2.12.6 =
 * Added option to filter conversations list to show only unread conversations
 * Migrated WC Vendors and WCFM Add-ons to the core plugin. WCFM and WC Vendors Add-ons are now deprecated and will be removed, please deactivate them in your website if you are using them.
@@ -256,7 +264,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Added voice message transcription powered by OpenAI (requires OpenAI API key)
 * Added protect files with proxy feature to protect uploaded files from direct access with support for X-Sendfile, X-Accel-Redirect and LiteSpeed optimized serving
 * Added resumable file uploads for improved reliability on slow or unstable connections
-* Added option to swithc between file upload method (Standard POST Upload or TUS (Resumable Upload)) as some hosting blocks TUS uploads with WAF
+* Added option to switch between file upload method (Standard POST Upload or TUS (Resumable Upload)) as some hosting blocks TUS uploads with WAF
 * Improved upload directory structure with per-thread unique subfolders to improve security and keep original filenames
 * Other minor bugfixes and improvements
 

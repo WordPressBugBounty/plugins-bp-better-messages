@@ -24,6 +24,7 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
             add_filter( 'better_messages_push_message_in_settings', array( $this, 'push_message_in_settings' ) );
 
             add_filter( 'better_messages_bulk_pushs', array( $this, 'send_bulk_pushs' ), 10, 4 );
+            add_filter( 'better_messages_mass_push', array( $this, 'send_mass_pushs' ), 10, 3 );
             add_filter( 'better_messages_get_user_push_subscriptions', array( $this, 'override_user_push_subscriptions' ), 10, 2 );
             add_filter( 'better_messages_vapid_keys', array( $this, 'override_vapid_keys' ), 10, 1 );
         }
@@ -57,6 +58,29 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
             }
 
             return $result;
+        }
+
+        public function send_mass_pushs( $pushs, $all_recipients, $notification )
+        {
+            global $wpdb;
+            $table = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
+            $user_ids = array_map('intval', $all_recipients);
+
+            $vapid = get_option('daftplug_progressify_vapid_keys');
+
+            if( empty( $vapid ) || !isset( $vapid['publicKey'] ) || !isset( $vapid['privateKey'] ) ) {
+                return $pushs;
+            }
+
+            $subscribers = $wpdb->get_results("SELECT `wp_user_id` as `user_id`, `endpoint`, `auth_key`,`p256dh_key` FROM `{$table}` WHERE `wp_user_id` IN (" . implode(',', $user_ids) . ")", ARRAY_A);
+
+            if( count( $subscribers ) === 0 ){
+                return $pushs;
+            }
+
+            var_dump( $subscribers );
+
+            return $pushs;
         }
 
         public function send_bulk_pushs( $pushs, $all_recipients, $notification, $message )

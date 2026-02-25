@@ -319,6 +319,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 }
             }
 
+            if( ! $added ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'All selected users are already participating in this conversation', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
             return $added;
         }
 

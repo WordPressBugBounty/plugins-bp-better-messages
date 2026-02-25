@@ -101,11 +101,19 @@ if ( ! class_exists( 'Better_Messages_WC_Vendors' ) ) {
             if( ! WCV_Vendors::is_vendor( get_current_user_id() ) ) return;
             if( ! $this->is_livechat_enabled( get_current_user_id() ) ) return;
 
-            $js = 'jQuery(document).on("bp-better-messages-update-unread", function(event){
-                var unread = parseInt(event.detail.unread);
-                var element = jQuery(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bp-better-messages-unread");
-                if(element.length === 0){
-                    jQuery(\'<span class="bp-better-messages-unread bpbmuc bpbmuc-hide-when-null" data-count="\' + unread + \'">\' + unread + \'</span>\').appendTo(jQuery(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a"));
+            $js = 'wp.hooks.addAction("better_messages_update_unread", "better_messages", function( unread ){
+                var element = document.querySelector(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bp-better-messages-unread");
+                if( ! element ){
+                    var parent = document.querySelector(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a");
+                    if( parent ){
+                        element = document.createElement("span");
+                        element.className = "bp-better-messages-unread bpbmuc bpbmuc-hide-when-null";
+                        parent.appendChild(element);
+                    }
+                }
+                if( element ){
+                    element.dataset.count = unread;
+                    element.textContent = unread;
                 }
             });';
 

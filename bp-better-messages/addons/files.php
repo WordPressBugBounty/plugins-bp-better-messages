@@ -505,16 +505,19 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             ON ( {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )
             INNER JOIN {$wpdb->postmeta} AS mt1
             ON ( {$wpdb->posts}.ID = mt1.post_id )
+            LEFT JOIN {$wpdb->postmeta} AS mt_fwd
+            ON ( {$wpdb->posts}.ID = mt_fwd.post_id AND mt_fwd.meta_key = 'bp-better-messages-last-forwarded' )
             WHERE 1=1
             AND ( ( {$wpdb->postmeta}.meta_key = 'bp-better-messages-attachment'
             AND {$wpdb->postmeta}.meta_value = '1' )
             AND ( mt1.meta_key = 'bp-better-messages-upload-time'
             AND mt1.meta_value < %d ) )
+            AND ( mt_fwd.meta_value IS NULL OR mt_fwd.meta_value < %d )
             AND {$wpdb->posts}.post_type = 'attachment'
             AND (({$wpdb->posts}.post_status = 'inherit'))
             GROUP BY {$wpdb->posts}.ID
             ORDER BY {$wpdb->posts}.post_date DESC
-            LIMIT 0, 50", $delete_after_time);
+            LIMIT 0, 50", $delete_after_time, $delete_after_time);
 
             $old_attachments = $wpdb->get_col( $sql );
 
@@ -532,10 +535,15 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $table = bm_get_table('messages');
             $message_attachments = Better_Messages()->functions->get_message_meta($message_id, 'attachments', true);
 
-            $file_path = get_attached_file( $attachment_id );
-            wp_delete_attachment($attachment_id, true);
-            if ( $file_path ) {
-                $this->cleanup_empty_directories( $file_path );
+            $message_refs = get_post_meta( $attachment_id, 'bp-better-messages-message-id' );
+            if( count( $message_refs ) > 1 ) {
+                delete_post_meta( $attachment_id, 'bp-better-messages-message-id', $message_id );
+            } else {
+                $file_path = get_attached_file( $attachment_id );
+                wp_delete_attachment($attachment_id, true);
+                if ( $file_path ) {
+                    $this->cleanup_empty_directories( $file_path );
+                }
             }
 
             /**
@@ -1282,21 +1290,40 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             if ( ! ( $user_id > 0 && user_can( $user_id, 'manage_options' ) ) ) {
                 // Check thread access
                 $thread_id = (int) get_post_meta( $attachment_id, 'bp-better-messages-thread-id', true );
-                if ( $thread_id <= 0 ) {
-                    return new WP_Error(
-                        'rest_forbidden',
-                        _x( 'File access denied.', 'File Proxy Error', 'bp-better-messages' ),
-                        array( 'status' => 403 )
-                    );
-                }
 
-                $has_access = Better_Messages()->functions->check_access( $thread_id, $user_id );
-                if ( ! $has_access ) {
-                    return new WP_Error(
-                        'rest_forbidden',
-                        _x( 'You do not have access to this conversation.', 'File Proxy Error', 'bp-better-messages' ),
-                        array( 'status' => 403 )
-                    );
+                if ( $thread_id <= 0 ) {
+                    // Bulk attachments have thread_id=0; validate via bulk job tables
+                    global $wpdb;
+                    $has_access = false;
+                    $bulk_job_id = (int) get_post_meta( $attachment_id, 'bp-better-messages-bulk-job-id', true );
+
+                    if ( $bulk_job_id > 0 ) {
+                        $has_access = (bool) $wpdb->get_var( $wpdb->prepare(
+                            "SELECT 1 FROM " . bm_get_table('bulk_job_threads') . " jt
+                             INNER JOIN " . bm_get_table('recipients') . " r
+                               ON r.thread_id = jt.thread_id AND r.user_id = %d
+                             WHERE jt.job_id = %d
+                             LIMIT 1",
+                            $user_id, $bulk_job_id
+                        ) );
+                    }
+
+                    if ( ! $has_access ) {
+                        return new WP_Error(
+                            'rest_forbidden',
+                            _x( 'File access denied.', 'File Proxy Error', 'bp-better-messages' ),
+                            array( 'status' => 403 )
+                        );
+                    }
+                } else {
+                    $has_access = Better_Messages()->functions->check_access( $thread_id, $user_id );
+                    if ( ! $has_access ) {
+                        return new WP_Error(
+                            'rest_forbidden',
+                            _x( 'You do not have access to this conversation.', 'File Proxy Error', 'bp-better-messages' ),
+                            array( 'status' => 403 )
+                        );
+                    }
                 }
             }
 

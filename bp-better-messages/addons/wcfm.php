@@ -113,18 +113,29 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
                 </div>
             </div>
             <script type="text/javascript">
-                jQuery(document).ready(function(){
-                    var container = jQuery('#wcfm-main-content .wcfm-content-container');
-                    var totalHeight = container.outerHeight();
-                    var headerHeight = container.find('.wcfm-page-headig').outerHeight();
-                    var resultHeight = totalHeight - headerHeight;
+                (function(){
+                    function initWcfmLayout(){
+                        var container = document.querySelector('#wcfm-main-content .wcfm-content-container');
+                        if( ! container ) return;
+                        var totalHeight = container.offsetHeight;
+                        var header = container.querySelector('.wcfm-page-headig');
+                        var headerHeight = header ? header.offsetHeight : 0;
+                        var resultHeight = totalHeight - headerHeight;
 
-                    if( typeof Better_Messages !== 'undefined' ) {
-                        container.find('.bp-messages-wrap').css({ 'height': resultHeight });
-                        container.find('.bp-messages-threads-wrapper').css({ 'height': resultHeight });
-                        Better_Messages['maxHeight'] = resultHeight;
+                        if( typeof Better_Messages !== 'undefined' ) {
+                            var wrap = container.querySelector('.bp-messages-wrap');
+                            if( wrap ) wrap.style.height = resultHeight + 'px';
+                            var threadsWrap = container.querySelector('.bp-messages-threads-wrapper');
+                            if( threadsWrap ) threadsWrap.style.height = resultHeight + 'px';
+                            Better_Messages['maxHeight'] = resultHeight;
+                        }
                     }
-                });
+                    if( document.readyState === 'loading' ){
+                        document.addEventListener('DOMContentLoaded', initWcfmLayout);
+                    } else {
+                        initWcfmLayout();
+                    }
+                })();
             </script>
             <?php
         }
@@ -136,10 +147,21 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
 
             Better_Messages()->enqueue_css( true );
 
-            $js = 'jQuery(document).ready(function($){
-                var link = jQuery(".wcfm_menu_bpbm-messages .wcfm_menu_item .text");
-                link.append(\'' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]') . '\');
-            });';
+            $js = '(function(){
+                function initWcfmCounter(){
+                    var link = document.querySelector(".wcfm_menu_bpbm-messages .wcfm_menu_item .text");
+                    if( link ){
+                        var tmp = document.createElement("div");
+                        tmp.innerHTML = \'' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]') . '\';
+                        while( tmp.firstChild ) link.appendChild( tmp.firstChild );
+                    }
+                }
+                if( document.readyState === "loading" ){
+                    document.addEventListener("DOMContentLoaded", initWcfmCounter);
+                } else {
+                    initWcfmCounter();
+                }
+            })();';
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js( $js ) );
 

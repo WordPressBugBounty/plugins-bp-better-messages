@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.8;
+        private $db_version = 1.9;
 
         public static function instance()
         {
@@ -308,6 +308,44 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                      PRIMARY KEY (`ID`),
                     KEY `last_activity_index` (`last_activity`),
                     KEY `last_changed_index` (`last_changed`)
+                ) ENGINE=InnoDB;",
+
+                "CREATE TABLE `" . bm_get_table('bulk_jobs') . "` (
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                    `sender_id` bigint(20) NOT NULL,
+                    `subject` varchar(255) NOT NULL DEFAULT '',
+                    `message` longtext NOT NULL,
+                    `selectors` longtext NOT NULL,
+                    `attachment_ids` text NOT NULL DEFAULT '',
+                    `status` varchar(20) NOT NULL DEFAULT 'pending',
+                    `disable_reply` tinyint(1) NOT NULL DEFAULT 0,
+                    `use_existing_thread` tinyint(1) NOT NULL DEFAULT 0,
+                    `hide_thread` tinyint(1) NOT NULL DEFAULT 0,
+                    `single_thread` tinyint(1) NOT NULL DEFAULT 0,
+                    `parent_job_id` bigint(20) NOT NULL DEFAULT 0,
+                    `total_users` int(11) NOT NULL DEFAULT 0,
+                    `processed_count` int(11) NOT NULL DEFAULT 0,
+                    `error_count` int(11) NOT NULL DEFAULT 0,
+                    `current_page` int(11) NOT NULL DEFAULT 1,
+                    `scheduled_at` datetime DEFAULT NULL,
+                    `batch_size` int(11) NOT NULL DEFAULT 0,
+                    `error_log` longtext DEFAULT NULL,
+                    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `started_at` datetime DEFAULT NULL,
+                    `completed_at` datetime DEFAULT NULL,
+                    PRIMARY KEY (`id`),
+                    KEY `status_index` (`status`)
+                ) ENGINE=InnoDB;",
+
+                "CREATE TABLE `" . bm_get_table('bulk_job_threads') . "` (
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                    `job_id` bigint(20) NOT NULL,
+                    `thread_id` bigint(20) NOT NULL,
+                    `message_id` bigint(20) NOT NULL DEFAULT 0,
+                    `user_id` bigint(20) NOT NULL DEFAULT 0,
+                    PRIMARY KEY (`id`),
+                    KEY `job_id_index` (`job_id`),
+                    KEY `thread_id_index` (`thread_id`)
                 ) ENGINE=InnoDB;"
             ];
 
@@ -516,6 +554,132 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     "ALTER TABLE `" . bm_get_table('moderation') ."` MODIFY COLUMN `type` enum('ban','mute','bypass_moderation','force_moderation') NOT NULL;",
                     "ALTER TABLE `" . bm_get_table('messages') ."` ADD COLUMN `is_pending` tinyint(1) NOT NULL DEFAULT '0';",
                     "ALTER TABLE `" . bm_get_table('messages') ."` ADD INDEX `is_pending_index` (`is_pending`);",
+                ],
+                '1.9' => [
+                    function (){
+                        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+                        global $wpdb;
+
+                        dbDelta([
+                            "CREATE TABLE `" . bm_get_table('bulk_jobs') . "` (
+                                `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                `sender_id` bigint(20) NOT NULL,
+                                `subject` varchar(255) NOT NULL DEFAULT '',
+                                `message` longtext NOT NULL,
+                                `selectors` longtext NOT NULL,
+                                `attachment_ids` text NOT NULL DEFAULT '',
+                                `status` varchar(20) NOT NULL DEFAULT 'pending',
+                                `disable_reply` tinyint(1) NOT NULL DEFAULT 0,
+                                `use_existing_thread` tinyint(1) NOT NULL DEFAULT 0,
+                                `hide_thread` tinyint(1) NOT NULL DEFAULT 0,
+                                `single_thread` tinyint(1) NOT NULL DEFAULT 0,
+                                `parent_job_id` bigint(20) NOT NULL DEFAULT 0,
+                                `total_users` int(11) NOT NULL DEFAULT 0,
+                                `processed_count` int(11) NOT NULL DEFAULT 0,
+                                `error_count` int(11) NOT NULL DEFAULT 0,
+                                `current_page` int(11) NOT NULL DEFAULT 1,
+                                `scheduled_at` datetime DEFAULT NULL,
+                                `batch_size` int(11) NOT NULL DEFAULT 0,
+                                `error_log` longtext DEFAULT NULL,
+                                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                `started_at` datetime DEFAULT NULL,
+                                `completed_at` datetime DEFAULT NULL,
+                                PRIMARY KEY (`id`),
+                                KEY `status_index` (`status`)
+                            ) ENGINE=InnoDB;",
+                            "CREATE TABLE `" . bm_get_table('bulk_job_threads') . "` (
+                                `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                `job_id` bigint(20) NOT NULL,
+                                `thread_id` bigint(20) NOT NULL,
+                                `message_id` bigint(20) NOT NULL DEFAULT 0,
+                                `user_id` bigint(20) NOT NULL DEFAULT 0,
+                                PRIMARY KEY (`id`),
+                                KEY `job_id_index` (`job_id`),
+                                KEY `thread_id_index` (`thread_id`)
+                            ) ENGINE=InnoDB;"
+                        ]);
+
+                        // Migrate old bpbm-bulk-report posts to new table
+                        $reports = get_posts([
+                            'post_type'      => 'bpbm-bulk-report',
+                            'post_status'    => 'any',
+                            'posts_per_page' => -1
+                        ]);
+
+                        if ( count( $reports ) > 0 ) {
+                            $bulk_jobs_table = bm_get_table('bulk_jobs');
+                            $bulk_job_threads_table = bm_get_table('bulk_job_threads');
+
+                            foreach ( $reports as $report ) {
+                                $selectors = get_post_meta( $report->ID, 'selectors', true );
+                                $message   = get_post_meta( $report->ID, 'message', true );
+                                $subject   = get_post_meta( $report->ID, 'subject', true );
+                                $disable_reply = get_post_meta( $report->ID, 'disableReply', true ) === '1' ? 1 : 0;
+                                $use_existing  = get_post_meta( $report->ID, 'useExistingThread', true ) === '1' ? 1 : 0;
+                                $hide_thread   = get_post_meta( $report->ID, 'hideThread', true ) === '1' ? 1 : 0;
+
+                                $thread_ids  = get_post_meta( $report->ID, 'thread_ids' );
+                                $message_ids = get_post_meta( $report->ID, 'message_ids' );
+
+                                $total = count( $thread_ids );
+
+                                $wpdb->insert( $bulk_jobs_table, [
+                                    'sender_id'            => (int) $report->post_author,
+                                    'subject'              => $subject ?: '',
+                                    'message'              => $message ?: '',
+                                    'selectors'            => is_array( $selectors ) ? wp_json_encode( $selectors ) : '{}',
+                                    'attachment_ids'       => '[]',
+                                    'status'               => 'completed',
+                                    'disable_reply'        => $disable_reply,
+                                    'use_existing_thread'  => $use_existing,
+                                    'hide_thread'          => $hide_thread,
+                                    'single_thread'        => 0,
+                                    'total_users'          => $total,
+                                    'processed_count'      => $total,
+                                    'error_count'          => 0,
+                                    'current_page'         => 1,
+                                    'created_at'           => $report->post_date,
+                                    'started_at'           => $report->post_date,
+                                    'completed_at'         => $report->post_date,
+                                ]);
+
+                                $job_id = $wpdb->insert_id;
+
+                                if ( $job_id && count( $thread_ids ) > 0 ) {
+                                    foreach ( $thread_ids as $i => $thread_id ) {
+                                        if ( ! is_numeric( $thread_id ) ) continue;
+                                        $msg_id = isset( $message_ids[ $i ] ) && is_numeric( $message_ids[ $i ] ) ? (int) $message_ids[ $i ] : 0;
+                                        $wpdb->insert( $bulk_job_threads_table, [
+                                            'job_id'     => $job_id,
+                                            'thread_id'  => (int) $thread_id,
+                                            'message_id' => $msg_id,
+                                            'user_id'    => 0,
+                                        ]);
+                                    }
+                                }
+
+                                // Delete old post and its meta
+                                wp_delete_post( $report->ID, true );
+                            }
+                        }
+                    },
+                    function (){
+                        global $wpdb;
+                        $table = bm_get_table('bulk_jobs');
+                        $column_exists = $wpdb->get_results( "SHOW COLUMNS FROM `{$table}` LIKE 'parent_job_id'" );
+                        if ( empty( $column_exists ) ) {
+                            $wpdb->query( "ALTER TABLE `{$table}` ADD `parent_job_id` bigint(20) NOT NULL DEFAULT 0 AFTER `single_thread`" );
+                        }
+                    },
+                    function (){
+                        global $wpdb;
+                        $table = bm_get_table('bulk_jobs');
+                        $col = $wpdb->get_results( "SHOW COLUMNS FROM `{$table}` LIKE 'scheduled_at'" );
+                        if ( empty( $col ) ) {
+                            $wpdb->query( "ALTER TABLE `{$table}` ADD `scheduled_at` datetime DEFAULT NULL AFTER `current_page`" );
+                            $wpdb->query( "ALTER TABLE `{$table}` ADD `batch_size` int(11) NOT NULL DEFAULT 0 AFTER `scheduled_at`" );
+                        }
+                    }
                 ]
             ];
 

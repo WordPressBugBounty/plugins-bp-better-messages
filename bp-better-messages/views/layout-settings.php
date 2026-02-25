@@ -93,6 +93,13 @@ $has_late_message = ob_get_clean();
         display: block;
     }
 
+    .bpbm-sub-tabs .nav-tab{
+        font-size: 13px;
+        padding: 6px 10px;
+        line-height: 1.4;
+        margin-bottom: -1px;
+    }
+
     td.attachments-formats ul{
         display: inline-block;
         vertical-align: top;
@@ -892,7 +899,9 @@ $has_late_message = ob_get_clean();
                                     $output .= "\t<option value=\"woocommerce\" " . selected($parsed_args['selected'], 'woocommerce', false) . ">" . _x('Show in WooCommerce My Account',  'Settings page', 'bp-better-message' ) . "</option>\n";
                                 }
 
-
+                                if( defined('SUREDASHBOARD_VER') ) {
+                                    $output .= "\t<option value=\"suredash-portal\" " . selected($parsed_args['selected'], 'suredash-portal', false) . ">" . _x('Show in SureDash Portal',  'Settings page', 'bp-better-messages' ) . "</option>\n";
+                                }
 
                                 if ( ! empty( $pages ) ) {
                                     $output .= walk_page_dropdown_tree( $pages, $parsed_args['depth'], $parsed_args );
@@ -1534,6 +1543,31 @@ $has_late_message = ob_get_clean();
                                     <th>
                                         <?php _ex( 'Add "Private Message" button to message context menu', 'Settings page', 'bp-better-messages' ); ?>
                                         <p style="font-size: 10px;"><?php _ex( 'Enables easy way to send message to specific user in group conversations by opening his message context menu', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+
+                                <tr valign="top" class="">
+                                    <td>
+                                        <input name="enableForwardMessages" type="checkbox" <?php checked( $this->settings[ 'enableForwardMessages' ], '1' ); ?> value="1" />
+                                    </td>
+                                    <th>
+                                        <?php _ex( 'Enable Forward Messages', 'Settings page', 'bp-better-messages' ); ?>
+                                        <p style="font-size: 10px;"><?php _ex( 'Allow users to forward messages to other conversations', 'Settings page', 'bp-better-messages' ); ?></p>
+                                    </th>
+                                </tr>
+                                <tr valign="top">
+                                    <td style="padding:0"></td>
+                                    <th style="padding:0">
+                                        <table>
+                                            <tbody>
+                                            <tr>
+                                                <td style="padding:0">
+                                                    <input style="vertical-align: middle;" name="forwardMessagesAttribution" type="checkbox" <?php checked( $this->settings[ 'forwardMessagesAttribution' ], '1' ); ?> value="1" />
+                                                    <label style="padding-left:5px"><?php _ex( 'Show "Forwarded from" attribution on forwarded messages', 'Settings page', 'bp-better-messages' ); ?></label>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </th>
                                 </tr>
 
@@ -4482,6 +4516,8 @@ $has_late_message = ob_get_clean();
             $active_integration = 'integrations_bm-peepso';
         } else if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){
             $active_integration = 'integrations_bm-fluentcommunity';
+        } else if( defined('SUREDASHBOARD_VER') ){
+            $active_integration = 'integrations_bm-suredash';
         }
         ?>
         <div id="integrations" class="bpbm-tab">
@@ -4489,7 +4525,13 @@ $has_late_message = ob_get_clean();
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-buddypress') echo 'nav-tab-active'; ?>" id="integrations_bm-buddypress-tab" href="#integrations_bm-buddypress">BuddyPress & BuddyBoss</a>
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-ultimate-member') echo 'nav-tab-active'; ?>" id="integrations_bm-ultimate-member-tab" href="#integrations_bm-ultimate-member">Ultimate Member</a>
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-peepso') echo 'nav-tab-active'; ?>" id="integrations_bm-peepso-tab" href="#integrations_bm-peepso">PeepSo</a>
+                <?php if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ) { ?>
                 <a class="nav-tab <?php if($active_integration === 'integrations_bm-fluentcommunity') echo 'nav-tab-active'; ?>" id="integrations_bm-fluentcommunity-tab" href="#integrations_bm-fluentcommunity">FluentCommunity</a>
+                <?php } ?>
+                <?php if( defined('SUREDASHBOARD_VER') ) { ?>
+                <a class="nav-tab <?php if($active_integration === 'integrations_bm-suredash') echo 'nav-tab-active'; ?>" id="integrations_bm-suredash-tab" href="#integrations_bm-suredash">SureDash</a>
+                <?php } ?>
+                <a class="nav-tab" id="integrations_woocommerce-tab" href="#integrations_bm-woocommerce">WooCommerce</a>
                 <a class="nav-tab" id="integrations_other-plugins-tab" href="#integrations_bm-other-plugins"><?php _ex( 'Other Plugins', 'Settings page', 'bp-better-messages' ); ?></a>
                 <a class="nav-tab" id="integrations_openai-tab" href="#integrations_openai">Open AI</a>
                 <a class="nav-tab" id="integrations_mycred-tab" href="#integrations_mycred">MyCRED</a>
@@ -4498,14 +4540,8 @@ $has_late_message = ob_get_clean();
                 <a class="nav-tab" id="integrations_emojies-tab" href="#integrations_bm-emojies"><?php _ex( 'Emojis', 'Settings page','bp-better-messages' ); ?></a>
             </div>
 
+            <?php if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ) { ?>
             <div id="integrations_bm-fluentcommunity" class="bpbm-subtab <?php if($active_integration === 'integrations_bm-fluentcommunity') echo 'active'; ?>">
-                <?php if( ! defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){ ?>
-                    <div class="bp-better-messages-connection-check bpbm-error" style="margin: 20px 0;">
-                        <p><?php echo sprintf(esc_html_x('Website must to have %s plugin to be installed.', 'Settings page', 'bp-better-messages'), '<a href="https://www.wordplus.org/fluentcommunity" target="_blank">FluentCommunity</a>'); ?></p>
-                        <p><small><?php echo esc_attr_x('This notice will be hidden when FluentCommunity plugin is installed', 'Settings page', 'bp-better-messages'); ?></small></p>
-                    </div>
-                <?php } ?>
-
                 <table class="form-table">
                     <tbody>
 
@@ -4645,6 +4681,7 @@ $has_late_message = ob_get_clean();
                     </tbody>
                 </table>
             </div>
+            <?php } ?>
 
             <div id="integrations_bm-peepso" class="bpbm-subtab <?php if($active_integration === 'integrations_bm-peepso') echo 'active'; ?>">
                 <?php if( ! class_exists('PeepSo') ){ ?>
@@ -4850,39 +4887,56 @@ $has_late_message = ob_get_clean();
                 </table>
             </div>
 
-            <div id="integrations_bm-other-plugins" class="bpbm-subtab">
+            <?php if( defined('SUREDASHBOARD_VER') ) { ?>
+            <div id="integrations_bm-suredash" class="bpbm-subtab <?php if($active_integration === 'integrations_bm-suredash') echo 'active'; ?>">
+
                 <table class="form-table">
                     <tbody>
 
                     <tr>
                         <th scope="row">
-                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/multivendorx" target="_blank">MultiVendorX</a>'); ?>
-
-                            <?php if( ! defined('MVX_PLUGIN_VERSION') ){ ?>
-                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/multivendorx" target="_blank">MultiVendorX</a>'); ?></p>
-                            <?php } ?>
+                            <?php _ex( 'SureDash User Profiles', 'Settings page', 'bp-better-messages' ); ?>
                         </th>
                         <td>
                             <fieldset>
                                 <table class="widefat bm-switcher-table">
                                     <tbody>
-
                                     <tr>
                                         <td>
-                                            <input name="MultiVendorXIntegration" type="checkbox" <?php checked( $this->settings[ 'MultiVendorXIntegration' ], '1' ); ?> value="1" />
+                                            <input name="SDenableProfileButton" type="checkbox" <?php checked( $this->settings['SDenableProfileButton'], '1' ); ?> value="1" />
                                         </td>
-                                        <th style="padding-bottom:0;">
-                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
-                                            <p style="font-size: 10px;"><?php _ex( 'When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        <th>
+                                            <?php _ex( 'Send Message button on user profiles', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add Send Message button to SureDash user profile pages', 'Settings page', 'bp-better-messages' ); ?></p>
                                         </th>
                                     </tr>
                                     <tr>
-                                        <td></td>
-                                        <th style="padding-top: 0;">
-                                            <p style="font-size: 12px;font-weight: 400;">
-                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
-                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_multivendorx_product_button]">
-                                            </p>
+                                        <td>
+                                            <input name="SDenableAuthorButton" type="checkbox" <?php checked( $this->settings['SDenableAuthorButton'], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Message button next to discussion authors', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add a compact message icon next to post and comment authors in SureDash discussions', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input name="SDProfileVideoCall" type="checkbox" <?php checked( $this->settings['SDProfileVideoCall'], '1' ); ?> value="1" <?php if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Video Call button on user profiles', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add video call button to SureDash user profile pages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php Better_Messages()->functions->license_proposal(); ?>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input name="SDProfileAudioCall" type="checkbox" <?php checked( $this->settings['SDProfileAudioCall'], '1' ); ?> value="1" <?php if( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) echo 'disabled'; ?> />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Audio Call button on user profiles', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add audio call button to SureDash user profile pages', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php Better_Messages()->functions->license_proposal(); ?>
                                         </th>
                                     </tr>
                                     </tbody>
@@ -4893,34 +4947,28 @@ $has_late_message = ob_get_clean();
 
                     <tr>
                         <th scope="row">
-                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/hivepress" target="_blank">HivePress</a>'); ?>
-
-                            <?php if( ! function_exists('hivepress') ){ ?>
-                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/hivepress" target="_blank">HivePress</a>'); ?></p>
-                            <?php } ?>
+                            <?php _ex( 'SureDash Navigation', 'Settings page', 'bp-better-messages' ); ?>
                         </th>
                         <td>
                             <fieldset>
                                 <table class="widefat bm-switcher-table">
                                     <tbody>
-
                                     <tr>
                                         <td>
-                                            <input name="hivepressIntegration" type="checkbox" <?php checked( $this->settings[ 'hivepressIntegration' ], '1' ); ?> value="1" />
+                                            <input name="SDenableSidebarMessages" type="checkbox" <?php checked( $this->settings['SDenableSidebarMessages'], '1' ); ?> value="1" />
                                         </td>
                                         <th>
-                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
-                                            <p style="font-size: 10px;"><?php _ex( 'When enabled visitors will be able to contact vendors easily using Send Message button at the listing page and Vendors profile', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php _ex( 'Messages link in sidebar', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add a Messages link with unread counter to SureDash sidebar navigation', 'Settings page', 'bp-better-messages' ); ?></p>
                                         </th>
                                     </tr>
-
                                     <tr>
                                         <td>
-                                            <input name="hivepressMenuItem" type="checkbox" <?php checked( $this->settings[ 'hivepressMenuItem' ], '1' ); ?> value="1" />
+                                            <input name="SDenableDropdownMessages" type="checkbox" <?php checked( $this->settings['SDenableDropdownMessages'], '1' ); ?> value="1" />
                                         </td>
                                         <th>
-                                            <?php _ex( 'Add messages item to HivePress User Menu', 'Settings page', 'bp-better-messages' ); ?>
-                                            <p style="font-size: 10px;"><?php _ex( 'When enabled messages menu item will be added to HivePress User Menu and unread messages counter will be shown in it', 'Settings page', 'bp-better-messages' ); ?></p>
+                                            <?php _ex( 'Messages link in profile dropdown', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'Add a Messages link with unread counter to SureDash user profile dropdown menu', 'Settings page', 'bp-better-messages' ); ?></p>
                                         </th>
                                     </tr>
                                     </tbody>
@@ -4929,42 +4977,13 @@ $has_late_message = ob_get_clean();
                         </td>
                     </tr>
 
-                    <tr>
-                        <th scope="row">
-                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/wpjobmanager" target="_blank">WP Job Manager</a>'); ?>
-
-                            <?php if( ! class_exists('WP_Job_Manager') ){ ?>
-                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/wpjobmanager" target="_blank">WP Job Manager</a>'); ?></p>
-                            <?php } ?>
-                        </th>
-                        <td>
-                            <fieldset>
-                                <table class="widefat bm-switcher-table">
-                                    <tbody>
-
-                                    <tr>
-                                        <td>
-                                            <input name="wpJobManagerIntegration" type="checkbox" <?php checked( $this->settings[ 'wpJobManagerIntegration' ], '1' ); ?> value="1" />
-                                        </td>
-                                        <th style="padding-bottom:0;">
-                                            <?php _ex( 'Enable Live Chat for Job Listings', 'Settings page', 'bp-better-messages' ); ?>
-                                            <p style="font-size: 10px;"><?php _ex( 'When enabled visitors will be able to contact job listing authors easily using Send Message button at the listing page', 'Settings page', 'bp-better-messages' ); ?></p>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <th style="padding-top: 0;">
-                                            <p style="font-size: 12px;font-weight: 400;">
-                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your job listing page', 'Settings page', 'bp-better-messages' ); ?>
-                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_wp_job_manager_listing_button]">
-                                            </p>
-                                        </th>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </fieldset>
-                        </td>
-                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <?php } ?>
+            <div id="integrations_bm-woocommerce" class="bpbm-subtab">
+                <table class="form-table">
+                    <tbody>
 
                     <tr>
                         <th scope="row">
@@ -5068,6 +5087,126 @@ $has_late_message = ob_get_clean();
                                             <p style="font-size: 12px;font-weight: 400;">
                                                 <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
                                                 <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_wcfm_product_button]">
+                                            </p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/multivendorx" target="_blank">MultiVendorX</a>'); ?>
+
+                            <?php if( ! defined('MVX_PLUGIN_VERSION') ){ ?>
+                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/multivendorx" target="_blank">MultiVendorX</a>'); ?></p>
+                            <?php } ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+
+                                    <tr>
+                                        <td>
+                                            <input name="MultiVendorXIntegration" type="checkbox" <?php checked( $this->settings[ 'MultiVendorXIntegration' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th style="padding-bottom:0;">
+                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled vendors will be able to activate live chat feature in their stores, which will allow buyers easily contact vendors via live chat', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th style="padding-top: 0;">
+                                            <p style="font-size: 12px;font-weight: 400;">
+                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your product page', 'Settings page', 'bp-better-messages' ); ?>
+                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_multivendorx_product_button]">
+                                            </p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="integrations_bm-other-plugins" class="bpbm-subtab">
+                <table class="form-table">
+                    <tbody>
+
+                    <tr>
+                        <th scope="row">
+                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/hivepress" target="_blank">HivePress</a>'); ?>
+
+                            <?php if( ! function_exists('hivepress') ){ ?>
+                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/hivepress" target="_blank">HivePress</a>'); ?></p>
+                            <?php } ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+
+                                    <tr>
+                                        <td>
+                                            <input name="hivepressIntegration" type="checkbox" <?php checked( $this->settings[ 'hivepressIntegration' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Enable Live Chat for Vendors', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled visitors will be able to contact vendors easily using Send Message button at the listing page and Vendors profile', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <input name="hivepressMenuItem" type="checkbox" <?php checked( $this->settings[ 'hivepressMenuItem' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th>
+                                            <?php _ex( 'Add messages item to HivePress User Menu', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled messages menu item will be added to HivePress User Menu and unread messages counter will be shown in it', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <?php printf(_x( '%s Integration', 'Settings page','bp-better-messages' ), '<a href="https://www.wordplus.org/wpjobmanager" target="_blank">WP Job Manager</a>'); ?>
+
+                            <?php if( ! class_exists('WP_Job_Manager') ){ ?>
+                                <p style="font-size: 10px;"><?php printf(_x( '%s must be installed', 'Settings page', 'bp-better-messages' ), '<a href="https://www.wordplus.org/wpjobmanager" target="_blank">WP Job Manager</a>'); ?></p>
+                            <?php } ?>
+                        </th>
+                        <td>
+                            <fieldset>
+                                <table class="widefat bm-switcher-table">
+                                    <tbody>
+
+                                    <tr>
+                                        <td>
+                                            <input name="wpJobManagerIntegration" type="checkbox" <?php checked( $this->settings[ 'wpJobManagerIntegration' ], '1' ); ?> value="1" />
+                                        </td>
+                                        <th style="padding-bottom:0;">
+                                            <?php _ex( 'Enable Live Chat for Job Listings', 'Settings page', 'bp-better-messages' ); ?>
+                                            <p style="font-size: 10px;"><?php _ex( 'When enabled visitors will be able to contact job listing authors easily using Send Message button at the listing page', 'Settings page', 'bp-better-messages' ); ?></p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th style="padding-top: 0;">
+                                            <p style="font-size: 12px;font-weight: 400;">
+                                                <?php _ex( 'If you are using custom page builder or button does not show up due to different reasons, you can use this shortcode to show the button at your job listing page', 'Settings page', 'bp-better-messages' ); ?>
+                                                <input readonly="" type="text" style="margin: 0;width: 100%;padding-left: 5px;font-size: 12px;" onclick="this.focus();this.select()" value="[better_messages_wp_job_manager_listing_button]">
                                             </p>
                                         </th>
                                     </tr>

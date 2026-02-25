@@ -333,6 +333,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Fluent_Community::instance();
             }
 
+            if( defined('SUREDASHBOARD_VER') ){
+                require_once Better_Messages()->path . 'addons/suredash.php';
+                Better_Messages_SureDash::instance();
+            }
+
             if( class_exists('DaftPlug\Progressify\Plugin') ){
                 require_once Better_Messages()->path . 'addons/progressify.php';
                 Better_Messages_Progressify::instance();
@@ -346,6 +351,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( Better_Messages()->settings['enableReplies'] === '1' ){
                 add_filter( 'better_messages_rest_message_meta', array( $this, 'reply_message_meta'), 10, 4 );
+            }
+
+            if( Better_Messages()->settings['enableForwardMessages'] === '1' ){
+                add_filter( 'better_messages_rest_message_meta', array( $this, 'forward_message_meta'), 10, 4 );
             }
 
             if( function_exists('jet_engine') ){
@@ -488,6 +497,21 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( $reply_to ){
                 $meta['replyTo'] = (int) $reply_to;
+            }
+
+            return $meta;
+        }
+
+        public function forward_message_meta( $meta, $message_id, $thread_id, $content ){
+            $forwarded_from_message = Better_Messages()->functions->get_message_meta( $message_id, 'forwarded_from_message', true );
+
+            if( $forwarded_from_message ){
+                $meta['forwardedFrom'] = (int) $forwarded_from_message;
+
+                $forwarded_from_user = Better_Messages()->functions->get_message_meta( $message_id, 'forwarded_from_user', true );
+                if( $forwarded_from_user ){
+                    $meta['forwardedFromUser'] = (int) $forwarded_from_user;
+                }
             }
 
             return $meta;
@@ -1265,17 +1289,20 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 </style>
                 <script type="text/javascript">
                     wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                        var private_messages = jQuery('#nav_private_messages');
+                        var private_messages = document.getElementById('nav_private_messages');
+                        if( ! private_messages ) return;
 
                         if( unread > 0 ){
-                            var count = private_messages.find('span.count');
-                            if( count.length === 0 ){
-                                private_messages.append('<span class="count">' + unread + '</span>');
-                            } else {
-                                private_messages.find('.count').text(unread);
+                            var count = private_messages.querySelector('span.count');
+                            if( ! count ){
+                                count = document.createElement('span');
+                                count.className = 'count';
+                                private_messages.appendChild(count);
                             }
+                            count.textContent = unread;
                         } else {
-                            private_messages.find('span.count').remove();
+                            var count = private_messages.querySelector('span.count');
+                            if( count ) count.remove();
                         }
                     });
                 </script>
@@ -1396,90 +1423,113 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( class_exists('BuddyBoss_Theme') ){ ?>
                     wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                        var messages_count = jQuery('.header-notifications.user-messages span');
-                        if( unread > 0 ){
-                            messages_count.text(unread).attr('class', 'count');
-                        } else {
-                            messages_count.text(unread).attr('class', 'no-alert');
-                        }
+                        document.querySelectorAll('.header-notifications.user-messages span').forEach(function( messages_count ){
+                            messages_count.textContent = unread;
+                            messages_count.className = unread > 0 ? 'count' : 'no-alert';
+                        });
                     });
             <?php } else if( function_exists( 'buddyboss_theme_register_required_plugins' ) ){  ?>
                     wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
                         var iconSelector = '.bb-icon-inbox-small';
 
-                        if( jQuery('body').hasClass('bb-template-v2') || jQuery('body').hasClass('bb-template-v1') ){
+                        if( document.body.classList.contains('bb-template-v2') || document.body.classList.contains('bb-template-v1') ){
                             iconSelector = '.bb-icon-inbox';
                         }
 
-                        var messages_count = jQuery('.notification-wrap.messages-wrap .count');
-                        if( unread > 0 ){
-                            if( messages_count.length === 0 ){
-                                jQuery('.notification-wrap.messages-wrap').find(iconSelector).parent().append( '<span class="count">' + unread + '</span>' );
-                            } else {
-                                messages_count.text(unread).show();
-                            }
-                        } else {
-                            messages_count.text(unread).hide();
-                        }
-
-                        var buddypanel = jQuery('.buddypanel-menu .bp-messages-nav > a');
-                        if( buddypanel.length > 0 ){
-                            var messages_count = buddypanel.find('.count');
+                        document.querySelectorAll('.notification-wrap.messages-wrap').forEach(function( messagesWrap ){
+                            var messages_count = messagesWrap.querySelector('.count');
                             if( unread > 0 ){
-                                if( messages_count.length === 0 ){
-                                    buddypanel.append( '<span class="count">' + unread + '</span>' );
-                                } else {
-                                    messages_count.text(unread).show();
+                                if( ! messages_count ){
+                                    var iconEl = messagesWrap.querySelector(iconSelector);
+                                    if( iconEl && iconEl.parentElement ){
+                                        messages_count = document.createElement('span');
+                                        messages_count.className = 'count';
+                                        iconEl.parentElement.appendChild(messages_count);
+                                    }
+                                }
+                                if( messages_count ){
+                                    messages_count.textContent = unread;
+                                    messages_count.style.display = '';
                                 }
                             } else {
-                                messages_count.text(unread).hide();
+                                if( messages_count ){
+                                    messages_count.textContent = unread;
+                                    messages_count.style.display = 'none';
+                                }
                             }
-                        }
+                        });
+
+                        document.querySelectorAll('.buddypanel-menu .bp-messages-nav > a').forEach(function( buddypanel ){
+                            var bp_count = buddypanel.querySelector('.count');
+                            if( unread > 0 ){
+                                if( ! bp_count ){
+                                    bp_count = document.createElement('span');
+                                    bp_count.className = 'count';
+                                    buddypanel.appendChild(bp_count);
+                                }
+                                bp_count.textContent = unread;
+                                bp_count.style.display = '';
+                            } else {
+                                if( bp_count ){
+                                    bp_count.textContent = unread;
+                                    bp_count.style.display = 'none';
+                                }
+                            }
+                        });
                     });
             <?php } else if( defined('BUDDYX_MINIMUM_WP_VERSION') || defined('BUDDYXPRO_MINIMUM_WP_VERSION') ){ ?>
                     wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                        var messages_count = jQuery('.buddypress-icons-wrapper .bp-msg .bp-icon-wrap sup');
-
-                        if( unread === 0 ){
-                            messages_count.hide();
-                        } else {
-                            if( messages_count.length === 0 ){
-                                jQuery('.buddypress-icons-wrapper .bp-msg .bp-icon-wrap').append('<sup>' + unread + '</sup>');
+                        document.querySelectorAll('.buddypress-icons-wrapper .bp-msg .bp-icon-wrap').forEach(function( wrap ){
+                            var sup = wrap.querySelector('sup');
+                            if( unread === 0 ){
+                                if( sup ) sup.style.display = 'none';
                             } else {
-                                messages_count.text(unread).show();
+                                if( ! sup ){
+                                    sup = document.createElement('sup');
+                                    wrap.appendChild(sup);
+                                }
+                                sup.textContent = unread;
+                                sup.style.display = '';
                             }
-                        }
+                        });
                     });
                 <?php
             } else if( defined('GRIMLOCK_BUDDYPRESS_VERSION') ){ ?>
                     wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                        var container = jQuery('.menu-item--messages');
+                        document.querySelectorAll('.menu-item--messages').forEach(function( container ){
+                            var bubbleSpan = container.querySelector('.bubble-count');
 
-                        var bubbleSpan = container.find('.bubble-count');
-
-                        if( unread > 0 ){
-                            if( bubbleSpan.length > 0 ){
-                                bubbleSpan.text(unread);
-                            } else {
-                                var bubble = '<span class="bubble-count messages-count">' + unread + '</span>';
-                                jQuery(bubble).prependTo( container );
-                            }
-                        } else {
-                            bubbleSpan.remove();
-                        }
-
-                        if( jQuery('body').hasClass('my-account') ) {
-                            var grimlock_counter = jQuery('#profile-content__nav ul.settings-nav #user-bp_better_messages_tab');
-                            var count = grimlock_counter.find('span.count');
-
-                            if (unread > 0) {
-                                if (count.length > 0) {
-                                    count.text(unread);
+                            if( unread > 0 ){
+                                if( bubbleSpan ){
+                                    bubbleSpan.textContent = unread;
                                 } else {
-                                    jQuery('<span class="count">' + unread + '</span>').appendTo(grimlock_counter);
+                                    bubbleSpan = document.createElement('span');
+                                    bubbleSpan.className = 'bubble-count messages-count';
+                                    bubbleSpan.textContent = unread;
+                                    container.insertBefore(bubbleSpan, container.firstChild);
                                 }
                             } else {
-                                count.remove();
+                                if( bubbleSpan ) bubbleSpan.remove();
+                            }
+                        });
+
+                        if( document.body.classList.contains('my-account') ) {
+                            var grimlock_counter = document.querySelector('#profile-content__nav ul.settings-nav #user-bp_better_messages_tab');
+                            if( grimlock_counter ){
+                                var count = grimlock_counter.querySelector('span.count');
+
+                                if (unread > 0) {
+                                    if ( count ) {
+                                        count.textContent = unread;
+                                    } else {
+                                        count = document.createElement('span');
+                                        count.className = 'count';
+                                        count.textContent = unread;
+                                        grimlock_counter.appendChild(count);
+                                    }
+                                } else {
+                                    if( count ) count.remove();
+                                }
                             }
                         }
                     });

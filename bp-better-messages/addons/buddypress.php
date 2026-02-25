@@ -35,6 +35,11 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                 add_filter( 'better_messages_get_groups', array($this, 'get_groups'), 10, 2 );
             }
 
+            if( bm_bp_is_active( 'groups' ) ){
+                add_filter( 'better_messages_bulk_get_all_groups', array($this, 'bulk_get_all_groups') );
+                add_filter( 'better_messages_bulk_get_group_members', array($this, 'bulk_get_group_members'), 10, 3 );
+            }
+
             if( class_exists('BP_Verified_Member') ) {
                 add_filter('better_messages_is_verified', array( $this, 'bp_verified_member' ), 10, 2 );
             }
@@ -459,6 +464,46 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             }
 
             return $groups;
+        }
+
+        public function bulk_get_all_groups( $groups ){
+            if( ! function_exists('groups_get_groups') ) return $groups;
+
+            $bp_groups = groups_get_groups(array(
+                'per_page'    => -1,
+                'show_hidden' => true
+            ));
+
+            if( ! empty( $bp_groups['groups'] ) ){
+                foreach( $bp_groups['groups'] as $group ){
+                    $groups[] = [
+                        'id'         => intval( $group->id ),
+                        'name'       => esc_attr( $group->name ),
+                        'type'       => 'bp',
+                        'type_label' => 'BuddyPress',
+                    ];
+                }
+            }
+
+            return $groups;
+        }
+
+        public function bulk_get_group_members( $user_ids, $group_type, $group_id ){
+            if( $group_type !== 'bp' ) return $user_ids;
+            if( ! function_exists('groups_get_group_members') ) return $user_ids;
+
+            $members = groups_get_group_members(array(
+                'group_id' => $group_id,
+                'per_page' => -1
+            ));
+
+            if( ! empty( $members['members'] ) ){
+                foreach( $members['members'] as $user ){
+                    $user_ids[] = (int) $user->ID;
+                }
+            }
+
+            return $user_ids;
         }
     }
 }

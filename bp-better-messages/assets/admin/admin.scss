@@ -1271,3 +1271,264 @@ table.build-info-table{
   color: #666;
   margin: 10px 0;
 }
+
+// ── Bulk Messaging: Select input fix ────────────────────────
+
+.bm-select__input input {
+  box-shadow: none !important;
+}
+
+// ── Bulk Messaging: File Drop Zone ──────────────────────────
+
+.bm-dropzone-area {
+  border: 2px dashed #c3c4c7;
+  border-radius: 4px;
+  padding: 32px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  max-width: 600px;
+
+  &:hover {
+    border-color: #2271b1;
+    background-color: #f0f6fc;
+  }
+
+  &.bm-dropzone-active {
+    border-color: #2271b1;
+    background-color: #e7f3ff;
+    border-style: solid;
+  }
+
+  .bm-dropzone-icon {
+    font-size: 40px;
+    color: #a7aaad;
+    display: block;
+    margin: 0 auto 8px;
+
+    .bm-dropzone-active & {
+      color: #2271b1;
+    }
+  }
+
+  .bm-dropzone-text {
+    font-size: 14px;
+    color: #50575e;
+
+    .bm-dropzone-active & {
+      color: #2271b1;
+      font-weight: 500;
+    }
+  }
+
+  .bm-dropzone-hint {
+    font-size: 12px;
+    color: #a7aaad;
+    margin-top: 4px;
+  }
+}
+
+// ── File List ───────────────────────────────────────────────
+
+.bm-file-list {
+  max-width: 600px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bm-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #fff;
+
+  &.bm-file-item-error {
+    border-color: #d63638;
+    background: #fcf0f1;
+  }
+
+  &.bm-file-item-uploading {
+    border-color: #2271b1;
+  }
+}
+
+.bm-file-thumb {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #f0f0f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bm-file-icon {
+    font-size: 24px;
+    color: #a7aaad;
+  }
+}
+
+.bm-file-info {
+  flex: 1;
+  min-width: 0;
+
+  .bm-file-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e1e1e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bm-file-size {
+    font-size: 12px;
+    color: #757575;
+    margin-top: 2px;
+  }
+
+  .bm-file-error-text {
+    font-size: 12px;
+    color: #d63638;
+    margin-top: 2px;
+  }
+}
+
+.bm-file-progress {
+  width: 100%;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+
+  .bm-file-progress-bar {
+    height: 100%;
+    background: #2271b1;
+    border-radius: 2px;
+    transition: width 0.15s ease;
+  }
+}
+
+.bm-file-remove {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  color: #a7aaad;
+  font-size: 20px;
+  line-height: 1;
+  border-radius: 50%;
+  transition: color 0.15s, background-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #d63638;
+    background-color: rgba(214, 54, 56, 0.08);
+  }
+}
+
+// ── Bulk Report: Expandable Thread List ─────────────────────
+
+.bm-report-row-expandable {
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f6fc;
+  }
+}
+
+.bm-report-chevron {
+  display: inline-block;
+  width: 16px;
+  font-size: 10px;
+  color: #999;
+}
+
+.bm-report-threads {
+  //padding: 12px 16px 12px 32px;
+  background: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.bm-report-threads-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.bm-thread-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.bm-thread-avatar {
+  flex-shrink: 0;
+
+  img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: block;
+  }
+}
+
+.bm-thread-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e1e1e;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bm-thread-status {
+  font-size: 12px;
+  flex-shrink: 0;
+
+  &.bm-read {
+    color: #00a32a;
+  }
+
+  &.bm-unread {
+    color: #999;
+  }
+}
+
+.bm-report-threads-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #50575e;
+}
+
+.bm-report-threads-loading {
+  padding: 16px;
+  text-align: center;
+  color: #999;
+}

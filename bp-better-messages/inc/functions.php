@@ -205,7 +205,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $is_moderator = Better_Messages()->functions->is_thread_super_moderator( $user_id, $thread_id );
 
-            if( count($participants['recipients']) >= 1 ) {
+            if( count($participants['recipients']) > 1 ) {
                 $allow_invite = ( Better_Messages()->functions->get_thread_meta($thread_id, 'allow_invite') === 'yes' );
 
                 if ($is_moderator || $allow_invite) {
@@ -322,10 +322,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $attachments = $wpdb->get_col( $sql );
 
             foreach( $attachments as $attachment_id ){
-                $file_path = get_attached_file( $attachment_id );
-                wp_delete_attachment( $attachment_id, true );
-                if ( $file_path ) {
-                    Better_Messages()->files->cleanup_empty_directories( $file_path );
+                $message_refs = get_post_meta( $attachment_id, 'bp-better-messages-message-id' );
+                if( count( $message_refs ) > 1 ) {
+                    delete_post_meta( $attachment_id, 'bp-better-messages-message-id', $message_id );
+                } else {
+                    $file_path = get_attached_file( $attachment_id );
+                    wp_delete_attachment( $attachment_id, true );
+                    if ( $file_path ) {
+                        Better_Messages()->files->cleanup_empty_directories( $file_path );
+                    }
                 }
             }
 
@@ -770,6 +775,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if (class_exists('WooCommerce') && Better_Messages()->settings['chatPage'] === 'woocommerce') {
                     $link = trailingslashit(get_permalink(get_option('woocommerce_myaccount_page_id'))) . $slug . '/';
                     return $link;
+                }
+
+                if ( defined('SUREDASHBOARD_VER') && Better_Messages()->settings['chatPage'] === 'suredash-portal' ) {
+                    $community_slug = function_exists('suredash_get_community_slug') ? suredash_get_community_slug() : 'portal';
+                    return home_url( '/' . $community_slug . '/messages/' );
                 }
             }
 

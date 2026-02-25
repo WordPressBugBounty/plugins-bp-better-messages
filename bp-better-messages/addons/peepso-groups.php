@@ -53,6 +53,11 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
                 add_filter('better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
                 add_filter('better_messages_thread_url',   array( $this, 'group_thread_url' ), 10, 3 );
             }
+
+            if( class_exists( 'PeepSoGroupsPlugin' ) ) {
+                add_filter( 'better_messages_bulk_get_all_groups', array($this, 'bulk_get_all_groups') );
+                add_filter( 'better_messages_bulk_get_group_members', array($this, 'bulk_get_group_members'), 10, 3 );
+            }
         }
 
         function update_unknown_property($key, $value, $group) {
@@ -502,6 +507,42 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             }
 
             return $sections;
+        }
+
+        public function bulk_get_all_groups( $groups ){
+            if( ! class_exists('PeepSoGroups') ) return $groups;
+
+            $PeepSoGroups = new PeepSoGroups();
+            $ps_groups = $PeepSoGroups->get_groups(0, -1, 'post_title', 'ASC', '');
+
+            if( count( $ps_groups ) > 0 ){
+                foreach( $ps_groups as $group ){
+                    if( $group->id === NULL ) continue;
+
+                    $groups[] = [
+                        'id'         => (int) $group->id,
+                        'name'       => html_entity_decode( esc_attr( $group->name ) ),
+                        'type'       => 'peepso',
+                        'type_label' => 'PeepSo',
+                    ];
+                }
+            }
+
+            return $groups;
+        }
+
+        public function bulk_get_group_members( $user_ids, $group_type, $group_id ){
+            if( $group_type !== 'peepso' ) return $user_ids;
+
+            $members = $this->get_groups_members( $group_id );
+
+            if( is_array( $members ) ){
+                foreach( $members as $uid ){
+                    $user_ids[] = (int) $uid;
+                }
+            }
+
+            return $user_ids;
         }
     }
 }

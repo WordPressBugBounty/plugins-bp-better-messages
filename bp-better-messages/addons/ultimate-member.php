@@ -101,16 +101,17 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
                 </div>
             </div>
             <script type="text/javascript">
-                jQuery(document).trigger("bp-better-messages-init-scrollers");
+                document.dispatchEvent(new Event('bp-better-messages-init-scrollers'));
                 wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                    var private_messages = jQuery('#bm-um-header .um-message-live-count');
+                    var private_messages = document.querySelector('#bm-um-header .um-message-live-count');
 
-                    if( private_messages.length > 0 ){
+                    if( private_messages ){
                         if( unread > 0 ){
-                            private_messages.text(unread);
-                            private_messages.show();
+                            private_messages.textContent = unread;
+                            private_messages.style.display = '';
                         } else {
-                            private_messages.text(0).hide();
+                            private_messages.textContent = '0';
+                            private_messages.style.display = 'none';
                         }
                     }
                 });
@@ -227,21 +228,21 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             ?>
             <script type="text/javascript">
                 wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                    var private_messages = jQuery('.um-profile-nav-item.um-profile-nav-messages > a');
+                    var tabs = document.querySelectorAll('.um-profile-nav-item.um-profile-nav-messages > a');
 
-                    private_messages.each(function(){
-                        var tab = jQuery(this);
-
+                    tabs.forEach(function( tab ){
                         if( unread > 0 ){
-                            var count = tab.find('span.um-tab-notifier');
+                            var count = tab.querySelector('span.um-tab-notifier');
 
-                            if( count.length === 0 ){
-                                tab.append('<span class="um-tab-notifier">' + unread + '</span>');
-                            } else {
-                                count.text(unread);
+                            if( ! count ){
+                                count = document.createElement('span');
+                                count.className = 'um-tab-notifier';
+                                tab.appendChild(count);
                             }
+                            count.textContent = unread;
                         } else {
-                            tab.find('span.um-tab-notifier').remove();
+                            var count = tab.querySelector('span.um-tab-notifier');
+                            if( count ) count.remove();
                         }
                     });
                 });

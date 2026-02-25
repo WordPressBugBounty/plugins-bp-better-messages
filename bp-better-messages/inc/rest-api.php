@@ -334,6 +334,27 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 //'permission_callback' => array( $this, 'is_user_authorized' )
             ) );
+
+            if( Better_Messages()->settings['enableForwardMessages'] === '1' ) {
+                register_rest_route('better-messages/v1', '/threadsPicker', array(
+                    'methods' => 'POST',
+                    'callback' => array($this, 'get_threads_picker'),
+                    'permission_callback' => array($this, 'is_user_authorized')
+                ));
+
+                register_rest_route('better-messages/v1', '/message/(?P<message_id>\d+)/forward', array(
+                    'methods' => 'POST',
+                    'callback' => array($this, 'forward_message'),
+                    'permission_callback' => array($this, 'is_user_authorized'),
+                    'args' => array(
+                        'message_id' => array(
+                            'validate_callback' => function ($param, $request, $key) {
+                                return is_numeric($param);
+                            }
+                        ),
+                    ),
+                ));
+            }
         }
 
         public function get_unique_conversation( WP_REST_Request $request ){
@@ -933,6 +954,132 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             }
         }
 
+        public function forward_message( WP_REST_Request $request ){
+            if( Better_Messages()->settings['enableForwardMessages'] !== '1' ) {
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x('Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => rest_authorization_required_code())
+                );
+            }
+
+            $message_id      = intval( $request->get_param('message_id') );
+            $thread_ids      = (array) $request->get_param('thread_ids');
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
+            $original_message = Better_Messages()->functions->get_message( $message_id );
+
+            if( ! $original_message || $original_message->message === '<!-- BM-DELETED-MESSAGE -->' ) {
+                return new WP_Error(
+                    'rest_not_found',
+                    _x('Message not found', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => 404)
+                );
+            }
+
+            $has_access = Better_Messages()->functions->check_access( $original_message->thread_id, $current_user_id );
+
+            if( ! $has_access ) {
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x('Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => rest_authorization_required_code())
+                );
+            }
+
+            if( empty( $thread_ids ) ) {
+                return new WP_Error(
+                    'rest_invalid',
+                    _x('No destination conversations specified', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => 400)
+                );
+            }
+
+            $thread_ids = array_map( 'intval', $thread_ids );
+            $thread_ids = array_filter( $thread_ids, function( $id ) { return $id > 0; } );
+            $thread_ids = array_unique( $thread_ids );
+            $thread_ids = array_slice( $thread_ids, 0, 20 );
+
+            $content = $original_message->message;
+            $show_attribution = Better_Messages()->settings['forwardMessagesAttribution'] === '1';
+
+            $original_attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
+            $attachment_ids = [];
+            if( is_array( $original_attachments ) && count( $original_attachments ) > 0 ) {
+                $attachment_ids = array_keys( $original_attachments );
+            }
+
+            $results = [];
+            $errors  = [];
+
+            foreach( $thread_ids as $thread_id ) {
+                $can_reply = Better_Messages()->functions->check_access( $thread_id, $current_user_id, 'reply' );
+
+                if( ! $can_reply ) {
+                    $errors[ $thread_id ] = _x('Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages');
+                    continue;
+                }
+
+                $meta_data = array(
+                    'forwarded_from_message' => $message_id,
+                );
+
+                if( $show_attribution ) {
+                    $existing_forwarded_user = Better_Messages()->functions->get_message_meta( $message_id, 'forwarded_from_user', true );
+                    if( $existing_forwarded_user ) {
+                        $meta_data['forwarded_from_user'] = (int) $existing_forwarded_user;
+                    } else {
+                        $meta_data['forwarded_from_user'] = (int) $original_message->sender_id;
+                    }
+                }
+
+                $args = array(
+                    'sender_id'    => $current_user_id,
+                    'content'      => $content,
+                    'thread_id'    => $thread_id,
+                    'return'       => 'message_id',
+                    'error_type'   => 'wp_error',
+                    'meta_data'    => $meta_data,
+                );
+
+                $new_message_id = Better_Messages()->functions->new_message( $args );
+
+                if( is_wp_error( $new_message_id ) ) {
+                    $errors[ $thread_id ] = $new_message_id->get_error_message();
+                } else {
+                    if( ! empty( $attachment_ids ) ) {
+                        $attachment_meta = [];
+                        foreach( $attachment_ids as $att_id ) {
+                            $url = wp_get_attachment_url( $att_id );
+                            if( $url ) {
+                                $attachment_meta[ $att_id ] = $url;
+                                add_post_meta( $att_id, 'bp-better-messages-message-id', $new_message_id );
+                                update_post_meta( $att_id, 'bp-better-messages-last-forwarded', time() );
+                            }
+                        }
+                        if( ! empty( $attachment_meta ) ) {
+                            Better_Messages()->functions->update_message_meta( $new_message_id, 'attachments', $attachment_meta );
+                        }
+                    }
+
+                    // Copy voice message meta if present
+                    $voice_attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+                    if( ! empty( $voice_attachment_id ) ) {
+                        Better_Messages()->functions->update_message_meta( $new_message_id, 'bpbm_voice_messages', (int) $voice_attachment_id );
+                        add_post_meta( (int) $voice_attachment_id, 'bp-better-messages-message-id', $new_message_id );
+                    }
+
+                    $results[ $thread_id ] = $new_message_id;
+                }
+            }
+
+            return array(
+                'result' => empty( $errors ),
+                'sent'   => $results,
+                'errors' => $errors,
+            );
+        }
+
         public function save_message( WP_REST_Request $request ){
             if( Better_Messages()->settings['allowEditMessages'] !== '1' ) {
                 return new WP_Error(
@@ -958,6 +1105,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             }
 
             $old_message_content = $wpdb->get_var( $wpdb->prepare( "SELECT message FROM " . bm_get_table('messages') ." WHERE id = %d AND sender_id = %d", $message_id, $user_id ) );
+
+            $forwarded_from = Better_Messages()->functions->get_message_meta( $message_id, 'forwarded_from_user', true );
+            if( Better_Messages()->settings['enableForwardMessages'] === '1' && $forwarded_from ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x('Forwarded messages cannot be edited', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => rest_authorization_required_code())
+                );
+            }
+
             $old_message = $old_message_content;
 
             $attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
@@ -1378,21 +1535,22 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     ORDER BY `created_at` DESC
                     LIMIT 1
                 ) as `message_id`,
-                MAX(`messages`.`created_at`) as `created_at`
+                COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 INNER JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`
-                INNER JOIN " . bm_get_table('messages') . " messages 
+                LEFT JOIN " . bm_get_table('messages') . " messages
                     ON recipients.`thread_id` = messages.`thread_id`
                 LEFT JOIN " . bm_get_table('threadsmeta') . " threadsmeta ON
-                    ( threadsmeta.`bm_thread_id` = messages.`thread_id`
+                    ( threadsmeta.`bm_thread_id` = threads.`id`
                 AND threadsmeta.meta_key = 'exclude_from_threads_list' )
                 WHERE
                     {$exclude_sql}
-                    recipients.`user_id` = %d 
+                    recipients.`user_id` = %d
                     AND recipients.`is_deleted` = 0
                     AND recipients.`unread_count` > 0
                     AND `threadsmeta`.`meta_value` IS NULL
+                    AND (`messages`.`id` IS NOT NULL OR `threads`.`type` IN ('chat-room', 'group'))
                     " . Better_Messages()->functions->threads_order_sql() . "
                     ", $user_id);
 
@@ -1418,20 +1576,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         ORDER BY `created_at` DESC
                         LIMIT 1
                     ) as `message_id`,
-                    MAX(`messages`.`created_at`) as `created_at`
+                    COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
                     FROM " . bm_get_table('threads') . " threads
                     INNER JOIN " . bm_get_table('recipients') . " recipients
                         ON threads.`id` = recipients.`thread_id`
-                    INNER JOIN " . bm_get_table('messages') . " messages 
+                    LEFT JOIN " . bm_get_table('messages') . " messages
                         ON recipients.`thread_id` = messages.`thread_id`
                     LEFT JOIN " . bm_get_table('threadsmeta') . " threadsmeta ON
-                        ( threadsmeta.`bm_thread_id` = messages.`thread_id`
+                        ( threadsmeta.`bm_thread_id` = threads.`id`
                     AND threadsmeta.meta_key = 'exclude_from_threads_list' )
                     WHERE
                         {$exclude_sql}
-                        recipients.`user_id` = %d 
+                        recipients.`user_id` = %d
                         AND recipients.`is_deleted` = 0
                         AND `threadsmeta`.`meta_value` IS NULL
+                        AND (`messages`.`id` IS NOT NULL OR `threads`.`type` IN ('chat-room', 'group'))
                     " . Better_Messages()->functions->threads_order_sql() . "
                         LIMIT 0, %d
                         ", $user_id, $toLoad);
@@ -1699,19 +1858,20 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 `recipients`.`is_muted`     as `is_muted`,
                 `recipients`.`is_pinned`    as `is_pinned`,
                 `recipients`.`last_update`  as `last_update`,
-                MAX(`messages`.`created_at`) as `created_at`
+                COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 INNER JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`
-                INNER JOIN " . bm_get_table('messages') . " messages 
+                LEFT JOIN " . bm_get_table('messages') . " messages
                     ON recipients.`thread_id` = messages.`thread_id` $pending_sql
                 LEFT JOIN " . bm_get_table('threadsmeta') . " threadsmeta ON
-                    ( threadsmeta.`bm_thread_id` = messages.`thread_id`
+                    ( threadsmeta.`bm_thread_id` = threads.`id`
                 AND threadsmeta.meta_key = 'exclude_from_threads_list' )
                 WHERE
-                    recipients.`user_id` = %d 
+                    recipients.`user_id` = %d
                     AND recipients.`is_deleted` = 0
                     AND `threadsmeta`.`meta_value` IS NULL
+                    AND (`messages`.`id` IS NOT NULL OR `threads`.`type` IN ('chat-room', 'group'))
                     {$excluded_sql}
                     " . Better_Messages()->functions->threads_order_sql() . "
                     LIMIT 0, 20
@@ -1929,6 +2089,161 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             }
 
             return $return;
+        }
+
+        public function get_threads_picker( WP_REST_Request $request ){
+            global $wpdb;
+
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+            $excluded        = (array) $request->get_param('exclude');
+            $search          = sanitize_text_field( (string) $request->get_param('search') );
+            $exclude_thread  = intval( $request->get_param('excludeThread') );
+
+            $excluded_sql = '';
+            $excluded = array_map( 'intval', $excluded );
+            if( $exclude_thread > 0 ){
+                $excluded[] = $exclude_thread;
+            }
+            $excluded = array_filter( $excluded, function( $id ) { return $id > 0; } );
+            $excluded = array_unique( $excluded );
+            if( count( $excluded ) > 0 ){
+                $excluded_sql = " AND threads.id NOT IN(" . implode(',', $excluded) . ") ";
+            }
+
+            $search_sql  = '';
+            $prepare_args = [ $current_user_id ];
+
+            if( ! empty( $search ) ){
+                $like = '%' . $wpdb->esc_like( $search ) . '%';
+                $recipients_table = bm_get_table('recipients');
+                $users_table = bm_get_table('users');
+                $search_sql = " AND (
+                    threads.subject LIKE %s
+                    OR EXISTS (
+                        SELECT 1 FROM {$recipients_table} r2
+                        INNER JOIN {$users_table} ui ON r2.user_id = ui.ID
+                        WHERE r2.thread_id = threads.id
+                        AND r2.user_id != " . intval($current_user_id) . "
+                        AND (
+                            ui.display_name LIKE %s
+                            OR ui.user_nicename LIKE %s
+                            OR ui.nickname LIKE %s
+                        )
+                        LIMIT 1
+                    )
+                ) ";
+                $prepare_args[] = $like;
+                $prepare_args[] = $like;
+                $prepare_args[] = $like;
+                $prepare_args[] = $like;
+            }
+
+            $messages_table = bm_get_table('messages');
+
+            $sql = $wpdb->prepare("
+                SELECT
+                `threads`.`id`              as `thread_id`,
+                `threads`.`type`            as `type`,
+                `threads`.`subject`         as `subject`,
+                `recipients`.`is_pinned`    as `is_pinned`,
+                (SELECT MAX(m.created_at) FROM {$messages_table} m WHERE m.thread_id = threads.id) as `created_at`
+                FROM " . bm_get_table('threads') . " threads
+                INNER JOIN " . bm_get_table('recipients') . " recipients
+                    ON threads.`id` = recipients.`thread_id`
+                LEFT JOIN " . bm_get_table('threadsmeta') . " threadsmeta ON
+                    ( threadsmeta.`bm_thread_id` = threads.`id`
+                AND threadsmeta.meta_key = 'exclude_from_threads_list' )
+                WHERE
+                    recipients.`user_id` = %d
+                    AND recipients.`is_deleted` = 0
+                    AND `threadsmeta`.`meta_value` IS NULL
+                    AND (
+                        threads.`type` != 'thread'
+                        OR EXISTS (
+                            SELECT 1 FROM " . bm_get_table('recipients') . " rc
+                            INNER JOIN " . bm_get_table('users') . " u ON rc.user_id = u.ID
+                            WHERE rc.thread_id = threads.id
+                            AND rc.is_deleted = 0
+                            AND rc.user_id != " . intval($current_user_id) . "
+                            LIMIT 1
+                        )
+                    )
+                    {$excluded_sql}
+                    {$search_sql}
+                    ORDER BY `created_at` DESC
+                    LIMIT 0, 20
+                    ", ...$prepare_args);
+
+            $get_threads = $wpdb->get_results( $sql );
+
+            $threads  = [];
+            $users    = [];
+            $user_ids = [];
+            $added_users = [];
+            foreach ( $get_threads as $thread ){
+                wp_cache_set('thread_' . $thread->thread_id, (object) [
+                    'id'      => $thread->thread_id,
+                    'subject' => $thread->subject,
+                    'type'    => $thread->type
+                ], 'bm_messages');
+
+                $recipients = Better_Messages()->functions->get_recipients( $thread->thread_id );
+
+                if( isset($recipients[$current_user_id]) ){
+                    unset($recipients[$current_user_id]);
+                }
+
+                $_all_user_ids = array_map( 'intval', array_keys($recipients) );
+                $_all_user_ids[] = intval($current_user_id);
+
+                $thread_type = Better_Messages()->functions->get_thread_type( $thread->thread_id );
+
+                foreach ( array_slice($_all_user_ids, 0, 10) as $user_id ){
+                    $user_ids[] = $user_id;
+                }
+
+                $title       = Better_Messages()->functions->get_thread_title( $thread->thread_id );
+                $image       = Better_Messages()->functions->get_thread_image( $thread->thread_id );
+
+                if( ! $image && $thread_type === 'chat-room' ){
+                    $chat_id = (int) Better_Messages()->functions->get_thread_meta( $thread->thread_id, 'chat_id' );
+                    if( $chat_id && has_post_thumbnail( $chat_id ) ){
+                        $image_id = get_post_thumbnail_id( $chat_id );
+                        if( $image_id ){
+                            $image_src = wp_get_attachment_image_src( $image_id, [100, 100] );
+                            if( $image_src ){
+                                $image = $image_src[0];
+                            }
+                        }
+                    }
+                }
+
+                $threads[] = [
+                    'thread_id'          => (int) $thread->thread_id,
+                    'type'               => $thread_type,
+                    'title'              => html_entity_decode($title),
+                    'subject'            => (string) html_entity_decode($thread->subject),
+                    'image'              => $image,
+                    'participants'       => array_map( 'intval', array_values($_all_user_ids) ),
+                    'participantsCount'  => (int) count( $_all_user_ids ),
+                ];
+            }
+
+            $user_ids = array_unique($user_ids);
+            foreach ( $user_ids as $user_id ){
+                if( in_array($user_id, $added_users) ) continue;
+                if( $user_id > 0 ){
+                    $user = get_userdata($user_id);
+                    if ( ! $user ) continue;
+                }
+                $users[] = Better_Messages()->functions->rest_user_item( $user_id, false );
+                $added_users[] = $user_id;
+            }
+
+            return [
+                'threads' => $threads,
+                'users'   => $users,
+            ];
         }
 
         public function can_reply(WP_REST_Request $request) {

@@ -38,6 +38,9 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
                 add_filter('better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
                 add_filter('better_messages_thread_url',   array( $this, 'group_thread_url' ), 10, 3 );
             }
+
+            add_filter( 'better_messages_bulk_get_all_groups', array($this, 'bulk_get_all_groups') );
+            add_filter( 'better_messages_bulk_get_group_members', array($this, 'bulk_get_group_members'), 10, 3 );
         }
 
         public function is_valid_group( $is_valid_group, $thread_id )
@@ -405,6 +408,43 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
             }
 
             return true;
+        }
+
+        public function bulk_get_all_groups( $groups ){
+            if( ! class_exists('UM_Groups') ) return $groups;
+
+            $um_groups = get_posts(array(
+                'post_type'   => 'um_groups',
+                'post_status' => 'publish',
+                'numberposts' => -1,
+            ));
+
+            if( $um_groups ){
+                foreach( $um_groups as $group ){
+                    $groups[] = [
+                        'id'         => (int) $group->ID,
+                        'name'       => esc_attr( $group->post_title ),
+                        'type'       => 'um',
+                        'type_label' => 'Ultimate Member',
+                    ];
+                }
+            }
+
+            return $groups;
+        }
+
+        public function bulk_get_group_members( $user_ids, $group_type, $group_id ){
+            if( $group_type !== 'um' ) return $user_ids;
+
+            $members = $this->get_groups_members( $group_id );
+
+            if( is_array( $members ) ){
+                foreach( $members as $uid ){
+                    $user_ids[] = (int) $uid;
+                }
+            }
+
+            return $user_ids;
         }
 
     }

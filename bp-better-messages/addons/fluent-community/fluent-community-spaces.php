@@ -45,6 +45,9 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             }
 
             add_action('fluent_community/on_wp_init', array( $this, 'on_wp_init' ), 10, 1 );
+
+            add_filter( 'better_messages_bulk_get_all_groups', array($this, 'bulk_get_all_groups') );
+            add_filter( 'better_messages_bulk_get_group_members', array($this, 'bulk_get_group_members'), 10, 3 );
         }
 
         public function on_wp_init( $app ){
@@ -436,6 +439,39 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             }
 
             return true;
+        }
+
+        public function bulk_get_all_groups( $groups ){
+            if( ! class_exists('FluentCommunity\App\Models\Space') ) return $groups;
+
+            $spaces = Space::get();
+
+            if( $spaces ){
+                foreach( $spaces as $space ){
+                    $groups[] = [
+                        'id'         => (int) $space->id,
+                        'name'       => esc_attr( $space->title ),
+                        'type'       => 'fc',
+                        'type_label' => 'FluentCommunity',
+                    ];
+                }
+            }
+
+            return $groups;
+        }
+
+        public function bulk_get_group_members( $user_ids, $group_type, $group_id ){
+            if( $group_type !== 'fc' ) return $user_ids;
+
+            $members = $this->get_group_members( $group_id );
+
+            if( is_array( $members ) ){
+                foreach( $members as $uid ){
+                    $user_ids[] = (int) $uid;
+                }
+            }
+
+            return $user_ids;
         }
 
     }

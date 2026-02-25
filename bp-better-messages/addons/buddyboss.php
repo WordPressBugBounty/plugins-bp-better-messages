@@ -199,7 +199,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                         el.classList.add('bm-notification-list');
                     });
 
-                    jQuery(document).trigger("bp-better-messages-init-scrollers");
+                    document.dispatchEvent(new Event("bp-better-messages-init-scrollers"));
                 }
             </script>
             <?php
@@ -486,12 +486,14 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             echo Better_Messages()->functions->get_conversations_layout();
             ?>
             <script type="text/javascript">
-                var notification_list = jQuery('.site-header .messages-wrap .notification-list');
-                notification_list.removeClass('notification-list').addClass('bm-notification-list');
+                document.querySelectorAll('.site-header .messages-wrap .notification-list').forEach(function( el ){
+                    el.classList.remove('notification-list');
+                    el.classList.add('bm-notification-list');
+                    el.style.margin = '0';
+                    el.style.padding = '0';
+                });
 
-                notification_list.css({'margin' : 0, 'padding' : 0});
-
-                jQuery(document).trigger("bp-better-messages-init-scrollers");
+                document.dispatchEvent(new Event("bp-better-messages-init-scrollers"));
             </script>
             <?php
             $response['contents'] = ob_get_clean();

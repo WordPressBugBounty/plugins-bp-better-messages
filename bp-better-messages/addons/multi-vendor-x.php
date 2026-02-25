@@ -237,10 +237,21 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX' ) ) {
                     Better_Messages()->enqueue_css(true);
 
 
-                    wp_add_inline_script('better-messages', 'jQuery(document).ready(function($){
-                        var link = jQuery(".mvx-venrod-dashboard-nav-link--bm-messages");
-                        link.append( \'' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]') . '\' );
-                    });' );
+                    wp_add_inline_script('better-messages', '(function(){
+                        function initMvxCounter(){
+                            var link = document.querySelector(".mvx-venrod-dashboard-nav-link--bm-messages");
+                            if( link ){
+                                var tmp = document.createElement("div");
+                                tmp.innerHTML = \'' . do_shortcode('[better_messages_unread_counter hide_when_no_messages="1" preserve_space="0"]') . '\';
+                                while( tmp.firstChild ) link.appendChild( tmp.firstChild );
+                            }
+                        }
+                        if( document.readyState === "loading" ){
+                            document.addEventListener("DOMContentLoaded", initMvxCounter);
+                        } else {
+                            initMvxCounter();
+                        }
+                    })();' );
                 }
             }
         }
