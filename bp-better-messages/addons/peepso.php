@@ -563,43 +563,65 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                     headerButton.innerHTML += html;
 
-                    var popup = headerButton.querySelector('.ps-notif__box,.pso-notifbox');
-                    var link = headerButton.querySelector(':scope > a');
+                    function getPopup() {
+                        return headerButton.querySelector('.ps-notif__box,.pso-notifbox');
+                    }
 
                     function isVisible(el) {
                         return el && el.offsetParent !== null && getComputedStyle(el).display !== 'none';
                     }
 
                     function togglePopup() {
+                        var popup = getPopup();
                         if( ! popup ) return;
-                        if( isVisible(popup) ){
-                            popup.style.display = 'none';
+                        var $popup = jQuery(popup);
+                        if( $popup.is(':visible') ){
+                            $popup.stop().slideUp('fast');
                         } else {
-                            popup.style.display = '';
+                            $popup.stop().slideDown('fast');
                         }
+                    }
+
+                    function addOutsideListener() {
+                        document.addEventListener('click', handleClickOutside);
+                        document.addEventListener('touchend', handleClickOutside);
+                    }
+
+                    function removeOutsideListener() {
+                        document.removeEventListener('click', handleClickOutside);
+                        document.removeEventListener('touchend', handleClickOutside);
                     }
 
                     function handleClickOutside(event) {
-                        if (!popup.contains(event.target) && !headerButton.contains(event.target)) {
+                        var popup = getPopup();
+                        if (popup && !popup.contains(event.target) && !headerButton.contains(event.target)) {
                             if (isVisible(popup)) {
                                 togglePopup();
-                                document.removeEventListener('click', handleClickOutside);
+                                removeOutsideListener();
                             }
                         }
                     }
 
-                    if( link ) {
-                        link.onclick = function (event) {
-                            event.preventDefault();
-                            togglePopup();
+                    function handleToggle(event) {
+                        var link = event.target.closest('a');
+                        if( !link || !headerButton.contains(link) ) return;
+                        var popup = getPopup();
+                        if( !popup ) return;
+                        if( popup.contains(link) ) return;
 
-                            if (isVisible(popup)) {
-                                document.addEventListener('click', handleClickOutside);
-                            } else {
-                                document.removeEventListener('click', handleClickOutside);
-                            }
-                        };
+                        event.preventDefault();
+                        event.stopPropagation();
+                        togglePopup();
+
+                        if (isVisible(popup)) {
+                            addOutsideListener();
+                        } else {
+                            removeOutsideListener();
+                        }
                     }
+
+                    headerButton.addEventListener('click', handleToggle);
+                    headerButton.addEventListener('touchend', handleToggle);
                 });
 
                 document.dispatchEvent(new Event("bp-better-messages-init-scrollers"));
