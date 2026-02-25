@@ -1009,6 +1009,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $attachment_ids = array_keys( $original_attachments );
             }
 
+            $voice_attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+
             $results = [];
             $errors  = [];
 
@@ -1031,6 +1033,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     } else {
                         $meta_data['forwarded_from_user'] = (int) $original_message->sender_id;
                     }
+                }
+
+                if( ! empty( $voice_attachment_id ) ) {
+                    $meta_data['bpbm_voice_messages'] = (int) $voice_attachment_id;
                 }
 
                 $args = array(
@@ -1062,10 +1068,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         }
                     }
 
-                    // Copy voice message meta if present
-                    $voice_attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
                     if( ! empty( $voice_attachment_id ) ) {
-                        Better_Messages()->functions->update_message_meta( $new_message_id, 'bpbm_voice_messages', (int) $voice_attachment_id );
                         add_post_meta( (int) $voice_attachment_id, 'bp-better-messages-message-id', $new_message_id );
                     }
 

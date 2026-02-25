@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.12.7\n"
+"Project-Id-Version: Better Messages 2.12.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-25T00:07:38+00:00\n"
+"POT-Creation-Date: 2026-02-25T00:54:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: bp-better-messages\n"
@@ -832,7 +832,7 @@ msgstr ""
 #: inc/moderation.php:846
 #: inc/rest-api.php:961
 #: inc/rest-api.php:985
-#: inc/rest-api.php:1087
+#: inc/rest-api.php:1090
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to do that"
 msgstr ""
@@ -841,7 +841,7 @@ msgstr ""
 #: addons/pinned-message.php:121
 #: addons/reactions.php:96
 #: addons/user-reports/user-reports.php:139
-#: inc/rest-api.php:1143
+#: inc/rest-api.php:1146
 msgid "Message not found"
 msgstr ""
 
@@ -2399,35 +2399,35 @@ msgctxt "Rest API Error"
 msgid "No destination conversations specified"
 msgstr ""
 
-#: inc/rest-api.php:1019
-#: inc/rest-api.php:2268
-#: inc/rest-api.php:2286
-#: inc/rest-api.php:2298
-#: inc/rest-api.php:2310
-#: inc/rest-api.php:2322
+#: inc/rest-api.php:1021
+#: inc/rest-api.php:2271
+#: inc/rest-api.php:2289
+#: inc/rest-api.php:2301
+#: inc/rest-api.php:2313
+#: inc/rest-api.php:2325
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to reply into this conversation"
 msgstr ""
 
-#: inc/rest-api.php:1102
+#: inc/rest-api.php:1105
 msgid "Message content was empty."
 msgstr ""
 
-#: inc/rest-api.php:1113
+#: inc/rest-api.php:1116
 msgctxt "Rest API Error"
 msgid "Forwarded messages cannot be edited"
 msgstr ""
 
-#: inc/rest-api.php:1678
+#: inc/rest-api.php:1681
 msgid "Message not found in this conversation"
 msgstr ""
 
-#: inc/rest-api.php:2362
+#: inc/rest-api.php:2365
 msgctxt "Rest API Error"
 msgid "Sorry, the conversation which you tried to access does not exists"
 msgstr ""
 
-#: inc/rest-api.php:2376
+#: inc/rest-api.php:2379
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to access this conversation"
 msgstr ""
