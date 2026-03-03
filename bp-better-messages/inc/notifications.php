@@ -406,7 +406,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 AND `messages`.`date_sent` > %s
                                 AND `messages`.message != '<!-- BM-DELETED-MESSAGE -->'
                                 AND `messages`.sender_id != %d
-                                AND `messages`.sender_id != 0
                                 AND `messages`.is_pending = 0
                                 AND ( messagesmeta.meta_id IS NULL )
                                 ORDER BY id DESC
@@ -422,6 +421,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                             foreach($messages as $index => $message){
                                 if( $message->message ){
+                                    if( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $message->message, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ){
+                                        $message->message = _x('Encrypted message', 'Email notification', 'bp-better-messages');
+                                    }
+
                                     $is_sticker = strpos( $message->message, '<span class="bpbm-sticker">' ) !== false;
                                     if( $is_sticker ){
                                         $message->message = __('Sticker', 'bp-better-messages');
@@ -443,6 +446,16 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 $last_message_id = 0;
 
                                 foreach ($messages as $message) {
+                                    // System messages (sender_id=0): display as centered italic text
+                                    if ( (int) $message->sender_id === 0 ) {
+                                        $_message = Better_Messages()->functions->format_message( $message->message, (int) $message->id, 'site', $user_id );
+                                        $messageHtml .= '<tr><td colspan="2" style="text-align:center;color:#888;font-style:italic;padding:4px 0;">' . esc_html($_message) . '</td></tr>';
+                                        $messageRaw .= $_message . "\n\n";
+                                        $last_sender_id = 0;
+                                        $last_message_id = (int) $message->id;
+                                        continue;
+                                    }
+
                                     $bm_user = Better_Messages()->functions->rest_user_item( $message->sender_id, false );
 
                                     $timestamp = strtotime($message->date_sent) + $gmt_offset;
@@ -485,13 +498,26 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 } else {
                                     $subject = Better_Messages()->functions->remove_re(sanitize_text_field(stripslashes($messages[0]->subject)));
                                     $subject = Better_Messages()->functions->clean_no_subject($subject);
+
+                                    if( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $subject, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ){
+                                        $subject = '';
+                                    }
                                 }
 
                                 // Check if BuddyPress email should be used
                                 $use_buddypress_email = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
                                 if ( $use_buddypress_email ) {
-                                    $sender = get_userdata( $message->sender_id );
+                                    // Find last real (non-system) sender for BuddyPress email
+                                    $email_sender_id = 0;
+                                    foreach ( array_reverse($messages) as $_msg ) {
+                                        if ( (int) $_msg->sender_id > 0 ) {
+                                            $email_sender_id = (int) $_msg->sender_id;
+                                            break;
+                                        }
+                                    }
+
+                                    $sender = $email_sender_id > 0 ? get_userdata( $email_sender_id ) : false;
 
                                     if ( ! is_object( $sender ) ){
                                         $this->update_last_email( $user_id, $thread_id, $last_date );

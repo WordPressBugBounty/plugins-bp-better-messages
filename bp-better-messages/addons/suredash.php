@@ -364,6 +364,8 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             <style type="text/css">
                 .wp-block-suredash-content:has(.bp-messages-wrap-main) {
                     padding-bottom: 0 !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
                 }
                 #portal-main-content .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile),
                 #portal-main-content .bp-messages-wrap-main .bp-messages-threads-wrapper {

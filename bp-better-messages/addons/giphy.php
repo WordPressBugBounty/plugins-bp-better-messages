@@ -122,7 +122,7 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
             }
 
             if( ! empty($errors) ) {
-                do_action( 'better_messages_on_message_not_sent', $thread_id, $errors );
+                do_action( 'better_messages_on_message_not_sent', $thread_id, '', $errors );
 
                 $redirect = 'redirect';
 
@@ -238,10 +238,19 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
 
             if( count($gifs ) > 0 ){
                 foreach ( $gifs as $gif ){
-                    $return['gifs'][] = [
+                    $item = [
                         'id'  => $gif->id,
                         'url' => $gif->images->fixed_width->url
                     ];
+
+                    if ( isset( $gif->images->original_mp4->mp4 ) ) {
+                        $item['mp4'] = $gif->images->original_mp4->mp4;
+                    }
+                    if ( isset( $gif->images->{'480w_still'}->url ) ) {
+                        $item['poster'] = $gif->images->{'480w_still'}->url;
+                    }
+
+                    $return['gifs'][] = $item;
                 }
             }
 
@@ -363,10 +372,19 @@ if ( !class_exists( 'Better_Messages_Giphy' ) ):
 
             if( count($gifs ) > 0 ){
                 foreach ( $gifs as $gif ){
-                    $return['gifs'][] = [
+                    $item = [
                         'id'  => $gif->id,
                         'url' => $gif->images->fixed_width->url
                     ];
+
+                    if ( isset( $gif->images->original_mp4->mp4 ) ) {
+                        $item['mp4'] = $gif->images->original_mp4->mp4;
+                    }
+                    if ( isset( $gif->images->{'480w_still'}->url ) ) {
+                        $item['poster'] = $gif->images->{'480w_still'}->url;
+                    }
+
+                    $return['gifs'][] = $item;
                 }
             }
 

@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 2.12.9
+Stable tag: 2.13.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,6 +58,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 **Media & Content:**
 
 * File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
+* Client-side image and video optimization for cross-browser compatibility and saving storage space (format conversion, quality control, metadata stripping)
 * Voice Messages (available as addon)
 * Embedded links with thumbnails and descriptions
 * oEmbed support for YouTube, Vimeo, Spotify, SoundCloud, Flickr and 20+ services
@@ -174,10 +175,11 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Mini Chats - chat windows anywhere on your site
 * Mini Conversations widget
 
-**Security:**
+**Security & Encryption:**
 
+* Optional End-to-End Encryption (E2EE) — can be enabled at the website level and per conversation; messages and files encrypted in users' browsers with AES-256-GCM, server never sees plaintext
+* Local browser encryption (AES256) for offline message storage
 * Web Push Notifications (works even when the browser is closed)
-* Local browser encryption (AES256)
 * All data encrypted in transit, so we can't read it on our servers
 
 **Support:**
@@ -228,6 +230,25 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.13.0 =
+* Added optional End-to-End Encryption (E2EE) for private and group conversations (WebSocket version only)
+    * Can be enabled at the website level and optionally per conversation
+    * Messages encrypted in user browsers — server never sees plaintext
+    * AES-256-GCM encryption for messages and file attachments
+    * Password-protected key backup for multi-device access
+    * Key recovery if the user forgets an encryption password
+    * Automatic key distribution for new conversation participants
+* Added client-side image and video optimization for cross-browser compatibility and saving storage space
+    * Automatic image conversion to WebP, AVIF, or JPEG before upload
+    * Configurable image quality and max resolution
+    * Metadata stripping for privacy
+    * HEIC/HEIF automatic conversion for cross-browser compatibility
+    * Video format conversion to MP4 for universal playback
+* Added Compact Mode for Side Conversations List with auto and always compact options
+* Renamed "Combined View" to "Side Conversations List"
+* Fixed "Enable PeepSo Header at Messages Page" was not working after some updates
+* Other minor bugfixes, improvements and optimizations
 
 = 2.12.9 =
 * Added optional feature to enable messages forwarding

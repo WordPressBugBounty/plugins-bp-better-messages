@@ -581,8 +581,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
         public function start_new_thread( WP_REST_Request $request ){
             $recipients = (array) $request->get_param( 'recipients');
-            $subject    = sanitize_text_field( $request->get_param( 'subject') );
-            $content = Better_Messages()->functions->filter_message_content( $request->get_param('message') );
+
+            // Allow addons (E2E) to intercept content/subject before sanitization.
+            // Returns array with 'subject' and 'content' keys, or null for default sanitization.
+            $e2e_init = apply_filters( 'better_messages_new_thread_e2e_init', null, $request, $recipients );
+
+            if ( $e2e_init ) {
+                $subject = $e2e_init['subject'];
+                $content = $e2e_init['content'];
+            } else {
+                $subject = sanitize_text_field( $request->get_param( 'subject') );
+                $content = Better_Messages()->functions->filter_message_content( $request->get_param('message') );
+            }
 
             $uploaded_files = $request->get_param('files');
 
@@ -608,16 +618,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $args['is_pending'] = $is_pending;
             }
 
-            if( trim($args['content']) == '') {
-                if( $uploaded_files ){
-                    $args['content'] .= '<!-- BM-ONLY-FILES -->';
+            if( ! $e2e_init ) {
+                if( trim($args['content']) == '') {
+                    if( $uploaded_files ){
+                        $args['content'] .= '<!-- BM-ONLY-FILES -->';
+                    }
+                } else if ($args['content'] === '0') {
+                    $args['content'] .= ' ';
                 }
-            } else if ($args['content'] === '0') {
-                $args['content'] .= ' ';
             }
 
             if( ! empty( $uploaded_files ) ){
-                $args['attachments'] = $uploaded_files;
+                $args['attachments'] = apply_filters( 'better_messages_new_thread_attachments', $uploaded_files, $request );
             }
 
             Better_Messages()->functions->before_new_thread_filter( $args, $errors );
@@ -636,6 +648,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     'errors' => $errors
                 );
             } else {
+                // Allow addons (E2E) to process after thread creation (e.g. send actual encrypted message)
+                $sent = apply_filters( 'better_messages_new_thread_after_create', $sent, $request, $current_user_id );
+
                 do_action( 'bp_better_messages_new_thread_created', $sent['thread_id'], $sent['message_id'] );
 
                 return array(
@@ -673,6 +688,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             } else {
                 $result = Better_Messages()->functions->get_unique_pm_thread_id( $uniqueKey, $user_id, Better_Messages()->functions->get_current_user_id(), $create, $subject );
             }
+
+            // Allow addons (E2E) to process newly created PM threads
+            $result = apply_filters( 'better_messages_private_thread_result', $result, $user_id, Better_Messages()->functions->get_current_user_id() );
 
             if( $result['result'] === 'thread_found' || $result['result'] === 'thread_created' ){
                 $thread_id = (int) $result['thread_id'];
@@ -828,7 +846,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $temp_id    = sanitize_text_field($request->get_param('temp_id'));
             $temp_time  = sanitize_text_field($request->get_param('temp_time'));
 
-            $content  = Better_Messages()->functions->filter_message_content($request->get_param('message'));
+            $raw_message = $request->get_param( 'message' );
+            $content = apply_filters( 'better_messages_send_message_content',
+                Better_Messages()->functions->filter_message_content( $raw_message ),
+                $raw_message, $thread_id
+            );
+
             $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'group_id');
 
             $group_thread = false;
@@ -985,6 +1008,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     _x('Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages'),
                     array('status' => rest_authorization_required_code())
                 );
+            }
+
+            $forward_error = apply_filters( 'better_messages_can_forward_message', null, $original_message, $current_user_id );
+            if ( is_wp_error( $forward_error ) ) {
+                return $forward_error;
             }
 
             if( empty( $thread_ids ) ) {
@@ -1450,6 +1478,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $user_ids = array_unique( $user_ids );
 
                 foreach ( $user_ids as $user_id ){
+                    if ( $user_id === 0 ) continue;
                     if ( in_array($user_id, $added_users ) ) continue;
 
                     $return['users'][] = Better_Messages()->functions->rest_user_item( $user_id, $apply_filters );

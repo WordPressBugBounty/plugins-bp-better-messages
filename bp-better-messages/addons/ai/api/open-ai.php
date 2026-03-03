@@ -395,22 +395,15 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     }
 
                     if( str_replace('<!-- BM-AI -->', '', $_message->message ) === '<!-- BPBM-VOICE-MESSAGE -->' && $attachment_id = Better_Messages()->functions->get_message_meta( $_message->id, 'bpbm_voice_messages', true ) ){
-                        $file_path = get_attached_file( $attachment_id );
+                        $transcription = $this->transcribe_audio( $attachment_id );
 
-                        if( ! $file_path || ! file_exists($file_path) || filesize($file_path) > 20 * 1024 * 1024 ){
+                        if( is_wp_error( $transcription ) || empty( $transcription ) ){
                             continue;
                         }
 
-                        $file_content = file_get_contents( $file_path );
-
-                        $base64 = base64_encode( $file_content );
-
                         $content[] = [
-                            'type' => 'input_audio',
-                            'input_audio' => [
-                                'data'   => $base64,
-                                'format' => 'mp3'
-                            ]
+                            'type' => 'text',
+                            'text' => $transcription
                         ];
 
                     } else {

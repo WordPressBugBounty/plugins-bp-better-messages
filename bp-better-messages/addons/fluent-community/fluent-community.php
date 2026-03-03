@@ -138,8 +138,14 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     max-height: calc( 100vh - var(--fcom-header-height, 0px) );
                 }
 
-                body[data-route="better_messages"] #fcom-chat-widget-container{
+                body[data-route="better_messages"] #fcom-chat-widget-container,
+                body[data-route="better_messages"] .bp-better-messages-list,
+                body[data-route="better_messages"] .bp-better-messages-mini{
                     display: none !important;
+                }
+
+                body[data-route="better_messages"] .bp-better-messages-list+.bp-better-messages-mini {
+                    right: 0;
                 }
 
                 .fcom_mobile_menu .focm_menu_item span.bm-unread-badge{

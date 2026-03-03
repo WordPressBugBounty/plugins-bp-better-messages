@@ -1067,6 +1067,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( $return ) {
                     do_action('better_messages_thread_updated', $thread_id);
                     do_action('better_messages_info_changed', $thread_id, [ $user_id ] );
+                    do_action('better_messages_participant_added', $thread_id, $user_id );
                     return true;
                 }
             }
@@ -1547,7 +1548,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $full_screen = $args['full_screen'] ? '1' : '0';
 
             ob_start();
-            echo '<div class="bp-messages-wrap-main" style="height: ' . $initialHeight . 'px" data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+            do_action('bp_better_messages_before_main_template_rendered');
+            echo '<div class="bp-messages-wrap-main" style="height: ' . $initialHeight . 'px" data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder( true ) . '</div>';
+            do_action('bp_better_messages_after_main_template_rendered');
             return ob_get_clean();
         }
 
@@ -2447,7 +2450,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function new_message( $args = '' ) {
             if( is_array($args) && ! is_user_logged_in() ) {
-                if ( ! isset($args['sender_id']) || $args['sender_id'] === 0 ) {
+                if ( ! array_key_exists('sender_id', $args) ) {
                     $args['sender_id'] = Better_Messages()->functions->get_current_user_id();
                 }
             }
@@ -2484,9 +2487,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             ), 'bm_new_message' );
 
             // Bail if no sender or no content.
-            if ( empty( $r['sender_id'] ) || empty( $r['content'] ) ) {
+            if ( ( ! is_numeric( $r['sender_id'] ) || $r['sender_id'] === false ) || empty( $r['content'] ) ) {
                 if ( 'wp_error' === $r['error_type'] ) {
-                    if ( empty( $r['sender_id'] ) ) {
+                    if ( ! is_numeric( $r['sender_id'] ) || $r['sender_id'] === false ) {
                         $error_code = 'messages_empty_sender';
                         $feedback   = __( 'Your message was not sent. Please use a valid sender.', 'bp-better-messages' );
                     } else {
@@ -2662,14 +2665,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $this->delete_all_message_meta( $message->id );
 
             if( isset($args['meta_data']) && is_array( $args['meta_data'] ) && count( $args['meta_data'] ) > 0 ){
-                foreach( $args['meta_data'] as $key => $value ){
-                    if( is_array( $value ) ){
-                        $value = array_map( function( $v ){
-                            return is_numeric( $v ) ? $v : sanitize_text_field( $v );
-                        }, $value );
-                    } else {
-                        $value = sanitize_text_field( $value );
+                $sanitize_meta_value = function( $value ) use ( &$sanitize_meta_value ) {
+                    if ( is_array( $value ) ) {
+                        return array_map( $sanitize_meta_value, $value );
                     }
+                    return is_numeric( $value ) ? $value : sanitize_text_field( $value );
+                };
+
+                foreach( $args['meta_data'] as $key => $value ){
+                    $value = $sanitize_meta_value( $value );
 
                     Better_Messages()->functions->update_message_meta( $message->id, sanitize_text_field($key), $value );
                 }
@@ -2740,6 +2744,26 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
             // Return the thread ID.
             return (int) $message->thread_id;
+        }
+
+        public function send_system_message( $thread_id, $type, $data = [] ) {
+            $content = '<!-- BM-SYSTEM-MESSAGE:' . sanitize_key( $type ) . ' -->';
+
+            $args = [
+                'sender_id'    => 0,
+                'thread_id'    => $thread_id,
+                'content'      => $content,
+                'count_unread' => false,
+                'show_on_site' => false,
+                'send_push'    => false,
+                'mobile_push'  => false,
+                'notification' => false,
+                'send_global'  => true,
+                'return'       => 'message_id',
+                'meta_data'    => [ 'system_data' => $data ],
+            ];
+
+            return $this->new_message( $args );
         }
 
         public function update_message_update_time( $message_id, $new_message = false, $deleted_message = false, $last_update = true ){
@@ -3244,22 +3268,67 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return ob_get_clean();
         }
 
-        public function container_placeholder(){
-            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+        public function header_placeholder(){
             ob_start();
             ?>
-            <div class="bp-messages-wrap" style="height:<?php echo $initialHeight; ?>px">
-                <div class="chat-header">
-                    <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
-                        <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
-                    </div>
-                    <div style="position: relative; width:100px; height: 20px; margin-left: auto;margin-right:10px;border-radius: 4px; overflow: hidden">
-                        <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
-                    </div>
+            <div class="chat-header">
+                <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
+                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
                 </div>
-                <?php echo $this->threads_placeholder(); ?>
+                <div style="position: relative; width:100px; height: 20px; margin-left: auto;margin-right:10px;border-radius: 4px; overflow: hidden">
+                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
+                </div>
             </div>
             <?php
+            return ob_get_clean();
+        }
+
+        public function container_placeholder( $with_sidebar = false ){
+            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+            $combinedView = $with_sidebar && Better_Messages()->settings['combinedView'] === '1';
+
+            ob_start();
+
+            if( $combinedView ){
+                $compactMode = Better_Messages()->settings['sidebarCompactMode'];
+                $sideWidth   = (int) Better_Messages()->settings['sideThreadsWidth'];
+
+                $wrapClass = 'bp-messages-wrap bm-no-transition';
+
+                if( $compactMode === 'always_compact' ){
+                    $wrapClass .= ' bm-side-compact';
+                    $sideWidthValue = '60px';
+                } else {
+                    $sideWidthValue = $sideWidth . 'px';
+                }
+                ?>
+                <div class="<?php echo esc_attr( $wrapClass ); ?>" style="height:<?php echo $initialHeight; ?>px; --bm-side-width:<?php echo esc_attr( $sideWidthValue ); ?>">
+                    <div class="bp-messages-threads-wrapper" style="height:<?php echo $initialHeight; ?>px">
+                        <div class="bp-messages-side-threads">
+                            <div class="chat-header side-header">
+                                <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
+                                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
+                                </div>
+                            </div>
+                            <div class="bm-side-content">
+                                <?php echo $this->threads_placeholder(); ?>
+                            </div>
+                        </div>
+                        <div class="bp-messages-column">
+                            <?php echo $this->header_placeholder(); ?>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            } else {
+                ?>
+                <div class="bp-messages-wrap" style="height:<?php echo $initialHeight; ?>px">
+                    <?php echo $this->header_placeholder(); ?>
+                    <?php echo $this->threads_placeholder(); ?>
+                </div>
+                <?php
+            }
+
             return ob_get_clean();
         }
 

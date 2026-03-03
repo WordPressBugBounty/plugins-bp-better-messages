@@ -135,7 +135,7 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
             }
 
             if( ! empty($errors) ) {
-                do_action( 'better_messages_on_message_not_sent', $thread_id, $errors );
+                do_action( 'better_messages_on_message_not_sent', $thread_id, '', $errors );
 
                 $redirect = 'redirect';
 

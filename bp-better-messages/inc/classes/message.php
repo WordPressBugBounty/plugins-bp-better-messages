@@ -193,10 +193,11 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 }
 
                 // Add a sender recipient entry if the sender is not in the list of recipients.
-                if ( ! in_array( $this->sender_id, $recipient_ids ) ) {
+                // Skip for system messages (sender_id=0) — system is not a participant.
+                if ( $this->sender_id != 0 && ! in_array( $this->sender_id, $recipient_ids ) ) {
                     $wpdb->query( $wpdb->prepare(
-                        "INSERT INTO " . bm_get_table('recipients') . " 
-                    ( user_id, thread_id, last_update ) 
+                        "INSERT INTO " . bm_get_table('recipients') . "
+                    ( user_id, thread_id, last_update )
                     VALUES ( %d, %d, %d )", $this->sender_id, $this->thread_id, $time ) );
                 }
             } else {

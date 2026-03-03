@@ -1274,6 +1274,7 @@ table.build-info-table button {
   margin-top: 10px;
   font-size: 13px;
   color: #50575e;
+  padding: 0 10px 10px;
 }
 
 .bm-report-threads-loading {

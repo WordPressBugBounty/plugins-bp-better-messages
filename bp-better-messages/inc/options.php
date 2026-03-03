@@ -37,7 +37,12 @@ class Better_Messages_Options
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'attachmentsUploadMethod'     => 'post',
-            'attachmentsBrowserEnable'    => '1',
+            'attachmentsBrowserEnable'    => '0',
+            'transcodingImageFormat'      => 'original',
+            'transcodingImageQuality'     => 85,
+            'transcodingImageMaxResolution' => 0,
+            'transcodingStripMetadata'    => '1',
+            'transcodingVideoFormat'      => 'original',
             'miniChatsEnable'             => '0',
             'combinedChatsEnable'         => '0',
             'searchAllUsers'              => '1',
@@ -89,6 +94,10 @@ class Better_Messages_Options
             'colorGeneral'                => '#21759b',
             'encryptionEnabled'           => '1',
             'encryptionLocal'             => '0',
+            'e2eEncryption'               => '0',
+            'e2eDefault'                  => '0',
+            'e2eForceSend'                => '0',
+            'e2eAllowGuests'              => '0',
             'stipopApiKey'                => '',
             'stipopLanguage'              => 'en',
             'allowMuteThreads'            => '1',
@@ -124,6 +133,10 @@ class Better_Messages_Options
             'messagesMinHeight'           => 450,
             'messagesHeight'              => 650,
             'sideThreadsWidth'            => 320,
+            'sidebarCompactMode'          => 'auto',
+            'sidebarUserToggle'           => '1',
+            'sidebarCompactBreakpoint'    => 0,
+            'sidebarHideBreakpoint'       => 0,
 
             'notificationSound'           => 100,
             'notificationSoundId'         => 0,
@@ -329,6 +342,10 @@ class Better_Messages_Options
             $args['audioCalls'] = '0';
             $args['encryptionEnabled'] = '0';
             $args['encryptionLocal'] = '0';
+            $args['e2eEncryption'] = '0';
+            $args['e2eDefault'] = '0';
+            $args['e2eForceSend'] = '0';
+            $args['e2eAllowGuests'] = '0';
             $args['userStatuses'] = '0';
         }
 
@@ -622,6 +639,9 @@ class Better_Messages_Options
         if ( !isset( $settings['UMmobileFriendsEnable'] ) ) {
             $settings['UMmobileFriendsEnable'] = '0';
         }
+        if ( !isset( $settings['sidebarUserToggle'] ) ) {
+            $settings['sidebarUserToggle'] = '0';
+        }
 
         if ( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ) {
             if ( ! isset( $settings['FCenableMessageButton'] ) ) {
@@ -702,6 +722,25 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsBrowserEnable'] ) ) {
             $settings['attachmentsBrowserEnable'] = '0';
+        }
+        if ( !isset( $settings['transcodingImageFormat'] ) || !in_array( $settings['transcodingImageFormat'], array( 'original', 'webp', 'avif', 'jpeg' ), true ) ) {
+            $settings['transcodingImageFormat'] = 'original';
+        }
+        if ( !isset( $settings['transcodingImageQuality'] ) ) {
+            $settings['transcodingImageQuality'] = 85;
+        } else {
+            $settings['transcodingImageQuality'] = max( 1, min( 100, intval( $settings['transcodingImageQuality'] ) ) );
+        }
+        if ( !isset( $settings['transcodingImageMaxResolution'] ) ) {
+            $settings['transcodingImageMaxResolution'] = 0;
+        } else {
+            $settings['transcodingImageMaxResolution'] = max( 0, intval( $settings['transcodingImageMaxResolution'] ) );
+        }
+        if ( !isset( $settings['transcodingStripMetadata'] ) ) {
+            $settings['transcodingStripMetadata'] = '1';
+        }
+        if ( !isset( $settings['transcodingVideoFormat'] ) || !in_array( $settings['transcodingVideoFormat'], array( 'original', 'mp4' ), true ) ) {
+            $settings['transcodingVideoFormat'] = 'original';
         }
         if ( !isset( $settings['miniChatsEnable'] ) ) {
             $settings['miniChatsEnable'] = '0';
@@ -1206,6 +1245,22 @@ class Better_Messages_Options
             $settings['encryptionLocal'] = '0';
         }
 
+        if( ! isset( $settings['e2eEncryption'] ) ) {
+            $settings['e2eEncryption'] = '0';
+        }
+
+        if( ! isset( $settings['e2eDefault'] ) ) {
+            $settings['e2eDefault'] = '0';
+        }
+
+        if( ! isset( $settings['e2eForceSend'] ) ) {
+            $settings['e2eForceSend'] = '0';
+        }
+
+        if( ! isset( $settings['e2eAllowGuests'] ) ) {
+            $settings['e2eAllowGuests'] = '0';
+        }
+
         if( ! isset( $settings['deleteMethod'] ) || $settings['deleteMethod'] !== 'replace' ) {
             $settings['deleteMethod'] = 'delete';
         }
@@ -1281,6 +1336,8 @@ class Better_Messages_Options
             'messagesHeight'            => 200,
             'messagesMinHeight'         => 100,
             'sideThreadsWidth'          => 320,
+            'sidebarCompactBreakpoint'  => 0,
+            'sidebarHideBreakpoint'     => 0,
             'mobilePopupLocationBottom' => 0,
             'rateLimitNewThread'        => 0,
             'notificationsInterval'     => 0,

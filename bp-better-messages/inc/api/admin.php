@@ -670,6 +670,28 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
                     $content = $message['message'];
 
+                    // System messages: convert to readable text for admin
+                    if ( strpos( $content, '<!-- BM-SYSTEM-MESSAGE:' ) === 0 ) {
+                        preg_match( '/<!-- BM-SYSTEM-MESSAGE:(\w+)/', $content, $type_match );
+                        $sys_type = isset( $type_match[1] ) ? $type_match[1] : '';
+                        switch ( $sys_type ) {
+                            case 'user_joined':
+                                $sys_data = Better_Messages()->functions->get_message_meta( $message['id'], 'system_data', true );
+                                $sys_name = is_array( $sys_data ) && isset( $sys_data['user_name'] ) ? esc_html( $sys_data['user_name'] ) : __( 'A user', 'bp-better-messages' );
+                                $content = '<em>' . sprintf( __( '%s joined the conversation', 'bp-better-messages' ), $sys_name ) . '</em>';
+                                break;
+                            case 'user_left':
+                                $sys_data = Better_Messages()->functions->get_message_meta( $message['id'], 'system_data', true );
+                                $sys_name = is_array( $sys_data ) && isset( $sys_data['user_name'] ) ? esc_html( $sys_data['user_name'] ) : __( 'A user', 'bp-better-messages' );
+                                $content = '<em>' . sprintf( __( '%s left the conversation', 'bp-better-messages' ), $sys_name ) . '</em>';
+                                break;
+                            default:
+                                // Allow addons to handle additional system message types
+                                $content = apply_filters( 'better_messages_admin_system_message', '<em>' . _x( 'System message', 'WP Admin', 'bp-better-messages' ) . '</em>', $sys_type, $message );
+                                break;
+                        }
+                    }
+
                     if( $content === '<!-- BPBM-VOICE-MESSAGE -->' ){
                         $content = __('Voice Message', 'bp-better-messages');
 
@@ -701,13 +723,24 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
                     $item = [
                         'id'           => $message['id'],
-                        'sender'       => Better_Messages()->functions->rest_user_item( $message['sender_id'] ),
+                        'sender'       => ( (int) $message['sender_id'] === 0 )
+                            ? [
+                                'id'      => '0',
+                                'user_id' => 0,
+                                'name'    => _x( 'System', 'WP Admin', 'bp-better-messages' ),
+                                'avatar'  => Better_Messages()->url . 'assets/images/avatar.png',
+                                'url'     => false,
+                            ]
+                            : Better_Messages()->functions->rest_user_item( $message['sender_id'] ),
                         'thread_id'    => $message['thread_id'],
                         'message'      => $content,
                         'time'         => $message['date_sent'],
                         'view_link'    => $view_link,
                         'participants' => $participants_count
                     ];
+
+                    // Allow addons (E2E) to modify the moderation item (e.g. replace encrypted content)
+                    $item = apply_filters( 'better_messages_admin_moderation_item', $item, $message );
 
                     if( $participants_count === 2 ){
                          $recipients = Better_Messages()->functions->get_recipients( $message['thread_id'] );

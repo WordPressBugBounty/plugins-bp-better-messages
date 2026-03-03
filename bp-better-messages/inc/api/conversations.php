@@ -482,7 +482,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
 
         public function change_subject( WP_REST_Request $request ){
             $thread_id  = intval($request->get_param('id'));
-            $subject    = sanitize_text_field($request->get_param('subject'));
+            $subject    = $request->get_param('subject');
+
+            $subject = apply_filters( 'better_messages_change_subject_content',
+                sanitize_text_field( $subject ),
+                $subject, $thread_id
+            );
 
             $can_change = Better_Messages()->functions->is_thread_super_moderator( Better_Messages()->functions->get_current_user_id(), $thread_id );
 

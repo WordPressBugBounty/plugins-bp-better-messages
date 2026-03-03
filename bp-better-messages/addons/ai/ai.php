@@ -698,7 +698,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                 }
             } catch (Throwable $e) {
-                error_log( 'Better Messages AI: Error in before_delete_message: ' . $e->getMessage() );
             }
         }
 
@@ -882,8 +881,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
+            // Skip E2E encrypted messages — content is ciphertext, cannot be moderated
+            $content = isset( $args['content'] ) ? $args['content'] : '';
+            if ( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $content, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) {
+                return;
+            }
+
             // Get message content
-            $content = isset( $args['content'] ) ? strip_tags( $args['content'] ) : '';
+            $content = strip_tags( $content );
             $has_text = ! empty( trim( $content ) );
 
             // Get image data URIs if image moderation is enabled
@@ -911,7 +916,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             // Fail open on API error
             if( is_wp_error( $result ) ) {
-                error_log( 'Better Messages AI Moderation Error: ' . $result->get_error_message() );
                 return;
             }
 
@@ -1047,6 +1051,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             // Mark as checked to prevent duplicate processing
             Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_checked', '1' );
 
+            // Skip E2E encrypted messages — content is ciphertext, cannot be moderated
+            if ( is_string( $message->message ) && class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $message->message, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) {
+                return;
+            }
+
             $content = strip_tags( $message->message );
             $has_text = ! empty( trim( $content ) );
 
@@ -1073,7 +1082,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             // Fail open on API error — message stays as-is
             if( is_wp_error( $result ) ) {
-                error_log( 'Better Messages AI Moderation Error: ' . $result->get_error_message() );
                 return;
             }
 
@@ -1153,7 +1161,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
 
             $admin_url = admin_url( 'admin.php?page=better-messages-viewer' );
-            $message_preview = wp_trim_words( strip_tags( $message->message ), 50 );
+            if ( is_string( $message->message ) && class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $message->message, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) {
+                $message_preview = _x( 'Encrypted message', 'AI Moderation', 'bp-better-messages' );
+            } else {
+                $message_preview = wp_trim_words( strip_tags( $message->message ), 50 );
+            }
 
             $body  = sprintf( _x( 'Sender: %s (ID: %d)', 'AI Moderation', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
             $body .= sprintf( _x( 'Conversation: #%d', 'AI Moderation', 'bp-better-messages' ), $thread_id ) . "\n";

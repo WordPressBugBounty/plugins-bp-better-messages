@@ -382,6 +382,7 @@ _x('Reject', 'WP Admin', 'bp-better-messages');
 _x('AI Flagged', 'WP Admin', 'bp-better-messages');
 _x('Click to filter by this conversation', 'WP Admin', 'bp-better-messages');
 _x('View conversation', 'WP Admin', 'bp-better-messages');
+_x('E2E Encrypted', 'WP Admin', 'bp-better-messages');
 _x('User Report', 'WP Admin', 'bp-better-messages');
 _x('by', 'WP Admin', 'bp-better-messages');
 _x('Are you sure you want to delete this report?', 'User Reports', 'bp-better-messages');

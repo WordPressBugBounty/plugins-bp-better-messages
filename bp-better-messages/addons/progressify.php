@@ -78,8 +78,6 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
                 return $pushs;
             }
 
-            var_dump( $subscribers );
-
             return $pushs;
         }
 

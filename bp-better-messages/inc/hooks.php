@@ -370,15 +370,48 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             add_action( 'better_messages_on_deleted_user', array( $this, 'bm_on_deleted_user'), 10, 1 );
 
             add_filter('bp_better_messages_after_format_message', array($this, 'system_message_formatting'), 101, 4);
+            add_filter('better_messages_rest_message_meta', array($this, 'system_message_meta'), 10, 4);
         }
 
         public function system_message_formatting( $message, $message_id, $context, $user_id )
         {
-            if( $message !== '<!-- BM-SYSTEM-MESSAGE -->' ) return $message;
+            if ( ! is_string($message) || strpos($message, '<!-- BM-SYSTEM-MESSAGE:') !== 0 ) return $message;
 
-            $message = 'User iphone joined';
-            return $message;
+            // For 'stack' context, pass through — frontend handles rendering
+            if ( $context === 'stack' ) return $message;
+
+            // For other contexts (notifications, push, etc.), return plain text
+            preg_match('/<!-- BM-SYSTEM-MESSAGE:(\w+)/', $message, $matches);
+            $type = isset($matches[1]) ? $matches[1] : '';
+
+            switch ( $type ) {
+                case 'e2e_pending':
+                    return __('Encrypted conversation created', 'bp-better-messages');
+                case 'user_joined':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $name = is_array($data) && isset($data['user_name']) ? $data['user_name'] : __('A user', 'bp-better-messages');
+                    return sprintf(__('%s joined the conversation', 'bp-better-messages'), $name);
+                case 'user_left':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $name = is_array($data) && isset($data['user_name']) ? $data['user_name'] : __('A user', 'bp-better-messages');
+                    return sprintf(__('%s left the conversation', 'bp-better-messages'), $name);
+                default:
+                    return '';
+            }
         }
+
+        public function system_message_meta( $meta, $message_id, $thread_id, $message_content )
+        {
+            if ( ! is_string($message_content) || strpos($message_content, '<!-- BM-SYSTEM-MESSAGE:') !== 0 ) return $meta;
+
+            $system_data = Better_Messages()->functions->get_message_meta( $message_id, 'system_data', true );
+            if ( $system_data && is_array($system_data) ) {
+                $meta['systemData'] = $system_data;
+            }
+
+            return $meta;
+        }
+
         public function wp_on_deleted_user( $user_id, $reassign = null, $user = null ){
             if( Better_Messages()->settings['deleteMessagesOnUserDelete'] === '1' && ! wp_get_scheduled_event( 'better_messages_on_deleted_user', [ $user_id ] ) ){
                 wp_schedule_single_event( time(), 'better_messages_on_deleted_user', [ $user_id ] );

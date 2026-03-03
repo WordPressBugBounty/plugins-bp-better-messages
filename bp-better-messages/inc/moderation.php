@@ -1254,7 +1254,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 get_bloginfo( 'name' )
             );
 
-            $message_content = wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' );
+            $message_content = apply_filters( 'better_messages_moderation_message_content',
+                wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' ),
+                $message
+            );
 
             // Determine reason for pending
             $reason = _x( 'Pre-moderation rules', 'Moderation email', 'bp-better-messages' );
@@ -1327,7 +1330,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 get_bloginfo( 'name' )
             );
 
-            $message_content = wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' );
+            $message_content = apply_filters( 'better_messages_moderation_message_content',
+                wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' ),
+                $message
+            );
             $report_count = count( $reports );
 
             $email_body = sprintf(

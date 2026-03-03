@@ -48,7 +48,6 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                 $old_time = strtotime("-$old_days days");
 
                 if ($old_time === false) {
-                    error_log('Failed to calculate old time for message deletion.');
                     return;
                 }
 
