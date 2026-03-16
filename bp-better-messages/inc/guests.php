@@ -354,13 +354,22 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
                     $guest_user = $this->get_guest_user( $user_id );
 
+                    $user_item = Better_Messages()->functions->rest_user_item( $user_id );
+
                     $return = [
                         'id'     => (int) $guest_user->id,
                         'secret' => $guest_user->secret,
                         'name'   => $guest_user->name,
                         'email'  => $guest_user->email,
-                        'user'   => Better_Messages()->functions->rest_user_item( $user_id )
+                        'user'   => $user_item
                     ];
+
+                    if ( Better_Messages()->websocket ) {
+                        $ws_profile = Better_Messages()->functions->build_ws_profile( $user_id, $user_item );
+                        $return['pd']  = $ws_profile['pd'];
+                        $return['pdh'] = $ws_profile['pdh'];
+                        $return['pds'] = $ws_profile['pds'];
+                    }
 
                     do_action( 'better_messages_guest_updated', $user_id );
                     do_action( 'better_messages_user_updated', $user_id );
@@ -441,13 +450,24 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
                 do_action( 'better_messages_guest_registered', $guest_id );
 
-                return [
+                $user_item = Better_Messages()->functions->rest_user_item( -$guest_id );
+
+                $return = [
                     'id'     => $guest_id,
                     'secret' => $secret,
                     'name'   => $name,
                     'email'  => $email,
-                    'user'   => Better_Messages()->functions->rest_user_item( $guest_id )
+                    'user'   => $user_item
                 ];
+
+                if ( Better_Messages()->websocket ) {
+                    $ws_profile = Better_Messages()->functions->build_ws_profile( -$guest_id, $user_item );
+                    $return['pd']  = $ws_profile['pd'];
+                    $return['pdh'] = $ws_profile['pdh'];
+                    $return['pds'] = $ws_profile['pds'];
+                }
+
+                return $return;
             }
 
             return false;

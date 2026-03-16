@@ -5,7 +5,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.13.0
+    Version: 2.14.0
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
     class Better_Messages {
-        public $version = '2.13.0';
+        public $version = '2.14.0';
 
         public $db_version = '1.0.4';
 
@@ -250,7 +250,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 }
             }
             if ( function_exists( 'Better_Messages_Calls_Group' ) ) {
-                if ( $this->settings['groupAudioCallsChats'] === '1' || $this->settings['groupAudioCallsThreads'] === '1' || $this->settings['groupAudioCallsChats'] === '1' || $this->settings['groupCallsGroups'] === '1' || $this->settings['groupCallsThreads'] === '1' || $this->settings['groupCallsChats'] === '1' ) {
+                if ( $this->settings['groupAudioCallsChats'] === '1' || $this->settings['groupAudioCallsThreads'] === '1' || $this->settings['groupAudioCallsGroups'] === '1' || $this->settings['groupCallsGroups'] === '1' || $this->settings['groupCallsThreads'] === '1' || $this->settings['groupCallsChats'] === '1' ) {
                     $this->group_calls = Better_Messages_Calls_Group();
                 }
             }
@@ -332,10 +332,10 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                         if ( str_ends_with( $current_screen->id, 'better-messages-mobile-app' ) ) {
                             $include_css = true;
                         } else {
-                            if ( str_ends_with( $current_screen->id, 'better-messages-settings' ) ) {
+                            if ( str_ends_with( $current_screen->id, 'bp-better-messages-ai' ) ) {
                                 $include_css = true;
                             } else {
-                                if ( str_ends_with( $current_screen->id, 'better-messages-bulk' ) ) {
+                                if ( str_ends_with( $current_screen->id, 'bp-better-messages-chat-rooms' ) ) {
                                     $include_css = true;
                                 }
                             }
@@ -367,16 +367,16 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 default:
                     if ( str_ends_with( $current_screen->id, 'better-messages-viewer' ) ) {
                         $include_js = true;
+                        wp_enqueue_editor();
                     } else {
                         if ( str_ends_with( $current_screen->id, 'better-messages-mobile-app' ) ) {
                             $include_js = true;
                         } else {
-                            if ( str_ends_with( $current_screen->id, 'better-messages-settings' ) ) {
+                            if ( str_ends_with( $current_screen->id, 'bp-better-messages-ai' ) ) {
                                 $include_js = true;
                             } else {
-                                if ( str_ends_with( $current_screen->id, 'better-messages-bulk' ) ) {
+                                if ( str_ends_with( $current_screen->id, 'bp-better-messages-chat-rooms' ) ) {
                                     $include_js = true;
-                                    wp_enqueue_editor();
                                 }
                             }
                         }
@@ -405,6 +405,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'adminUrl'             => admin_url(),
                 'canEditUsers'         => current_user_can( 'edit_users' ),
                 'premoderationEnabled' => $this->settings['messagesPremoderation'] === '1',
+                'hasWebSocketClass'    => class_exists( 'Better_Messages_WebSocket' ),
             ];
             wp_set_script_translations( 'better-messages-admin', 'bp-better-messages', plugin_dir_path( __FILE__ ) . 'languages/' );
             wp_localize_script( 'better-messages-admin', 'Better_Messages_Admin', $script_variables );
@@ -522,6 +523,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'user_id'                  => get_current_user_id(),
                 'version'                  => $this->version,
                 'workerVersion'            => $this->get_worker_version(),
+                'blogId'                   => ( is_multisite() ? get_current_blog_id() : '' ),
                 'ajaxUrl'                  => admin_url( 'admin-ajax.php' ),
                 'restUrl'                  => esc_url_raw( get_rest_url( null, '/better-messages/v1/' ) ),
                 'nonce'                    => wp_create_nonce( 'wp_rest' ),
@@ -606,6 +608,7 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 'drafts'                   => ( $this->settings['enableDrafts'] == '1' ? '1' : '0' ),
                 'mobileOnsite'             => ( in_array( $this->settings['mobileOnsiteLocation'], ['top', 'bottom'] ) ? $this->settings['mobileOnsiteLocation'] : 'auto' ),
                 'enableSound'              => $enableSound,
+                'forceMentions'            => ( $this->settings['mentionsForceNotifications'] == '1' ? '1' : '0' ),
                 'guests'                   => ( Better_Messages()->guests->guest_access_enabled() ? '1' : '0' ),
                 'reports'                  => ( $this->settings['allowReports'] == '1' ? '1' : '0' ),
             );
@@ -631,6 +634,30 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             if ( current_user_can( 'manage_options' ) ) {
                 $script_variables['isAdmin'] = '1';
             }
+            $balanceKeys = [
+                'pointsBalanceHeader',
+                'pointsBalanceThreadsList',
+                'pointsBalanceThreadsListBottom',
+                'pointsBalanceUserMenu',
+                'pointsBalanceUserMenuPopup',
+                'pointsBalanceReplyForm'
+            ];
+            $hasBalance = false;
+            foreach ( $balanceKeys as $key ) {
+                if ( ($this->settings[$key] ?? '0') === '1' ) {
+                    $script_variables[$key] = '1';
+                    $hasBalance = true;
+                }
+            }
+            if ( $hasBalance && is_user_logged_in() && class_exists( 'Better_Messages_Points' ) ) {
+                $provider = Better_Messages_Points()->get_provider();
+                if ( $provider ) {
+                    $script_variables['pointsBalance'] = (float) $provider->get_user_balance( get_current_user_id() );
+                }
+                if ( !empty( $this->settings['pointsBalanceUrl'] ) ) {
+                    $script_variables['pointsBalanceUrl'] = $this->settings['pointsBalanceUrl'];
+                }
+            }
             if ( Better_Messages_Rest_Api_Bulk_Message()->has_access() ) {
                 $script_variables['canBulk'] = '1';
                 $script_variables['adminUrl'] = admin_url();
@@ -649,6 +676,28 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                 $script_variables['miniGroups'] = ( $this->settings['enableMiniGroups'] == '1' ? '1' : '0' );
                 $script_variables['mobileGroups'] = ( $this->settings['mobileGroupsEnable'] == '1' ? '1' : '0' );
             }
+            // Resolve widget order arrays for frontend (map integration-specific IDs to generic)
+            $order_map = [
+                'bp-friends' => 'friends',
+                'um-friends' => 'friends',
+                'ps-friends' => 'friends',
+                'bp-groups'  => 'groups',
+                'um-groups'  => 'groups',
+                'ps-groups'  => 'groups',
+            ];
+            foreach ( ['miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder'] as $order_key ) {
+                $raw = ( isset( $this->settings[$order_key] ) ? $this->settings[$order_key] : [] );
+                if ( !empty( $raw ) && is_array( $raw ) ) {
+                    $resolved = [];
+                    foreach ( $raw as $id ) {
+                        $mapped = ( isset( $order_map[$id] ) ? $order_map[$id] : $id );
+                        if ( !in_array( $mapped, $resolved, true ) ) {
+                            $resolved[] = $mapped;
+                        }
+                    }
+                    $script_variables[$order_key] = $resolved;
+                }
+            }
             if ( $this->realtime && $this->settings['userStatuses'] ) {
                 $script_variables['userStatuses'] = $this->websocket->get_all_statuses();
             }
@@ -658,14 +707,29 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
             if ( is_user_logged_in() ) {
                 $user_data = $this->functions->rest_user_item( get_current_user_id(), false );
                 $script_variables['me'] = [
-                    'name'   => base64_encode( $user_data['name'] ),
-                    'url'    => base64_encode( $user_data['url'] ),
-                    'avatar' => base64_encode( $user_data['avatar'] ),
+                    'user_id'  => get_current_user_id(),
+                    'name'     => base64_encode( $user_data['name'] ),
+                    'url'      => base64_encode( $user_data['url'] ?? '' ),
+                    'avatar'   => base64_encode( $user_data['avatar'] ),
+                    'verified' => (int) ($user_data['verified'] ?? 0),
                 ];
+                if ( isset( $user_data['status'] ) ) {
+                    $script_variables['me']['status'] = $user_data['status'];
+                }
+                if ( $this->realtime ) {
+                    $profile = $this->functions->build_ws_profile( get_current_user_id(), $user_data );
+                    $script_variables['me']['pd'] = $profile['pd'];
+                    $script_variables['me']['pdh'] = $profile['pdh'];
+                    $script_variables['me']['pds'] = $profile['pds'];
+                }
             }
             $script_variables['ukey'] = $ukey;
             if ( get_current_user_id() > 0 && $this->settings['attachmentsProxy'] === '1' ) {
                 $script_variables['fileSigningKey'] = hash_hmac( 'sha256', $ukey, wp_salt( 'auth' ) );
+            }
+            $voice_max_duration = (int) $this->settings['voiceMessagesMaxDuration'];
+            if ( $voice_max_duration > 0 ) {
+                $script_variables['voiceMaxDuration'] = $voice_max_duration;
             }
             $this->script_variables = apply_filters( 'bp_better_messages_script_variable', $script_variables );
             return $this->script_variables;
@@ -743,6 +807,8 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                     return $bp_prefix . 'bm_bulk_jobs';
                 case 'bulk_job_threads':
                     return $bp_prefix . 'bm_bulk_job_threads';
+                case 'ai_usage':
+                    return $bp_prefix . 'bm_ai_usage';
             }
         } else {
             switch ( $table ) {
@@ -781,6 +847,8 @@ if ( !class_exists( 'Better_Messages' ) && !function_exists( 'bpbm_fs' ) ) {
                     return $bp_prefix . 'bm_bulk_jobs';
                 case 'bulk_job_threads':
                     return $bp_prefix . 'bm_bulk_job_threads';
+                case 'ai_usage':
+                    return $bp_prefix . 'bm_ai_usage';
             }
         }
         return false;

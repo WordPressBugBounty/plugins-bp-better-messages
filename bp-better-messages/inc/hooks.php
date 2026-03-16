@@ -234,15 +234,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
 
-            if ( class_exists( 'myCRED_Core' ) ){
-                require_once Better_Messages()->path . 'addons/mycred.php';
-                Better_Messages_MyCred::instance();
-            }
-
-            if ( class_exists( 'GamiPress' ) ) {
-                require_once Better_Messages()->path . 'addons/gamipress.php';
-                Better_Messages_GamiPress::instance();
-            }
+            require_once Better_Messages()->path . 'addons/points/points.php';
+            Better_Messages_Points();
 
             if( Better_Messages()->settings['pinnedMessages'] === '1' ) {
                 require_once Better_Messages()->path . 'addons/pinned-message.php';
@@ -338,7 +331,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_SureDash::instance();
             }
 
-            if( class_exists('DaftPlug\Progressify\Plugin') ){
+            if( class_exists('DaftPlug\Progressify\Plugin') || defined('PROGRESSIFY_VERSION') ){
                 require_once Better_Messages()->path . 'addons/progressify.php';
                 Better_Messages_Progressify::instance();
             }
@@ -1130,6 +1123,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( Better_Messages()->functions->get_current_user_id() === intval($author_id) ) return false;
 
             $view_user = get_userdata( $author_id );
+
+            if ( ! $view_user ) return;
 
             $link = Better_Messages()->functions->add_hash_arg('new-conversation', [
                 'to' => $view_user->ID
@@ -1941,10 +1936,15 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function admin_notice(){
+            $screen = get_current_screen();
+            if( $screen && strpos( $screen->id, 'better-messages' ) !== false ){
+                return;
+            }
+
             if( ! class_exists('BuddyPress') && ! defined('ultimatemember_version') ){
                 if( Better_Messages()->settings['chatPage'] == '0' ){
                     echo '<div class="notice notice-error">';
-                    echo '<p><b>Better Messages</b> require <b><a href="'. admin_url('options-general.php?page=bp-better-messages#general').'">installing Messages Location</a></b>.</p>';
+                    echo '<p><b>Better Messages</b> require <b><a href="'. admin_url('admin.php?page=bp-better-messages#/general').'">installing Messages Location</a></b>.</p>';
                     echo '</div>';
                 }
             } else {

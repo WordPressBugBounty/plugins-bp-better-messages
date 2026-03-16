@@ -4,6 +4,8 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
     class Better_Messages_Progressify
     {
+        private $table_name;
+        private $vapid_option;
 
         public static function instance()
         {
@@ -19,21 +21,44 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
 
         public function __construct()
         {
+            global $wpdb;
+
+            // Detect which version of Progressify is active
+            if ( defined('PROGRESSIFY_VERSION') ) {
+                // New version (wordpress.org)
+                $this->table_name   = $wpdb->prefix . 'progressify_push_notifications_subscribers';
+                $this->vapid_option = 'progressify_vapid_keys';
+            } else {
+                // Old version (codecanyon / daftplug-progressify)
+                $this->table_name   = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
+                $this->vapid_option = 'daftplug_progressify_vapid_keys';
+            }
+
             add_filter( 'better_messages_3rd_party_push_active', '__return_true' );
             add_filter( 'better_messages_push_active', '__return_false' );
             add_filter( 'better_messages_push_message_in_settings', array( $this, 'push_message_in_settings' ) );
 
             add_filter( 'better_messages_bulk_pushs', array( $this, 'send_bulk_pushs' ), 10, 4 );
-            add_filter( 'better_messages_mass_push', array( $this, 'send_mass_pushs' ), 10, 3 );
             add_filter( 'better_messages_get_user_push_subscriptions', array( $this, 'override_user_push_subscriptions' ), 10, 2 );
             add_filter( 'better_messages_vapid_keys', array( $this, 'override_vapid_keys' ), 10, 1 );
         }
 
-        public function override_vapid_keys( $keys )
+        private function get_vapid_keys()
         {
-            $vapid = get_option('daftplug_progressify_vapid_keys');
+            $vapid = get_option( $this->vapid_option );
 
             if( empty( $vapid ) || !isset( $vapid['publicKey'] ) || !isset( $vapid['privateKey'] ) ) {
+                return false;
+            }
+
+            return $vapid;
+        }
+
+        public function override_vapid_keys( $keys )
+        {
+            $vapid = $this->get_vapid_keys();
+
+            if( $vapid === false ) {
                 return $keys;
             }
 
@@ -44,9 +69,7 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
         {
             global $wpdb;
 
-            $table = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
-
-            $subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT `endpoint`, `auth_key`,`p256dh_key` FROM `{$table}` WHERE `wp_user_id` = %d", $user_id ), ARRAY_A);
+            $subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT `endpoint`, `auth_key`,`p256dh_key` FROM `{$this->table_name}` WHERE `wp_user_id` = %d", $user_id ), ARRAY_A);
 
             $result = [];
 
@@ -60,40 +83,15 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
             return $result;
         }
 
-        public function send_mass_pushs( $pushs, $all_recipients, $notification )
-        {
-            global $wpdb;
-            $table = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
-            $user_ids = array_map('intval', $all_recipients);
-
-            $vapid = get_option('daftplug_progressify_vapid_keys');
-
-            if( empty( $vapid ) || !isset( $vapid['publicKey'] ) || !isset( $vapid['privateKey'] ) ) {
-                return $pushs;
-            }
-
-            $subscribers = $wpdb->get_results("SELECT `wp_user_id` as `user_id`, `endpoint`, `auth_key`,`p256dh_key` FROM `{$table}` WHERE `wp_user_id` IN (" . implode(',', $user_ids) . ")", ARRAY_A);
-
-            if( count( $subscribers ) === 0 ){
-                return $pushs;
-            }
-
-            return $pushs;
-        }
-
         public function send_bulk_pushs( $pushs, $all_recipients, $notification, $message )
         {
             global $wpdb;
-            $table = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
             $user_ids = array_map('intval', $all_recipients);
 
-            $vapid = get_option('daftplug_progressify_vapid_keys');
+            $vapid = $this->get_vapid_keys();
+            if( $vapid === false ) return $pushs;
 
-            if( empty( $vapid ) || !isset( $vapid['publicKey'] ) || !isset( $vapid['privateKey'] ) ) {
-                return $pushs;
-            }
-
-            $subscribers = $wpdb->get_results("SELECT `wp_user_id` as `user_id`, `endpoint`, `auth_key`,`p256dh_key` FROM `{$table}` WHERE `wp_user_id` IN (" . implode(',', $user_ids) . ")", ARRAY_A);
+            $subscribers = $wpdb->get_results("SELECT `wp_user_id` as `user_id`, `endpoint`, `auth_key`,`p256dh_key` FROM `{$this->table_name}` WHERE `wp_user_id` IN (" . implode(',', $user_ids) . ")", ARRAY_A);
 
             if( count( $subscribers ) === 0 ){
                 return $pushs;

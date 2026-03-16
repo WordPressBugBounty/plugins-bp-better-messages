@@ -113,6 +113,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
         }
 
         public function on_something_changed( $space, $userId = null, $initiator = null ){
+            if( ! $this->is_group_messages_enabled( $space->id ) ){
+                return;
+            }
+
             $thread_id = $this->get_group_thread_id( $space->id );
             $this->sync_thread_members( $thread_id );
         }

@@ -350,6 +350,10 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
         }
 
         public function on_something_changed( $group_id, $user_id = false ){
+            if( $this->is_group_messages_enabled( $group_id ) !== 'enabled' ){
+                return;
+            }
+
             $thread_id = $this->get_group_thread_id( $group_id );
             $this->sync_thread_members( $thread_id );
         }

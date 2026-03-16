@@ -220,7 +220,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             $ffmpeg_url = self::get_ffmpeg_wasm_url();
             if ( $ffmpeg_url ) {
-                $vars['transcodingFfmpegUrl'] = $ffmpeg_url;
+                $vars['transcodingFFmpegUrl'] = $ffmpeg_url;
             }
 
             $vars['transcodingLibheifUrl'] = self::get_libheif_wasm_url();
@@ -259,6 +259,30 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     ),
                 ),
             ));
+
+            register_rest_route( 'better-messages/v1/admin', '/testProxyMethod', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'test_proxy_method' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'manage_options' );
+                },
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/downloadFFmpeg', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_download_ffmpeg' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'manage_options' );
+                },
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/removeFFmpeg', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_remove_ffmpeg' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'manage_options' );
+                },
+            ) );
 
             if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) {
                 return;
@@ -326,13 +350,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 ));
             }
 
-            register_rest_route( 'better-messages/v1/admin', '/testProxyMethod', array(
-                'methods'             => 'POST',
-                'callback'            => array( $this, 'test_proxy_method' ),
-                'permission_callback' => function() {
-                    return current_user_can( 'manage_options' );
-                },
-            ) );
         }
 
         public function get_thread_attachments( WP_REST_Request $request ) {
@@ -2381,6 +2398,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             }
 
             // Extract the needed files from the tgz
+            $tar_file = null;
             try {
                 $phar = new PharData( $tmp_file );
                 $extracted = false;
@@ -2390,12 +2408,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     'package/dist/umd/ffmpeg-core.wasm',
                 );
 
-                foreach ( $phar as $entry ) {
-                    // PharData iterator for tgz needs decompression first
-                }
-
                 // Decompress .tgz to .tar
-                $tar_file = $tmp_file . '.tar';
                 $phar->decompress();
                 $tar_file = str_replace( '.tgz', '.tar', $tmp_file );
                 if ( ! file_exists( $tar_file ) ) {
@@ -2430,6 +2443,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             } catch ( Exception $e ) {
                 @unlink( $tmp_file );
+                if ( $tar_file ) {
+                    @unlink( $tar_file );
+                }
                 wp_send_json_error( $e->getMessage() );
             }
         }
@@ -2464,6 +2480,100 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             Better_Messages_Options::instance()->update_settings( $settings );
 
             wp_send_json_success();
+        }
+
+        /**
+         * REST handler: Download FFmpeg WASM files.
+         */
+        public function rest_download_ffmpeg( WP_REST_Request $request ) {
+            if ( ! function_exists( 'download_url' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+
+            $version = '0.12.10';
+            $tgz_url = 'https://registry.npmjs.org/@ffmpeg/core/-/core-' . $version . '.tgz';
+
+            $dir = self::get_ffmpeg_wasm_dir();
+            wp_mkdir_p( $dir );
+
+            $tmp_file = download_url( $tgz_url, 300 );
+            if ( is_wp_error( $tmp_file ) ) {
+                return new WP_Error( 'download_failed', $tmp_file->get_error_message(), array( 'status' => 500 ) );
+            }
+
+            $tar_file = null;
+            try {
+                $phar = new PharData( $tmp_file );
+                $extracted = false;
+
+                $files_to_extract = array(
+                    'package/dist/umd/ffmpeg-core.js',
+                    'package/dist/umd/ffmpeg-core.wasm',
+                );
+
+                $phar->decompress();
+                $tar_file = str_replace( '.tgz', '.tar', $tmp_file );
+                if ( ! file_exists( $tar_file ) ) {
+                    $tar_file = preg_replace( '/\.tmp$/', '.tar', $tmp_file );
+                }
+
+                $tar = new PharData( $tar_file );
+
+                foreach ( $files_to_extract as $path ) {
+                    $content = file_get_contents( 'phar://' . $tar_file . '/' . $path );
+                    if ( $content !== false ) {
+                        $filename = basename( $path );
+                        file_put_contents( $dir . '/' . $filename, $content );
+                        $extracted = true;
+                    }
+                }
+
+                @unlink( $tmp_file );
+                @unlink( $tar_file );
+
+                if ( ! $extracted || ! file_exists( $dir . '/ffmpeg-core.wasm' ) ) {
+                    return new WP_Error( 'extract_failed', 'Failed to extract FFmpeg files', array( 'status' => 500 ) );
+                }
+
+                self::write_wasm_htaccess( $dir );
+
+                return rest_ensure_response( array(
+                    'success' => true,
+                    'version' => $version,
+                    'size'    => size_format( filesize( $dir . '/ffmpeg-core.wasm' ) ),
+                ) );
+
+            } catch ( Exception $e ) {
+                @unlink( $tmp_file );
+                if ( $tar_file ) {
+                    @unlink( $tar_file );
+                }
+                return new WP_Error( 'extract_failed', $e->getMessage(), array( 'status' => 500 ) );
+            }
+        }
+
+        /**
+         * REST handler: Remove FFmpeg WASM files.
+         */
+        public function rest_remove_ffmpeg( WP_REST_Request $request ) {
+            $dir = self::get_ffmpeg_wasm_dir();
+
+            $files = array( 'ffmpeg-core.wasm', 'ffmpeg-core.js', 'ffmpeg-core.worker.js', '.htaccess' );
+            foreach ( $files as $file ) {
+                $path = $dir . '/' . $file;
+                if ( file_exists( $path ) ) {
+                    @unlink( $path );
+                }
+            }
+
+            @rmdir( $dir );
+            @rmdir( dirname( $dir ) );
+
+            $settings = Better_Messages()->settings;
+            $settings['transcodingVideoFormat'] = 'original';
+            Better_Messages_Options::instance()->update_settings( $settings );
+
+            return rest_ensure_response( array( 'success' => true ) );
         }
 
         /**

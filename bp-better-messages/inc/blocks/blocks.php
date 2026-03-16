@@ -17,14 +17,16 @@ class Better_Messages_Blocks {
 
     public function __construct()
     {
-        add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+        add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_editor_assets' ) );
         add_action( 'init', array( $this, 'register_blocks' ) );
         add_filter( 'block_categories_all', array( $this, 'register_block_category' ), 10, 2 );
     }
 
     public function enqueue_block_editor_assets()
     {
-        Better_Messages()->enqueue_css();
+        if ( is_admin() ) {
+            Better_Messages()->enqueue_css();
+        }
     }
 
     public function register_blocks()

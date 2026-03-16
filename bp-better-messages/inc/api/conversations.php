@@ -477,6 +477,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 ];
             }
 
+            $response = apply_filters( 'better_messages_mentions_suggestions', $response, $thread_id, $search_request );
+
             return $response;
         }
 

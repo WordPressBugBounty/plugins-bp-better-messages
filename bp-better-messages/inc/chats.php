@@ -25,6 +25,7 @@ class Better_Messages_Chats
     public function setup_actions(){
         add_action( 'init',      array( $this, 'register_post_type' ) );
         add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
+        add_action( 'edit_form_after_title', array( $this, 'render_chat_settings' ) );
 
         add_shortcode( 'bp_better_messages_chat_room', array( $this, 'layout' ) );
         add_shortcode( 'better_messages_chat_room', array( $this, 'layout' ) );
@@ -132,6 +133,48 @@ class Better_Messages_Chats
             'callback' => array( $this, 'leave_chat' ),
             'permission_callback' => array( Better_Messages_Rest_Api(), 'is_user_authorized' )
         ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'rest_admin_list_chat_rooms' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'rest_admin_create_chat_room' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'rest_admin_update_chat_room' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)', array(
+            'methods'             => 'DELETE',
+            'callback'            => array( $this, 'rest_admin_delete_chat_room' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/participants', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'rest_admin_get_participants' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/participants', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'rest_admin_add_participant' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/participants/(?P<user_id>-?\d+)', array(
+            'methods'             => 'DELETE',
+            'callback'            => array( $this, 'rest_admin_remove_participant' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
     }
 
     public function user_is_admin(){
@@ -193,6 +236,346 @@ class Better_Messages_Chats
         return $result;
     }
 
+    public function rest_admin_list_chat_rooms( WP_REST_Request $request ) {
+        $page     = max( 1, (int) ( $request->get_param('page') ?: 1 ) );
+        $per_page = max( 1, min( 100, (int) ( $request->get_param('per_page') ?: 20 ) ) );
+        $search   = sanitize_text_field( $request->get_param('search') ?: '' );
+
+        $query_args = array(
+            'post_type'      => 'bpbm-chat',
+            'posts_per_page' => $per_page,
+            'paged'          => $page,
+            'post_status'    => array( 'publish', 'draft' ),
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        );
+
+        if ( ! empty( $search ) ) {
+            $query_args['s'] = $search;
+        }
+
+        $include = $request->get_param('include');
+        if ( ! empty( $include ) ) {
+            $query_args['post__in'] = array_map( 'intval', (array) $include );
+            $query_args['posts_per_page'] = count( $query_args['post__in'] );
+            unset( $query_args['paged'] );
+        }
+
+        $query = new WP_Query( $query_args );
+
+        $chat_rooms = array();
+        foreach ( $query->posts as $post ) {
+            $item = $this->format_chat_room_for_rest( $post->ID );
+            if ( $item ) $chat_rooms[] = $item;
+        }
+
+        return array(
+            'items'   => $chat_rooms,
+            'total'   => (int) $query->found_posts,
+            'page'    => $page,
+            'perPage' => $per_page,
+            'pages'   => (int) $query->max_num_pages,
+        );
+    }
+
+    public function rest_admin_create_chat_room( WP_REST_Request $request ) {
+        $title = sanitize_text_field( $request->get_param( 'title' ) );
+
+        if ( empty( $title ) ) {
+            return new WP_Error( 'missing_title', __( 'Chat room title is required', 'bp-better-messages' ), array( 'status' => 400 ) );
+        }
+
+        $post_id = wp_insert_post( array(
+            'post_type'   => 'bpbm-chat',
+            'post_title'  => $title,
+            'post_status' => 'publish',
+        ) );
+
+        if ( is_wp_error( $post_id ) ) {
+            return $post_id;
+        }
+
+        $defaults = $this->get_chat_settings( 0 );
+        update_post_meta( $post_id, 'bpbm-chat-settings', $defaults );
+
+        return $this->format_chat_room_for_rest( $post_id );
+    }
+
+    public function rest_admin_update_chat_room( WP_REST_Request $request ) {
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $title = $request->get_param( 'title' );
+        if ( $title !== null ) {
+            wp_update_post( array(
+                'ID'         => $chat_id,
+                'post_title' => sanitize_text_field( $title ),
+            ) );
+        }
+
+        $image_id = $request->get_param( 'imageId' );
+        if ( $image_id !== null ) {
+            $image_id = intval( $image_id );
+            if ( $image_id > 0 ) {
+                set_post_thumbnail( $chat_id, $image_id );
+            } else {
+                delete_post_thumbnail( $chat_id );
+            }
+        }
+
+        $settings = $request->get_param( 'settings' );
+        if ( is_array( $settings ) ) {
+            $this->save_chat_settings( $chat_id, $settings );
+        }
+
+        return $this->format_chat_room_for_rest( $chat_id );
+    }
+
+    public function rest_admin_delete_chat_room( WP_REST_Request $request ) {
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        wp_delete_post( $chat_id, true );
+
+        return array( 'deleted' => true );
+    }
+
+    public function rest_admin_get_participants( WP_REST_Request $request ) {
+        global $wpdb;
+
+        $chat_id   = intval( $request->get_param( 'id' ) );
+        $post      = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+        $page      = max( 1, intval( $request->get_param( 'page' ) ?: 1 ) );
+        $per_page  = 10;
+        $offset    = ( $page - 1 ) * $per_page;
+        $search    = sanitize_text_field( $request->get_param( 'search' ) ?: '' );
+
+        $table = bm_get_table( 'recipients' );
+
+        $search_clause = '';
+        if ( ! empty( $search ) ) {
+            $like = '%' . $wpdb->esc_like( $search ) . '%';
+            $search_clause = $wpdb->prepare(
+                " AND ( `users`.`display_name` LIKE %s OR `users`.`user_login` LIKE %s OR `users`.`user_email` LIKE %s )",
+                $like, $like, $like
+            );
+        }
+
+        $total = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*)
+            FROM `{$table}` `recipients`
+            LEFT JOIN {$wpdb->users} `users` ON `users`.`ID` = `recipients`.`user_id`
+            WHERE `thread_id` = %d
+            AND ( ( `recipients`.`user_id` >= 0 AND `users`.`ID` IS NOT NULL ) OR ( `recipients`.`user_id` < 0 ) )"
+            . $search_clause,
+            $thread_id
+        ) );
+
+        $user_ids = $wpdb->get_col( $wpdb->prepare(
+            "SELECT `user_id`
+            FROM `{$table}` `recipients`
+            LEFT JOIN {$wpdb->users} `users` ON `users`.`ID` = `recipients`.`user_id`
+            WHERE `thread_id` = %d
+            AND ( ( `recipients`.`user_id` >= 0 AND `users`.`ID` IS NOT NULL ) OR ( `recipients`.`user_id` < 0 ) )"
+            . $search_clause .
+            " ORDER BY `user_id` ASC
+            LIMIT %d, %d",
+            $thread_id, $offset, $per_page
+        ) );
+
+        $users = array();
+        foreach ( $user_ids as $user_id ) {
+            $users[] = Better_Messages()->functions->rest_user_item( $user_id );
+        }
+
+        return array(
+            'users' => $users,
+            'total' => $total,
+            'pages' => (int) ceil( $total / $per_page ),
+        );
+    }
+
+    public function rest_admin_add_participant( WP_REST_Request $request ) {
+        $chat_id  = intval( $request->get_param( 'id' ) );
+        $post     = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $user_ids = $request->get_param( 'user_ids' );
+        if ( ! is_array( $user_ids ) ) {
+            $user_ids = array( intval( $user_ids ) );
+        }
+        $user_ids = array_map( 'intval', $user_ids );
+
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+        $added = 0;
+
+        foreach ( $user_ids as $user_id ) {
+            if ( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ) {
+                Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id );
+                $added++;
+            }
+        }
+
+        do_action( 'better_messages_thread_updated', $thread_id );
+        do_action( 'better_messages_info_changed', $thread_id );
+
+        return array( 'added' => $added );
+    }
+
+    public function rest_admin_remove_participant( WP_REST_Request $request ) {
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $user_id = intval( $request->get_param( 'user_id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if ( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ) {
+            return new WP_Error( 'not_participant', __( 'User is not a participant', 'bp-better-messages' ), array( 'status' => 400 ) );
+        }
+
+        Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
+
+        do_action( 'better_messages_thread_updated', $thread_id );
+        do_action( 'better_messages_info_changed', $thread_id );
+
+        return array( 'removed' => true );
+    }
+
+    private function format_chat_room_for_rest( $chat_id ) {
+        $post = get_post( $chat_id );
+        if ( ! $post ) return null;
+
+        $settings = $this->get_chat_settings( $chat_id );
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        $image_id  = 0;
+        $image_url = '';
+
+        if ( has_post_thumbnail( $chat_id ) ) {
+            $image_id = (int) get_post_thumbnail_id( $chat_id );
+            if ( $image_id ) {
+                $src = wp_get_attachment_image_src( $image_id, array( 100, 100 ) );
+                if ( $src ) {
+                    $image_url = $src[0];
+                }
+            }
+        }
+
+        $inbox_url = '';
+        if ( $thread_id ) {
+            $inbox_url = Better_Messages()->functions->get_user_messages_url( get_current_user_id(), $thread_id );
+        }
+
+        return array(
+            'id'       => (int) $post->ID,
+            'title'    => $post->post_title,
+            'status'   => $post->post_status,
+            'threadId' => (int) $thread_id,
+            'inboxUrl' => $inbox_url,
+            'imageId'  => $image_id,
+            'imageUrl' => $image_url,
+            'settings' => $settings,
+        );
+    }
+
+    private function save_chat_settings( $chat_id, $settings ) {
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        $checkbox_fields = array(
+            'only_joined_can_read', 'auto_join', 'auto_exclude', 'hide_participants',
+            'hide_participants_count', 'enable_chat_email_notifications', 'enable_files',
+            'hide_from_thread_list', 'enable_notifications', 'allow_guests', 'show_online_users'
+        );
+
+        foreach ( $checkbox_fields as $field ) {
+            if ( ! isset( $settings[ $field ] ) ) {
+                $settings[ $field ] = '0';
+            }
+        }
+
+        if ( ! isset( $settings['auto_exclude'] ) || $settings['auto_exclude'] !== '1' ) {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
+        }
+
+        $kses_fields = array( 'must_join_message', 'not_allowed_text', 'not_allowed_reply_text', 'must_login_text' );
+        foreach ( $kses_fields as $field ) {
+            if ( isset( $settings[ $field ] ) && ! empty( $settings[ $field ] ) ) {
+                $settings[ $field ] = wp_kses( $settings[ $field ], 'user_description' );
+            }
+        }
+
+        $text_fields = array( 'join_button_text', 'login_button_text', 'guest_button_text' );
+        foreach ( $text_fields as $field ) {
+            if ( isset( $settings[ $field ] ) && ! empty( $settings[ $field ] ) ) {
+                $settings[ $field ] = sanitize_text_field( $settings[ $field ] );
+            }
+        }
+
+        update_post_meta( $chat_id, 'bpbm-chat-settings', $settings );
+
+        $notifications_enabled = true;
+
+        if ( $settings['hide_from_thread_list'] === '1' ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'exclude_from_threads_list', '1' );
+            $notifications_enabled = false;
+        } else {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'exclude_from_threads_list' );
+        }
+
+        if ( $settings['enable_notifications'] === '1' ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'enable_notifications', '1' );
+        } else {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'enable_notifications' );
+            $notifications_enabled = false;
+        }
+
+        if ( ! $notifications_enabled ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'email_disabled', '1' );
+        } else {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'email_disabled' );
+        }
+
+        if ( isset( $settings['can_join'] ) ) {
+            update_post_meta( $chat_id, 'bpbm-chat-can-join', $settings['can_join'] );
+        } else {
+            delete_post_meta( $chat_id, 'bpbm-chat-can-join' );
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
+        }
+
+        if ( isset( $settings['auto_add'] ) ) {
+            update_post_meta( $chat_id, 'bpbm-chat-auto-add', $settings['auto_add'] );
+        } else {
+            delete_post_meta( $chat_id, 'bpbm-chat-auto-add' );
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_add_hash' );
+        }
+
+        $this->sync_auto_add_users( $chat_id );
+
+        do_action( 'better_messages_thread_updated', $thread_id );
+        do_action( 'better_messages_info_changed', $thread_id );
+    }
+
     public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
         if( $thread_type !== 'chat-room'){
             return $thread_item;
@@ -234,6 +617,7 @@ class Better_Messages_Chats
         $thread_item['chatRoom']['mustLoginText']        = $settings['must_login_text'];
         $thread_item['chatRoom']['loginButtonText']      = $settings['login_button_text'];
         $thread_item['chatRoom']['guestButtonText']        = $settings['guest_button_text'];
+        $thread_item['chatRoom']['showOnlineUsers']        = ( $settings['show_online_users'] === '1' );
 
 
         if( $include_personal ) {
@@ -489,7 +873,7 @@ class Better_Messages_Chats
             ],
             'publicly_queryable'   => false,
             'show_ui'              => true,
-            'show_in_menu'         => 'bp-better-messages',
+            'show_in_menu'         => false,
             'show_in_rest'         => true,
             'menu_position'        => 1,
             'query_var'            => false,
@@ -498,30 +882,11 @@ class Better_Messages_Chats
             'hierarchical'         => false,
             'show_in_admin_bar'    => false,
             'show_in_nav_menus'    => false,
-            'supports'             => array( 'title', 'thumbnail' ),
-            'register_meta_box_cb' => array( $this, 'register_meta_box' )
+            'supports'             => array( 'title', 'thumbnail' )
 
         );
 
         register_post_type( 'bpbm-chat', $args );
-    }
-
-    public function register_meta_box(){
-        add_meta_box(
-            'bm-chat-settings',
-            _x( 'Settings', 'Chat rooms settings page', 'bp-better-messages' ),
-            array( $this, 'bpbm_chat_settings' ),
-            null,
-            'advanced'
-        );
-
-        /*add_meta_box(
-            'bm-chat-participants',
-            _x( 'Participants', 'Chat rooms settings page', 'bp-better-messages' ),
-            array( $this, 'chat_participants' ),
-            null,
-            'normal'
-        );*/
     }
 
     public function chat_participants( $post ){
@@ -543,6 +908,7 @@ class Better_Messages_Chats
             'allow_guests'                    => '0',
             'hide_participants'               => '0',
             'hide_participants_count'         => '0',
+            'show_online_users'              => '0',
             'enable_files'                    => '0',
             'hide_from_thread_list'           => '1',
             'must_join_message'               => _x('You need to join this chat room to send messages', 'Chat rooms settings page', 'bp-better-messages'),
@@ -629,6 +995,10 @@ class Better_Messages_Chats
 
             if ( ! isset( $settings['allow_guests'] ) ) {
                 $settings['allow_guests'] = '0';
+            }
+
+            if ( ! isset( $settings['show_online_users'] ) ) {
+                $settings['show_online_users'] = '0';
             }
 
             if ( ! isset( $settings['must_join_message'] ) || empty( $settings['must_join_message'] )  ) {
@@ -719,7 +1089,11 @@ class Better_Messages_Chats
 
     }
 
-    public function bpbm_chat_settings( $post ){
+    public function render_chat_settings( $post ){
+        if ( $post->post_type !== 'bpbm-chat' ) {
+            return;
+        }
+
         $roles = get_editable_roles();
         if(isset($roles['administrator'])) unset( $roles['administrator'] );
 
@@ -731,8 +1105,9 @@ class Better_Messages_Chats
 
         $settings = $this->get_chat_settings( $post->ID );
         $thread_id = $this->get_chat_thread_id( $post->ID );
-        $inbox_url = $thread_id ? Better_Messages()->functions->get_user_messages_url( get_current_user_id(), $thread_id ) : ''; ?>
-        <div class="bm-chat-settings" data-chat-id="<?php echo esc_attr($post->ID); ?>" data-thread-id="<?php echo esc_attr($thread_id ? $thread_id : ''); ?>" data-inbox-url="<?php echo esc_attr($inbox_url); ?>" data-settings="<?php echo esc_attr(json_encode($settings)); ?>" data-roles="<?php echo esc_attr(json_encode($roles)); ?>">
+        $inbox_url = $thread_id ? Better_Messages()->functions->get_user_messages_url( get_current_user_id(), $thread_id ) : '';
+        $is_websocket = Better_Messages()->settings['mechanism'] === 'websocket' ? '1' : '0'; ?>
+        <div class="bm-chat-settings" data-chat-id="<?php echo esc_attr($post->ID); ?>" data-thread-id="<?php echo esc_attr($thread_id ? $thread_id : ''); ?>" data-inbox-url="<?php echo esc_attr($inbox_url); ?>" data-settings="<?php echo esc_attr(json_encode($settings)); ?>" data-roles="<?php echo esc_attr(json_encode($roles)); ?>" data-is-websocket="<?php echo esc_attr($is_websocket); ?>">
             <p style="text-align: center"><?php _ex( 'Loading',  'WP Admin', 'bp-better-messages' ); ?></p>
         </div>
     <?php
@@ -797,6 +1172,7 @@ class Better_Messages_Chats
 
     public function user_can_join( $user_id, $chat_id ){
         if( user_can( $user_id, 'manage_options') ) return true;
+        if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
 
         $settings = $this->get_chat_settings( $chat_id );
         $thread_id = $this->get_chat_thread_id( $chat_id );
@@ -816,6 +1192,7 @@ class Better_Messages_Chats
 
     public function user_can_reply( $user_id, $chat_id ){
         if( user_can( $user_id, 'manage_options') ) return true;
+        if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
         $settings = $this->get_chat_settings( $chat_id );
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
@@ -1041,9 +1418,16 @@ class Better_Messages_Chats
                 $to_exclude_users = array_map('intval', $wpdb->get_col($to_exclude_users_sql));
 
                 if( count($to_exclude_users) > 0 ){
+                    // Ensure AI bot users (negative IDs) are never auto-excluded
+                    $to_exclude_users = array_filter( $to_exclude_users, function( $uid ) {
+                        return $uid > 0 || ! Better_Messages()->functions->is_ai_bot_user( $uid );
+                    });
+                }
+
+                if( count($to_exclude_users) > 0 ){
                     $delete_sql = $wpdb->prepare("
                     DELETE FROM `" . bm_get_table('recipients') . "`
-                    WHERE `user_id` IN (" . implode(',', $to_exclude_users) . ") 
+                    WHERE `user_id` IN (" . implode(',', $to_exclude_users) . ")
                     AND `thread_id` = %d", $thread_id);
 
                     $wpdb->query( $delete_sql );

@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 1.9;
+        private $db_version = 2.0;
 
         public static function instance()
         {
@@ -346,6 +346,22 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     PRIMARY KEY (`id`),
                     KEY `job_id_index` (`job_id`),
                     KEY `thread_id_index` (`thread_id`)
+                ) ENGINE=InnoDB;",
+
+                "CREATE TABLE `" . bm_get_table('ai_usage') . "` (
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                    `bot_id` bigint(20) NOT NULL,
+                    `message_id` bigint(20) NOT NULL DEFAULT 0,
+                    `thread_id` bigint(20) NOT NULL DEFAULT 0,
+                    `user_id` bigint(20) NOT NULL DEFAULT 0,
+                    `is_summary` tinyint(1) NOT NULL DEFAULT 0,
+                    `points_charged` int(11) NOT NULL DEFAULT 0,
+                    `cost_data` longtext NOT NULL,
+                    `created_at` bigint(20) NOT NULL DEFAULT 0,
+                    PRIMARY KEY (`id`),
+                    KEY `bot_id_index` (`bot_id`),
+                    KEY `bot_id_created_at` (`bot_id`, `created_at`),
+                    KEY `message_id_index` (`message_id`)
                 ) ENGINE=InnoDB;"
             ];
 
@@ -678,6 +694,65 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         if ( empty( $col ) ) {
                             $wpdb->query( "ALTER TABLE `{$table}` ADD `scheduled_at` datetime DEFAULT NULL AFTER `current_page`" );
                             $wpdb->query( "ALTER TABLE `{$table}` ADD `batch_size` int(11) NOT NULL DEFAULT 0 AFTER `scheduled_at`" );
+                        }
+                    }
+                ],
+                '2.0' => [
+                    function () {
+                        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+                        dbDelta(["CREATE TABLE `" . bm_get_table('ai_usage') . "` (
+                            `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                            `bot_id` bigint(20) NOT NULL,
+                            `message_id` bigint(20) NOT NULL DEFAULT 0,
+                            `thread_id` bigint(20) NOT NULL DEFAULT 0,
+                            `user_id` bigint(20) NOT NULL DEFAULT 0,
+                            `is_summary` tinyint(1) NOT NULL DEFAULT 0,
+                            `points_charged` int(11) NOT NULL DEFAULT 0,
+                            `cost_data` longtext NOT NULL,
+                            `created_at` bigint(20) NOT NULL DEFAULT 0,
+                            PRIMARY KEY (`id`),
+                            KEY `bot_id_index` (`bot_id`),
+                            KEY `bot_id_created_at` (`bot_id`, `created_at`),
+                            KEY `message_id_index` (`message_id`)
+                        ) ENGINE=InnoDB;"]);
+                    },
+                    function () {
+                        // Migrate points system: auto-detect provider for existing installs
+                        $stored = get_option( 'bp-better-chat-settings', [] );
+                        $current = $stored['pointsSystem'] ?? 'none';
+                        if ( $current !== 'none' ) return;
+
+                        $detected = 'none';
+                        $prefixes = [
+                            'mycred'    => 'myCred',
+                            'gamipress' => 'GamiPress',
+                        ];
+                        $classes = [
+                            'mycred'    => 'myCRED_Core',
+                            'gamipress' => 'GamiPress',
+                        ];
+
+                        foreach ( $prefixes as $provider_id => $prefix ) {
+                            if ( ! class_exists( $classes[ $provider_id ] ) ) continue;
+
+                            foreach ( [ 'NewMessageCharge', 'NewThreadCharge', 'CallPricing' ] as $key ) {
+                                $values = $stored[ $prefix . $key ] ?? [];
+                                if ( is_array( $values ) ) {
+                                    foreach ( $values as $role_data ) {
+                                        if ( isset( $role_data['value'] ) && $role_data['value'] > 0 ) {
+                                            $detected = $provider_id;
+                                            break 3;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if ( $detected !== 'none' ) {
+                            $stored['pointsSystem'] = $detected;
+                            update_option( 'bp-better-chat-settings', $stored );
+                            Better_Messages()->settings['pointsSystem'] = $detected;
                         }
                     }
                 ]

@@ -7,6 +7,8 @@
     max-width: 100%;
     overflow: hidden;
     min-width: 1px;
+    height: 14px;
+    contain: layout;
 }
 
 .bm-typing-container .bm-typing-text{
@@ -71,5 +73,37 @@
     100% {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Activity indicator icons (recording, uploading) */
+.bm-activity-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    color: #757575;
+}
+
+.bm-activity-icon svg {
+    display: block;
+}
+
+.bm-activity-recording {
+    margin-right: -3px;
+    animation: bm-activity-pulse 1500ms ease-in-out infinite;
+}
+
+.bm-activity-uploading {
+    animation: bm-activity-pulse 1500ms ease-in-out infinite;
+}
+
+@keyframes bm-activity-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
     }
 }

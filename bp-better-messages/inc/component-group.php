@@ -315,6 +315,10 @@ class Better_Messages_Group extends BP_Group_Extension
     }
 
     public function on_groups_member_status_change( $group_id, $user_id = false ){
+        if( $this->is_group_messages_enabled( $group_id ) !== 'enabled' ){
+            return;
+        }
+
         $thread_id = $this->get_group_thread_id( $group_id );
         $this->sync_thread_members( $thread_id );
     }

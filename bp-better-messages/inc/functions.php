@@ -1049,6 +1049,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return false;
             }
 
+            // Prevent adding AI bots to E2E encrypted threads
+            if ( $user_id < 0 && class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ) {
+                if ( isset( Better_Messages()->ai ) && Better_Messages()->ai->get_bot_id_from_user( $user_id ) ) {
+                    return false;
+                }
+            }
+
             global $wpdb;
 
             $userIsParticipant = $this->is_user_participant( $thread_id, $user_id );
@@ -1130,6 +1137,17 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             if (empty($threads_excluded)) {
                 $threads_excluded = '0';
+            }
+
+            $bulk_excluded = $wpdb->get_col("
+                SELECT bjt.thread_id
+                FROM " . bm_get_table('bulk_job_threads') . " AS bjt
+                INNER JOIN " . bm_get_table('bulk_jobs') . " AS bj ON bj.id = bjt.job_id
+                WHERE bj.disable_reply = 1
+            ");
+
+            if ( ! empty( $bulk_excluded ) ) {
+                $threads_excluded .= ',' . implode( ',', array_map( 'intval', $bulk_excluded ) );
             }
 
             if( $exclude_deleted === null ){
@@ -1682,6 +1700,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $thread_type = 'thread';
 
+            if( ! $thread ) {
+                wp_cache_set('thread_' . $thread_id . '_type', $thread_type, 'bm_messages');
+                return $thread_type;
+            }
+
             if( $thread->type === 'group' ) {
                 $is_valid_group = apply_filters( 'better_messages_is_valid_group', false, $thread_id );
 
@@ -1832,6 +1855,47 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             return apply_filters( 'better_messages_rest_user_item', $item, $user_id, $include_personal );
+        }
+
+        /**
+         * Build encrypted and HMAC-signed user profile for WebSocket server caching.
+         * The server stores the encrypted data opaquely and verifies the signature
+         * before caching to prevent client-side tampering.
+         */
+        public function build_ws_profile( $user_id, $user_data = null ) {
+            if ( ! $user_data ) {
+                $user_data = $this->rest_user_item( $user_id, false );
+            }
+
+            $plaintext = [
+                'user_id'  => (int) $user_id,
+                'name'     => $user_data['name'],
+                'avatar'   => $user_data['avatar'],
+                'url'      => $user_data['url'] ?? '',
+                'verified' => (int) ( $user_data['verified'] ?? 0 ),
+            ];
+
+            $hash = md5( json_encode( $plaintext ) );
+
+            $encrypted = [
+                'user_id'  => (int) $user_id,
+                'name'     => Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['name'] ),
+                'avatar'   => Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['avatar'] ),
+                'url'      => $user_data['url'] ? Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['url'] ) : '',
+                'verified' => (int) ( $user_data['verified'] ?? 0 ),
+            ];
+
+            if ( isset( $user_data['status'] ) ) {
+                $encrypted['status'] = $user_data['status'];
+            }
+
+            $sig = hash_hmac( 'sha256', $hash, Better_Messages_WebSocket()->secret_key );
+
+            return [
+                'pd'  => $encrypted,
+                'pdh' => $hash,
+                'pds' => $sig,
+            ];
         }
 
         public function get_message_by_order( $thread_id, $message_number = 1 ){
@@ -2715,6 +2779,25 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             Better_Messages()->mentions->process_mentions( $message->thread_id, $message->id, $message->message );
 
+            // Force push notifications for mentioned users even when push was suppressed
+            if ( Better_Messages()->settings['mentionsForceNotifications'] === '1' ) {
+                $mentioned_users = Better_Messages()->mentions->get_mentions_for_message( $message->thread_id, $message->id );
+                if ( ! empty( $mentioned_users ) ) {
+                    if ( ! $message->send_push ) {
+                        $message->send_push = true;
+                        $message->mentions_only_push = true;
+                    }
+                    if ( ! $message->mobile_push ) {
+                        $message->mobile_push = true;
+                        $message->mentions_only_mobile_push = true;
+                    }
+                    if ( ! isset( $message->send_global ) || ! $message->send_global ) {
+                        $message->send_global = true;
+                        $message->mentions_only_push = true;
+                    }
+                }
+            }
+
             //do_action( 'better_messages_thread_updated', $message->thread_id );
 
             /**
@@ -2727,6 +2810,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             if( $is_pending === 0 ){
                 do_action_ref_array( 'better_messages_message_sent', array( &$message ) );
+
+                // Fire reply hook when message is a reply to another message
+                if( isset( $args['meta_data']['reply_to'] ) && ! empty( $args['meta_data']['reply_to'] ) ){
+                    $replied_to_message_id = (int) $args['meta_data']['reply_to'];
+                    $replied_to_message = $this->get_message( $replied_to_message_id );
+
+                    if( $replied_to_message ){
+                        do_action( 'better_messages_message_reply', $message, $replied_to_message );
+                    }
+                }
             } else {
                 Better_Messages()->functions->update_message_meta( $message->id, 'pending_args', $message );
                 do_action_ref_array( 'better_messages_message_pending', array( &$message ) );
@@ -3418,6 +3511,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             } else {
                 return (int) apply_filters('better_messages_guest_user_id', 0);
             }
+        }
+
+        public function is_ai_bot_user( $user_id ){
+            if( $user_id >= 0 ) return false;
+
+            $guest = Better_Messages()->guests->get_guest_user( $user_id );
+            if( ! $guest || empty( $guest->ip ) ) return false;
+
+            return str_starts_with( $guest->ip, 'ai-chat-bot-' );
         }
 
         public function is_valid_user_id( $user_id ){

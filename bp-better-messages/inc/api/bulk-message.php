@@ -936,22 +936,28 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 case 'users':
                     $usersIds = isset( $selectors['userIds'] ) ? array_map( 'intval', (array) $selectors['userIds'] ) : [];
                     $usersIds = array_filter( $usersIds, function( $uid ) use ( $exclude_id ) {
-                        return $uid > 0 && $uid !== (int) $exclude_id;
+                        return $uid !== 0 && $uid !== (int) $exclude_id;
                     });
                     $usersIds = array_values( $usersIds );
 
-                    if ( $activity_sql !== '' && ! empty( $usersIds ) ) {
-                        $id_placeholders = implode( ',', array_fill( 0, count( $usersIds ), '%d' ) );
-                        $usersIds = $wpdb->get_col( $wpdb->prepare(
+                    // Split into registered users (positive) and guests (negative)
+                    $registered_ids = array_values( array_filter( $usersIds, function( $uid ) { return $uid > 0; } ) );
+                    $guest_ids      = array_values( array_filter( $usersIds, function( $uid ) { return $uid < 0; } ) );
+
+                    if ( $activity_sql !== '' && ! empty( $registered_ids ) ) {
+                        $id_placeholders = implode( ',', array_fill( 0, count( $registered_ids ), '%d' ) );
+                        $registered_ids = $wpdb->get_col( $wpdb->prepare(
                             "SELECT `ID` FROM `{$users_table}` WHERE `ID` IN ({$id_placeholders})" . $activity_sql,
-                            ...array_map( 'intval', $usersIds )
+                            ...array_map( 'intval', $registered_ids )
                         ));
                     }
+
+                    $usersIds = array_values( array_merge( $registered_ids, $guest_ids ) );
 
                     // Exclude users already in parent job chain
                     if ( $exclude_job_id > 0 && ! empty( $usersIds ) ) {
                         $already_sent = $wpdb->get_col( $wpdb->prepare(
-                            "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` AND `bt2`.`user_id` > 0 WHERE `bt1`.`job_id` = %d",
+                            "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` WHERE `bt1`.`job_id` = %d",
                             $exclude_job_id
                         ) );
                         $already_sent = array_map( 'intval', $already_sent );

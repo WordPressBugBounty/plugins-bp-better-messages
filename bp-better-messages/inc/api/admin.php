@@ -26,8 +26,28 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             return current_user_can('bm_can_administrate');
         }
 
+        public function user_is_admin(){
+            return current_user_can('manage_options');
+        }
 
         public function rest_api_init(){
+            register_rest_route('better-messages/v1/admin', '/settings/save', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_save_settings'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/settings/get', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'rest_get_settings'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/settings/createPage', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_create_messages_page'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
             register_rest_route('better-messages/v1/admin', '/getMessages', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'get_messages'),
@@ -147,6 +167,31 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'callback'            => array($this, 'dismiss_ai_flag'),
                 'permission_callback' => array($this, 'user_can_admin'),
             ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/sync-user-index', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_sync_user_index'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/convert-utf8mb4', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_convert_utf8mb4'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/reset-database', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_reset_database'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/import-settings', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_import_settings'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
         }
 
         public function get_user( WP_REST_Request $request ){
@@ -459,15 +504,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return [];
             }
 
+            $search_like = '%' . $wpdb->esc_like( $search ) . '%';
+
             $sql = $wpdb->prepare("
             SELECT ID FROM `" . bm_get_table('users') . "`
             WHERE ( ID = %s
             OR `user_nicename` LIKE %s
-            OR `display_name` LIKE %s 
+            OR `display_name` LIKE %s
             OR `first_name` LIKE %s
             OR `last_name` LIKE %s
             OR `nickname` LIKE %s )
-            LIMIT 0, 10", $search, '%' . $search . '%', '%' . $search . '%', '%' . $search . '%', '%' . $search . '%', '%' . $search . '%');
+            LIMIT 0, 10", $search, $search_like, $search_like, $search_like, $search_like, $search_like);
 
             $search_results = $wpdb->get_col( $sql );
 
@@ -800,6 +847,22 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         $item['ai_moderation_scores'] = isset( $result_data['category_scores'] ) ? $result_data['category_scores'] : [];
                     }
 
+                    // Add AI cost data from dedicated usage table
+                    $ai_usage_table = bm_get_table('ai_usage');
+                    if ( $ai_usage_table ) {
+                        $ai_usage_row = $wpdb->get_row( $wpdb->prepare(
+                            "SELECT cost_data, points_charged FROM {$ai_usage_table} WHERE message_id = %d LIMIT 1",
+                            $message['id']
+                        ) );
+                        if ( $ai_usage_row && ! empty( $ai_usage_row->cost_data ) ) {
+                            $ai_cost = json_decode( $ai_usage_row->cost_data, true );
+                            if ( (int) $ai_usage_row->points_charged > 0 ) {
+                                $ai_cost['pointsCharged'] = (int) $ai_usage_row->points_charged;
+                            }
+                            $item['ai_cost'] = $ai_cost;
+                        }
+                    }
+
                     $return['messages'][] = $item;
                 }
             }
@@ -1086,6 +1149,162 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'message'      => 'User blacklisted and pending messages deleted successfully',
                 'deletedCount' => $deleted_count
             );
+        }
+        public function rest_save_settings( WP_REST_Request $request ) {
+            $data = $request->get_json_params();
+
+            if ( empty( $data ) || ! is_array( $data ) ) {
+                return new WP_Error( 'invalid_data', 'No settings provided', array( 'status' => 400 ) );
+            }
+
+            // Handle emojiSettings separately — it saves to its own option
+            // and should not go through update_settings().
+            if ( isset( $data['emojiSettings'] ) ) {
+                $emoji_json = $data['emojiSettings'];
+                unset( $data['emojiSettings'] );
+
+                if ( ! empty( trim( $emoji_json ) ) ) {
+                    $emojies = json_decode( wp_unslash( $emoji_json ), true );
+                    if ( is_array( $emojies ) ) {
+                        update_option( 'bm-emoji-set-2', $emojies );
+                        update_option( 'bm-emoji-hash', hash( 'md5', json_encode( $emojies ) ) );
+                    }
+                }
+            }
+
+            // If other settings were changed, merge and save them.
+            if ( ! empty( $data ) ) {
+                $existing = Better_Messages_Options::instance()->settings;
+                $merged   = array_merge( $existing, $data );
+
+                Better_Messages_Options::instance()->update_settings( $merged );
+            }
+
+            return rest_ensure_response( array(
+                'success'  => true,
+                'settings' => Better_Messages_Options::instance()->settings,
+            ) );
+        }
+
+        public function rest_create_messages_page( WP_REST_Request $request ) {
+            $page_title = _x( 'Messages', 'Default page title', 'bp-better-messages' );
+
+            // Use Gutenberg block if block editor is available, otherwise shortcode
+            if ( function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( 'page' ) ) {
+                $page_content = '<!-- wp:better-messages/user-inbox /-->';
+            } else {
+                $page_content = '[bp-better-messages]';
+            }
+
+            $page_id = wp_insert_post( array(
+                'post_title'   => $page_title,
+                'post_content' => $page_content,
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+            ) );
+
+            if ( is_wp_error( $page_id ) ) {
+                return new WP_Error( 'create_failed', $page_id->get_error_message(), array( 'status' => 500 ) );
+            }
+
+            // Auto-select the new page as messages location
+            $existing = Better_Messages_Options::instance()->settings;
+            $existing['chatPage'] = (string) $page_id;
+            Better_Messages_Options::instance()->update_settings( $existing );
+
+            return rest_ensure_response( array(
+                'success'   => true,
+                'pageId'    => $page_id,
+                'pageTitle' => $page_title,
+                'settings'  => Better_Messages_Options::instance()->settings,
+            ) );
+        }
+
+        public function rest_sync_user_index( WP_REST_Request $request ) {
+            Better_Messages()->users->sync_all_users();
+
+            return rest_ensure_response( array(
+                'success' => true,
+                'message' => 'User synchronization is finished',
+            ) );
+        }
+
+        public function rest_convert_utf8mb4( WP_REST_Request $request ) {
+            if ( class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ) {
+                Better_Messages_Rest_Api_DB_Migrate()->update_collate();
+            }
+
+            return rest_ensure_response( array(
+                'success' => true,
+                'message' => 'Database was converted',
+            ) );
+        }
+
+        public function rest_reset_database( WP_REST_Request $request ) {
+            if ( class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ) {
+                $migrate = Better_Messages_Rest_Api_DB_Migrate();
+                $migrate->drop_tables();
+                $migrate->delete_bulk_reports();
+                $migrate->first_install();
+
+                $settings = get_option( 'bp-better-chat-settings', array() );
+                $settings['updateTime'] = time();
+                update_option( 'bp-better-chat-settings', $settings );
+
+                do_action( 'better_messages_reset_database' );
+            }
+
+            return rest_ensure_response( array(
+                'success' => true,
+                'message' => 'Database was reset',
+            ) );
+        }
+
+        public function rest_import_settings( WP_REST_Request $request ) {
+            $data = $request->get_json_params();
+
+            if ( empty( $data ) || ! is_array( $data ) ) {
+                return new WP_Error( 'invalid_data', 'Invalid settings data', array( 'status' => 400 ) );
+            }
+
+            Better_Messages_Options::instance()->update_settings( $data );
+
+            return rest_ensure_response( array(
+                'success'  => true,
+                'message'  => 'Settings imported successfully',
+            ) );
+        }
+
+        public function rest_get_settings( WP_REST_Request $request ) {
+            $settings = Better_Messages_Options::instance()->settings;
+
+            $all_roles = get_editable_roles();
+            $roles = array();
+            foreach ( $all_roles as $role_key => $role_data ) {
+                $roles[] = array(
+                    'key'  => $role_key,
+                    'name' => $role_data['name'],
+                );
+            }
+
+            $roles[] = array( 'key' => 'bm-guest', 'name' => _x( 'Guests', 'Settings page', 'bp-better-messages' ) );
+
+            $pages_list = get_pages( array( 'sort_column' => 'post_title', 'sort_order' => 'ASC' ) );
+            $pages = array();
+            if ( ! empty( $pages_list ) ) {
+                foreach ( $pages_list as $page ) {
+                    $pages[] = array(
+                        'id'    => $page->ID,
+                        'title' => $page->post_title,
+                    );
+                }
+            }
+
+            return rest_ensure_response( array(
+                'settings' => $settings,
+                'roles'    => $roles,
+                'pages'    => $pages,
+            ) );
         }
     }
 

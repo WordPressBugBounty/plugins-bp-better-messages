@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
-Tested up to: 6.9.1
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.13.0
+Stable tag: 2.14.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,7 +48,10 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **AI & Automation:**
 
-* AI Chat Bots powered by OpenAI ChatGPT API
+* AI Chat Bots powered by OpenAI, Anthropic (Claude) and Google Gemini
+* AI Chat Bots in group conversations with mention-based responses
+* Conversation summarization and scheduled digests with AI
+* Token usage tracking with cost estimation
 * Voice message transcription powered by OpenAI
 * Web Search capability for AI bots
 * File Search tool for AI bots
@@ -126,8 +129,8 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [Verified Member for BuddyPress](https://www.wordplus.org/bpvm) - verified badges for users
 * [AutomatorWP](https://www.wordplus.org/automatorwp)
 * [Uncanny Automator](https://www.wordplus.org/uncanny)
-* [GamiPress](https://www.wordplus.org/gamipress) - charge for messages & calls
-* [MyCRED](https://www.wordplus.org/mc) - charge for messages & calls
+* [GamiPress](https://www.wordplus.org/gamipress) - charge for messages & calls with per-role pricing and balance display
+* [MyCRED](https://www.wordplus.org/mc) - charge for messages & calls with per-role pricing and balance display
 * [Block, Suspend, Report for BuddyPress](https://www.wordplus.org/BSRB) - allow users block each other
 * [Youzer](https://www.wordplus.org/youzer) (Youzify)
 * [Paid Memberships Pro](https://www.wordplus.org/pmpro)
@@ -169,7 +172,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 **Realtime Features:**
 
 * Messages Delivery Status (sent, delivered, seen)
-* Typing indicator
+* Typing, voice recording and file uploading activity indicators
 * Online/Offline presence indicator
 * User statuses (Online, Away, Do Not Disturb)
 * Mini Chats - chat windows anywhere on your site
@@ -231,7 +234,28 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.13.0 =
+= 2.14.0 =
+* Completely rebuilt Settings page in WP Admin to make it more compact and easier to navigate while adding new features
+* Reworked GamiPress and myCRED addons into unified Points System with per-role pricing and balance display directly in Better Messages interface
+* AI Chat Bots: Added support for adding chat bots to group conversations and ability to respond when they are mentioned
+* AI Chat Bots: Added support for Anthropic (Claude) and Google Gemini providers alongside OpenAI
+* AI Chat Bots: Added conversation summarization and scheduled digests features for Group Conversations
+* AI Chat Bots: Added token usage tracking with cost estimation and ability to charge with MyCred or GamiPress points
+* AI Chat Bots: Bots now appear as online users and show typing indicators while generating responses in WebSocket Version
+* AI Chat Bots: Added dedicated admin page for bot management
+* Added activity indicators for voice recording and file uploading in addition to typing indicator in WebSocket Version
+* Added Voice Messages settings tab with max recording duration, auto-delete, voice transcription and role restrictions
+* Added new Chat Rooms administration page in WP Admin
+* Added ability to force notification for tagged users even if muted the conversation
+* Added online users sidebar panel in Chat Rooms with toggle button
+* Added ability mute and unmute participant microphones in group video calls
+* Added ability to send voice messages when creating a new conversation
+* Added ability to customize order of tabs in mini widgets, side panel and mobile view
+* Added compatibility with the new Progressify plugin (wordpress.org version) alongside the legacy CodeCanyon version
+* Tested with WordPress 7.0 Beta
+* Other minor bugfixes, improvements and optimizations
+
+= 2.13.0 - 2.13.1 =
 * Added optional End-to-End Encryption (E2EE) for private and group conversations (WebSocket version only)
     * Can be enabled at the website level and optionally per conversation
     * Messages encrypted in user browsers — server never sees plaintext
