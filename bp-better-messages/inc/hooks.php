@@ -37,6 +37,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
             add_action( 'admin_notices', array( $this, 'admin_notice') );
+            add_action( 'in_admin_header', array( $this, 'hide_admin_notices_on_bm_pages' ) );
 
             //if( Better_Messages()->settings['fastStart'] == '1' ) {
             add_action( 'template_redirect', array($this, 'catch_fast_thread'), 0 );
@@ -1933,6 +1934,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 wp_redirect($url);
                 exit;
             }
+        }
+
+        public function hide_admin_notices_on_bm_pages(){
+            $screen = get_current_screen();
+            if( ! $screen || strpos( $screen->id, 'better-messages' ) === false ){
+                return;
+            }
+
+            remove_all_actions( 'admin_notices' );
+            remove_all_actions( 'all_admin_notices' );
         }
 
         public function admin_notice(){

@@ -73,6 +73,7 @@ if ( !class_exists('Better_Messages_Emojis') ):
 
                 if( isset( $emojis[ $category ] ) ){
                     $emojis_overwrite = $emojis[$category];
+                    $emojis_overwrite = array_filter( $emojis_overwrite, function( $id ){ return $id !== '__none__'; } );
 
                     if( count( $emojis_overwrite ) === 0 ){
                         unset( $dataset['categories'][ $category_index ] );
@@ -82,6 +83,8 @@ if ( !class_exists('Better_Messages_Emojis') ):
                 }
 
             }
+
+            $dataset['categories'] = array_values( $dataset['categories'] );
 
             return apply_filters('better_messages_get_emoji_dataset', $dataset);
         }

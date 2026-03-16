@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.0
+Stable tag: 2.14.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -111,7 +111,6 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [BuddyPress](https://wordpress.org/plugins/buddypress)
 * [Ultimate Member](https://wordpress.org/plugins/ultimate-member)
 * [PeepSo](https://www.wordplus.org/peepso)
-* [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
@@ -234,7 +233,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.14.0 =
+= 2.14.0 - 2.14.1 =
 * Completely rebuilt Settings page in WP Admin to make it more compact and easier to navigate while adding new features
 * Reworked GamiPress and myCRED addons into unified Points System with per-role pricing and balance display directly in Better Messages interface
 * AI Chat Bots: Added support for adding chat bots to group conversations and ability to respond when they are mentioned
