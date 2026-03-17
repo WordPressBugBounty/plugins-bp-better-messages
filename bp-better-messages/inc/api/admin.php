@@ -1166,6 +1166,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 if ( ! empty( trim( $emoji_json ) ) ) {
                     $emojies = json_decode( wp_unslash( $emoji_json ), true );
                     if ( is_array( $emojies ) ) {
+                        $emojies = Better_Messages_Options::instance()->sanitize_emoji_data( $emojies );
                         update_option( 'bm-emoji-set-2', $emojies );
                         update_option( 'bm-emoji-hash', hash( 'md5', json_encode( $emojies ) ) );
                     }

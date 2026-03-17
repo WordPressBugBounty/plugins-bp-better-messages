@@ -37,6 +37,7 @@ class Better_Messages_Options
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'attachmentsUploadMethod'     => 'post',
+            'attachmentsSafeFilename'     => '0',
             'attachmentsBrowserEnable'    => '0',
             'transcodingImageFormat'      => 'original',
             'transcodingImageQuality'     => 85,
@@ -624,6 +625,9 @@ class Better_Messages_Options
         $has_woocommerce = class_exists('WooCommerce');
         $has_suredash    = defined('SUREDASHBOARD_VER');
         $has_fluent_community = defined('FLUENT_COMMUNITY_PLUGIN_VERSION');
+        $has_userswp     = defined('USERSWP_VERSION');
+        $has_profile_grid = defined('PROGRID_PLUGIN_VERSION');
+        $has_wp_user_manager = class_exists('WP_User_Manager');
         $has_dokan       = class_exists('WeDevs_Dokan');
         $has_wc_vendors  = class_exists('WCV_Vendors');
         $has_wcfm        = class_exists('WCFM');
@@ -775,6 +779,9 @@ class Better_Messages_Options
             'hasWooCommerce'     => $has_woocommerce,
             'hasSureDash'        => $has_suredash,
             'hasFluentCommunity' => $has_fluent_community,
+            'hasUsersWP'         => $has_userswp,
+            'hasProfileGrid'     => $has_profile_grid,
+            'hasWpUserManager'   => $has_wp_user_manager,
             'hasPeepSo'          => $has_peepso,
             'hasDokan'           => $has_dokan,
             'hasWcVendors'       => $has_wc_vendors,
@@ -965,10 +972,37 @@ class Better_Messages_Options
         include $this->path . 'layout-moderation.php';
     }
 
+    /**
+     * Recursively sanitize an array — strings get sanitize_text_field,
+     * numbers and booleans pass through, sub-arrays recurse.
+     */
+    public function sanitize_array_recursive( $arr ) {
+        $sanitized = array();
+        foreach ( $arr as $key => $value ) {
+            $safe_key = is_string( $key ) ? sanitize_text_field( $key ) : $key;
+            if ( is_array( $value ) ) {
+                $sanitized[ $safe_key ] = $this->sanitize_array_recursive( $value );
+            } else if ( is_string( $value ) ) {
+                $sanitized[ $safe_key ] = sanitize_text_field( $value );
+            } else {
+                $sanitized[ $safe_key ] = $value;
+            }
+        }
+        return $sanitized;
+    }
+
+    /**
+     * Sanitize emoji customization data.
+     */
+    public function sanitize_emoji_data( $emojies ) {
+        return $this->sanitize_array_recursive( $emojies );
+    }
+
     public function update_settings( $settings )
     {
         if( isset( $settings['emojiSettings'] ) && ! empty( trim($settings['emojiSettings']) ) ){
             $emojies = json_decode( wp_unslash($settings['emojiSettings']), true );
+            $emojies = $this->sanitize_emoji_data( $emojies );
             update_option( 'bm-emoji-set-2', $emojies );
             update_option( 'bm-emoji-hash', hash('md5', json_encode($emojies) ) );
             unset($settings['emojiSettings']);
@@ -1126,6 +1160,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsUploadMethod'] ) || !in_array( $settings['attachmentsUploadMethod'], array( 'tus', 'post' ), true ) ) {
             $settings['attachmentsUploadMethod'] = 'tus';
+        }
+        if ( !isset( $settings['attachmentsSafeFilename'] ) ) {
+            $settings['attachmentsSafeFilename'] = '0';
         }
         if ( !isset( $settings['attachmentsBrowserEnable'] ) ) {
             $settings['attachmentsBrowserEnable'] = '0';
@@ -1704,6 +1741,59 @@ class Better_Messages_Options
             $settings['messagesPremoderation'] = '0';
         }
 
+        if( ! isset( $settings['mentionsForceNotifications'] ) ) {
+            $settings['mentionsForceNotifications'] = '0';
+        }
+
+        if( ! isset( $settings['emailUnsubscribeLink'] ) ) {
+            $settings['emailUnsubscribeLink'] = '0';
+        }
+
+        if( ! isset( $settings['badWordsSkipAdmins'] ) ) {
+            $settings['badWordsSkipAdmins'] = '0';
+        }
+
+        if( ! isset( $settings['voiceTranscription'] ) ) {
+            $settings['voiceTranscription'] = '0';
+        }
+
+        // Enum validations for select/radio fields
+        if( ! isset( $settings['sidebarCompactMode'] ) || ! in_array( $settings['sidebarCompactMode'], ['auto', 'always'], true ) ) {
+            $settings['sidebarCompactMode'] = 'auto';
+        }
+
+        if( ! isset( $settings['pushNotificationsLogic'] ) || ! in_array( $settings['pushNotificationsLogic'], ['offline', 'always'], true ) ) {
+            $settings['pushNotificationsLogic'] = 'offline';
+        }
+
+        if( ! isset( $settings['modernLayout'] ) || ! in_array( $settings['modernLayout'], ['left', 'right'], true ) ) {
+            $settings['modernLayout'] = 'left';
+        }
+
+        if( ! isset( $settings['deletedBehaviour'] ) || ! in_array( $settings['deletedBehaviour'], ['ignore', 'delete'], true ) ) {
+            $settings['deletedBehaviour'] = 'ignore';
+        }
+
+        if( ! isset( $settings['unreadCounter'] ) || ! in_array( $settings['unreadCounter'], ['messages', 'threads'], true ) ) {
+            $settings['unreadCounter'] = 'messages';
+        }
+
+        if( ! isset( $settings['onsitePosition'] ) || ! in_array( $settings['onsitePosition'], ['left', 'right'], true ) ) {
+            $settings['onsitePosition'] = 'right';
+        }
+
+        if( ! isset( $settings['mobilePopupLocation'] ) || ! in_array( $settings['mobilePopupLocation'], ['left', 'right'], true ) ) {
+            $settings['mobilePopupLocation'] = 'right';
+        }
+
+        if( ! isset( $settings['mobileOnsiteLocation'] ) || ! in_array( $settings['mobileOnsiteLocation'], ['auto', 'left', 'right'], true ) ) {
+            $settings['mobileOnsiteLocation'] = 'auto';
+        }
+
+        if( ! isset( $settings['giphyContentRating'] ) || ! in_array( $settings['giphyContentRating'], ['g', 'pg', 'pg-13', 'r'], true ) ) {
+            $settings['giphyContentRating'] = 'g';
+        }
+
         // Email template source validation (for BuddyPress sites)
         if( ! isset( $settings['emailTemplateSource'] ) || ! in_array( $settings['emailTemplateSource'], ['buddypress', 'custom'] ) ) {
             $settings['emailTemplateSource'] = 'buddypress';
@@ -1758,6 +1848,7 @@ class Better_Messages_Options
         $int_only = [
             'thread_interval'           => 1,
             'site_interval'             => 1,
+            'attachmentsRetention'      => 0,
             'callRequestTimeLimit'      => 10,
             'fixedHeaderHeight'         => 0,
             'messagesHeight'            => 200,
@@ -1809,7 +1900,7 @@ class Better_Messages_Options
             /** Processing checkbox groups **/
 
             if( in_array( $key, $arrays ) ){
-                $this->settings[$key] = (array) $value;
+                $this->settings[$key] = $this->sanitize_array_recursive( (array) $value );
             } else if ( is_array( $value ) ) {
                 $this->settings[$key] = array();
                 foreach ( $value as $val ) {
@@ -1873,6 +1964,11 @@ class Better_Messages_Options
         } else {
             $this->settings['emailLogoId'] = 0;
             $this->settings['emailLogoUrl'] = '';
+        }
+
+        // Sanitize pointsBalanceUrl as URL
+        if( isset( $this->settings['pointsBalanceUrl'] ) && ! empty( $this->settings['pointsBalanceUrl'] ) ){
+            $this->settings['pointsBalanceUrl'] = esc_url_raw( $this->settings['pointsBalanceUrl'] );
         }
 
         // Validate email colors (hex format)

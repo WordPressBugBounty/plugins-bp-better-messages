@@ -1837,6 +1837,12 @@ body[class*=_page_better-messages-viewer] .update-nag {
 .bm-settings-notice a {
   text-decoration: underline;
 }
+.bm-settings-notice.bm-settings-notice-warning {
+  background: #fef8ee;
+  border: 1px solid #dba617;
+  color: #6e4e00;
+  font-size: 13px;
+}
 .bm-settings-notice.bm-settings-notice-error {
   background: #fcf0f1;
   border: 1px solid #d63638;

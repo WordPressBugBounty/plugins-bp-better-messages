@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.1
+Stable tag: 2.14.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -233,6 +233,16 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
+= 2.14.2 =
+* Added WAF-safe filename upload option to prevent Web Application Firewalls from blocking file uploads in some web hosts
+* Improved integrations subtabs sorting — active plugins now appear first
+* Improved AI Digests with better context awareness and error logging
+* Improved video and image transcoding to prevent GIF animation loss
+* Fixed stale E2E encryption status when sending messages after switching threads
+* Fixed Ultimate Member directory message button missing target user ID
+* Fixed Chat Room block "Create new" link pointing to old post editor
+* Other minor bugfixes, improvements and optimizations
+
 = 2.14.0 - 2.14.1 =
 * Completely rebuilt Settings page in WP Admin to make it more compact and easier to navigate while adding new features
 * Reworked GamiPress and myCRED addons into unified Points System with per-role pricing and balance display directly in Better Messages interface
@@ -252,7 +262,6 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Added ability to customize order of tabs in mini widgets, side panel and mobile view
 * Added compatibility with the new Progressify plugin (wordpress.org version) alongside the legacy CodeCanyon version
 * Tested with WordPress 7.0 Beta
-* Other minor bugfixes, improvements and optimizations
 
 = 2.13.0 - 2.13.1 =
 * Added optional End-to-End Encryption (E2EE) for private and group conversations (WebSocket version only)

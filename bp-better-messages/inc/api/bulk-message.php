@@ -512,6 +512,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             require_once( ABSPATH . 'wp-admin/includes/file.php' );
             require_once( ABSPATH . 'wp-admin/includes/media.php' );
 
+            // Restore original filename if sent via safe upload, and enforce byte limit
+            $decoded_name = '';
+            $original_name = $request->get_param( 'original_name' );
+            if ( ! empty( $original_name ) && class_exists( 'Better_Messages_Files' ) ) {
+                $decoded_name = Better_Messages_Files()->decode_original_name( $original_name );
+                if ( ! empty( $decoded_name ) ) {
+                    $_FILES['file']['name'] = Better_Messages_Files()->limit_filename_bytes( sanitize_file_name( $decoded_name ) );
+                }
+            } else if ( class_exists( 'Better_Messages_Files' ) ) {
+                $_FILES['file']['name'] = Better_Messages_Files()->limit_filename_bytes( sanitize_file_name( $_FILES['file']['name'] ) );
+            }
+
             $attachment_id = media_handle_upload( 'file', 0 );
 
             if ( is_wp_error( $attachment_id ) ) {
@@ -523,6 +535,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             update_post_meta( $attachment_id, 'bp-better-messages-bulk-attachment', 1 );
             update_post_meta( $attachment_id, 'bp-better-messages-uploader-user-id', get_current_user_id() );
             update_post_meta( $attachment_id, 'bp-better-messages-upload-time', time() );
+            if ( ! empty( $decoded_name ) ) {
+                update_post_meta( $attachment_id, 'bp-better-messages-original-name', $decoded_name );
+            }
 
             $file_path = get_attached_file( $attachment_id );
 

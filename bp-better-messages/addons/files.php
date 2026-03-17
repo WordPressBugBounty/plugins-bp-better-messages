@@ -209,6 +209,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     'allowPhoto'     => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
                     'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
                     'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
+                    'safeFilename'   => Better_Messages()->settings['attachmentsSafeFilename'] === '1',
                 ];
             }
 
@@ -1031,7 +1032,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 $name = wp_basename($file['name']);
 
-                $file['name'] = sanitize_file_name( $name );
+                $file['name'] = $this->limit_filename_bytes( sanitize_file_name( $name ) );
 
                 add_filter('intermediate_image_sizes', '__return_empty_array');
                 add_filter('big_image_size_threshold', '__return_false');
@@ -1115,9 +1116,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     }
                 }
 
-                $name = wp_basename($file['name']);
+                // Skip original_name for E2E uploads — the server must not know the real filename
+                $original_name = $is_e2e_upload ? '' : $this->decode_original_name( $request->get_param( 'original_name' ) );
+                $name = ! empty( $original_name ) ? $original_name : wp_basename( $file['name'] );
 
-                $_FILES['file']['name'] = sanitize_file_name( $name );
+                $_FILES['file']['name'] = $this->limit_filename_bytes( sanitize_file_name( $name ) );
 
                 $maxSizeMb = apply_filters( 'bp_better_messages_attachment_max_size', Better_Messages()->settings['attachmentsMaxSize'], $thread_id, $user_id );
 
@@ -1191,7 +1194,8 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                             $mime_type = get_post_mime_type( $attachment_id );
                             // Only strip metadata for formats the server can reliably re-encode
                             // without converting to a different format (e.g. AVIF/WebP → PNG)
-                            $safe_mimes = array( 'image/jpeg', 'image/png', 'image/gif' );
+                            // GIF excluded: wp_get_image_editor destroys animation (only keeps first frame)
+                            $safe_mimes = array( 'image/jpeg', 'image/png' );
                             if ( in_array( $mime_type, $safe_mimes, true ) ) {
                                 $editor = wp_get_image_editor( $file_path );
                                 if ( ! is_wp_error( $editor ) ) {
@@ -1260,6 +1264,52 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             }
 
             return $can_upload;
+        }
+
+        /**
+         * Decode a base64-encoded original filename sent by the client.
+         *
+         * The client sends the real filename as a base64 string to bypass WAF
+         * rules that block long or non-ASCII filenames in Content-Disposition.
+         * This method decodes it and applies security sanitization.
+         */
+        public function decode_original_name( $encoded_name ) {
+            if ( empty( $encoded_name ) || ! is_string( $encoded_name ) ) {
+                return '';
+            }
+
+            $decoded = base64_decode( $encoded_name, true );
+            if ( $decoded === false ) {
+                return '';
+            }
+
+            // Strip null bytes
+            $decoded = str_replace( "\0", '', $decoded );
+
+            // Strip directory components (path traversal protection)
+            $decoded = wp_basename( $decoded );
+
+            // WordPress sanitization (strips special chars, normalizes whitespace)
+            $decoded = sanitize_file_name( $decoded );
+
+            return $this->limit_filename_bytes( $decoded );
+        }
+
+        /**
+         * Truncate a filename to fit within the filesystem byte limit (255 bytes for ext4).
+         * Preserves the file extension and avoids splitting multibyte characters.
+         */
+        public function limit_filename_bytes( $filename, $max_bytes = 255 ) {
+            if ( strlen( $filename ) <= $max_bytes ) {
+                return $filename;
+            }
+
+            $extension    = pathinfo( $filename, PATHINFO_EXTENSION );
+            $ext_with_dot = ! empty( $extension ) ? '.' . $extension : '';
+            $base         = mb_strcut( $filename, 0, $max_bytes - strlen( $ext_with_dot ), 'UTF-8' );
+            $base         = rtrim( $base, '.' );
+
+            return $base . $ext_with_dot;
         }
 
         /**
@@ -1790,6 +1840,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             $filename = isset( $metadata['filename'] ) ? $metadata['filename'] : '';
             $filetype = isset( $metadata['filetype'] ) ? $metadata['filetype'] : '';
+            $original_filename = $this->decode_original_name( isset( $metadata['original_filename'] ) ? $metadata['original_filename'] : '' );
 
             if ( empty( $filename ) ) {
                 return new WP_Error(
@@ -1845,13 +1896,14 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 'upload_id'  => $upload_id,
                 'thread_id'  => $thread_id,
                 'user_id'    => $user_id,
-                'filename'   => sanitize_file_name( $filename ),
+                'filename'   => $this->limit_filename_bytes( sanitize_file_name( $filename ) ),
                 'filetype'   => sanitize_mime_type( $filetype ),
                 'filesize'   => $upload_length,
                 'offset'     => 0,
                 'created_at' => time(),
                 'expires_at' => time() + DAY_IN_SECONDS,
                 'is_e2e'     => $is_e2e_upload,
+                'original_filename' => $original_filename,
             );
 
             if ( $is_e2e_upload ) {
@@ -2059,7 +2111,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         private function finalize_tus_upload( array $meta ) {
             $thread_id = (int) $meta['thread_id'];
             $user_id   = (int) $meta['user_id'];
-            $filename  = $meta['filename'];
+            $filename  = ! empty( $meta['original_filename'] ) ? $meta['original_filename'] : $meta['filename'];
             $filetype  = $meta['filetype'];
             $is_e2e    = ! empty( $meta['is_e2e'] );
 
@@ -2094,7 +2146,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 require_once ABSPATH . 'wp-admin/includes/media.php';
 
                 $file_array = array(
-                    'name'     => sanitize_file_name( $filename ),
+                    'name'     => $this->limit_filename_bytes( sanitize_file_name( $filename ) ),
                     'type'     => $filetype,
                     'tmp_name' => $part_file,
                     'error'    => 0,
@@ -2123,11 +2175,28 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 add_post_meta( $attachment_id, 'bp-better-messages-thread-id', $thread_id, true );
                 add_post_meta( $attachment_id, 'bp-better-messages-uploader-user-id', $user_id, true );
                 add_post_meta( $attachment_id, 'bp-better-messages-upload-time', time(), true );
-                add_post_meta( $attachment_id, 'bp-better-messages-original-name', $meta['filename'], true );
+                add_post_meta( $attachment_id, 'bp-better-messages-original-name', $filename, true );
                 add_post_meta( $attachment_id, 'better-messages-waiting-for-message', time(), true );
 
                 if ( $is_e2e && ! empty( $meta['e2e_original_mime'] ) ) {
                     add_post_meta( $attachment_id, 'bm-e2e-original-mime', $meta['e2e_original_mime'], true );
+                }
+
+                // Server-side metadata strip fallback (catches images not processed client-side)
+                if ( Better_Messages()->settings['transcodingStripMetadata'] === '1' ) {
+                    $file_path = get_attached_file( $attachment_id );
+                    if ( $file_path && wp_attachment_is_image( $attachment_id ) ) {
+                        $mime_type = get_post_mime_type( $attachment_id );
+                        // GIF excluded: wp_get_image_editor destroys animation
+                        $safe_mimes = array( 'image/jpeg', 'image/png' );
+                        if ( in_array( $mime_type, $safe_mimes, true ) ) {
+                            $editor = wp_get_image_editor( $file_path );
+                            if ( ! is_wp_error( $editor ) ) {
+                                $editor->set_quality( 100 );
+                                $editor->save( $file_path );
+                            }
+                        }
+                    }
                 }
 
                 return $attachment_id;

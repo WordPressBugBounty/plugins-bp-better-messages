@@ -34,6 +34,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             if( Better_Messages()->settings['UMuserListButton'] == '1' ) {
                 add_action('um_members_just_after_name_tmpl', array($this, 'um_pm_link'), 10);
                 add_action('um_members_list_just_after_actions_tmpl', array( $this, 'um_pm_link' ), 10);
+                add_filter('um_ajax_get_members_data', array( $this, 'add_pm_button_to_directory_data' ), 10, 2);
             }
 
             if(  class_exists('UM_Friends_API') ) {
@@ -417,41 +418,53 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
         }
 
 
-        public function um_pm_link( $args ){
-            if ( ! is_user_logged_in() ) return;
+        public function add_pm_button_to_directory_data( $data_array, $user_id ) {
+            $data_array['bm_pm_button'] = '';
 
-            $base_url = Better_Messages()->functions->get_link(Better_Messages()->functions->get_current_user_id());
+            if ( ! is_user_logged_in() || $user_id == Better_Messages()->functions->get_current_user_id() ) {
+                return $data_array;
+            }
 
-            $args = [
-                'to' => '{{{user.id}}}'
+            $base_url = Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() );
+
+            $url_args = [
+                'to' => $user_id
             ];
 
-            if( Better_Messages()->settings['fastStart'] == '1'){
-                $args['bm-fast-start'] = '1';
+            if ( Better_Messages()->settings['fastStart'] == '1' ) {
+                $url_args['bm-fast-start'] = '1';
             }
 
-            if( isset( $args['bm-fast-start'] ) ){
-                $url = add_query_arg( $args, $base_url );
+            if ( isset( $url_args['bm-fast-start'] ) ) {
+                $url = add_query_arg( $url_args, $base_url );
             } else {
-                $url = Better_Messages()->functions->add_hash_arg('new-conversation', $args, $base_url);
+                $url = Better_Messages()->functions->add_hash_arg( 'new-conversation', $url_args, $base_url );
             }
 
-            $class      = 'um-members-bpbm-btn';
             $link_class = 'um-button um-alt';
             $link_attr  = '';
 
-            if( Better_Messages()->settings['umForceMiniChat'] === '1' ){
+            if ( Better_Messages()->settings['umForceMiniChat'] === '1' ) {
                 $link_class .= ' bpbm-pm-button open-mini-chat ';
-                $link_attr .= ' data-user-id="{{{user.id}}}"';
+                $link_attr .= ' data-user-id="' . esc_attr( $user_id ) . '"';
             }
 
-            if( doing_action('um_members_list_just_after_actions_tmpl') ){
+            $data_array['bm_pm_button'] = '<a href="' . esc_url( $url ) . '" class="' . $link_class . '" target="_self" ' . $link_attr . '><span class="bm-button-text">' . __( 'Private Message', 'bp-better-messages' ) . '</span></a>';
+
+            return $data_array;
+        }
+
+        public function um_pm_link( $args ){
+            $class = 'um-members-bpbm-btn';
+
+            if ( doing_action( 'um_members_list_just_after_actions_tmpl' ) ) {
                 $class .= ' um-members-list-footer-button-wrapper bpbm-pm-button';
             }
-
-            echo '<div class="' . $class . '">';
-            echo '<a href="' . $url . '" class="' . $link_class . '" target="_self" ' . $link_attr . '><span class="bm-button-text">' . __('Private Message', 'bp-better-messages') . '</span></a>';
-            echo '</div>';
+            ?>
+            <# if ( user.bm_pm_button && user.bm_pm_button != '' ) { #>
+                <div class="<?php echo $class; ?>">{{{user.bm_pm_button}}}</div>
+            <# } #>
+            <?php
         }
 
         public function um_profile_message_button( $args ){

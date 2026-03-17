@@ -24,8 +24,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
             add_action( 'bm_generate_summary', array( $this, 'cron_generate_summary' ), 10, 1 );
             add_action( 'bm_cron_summarization', array( $this, 'cron_summarize_all' ) );
-            add_action( 'bm_generate_digest', array( $this, 'cron_generate_digest' ), 10, 1 );
-
             add_action( 'init', array( $this, 'register_cron_schedules' ) );
         }
 
@@ -315,7 +313,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
             $this->send_json_and_close( array( 'success' => true ) );
 
-            $this->generate_summary( $thread_id );
+            $result = $this->generate_summary( $thread_id );
+            if ( is_wp_error( $result ) ) {
+                $this->log_bot_error( $bot_id, $thread_id, 'summary', $result->get_error_message() );
+            }
             delete_transient( $lock_key );
 
             exit;
@@ -401,6 +402,9 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             $this->send_json_and_close( array( 'success' => true ) );
 
             $result = $this->generate_digest( $thread_id );
+            if ( is_wp_error( $result ) ) {
+                $this->log_bot_error( $bot_id, $thread_id, 'digest', $result->get_error_message() );
+            }
             delete_transient( $lock_key );
 
             exit;
@@ -699,9 +703,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             $provider->set_api_key( $api_key );
 
             $custom_max_tokens = $bot_settings['digestMaxTokens'] ?? '';
-            $max_tokens = ( $custom_max_tokens !== '' && (int) $custom_max_tokens > 0 ) ? (int) $custom_max_tokens : 16000;
+            $max_tokens = ( $custom_max_tokens !== '' && (int) $custom_max_tokens > 0 ) ? (int) $custom_max_tokens : 32000;
 
-            $system_prompt = $this->build_digest_prompt( $bot_settings );
+            $context_limit = (int) ( $bot_settings['digestContextDigests'] ?? 3 );
+            $previous_digests = $context_limit > 0 ? $this->get_recent_digests( $thread_id, $context_limit ) : array();
+
+            $system_prompt = $this->build_digest_prompt( $bot_settings, $previous_digests );
             $user_content  = ! empty( $bot_settings['digestPrompt'] ) ? $bot_settings['digestPrompt'] : 'Generate a digest.';
 
             $options = array();
@@ -758,7 +765,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return (int) $message_id;
         }
 
-        private function build_digest_prompt( $bot_settings )
+        private function build_digest_prompt( $bot_settings, $previous_digests = array() )
         {
             $prompt = "You are a digest bot. Your task is to generate a digest based on the instructions provided by the user. Search the web for the latest information when available. Present the digest in a clear, well-structured format.\n\n";
 
@@ -770,7 +777,61 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
             $prompt .= "Do not add introductory or closing phrases. Start directly with the content.";
 
+            if ( ! empty( $previous_digests ) ) {
+                $prompt .= "\n\n## Previous digests\n\nBelow are your previous digests. Avoid repeating the same information. Focus on new developments, updates, and topics not already covered.\n\n";
+
+                foreach ( $previous_digests as $digest ) {
+                    $prompt .= "--- Digest from " . $digest['date'] . " ---\n" . $digest['text'] . "\n\n";
+                }
+            }
+
             return $prompt;
+        }
+
+        /**
+         * Get recent digest messages for a thread.
+         */
+        private function get_recent_digests( $thread_id, $limit = 3 )
+        {
+            global $wpdb;
+
+            $rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT m.message, m.created_at
+                FROM `" . bm_get_table( 'messages' ) . "` m
+                INNER JOIN `" . bm_get_table( 'meta' ) . "` mt ON mt.bm_message_id = m.id
+                WHERE m.thread_id = %d
+                AND mt.meta_key = 'ai_digest'
+                ORDER BY m.created_at DESC
+                LIMIT %d",
+                $thread_id, $limit
+            ) );
+
+            if ( empty( $rows ) ) {
+                return array();
+            }
+
+            $digests = array();
+
+            foreach ( array_reverse( $rows ) as $row ) {
+                $text = $row->message;
+                $text = str_replace( '<!-- BM-AI -->', '', $text );
+                $text = html_entity_decode( $text, ENT_QUOTES, 'UTF-8' );
+                $text = trim( $text );
+
+                if ( empty( $text ) ) {
+                    continue;
+                }
+
+                $timestamp = (int) ( (int) $row->created_at / 10 / 1000 );
+                $date = wp_date( 'Y-m-d H:i', $timestamp );
+
+                $digests[] = array(
+                    'date' => $date,
+                    'text' => $text,
+                );
+            }
+
+            return $digests;
         }
 
         private function get_last_digest_created_at( $thread_id )
@@ -789,11 +850,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             ) );
 
             return $result ? (int) $result : 0;
-        }
-
-        public function cron_generate_digest( $thread_id )
-        {
-            $this->generate_digest( $thread_id );
         }
 
         private function build_system_prompt( $bot_settings, $sender_names = array() )
@@ -1000,6 +1056,32 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return false;
         }
 
+        /**
+         * Log an error to the bot's post meta. Keeps last 20 entries.
+         */
+        private function log_bot_error( $bot_id, $thread_id, $type, $error_message )
+        {
+            $meta_key = '_bm_ai_errors';
+            $errors = get_post_meta( $bot_id, $meta_key, true );
+
+            if ( ! is_array( $errors ) ) {
+                $errors = array();
+            }
+
+            $errors[] = array(
+                'type'      => $type,
+                'thread_id' => $thread_id,
+                'error'     => $error_message,
+                'date'      => current_time( 'mysql' ),
+            );
+
+            if ( count( $errors ) > 20 ) {
+                $errors = array_slice( $errors, -20 );
+            }
+
+            update_post_meta( $bot_id, $meta_key, $errors );
+        }
+
         public function on_message_sent( $message )
         {
             $sender_id = (int) $message->sender_id;
@@ -1027,7 +1109,13 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function cron_generate_summary( $thread_id )
         {
-            $this->generate_summary( $thread_id );
+            $result = $this->generate_summary( $thread_id );
+            if ( is_wp_error( $result ) ) {
+                $config = $this->get_thread_config( $thread_id );
+                if ( $config && ! empty( $config['botId'] ) ) {
+                    $this->log_bot_error( (int) $config['botId'], $thread_id, 'summary', $result->get_error_message() );
+                }
+            }
         }
 
         public function cron_summarize_all()
@@ -1064,7 +1152,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                         }
                     }
 
-                    $this->generate_summary( $thread_id );
+                    $result = $this->generate_summary( $thread_id );
+                    if ( is_wp_error( $result ) ) {
+                        $this->log_bot_error( (int) $config['botId'], $thread_id, 'summary', $result->get_error_message() );
+                    }
                 }
             }
 
@@ -1115,7 +1206,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                     }
                 }
 
-                $this->generate_digest( $thread_id );
+                $result = $this->generate_digest( $thread_id );
+                if ( is_wp_error( $result ) ) {
+                    $this->log_bot_error( (int) $config['botId'], $thread_id, 'digest', $result->get_error_message() );
+                }
             }
         }
 

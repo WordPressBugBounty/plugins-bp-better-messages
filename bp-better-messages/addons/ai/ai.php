@@ -1709,34 +1709,53 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return new WP_Error('not_found', 'Bot not found', array('status' => 404));
             }
 
+            $items = array();
+
             $bot_user = $this->get_bot_user( $bot_id );
 
-            if ( ! $bot_user ) {
-                return array( 'items' => array() );
+            if ( $bot_user ) {
+                $bot_user_id    = absint( $bot_user->id ) * -1;
+                $messages_table = bm_get_table('messages');
+                $meta_table     = bm_get_table('meta');
+
+                $rows = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT m.id, m.thread_id, m.created_at, em.meta_value as error
+                     FROM {$messages_table} m
+                     INNER JOIN {$meta_table} em ON em.bm_message_id = m.id AND em.meta_key = 'ai_response_error'
+                     WHERE m.sender_id = %d
+                     ORDER BY m.created_at DESC
+                     LIMIT 20",
+                    $bot_user_id
+                ) );
+
+                foreach ( $rows as $row ) {
+                    $items[] = array(
+                        'messageId' => (int) $row->id,
+                        'threadId'  => (int) $row->thread_id,
+                        'date'      => $row->created_at,
+                        'error'     => $row->error,
+                    );
+                }
             }
 
-            $bot_user_id    = absint( $bot_user->id ) * -1;
-            $messages_table = bm_get_table('messages');
-            $meta_table     = bm_get_table('meta');
+            // Include digest/summary errors from post meta
+            $post_meta_errors = get_post_meta( $bot_id, '_bm_ai_errors', true );
+            if ( is_array( $post_meta_errors ) ) {
+                foreach ( $post_meta_errors as $entry ) {
+                    $timestamp = strtotime( $entry['date'] );
+                    $items[] = array(
+                        'messageId' => 0,
+                        'threadId'  => (int) $entry['thread_id'],
+                        'date'      => $timestamp * 1000 * 10,
+                        'error'     => '[' . ucfirst( $entry['type'] ) . '] ' . $entry['error'],
+                    );
+                }
 
-            $rows = $wpdb->get_results( $wpdb->prepare(
-                "SELECT m.id, m.thread_id, m.created_at, em.meta_value as error
-                 FROM {$messages_table} m
-                 INNER JOIN {$meta_table} em ON em.bm_message_id = m.id AND em.meta_key = 'ai_response_error'
-                 WHERE m.sender_id = %d
-                 ORDER BY m.created_at DESC
-                 LIMIT 20",
-                $bot_user_id
-            ) );
-
-            $items = array();
-            foreach ( $rows as $row ) {
-                $items[] = array(
-                    'messageId' => (int) $row->id,
-                    'threadId'  => (int) $row->thread_id,
-                    'date'      => $row->created_at,
-                    'error'     => $row->error,
-                );
+                // Re-sort by date descending, limit to 20
+                usort( $items, function( $a, $b ) {
+                    return $b['date'] <=> $a['date'];
+                } );
+                $items = array_slice( $items, 0, 20 );
             }
 
             return array( 'items' => $items );
@@ -2428,6 +2447,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 "digestPrompt" => "",
                 "digestMaxTokens" => "",
                 "digestLanguage" => "",
+                "digestContextDigests" => "3",
                 "userPricingMode" => "disabled",
                 "userPricingFixedAmount" => "",
                 "userPricingCostRate" => "",
