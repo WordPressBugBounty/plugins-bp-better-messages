@@ -37,7 +37,7 @@ class Better_Messages_Options
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
             'attachmentsMaxNumber'        => 0,
             'attachmentsUploadMethod'     => 'post',
-            'attachmentsSafeFilename'     => '0',
+            'attachmentsRandomizeFilenames'     => '0',
             'attachmentsBrowserEnable'    => '0',
             'transcodingImageFormat'      => 'original',
             'transcodingImageQuality'     => 85,
@@ -1161,8 +1161,8 @@ class Better_Messages_Options
         if ( !isset( $settings['attachmentsUploadMethod'] ) || !in_array( $settings['attachmentsUploadMethod'], array( 'tus', 'post' ), true ) ) {
             $settings['attachmentsUploadMethod'] = 'tus';
         }
-        if ( !isset( $settings['attachmentsSafeFilename'] ) ) {
-            $settings['attachmentsSafeFilename'] = '0';
+        if ( !isset( $settings['attachmentsRandomizeFilenames'] ) ) {
+            $settings['attachmentsRandomizeFilenames'] = '0';
         }
         if ( !isset( $settings['attachmentsBrowserEnable'] ) ) {
             $settings['attachmentsBrowserEnable'] = '0';

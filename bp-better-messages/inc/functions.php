@@ -1228,6 +1228,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             if( ! $from ) $from = Better_Messages()->functions->get_current_user_id();
 
+            if( $from === $to ) {
+                return [
+                    'result' => 'not_allowed',
+                    'errors' => [ _x('You can not start a conversation with yourself', 'Shortcode error', 'bp-better-messages') ]
+                ];
+            }
+
             if( ! $uniqueKey ){
                 $existing_threads = $this->find_existing_threads( $from, $to );
 

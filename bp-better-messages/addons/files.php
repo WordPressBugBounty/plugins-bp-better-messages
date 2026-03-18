@@ -209,7 +209,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     'allowPhoto'     => (int) ( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ? '1' : '0' ),
                     'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
                     'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
-                    'safeFilename'   => Better_Messages()->settings['attachmentsSafeFilename'] === '1',
+                    'randomizeFilenames'   => Better_Messages()->settings['attachmentsRandomizeFilenames'] === '1',
                 ];
             }
 
@@ -1116,9 +1116,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     }
                 }
 
-                // Skip original_name for E2E uploads — the server must not know the real filename
-                $original_name = $is_e2e_upload ? '' : $this->decode_original_name( $request->get_param( 'original_name' ) );
-                $name = ! empty( $original_name ) ? $original_name : wp_basename( $file['name'] );
+                $name = wp_basename( $file['name'] );
 
                 $_FILES['file']['name'] = $this->limit_filename_bytes( sanitize_file_name( $name ) );
 
@@ -1264,35 +1262,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             }
 
             return $can_upload;
-        }
-
-        /**
-         * Decode a base64-encoded original filename sent by the client.
-         *
-         * The client sends the real filename as a base64 string to bypass WAF
-         * rules that block long or non-ASCII filenames in Content-Disposition.
-         * This method decodes it and applies security sanitization.
-         */
-        public function decode_original_name( $encoded_name ) {
-            if ( empty( $encoded_name ) || ! is_string( $encoded_name ) ) {
-                return '';
-            }
-
-            $decoded = base64_decode( $encoded_name, true );
-            if ( $decoded === false ) {
-                return '';
-            }
-
-            // Strip null bytes
-            $decoded = str_replace( "\0", '', $decoded );
-
-            // Strip directory components (path traversal protection)
-            $decoded = wp_basename( $decoded );
-
-            // WordPress sanitization (strips special chars, normalizes whitespace)
-            $decoded = sanitize_file_name( $decoded );
-
-            return $this->limit_filename_bytes( $decoded );
         }
 
         /**
@@ -1840,8 +1809,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             $filename = isset( $metadata['filename'] ) ? $metadata['filename'] : '';
             $filetype = isset( $metadata['filetype'] ) ? $metadata['filetype'] : '';
-            $original_filename = $this->decode_original_name( isset( $metadata['original_filename'] ) ? $metadata['original_filename'] : '' );
-
             if ( empty( $filename ) ) {
                 return new WP_Error(
                     'tus_missing_filename',
@@ -1903,7 +1870,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 'created_at' => time(),
                 'expires_at' => time() + DAY_IN_SECONDS,
                 'is_e2e'     => $is_e2e_upload,
-                'original_filename' => $original_filename,
             );
 
             if ( $is_e2e_upload ) {
@@ -2111,7 +2077,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         private function finalize_tus_upload( array $meta ) {
             $thread_id = (int) $meta['thread_id'];
             $user_id   = (int) $meta['user_id'];
-            $filename  = ! empty( $meta['original_filename'] ) ? $meta['original_filename'] : $meta['filename'];
+            $filename  = $meta['filename'];
             $filetype  = $meta['filetype'];
             $is_e2e    = ! empty( $meta['is_e2e'] );
 

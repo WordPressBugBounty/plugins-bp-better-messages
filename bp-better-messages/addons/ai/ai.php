@@ -2447,7 +2447,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 "digestPrompt" => "",
                 "digestMaxTokens" => "",
                 "digestLanguage" => "",
-                "digestContextDigests" => "3",
+                "digestContextDigests" => "1",
                 "userPricingMode" => "disabled",
                 "userPricingFixedAmount" => "",
                 "userPricingCostRate" => "",

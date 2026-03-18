@@ -1,6 +1,7 @@
 __('Voice Message', 'bp-better-messages');
 __('Sticker', 'bp-better-messages');
 __('A user', 'bp-better-messages');
+_x('You can not start a conversation with yourself', 'Shortcode error', 'bp-better-messages');
 _x('%s Participants', 'Thread Title (when subjects are disabled)', 'bp-better-messages');
 _x('Please select recipient(s) before sending the message', 'User tried to send message with no recipients', 'bp-better-messages');
 __('Display Name', 'bp-better-messages');
@@ -687,7 +688,6 @@ _x('Friends', 'Mini Widgets - Head', 'bp-better-messages');
 _x('Groups', 'Mini Widgets - Head', 'bp-better-messages');
 _x('Start a new conversation', 'Mini Widgets', 'bp-better-messages');
 _x('You can not make a call to yourself', 'Shortcode error', 'bp-better-messages');
-_x('You can not start a conversation with yourself', 'Shortcode error', 'bp-better-messages');
 _x('Enable browser push notifications to receive private messages when you are offline?', 'Push Request Proposal', 'bp-better-messages');
 _x('Enable', 'Push Request Proposal', 'bp-better-messages');
 _x('Dismiss', 'Push Request Proposal', 'bp-better-messages');

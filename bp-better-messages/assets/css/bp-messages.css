@@ -13849,6 +13849,7 @@ a.bpbm-pm-button:focus:not(.bm-no-style) {
   padding-right: 15px;
   padding-top: 10px;
   padding-bottom: 10px;
+  text-decoration: none;
 }
 
 .bpbm-join-to-chat-button,

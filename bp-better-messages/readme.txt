@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.2
+Stable tag: 2.14.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -233,14 +233,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.14.2 =
-* Added WAF-safe filename upload option to prevent Web Application Firewalls from blocking file uploads in some web hosts
+= 2.14.2 - 2.14.3 =
+* Added option to randomize filenames on upload to prevent Web Application Firewalls from blocking file uploads in some web hosts
+* Added double confirmation for message auto deleting setting to prevent accidental data loss
 * Improved integrations subtabs sorting — active plugins now appear first
 * Improved AI Digests with better context awareness and error logging
 * Improved video and image transcoding to prevent GIF animation loss
 * Fixed stale E2E encryption status when sending messages after switching threads
 * Fixed Ultimate Member directory message button missing target user ID
 * Fixed Chat Room block "Create new" link pointing to old post editor
+* Fixed messages location warning showing incorrectly for integration plugins
+* Fixed mentions with HTML badges (e.g. PeepSo verified icons) rendering as raw HTML instead of images
 * Other minor bugfixes, improvements and optimizations
 
 = 2.14.0 - 2.14.1 =
