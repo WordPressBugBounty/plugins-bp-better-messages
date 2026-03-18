@@ -42,7 +42,7 @@ class Better_Messages_Options
             'transcodingImageFormat'      => 'original',
             'transcodingImageQuality'     => 85,
             'transcodingImageMaxResolution' => 0,
-            'transcodingStripMetadata'    => '1',
+            'transcodingStripMetadata'    => '0',
             'transcodingVideoFormat'      => 'original',
             'miniChatsEnable'             => '0',
             'combinedChatsEnable'         => '0',
@@ -1181,7 +1181,7 @@ class Better_Messages_Options
             $settings['transcodingImageMaxResolution'] = max( 0, intval( $settings['transcodingImageMaxResolution'] ) );
         }
         if ( !isset( $settings['transcodingStripMetadata'] ) ) {
-            $settings['transcodingStripMetadata'] = '1';
+            $settings['transcodingStripMetadata'] = '0';
         }
         if ( !isset( $settings['transcodingVideoFormat'] ) || !in_array( $settings['transcodingVideoFormat'], array( 'original', 'mp4' ), true ) ) {
             $settings['transcodingVideoFormat'] = 'original';
@@ -1758,23 +1758,23 @@ class Better_Messages_Options
         }
 
         // Enum validations for select/radio fields
-        if( ! isset( $settings['sidebarCompactMode'] ) || ! in_array( $settings['sidebarCompactMode'], ['auto', 'always'], true ) ) {
+        if( ! isset( $settings['sidebarCompactMode'] ) || ! in_array( $settings['sidebarCompactMode'], ['auto', 'always_compact', 'always_expanded'], true ) ) {
             $settings['sidebarCompactMode'] = 'auto';
         }
 
-        if( ! isset( $settings['pushNotificationsLogic'] ) || ! in_array( $settings['pushNotificationsLogic'], ['offline', 'always'], true ) ) {
+        if( ! isset( $settings['pushNotificationsLogic'] ) || ! in_array( $settings['pushNotificationsLogic'], ['offline', 'unread'], true ) ) {
             $settings['pushNotificationsLogic'] = 'offline';
         }
 
-        if( ! isset( $settings['modernLayout'] ) || ! in_array( $settings['modernLayout'], ['left', 'right'], true ) ) {
+        if( ! isset( $settings['modernLayout'] ) || ! in_array( $settings['modernLayout'], ['left', 'right', 'leftAll'], true ) ) {
             $settings['modernLayout'] = 'left';
         }
 
-        if( ! isset( $settings['deletedBehaviour'] ) || ! in_array( $settings['deletedBehaviour'], ['ignore', 'delete'], true ) ) {
+        if( ! isset( $settings['deletedBehaviour'] ) || ! in_array( $settings['deletedBehaviour'], ['ignore', 'include'], true ) ) {
             $settings['deletedBehaviour'] = 'ignore';
         }
 
-        if( ! isset( $settings['unreadCounter'] ) || ! in_array( $settings['unreadCounter'], ['messages', 'threads'], true ) ) {
+        if( ! isset( $settings['unreadCounter'] ) || ! in_array( $settings['unreadCounter'], ['messages', 'conversations'], true ) ) {
             $settings['unreadCounter'] = 'messages';
         }
 
@@ -1786,7 +1786,7 @@ class Better_Messages_Options
             $settings['mobilePopupLocation'] = 'right';
         }
 
-        if( ! isset( $settings['mobileOnsiteLocation'] ) || ! in_array( $settings['mobileOnsiteLocation'], ['auto', 'left', 'right'], true ) ) {
+        if( ! isset( $settings['mobileOnsiteLocation'] ) || ! in_array( $settings['mobileOnsiteLocation'], ['auto', 'top', 'bottom'], true ) ) {
             $settings['mobileOnsiteLocation'] = 'auto';
         }
 

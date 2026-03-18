@@ -12925,6 +12925,8 @@ body.bp-messages-mobile .bp-messages-threads-wrapper .bp-messages-column {
   bottom: 0;
   right: 0;
   margin: auto;
+  width: 100%;
+  height: 100%;
 }
 
 .bp-messages-wrap .bp-messages-side-threads .threads-list .thread .pic {

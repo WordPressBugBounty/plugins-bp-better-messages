@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.14.3\n"
+"Project-Id-Version: Better Messages 2.14.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-18T16:13:28+00:00\n"
+"POT-Creation-Date: 2026-03-18T18:53:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -4514,15 +4514,12 @@ msgstr ""
 
 #: assets/admin/admin.js:2
 #: assets/admin/admin.min.js:1
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
 msgctxt "WP Admin"
 msgid "Subject"
 msgstr ""
 
 #: assets/admin/admin.js:2
 #: assets/admin/admin.min.js:1
-#: inc/blocks/builds/pm-button/index.js:1
 msgctxt "WP Admin"
 msgid "Message"
 msgstr ""
@@ -5864,8 +5861,6 @@ msgstr ""
 
 #: assets/admin/admin.js:2
 #: assets/admin/admin.min.js:1
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
 msgctxt "WP Admin"
 msgid "User ID"
 msgstr ""
@@ -18945,126 +18940,6 @@ msgctxt "WP Admin"
 msgid "The chat room will be opened in full screen mode when accessed from desktop devices or mobile full screen mode is disabled"
 msgstr ""
 
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Private Message"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Button Settings"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "User ID or token: {post_author}, {current_user_id}. Leave empty to auto-detect."
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Button Text"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Leave empty for default: \"Private Message\""
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "Supports tokens: {post_title}, {custom_field:field_name}"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "Unique Tag"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "Supports tokens: {post_id}, {custom_field:field_name}"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "CSS Class"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "This block requires a WebSocket license."
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "Get WebSocket License"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/index.js:1
-msgctxt "WP Admin"
-msgid "WebSocket"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "User ID or token: {post_author}, {current_user_id}, {custom_field:field_name}, {url_param:param_name}. Leave empty to auto-detect."
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Prefill subject. Supports tokens: {post_title}, {custom_field:field_name}"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Prefill message. Supports dynamic tokens."
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Link Target"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Same window (default)"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Same window"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "New tab"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Fast Start"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Open conversation directly, skipping new conversation screen."
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "URL Only"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/index.js:1
-msgctxt "WP Admin"
-msgid "Output only the URL instead of a button"
-msgstr ""
-
 #: inc/blocks/builds/user-inbox/index.js:1
 #: inc/blocks/src/user-inbox/edit.js:44
 msgid "User Inbox"
@@ -19089,8 +18964,6 @@ msgid "Embed a Better Messages chat room"
 msgstr ""
 
 #: inc/blocks/builds/chat-room/block.json
-#: inc/blocks/builds/mini-chat-button/block.json
-#: inc/blocks/builds/pm-button/block.json
 #: inc/blocks/builds/user-inbox/block.json
 #: inc/blocks/src/chat-room/block.json
 #: inc/blocks/src/user-inbox/block.json
@@ -19099,8 +18972,6 @@ msgid "better"
 msgstr ""
 
 #: inc/blocks/builds/chat-room/block.json
-#: inc/blocks/builds/mini-chat-button/block.json
-#: inc/blocks/builds/pm-button/block.json
 #: inc/blocks/builds/user-inbox/block.json
 #: inc/blocks/src/chat-room/block.json
 #: inc/blocks/src/user-inbox/block.json
@@ -19109,7 +18980,6 @@ msgid "messages"
 msgstr ""
 
 #: inc/blocks/builds/chat-room/block.json
-#: inc/blocks/builds/mini-chat-button/block.json
 #: inc/blocks/src/chat-room/block.json
 msgctxt "block keyword"
 msgid "chat"
@@ -19119,52 +18989,6 @@ msgstr ""
 #: inc/blocks/src/chat-room/block.json
 msgctxt "block keyword"
 msgid "room"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/block.json
-msgctxt "block title"
-msgid "Mini Chat Button"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/block.json
-msgctxt "block description"
-msgid "Open a mini chat window on click. Requires WebSocket license and Mini Chats to be enabled."
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/block.json
-msgctxt "block keyword"
-msgid "mini"
-msgstr ""
-
-#: inc/blocks/builds/mini-chat-button/block.json
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block keyword"
-msgid "button"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block title"
-msgid "Private Message Button"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block description"
-msgid "Display a private message button that links to a conversation with a specific user"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block keyword"
-msgid "private"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block keyword"
-msgid "message"
-msgstr ""
-
-#: inc/blocks/builds/pm-button/block.json
-msgctxt "block keyword"
-msgid "pm"
 msgstr ""
 
 #: inc/blocks/builds/user-inbox/block.json
