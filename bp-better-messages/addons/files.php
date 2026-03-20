@@ -45,9 +45,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             add_action( 'bp_better_chat_settings_updated', array($this, 'create_index_file') );
             add_action( 'bp_better_chat_settings_updated', array( $this, 'update_htaccess_protection' ) );
 
-            add_action( 'wp_ajax_bm_download_ffmpeg', array( __CLASS__, 'ajax_download_ffmpeg' ) );
-            add_action( 'wp_ajax_bm_remove_ffmpeg', array( __CLASS__, 'ajax_remove_ffmpeg' ) );
-
             // WASM fallback file serving for hosts that block .wasm files
             add_action( 'wp_ajax_bm_ffmpeg_wasm', array( __CLASS__, 'serve_ffmpeg_wasm' ) );
             add_action( 'wp_ajax_nopriv_bm_ffmpeg_wasm', array( __CLASS__, 'serve_ffmpeg_wasm' ) );
@@ -2341,113 +2338,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $wasm_file = $dir . '/ffmpeg-core.wasm';
             $size = file_exists( $wasm_file ) ? size_format( filesize( $wasm_file ) ) : '0 B';
             return array( 'size' => $size );
-        }
-
-        /**
-         * AJAX handler: Download FFmpeg WASM files from npm registry.
-         */
-        public static function ajax_download_ffmpeg() {
-            check_ajax_referer( 'bm_ffmpeg_action' );
-
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_send_json_error( 'Unauthorized' );
-            }
-
-            $version = '0.12.10';
-            $tgz_url = 'https://registry.npmjs.org/@ffmpeg/core/-/core-' . $version . '.tgz';
-
-            $dir = self::get_ffmpeg_wasm_dir();
-            wp_mkdir_p( $dir );
-
-            // Download the tarball
-            $tmp_file = download_url( $tgz_url, 300 );
-            if ( is_wp_error( $tmp_file ) ) {
-                wp_send_json_error( $tmp_file->get_error_message() );
-            }
-
-            // Extract the needed files from the tgz
-            $tar_file = null;
-            try {
-                $phar = new PharData( $tmp_file );
-                $extracted = false;
-
-                $files_to_extract = array(
-                    'package/dist/umd/ffmpeg-core.js',
-                    'package/dist/umd/ffmpeg-core.wasm',
-                );
-
-                // Decompress .tgz to .tar
-                $phar->decompress();
-                $tar_file = str_replace( '.tgz', '.tar', $tmp_file );
-                if ( ! file_exists( $tar_file ) ) {
-                    $tar_file = preg_replace( '/\.tmp$/', '.tar', $tmp_file );
-                }
-
-                $tar = new PharData( $tar_file );
-
-                foreach ( $files_to_extract as $path ) {
-                    $content = file_get_contents( 'phar://' . $tar_file . '/' . $path );
-                    if ( $content !== false ) {
-                        $filename = basename( $path );
-                        file_put_contents( $dir . '/' . $filename, $content );
-                        $extracted = true;
-                    }
-                }
-
-                @unlink( $tmp_file );
-                @unlink( $tar_file );
-
-                if ( ! $extracted || ! file_exists( $dir . '/ffmpeg-core.wasm' ) ) {
-                    wp_send_json_error( 'Failed to extract FFmpeg files' );
-                }
-
-                // Write .htaccess to set correct WASM Content-Type header
-                self::write_wasm_htaccess( $dir );
-
-                wp_send_json_success( array(
-                    'version' => $version,
-                    'size'    => size_format( filesize( $dir . '/ffmpeg-core.wasm' ) ),
-                ) );
-
-            } catch ( Exception $e ) {
-                @unlink( $tmp_file );
-                if ( $tar_file ) {
-                    @unlink( $tar_file );
-                }
-                wp_send_json_error( $e->getMessage() );
-            }
-        }
-
-        /**
-         * AJAX handler: Remove FFmpeg WASM files.
-         */
-        public static function ajax_remove_ffmpeg() {
-            check_ajax_referer( 'bm_ffmpeg_action' );
-
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_send_json_error( 'Unauthorized' );
-            }
-
-            $dir = self::get_ffmpeg_wasm_dir();
-
-            $files = array( 'ffmpeg-core.wasm', 'ffmpeg-core.js', 'ffmpeg-core.worker.js', '.htaccess' );
-            foreach ( $files as $file ) {
-                $path = $dir . '/' . $file;
-                if ( file_exists( $path ) ) {
-                    @unlink( $path );
-                }
-            }
-
-            // Remove empty directories
-            @rmdir( $dir );
-            @rmdir( dirname( $dir ) );
-
-            // Reset video transcoding setting to original
-            $settings = Better_Messages()->settings;
-            $settings['transcodingVideoFormat'] = 'original';
-            Better_Messages_Options::instance()->update_settings( $settings );
-
-            wp_send_json_success();
         }
 
         /**

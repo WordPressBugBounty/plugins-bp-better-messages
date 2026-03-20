@@ -55,6 +55,16 @@ const header = ( ! isMobile && typeof settings !== 'undefined' && settings.title
 document.addEventListener('fluentCommunityUtilReady', function () {
   updateDynamicCSS();
 
+  // When clicking bottom bar icon while already on messages page, navigate back to threads list
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('.fcom_mobile_menu a');
+    if( link && link.querySelector('.bm-unread-badge') && window.location.pathname.endsWith(path) && window.location.hash && window.location.hash !== '#/' && window.location.hash !== '#' ) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.hash = '#/';
+    }
+  }, true);
+
   window.FluentCommunityUtil.hooks.addFilter("fluent_com_portal_routes", "fluent_chat_route", function (a) {
     return a.push({
       path: path,
@@ -154,3 +164,21 @@ const observer = new MutationObserver(callback);
 
 // Start observing the target node for configured mutations
 observer.observe(html, config);
+
+// Detect keyboard dismiss on iOS Chrome via visualViewport resize
+if( window.visualViewport ){
+  var lastViewportHeight = window.visualViewport.height;
+
+  window.visualViewport.addEventListener('resize', function(){
+    var currentHeight = window.visualViewport.height;
+    var diff = currentHeight - lastViewportHeight;
+    lastViewportHeight = currentHeight;
+
+    // Viewport grew significantly = keyboard closed (small changes are keyboard mode switches)
+    if( diff > 100 && document.body.classList.contains('bm-reply-area-focused') ){
+      document.body.classList.remove('bm-reply-area-focused');
+    }
+
+    updateDynamicCSS();
+  });
+}
