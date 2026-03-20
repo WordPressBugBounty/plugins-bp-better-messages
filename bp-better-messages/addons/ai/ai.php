@@ -53,7 +53,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 add_action( 'better_messages_before_new_thread',  array( $this, 'check_ai_bot_new_thread_balance'), 11, 2 );
                 add_action( 'better_messages_ai_response_completed', array( $this, 'charge_for_ai_response' ), 10, 5 );
 
-                add_filter( 'better_messages_mentions_suggestions', array( $this, 'add_bot_mention_suggestions' ), 10, 3 );
                 add_filter( 'better_messages_search_user_results', array( $this, 'add_bots_to_search_results' ), 10, 3 );
                 add_action('better_messages_ai_bot_ensure_completion', array( $this, 'ai_bot_ensure_completion'), 10, 2 );
                 add_action('better_messages_ai_ensure_completion_job', array( $this->api, 'ensureResponseCompletionJob' ) );
@@ -100,54 +99,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
 
             return $roles;
-        }
-
-        /**
-         * Add AI bots with respondToMentions enabled to mention suggestions.
-         */
-        public function add_bot_mention_suggestions( $response, $thread_id, $search )
-        {
-            // Don't suggest bots in E2E encrypted threads
-            if ( class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ) {
-                return $response;
-            }
-
-            $existing_ids = array_column( $response, 'user_id' );
-
-            $bots = get_posts( array(
-                'post_type'   => 'bm-ai-chat-bot',
-                'post_status' => 'publish',
-                'numberposts' => -1,
-                'fields'      => 'ids',
-            ) );
-
-            foreach ( $bots as $bot_id ) {
-                $settings = $this->get_bot_settings( $bot_id );
-
-                if ( $settings['enabled'] !== '1' || $settings['respondToMentions'] !== '1' ) {
-                    continue;
-                }
-
-                $bot_user = $this->get_bot_user( $bot_id );
-                if ( ! $bot_user ) continue;
-
-                $bot_user_id = absint( $bot_user->id ) * -1;
-
-                if ( in_array( $bot_user_id, $existing_ids ) ) continue;
-
-                $bot_name = get_the_title( $bot_id );
-
-                if ( ! empty( $search ) && stripos( $bot_name, $search ) === false ) {
-                    continue;
-                }
-
-                $response[] = array(
-                    'user_id' => $bot_user_id,
-                    'label'   => $bot_name,
-                );
-            }
-
-            return $response;
         }
 
         public function add_bots_to_search_results( $users, $search, $user_id )

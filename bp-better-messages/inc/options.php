@@ -2028,6 +2028,22 @@ class Better_Messages_Options
             $this->settings['bpGroupSlug'] = 'bp-messages';
         }
 
+        // Ensure required output formats are in attachmentsFormats when optimization is enabled
+        if ( is_array( $this->settings['attachmentsFormats'] ) ) {
+            $required_formats = array();
+            if ( $this->settings['transcodingImageFormat'] !== 'original' ) {
+                $required_formats = array_merge( $required_formats, array( 'jpg', 'jpeg', 'webp', 'avif' ) );
+            }
+            if ( $this->settings['transcodingVideoFormat'] !== 'original' ) {
+                $required_formats = array_merge( $required_formats, array( 'mp4' ) );
+            }
+            foreach ( $required_formats as $fmt ) {
+                if ( ! in_array( $fmt, $this->settings['attachmentsFormats'], true ) ) {
+                    $this->settings['attachmentsFormats'][] = $fmt;
+                }
+            }
+        }
+
         $this->settings['updateTime'] = time();
 
         wp_unschedule_hook('better_messages_send_notifications');

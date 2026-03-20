@@ -445,39 +445,22 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             $search         = '%' . $search_request . '%';
 
             $query = $wpdb->prepare("
-                SELECT `users`.`ID`
-                FROM `{$wpdb->users}` as users
-                INNER JOIN " . bm_get_table('recipients') . " recipients
-                ON ( `users`.`ID` = `recipients`.`user_id`
+                SELECT `user_index`.`ID`
+                FROM `" . bm_get_table('users') . "` as user_index
+                INNER JOIN `" . bm_get_table('recipients') . "` recipients
+                ON ( `user_index`.`ID` = `recipients`.`user_id`
                     AND `recipients`.`thread_id` = %d
                     AND `recipients`.`user_id` != %d
                     AND `recipients`.`is_deleted` = 0)
-                WHERE `user_login` LIKE %s
-                   OR `user_nicename` LIKE %s
-                   OR `display_name` LIKE %s
-                ORDER BY `display_name` ASC
+                WHERE `user_index`.`display_name` LIKE %s
+                   OR `user_index`.`user_nicename` LIKE %s
+                ORDER BY `user_index`.`display_name` ASC
                 LIMIT 0, 50
-            ", $thread_id, Better_Messages()->functions->get_current_user_id(), $search, $search, $search );
+            ", $thread_id, Better_Messages()->functions->get_current_user_id(), $search, $search );
 
             $user_ids = $wpdb->get_col( $query );
 
-            $response = [];
-
-            $user_ids_index = [];
-            foreach( $user_ids as $user_id ){
-                if( in_array( $user_id, $user_ids_index ) ) continue;
-
-                $user_ids_index[] = $user_id;
-
-                $user = get_userdata( $user_id );
-
-                $response[] = [
-                    'user_id' => (int) $user_id,
-                    'label'    => (!empty($user->display_name)) ? $user->display_name : $user->user_login
-                ];
-            }
-
-            $response = apply_filters( 'better_messages_mentions_suggestions', $response, $thread_id, $search_request );
+            $response = array_values( array_unique( array_map( 'intval', $user_ids ) ) );
 
             return $response;
         }

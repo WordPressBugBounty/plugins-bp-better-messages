@@ -30,8 +30,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             add_filter( 'bp_better_messages_script_variable', array( $this, 'attachments_script_vars' ), 10, 1 );
 
             if ( Better_Messages()->settings['attachmentsEnable'] === '1' ) {
-                add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ), 9 );
-                add_action( 'better_messages_register_script_dependencies', array($this, 'load_scripts'), 10, 1);
 
                 if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
                     add_filter( 'rest_pre_dispatch', array( $this, 'intercept_tus_requests' ), 10, 3 );
@@ -63,70 +61,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         const HTACCESS_CONTENT = "Options -Indexes\n";
         const INDEX_CONTENT = "<?php\n// Silence is golden.";
 
-        public bool $scripts_loaded = false;
-
-        public function load_scripts( $context ){
-            if( $this->scripts_loaded ) return;
-            $this->scripts_loaded = true;
-
-            $is_dev = defined( 'BM_DEV' );
-
-            $version = Better_Messages()->version;
-            $suffix = ( $is_dev ? '' : '.min' );
-
-            $deps = [
-                'better-messages-files-image-editor',
-                'better-messages-files-react'
-            ];
-
-            if( Better_Messages()->settings['attachmentsAllowPhoto'] == '1' ) {
-                wp_register_script(
-                    'better-messages-files-webcam',
-                    Better_Messages()->url . "assets/js/addons/files/webcam{$suffix}.js",
-                    [],
-                    $version
-                );
-
-                $deps[] = 'better-messages-files-webcam';
-            }
-
-            wp_register_script(
-                'better-messages-files-image-editor',
-                Better_Messages()->url . "assets/js/addons/files/image-editor{$suffix}.js",
-                [],
-                $version
-            );
-
-            wp_register_script(
-                'better-messages-files-react',
-                Better_Messages()->url . "assets/js/addons/files/react{$suffix}.js",
-                [],
-                $version
-            );
-
-            if ( Better_Messages()->settings['attachmentsUploadMethod'] === 'tus' ) {
-                wp_register_script(
-                    'better-messages-files-tus',
-                    Better_Messages()->url . "assets/js/addons/files/tus{$suffix}.js",
-                    [],
-                    $version
-                );
-
-                $deps[] = 'better-messages-files-tus';
-            }
-
-            wp_register_script(
-                'better-messages-files-core',
-                Better_Messages()->url . "assets/js/addons/files/core{$suffix}.js",
-                $deps,
-                $version
-            );
-
-            add_filter('better_messages_script_dependencies', function( $deps ) {
-                $deps[] = 'better-messages-files-core';
-                return $deps;
-            } );
-        }
 
         public function files_message_meta( $meta, $message_id, $thread_id, $content ){
             if( $content === '<!-- BM-DELETED-MESSAGE -->' ){
@@ -986,8 +920,22 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
         public function upload_mimes($mimes, $user){
             $allowedExtensions = Better_Messages()->settings['attachmentsFormats'];
-            $allowed = array();
 
+            // Force-accept output formats when optimization is enabled
+            if ( Better_Messages()->settings['transcodingImageFormat'] !== 'original' ) {
+                foreach ( array( 'jpg', 'jpeg', 'webp', 'avif' ) as $fmt ) {
+                    if ( ! in_array( $fmt, $allowedExtensions ) ) {
+                        $allowedExtensions[] = $fmt;
+                    }
+                }
+            }
+            if ( Better_Messages()->settings['transcodingVideoFormat'] !== 'original' ) {
+                if ( ! in_array( 'mp4', $allowedExtensions ) ) {
+                    $allowedExtensions[] = 'mp4';
+                }
+            }
+
+            $allowed = array();
 
             foreach( wp_get_mime_types() as $extensions => $mime_type ){
                 $key = array();
@@ -999,10 +947,6 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 if( ! empty($key) ){
                     $key = implode('|', $key);
                     $allowed[$key] = $mime_type;
-
-                    if( str_contains( $key, 'jpg' ) || str_contains( $key, 'jpe' ) ){
-                        $allowed['webp'] = 'image/webp';
-                    }
                 }
             }
 
@@ -2334,30 +2278,19 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             }
 
             if ( $imageFormat !== 'original' ) {
-                $imageExts = array( 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp', 'heic', 'heif', 'tiff', 'tif', 'bmp', 'ico', 'avif' );
-                if ( ! empty( array_intersect( $extensions, $imageExts ) ) ) {
-                    $targetMap = array(
-                        'webp' => array( 'webp' ),
-                        'avif' => array( 'avif' ),
-                        'jpeg' => array( 'jpg', 'jpeg' ),
-                    );
-                    $targets = isset( $targetMap[ $imageFormat ] ) ? $targetMap[ $imageFormat ] : array();
-                    foreach ( $targets as $t ) {
-                        if ( ! in_array( $t, $extensions ) ) {
-                            $extensions[] = $t;
-                        }
+                // Force-accept all possible output formats when image optimization is enabled
+                $force_accept = array( 'jpg', 'jpeg', 'webp', 'avif' );
+                foreach ( $force_accept as $t ) {
+                    if ( ! in_array( $t, $extensions ) ) {
+                        $extensions[] = $t;
                     }
                 }
             }
 
             if ( $videoFormat !== 'original' ) {
-                $videoExts = array( 'mov', 'avi', 'wmv', 'mkv' );
-                if ( ! empty( array_intersect( $extensions, $videoExts ) ) ) {
-                    foreach ( array( 'mp4', 'm4v' ) as $t ) {
-                        if ( ! in_array( $t, $extensions ) ) {
-                            $extensions[] = $t;
-                        }
-                    }
+                // Force-accept mp4 when video optimization is enabled
+                if ( ! in_array( 'mp4', $extensions ) ) {
+                    $extensions[] = 'mp4';
                 }
             }
 
