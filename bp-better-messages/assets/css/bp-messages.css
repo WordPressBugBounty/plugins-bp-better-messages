@@ -6303,7 +6303,7 @@ body.bm-messages-dark .bp-messages-wrap.bp-better-messages-list .chat .close .un
 body.bm-messages-dark .bp-messages-wrap .threads-list .thread .unread-count,
 body.bm-messages-dark .bp-messages-wrap .bm-reply .bm-attachment[data-count]:after,
 body.bm-messages-dark .bp-messages-wrap .threads-list .thread .unread-mention {
-  background: rgb(63, 75, 111);
+  background: rgb(63, 75, 111) !important;
 }
 body.bm-messages-dark .bp-messages-wrap h1, body.bm-messages-dark .bp-messages-wrap h2, body.bm-messages-dark .bp-messages-wrap h3, body.bm-messages-dark .bp-messages-wrap h4, body.bm-messages-dark .bp-messages-wrap h5, body.bm-messages-dark .bp-messages-wrap h6 {
   color: rgba(var(--bm-text-color), 1);
@@ -7377,6 +7377,54 @@ body.bp-messages-mobile #better-messages-modals-container input {
   height: 100%;
   border: 0;
   margin: 0;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent:hover .bm-embed-consent-play {
+  transform: scale(1.1);
+  background-color: rgba(255, 0, 0, 0.9);
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent .bm-embed-consent-play {
+  width: 68px;
+  height: 48px;
+  background-color: rgba(255, 0, 0, 0.8);
+  border-radius: 12px;
+  position: relative;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent .bm-embed-consent-play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-35%, -50%);
+  border-style: solid;
+  border-width: 10px 0 10px 18px;
+  border-color: transparent transparent transparent #fff;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent .bm-embed-consent-title {
+  color: #fff;
+  font-size: 13px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  max-width: 80%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info {
   display: block;
@@ -9510,6 +9558,7 @@ body.bm-mobile-device-ios-old .bp-messages-wrap .bm-reply {
   text-decoration: none !important;
   border: none;
   font-size: 18px;
+  outline: none;
 }
 
 .bp-messages-wrap .chat-header .thread-actions {
@@ -13075,7 +13124,7 @@ body.bp-messages-mobile .bm-emoji-picker-container {
   /*width: 100%;
       left: 0 !important;
 
-      em-emoji-picker{
+      bm-emoji-picker{
           margin: 0 auto;
       }*/
 }
@@ -14563,6 +14612,7 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   line-height: inherit;
   text-decoration: none !important;
   border: none;
+  outline: none;
 }
 .bp-messages-wrap .chat-footer > a > svg {
   position: absolute;
@@ -15429,6 +15479,12 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
 .bm-compact-tooltip strong {
   font-weight: 600;
 }
+.bm-compact-tooltip .bm-compact-tooltip-preview {
+  display: inline;
+}
+.bm-compact-tooltip .bm-compact-tooltip-preview .last-message-rich {
+  display: inline;
+}
 
 .bp-messages-wrap.bm-no-transition {
   transition: none !important;
@@ -15562,7 +15618,6 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   background: rgba(var(--main-bm-color), 1);
   color: #fff;
   text-align: center;
-  border: 0.5px solid rgba(var(--bm-bg-color), 1);
   margin-right: 0;
 }
 

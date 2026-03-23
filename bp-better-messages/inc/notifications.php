@@ -716,7 +716,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                         if( is_array( $threads ) && count( $threads ) > 0 ){
                             foreach( $threads as $thread_id => $last_id ){
-                                $last_time = $wpdb->get_var( $wpdb->prepare(  "SELECT created_at FROM `" . bm_get_table('messages') . "'` WHERE `thread_id` = %d AND `id` = %d", $thread_id, $last_id ) );
+                                $last_time = $wpdb->get_var( $wpdb->prepare(  "SELECT created_at FROM `" . bm_get_table('messages') . "` WHERE `thread_id` = %d AND `id` = %d", $thread_id, $last_id ) );
                                 if( $last_time ) {
                                     $last_time = gmdate( 'Y-m-d H:i:s', substr( $last_time, 0, 10 ) );
                                 }
@@ -1181,21 +1181,57 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
             $button_text      = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
 
+            // Process header text
+            $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
+            if ( empty( $header_text ) ) {
+                $header_text = sprintf( __( 'Hi %s,', 'bp-better-messages' ), $data['user_name'] );
+            } else {
+                $header_text = str_replace( '{{user_name}}', $data['user_name'], $header_text );
+            }
+
+            // Process footer text
+            $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
+            if ( empty( $footer_text ) ) {
+                $footer_text = get_bloginfo( 'name' );
+            } else {
+                $footer_text = str_replace(
+                    array( '{{site_name}}', '{{site_url}}' ),
+                    array( get_bloginfo( 'name' ), home_url() ),
+                    $footer_text
+                );
+            }
+
+            // Logo HTML
+            $logo_html = '';
+            if ( ! empty( $settings['emailLogoUrl'] ) ) {
+                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 200px; max-height: 60px;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
+            }
+
+            // Unsubscribe HTML
+            $unsubscribe_html = '';
+            if ( ! empty( $data['unsubscribe_url'] ) ) {
+                $unsubscribe_html = '<br><a href="' . esc_url( $data['unsubscribe_url'] ) . '" style="color: #999999; font-size: 11px; text-decoration: underline;">' . esc_html_x( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ) . '</a>';
+            }
+
             // Replace all placeholders
             $replacements = array(
-                '{{site_name}}'       => get_bloginfo( 'name' ),
-                '{{site_url}}'        => home_url(),
-                '{{user_name}}'       => $data['user_name'],
-                '{{subject}}'         => $data['subject'],
-                '{{email_subject}}'   => $data['email_subject'],
-                '{{messages_html}}'   => $data['messages_html'],
-                '{{thread_url}}'      => $data['thread_url'],
-                '{{unsubscribe_url}}' => isset( $data['unsubscribe_url'] ) ? $data['unsubscribe_url'] : '',
-                '{{primary_color}}'   => $primary_color,
+                '{{site_name}}'        => get_bloginfo( 'name' ),
+                '{{site_url}}'         => home_url(),
+                '{{user_name}}'        => $data['user_name'],
+                '{{subject}}'          => $data['subject'],
+                '{{email_subject}}'    => $data['email_subject'],
+                '{{messages_html}}'    => $data['messages_html'],
+                '{{thread_url}}'       => $data['thread_url'],
+                '{{unsubscribe_url}}'  => isset( $data['unsubscribe_url'] ) ? $data['unsubscribe_url'] : '',
+                '{{primary_color}}'    => $primary_color,
                 '{{background_color}}' => $background_color,
                 '{{content_bg_color}}' => $content_bg_color,
-                '{{text_color}}'      => $text_color,
-                '{{button_text}}'     => $button_text,
+                '{{text_color}}'       => $text_color,
+                '{{button_text}}'      => $button_text,
+                '{{header_text}}'      => $header_text,
+                '{{footer_text}}'      => $footer_text,
+                '{{logo_html}}'        => $logo_html,
+                '{{unsubscribe_html}}' => $unsubscribe_html,
             );
 
             return str_replace( array_keys( $replacements ), array_values( $replacements ), $template );

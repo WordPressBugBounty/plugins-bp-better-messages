@@ -132,7 +132,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         public function attachments_script_vars( $vars ){
             $vars['attachmentsBrowserEnable'] = Better_Messages()->settings['attachmentsBrowserEnable'] === '1';
 
-            if ( Better_Messages()->settings['attachmentsEnable'] === '1' ) {
+            $attachments_enabled = Better_Messages()->settings['attachmentsEnable'] === '1';
+            $has_voice_messages  = class_exists( 'BP_Better_Messages_Voice_Messages' );
+
+            if ( $attachments_enabled || $has_voice_messages ) {
                 $vars['attachments'] = [
                     'maxSize'        => intval(Better_Messages()->settings['attachmentsMaxSize']),
                     'maxItems'       => intval(Better_Messages()->settings['attachmentsMaxNumber']),
@@ -141,6 +144,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     'tusEndpoint'    => esc_url_raw( get_rest_url( null, '/better-messages/v1/tus/' ) ),
                     'uploadMethod'   => Better_Messages()->settings['attachmentsUploadMethod'],
                     'randomizeFilenames'   => Better_Messages()->settings['attachmentsRandomizeFilenames'] === '1',
+                    'voiceOnly'      => ! $attachments_enabled && $has_voice_messages,
                 ];
             }
 
@@ -216,7 +220,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 },
             ) );
 
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) {
+            $has_voice_messages = class_exists( 'BP_Better_Messages_Voice_Messages' );
+
+            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! $has_voice_messages ) {
                 return;
             }
 
@@ -1026,7 +1032,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 $extensions = apply_filters( 'bp_better_messages_attachment_allowed_extensions', Better_Messages()->settings['attachmentsFormats'], $thread_id, $user_id );
                 $extensions = self::get_expanded_extensions( $extensions );
 
-                $is_e2e_upload = class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id );
+                $is_e2e_upload = class_exists( 'Better_Messages_E2E_Encryption' ) && (
+                    Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
+                    || ( $thread_id === 0 && ! empty( $request->get_param( 'e2e_encrypted' ) ) )
+                );
 
                 $extension = pathinfo( $file['name'], PATHINFO_EXTENSION );
 
@@ -1172,7 +1181,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         }
 
         public function user_can_upload( $user_id, $thread_id ) {
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) return false;
+            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! class_exists( 'BP_Better_Messages_Voice_Messages' ) ) return false;
 
             if( $thread_id === 0 ) return true;
 
@@ -1180,7 +1189,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         }
 
         public function user_can_upload_callback(WP_REST_Request $request) {
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) return false;
+            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! class_exists( 'BP_Better_Messages_Voice_Messages' ) ) return false;
 
             if( ! Better_Messages_Rest_Api()->is_user_authorized( $request ) ){
                 return false;
@@ -1722,7 +1731,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $user_id   = Better_Messages()->functions->get_current_user_id();
             $thread_id = intval( $request->get_param( 'thread_id' ) );
 
-            $is_e2e_upload = class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id );
+            $is_e2e_upload = false;
 
             $upload_length = $request->get_header( 'upload_length' );
             if ( $upload_length === null || ! is_numeric( $upload_length ) ) {
@@ -1757,6 +1766,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     array( 'status' => 400 )
                 );
             }
+
+            $is_e2e_upload = class_exists( 'Better_Messages_E2E_Encryption' ) && (
+                Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
+                || ( $thread_id === 0 && ! empty( $metadata['e2e_encrypted'] ) )
+            );
 
             if ( $is_e2e_upload ) {
                 // E2E: require e2e_encrypted flag and .enc extension
@@ -2500,7 +2514,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 return admin_url( 'admin-ajax.php' ) . '?action=bm_libheif_wasm&file=' . $filename;
             }
 
-            return Better_Messages()->url . 'assets/js/addons/transcode/' . $filename;
+            return Better_Messages()->url . 'assets/js/modules/transcode/' . $filename;
         }
 
         /**
@@ -2518,7 +2532,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 wp_die( 'Invalid file', '', array( 'response' => 404 ) );
             }
 
-            $path = Better_Messages()->path . 'assets/js/addons/transcode/' . $file;
+            $path = Better_Messages()->path . 'assets/js/modules/transcode/' . $file;
 
             if ( ! file_exists( $path ) ) {
                 wp_die( 'File not found', '', array( 'response' => 404 ) );

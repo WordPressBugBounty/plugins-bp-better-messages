@@ -1,10 +1,10 @@
 === Better Messages - Live Chat, Chat Rooms, Real-Time Messaging & Private Messages ===
-Contributors: wordplus, freemius
+Contributors: wordplus
 Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.6
+Stable tag: 2.14.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -184,6 +184,17 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Web Push Notifications (works even when the browser is closed)
 * All data encrypted in transit, so we can't read it on our servers
 
+**Privacy & GDPR:**
+
+* Dedicated Privacy & GDPR settings page
+* All message data stored on your own server — no message content stored externally
+* WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
+* Suggested privacy policy text that adapts based on enabled features
+* Self-hosted emoji images option — no external CDN requests
+* Privacy-friendly video embeds — YouTube, Vimeo load only after user clicks
+* No cookies set, no analytics or tracking scripts
+* [Privacy & GDPR documentation](https://www.better-messages.com/docs/features/privacy-gdpr/)
+
 **Support:**
 
 * Priority email support
@@ -232,6 +243,29 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.14.7 =
+* Added new Privacy & GDPR settings page with compliance overview and privacy controls
+* Added self-hosted emoji sprites option — download emoji images to your server instead of loading from external CDN
+* Added Privacy-friendly oEmbeds — YouTube, Vimeo and other video embeds load only after user clicks
+* Added WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
+* Added suggested privacy policy text that adapts based on enabled features (Settings → Privacy)
+* Added option to delete file attachments when user requests data erasure
+* Added option to enable or disable Emoji Picker button
+* Added option to enable or disable automatic text emoticon to emoji conversion
+* Improved caching — scripts and resources that don't change between updates are now cached independently by the browser
+* Scripts and resources are now loaded on demand only when the feature is actually used
+* Added filter hooks for custom AI provider registration
+* AI Chat Bots will not be auto-removed from Group Conversations when members list syncing
+* Show "Voice message" fallback text when voice messages addon is disabled
+* Fixed mentions popup not closing when no matches found
+* Fixed voice message uploads returning 404 when file attachments disabled
+* Fixed E2E encrypted file uploads in new conversations
+* Fixed group member sync running for groups with chat disabled
+* Improved translation compatibility — all translated strings from WordPress.org now visible in Loco Translate
+* Improved email template customization — preview now reflects all settings accurately
+* Fixed custom HTML email template not saving properly
+* Other minor bugfixes and improvements
 
 = 2.14.2 - 2.14.6 =
 * Added option to randomize filenames on upload to prevent Web Application Firewalls from blocking file uploads in some web hosts

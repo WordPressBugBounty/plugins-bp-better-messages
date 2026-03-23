@@ -1,0 +1,14 @@
+<IfModule mod_headers.c>
+    <FilesMatch "\.wasm$">
+        Header set Content-Type "application/wasm"
+    </FilesMatch>
+    <FilesMatch "\.js$">
+        Header set Content-Type "application/javascript"
+    </FilesMatch>
+</IfModule>
+
+# Fallback for servers without mod_headers
+<IfModule mod_mime.c>
+    AddType application/wasm .wasm
+    AddType application/javascript .js
+</IfModule>

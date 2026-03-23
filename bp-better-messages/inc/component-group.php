@@ -186,11 +186,20 @@ class Better_Messages_Group extends BP_Group_Extension
 
     public function on_group_member_change($group_member){
         $group_id  = $group_member->group_id;
+
+        if( $this->is_group_messages_enabled( $group_id ) !== 'enabled' ){
+            return;
+        }
+
         $thread_id = $this->get_group_thread_id( $group_id );
         $this->sync_thread_members( $thread_id );
     }
 
     public function group_member_deleted( $user_id, $group_id ){
+        if( $this->is_group_messages_enabled( $group_id ) !== 'enabled' ){
+            return;
+        }
+
         $thread_id = $this->get_group_thread_id( $group_id );
         $this->sync_thread_members( $thread_id );
     }
@@ -440,6 +449,10 @@ class Better_Messages_Group extends BP_Group_Extension
 
         if( count($recipients) > 0 ) {
             foreach ($recipients as $user_id => $recipient) {
+                if( $user_id < 0 ){
+                    continue;
+                }
+
                 $wpdb->delete( bm_get_table('recipients'), [
                     'thread_id' => $thread_id,
                     'user_id'   => $user_id

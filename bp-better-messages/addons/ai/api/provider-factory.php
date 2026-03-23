@@ -21,7 +21,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
                 case 'gemini':
                     return Better_Messages_Gemini_API::instance();
                 default:
-                    return null;
+                    return apply_filters( 'better_messages_ai_provider_create', null, $provider_id );
             }
         }
 
@@ -63,7 +63,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
                 ],
             ];
 
-            return $providers;
+            return apply_filters( 'better_messages_ai_providers_info', $providers );
         }
 
         /**
@@ -82,7 +82,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
                 case 'gemini':
                     return Better_Messages()->settings['geminiApiKey'] ?? '';
                 default:
-                    return '';
+                    return apply_filters( 'better_messages_ai_provider_global_key', '', $provider_id );
             }
         }
     }

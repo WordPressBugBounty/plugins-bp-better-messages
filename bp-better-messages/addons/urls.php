@@ -193,10 +193,21 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
                         if( $embed !== false ){
                             $html = false;
+                            $privacy_embeds = Better_Messages()->settings['privacyEmbeds'] === '1';
+
                             if( isset($embed->provider_name) && in_array( strtolower($embed->provider_name), $video_providers ) ){
-                                $html = '<span class="bp-messages-iframe-container">' . $embed->html . '</span>';
+                                if ( $privacy_embeds ) {
+                                    $html = $this->render_privacy_embed( $url, $embed );
+                                } else {
+                                    $html = '<span class="bp-messages-iframe-container">' . $embed->html . '</span>';
+                                }
                             } else if( isset($embed->html) ) {
-                                $html = $embed->html;
+                                // Non-video embeds (SoundCloud, Flickr, etc.) can contain
+                                // arbitrary scripts that can't be sandboxed with a simple
+                                // iframe swap — skip them when privacy embeds is enabled.
+                                if ( ! $privacy_embeds ) {
+                                    $html = $embed->html;
+                                }
                             }
 
                             if( isset($embed->provider_name) && in_array( strtolower($embed->provider_name), $hide_link ) ){
@@ -332,6 +343,55 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             if ( isset( $titles[ 1 ] ) ) $out[ 'title' ] = $titles[ 1 ];
 
             return $out;
+        }
+
+        /**
+         * Render a privacy-friendly embed placeholder.
+         * Shows a thumbnail with a play button — the actual iframe loads only on click.
+         */
+        public function render_privacy_embed( $url, $embed ) {
+            $provider  = isset( $embed->provider_name ) ? strtolower( $embed->provider_name ) : '';
+            $title     = isset( $embed->title ) ? esc_attr( $embed->title ) : '';
+
+            // Extract the iframe src from the embed HTML
+            $iframe_src = '';
+            if ( isset( $embed->html ) && preg_match( '/src=["\']([^"\']+)["\']/', $embed->html, $matches ) ) {
+                $iframe_src = $matches[1];
+
+                // YouTube: switch to privacy-enhanced mode
+                if ( $provider === 'youtube' ) {
+                    $iframe_src = str_replace( 'youtube.com', 'youtube-nocookie.com', $iframe_src );
+                }
+            }
+
+            if ( empty( $iframe_src ) ) {
+                return false;
+            }
+
+            return '<span class="bp-messages-iframe-container">'
+                . '<span class="bm-embed-consent" data-src="' . esc_attr( $iframe_src ) . '">'
+                . '<span class="bm-embed-consent-play"></span>'
+                . ( $title ? '<span class="bm-embed-consent-title">' . esc_html( $title ) . '</span>' : '' )
+                . '</span>'
+                . '</span>';
+        }
+
+        /**
+         * Extract YouTube video ID from URL.
+         */
+        private function extract_youtube_id( $url ) {
+            $patterns = [
+                '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
+                '/youtu\.be\/([a-zA-Z0-9_-]+)/',
+                '/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/',
+                '/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/',
+            ];
+            foreach ( $patterns as $pattern ) {
+                if ( preg_match( $pattern, $url, $matches ) ) {
+                    return $matches[1];
+                }
+            }
+            return false;
         }
     }
 

@@ -148,54 +148,60 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_api_init()
         {
-            register_rest_route( 'better-messages/v1', '/thread/(?P<thread_id>\d+)/summarization', array(
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/summarization', array(
                 array(
                     'methods'             => 'GET',
                     'callback'            => array( $this, 'rest_get_config' ),
-                    'permission_callback' => array( $this, 'rest_configure_permission' ),
+                    'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
                 ),
                 array(
                     'methods'             => 'POST',
                     'callback'            => array( $this, 'rest_save_config' ),
-                    'permission_callback' => array( $this, 'rest_configure_permission' ),
+                    'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
                 ),
             ) );
 
-            register_rest_route( 'better-messages/v1', '/thread/(?P<thread_id>\d+)/summary', array(
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/summary', array(
                 'methods'             => 'POST',
                 'callback'            => array( $this, 'rest_generate_summary' ),
-                'permission_callback' => array( $this, 'rest_configure_permission' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
             ) );
 
-            register_rest_route( 'better-messages/v1', '/thread/(?P<thread_id>\d+)/digest-config', array(
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/digest-config', array(
                 array(
                     'methods'             => 'GET',
                     'callback'            => array( $this, 'rest_get_digest_config' ),
-                    'permission_callback' => array( $this, 'rest_configure_permission' ),
+                    'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
                 ),
                 array(
                     'methods'             => 'POST',
                     'callback'            => array( $this, 'rest_save_digest_config' ),
-                    'permission_callback' => array( $this, 'rest_configure_permission' ),
+                    'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
                 ),
             ) );
 
-            register_rest_route( 'better-messages/v1', '/thread/(?P<thread_id>\d+)/digest', array(
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/digest', array(
                 'methods'             => 'POST',
                 'callback'            => array( $this, 'rest_generate_digest' ),
-                'permission_callback' => array( $this, 'rest_configure_permission' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
             ) );
 
-            register_rest_route( 'better-messages/v1', '/thread/(?P<thread_id>\d+)/ai-settings', array(
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/ai-settings', array(
                 'methods'             => 'GET',
                 'callback'            => array( $this, 'rest_get_ai_settings' ),
-                'permission_callback' => array( $this, 'rest_configure_permission' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
             ) );
         }
 
         public function rest_get_ai_settings( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
+
             $tz = wp_timezone();
             $now = new \DateTime( 'now', $tz );
 
@@ -212,25 +218,14 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             ) );
         }
 
-        public function rest_configure_permission( $request )
+        public function rest_get_config( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
             $user_id   = Better_Messages()->functions->get_current_user_id();
-
-            if ( $user_id <= 0 ) {
-                return new \WP_Error( 'rest_forbidden', __( 'You must be logged in', 'bp-better-messages' ), array( 'status' => 401 ) );
-            }
 
             if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
                 return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
             }
-
-            return true;
-        }
-
-        public function rest_get_config( $request )
-        {
-            $thread_id = (int) $request->get_param( 'thread_id' );
 
             return rest_ensure_response( array(
                 'config'        => $this->get_thread_config( $thread_id ),
@@ -240,7 +235,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_save_config( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
             $config    = $request->get_json_params();
 
             $saved = $this->save_thread_config( $thread_id, $config );
@@ -260,7 +260,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_generate_summary( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
             $config    = $this->get_thread_config( $thread_id );
 
             if ( ! $config || empty( $config['botId'] ) ) {
@@ -324,7 +329,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_get_digest_config( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
             $tz = wp_timezone();
             $now = new \DateTime( 'now', $tz );
 
@@ -337,7 +347,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_save_digest_config( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
             $config    = $request->get_json_params();
 
             $saved = $this->save_thread_digest_config( $thread_id, $config );
@@ -357,7 +372,12 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function rest_generate_digest( $request )
         {
-            $thread_id = (int) $request->get_param( 'thread_id' );
+            $thread_id = (int) $request->get_param( 'id' );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! $this->user_can_configure( $user_id, $thread_id ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
             $config    = $this->get_thread_digest_config( $thread_id );
 
             if ( ! $config || empty( $config['botId'] ) ) {
@@ -1045,7 +1065,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function user_can_configure( $user_id, $thread_id )
         {
-            if ( user_can( $user_id, 'manage_options' ) ) {
+            if ( Better_Messages()->functions->is_thread_super_moderator( $user_id, $thread_id ) ) {
                 return true;
             }
 

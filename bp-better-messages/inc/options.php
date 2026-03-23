@@ -27,7 +27,7 @@ class Better_Messages_Options
             'template'                    => 'modern',
             'thread_interval'             => 3,
             'site_interval'               => 10,
-            'attachmentsFormats'          => array(),
+            'attachmentsFormats'          => array('jpg','jpeg','jpe','png','gif','webp','avif','heic','mp3','m4a','ogg','wav','flac','mp4','mov','webm','pdf','doc','docx','xls','xlsx','ppt','pptx','odt','txt','rtf','csv','zip'),
             'attachmentsRetention'        => 365,
             'attachmentsEnable'           => '0',
             'attachmentsHide'             => '1',
@@ -307,6 +307,11 @@ class Better_Messages_Options
             'umForceMiniChat'               => '0',
             'psForceMiniChat'               => '0',
             'emojiSet'                      => 'apple',
+            'smileToEmoji'                  => '1',
+            'emojiPicker'                   => '1',
+            'emojiSpriteDelivery'           => 'cdn',
+            'privacyEmbeds'                 => '0',
+            'privacyDeleteAttachments'      => '1',
             'attachmentsAllowPhoto'         => '0',
             'onsitePosition'                => 'right',
             'bpFallback'                    => '0',
@@ -752,8 +757,12 @@ class Better_Messages_Options
             }
         }
 
+        // Load emailCustomHtml from separate option for frontend display
+        $settings_for_frontend = $this->settings;
+        $settings_for_frontend['emailCustomHtml'] = $this->get_email_custom_html();
+
         $settings_data = array(
-            'settings'           => $this->settings,
+            'settings'           => $settings_for_frontend,
             'roles'              => $roles,
             'allRoles'           => $all_roles_list,
             'wpRoles'            => $wp_roles,
@@ -841,6 +850,16 @@ class Better_Messages_Options
                 'facebook' => 'https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@14.0.0/img/facebook/sheets-256/64.png',
             ),
             'emojiDatasetBaseUrl' => Better_Messages()->url . 'assets/emojies/',
+            'emojiSpriteStatus'  => Better_Messages_Emojis()->getLocalStatus(),
+            'contactUrl'         => method_exists( bpbm_fs(), 'contact_url' ) ? bpbm_fs()->contact_url() : '',
+            'emailPreviewStrings' => array(
+                'testConversation' => __( 'Test Conversation', 'bp-better-messages' ),
+                'emailSubject'     => sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), __( 'Test Conversation', 'bp-better-messages' ) ),
+                'hiUser'           => sprintf( __( 'Hi %s,', 'bp-better-messages' ), 'John' ),
+                'wroteLabel'       => sprintf( __( '%s wrote:', 'bp-better-messages' ), 'Jane Smith' ),
+                'viewConversation' => __( 'View Conversation', 'bp-better-messages' ),
+                'unsubscribe'      => _x( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ),
+            ),
         );
 
         ?>
@@ -1645,6 +1664,26 @@ class Better_Messages_Options
             $settings['pinnedThreads'] = '0';
         }
 
+        if( ! isset( $settings['smileToEmoji'] ) ) {
+            $settings['smileToEmoji'] = '1';
+        }
+
+        if( ! isset( $settings['emojiPicker'] ) ) {
+            $settings['emojiPicker'] = '1';
+        }
+
+        if( ! isset( $settings['emojiSpriteDelivery'] ) || ! in_array( $settings['emojiSpriteDelivery'], array( 'cdn', 'self-hosted' ) ) ) {
+            $settings['emojiSpriteDelivery'] = 'cdn';
+        }
+
+        if( ! isset( $settings['privacyEmbeds'] ) ) {
+            $settings['privacyEmbeds'] = '0';
+        }
+
+        if( ! isset( $settings['privacyDeleteAttachments'] ) ) {
+            $settings['privacyDeleteAttachments'] = '1';
+        }
+
         if( ! isset( $settings['enableDrafts'] ) ) {
             $settings['enableDrafts'] = '0';
         }
@@ -1990,8 +2029,18 @@ class Better_Messages_Options
             }
         }
 
-        // Handle email custom HTML with allowed tags
+        // Handle email custom HTML — allow email-specific CSS properties (mso-*, Margin, vendor prefixes)
+        // that wp_kses would otherwise strip. Only admins can save this content.
         if( isset( $this->settings['emailCustomHtml'] ) && ! empty( $this->settings['emailCustomHtml'] ) ){
+            $allow_all_css = function( $styles ) {
+                return array_merge( $styles, array(
+                    'mso-table-lspace', 'mso-table-rspace', 'mso-padding-alt',
+                    '-webkit-font-smoothing', '-ms-text-size-adjust', '-webkit-text-size-adjust',
+                    'Margin', 'Margin-bottom', 'Margin-top', 'Margin-left', 'Margin-right',
+                ) );
+            };
+            add_filter( 'safe_style_css', $allow_all_css );
+
             // Allow all HTML tags that are needed for email templates
             $allowed_html = array_merge(
                 wp_kses_allowed_html('post'),
@@ -2015,6 +2064,8 @@ class Better_Messages_Options
                 )
             );
             $this->settings['emailCustomHtml'] = wp_kses( wp_unslash( $this->settings['emailCustomHtml'] ), $allowed_html );
+
+            remove_filter( 'safe_style_css', $allow_all_css );
         }
 
         $this->settings['bpProfileSlug'] = preg_replace('/\s+/', '', trim( $this->settings['bpProfileSlug'] ) );

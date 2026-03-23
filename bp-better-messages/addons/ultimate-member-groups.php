@@ -386,6 +386,10 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
 
             if( count($recipients) > 0 ) {
                 foreach ($recipients as $user_id => $recipient) {
+                    if( $user_id < 0 ){
+                        continue;
+                    }
+
                     $changes = true;
                     global $wpdb;
 

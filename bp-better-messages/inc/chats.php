@@ -1089,6 +1089,13 @@ class Better_Messages_Chats
 
     }
 
+    /**
+     * @deprecated Use render_chat_settings() instead
+     */
+    public function bpbm_chat_settings( $post ){
+        $this->render_chat_settings( $post );
+    }
+
     public function render_chat_settings( $post ){
         if ( $post->post_type !== 'bpbm-chat' ) {
             return;

@@ -420,6 +420,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
 
             if( count($recipients) > 0 ) {
                 foreach ($recipients as $user_id => $recipient) {
+                    if( $user_id < 0 ){
+                        continue;
+                    }
+
                     global $wpdb;
 
                     $wpdb->delete( bm_get_table('recipients'), [

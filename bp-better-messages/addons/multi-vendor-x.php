@@ -273,7 +273,7 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX' ) ) {
         public function vendor_dashboard_nav( $nav_items ){
             if( $this->is_livechat_enabled( get_current_user_id() ) ) {
                 $nav_items['bm-messages'] = [
-                    'label' => 'Messages',
+                    'label' => _x('Messages', 'MultiVendorX vendor dashboard nav', 'bp-better-messages'),
                     'url' => mvx_get_vendor_dashboard_endpoint_url('messages'),
                     'capability' => true,
                     'position' => 29,

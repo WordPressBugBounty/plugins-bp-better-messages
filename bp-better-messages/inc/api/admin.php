@@ -1181,9 +1181,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 Better_Messages_Options::instance()->update_settings( $merged );
             }
 
+            $response_settings = Better_Messages_Options::instance()->settings;
+            $response_settings['emailCustomHtml'] = Better_Messages_Options::instance()->get_email_custom_html();
+
             return rest_ensure_response( array(
                 'success'  => true,
-                'settings' => Better_Messages_Options::instance()->settings,
+                'settings' => $response_settings,
             ) );
         }
 
@@ -1217,6 +1220,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'success'   => true,
                 'pageId'    => $page_id,
                 'pageTitle' => $page_title,
+                'pageUrl'   => get_permalink( $page_id ),
                 'settings'  => Better_Messages_Options::instance()->settings,
             ) );
         }
