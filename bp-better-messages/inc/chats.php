@@ -175,6 +175,24 @@ class Better_Messages_Chats
             'callback'            => array( $this, 'rest_admin_remove_participant' ),
             'permission_callback' => array( $this, 'user_is_admin' ),
         ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/duplicate', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'rest_admin_duplicate_chat_room' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/clear', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'rest_admin_clear_chat_room' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
+
+        register_rest_route( 'better-messages/v1', '/admin/chat-rooms/(?P<id>\d+)/participants', array(
+            'methods'             => 'DELETE',
+            'callback'            => array( $this, 'rest_admin_remove_all_participants' ),
+            'permission_callback' => array( $this, 'user_is_admin' ),
+        ) );
     }
 
     public function user_is_admin(){
@@ -309,12 +327,18 @@ class Better_Messages_Chats
             return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
         }
 
-        $title = $request->get_param( 'title' );
+        $title  = $request->get_param( 'title' );
+        $status = $request->get_param( 'status' );
+
+        $update = array( 'ID' => $chat_id );
         if ( $title !== null ) {
-            wp_update_post( array(
-                'ID'         => $chat_id,
-                'post_title' => sanitize_text_field( $title ),
-            ) );
+            $update['post_title'] = sanitize_text_field( $title );
+        }
+        if ( $status !== null && in_array( $status, array( 'publish', 'draft' ), true ) ) {
+            $update['post_status'] = $status;
+        }
+        if ( count( $update ) > 1 ) {
+            wp_update_post( $update );
         }
 
         $image_id = $request->get_param( 'imageId' );
@@ -462,6 +486,145 @@ class Better_Messages_Chats
         return array( 'removed' => true );
     }
 
+    public function rest_admin_duplicate_chat_room( WP_REST_Request $request ) {
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $settings = $this->get_chat_settings( $chat_id );
+
+        $new_id = wp_insert_post( array(
+            'post_type'   => 'bpbm-chat',
+            'post_title'  => $post->post_title . ' (' . __( 'Copy', 'bp-better-messages' ) . ')',
+            'post_status' => 'publish',
+        ) );
+
+        if ( is_wp_error( $new_id ) ) {
+            return $new_id;
+        }
+
+        update_post_meta( $new_id, 'bpbm-chat-settings', $settings );
+
+        $can_join = get_post_meta( $chat_id, 'bpbm-chat-can-join', true );
+        if ( ! empty( $can_join ) ) {
+            update_post_meta( $new_id, 'bpbm-chat-can-join', $can_join );
+        }
+
+        $auto_add = get_post_meta( $chat_id, 'bpbm-chat-auto-add', true );
+        if ( ! empty( $auto_add ) ) {
+            update_post_meta( $new_id, 'bpbm-chat-auto-add', $auto_add );
+        }
+
+        if ( has_post_thumbnail( $chat_id ) ) {
+            set_post_thumbnail( $new_id, get_post_thumbnail_id( $chat_id ) );
+        }
+
+        $copy_participants = ! empty( $request->get_param( 'copyParticipants' ) );
+
+        if ( $copy_participants ) {
+            $source_thread_id = $this->get_chat_thread_id( $chat_id );
+            if ( $source_thread_id ) {
+                $new_thread_id = $this->get_chat_thread_id( $new_id );
+                if ( $new_thread_id ) {
+                    $recipient_ids = Better_Messages()->functions->get_recipients_ids( $source_thread_id );
+                    foreach ( $recipient_ids as $user_id ) {
+                        Better_Messages()->functions->add_participant_to_thread( $new_thread_id, $user_id );
+                    }
+                }
+            }
+        }
+
+        return $this->format_chat_room_for_rest( $new_id );
+    }
+
+    public function rest_admin_clear_chat_room( WP_REST_Request $request ) {
+        global $wpdb;
+
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if ( ! $thread_id ) {
+            return new WP_Error( 'no_thread', __( 'Chat room has no thread', 'bp-better-messages' ), array( 'status' => 400 ) );
+        }
+
+        $batch_size = 50;
+
+        $message_ids = $wpdb->get_col( $wpdb->prepare(
+            "SELECT id FROM " . bm_get_table('messages') . " WHERE `thread_id` = %d LIMIT %d",
+            $thread_id, $batch_size
+        ) );
+
+        $deleted = count( $message_ids );
+
+        if ( $deleted > 0 ) {
+            foreach ( $message_ids as $message_id ) {
+                Better_Messages()->functions->delete_message( $message_id, $thread_id, false, 'delete' );
+            }
+        }
+
+        $remaining = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM " . bm_get_table('messages') . " WHERE `thread_id` = %d",
+            $thread_id
+        ) );
+
+        $done = $remaining === 0;
+
+        if ( $done ) {
+            $time = bp_core_current_time();
+
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE " . bm_get_table('recipients') . "
+                SET unread_count = 0,
+                last_read = %s,
+                last_delivered = %s
+                WHERE thread_id = %d",
+                $time, $time, $thread_id
+            ) );
+
+            do_action( 'better_messages_thread_updated', $thread_id );
+            do_action( 'better_messages_thread_cleared', $thread_id );
+        }
+
+        return array(
+            'done'      => $done,
+            'deleted'   => $deleted,
+            'remaining' => $remaining,
+        );
+    }
+
+    public function rest_admin_remove_all_participants( WP_REST_Request $request ) {
+        global $wpdb;
+
+        $chat_id = intval( $request->get_param( 'id' ) );
+        $post    = get_post( $chat_id );
+
+        if ( ! $post || $post->post_type !== 'bpbm-chat' ) {
+            return new WP_Error( 'not_found', __( 'Chat room not found', 'bp-better-messages' ), array( 'status' => 404 ) );
+        }
+
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if ( ! $thread_id ) {
+            return new WP_Error( 'no_thread', __( 'Chat room has no thread', 'bp-better-messages' ), array( 'status' => 400 ) );
+        }
+
+        $wpdb->delete( bm_get_table( 'recipients' ), array( 'thread_id' => $thread_id ), array( '%d' ) );
+
+        do_action( 'better_messages_thread_updated', $thread_id );
+        do_action( 'better_messages_info_changed', $thread_id );
+
+        return array( 'removed' => true );
+    }
+
     private function format_chat_room_for_rest( $chat_id ) {
         $post = get_post( $chat_id );
         if ( ! $post ) return null;
@@ -487,15 +650,21 @@ class Better_Messages_Chats
             $inbox_url = Better_Messages()->functions->get_user_messages_url( get_current_user_id(), $thread_id );
         }
 
+        $message_count = 0;
+        if ( $thread_id ) {
+            $message_count = (int) Better_Messages()->functions->get_thread_message_count( $thread_id );
+        }
+
         return array(
-            'id'       => (int) $post->ID,
-            'title'    => $post->post_title,
-            'status'   => $post->post_status,
-            'threadId' => (int) $thread_id,
-            'inboxUrl' => $inbox_url,
-            'imageId'  => $image_id,
-            'imageUrl' => $image_url,
-            'settings' => $settings,
+            'id'           => (int) $post->ID,
+            'title'        => $post->post_title,
+            'status'       => $post->post_status,
+            'threadId'     => (int) $thread_id,
+            'inboxUrl'     => $inbox_url,
+            'imageId'      => $image_id,
+            'imageUrl'     => $image_url,
+            'settings'     => $settings,
+            'messageCount' => $message_count,
         );
     }
 
@@ -518,7 +687,7 @@ class Better_Messages_Chats
             Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
         }
 
-        $kses_fields = array( 'must_join_message', 'not_allowed_text', 'not_allowed_reply_text', 'must_login_text' );
+        $kses_fields = array( 'must_join_message', 'not_allowed_text', 'not_allowed_reply_text', 'must_login_text', 'closed_message' );
         foreach ( $kses_fields as $field ) {
             if ( isset( $settings[ $field ] ) && ! empty( $settings[ $field ] ) ) {
                 $settings[ $field ] = wp_kses( $settings[ $field ], 'user_description' );
@@ -603,6 +772,10 @@ class Better_Messages_Chats
 
         $thread_item['chatRoom']['id']                   = (int) $chat_id;
 
+        $post = get_post( $chat_id );
+        $is_closed = ( $post && $post->post_status === 'draft' );
+        $thread_item['chatRoom']['isClosed']             = $is_closed;
+
         $template =  $settings['template'];
         $thread_item['chatRoom']['template']             = $template;
         $thread_item['chatRoom']['modernLayout']         = $settings['modernLayout'];
@@ -618,6 +791,7 @@ class Better_Messages_Chats
         $thread_item['chatRoom']['loginButtonText']      = $settings['login_button_text'];
         $thread_item['chatRoom']['guestButtonText']        = $settings['guest_button_text'];
         $thread_item['chatRoom']['showOnlineUsers']        = ( $settings['show_online_users'] === '1' );
+        $thread_item['chatRoom']['closedMessage']            = $settings['closed_message'];
 
 
         if( $include_personal ) {
@@ -643,16 +817,20 @@ class Better_Messages_Chats
                 $thread_item['chatRoom']['hideParticipants'] = true;
                 $thread_item['chatRoom']['hideParticipantsCount'] = true;
             } else {
-                $can_reply = $this->user_can_reply( $user_id, $chat_id );
-
                 if( $is_moderator ){
                     $thread_item['restricted'] = Better_Messages()->moderation->get_restricted_users( $thread_id );
                 }
 
-                $thread_item['permissions']['canReply'] = $can_reply;
+                if ( $is_closed && ! $is_moderator ) {
+                    $thread_item['permissions']['canReply'] = false;
+                    $thread_item['permissions']['canReplyMsg']['chat_room_closed'] = $settings['closed_message'];
+                } else {
+                    $can_reply = $this->user_can_reply( $user_id, $chat_id );
+                    $thread_item['permissions']['canReply'] = $can_reply;
 
-                if( ! $can_reply ){
-                    if( count($thread_item['permissions']['canReplyMsg']) === 0 ) $thread_item['permissions']['canReplyMsg']['cant_reply_to_chat'] = $settings['not_allowed_reply_text'];
+                    if( ! $can_reply ){
+                        if( count($thread_item['permissions']['canReplyMsg']) === 0 ) $thread_item['permissions']['canReplyMsg']['cant_reply_to_chat'] = $settings['not_allowed_reply_text'];
+                    }
                 }
             }
         }
@@ -917,7 +1095,8 @@ class Better_Messages_Chats
             'not_allowed_reply_text'          => _x('You are not allowed to reply in this chat room', 'Chat rooms settings page', 'bp-better-messages'),
             'must_login_text'                 => _x('You need to login to website to send messages', 'Chat rooms settings page', 'bp-better-messages'),
             'login_button_text'               => _x('Login', 'Chat rooms settings page', 'bp-better-messages'),
-            'guest_button_text'               => _x('Chat as Guest', 'Chat rooms settings page', 'bp-better-messages')
+            'guest_button_text'               => _x('Chat as Guest', 'Chat rooms settings page', 'bp-better-messages'),
+            'closed_message'                  => _x('This chat room is currently closed', 'Chat rooms settings page', 'bp-better-messages')
         );
 
         $args = get_post_meta( $chat_id, 'bpbm-chat-settings', true );
@@ -1181,6 +1360,9 @@ class Better_Messages_Chats
         if( user_can( $user_id, 'manage_options') ) return true;
         if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
 
+        $post = get_post( $chat_id );
+        if ( $post && $post->post_status === 'draft' ) return false;
+
         $settings = $this->get_chat_settings( $chat_id );
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
@@ -1200,6 +1382,10 @@ class Better_Messages_Chats
     public function user_can_reply( $user_id, $chat_id ){
         if( user_can( $user_id, 'manage_options') ) return true;
         if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
+
+        $post = get_post( $chat_id );
+        if ( $post && $post->post_status === 'draft' ) return false;
+
         $settings = $this->get_chat_settings( $chat_id );
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
@@ -1321,11 +1507,8 @@ class Better_Messages_Chats
         global $wpdb;
 
         if( $auto_add ){
-            $roles = [];
-
-            foreach ( $settings['auto_add'] as $role ){
-                $roles[] = $wpdb->prepare('%s', $role );
-            }
+            $roles = $settings['auto_add'];
+            $role_placeholders = implode(',', array_fill(0, count($roles), '%s'));
 
             $users_hash_sql = $wpdb->prepare("
             SELECT MD5(GROUP_CONCAT(DISTINCT(`roles`.`user_id`))) as users_hash
@@ -1334,9 +1517,9 @@ class Better_Messages_Chats
             ON `roles`.`user_id` = `moderation`.`user_id`
             AND `moderation`.`thread_id` = %d
             AND `moderation`.`type` = 'ban'
-            WHERE `roles`.`role` IN (". implode(',', $roles ) .")
+            WHERE `roles`.`role` IN ({$role_placeholders})
             AND `moderation`.`user_id` IS NULL
-            ORDER BY `roles`.`user_id` ASC", $thread_id);
+            ORDER BY `roles`.`user_id` ASC", array_merge([$thread_id], $roles));
 
             $users_hash = $wpdb->get_var($users_hash_sql);
 
@@ -1354,9 +1537,9 @@ class Better_Messages_Chats
                 AND `moderation`.`thread_id` = %d
                 AND `moderation`.`type` = 'ban'
                 AND `moderation`.`expiration` > NOW()
-                WHERE `roles`.`role` IN (". implode(',', $roles ) .")
+                WHERE `roles`.`role` IN ({$role_placeholders})
                 AND `recipients`.`user_id` IS NULL
-                AND `moderation`.`user_id` IS NULL", $thread_id, $thread_id);
+                AND `moderation`.`user_id` IS NULL", array_merge([$thread_id, $thread_id], $roles));
 
                 $not_added_users_count = (int) $wpdb->get_var($not_added_users_count_sql);
 
@@ -1373,9 +1556,9 @@ class Better_Messages_Chats
                     AND `moderation`.`thread_id` = %d
                     AND `moderation`.`type` = 'ban'
                     AND `moderation`.`expiration` > NOW()
-                    WHERE `roles`.`role` IN (" . implode(',', $roles) . ")
+                    WHERE `roles`.`role` IN ({$role_placeholders})
                     AND `recipients`.`user_id` IS NULL
-                    AND `moderation`.`user_id` IS NULL", $thread_id, $thread_id, $thread_id);
+                    AND `moderation`.`user_id` IS NULL", array_merge([$thread_id, $thread_id, $thread_id], $roles));
 
                     $wpdb->query($insert_sql);
 
@@ -1388,18 +1571,13 @@ class Better_Messages_Chats
 
 
         if( $auto_exclude ){
-            $not_exclude_roles = [
-                "'administrator'"
-            ];
+            $not_exclude_roles = array_merge(['administrator'], $settings['can_join']);
+            $exclude_role_placeholders = implode(',', array_fill(0, count($not_exclude_roles), '%s'));
 
-            foreach ( $settings['can_join'] as $role ){
-                $not_exclude_roles[] = $wpdb->prepare('%s', $role );
-            }
-
-            $users_hash_sql = "SELECT MD5(GROUP_CONCAT(DISTINCT(`roles`.`user_id`))) as users_hash
+            $users_hash_sql = $wpdb->prepare("SELECT MD5(GROUP_CONCAT(DISTINCT(`roles`.`user_id`))) as users_hash
             FROM `" . bm_get_table('roles') . "` `roles`
-            WHERE `roles`.`role` IN (". implode(',', $not_exclude_roles ) .")
-            ORDER BY `roles`.`user_id` ASC";
+            WHERE `roles`.`role` IN ({$exclude_role_placeholders})
+            ORDER BY `roles`.`user_id` ASC", $not_exclude_roles);
 
             $users_hash = $wpdb->get_var($users_hash_sql);
 
@@ -1418,9 +1596,9 @@ class Better_Messages_Chats
                     LEFT JOIN `" . bm_get_table('recipients') . "` `recipients`
                         ON `roles`.`user_id` = `recipients`.`user_id`
                         AND `recipients`.`thread_id` = %d
-                    WHERE `roles`.`role` IN (". implode(',', $not_exclude_roles ) .")
-                    AND `recipients`.`user_id` IS NOT NULL 
-                )", $thread_id, $thread_id);
+                    WHERE `roles`.`role` IN ({$exclude_role_placeholders})
+                    AND `recipients`.`user_id` IS NOT NULL
+                )", array_merge([$thread_id, $thread_id], $not_exclude_roles));
 
                 $to_exclude_users = array_map('intval', $wpdb->get_col($to_exclude_users_sql));
 

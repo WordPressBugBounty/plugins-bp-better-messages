@@ -28,6 +28,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
 
             add_filter('fluent_community/space_header_links', array( $this, 'group_link_to_chat' ), 10, 2);
             add_filter('better_messages_has_access_to_group_chat', array( $this, 'has_access_to_group_chat'), 10, 3 );
+            add_filter('better_messages_can_send_message', array( $this, 'can_reply_to_group_chat'), 10, 3 );
+
+            add_filter('better_messages_groups_active', array($this, 'enabled') );
+            add_filter('better_messages_get_groups', array($this, 'get_groups'), 10, 2 );
 
             add_filter('better_messages_thread_title', array( $this, 'group_thread_title' ), 10, 3 );
             add_filter('better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
@@ -177,20 +181,22 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             $space = Space::find( $group_id );
 
             if( $space ){
-                $space = $space->toArray();
-
-                if( $space['logo'] ){
-                    $image = $space['logo'];
-                } else if( $space['settings'] && ! empty( trim($space['settings']['emoji']) ) ){
-                    $image = 'html:<span class="bm-thread-emoji">' . trim($space['settings']['emoji']) . '</span>';
-                } else if( $space['settings'] && ! empty( trim($space['settings']['shape_svg']) ) ) {
-                    $image = 'html:<span class="bm-thread-svg">' . trim($space['settings']['shape_svg']) . '</span>';
-                } else {
-                    $image = 'html:<span style="margin:auto" class="fcom_no_avatar"></span>';
-                }
+                $image = $this->get_space_image( $space->toArray() );
             }
 
             return $image;
+        }
+
+        private function get_space_image( array $space_arr ){
+            if( ! empty( $space_arr['logo'] ) ){
+                return $space_arr['logo'];
+            } else if( ! empty( $space_arr['settings'] ) && isset( $space_arr['settings']['emoji'] ) && ! empty( trim($space_arr['settings']['emoji']) ) ){
+                return 'html:<span class="bm-thread-emoji">' . trim($space_arr['settings']['emoji']) . '</span>';
+            } else if( ! empty( $space_arr['settings'] ) && isset( $space_arr['settings']['shape_svg'] ) && ! empty( trim($space_arr['settings']['shape_svg']) ) ) {
+                return 'html:<span class="bm-thread-svg">' . trim($space_arr['settings']['shape_svg']) . '</span>';
+            } else {
+                return 'html:<span style="margin:auto" class="fcom_no_avatar"></span>';
+            }
         }
 
 
@@ -221,7 +227,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             $group = Space::find($group_id);
 
             if( ! $group ){
-                return  false;
+                return false;
             }
 
             $defaults = [
@@ -288,6 +294,59 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             }
 
             return $has_access;
+        }
+
+        public function can_reply_to_group_chat( $allowed, $user_id, $thread_id ){
+            $type = Better_Messages()->functions->get_thread_type( $thread_id );
+
+            if( $type === 'group' ){
+                $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
+                if ( !! $group_id ) {
+                    if( $this->is_group_messages_enabled( $group_id ) && $this->user_has_access( $group_id, $user_id ) ){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            return $allowed;
+        }
+
+        public function enabled( $var ){
+            return true;
+        }
+
+        public function get_groups( $groups, $user_id ){
+            $user = User::find( $user_id );
+
+            if( ! $user ) return $groups;
+
+            $spaces = $user->spaces;
+
+            $return = [];
+
+            if( $spaces && count( $spaces ) > 0 ) {
+                foreach ( $spaces as $space ) {
+                    if( ! $this->is_group_messages_enabled( $space->id ) ){
+                        continue;
+                    }
+
+                    $thread_id = $this->get_group_thread_id( $space->id );
+                    $image = $this->get_space_image( $space->toArray() );
+
+                    $return[] = [
+                        'group_id'  => (int) $space->id,
+                        'name'      => html_entity_decode( esc_attr( $space->title ) ),
+                        'messages'  => 1,
+                        'thread_id' => (int) $thread_id,
+                        'image'     => $image,
+                        'url'       => Helper::baseUrl('space/' . $space->slug . '/home')
+                    ];
+                }
+            }
+
+            return $return;
         }
 
         public function get_group_thread_id( $group_id ){

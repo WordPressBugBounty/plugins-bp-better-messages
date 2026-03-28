@@ -49,6 +49,24 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             add_filter( 'fluent_community/profile_view_data', array( $this, 'profile_button' ), 10, 2 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
+
+            add_filter('bp_better_messages_script_variable', array( $this, 'script_variables' ) );
+        }
+
+        public function script_variables( $script_variables ){
+            if( Better_Messages()->settings['FCminiGroupsEnable'] === '1' ) {
+                $script_variables['miniGroups'] = '1';
+            }
+            if( Better_Messages()->settings['FCcombinedGroupsEnable'] === '1' ) {
+                $script_variables['combinedGroups'] = '1';
+            }
+            if( Better_Messages()->settings['FCmobileGroupsEnable'] === '1' ) {
+                $script_variables['mobileGroups'] = '1';
+            }
+
+            $script_variables['groupsLabel'] = _x('Spaces', 'FluentCommunity Integration', 'bp-better-messages');
+
+            return $script_variables;
         }
 
         public function login_url( $url )
@@ -260,11 +278,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
                 if (isset($_script->extra['data'])) {
                     $extra_data = $_script->extra['data'];
-                }
-
-                if ($handle === 'better-messages') {
-                    $translations = wp_scripts()->print_translations('better-messages', false);
-                    $extra_data = $translations . $extra_data;
                 }
 
                 if( $extra_data ){

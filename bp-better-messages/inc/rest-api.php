@@ -935,7 +935,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             Better_Messages()->functions->before_message_send_filter( $args, $errors );
 
             // Re-read $is_pending from $args, as filters (e.g. AI moderation) may have changed it
-            $is_pending = ! empty( $args['is_pending'] ) ? 1 : 0;
+            $is_pending = (int) ( $args['is_pending'] ?? 0 );
 
             if( empty( $errors ) ){
                 $message_id = Better_Messages()->functions->new_message( $args );
@@ -1407,7 +1407,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
-            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` = 0 OR `messages`.`sender_id` = %d ) ", $current_user_id );
+            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` != 1 OR `messages`.`sender_id` = %d )", $current_user_id );
 
             if( $mode === 'from_message' ){
                 $messages = Better_Messages()->functions->get_messages( $thread_id, $message_ids, 'from_message', $count );
@@ -1472,7 +1472,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $messages[ $key ]->thread_id  = $_thread_id;
 
                 $meta = [];
-                if( $is_pending ){
+                if( $is_pending === 1 ){
                     $meta['isPending'] = true;
                 }
 
@@ -1836,7 +1836,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $return['messages'] = $get_messages['messages'];
             $return['users']    = array_merge($return['users'], $get_messages['users']);
 
-            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` = 0 OR `messages`.`sender_id` = %d ) ", $current_user_id );
+            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` != 1 OR `messages`.`sender_id` = %d )", $current_user_id );
 
             if( count( $message_ids ) > 0 ){
                 $sql = $wpdb->prepare("SELECT id

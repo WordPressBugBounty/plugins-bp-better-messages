@@ -611,6 +611,11 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                         event.preventDefault();
                         event.stopPropagation();
+
+                        // Close any open PeepSo popups (notifications, friend requests, etc.)
+                        jQuery('.pso-notifbox:visible, .ps-notif__box:visible').not(jQuery(headerButton).find('.pso-notifbox, .ps-notif__box')).hide();
+                        jQuery(document).off('mouseup.notification_click');
+
                         togglePopup();
 
                         if (isVisible(popup)) {

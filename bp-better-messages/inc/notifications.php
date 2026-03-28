@@ -712,7 +712,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 if( count( $rows ) > 0 ){
                     foreach ( $rows as $row ){
                         $user_id = $row->user_id;
-                        $threads = unserialize($row->meta_value);
+                        $threads = maybe_unserialize($row->meta_value);
 
                         if( is_array( $threads ) && count( $threads ) > 0 ){
                             foreach( $threads as $thread_id => $last_id ){

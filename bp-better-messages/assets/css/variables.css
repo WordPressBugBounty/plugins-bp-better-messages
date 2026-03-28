@@ -44,7 +44,7 @@
 
     --bm-message-border-radius: 2px;
 
-    --bm-widgets-button-radius: 5px;
+    --bm-widgets-button-radius: 7px;
     --bm-button-hover: #00000017;
     --bm-button-active: #00000027;
 
@@ -61,7 +61,7 @@
     --bm-mini-chats-width: 300px;
     --bm-mini-chats-height: 450px;
 
-    --bm-mini-chats-border-radius: 0;
+    --bm-mini-chats-border-radius: 7px;
 
     --bm-tooltip-bg: 0,0,0;
     --bm-tooltip-color: 255,255,255;

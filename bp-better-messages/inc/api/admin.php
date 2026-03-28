@@ -507,14 +507,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             $search_like = '%' . $wpdb->esc_like( $search ) . '%';
 
             $sql = $wpdb->prepare("
-            SELECT ID FROM `" . bm_get_table('users') . "`
-            WHERE ( ID = %s
-            OR `user_nicename` LIKE %s
-            OR `display_name` LIKE %s
-            OR `first_name` LIKE %s
-            OR `last_name` LIKE %s
-            OR `nickname` LIKE %s )
-            LIMIT 0, 10", $search, $search_like, $search_like, $search_like, $search_like, $search_like);
+            SELECT `bm_users`.`ID` FROM `" . bm_get_table('users') . "` `bm_users`
+            LEFT JOIN `{$wpdb->users}` `wp_users` ON `wp_users`.`ID` = `bm_users`.`ID`
+            WHERE ( `bm_users`.`ID` = %s
+            OR `bm_users`.`user_nicename` LIKE %s
+            OR `bm_users`.`display_name` LIKE %s
+            OR `bm_users`.`first_name` LIKE %s
+            OR `bm_users`.`last_name` LIKE %s
+            OR `bm_users`.`nickname` LIKE %s
+            OR `wp_users`.`user_email` LIKE %s )
+            LIMIT 0, 10", $search, $search_like, $search_like, $search_like, $search_like, $search_like, $search_like);
 
             $search_results = $wpdb->get_col( $sql );
 
@@ -845,6 +847,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         $ai_result = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_result', true );
                         $result_data = $ai_result ? json_decode( $ai_result, true ) : [];
                         $item['ai_moderation_scores'] = isset( $result_data['category_scores'] ) ? $result_data['category_scores'] : [];
+
+                        $ai_provider = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_provider', true );
+                        if ( ! empty( $ai_provider ) ) {
+                            $item['ai_moderation_provider'] = $ai_provider;
+                        }
+                        if ( isset( $result_data['reason'] ) && ! empty( $result_data['reason'] ) ) {
+                            $item['ai_moderation_reason'] = $result_data['reason'];
+                        }
                     }
 
                     // Add AI cost data from dedicated usage table
@@ -1018,6 +1028,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_flagged' );
             Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_categories' );
             Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_result' );
+            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_moderation_provider' );
 
             return array(
                 'success'  => true,

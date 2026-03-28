@@ -1850,6 +1850,14 @@ body[class*=_page_better-messages-viewer] .update-nag {
 .bm-settings-notice.bm-settings-notice-error a {
   color: #d63638;
 }
+.bm-settings-notice.bm-settings-notice-info {
+  background: #f0f6fc;
+  border: 1px solid #72aee6;
+  color: #2271b1;
+}
+.bm-settings-notice.bm-settings-notice-info p {
+  color: #2271b1;
+}
 .bm-settings-notice.bm-settings-notice-inside {
   margin: 16px 16px 8px;
 }
@@ -1926,6 +1934,28 @@ body[class*=_page_better-messages-viewer] .update-nag {
 .bm-settings-inline-notice a {
   color: #d63638;
   text-decoration: underline;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-info {
+  background: #f0f6fc;
+  border-left-color: #72aee6;
+  color: #2271b1;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-info p {
+  margin: 0;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-info a {
+  color: #2271b1;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-warning {
+  background: #fcf9e8;
+  border-left-color: #dba617;
+  color: #6e4e00;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-warning p {
+  margin: 0;
+}
+.bm-settings-inline-notice.bm-settings-inline-notice-warning a {
+  color: #6e4e00;
 }
 .bm-settings-inline-notice + .bm-settings-row {
   padding-top: 7px;
@@ -2720,6 +2750,9 @@ body[class*=_page_better-messages-viewer] .update-nag {
 }
 .bm-paginated-sidebar .bm-paginated-sidebar-header .button {
   width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
 }
 .bm-paginated-sidebar .bm-paginated-sidebar-search {
   padding: 0 12px 8px;
@@ -2816,6 +2849,15 @@ body[class*=_page_better-messages-viewer] .update-nag {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.bm-paginated-sidebar .bm-sidebar-item-badge {
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #d63638;
+  color: #fff;
+  flex-shrink: 0;
 }
 .bm-paginated-sidebar .bm-sidebar-item-status {
   width: 8px;
@@ -4597,3 +4639,5 @@ body.folded .bm-viewer-new-wrap .bm-viewer-new-content .bm-bulk-action-bar {
     content: "Conversations:";
   }
 }
+
+/*# sourceMappingURL=admin.css.map*/

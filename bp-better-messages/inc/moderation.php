@@ -1281,10 +1281,25 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             if( ! empty( $message->ai_moderation_result ) && ! empty( $message->ai_moderation_result['flagged_categories'] ) ) {
                 $categories = implode( ', ', $message->ai_moderation_result['flagged_categories'] );
                 $email_body .= sprintf( _x( 'AI Flagged Categories: %s', 'Moderation email', 'bp-better-messages' ), $categories ) . "\n";
+                if ( ! empty( $message->ai_moderation_result['reason'] ) ) {
+                    $email_body .= sprintf( _x( 'AI Reason: %s', 'Moderation email', 'bp-better-messages' ), $message->ai_moderation_result['reason'] ) . "\n";
+                }
             }
 
-            $email_body .= "\n" . sprintf( _x( 'Message: %s', 'Moderation email', 'bp-better-messages' ), $message_content ) . "\n\n";
-            $email_body .= sprintf( _x( 'Review in moderation panel: %s', 'Moderation email', 'bp-better-messages' ), $moderation_url );
+            $email_body .= "\n" . sprintf( _x( 'Message: %s', 'Moderation email', 'bp-better-messages' ), $message_content ) . "\n";
+
+            $attachments = Better_Messages()->functions->get_message_meta( $message->id, 'attachments', true );
+            if ( is_array( $attachments ) && ! empty( $attachments ) ) {
+                $email_body .= _x( 'Attachments:', 'Moderation email', 'bp-better-messages' ) . "\n";
+                foreach ( array_keys( $attachments ) as $att_id ) {
+                    $url = wp_get_attachment_url( $att_id );
+                    if ( $url ) {
+                        $email_body .= '  - ' . $url . "\n";
+                    }
+                }
+            }
+
+            $email_body .= "\n" . sprintf( _x( 'Review in moderation panel: %s', 'Moderation email', 'bp-better-messages' ), $moderation_url );
 
             foreach( $emails as $email ){
                 wp_mail( $email, $subject, $email_body );

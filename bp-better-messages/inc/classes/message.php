@@ -83,6 +83,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $ai_moderation_result = null;
 
+        public $ai_moderation_provider = null;
+
         public $ai_moderation_deferred = false;
 
         /**

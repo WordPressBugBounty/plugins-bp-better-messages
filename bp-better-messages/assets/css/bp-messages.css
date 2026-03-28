@@ -6038,7 +6038,7 @@ body > .os-scrollbar {
   --right-message-text-color: 255, 255, 255;
   --right-message-nickname-color: 33, 117, 155;
   --bm-message-border-radius: 2px;
-  --bm-widgets-button-radius: 5px;
+  --bm-widgets-button-radius: 7px;
   --bm-button-hover: #00000017;
   --bm-button-active: #00000027;
   --bm-avatar-radius: 2px;
@@ -6050,7 +6050,7 @@ body > .os-scrollbar {
   --bm-mini-widgets-height: 450px;
   --bm-mini-chats-width: 300px;
   --bm-mini-chats-height: 450px;
-  --bm-mini-chats-border-radius: 0;
+  --bm-mini-chats-border-radius: 7px;
   --bm-tooltip-bg: 0,0,0;
   --bm-tooltip-color: 255,255,255;
   --bm-alert-error-color: #842029;
@@ -11404,9 +11404,24 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 }
 
 .bp-better-messages-list .tabs > div[data-tab=bpbm-close] {
-  width: 40px;
-  min-width: 40px;
-  padding: 0 5px 0 5px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  line-height: 30px;
+  padding: 0;
+  margin: 0 3px;
+  border-radius: var(--bm-widgets-button-radius) !important;
+  font-size: 18px;
+  position: relative;
+}
+.bp-better-messages-list .tabs > div[data-tab=bpbm-close] > svg {
+  margin: 0;
+}
+.bp-better-messages-list .tabs > div[data-tab=bpbm-close]:hover {
+  background: var(--bm-button-hover);
+}
+.bp-better-messages-list .tabs > div[data-tab=bpbm-close]:active {
+  background: var(--bm-button-active);
 }
 
 .bp-better-messages-list .tabs-content > div {
@@ -11747,6 +11762,13 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   position: relative;
   opacity: 1;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bp-messages-group-list .group .pic .bm-thread-emoji {
+  font-size: 25px;
+  line-height: 30px;
 }
 
 .bp-messages-group-list .group .pic img {
@@ -17016,3 +17038,5 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   border: 1px solid rgba(var(--bm-border-secondary-color), 0.5) !important;
   color: rgba(var(--bm-text-color), 1) !important;
 }
+
+/*# sourceMappingURL=bp-messages.css.map*/

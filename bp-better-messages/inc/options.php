@@ -293,6 +293,9 @@ class Better_Messages_Options
             'FCenableGroupsFiles'           => '0',
             'FCenableGroupsEmails'          => '0',
             'FCenableGroupsPushs'           => '0',
+            'FCminiGroupsEnable'            => '0',
+            'FCcombinedGroupsEnable'        => '0',
+            'FCmobileGroupsEnable'          => '0',
 
             'SDenableProfileButton'         => '1',
             'SDenableAuthorButton'          => '1',
@@ -355,10 +358,13 @@ class Better_Messages_Options
             'messagesModerateFirstTimeSenders'     => '0',
             'messagesModerationNotificationEmails' => '',
 
+            'aiModerationProvider'          => 'openai',
             'aiModerationEnabled'           => '0',
-            'aiModerationAction'            => 'hold',
+            'aiModerationAction'            => 'flag',
             'aiModerationImages'            => '0',
             'aiModerationCategories'        => ['hate', 'harassment', 'sexual', 'violence', 'self-harm', 'illicit'],
+            'aiModerationCustomRules'       => '',
+            'aiModerationContextMessages'   => '0',
             'aiModerationThreshold'         => '0.5',
             'aiModerationBypassRoles'       => [],
 
@@ -820,6 +826,7 @@ class Better_Messages_Options
             'hasUmFriends'       => $has_um_friends,
             'hasUmGroups'        => $has_um_groups,
             'hasUmFollowers'     => $has_um_followers,
+            'hasFcSpaces'        => $has_fluent_community,
             'hasBuddyBossApp'    => $has_buddyboss_app,
             'hasOneSignal'       => defined('ONESIGNAL_PLUGIN_URL') || defined('ONESIGNAL_VERSION_V3') || class_exists('OneSignal'),
             'hasProgressify'     => class_exists('DaftPlug\Progressify\Plugin') || defined('PROGRESSIFY_VERSION'),
@@ -1139,6 +1146,18 @@ class Better_Messages_Options
             if ( ! isset( $settings['FCenableGroupsPushs'] ) ) {
                 $settings['FCenableGroupsPushs'] = '0';
             }
+
+            if ( ! isset( $settings['FCminiGroupsEnable'] ) ) {
+                $settings['FCminiGroupsEnable'] = '0';
+            }
+
+            if ( ! isset( $settings['FCcombinedGroupsEnable'] ) ) {
+                $settings['FCcombinedGroupsEnable'] = '0';
+            }
+
+            if ( ! isset( $settings['FCmobileGroupsEnable'] ) ) {
+                $settings['FCmobileGroupsEnable'] = '0';
+            }
         }
 
         if ( defined('SUREDASHBOARD_VER') ) {
@@ -1303,7 +1322,7 @@ class Better_Messages_Options
         if( $settings['aiModerationEnabled'] !== '1' ) {
             $existing = $this->settings;
             if( ! isset( $settings['aiModerationAction'] ) ){
-                $settings['aiModerationAction'] = isset( $existing['aiModerationAction'] ) ? $existing['aiModerationAction'] : 'hold';
+                $settings['aiModerationAction'] = isset( $existing['aiModerationAction'] ) ? $existing['aiModerationAction'] : 'flag';
             }
             if( ! isset( $settings['aiModerationImages'] ) ){
                 $settings['aiModerationImages'] = isset( $existing['aiModerationImages'] ) ? $existing['aiModerationImages'] : '0';
@@ -1319,7 +1338,7 @@ class Better_Messages_Options
             }
         } else {
             if( ! isset( $settings['aiModerationAction'] ) ){
-                $settings['aiModerationAction'] = 'hold';
+                $settings['aiModerationAction'] = 'flag';
             }
             if( ! isset( $settings['aiModerationImages'] ) ){
                 $settings['aiModerationImages'] = '0';
@@ -1879,7 +1898,7 @@ class Better_Messages_Options
             'GamiPressCallPricingEndMessage'
         ];
 
-        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt' ];
+        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules' ];
 
         // Fields that need special HTML handling (processed separately with wp_kses)
         $html_fields = [ 'emailCustomHtml' ];

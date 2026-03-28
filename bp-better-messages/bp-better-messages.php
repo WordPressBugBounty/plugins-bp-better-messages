@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.14.7
+    Version: 2.14.8
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.14.7';
+        public  $version = '2.14.8';
 
         public  $db_version = '1.0.4';
 
@@ -192,6 +192,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/shortcodes.php';
             require_once 'inc/rest-api.php';
             require_once 'inc/capabilities.php';
+            require_once 'inc/translations.php';
             require_once 'inc/cleaner.php';
             require_once 'inc/bulk-sender.php';
             require_once 'inc/moderation.php';
@@ -384,9 +385,14 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
         public function enqueue_admin_css(){
             $current_screen = get_current_screen();
 
-            $suffix = '.min';
+            $admin_css_file = 'assets/admin/admin.min.css';
 
             $version = $this->version;
+
+            if( defined( 'BM_DEV' ) && file_exists( $this->path . 'assets/admin/admin.css' ) ) {
+                $admin_css_file = 'assets/admin/admin.css';
+                $version .= filemtime( $this->path . $admin_css_file );
+            }
 
             $include_css = false;
 
@@ -417,7 +423,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             if( $include_css ) {
                 wp_enqueue_style(
                     'better-messages-admin',
-                    plugins_url('assets/admin/admin' . $suffix . '.css', __FILE__),
+                    plugins_url( $admin_css_file, __FILE__ ),
                     false,
                     $version
                 );
@@ -467,7 +473,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
             $dependencies = array(
                 'jquery',
-                'wp-i18n'
             );
 
             wp_register_script(
@@ -477,6 +482,20 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 $version
             );
 
+            // Generate cacheable translation file
+            $i18n_url = Better_Messages_Translations()->get_translation_file_url( 'better-messages-admin' );
+            if ( $i18n_url ) {
+                wp_register_script( 'better-messages-admin-i18n', $i18n_url, array(), null, false );
+                wp_scripts()->registered['better-messages-admin']->deps[] = 'better-messages-admin-i18n';
+            }
+
+            // Inline fallback if file cache failed
+            $inline_i18n = Better_Messages_Translations()->get_inline_translations( 'better-messages-admin' );
+            if ( $inline_i18n ) {
+                wp_register_script( 'better-messages-admin-i18n-inline', false, array(), null, false );
+                wp_add_inline_script( 'better-messages-admin-i18n-inline', 'window.Better_Messages_i18n=' . wp_json_encode( $inline_i18n, JSON_UNESCAPED_UNICODE ) . ';' );
+                wp_scripts()->registered['better-messages-admin']->deps[] = 'better-messages-admin-i18n-inline';
+            }
 
             $script_variables = [
                 'restUrl'               => $this->functions->get_rest_api_url(),
@@ -487,7 +506,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'hasWebSocketClass'     => class_exists('Better_Messages_WebSocket'),
             ];
 
-            wp_set_script_translations('better-messages-admin', 'bp-better-messages', plugin_dir_path(__FILE__) . 'languages/' );
             wp_localize_script( 'better-messages-admin', 'Better_Messages_Admin', $script_variables );
 
             wp_enqueue_script('better-messages-admin');
@@ -502,13 +520,18 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 add_action('style_loader_src', array($this, 'ensure_version_included'), 999, 2);
             }
 
-            $suffix = '.min';
+            $css_file = 'assets/css/bp-messages.min.css';
 
             $version = $this->version;
 
+            if( defined( 'BM_DEV' ) && file_exists( $this->path . 'assets/css/bp-messages.css' ) ) {
+                $css_file = 'assets/css/bp-messages.css';
+                $version .= filemtime( $this->path . $css_file );
+            }
+
             $dependencies = apply_filters('better_messages_style_dependencies', array());
 
-            wp_register_style('better-messages', plugins_url( 'assets/css/bp-messages' . $suffix . '.css', __FILE__ ),
+            wp_register_style('better-messages', plugins_url( $css_file, __FILE__ ),
                 $dependencies,
                 $version
             );
@@ -532,20 +555,16 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
             do_action('better_messages_register_script_dependencies');
 
-            $react_file = defined( 'BM_DEV' ) ? 'assets/js/modules/react.js' : 'assets/js/modules/react.min.js';
+            $deps_file = defined( 'BM_DEV' ) ? 'assets/js/modules/deps.js' : 'assets/js/modules/deps.min.js';
+            $deps_version = $this->get_module_version( 'deps' );
 
             wp_register_script(
-                'better-messages-react',
-                plugins_url( $react_file, __FILE__ ),
+                'better-messages-deps',
+                plugins_url( $deps_file, __FILE__ ),
                 array(),
-                '19.2.3',
+                $deps_version,
                 false
             );
-
-            $dependencies = apply_filters('better_messages_script_dependencies', array(
-                'wp-i18n',
-                'better-messages-react'
-            ));
 
             $file_name = 'bp-messages-free.min.js';
 
@@ -560,6 +579,14 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
             $version = $this->version;
 
+            if( defined( 'BM_DEV' ) ) {
+                $version .= filemtime( $this->path . 'assets/js/' . $file_name );
+            }
+
+            $dependencies = apply_filters('better_messages_script_dependencies', array(
+                'wp-hooks', 'better-messages-deps'
+            ));
+
             wp_register_script(
                 'better-messages',
                 plugins_url( 'assets/js/' . $file_name, __FILE__ ),
@@ -568,14 +595,48 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 false
             );
 
+            // Generate cacheable translation file using WP's own translation discovery
+            $i18n_url = Better_Messages_Translations()->get_translation_file_url( 'better-messages' );
+            if ( $i18n_url ) {
+                wp_register_script( 'better-messages-i18n', $i18n_url, array(), null, false );
+                wp_scripts()->registered['better-messages']->deps[] = 'better-messages-i18n';
+            }
+
+            // Inline fallback if file cache failed
+            $inline_i18n = Better_Messages_Translations()->get_inline_translations( 'better-messages' );
+            if ( $inline_i18n ) {
+                wp_register_script( 'better-messages-i18n-inline', false, array(), null, false );
+                wp_add_inline_script( 'better-messages-i18n-inline', 'window.Better_Messages_i18n=' . wp_json_encode( $inline_i18n, JSON_UNESCAPED_UNICODE ) . ';' );
+                wp_scripts()->registered['better-messages']->deps[] = 'better-messages-i18n-inline';
+            }
+
             $script_variables = $this->get_script_variables();
 
-            wp_set_script_translations('better-messages', 'bp-better-messages', plugin_dir_path(__FILE__) . 'languages/' );
             wp_localize_script( 'better-messages', 'Better_Messages', apply_filters( 'bp_better_messages_script_variables', $script_variables ) );
 
             wp_enqueue_script( 'better-messages' );
 
             $this->js_loaded = true;
+        }
+
+        private $module_versions = null;
+
+        public function get_module_version( $name ) {
+            if ( $this->module_versions === null ) {
+                $manifest_file = $this->path . 'assets/js/modules/versions.php';
+                if ( file_exists( $manifest_file ) ) {
+                    $this->module_versions = include $manifest_file;
+                }
+                if ( ! is_array( $this->module_versions ) ) {
+                    $this->module_versions = array();
+                }
+            }
+
+            if ( isset( $this->module_versions[ $name ] ) ) {
+                return $this->module_versions[ $name ];
+            }
+
+            return $this->version;
         }
 
         private $worker_versions = null;
@@ -810,7 +871,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             // Resolve widget order arrays for frontend (map integration-specific IDs to generic)
             $order_map = [
                 'bp-friends' => 'friends', 'um-friends' => 'friends', 'ps-friends' => 'friends',
-                'bp-groups'  => 'groups',  'um-groups'  => 'groups',  'ps-groups'  => 'groups',
+                'bp-groups'  => 'groups',  'um-groups'  => 'groups',  'ps-groups'  => 'groups',  'fc-groups' => 'groups',
             ];
 
             foreach ( ['miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder'] as $order_key ) {

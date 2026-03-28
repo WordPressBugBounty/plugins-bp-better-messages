@@ -81,7 +81,7 @@ class Better_Messages_Shortcodes
         }
 
         if( isset( $args['subject'] ) ) {
-            $attrs .= ' data-subject="' . urlencode($args['subject']) . '"';
+            $attrs .= ' data-subject="' . esc_attr($args['subject']) . '"';
         }
 
         if( isset( $args['target'] ) ) {
@@ -89,7 +89,7 @@ class Better_Messages_Shortcodes
         }
 
         if( isset( $args['unique_tag'] ) ) {
-            $attrs .= ' data-bm-unique-key="' . urlencode($args['unique_tag']) . '"';
+            $attrs .= ' data-bm-unique-key="' . esc_attr($args['unique_tag']) . '"';
         }
 
         if( isset( $args['object_id'] ) ) {
@@ -240,11 +240,11 @@ class Better_Messages_Shortcodes
         $attributes = '';
 
         if( isset( $args['subject'] ) ) {
-            $attributes .= ' data-bm-subject="' . $args['subject'] . '"';
+            $attributes .= ' data-bm-subject="' . esc_attr($args['subject']) . '"';
         }
 
         if( isset( $args['unique_tag'] ) ) {
-            $attributes .= ' data-bm-unique-key="' . urlencode($args['unique_tag']) . '"';
+            $attributes .= ' data-bm-unique-key="' . esc_attr($args['unique_tag']) . '"';
         }
 
         if( isset($args['bm-fast-start']) && $args['bm-fast-start'] ){
@@ -387,11 +387,11 @@ class Better_Messages_Shortcodes
         $attributes = '';
 
         if( isset( $args['subject'] ) ) {
-            $attributes .= ' data-bm-subject="' . urlencode($args['subject']) . '"';
+            $attributes .= ' data-bm-subject="' . esc_attr($args['subject']) . '"';
         }
 
         if( isset( $args['unique_tag'] ) ) {
-            $attributes .= ' data-bm-unique-key="' . urlencode($args['unique_tag']) . '"';
+            $attributes .= ' data-bm-unique-key="' . esc_attr($args['unique_tag']) . '"';
         }
 
         $link = '#';

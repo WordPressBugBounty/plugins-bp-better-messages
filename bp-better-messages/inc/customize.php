@@ -1107,7 +1107,7 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
                 array(
                     'section'    => 'better_messages_mini_widgets',
                     'transport'  => 'postMessage',
-                    'default'    => 0
+                    'default'    => 7
                 )
             );
 
@@ -1131,7 +1131,7 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
                 array(
                     'section'    => 'better_messages_mini_widgets',
                     'transport'  => 'postMessage',
-                    'default'    => 3
+                    'default'    => 7
                 )
             );
 
@@ -1330,10 +1330,10 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             $mod = get_theme_mod('bm-border-radius', 3);
             echo '--bm-border-radius:' . $mod . 'px;';
 
-            $mod = get_theme_mod('bm-widgets-border-radius', 0);
+            $mod = get_theme_mod('bm-widgets-border-radius', 7);
             echo '--bm-mini-chats-border-radius:' . $mod . 'px;';
 
-            $mod = get_theme_mod('bm-widgets-button-radius', 5);
+            $mod = get_theme_mod('bm-widgets-button-radius', 7);
             echo '--bm-widgets-button-radius:' . $mod . 'px;';
 
             $mod = get_theme_mod('bm-mini-chats-width', 300 );

@@ -316,6 +316,7 @@ _x('This is a list of users that you have blocked. You may unblock them from the
 _x('Unblock user', 'User settings screen', 'bp-better-messages');
 _x('You haven’t blocked anyone yet', 'User settings screen', 'bp-better-messages');
 _x('Only participants can see this chat room messages', 'Chat Room Screen', 'bp-better-messages');
+_x('This chat room is currently closed', 'Chat Room', 'bp-better-messages');
 __('Continue as guest', 'bp-better-messages');
 _x('Guest Settings', 'Moderation actions', 'bp-better-messages');
 _x('Messages', 'Mobile view tabs', 'bp-better-messages');

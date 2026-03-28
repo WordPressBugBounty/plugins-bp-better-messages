@@ -307,7 +307,7 @@ class Better_Messages_Privacy {
         }
 
         if ( bpbm_fs()->is__premium_only() && Better_Messages()->realtime ) {
-            $third_party_items[] = __( 'Real-time message delivery is handled through a cloud server (cloud.better-messages.com). Your messages pass through this server for instant delivery.', 'bp-better-messages' );
+            $third_party_items[] = __( 'Real-time message delivery is handled through a cloud server (cloud.better-messages.com). Your messages are encrypted in transit and pass through this server for instant delivery.', 'bp-better-messages' );
         }
 
         if ( ! empty( $third_party_items ) ) {

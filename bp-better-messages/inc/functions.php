@@ -588,7 +588,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 
-            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` = 0 OR `messages`.`sender_id` = %d ) ", $current_user_id );
+            $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` != 1 OR `messages`.`sender_id` = %d ) ", $current_user_id );
 
             switch ($action){
                 case 'last_messages':
@@ -2554,6 +2554,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'error_type'       => 'bool',
                 'is_update'        => false,
                 'ai_moderation_result' => null,
+                'ai_moderation_provider' => null,
                 'ai_moderation_deferred' => false
             ), 'bm_new_message' );
 
@@ -2596,6 +2597,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $message->notification  = $r['notification'];
             $message->is_update     = $r['is_update'];
             $message->ai_moderation_result = $r['ai_moderation_result'];
+            $message->ai_moderation_provider = $r['ai_moderation_provider'];
             $message->ai_moderation_deferred = $r['ai_moderation_deferred'];
 
             $is_pending = $message->is_pending;
@@ -2815,7 +2817,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
              * @param BP_Messages_Message $message Message object. Passed by reference.
              */
 
-            if( $is_pending === 0 ){
+            if( $is_pending !== 1 ){
+                // is_pending=2: waiting for AI moderation — deliver via websocket but suppress push notifications
+                if( $is_pending === 2 ){
+                    $message->send_push = false;
+                }
+
                 do_action_ref_array( 'better_messages_message_sent', array( &$message ) );
 
                 // Fire reply hook when message is a reply to another message
@@ -2826,6 +2833,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     if( $replied_to_message ){
                         do_action( 'better_messages_message_reply', $message, $replied_to_message );
                     }
+                }
+
+                if( $is_pending === 2 ){
+                    Better_Messages()->functions->update_message_meta( $message->id, 'pending_args', $message );
                 }
             } else {
                 Better_Messages()->functions->update_message_meta( $message->id, 'pending_args', $message );
@@ -3437,7 +3448,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $charactersLength = strlen($characters);
             $randomString = '';
             for ($i = 0; $i < $length; $i++) {
-                $randomString .= $characters[rand(0, $charactersLength - 1)];
+                $randomString .= $characters[random_int(0, $charactersLength - 1)];
             }
             return $randomString;
         }
@@ -3608,7 +3619,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function get_pending_messages_count(): int
         {
             global $wpdb;
-            return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `" . bm_get_table('messages') . "` WHERE `is_pending` != 0" );
+            return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `" . bm_get_table('messages') . "` WHERE `is_pending` = 1" );
         }
 
         public function get_user_secret_key( $user_id ){

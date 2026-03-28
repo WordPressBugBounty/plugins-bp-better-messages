@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.7
+Stable tag: 2.14.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,7 +79,12 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **Moderation & Security:**
 
-* AI Content Moderation powered by OpenAI - automatically detect harmful content
+* AI Content Moderation with two providers:
+  * **Better Messages Moderation AI** — included with WebSocket license at no additional cost, no third-party API keys required. Powered by Better Messages Cloud with extended categories, custom rules, and conversation context awareness
+  * **OpenAI Moderation API** — free to use, requires an OpenAI API key
+* Custom moderation rules — define your own rules in plain text
+* Conversation context awareness — detect patterns split across multiple messages
+* Choose between "Flag Only" (recommended) or "Hold for Review" moderation actions
 * Pre-Moderated Messages - review messages before delivery
 * Report messages feature
 * Bad words filter with customizable blacklist
@@ -103,6 +108,18 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * White label solution
 * Fully translatable
 * Auto-delete old messages option
+
+**Privacy & GDPR:**
+
+* Dedicated Privacy & GDPR settings page
+* All message data stored on your own server
+* AI moderation (when enabled) sends message content for analysis — Better Messages Cloud does not store any data; review OpenAI's data policy if using OpenAI provider
+* WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
+* Suggested privacy policy text that adapts based on enabled features
+* Self-hosted emoji images option — no external CDN requests
+* Privacy-friendly video embeds — YouTube, Vimeo load only after user clicks
+* No cookies set, no analytics or tracking scripts
+* [Privacy & GDPR documentation](https://www.better-messages.com/docs/features/privacy-gdpr/)
 
 **This is not a complete list of features** - Better Messages has many more small features and options that are not listed here. We are constantly adding new features and improvements based on user feedback.
 
@@ -184,17 +201,6 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Web Push Notifications (works even when the browser is closed)
 * All data encrypted in transit, so we can't read it on our servers
 
-**Privacy & GDPR:**
-
-* Dedicated Privacy & GDPR settings page
-* All message data stored on your own server — no message content stored externally
-* WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
-* Suggested privacy policy text that adapts based on enabled features
-* Self-hosted emoji images option — no external CDN requests
-* Privacy-friendly video embeds — YouTube, Vimeo load only after user clicks
-* No cookies set, no analytics or tracking scripts
-* [Privacy & GDPR documentation](https://www.better-messages.com/docs/features/privacy-gdpr/)
-
 **Support:**
 
 * Priority email support
@@ -244,6 +250,26 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
+= 2.14.8 =
+* Initial release of Better Messages Cloud AI
+* Added [Better Messages Moderation AI](https://www.better-messages.com/docs/features/ai-content-moderation) — included with WebSocket license at no additional cost, no third-party API keys required.
+    * Cloud-powered content moderation with extended categories, custom rules, and conversation context awareness
+    * Added AI moderation provider selection: choose between OpenAI Moderation API and Better Messages Moderation AI
+    * Added custom moderation rules — define your own rules in plain text (e.g. block contact sharing, promotions)
+    * Added conversation context for AI moderation — detect patterns like phone numbers split across multiple messages
+    * Added 10 new moderation categories for Better Messages AI: spam, scam/phishing, minor safety, contact sharing, profanity, impersonation, doxxing, drugs/alcohol, threats, commercial promotion
+* Translations now loaded as cacheable external file instead of inline scripts to make it more efficient
+* Added ability to open and close chat rooms
+* Added chat room management actions: duplicate, clear messages, remove all participants
+* Fixed PeepSo Notifications Popup overlapping Better Messages Popup
+* Improved database reset detection and connection timeout for settings changes
+* Added FluentCommunity Spaces integration for groups widgets (mini widgets, side panel tabs, mobile tabs)
+* It's now possible to find users by email in admin user search
+* Fixed PHP warning for undefined 'lang' key in mobile device registration
+* Improved SharedWorker reconnect, plugin updates no longer require page reload
+* Updated Freemius SDK to latest version
+* Other minor bugfixes and improvements
+
 = 2.14.7 =
 * Added new Privacy & GDPR settings page with compliance overview and privacy controls
 * Added self-hosted emoji sprites option — download emoji images to your server instead of loading from external CDN
@@ -262,7 +288,6 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Fixed voice message uploads returning 404 when file attachments disabled
 * Fixed E2E encrypted file uploads in new conversations
 * Fixed group member sync running for groups with chat disabled
-* Improved translation compatibility — all translated strings from WordPress.org now visible in Loco Translate
 * Improved email template customization — preview now reflects all settings accurately
 * Fixed custom HTML email template not saving properly
 * Other minor bugfixes and improvements
