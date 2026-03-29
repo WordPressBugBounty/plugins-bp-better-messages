@@ -2361,67 +2361,40 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             if ( ! function_exists( 'download_url' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/file.php';
             }
+            if ( ! function_exists( 'unzip_file' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
 
             $version = '0.12.10';
-            $tgz_url = 'https://registry.npmjs.org/@ffmpeg/core/-/core-' . $version . '.tgz';
+            $zip_url = 'https://www.better-messages.com/downloads/ffmpeg-core-' . $version . '.zip';
 
             $dir = self::get_ffmpeg_wasm_dir();
             wp_mkdir_p( $dir );
 
-            $tmp_file = download_url( $tgz_url, 300 );
+            $tmp_file = download_url( $zip_url, 300 );
             if ( is_wp_error( $tmp_file ) ) {
                 return new WP_Error( 'download_failed', $tmp_file->get_error_message(), array( 'status' => 500 ) );
             }
 
-            $tar_file = null;
-            try {
-                $phar = new PharData( $tmp_file );
-                $extracted = false;
+            WP_Filesystem();
+            $result = unzip_file( $tmp_file, $dir );
+            @unlink( $tmp_file );
 
-                $files_to_extract = array(
-                    'package/dist/umd/ffmpeg-core.js',
-                    'package/dist/umd/ffmpeg-core.wasm',
-                );
-
-                $phar->decompress();
-                $tar_file = str_replace( '.tgz', '.tar', $tmp_file );
-                if ( ! file_exists( $tar_file ) ) {
-                    $tar_file = preg_replace( '/\.tmp$/', '.tar', $tmp_file );
-                }
-
-                $tar = new PharData( $tar_file );
-
-                foreach ( $files_to_extract as $path ) {
-                    $content = file_get_contents( 'phar://' . $tar_file . '/' . $path );
-                    if ( $content !== false ) {
-                        $filename = basename( $path );
-                        file_put_contents( $dir . '/' . $filename, $content );
-                        $extracted = true;
-                    }
-                }
-
-                @unlink( $tmp_file );
-                @unlink( $tar_file );
-
-                if ( ! $extracted || ! file_exists( $dir . '/ffmpeg-core.wasm' ) ) {
-                    return new WP_Error( 'extract_failed', 'Failed to extract FFmpeg files', array( 'status' => 500 ) );
-                }
-
-                self::write_wasm_htaccess( $dir );
-
-                return rest_ensure_response( array(
-                    'success' => true,
-                    'version' => $version,
-                    'size'    => size_format( filesize( $dir . '/ffmpeg-core.wasm' ) ),
-                ) );
-
-            } catch ( Exception $e ) {
-                @unlink( $tmp_file );
-                if ( $tar_file ) {
-                    @unlink( $tar_file );
-                }
-                return new WP_Error( 'extract_failed', $e->getMessage(), array( 'status' => 500 ) );
+            if ( is_wp_error( $result ) ) {
+                return new WP_Error( 'extract_failed', $result->get_error_message(), array( 'status' => 500 ) );
             }
+
+            if ( ! file_exists( $dir . '/ffmpeg-core.wasm' ) || ! file_exists( $dir . '/ffmpeg-core.js' ) ) {
+                return new WP_Error( 'extract_failed', 'Failed to extract FFmpeg files', array( 'status' => 500 ) );
+            }
+
+            self::write_wasm_htaccess( $dir );
+
+            return rest_ensure_response( array(
+                'success' => true,
+                'version' => $version,
+                'size'    => size_format( filesize( $dir . '/ffmpeg-core.wasm' ) ),
+            ) );
         }
 
         /**

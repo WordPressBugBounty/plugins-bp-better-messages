@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.8
+Stable tag: 2.14.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -250,7 +250,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.14.8 =
+= 2.14.8 - 2.14.9 =
 * Initial release of Better Messages Cloud AI
 * Added [Better Messages Moderation AI](https://www.better-messages.com/docs/features/ai-content-moderation) — included with WebSocket license at no additional cost, no third-party API keys required.
     * Cloud-powered content moderation with extended categories, custom rules, and conversation context awareness

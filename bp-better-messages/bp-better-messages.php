@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.14.8
+    Version: 2.14.9
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.14.8';
+        public  $version = '2.14.9';
 
         public  $db_version = '1.0.4';
 
@@ -192,7 +192,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/shortcodes.php';
             require_once 'inc/rest-api.php';
             require_once 'inc/capabilities.php';
-            require_once 'inc/translations.php';
+            require_once 'inc/translations/translations.php';
             require_once 'inc/cleaner.php';
             require_once 'inc/bulk-sender.php';
             require_once 'inc/moderation.php';
@@ -482,8 +482,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 $version
             );
 
-            // Generate cacheable translation file
-            $i18n_url = Better_Messages_Translations()->get_translation_file_url( 'better-messages-admin' );
+            $i18n_url = Better_Messages_Translations()->get_php_translation_file_url( 'better-messages-admin' );
             if ( $i18n_url ) {
                 wp_register_script( 'better-messages-admin-i18n', $i18n_url, array(), null, false );
                 wp_scripts()->registered['better-messages-admin']->deps[] = 'better-messages-admin-i18n';
