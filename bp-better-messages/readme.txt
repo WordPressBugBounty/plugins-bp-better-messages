@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.9
+Stable tag: 2.14.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -210,18 +210,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 
 **[Get WebSocket version license key](https://www.wordplus.org/downloads/bp-better-messages/) | [Terms of Use](https://www.wordplus.org/end-user-license-agreement/)**
 
-Languages:
-
-* English
-* Spanish
-* Portuguese (Brazil)
-* Russian
-* Dutch
-* Italiano
-* Turkish
-* Japanese
-* Danish
-* Korean [@modelaid](https://profiles.wordpress.org/modelaid/)
+[Languages](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/)
 
 RTL Layout built in to plugin.
 
@@ -250,7 +239,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.14.8 - 2.14.9 =
+= 2.14.8 - 2.14.10 =
 * Initial release of Better Messages Cloud AI
 * Added [Better Messages Moderation AI](https://www.better-messages.com/docs/features/ai-content-moderation) — included with WebSocket license at no additional cost, no third-party API keys required.
     * Cloud-powered content moderation with extended categories, custom rules, and conversation context awareness
@@ -262,6 +251,8 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Added ability to open and close chat rooms
 * Added chat room management actions: duplicate, clear messages, remove all participants
 * Fixed PeepSo Notifications Popup overlapping Better Messages Popup
+* Fixed PeepSo Vip Icons displaying incorrectly in administration panel
+* Reworked reactions selector displaying as they became a bit jumpy, especially on mobile devices
 * Improved database reset detection and connection timeout for settings changes
 * Added FluentCommunity Spaces integration for groups widgets (mini widgets, side panel tabs, mobile tabs)
 * It's now possible to find users by email in admin user search

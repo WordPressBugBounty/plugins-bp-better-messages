@@ -397,7 +397,6 @@ class Better_Messages_Translations {
             return;
         }
         $locale = determine_locale();
-
         $files = glob( $this->upload_dir . 'bm-i18n-*-' . $locale . '-*.js' );
         if ( $files ) {
             foreach ( $files as $file ) {

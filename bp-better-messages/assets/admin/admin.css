@@ -1055,6 +1055,10 @@ table.build-info-table button {
   align-items: center;
   gap: 4px;
   margin-bottom: 4px;
+  width: max-content;
+}
+.bm-messages-table .bm-combined-users > .user-td {
+  flex-shrink: 0;
 }
 .bm-messages-table .bm-combined-users > .user-td .bm-user-actions {
   visibility: hidden;
@@ -4347,7 +4351,7 @@ body[class*=_page_better-messages-viewer] .update-nag {
   padding: 10px 12px;
   vertical-align: middle;
 }
-.bm-viewer-new-wrap .bm-viewer-new-content .bm-list-wrapper table tbody tr td img, .bm-viewer-new-wrap .bm-viewer-new-content .bm-list-wrapper table tbody tr td video {
+.bm-viewer-new-wrap .bm-viewer-new-content .bm-list-wrapper table tbody tr td img:not(.ps-vip__icon):not(.ps-js-vip-badge), .bm-viewer-new-wrap .bm-viewer-new-content .bm-list-wrapper table tbody tr td video {
   max-width: 100%;
   max-height: 100px;
 }

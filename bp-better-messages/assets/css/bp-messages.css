@@ -9022,48 +9022,65 @@ body.bp-messages-mobile #better-messages-modals-container input {
   height: 30px;
 }
 
-.bm-reactions-selector {
+.bm-reactions-trigger {
   position: absolute;
-  padding: 0;
+  bottom: -8px;
+  right: -8px;
+  cursor: pointer;
+  opacity: 0;
+  z-index: 1;
+  background: white;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 3px 0 #b0b0b0;
+  padding: 4px;
+  line-height: 0;
+}
+.bm-reactions-trigger > img {
+  width: 12px !important;
+  height: 12px !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.bm-message-content:hover .bm-reactions-trigger,
+.bm-reactions-trigger:hover {
+  opacity: 1;
+}
+
+.bm-reactions-trigger.bm-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.bm-reactions-selector.bm-reactions-expanded {
   border: none;
   box-shadow: 0 1px 3px 0 #b0b0b0;
   background: white;
-  border-radius: 50px !important;
   z-index: 10000001;
-}
-.bm-reactions-selector:hover {
   overflow-y: hidden;
   display: grid;
   grid-template-columns: repeat(var(--columns, 1), 1fr);
   border-radius: 5px !important;
   padding: 5px;
 }
-.bm-reactions-selector:hover[data-columns="1"] {
+.bm-reactions-selector.bm-reactions-expanded[data-columns="1"] {
   border-radius: 50px !important;
   padding: 3px 2px;
 }
-.bm-reactions-selector:hover .bm-reaction-icon {
+.bm-reactions-selector.bm-reactions-expanded .bm-reaction-icon {
   display: block;
+  cursor: pointer;
   margin-top: 1px;
   margin-bottom: 1px;
   padding: 2px;
 }
-.bm-reactions-selector:hover .bm-reaction-icon > img {
+.bm-reactions-selector.bm-reactions-expanded .bm-reaction-icon > img {
   width: 20px !important;
   height: 20px !important;
-}
-.bm-reactions-selector .bm-reaction-icon {
-  display: none;
-  cursor: pointer;
-  padding: 4px;
-}
-.bm-reactions-selector .bm-reaction-icon > img {
   display: block !important;
   margin: 0 !important;
   padding: 0 !important;
-}
-.bm-reactions-selector .bm-reaction-icon:last-child {
-  display: block;
 }
 
 .bm_user_selector {
@@ -16421,7 +16438,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   overflow: hidden !important;
 }
 
-#buddypress .bp-messages-wrap div:not(.bm-sticky-date, .bm-reactions-selector, .bm-message-content) {
+#buddypress .bp-messages-wrap div:not(.bm-sticky-date, .bm-reactions-selector, .bm-message-content, .bm-reactions-trigger, .bm-sidebar-toggle, .os-scrollbar-handle) {
   border-radius: 0 !important;
 }
 
