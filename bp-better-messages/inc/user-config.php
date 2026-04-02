@@ -188,7 +188,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 $settings[] = $notifications;
             }
 
-            return apply_filters('better_messages_user_config', $settings);
+            return apply_filters('better_messages_user_config', $settings, $user_id);
         }
 
         public function user_settings_save( WP_REST_Request $request ){
@@ -219,6 +219,8 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                     }
                     break;
             }
+
+            do_action( 'better_messages_user_setting_saved', $option, $value, $user_id );
 
             return [
                 'message' => $message

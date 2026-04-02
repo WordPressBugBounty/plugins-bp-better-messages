@@ -341,6 +341,8 @@ class Better_Messages_Options
             'anthropicApiKey'               => '',
             'geminiApiKey'                  => '',
             'voiceTranscription'            => '0',
+            'voiceTranscriptionProvider'    => 'openai',
+            'voiceTranscriptionLanguage'    => '',
             'voiceTranscriptionModel'       => 'gpt-4o-mini-transcribe',
             'voiceTranscriptionPrompt'      => '',
 
@@ -367,6 +369,9 @@ class Better_Messages_Options
             'aiModerationContextMessages'   => '0',
             'aiModerationThreshold'         => '0.5',
             'aiModerationBypassRoles'       => [],
+
+            'aiTranslationEnabled'          => '0',
+            'aiTranslationLanguages'        => [],
 
             'miniWidgetsOrder'              => [],
             'sidePanelTabsOrder'            => [],
@@ -808,6 +813,7 @@ class Better_Messages_Options
             'hasJetEngine'       => $has_jetengine,
             'hasFriends'         => $has_friends,
             'hasVoiceMessages'   => class_exists('BP_Better_Messages_Voice_Messages'),
+            'translationLanguages' => class_exists('Better_Messages_AI') ? Better_Messages_AI::instance()->get_all_translation_languages() : array(),
             'giphyError'         => get_option( 'bp_better_messages_giphy_error', false ),
             'stipopError'        => get_option( 'bp_better_messages_stipop_error', false ),
             'ffmpegInstalled'    => class_exists('Better_Messages_Files') && Better_Messages_Files::is_ffmpeg_installed(),
@@ -1360,6 +1366,15 @@ class Better_Messages_Options
             $settings['aiModerationThreshold'] = (string) $settings['aiModerationThreshold'];
         }
 
+        if( ! isset( $settings['aiTranslationEnabled'] ) ){
+            $settings['aiTranslationEnabled'] = '0';
+        }
+
+        if ( !isset( $settings['aiTranslationLanguages'] ) ) {
+            $existing = $this->settings;
+            $settings['aiTranslationLanguages'] = isset( $existing['aiTranslationLanguages'] ) ? $existing['aiTranslationLanguages'] : [];
+        }
+
         if ( !isset( $settings['restrictBlockUsers'] ) ) {
             $settings['restrictBlockUsers'] = [];
         }
@@ -1813,6 +1828,17 @@ class Better_Messages_Options
 
         if( ! isset( $settings['voiceTranscription'] ) ) {
             $settings['voiceTranscription'] = '0';
+        }
+
+        if( isset( $settings['voiceTranscriptionLanguage'] ) ) {
+            $lang = strtolower( trim( $settings['voiceTranscriptionLanguage'] ) );
+            if ( $lang !== '' && $lang !== 'auto' && ! preg_match( '/^[a-z]{2,3}$/', $lang ) ) {
+                $lang = '';
+            }
+            if ( $lang === 'auto' ) {
+                $lang = '';
+            }
+            $settings['voiceTranscriptionLanguage'] = $lang;
         }
 
         // Enum validations for select/radio fields

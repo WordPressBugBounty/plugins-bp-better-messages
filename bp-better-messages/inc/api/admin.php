@@ -873,6 +873,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         }
                     }
 
+                    // Add translations data
+                    $raw_translations = Better_Messages()->functions->get_message_meta( $message['id'], 'bm_translations', true );
+                    $translations = ! empty( $raw_translations ) ? ( is_array( $raw_translations ) ? $raw_translations : json_decode( $raw_translations, true ) ) : array();
+                    $translations = is_array( $translations ) ? array_filter( $translations, function( $v ) { return ! empty( $v ); } ) : array();
+                    if ( ! empty( $translations ) ) {
+                        $item['translations'] = $translations;
+                    }
+
                     $return['messages'][] = $item;
                 }
             }

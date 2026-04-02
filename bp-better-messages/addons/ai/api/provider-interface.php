@@ -637,9 +637,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $ai_user_id    = absint( $bot_user->id ) * -1;
             $ai_thread_id  = $message->thread_id;
 
-            // Mark thread as seen by the bot and show typing indicator
+            // Show typing indicator (mark_thread_read is handled by v2/send when bot response is delivered)
             if ( Better_Messages()->websocket ) {
-                Better_Messages()->websocket->mark_thread_read( $ai_thread_id, [ $ai_user_id ] );
                 Better_Messages()->websocket->send_typing( $ai_thread_id, $ai_user_id );
             }
 

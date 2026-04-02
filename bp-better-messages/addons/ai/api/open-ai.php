@@ -877,6 +877,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
+        private function is_conversation_not_found_error( $error_message )
+        {
+            $lower = strtolower( $error_message );
+            return strpos( $lower, 'conversation' ) !== false && strpos( $lower, 'not found' ) !== false;
+        }
+
         public function get_open_ai_conversation( $thread_id )
         {
             $openai_conversation = Better_Messages()->functions->get_thread_meta( $thread_id, 'openai_conversation' );
@@ -1221,16 +1227,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     }
                     yield ['finish', $meta];
                 } catch ( GuzzleException $e ) {
-                    $fullError = $e->getMessage();
-                    if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
-                        $fullError = $e->getResponse()->getBody()->getContents();
-                        try {
-                            $data = json_decode($fullError, true);
-                            if ( isset($data['error']['message']) ) {
-                                $fullError = $data['error']['message'];
-                            }
-                        } catch ( Exception $exception ) {}
+                    $fullError = $this->parse_guzzle_error( $e );
+
+                    if ( $open_ai_conversation && $this->is_conversation_not_found_error( $fullError ) ) {
+                        Better_Messages()->functions->delete_thread_meta( $thread_id, 'openai_conversation' );
                     }
+
                     yield ['error', $fullError];
                 } catch ( \Throwable $e ) {
                     yield ['error', $e->getMessage()];
@@ -1457,21 +1459,14 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                    }
                }
            } catch ( GuzzleException $e ) {
-               $fullError = $e->getMessage();
-
-               if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
-                   $fullError = $e->getResponse()->getBody()->getContents();
-
-                   try{
-                       $data = json_decode($fullError, true);
-                       if( isset($data['error']['message']) ){
-                           $fullError = $data['error']['message'];
-                       }
-                   } catch ( Exception $exception ){}
-               }
+               $fullError = $this->parse_guzzle_error( $e );
 
                if( defined('BM_DEBUG') ) {
-                   file_put_contents(ABSPATH . 'open-ai.log', time() . ' - error responseProvider GuzzleException - ' . $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
+                   file_put_contents(ABSPATH . 'open-ai.log', time() . ' - error responseProvider GuzzleException - ' . $fullError . "\n", FILE_APPEND | LOCK_EX);
+               }
+
+               if ( $open_ai_conversation && $this->is_conversation_not_found_error( $fullError ) ) {
+                   Better_Messages()->functions->delete_thread_meta( $thread_id, 'openai_conversation' );
                }
 
                yield ['error', $fullError];

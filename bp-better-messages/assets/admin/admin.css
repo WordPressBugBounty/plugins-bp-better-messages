@@ -4054,6 +4054,9 @@ body[class*=_page_better-messages-viewer] .update-nag {
 .bm-formats-section .bm-formats-group input[type=checkbox] {
   margin: 0;
 }
+.bm-formats-section.bm-languages-section .bm-formats-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
 
 .bm-emoji-cat-section__toolbar {
   display: flex;

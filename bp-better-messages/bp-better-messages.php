@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.14.10
+    Version: 2.14.11
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.14.10';
+        public  $version = '2.14.11';
 
         public  $db_version = '1.0.4';
 
@@ -124,6 +124,9 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
         public $blocks = false;
         public $privacy = false;
 
+        /** @var Better_Messages_Abilities|false $abilities */
+        public $abilities = false;
+
         /** @var Better_Messages_Mobile_App $mobile_app */
         public $mobile_app = false;
 
@@ -210,6 +213,10 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once 'addons/ai/ai.php';
             require_once 'inc/blocks/blocks.php';
 
+            if ( class_exists( 'WP_Ability' ) ) {
+                require_once 'inc/abilities/abilities.php';
+            }
+
             require_once Better_Messages()->path . 'vendor/AES256.php';
             require_once Better_Messages()->path . 'vendor/randomizer/randomizer-start.php';
             require_once Better_Messages()->path . 'vendor/random-name-generator/random-name-generator.php';
@@ -254,11 +261,15 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             $this->blocks       = Better_Messages_Blocks();
             $this->privacy      = Better_Messages_Privacy();
 
+            if ( function_exists( 'Better_Messages_Abilities' ) ) {
+                $this->abilities = Better_Messages_Abilities();
+            }
+
             if ( file_exists($this->path . 'addons/e2e-encryption.php') && Better_Messages()->functions->can_use_premium_code_premium_only() ) {
                 require_once $this->path . 'addons/e2e-encryption.php';
             }
 
-            if ( function_exists( 'Better_Messages_E2E_Encryption' ) && $this->settings['e2eEncryption'] === '1' ) {
+            if ( function_exists( 'Better_Messages_E2E_Encryption' ) ) {
                 $this->e2e = Better_Messages_E2E_Encryption();
             }
 
@@ -790,6 +801,9 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'forceMentions'          => ( $this->settings['mentionsForceNotifications'] == '1' ? '1' : '0' ),
                 'guests'                 => ( Better_Messages()->guests->guest_access_enabled() ? '1' : '0' ),
                 'reports'                => ( $this->settings['allowReports'] == '1' ? '1' : '0' ),
+                'translationLanguage'    => ( $this->settings['aiTranslationEnabled'] === '1' && is_user_logged_in()
+                    ? Better_Messages()->functions->get_user_meta( get_current_user_id(), 'bpbm_translation_language', true )
+                    : '' ),
             );
 
             $sounds_keys = [

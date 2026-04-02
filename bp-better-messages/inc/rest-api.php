@@ -378,6 +378,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         public function get_unique_conversation( WP_REST_Request $request ){
             $thread_id = apply_filters('better_messages_get_unique_conversation', 0, sanitize_text_field( $request->get_param('key') ), Better_Messages()->functions->get_current_user_id() );
 
+            // Skip E2E threads when E2E is disabled globally
+            if ( $thread_id
+                && Better_Messages()->settings['e2eEncryption'] !== '1'
+                && class_exists( 'Better_Messages_E2E_Encryption' )
+                && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
+            ) {
+                $thread_id = 0;
+            }
+
             if( $thread_id ){
                 $return = $this->get_threads([ $thread_id ]);
                 $return['thread_id'] = $thread_id;
@@ -2392,7 +2401,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $error = new WP_Error();
 
                 $temp_id = sanitize_text_field( $request->get_param('temp_id') );
-                do_action('better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
+
+                global $bp_better_messages_restrict_send_message;
+                $skip_abort = is_array( $bp_better_messages_restrict_send_message ) && isset( $bp_better_messages_restrict_send_message['waiting_for_ai_response'] );
+
+                if( ! $skip_abort ) {
+                    do_action('better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
+                }
 
                 $thread = $this->get_threads( [$thread_id] );
 

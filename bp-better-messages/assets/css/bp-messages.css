@@ -7087,6 +7087,10 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-messages-list .bm-list.bm-date-position-stack .bm-voice-message {
   padding-bottom: 20px;
 }
+.bp-messages-wrap .bm-messages-list .bm-list.bm-date-position-stack .bm-voice-message .bm-voice-message-duration {
+  top: 42px;
+  bottom: auto !important;
+}
 .bp-messages-wrap .bm-messages-list .bm-list .bm-list-content {
   padding-top: 15px;
   padding-bottom: 1px;
@@ -7460,6 +7464,29 @@ body.bp-messages-mobile #better-messages-modals-container input {
   color: rgba(var(--bm-text-color), 1);
   font-size: 10px;
   white-space: nowrap;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-translation-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  margin-right: 4px;
+  font-size: 11px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-translation-toggle.original {
+  opacity: 0.3;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-translation-toggle.original:hover {
+  opacity: 0.7;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-translation-toggle.pending {
+  opacity: 0.3;
+  cursor: default;
+  animation: bm-translation-pulse 1.5s ease-in-out infinite;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-translation-toggle svg {
+  vertical-align: middle;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message.selected .bm-message-content:after {
   position: absolute;
@@ -10938,6 +10965,14 @@ body:not(.bm-mobile-device) .bp-messages-wrap .bm-messages-list .bm-list .bm-mes
     transform: rotate(360deg);
   }
 }
+@keyframes bm-translation-pulse {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
 @-webkit-keyframes sk-bouncedelay {
   0%, 80%, 100% {
     -webkit-transform: scale(0);
@@ -12118,6 +12153,43 @@ body.bp-messages-mobile #yz-profile-navmenu {
 }
 .bp-messages-wrap .bpbm-user-options input:focus {
   border-color: rgba(var(--bm-border-active), 1) !important;
+}
+.bp-messages-wrap .bpbm-user-options select.bpbm-select {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  min-height: 30px !important;
+  padding: 8px 10px !important;
+  font-size: 13px !important;
+  font-family: inherit !important;
+  line-height: 1.4 !important;
+  color: rgba(var(--bm-text-color), 1) !important;
+  background-color: rgba(var(--bm-bg-color), 1) !important;
+  border: 1px solid rgba(var(--bm-border-secondary-color), 1) !important;
+  border-radius: 3px !important;
+  outline: none !important;
+  transition: border-color 0.2s !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath fill=%27%23888%27 d=%27M6 8L1 3h10z%27/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 12px !important;
+  padding-right: 30px !important;
+}
+.bp-messages-wrap .bpbm-user-options select.bpbm-select:hover {
+  border-color: rgba(var(--main-bm-color), 0.5) !important;
+}
+.bp-messages-wrap .bpbm-user-options select.bpbm-select:focus {
+  border-color: rgba(var(--main-bm-color), 1) !important;
+}
+.bp-messages-wrap .bpbm-user-options select.bpbm-select option {
+  color: rgba(var(--bm-text-color), 1) !important;
+  background-color: rgba(var(--bm-bg-color), 1) !important;
+  padding: 5px !important;
 }
 
 .bp-messages-wrap .bpbm-user-options .bpbm-user-option {
@@ -16105,7 +16177,6 @@ html[dir=rtl] .bm-messages-list.bm-template-modern .bm-list .bm-messages-stack .
 }
 html[dir=rtl] .bm-messages-list.bm-template-modern .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-time {
   margin-left: 0;
-  margin-right: 10px;
 }
 html[dir=rtl] .bm-messages-list.bm-template-modern .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info .bm-pinned-label {
   margin-left: 0;

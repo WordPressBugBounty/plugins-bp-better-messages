@@ -1157,6 +1157,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $exclude_deleted_sql = '';
             if( $exclude_deleted ) $exclude_deleted_sql = 'AND recipients.is_deleted = 0';
 
+            $exclude_e2e_join = '';
+            $exclude_e2e_where = '';
+            if ( Better_Messages()->settings['e2eEncryption'] !== '1' ) {
+                $exclude_e2e_join  = "LEFT JOIN " . bm_get_table('threadsmeta') . " e2emeta ON ( e2emeta.`bm_thread_id` = threads.`id` AND e2emeta.meta_key = 'bm_e2e' )";
+                $exclude_e2e_where = "AND e2emeta.`meta_value` IS NULL";
+            }
+
             $threads_between_users = $wpdb->prepare("
             SELECT recipients.thread_id
             FROM " . bm_get_table('recipients') . " as recipients
@@ -1164,10 +1171,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 ON recipients.thread_id = threads.id
             LEFT JOIN " . bm_get_table('threadsmeta') . " threadsmeta ON
                 ( threadsmeta.`bm_thread_id` = threads.`id` AND threadsmeta.meta_key = 'unique_tag' )
+            {$exclude_e2e_join}
             WHERE recipients.user_id IN (%d, %d)
             {$exclude_deleted_sql}
             AND threads.type = 'thread'
             AND `threadsmeta`.`meta_value` IS NULL
+            {$exclude_e2e_where}
             AND threads.id NOT IN (" . $threads_excluded . ")
             GROUP BY recipients.thread_id
             HAVING COUNT(recipients.thread_id) = 2", $from, $to);
@@ -1392,7 +1401,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $thread = $this->get_thread( $thread_id );
 
                 if( $thread ) {
-                    return $thread_id;
+                    // Skip E2E threads when E2E is disabled globally,
+                    // so users can create a new non-encrypted conversation
+                    if ( Better_Messages()->settings['e2eEncryption'] !== '1'
+                        && class_exists( 'Better_Messages_E2E_Encryption' )
+                        && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
+                    ) {
+                        // Fall through to create new conversation below
+                    } else {
+                        return $thread_id;
+                    }
                 }
             }
 
@@ -2939,6 +2957,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             ], ['%s'], ['%d']);
 
             $this->update_message_update_time( $message->id );
+
+            if ( $r['is_update'] ) {
+                do_action( 'better_messages_message_edited', $message->id, $message->thread_id );
+            }
 
             do_action( 'better_messages_thread_updated', $message->thread_id );
 
