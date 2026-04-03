@@ -692,6 +692,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
+            register_rest_route('better-messages/v1/admin/ai', '/testCallback', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'rest_test_callback'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
             // Token usage endpoint
             register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/usage', array(
                 'methods' => 'GET',
@@ -1543,6 +1549,41 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return new WP_REST_Response( array(
                 'success'     => true,
                 'modelsCount' => count( $models ),
+            ), 200 );
+        }
+
+        /**
+         * REST: Test cloud AI callback URL reachability
+         */
+        public function rest_test_callback( WP_REST_Request $request ) {
+            $cloud = Better_Messages_Cloud_AI::instance();
+            $simulate_blocked = ! empty( $request->get_param('simulateBlocked') );
+            $result = $cloud->ping( $simulate_blocked );
+
+            if ( is_wp_error( $result ) ) {
+                return new WP_REST_Response( array(
+                    'success' => false,
+                    'error'   => $result->get_error_message(),
+                ), 200 );
+            }
+
+            if ( ! empty( $result['success'] ) ) {
+                return new WP_REST_Response( array(
+                    'success'      => true,
+                    'callbackUrl'  => rest_url( 'better-messages/v1/ai/task-result' ),
+                ), 200 );
+            }
+
+            $error = $result['error'] ?? 'unknown';
+            $details = $result['details'] ?? '';
+            $status = $result['callback_status'] ?? '';
+
+            return new WP_REST_Response( array(
+                'success'        => false,
+                'error'          => $error,
+                'callbackUrl'    => rest_url( 'better-messages/v1/ai/task-result' ),
+                'callbackStatus' => $status,
+                'details'        => $details,
             ), 200 );
         }
 
@@ -2754,7 +2795,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 set_transient( 'bm_translate_req_' . $result['request_id'], array(
                     'target_lang' => $target_lang,
                     'thread_id'   => $thread_id,
-                ), 5 * MINUTE_IN_SECONDS );
+                ), 30 * MINUTE_IN_SECONDS );
             }
 
             return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
@@ -2827,7 +2868,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     set_transient( 'bm_translate_req_' . $result['request_id'], array(
                         'target_lang' => $target_lang,
                         'thread_id'   => $thread_id,
-                    ), 5 * MINUTE_IN_SECONDS );
+                    ), 30 * MINUTE_IN_SECONDS );
                 }
             }
         }

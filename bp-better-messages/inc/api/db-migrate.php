@@ -130,6 +130,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 bm_get_table('guests'),
                 bm_get_table('users'),
                 bm_get_table('roles'),
+                bm_get_table('bulk_jobs'),
+                bm_get_table('bulk_job_threads'),
+                bm_get_table('ai_usage'),
             ];
         }
 
@@ -147,6 +150,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 "ALTER TABLE `" . bm_get_table('guests') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
                 "ALTER TABLE `" . bm_get_table('users') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
                 "ALTER TABLE `" . bm_get_table('roles') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
+                "ALTER TABLE `" . bm_get_table('bulk_jobs') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
+                "ALTER TABLE `" . bm_get_table('bulk_job_threads') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
+                "ALTER TABLE `" . bm_get_table('ai_usage') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
             ];
 
             foreach( $actions as $sql ){

@@ -1415,6 +1415,18 @@ function _bm_js_translation_strings() {
     _x('Android', 'WP Admin (Mobile App)', 'bp-better-messages');
     _x('Download and install WebSocket version', 'Settings page', 'bp-better-messages');
     _x('Get WebSocket License', 'Settings page', 'bp-better-messages');
+    _x('Callback URL is reachable. Cloud AI features will work at full speed.', 'Settings page', 'bp-better-messages');
+    _x('Callback URL is reachable', 'Settings page', 'bp-better-messages');
+    _x('The cloud server could not reach your callback URL. This is usually caused by a firewall, security plugin, or server configuration blocking incoming requests. Please whitelist the following URL in your firewall or security plugin settings:', 'Settings page', 'bp-better-messages');
+    _x('Unknown error', 'Settings page', 'bp-better-messages');
+    _x('Callback URL is not reachable', 'Settings page', 'bp-better-messages');
+    _x('Connection test failed', 'Settings page', 'bp-better-messages');
+    _x('Better Messages Cloud AI uses a callback URL to deliver results to your site. If your server is behind a firewall or a security plugin that blocks external requests, Cloud AI features may be slow or fail. Please test the callback URL to make sure everything works correctly.', 'Settings page', 'bp-better-messages');
+    _x('Testing...', 'Settings page', 'bp-better-messages');
+    _x('Test Callback URL', 'Settings page', 'bp-better-messages');
+    _x('Simulate Blocked', 'Settings page', 'bp-better-messages');
+    _x('For more information, see the %s.', 'Settings page', 'bp-better-messages');
+    _x('documentation', 'Settings page', 'bp-better-messages');
     _x('Cron Issue', 'Settings page', 'bp-better-messages');
     _x('WP Cron Jobs does not work properly at this website', 'Settings page', 'bp-better-messages');
     _x('That can cause problems with email notifications and other features, which are running in background.', 'Settings page', 'bp-better-messages');
@@ -1555,7 +1567,6 @@ function _bm_js_translation_strings() {
     _x('Download', 'Settings page', 'bp-better-messages');
     _x('WASM Headers Test', 'Settings page', 'bp-better-messages');
     _x('Check that WASM files are served with the correct Content-Type.', 'Settings page', 'bp-better-messages');
-    _x('Testing...', 'Settings page', 'bp-better-messages');
     _x('Run Test', 'Settings page', 'bp-better-messages');
     _x('All WASM files served correctly', 'Settings page', 'bp-better-messages');
     _x('Wrong Content-Type', 'Settings page', 'bp-better-messages');

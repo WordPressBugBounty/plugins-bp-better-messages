@@ -39,7 +39,10 @@ if ( !class_exists( 'Better_Messages_Reactions' ) ){
 
             $message_reactions = $this->get_message_reactions( $message_id );
 
-            if( empty( $message_reactions ) ) return $meta;
+            if( empty( $message_reactions ) ){
+                $meta['reactions'] = [];
+                return $meta;
+            }
 
             $result_reactions = [];
 
@@ -55,7 +58,10 @@ if ( !class_exists( 'Better_Messages_Reactions' ) ){
                 $result_reactions[ $reaction ][] = (int) $user_id;
             }
 
-            if( count( $result_reactions ) === 0 ) return $meta;
+            if( count( $result_reactions ) === 0 ){
+                $meta['reactions'] = [];
+                return $meta;
+            }
 
             $_result_reactions = [];
 

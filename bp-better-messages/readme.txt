@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.11
+Stable tag: 2.14.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -196,7 +196,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 
 **Better Messages Cloud AI:**
 
-* Automatic message translation — 53 languages, auto-detection, 1-to-1 conversations
+* Automatic message translation in 1-to-1 conversations — 53 languages, auto-detection
 * AI Content Moderation — 23 categories, custom rules, conversation context awareness
 * Voice message transcription — 99+ languages with auto-detection
 * No third-party API keys required — included with WebSocket license at no additional cost
@@ -246,9 +246,10 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-== 2.14.11 ==
+= 2.14.11 - 2.14.12 =
 * Added [Better Messages Translation AI](https://www.better-messages.com/docs/features/ai-message-translation) — automatic message translation for 1-to-1 conversations
 * Added [Better Messages Transcription AI](https://www.better-messages.com/docs/websocket/cloud-ai) — voice message transcriptions
+* Added Test [Callback URL](https://www.better-messages.com/docs/websocket/cloud-ai/#callback-url) button to the Settings page in the WebSocket version, which allows testing the callback URL for the Better Messages Cloud AI
 * Initial integration with [WordPress Abilities API](https://www.better-messages.com/docs/ai-mcp/ai-mcp-integration), which allows using MCP and AI
 * Fixed bug with AI Chat Bots not allowing to select model if no global api key setting
 * Fixed bug with attachments being sent to previously opened conversation when using "Send now" button in the file uploader popup
