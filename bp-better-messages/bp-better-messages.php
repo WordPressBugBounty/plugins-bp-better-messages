@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.14.12
+    Version: 2.14.13
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.14.12';
+        public  $version = '2.14.13';
 
         public  $db_version = '1.0.4';
 
@@ -782,6 +782,13 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'miniChats'              => ( $this->realtime && $this->settings['miniChatsEnable'] ? '1' : '0' ),
                 'miniMessages'           => ( $this->realtime && $this->settings['miniThreadsEnable'] ? '1' : '0' ),
                 'combinedChats'          => ( $this->realtime && $this->settings['combinedChatsEnable'] == '1' ? '1' : '0' ),
+                'miniWidgetsStyle'       => ( $this->settings['miniWidgetsStyle'] ?? 'classic' ),
+                'widgetsPosition'        => ( get_theme_mod('bm-widgets-position', 'right') === 'left' ? 'left' : 'right' ),
+                'miniWidgetsAnimation'   => ( $this->settings['miniWidgetsAnimation'] ?? '1' ),
+                'bubbleChatHeads'        => ( $this->settings['bubbleChatHeads'] ?? '0' ),
+                'bubbleChatHeadsLimit'   => intval( $this->settings['bubbleChatHeadsLimit'] ?? 5 ),
+                'bubbleIcon'             => ( $this->settings['bubbleIcon'] ?? 'comment' ),
+                'bubbleCloseOnOutside'   => ( $this->settings['bubbleCloseOnOutside'] ?? '0' ),
                 'miniAudio'              => ( $this->realtime && $this->settings['miniChatAudioCall'] ? '1' : '0' ),
                 'miniVideo'              => ( $this->realtime && $this->settings['miniChatVideoCall'] ? '1' : '0' ),
                 'messagesStatus'         => ( $this->realtime && $this->settings['messagesStatus'] ? '1' : '0' ),

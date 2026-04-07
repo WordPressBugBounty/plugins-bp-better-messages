@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.12
+Stable tag: 2.14.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -245,6 +245,16 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.14.13 =
+* Added new "Floating Bubble" display style for mini widgets — replaces the classic bottom tab bar with a circular button that expands into a chat panel on click
+* Added "Bubble Chat Heads" option — shows recently closed conversations as avatar bubbles stacked above the floating bubble button (similar to Messenger chat heads), with hover tooltips showing thread name, time, and last message preview
+* Added Bubble Icon picker in admin settings
+* Added customizer controls for bubble button and chat head sizes and roundness
+* Added smooth open/close/transition animations for mini widgets, bubble panel, and chat heads (can be disabled in admin settings)
+* Fixed bug where photos uploaded from iOS could appear rotated in chat — caused by buggy EXIF orientation handling in iOS Safari's createImageBitmap
+* Fixed bug where the "Select Logo" button on the Email template settings page did nothing because the WordPress media library was not enqueued
+* Other minor bugfixes and improvements
 
 = 2.14.11 - 2.14.12 =
 * Added [Better Messages Translation AI](https://www.better-messages.com/docs/features/ai-message-translation) — automatic message translation for 1-to-1 conversations

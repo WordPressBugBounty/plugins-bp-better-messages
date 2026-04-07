@@ -80,9 +80,15 @@
         function newValue( value ){
             if( value === 'right' ){
                 return '';
-            } else {
-                return '.bp-messages-wrap.bp-better-messages-list .bm-mini-widgets-button{right:auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-list{right: auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-mini{left:70px;right: auto}.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset);}';
             }
+            var css = '.bp-messages-wrap.bp-better-messages-list .bm-mini-widgets-button{right:auto;left:var(--bm-mini-widgets-offset)}';
+            css += '.bp-better-messages-list{right:auto;left:var(--bm-mini-widgets-offset)}';
+            css += '.bp-better-messages-mini{left:70px;right:auto}';
+            css += '.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset)}';
+            css += '.bp-better-messages-list.bm-widget-bubble .bm-bubble-panel{right:auto;left:0;transform-origin:bottom left}';
+            css += '.bp-better-messages-list.bm-widget-bubble+.bp-better-messages-mini{left:calc(var(--bm-bubble-size, 56px) + var(--bm-mini-widgets-offset, 70px) + 10px);right:auto}';
+            css += '.bp-better-messages-list.bm-widget-bubble.bm-bubble-open+.bp-better-messages-mini{left:calc(var(--bm-mini-widgets-width, 320px) + var(--bm-mini-widgets-offset, 70px) + 10px);right:auto}';
+            return css;
         }
 
         updateGeneralRule( 'bm-widgets-position', newValue(value()) );
@@ -480,5 +486,33 @@
       } );
     } );
 
+
+    wp.customize( 'bm-bubble-size', function( value ) {
+        updateCssRule( 'bm-bubble-size', '--bm-bubble-size: ' + value() + 'px' );
+        value.bind( function( newval ) {
+            updateCssRule( 'bm-bubble-size', '--bm-bubble-size: ' + newval + 'px' );
+        } );
+    } );
+
+    wp.customize( 'bm-bubble-head-size', function( value ) {
+        updateCssRule( 'bm-bubble-head-size', '--bm-bubble-head-size: ' + value() + 'px' );
+        value.bind( function( newval ) {
+            updateCssRule( 'bm-bubble-head-size', '--bm-bubble-head-size: ' + newval + 'px' );
+        } );
+    } );
+
+    wp.customize( 'bm-bubble-radius', function( value ) {
+        updateCssRule( 'bm-bubble-radius', '--bm-bubble-radius: ' + value() + '%' );
+        value.bind( function( newval ) {
+            updateCssRule( 'bm-bubble-radius', '--bm-bubble-radius: ' + newval + '%' );
+        } );
+    } );
+
+    wp.customize( 'bm-bubble-head-radius', function( value ) {
+        updateCssRule( 'bm-bubble-head-radius', '--bm-bubble-head-radius: ' + value() + '%' );
+        value.bind( function( newval ) {
+            updateCssRule( 'bm-bubble-head-radius', '--bm-bubble-head-radius: ' + newval + '%' );
+        } );
+    } );
 
 } )( jQuery );

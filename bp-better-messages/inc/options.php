@@ -45,6 +45,12 @@ class Better_Messages_Options
             'transcodingStripMetadata'    => '0',
             'transcodingVideoFormat'      => 'original',
             'miniChatsEnable'             => '0',
+            'miniWidgetsStyle'            => 'classic',
+            'miniWidgetsAnimation'        => '1',
+            'bubbleChatHeads'             => '0',
+            'bubbleChatHeadsLimit'        => '5',
+            'bubbleIcon'                  => 'comment',
+            'bubbleCloseOnOutside'        => '0',
             'combinedChatsEnable'         => '0',
             'searchAllUsers'              => '1',
             'disableSubject'              => '0',
@@ -551,6 +557,8 @@ class Better_Messages_Options
 
     public function settings_page_new_html()
     {
+        wp_enqueue_media();
+
         $all_roles = get_editable_roles();
         $roles = array();
         foreach ( $all_roles as $role_key => $role_data ) {
@@ -1030,6 +1038,67 @@ class Better_Messages_Options
         return $this->sanitize_array_recursive( $emojies );
     }
 
+    /**
+     * Sanitize an inline SVG markup string with a tag/attribute whitelist.
+     * Used for the bubbleIcon setting where users can paste SVG from lucide.dev etc.
+     */
+    public function sanitize_svg( $svg ) {
+        $allowed_attrs = array(
+            'xmlns'             => true,
+            'xmlns:xlink'       => true,
+            'viewbox'           => true,
+            'width'             => true,
+            'height'            => true,
+            'fill'              => true,
+            'stroke'            => true,
+            'stroke-width'      => true,
+            'stroke-linecap'    => true,
+            'stroke-linejoin'   => true,
+            'stroke-miterlimit' => true,
+            'stroke-dasharray'  => true,
+            'stroke-dashoffset' => true,
+            'stroke-opacity'    => true,
+            'fill-opacity'      => true,
+            'fill-rule'         => true,
+            'clip-rule'         => true,
+            'opacity'           => true,
+            'transform'         => true,
+            'd'                 => true,
+            'cx'                => true,
+            'cy'                => true,
+            'r'                 => true,
+            'rx'                => true,
+            'ry'                => true,
+            'x'                 => true,
+            'y'                 => true,
+            'x1'                => true,
+            'y1'                => true,
+            'x2'                => true,
+            'y2'                => true,
+            'points'            => true,
+            'id'                => true,
+            'class'             => true,
+            'style'             => true,
+            'preserveaspectratio' => true,
+        );
+        $allowed_tags = array(
+            'svg'      => $allowed_attrs,
+            'g'        => $allowed_attrs,
+            'path'     => $allowed_attrs,
+            'circle'   => $allowed_attrs,
+            'ellipse'  => $allowed_attrs,
+            'rect'     => $allowed_attrs,
+            'line'     => $allowed_attrs,
+            'polyline' => $allowed_attrs,
+            'polygon'  => $allowed_attrs,
+            'title'    => $allowed_attrs,
+            'desc'     => $allowed_attrs,
+            'defs'     => $allowed_attrs,
+            'use'      => $allowed_attrs,
+        );
+        return wp_kses( $svg, $allowed_tags );
+    }
+
     public function update_settings( $settings )
     {
         if( isset( $settings['emojiSettings'] ) && ! empty( trim($settings['emojiSettings']) ) ){
@@ -1410,6 +1479,24 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['miniWidgetsOrder'] ) ) {
             $settings['miniWidgetsOrder'] = [];
+        }
+        if ( !isset( $settings['miniWidgetsStyle'] ) ) {
+            $settings['miniWidgetsStyle'] = 'classic';
+        }
+        if ( !isset( $settings['miniWidgetsAnimation'] ) ) {
+            $settings['miniWidgetsAnimation'] = '1';
+        }
+        if ( !isset( $settings['bubbleChatHeads'] ) ) {
+            $settings['bubbleChatHeads'] = '0';
+        }
+        if ( !isset( $settings['bubbleChatHeadsLimit'] ) ) {
+            $settings['bubbleChatHeadsLimit'] = '5';
+        }
+        if ( !isset( $settings['bubbleIcon'] ) ) {
+            $settings['bubbleIcon'] = 'comment';
+        }
+        if ( !isset( $settings['bubbleCloseOnOutside'] ) ) {
+            $settings['bubbleCloseOnOutside'] = '0';
         }
         if ( !isset( $settings['sidePanelTabsOrder'] ) ) {
             $settings['sidePanelTabsOrder'] = [];
@@ -1993,6 +2080,9 @@ class Better_Messages_Options
             } else if ( in_array( $key, $html_fields ) ) {
                 // HTML fields are processed separately with wp_kses later
                 $this->settings[$key] = $value;
+            } else if ( $key === 'bubbleIcon' && is_string( $value ) && stripos( ltrim( $value ), '<svg' ) === 0 ) {
+                // Custom SVG icon — sanitize with SVG-safe tag/attribute whitelist
+                $this->settings[$key] = $this->sanitize_svg( wp_unslash( $value ) );
             } else {
                 if( in_array( $key, $textareas ) ){
                     $this->settings[$key] = sanitize_textarea_field( $value );

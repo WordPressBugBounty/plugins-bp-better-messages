@@ -90,7 +90,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Users' ) ):
                 $results[] = array(
                     'user_id' => intval( $uid ),
                     'name'    => Better_Messages()->functions->get_name( $uid ),
-                    'avatar'  => Better_Messages()->functions->get_avatar( $uid, 50, array( 'html' => false ) ),
+                    'avatar'  => Better_Messages()->functions->get_avatar( $uid, 100, array( 'html' => false ) ),
                 );
             }
 

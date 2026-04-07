@@ -1300,6 +1300,100 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
                 )
             );
 
+            $wp_customize->add_setting(
+                'bm-bubble-size',
+                array(
+                    'section'    => 'better_messages_mini_widgets',
+                    'transport'  => 'postMessage',
+                    'default'    => 56
+                )
+            );
+
+            $wp_customize->add_control(
+                'bm-bubble-size',
+                array(
+                    'label'   => _x( 'Bubble Button Size', 'WP Customizer', 'bp-better-messages' ),
+                    'description' => _x( 'Size of the floating bubble button (in pixels)', 'WP Customizer', 'bp-better-messages' ),
+                    'section' => 'better_messages_mini_widgets',
+                    'type' => 'number',
+                    'input_attrs' => array(
+                        'min' => 40,
+                        'max' => 80
+                    )
+                )
+            );
+
+            $wp_customize->add_setting(
+                'bm-bubble-head-size',
+                array(
+                    'section'    => 'better_messages_mini_widgets',
+                    'transport'  => 'postMessage',
+                    'default'    => 48
+                )
+            );
+
+            $wp_customize->add_control(
+                'bm-bubble-head-size',
+                array(
+                    'label'   => _x( 'Chat Head Size', 'WP Customizer', 'bp-better-messages' ),
+                    'description' => _x( 'Size of the chat head avatar bubbles (in pixels)', 'WP Customizer', 'bp-better-messages' ),
+                    'section' => 'better_messages_mini_widgets',
+                    'type' => 'number',
+                    'input_attrs' => array(
+                        'min' => 30,
+                        'max' => 70
+                    )
+                )
+            );
+
+            $wp_customize->add_setting(
+                'bm-bubble-radius',
+                array(
+                    'section'    => 'better_messages_mini_widgets',
+                    'transport'  => 'postMessage',
+                    'default'    => 50
+                )
+            );
+
+            $wp_customize->add_control(
+                'bm-bubble-radius',
+                array(
+                    'label'   => _x( 'Bubble Button Roundness', 'WP Customizer', 'bp-better-messages' ),
+                    'description' => _x( 'Border radius of the floating bubble button', 'WP Customizer', 'bp-better-messages' ),
+                    'section' => 'better_messages_mini_widgets',
+                    'type' => 'range',
+                    'input_attrs' => array(
+                        'min' => 0,
+                        'step' => 1,
+                        'max' => 50
+                    )
+                )
+            );
+
+            $wp_customize->add_setting(
+                'bm-bubble-head-radius',
+                array(
+                    'section'    => 'better_messages_mini_widgets',
+                    'transport'  => 'postMessage',
+                    'default'    => 50
+                )
+            );
+
+            $wp_customize->add_control(
+                'bm-bubble-head-radius',
+                array(
+                    'label'   => _x( 'Chat Head Roundness', 'WP Customizer', 'bp-better-messages' ),
+                    'description' => _x( 'Border radius of the chat head avatar bubbles', 'WP Customizer', 'bp-better-messages' ),
+                    'section' => 'better_messages_mini_widgets',
+                    'type' => 'range',
+                    'input_attrs' => array(
+                        'min' => 0,
+                        'step' => 1,
+                        'max' => 50
+                    )
+                )
+            );
+
         }
 
 
@@ -1310,9 +1404,19 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
                 echo '.bp-messages-wrap .thread-info .avatar-group{display: none !important}.bp-messages-wrap .thread-info .avatar-group+.thread-info-data{max-width: 100% !important}';
             }
 
-            $mod = get_theme_mod('bm-widgets-position', 'right');
-            if( $mod === 'left' ){
-                echo '.bp-better-messages-list{right: auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-mini{left:70px;right: auto}.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset);}';
+            // Skip position CSS in customize preview — customizer.js handles it
+            // dynamically so toggling between left/right takes effect immediately.
+            if ( ! is_customize_preview() ) {
+                $mod = get_theme_mod('bm-widgets-position', 'right');
+                if( $mod === 'left' ){
+                    echo '.bp-better-messages-list{right: auto;left:var(--bm-mini-widgets-offset)}.bp-better-messages-mini{left:70px;right: auto}.bp-better-messages-list+.bp-better-messages-mini{right:auto;left:var(--bm-mini-chats-offset);}';
+
+                    if ( Better_Messages()->settings['miniWidgetsStyle'] === 'bubble' ) {
+                        echo '.bp-better-messages-list.bm-widget-bubble .bm-bubble-panel{right:auto;left:0;transform-origin:bottom left}';
+                        echo '.bp-better-messages-list.bm-widget-bubble+.bp-better-messages-mini{left:calc(var(--bm-bubble-size, 56px) + var(--bm-mini-widgets-offset, 70px) + 10px);right:auto}';
+                        echo '.bp-better-messages-list.bm-widget-bubble.bm-bubble-open+.bp-better-messages-mini{left:calc(var(--bm-mini-widgets-width, 320px) + var(--bm-mini-widgets-offset, 70px) + 10px);right:auto}';
+                    }
+                }
             }
 
 
@@ -1353,6 +1457,18 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
 
             $mod = get_theme_mod('bm-mini-widgets-bottom', 0 );
             echo '--bm-mini-widgets-offset-bottom:'. $mod . 'px;';
+
+            $mod = get_theme_mod('bm-bubble-size', 56 );
+            echo '--bm-bubble-size:'. $mod . 'px;';
+
+            $mod = get_theme_mod('bm-bubble-head-size', 48 );
+            echo '--bm-bubble-head-size:'. $mod . 'px;';
+
+            $mod = get_theme_mod('bm-bubble-radius', 50 );
+            echo '--bm-bubble-radius:'. $mod . '%;';
+
+            $mod = get_theme_mod('bm-bubble-head-radius', 50 );
+            echo '--bm-bubble-head-radius:'. $mod . '%;';
 
             $mod = get_theme_mod('bm-modern-radius', 2 );
             echo '--bm-message-border-radius:'. $mod . 'px;';
@@ -1474,10 +1590,18 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             $mod = get_theme_mod('bm-theme', 'light');
 
             if( $mod === 'dark' ) {
-                return array_merge($classes, array('bm-messages-dark'));
+                $classes = array_merge($classes, array('bm-messages-dark'));
             } else {
-                return array_merge($classes, array('bm-messages-light'));
+                $classes = array_merge($classes, array('bm-messages-light'));
             }
+
+            if ( ( Better_Messages()->settings['miniWidgetsStyle'] ?? 'classic' ) === 'bubble' ) {
+                $classes[] = 'bm-bubble-mode';
+                $position = get_theme_mod('bm-widgets-position', 'right');
+                $classes[] = 'bm-bubble-position-' . ( $position === 'left' ? 'left' : 'right' );
+            }
+
+            return $classes;
         }
 
 

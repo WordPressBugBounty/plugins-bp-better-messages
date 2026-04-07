@@ -47,6 +47,10 @@ class Better_Messages_Mini_List
             if( $mod > 0 ) {
                 $class .= ' bm-widget-not-at-bottom';
             }
+
+            if ( Better_Messages()->settings['miniWidgetsStyle'] === 'bubble' ) {
+                $class .= ' bm-widget-bubble';
+            }
             echo '<div class="' . $class . '"></div>';
         }
     }

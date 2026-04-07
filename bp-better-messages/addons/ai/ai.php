@@ -2743,7 +2743,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return new WP_REST_Response( array( 'status' => 'skipped' ), 200 );
             }
 
-            $message_ids = array_slice( $message_ids, 0, 50 );
+
             $texts = array();
 
             foreach ( $message_ids as $msg_id ) {
@@ -3866,6 +3866,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( strpos( $content, '<span class="bpbm-gif">' ) === 0 ) return false;
             if ( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $content, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) return false;
             $plain = wp_strip_all_tags( $content );
+            $letters = preg_replace( '/[^\pL]/u', '', mb_strtolower( $plain ) );
+            if ( $letters !== '' && mb_strlen( $letters ) > 1 && count( array_unique( mb_str_split( $letters ) ) ) === 1 ) return false;
             if ( preg_match( '/^\s*(?:[\x{1F000}-\x{1FFFF}\x{2600}-\x{27BF}\x{FE00}-\x{FE0F}\x{200D}\x{20E3}\x{E0020}-\x{E007F}\x{2702}-\x{27B0}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2194}-\x{2199}\x{231A}-\x{231B}\x{23E9}-\x{23F3}\x{23F8}-\x{23FA}\x{25AA}-\x{25AB}\x{25B6}\x{25C0}\x{25FB}-\x{25FE}\x{2614}-\x{2615}\x{2648}-\x{2653}\x{267F}\x{2693}\x{26A1}\x{26AA}-\x{26AB}\x{26BD}-\x{26BE}\x{26C4}-\x{26C5}\x{26CE}\x{26D4}\x{26EA}\x{26F2}-\x{26F3}\x{26F5}\x{26FA}\x{26FD}\x{2702}\x{2705}\x{2708}-\x{270D}\x{270F}]\s*)+$/u', $plain ) ) return false;
             return true;
         }

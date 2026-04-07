@@ -1147,6 +1147,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                             if ( in_array( $mime_type, $safe_mimes, true ) ) {
                                 $editor = wp_get_image_editor( $file_path );
                                 if ( ! is_wp_error( $editor ) ) {
+                                    // Apply EXIF orientation before stripping metadata,
+                                    // since big_image_size_threshold is disabled and WP skips its own rotation
+                                    if ( method_exists( $editor, 'maybe_exif_rotate' ) ) {
+                                        $editor->maybe_exif_rotate();
+                                    }
                                     $editor->set_quality( 100 );
                                     $editor->save( $file_path );
                                 }
@@ -2113,6 +2118,11 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                         if ( in_array( $mime_type, $safe_mimes, true ) ) {
                             $editor = wp_get_image_editor( $file_path );
                             if ( ! is_wp_error( $editor ) ) {
+                                // Apply EXIF orientation before stripping metadata,
+                                // since big_image_size_threshold is disabled and WP skips its own rotation
+                                if ( method_exists( $editor, 'maybe_exif_rotate' ) ) {
+                                    $editor->maybe_exif_rotate();
+                                }
                                 $editor->set_quality( 100 );
                                 $editor->save( $file_path );
                             }

@@ -1848,7 +1848,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'id'         => (string) $user_id,
                 'user_id'    => (int) $user_id,
                 'name'       => html_entity_decode( Better_Messages()->functions->get_name( $user_id ) ),
-                'avatar'     => Better_Messages()->functions->get_avatar( $user_id, 50, ['html' => false] ),
+                'avatar'     => Better_Messages()->functions->get_avatar( $user_id, 100, ['html' => false] ),
                 'url'        => $url,
                 'verified'   => (int) $this->is_verified( $user_id ),
                 'lastActive' => Better_Messages()->functions->get_last_activity( $user_id )
