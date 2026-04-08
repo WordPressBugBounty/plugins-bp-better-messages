@@ -61,6 +61,7 @@ class Better_Messages_Options
             'mobilePopup'                 => '0',
             'mobileFullScreen'            => '1',
             'chatPage'                    => '0',
+            'wooCommerceMessagesSlug'     => 'messages',
             'messagesStatus'              => '0',
             'messagesStatusList'          => '0',
             'messagesStatusDetailed'      => '0',
@@ -334,6 +335,18 @@ class Better_Messages_Options
             'MultiVendorXIntegration'       => '0',
             'wcVendorsIntegration'          => '0',
             'wcfmIntegration'               => '0',
+            'wooCommerceIntegration'                  => '0',
+            'wooCommerceProductButton'                => '1',
+            'wooCommerceProductButtonPlacement'       => 'before_summary',
+            'wooCommerceOrderButton'                  => '1',
+            'wooCommerceOrderButtonPlacement'         => 'after_order_table',
+            'wooCommercePrePurchaseButton'            => '0',
+            'wooCommercePrePurchaseCartPlacement'     => 'after_cart_table',
+            'wooCommercePrePurchaseCheckoutPlacement' => 'after_order_summary',
+            'wooCommerceMyAccountLink'                => '1',
+            'wooCommerceProductSupportUser'           => 0,
+            'wooCommerceOrderSupportUser'             => 0,
+            'wooCommercePrePurchaseSupportUser'       => 0,
             'jetEngineAvatars'              => '0',
             'hivepressIntegration'          => '0',
             'hivepressMenuItem'             => '0',
@@ -776,6 +789,23 @@ class Better_Messages_Options
             }
         }
 
+        $resolve_support_user = function( $user_id ){
+            $user_id = (int) $user_id;
+            if ( $user_id <= 0 || ! Better_Messages()->functions->is_user_exists( $user_id ) ) {
+                return null;
+            }
+            $user = Better_Messages()->functions->rest_user_item( $user_id );
+            return array(
+                'value'  => $user['user_id'],
+                'label'  => $user['name'],
+                'avatar' => $user['avatar'],
+            );
+        };
+
+        $woocommerce_product_support_user      = $resolve_support_user( $this->settings['wooCommerceProductSupportUser'] );
+        $woocommerce_order_support_user        = $resolve_support_user( $this->settings['wooCommerceOrderSupportUser'] );
+        $woocommerce_pre_purchase_support_user = $resolve_support_user( $this->settings['wooCommercePrePurchaseSupportUser'] );
+
         // Load emailCustomHtml from separate option for frontend display
         $settings_for_frontend = $this->settings;
         $settings_for_frontend['emailCustomHtml'] = $this->get_email_custom_html();
@@ -863,6 +893,9 @@ class Better_Messages_Options
             ),
             'ffmpegSize'         => class_exists('Better_Messages_Files') ? Better_Messages_Files::get_ffmpeg_info()['size'] : '',
             'suggestedConversationsUsers' => $suggested_conversations_users,
+            'wooCommerceProductSupportUserData'     => $woocommerce_product_support_user,
+            'wooCommerceOrderSupportUserData'       => $woocommerce_order_support_user,
+            'wooCommercePrePurchaseSupportUserData' => $woocommerce_pre_purchase_support_user,
             'emojiCustomization' => get_option( 'bm-emoji-set-2', array() ),
             'emojiSpriteUrls'    => array(
                 'apple'    => 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@14.0.0/img/apple/sheets-256/64.png',
@@ -1833,6 +1866,26 @@ class Better_Messages_Options
             $settings['wcfmIntegration'] = '0';
         }
 
+        if( ! isset( $settings['wooCommerceIntegration'] ) ) {
+            $settings['wooCommerceIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['wooCommerceProductButton'] ) ) {
+            $settings['wooCommerceProductButton'] = '0';
+        }
+
+        if( ! isset( $settings['wooCommerceOrderButton'] ) ) {
+            $settings['wooCommerceOrderButton'] = '0';
+        }
+
+        if( ! isset( $settings['wooCommercePrePurchaseButton'] ) ) {
+            $settings['wooCommercePrePurchaseButton'] = '0';
+        }
+
+        if( ! isset( $settings['wooCommerceMyAccountLink'] ) ) {
+            $settings['wooCommerceMyAccountLink'] = '0';
+        }
+
         if( ! isset( $settings['jetEngineAvatars'] ) ) {
             $settings['jetEngineAvatars'] = '0';
         }
@@ -1965,6 +2018,26 @@ class Better_Messages_Options
             $settings['giphyContentRating'] = 'g';
         }
 
+        $wc_product_placements = ['before_summary', 'before_add_to_cart', 'after_add_to_cart', 'after_summary', 'manual'];
+        if( ! isset( $settings['wooCommerceProductButtonPlacement'] ) || ! in_array( $settings['wooCommerceProductButtonPlacement'], $wc_product_placements, true ) ) {
+            $settings['wooCommerceProductButtonPlacement'] = 'before_summary';
+        }
+
+        $wc_order_placements = ['before_order_table', 'after_order_table', 'after_customer_details', 'manual'];
+        if( ! isset( $settings['wooCommerceOrderButtonPlacement'] ) || ! in_array( $settings['wooCommerceOrderButtonPlacement'], $wc_order_placements, true ) ) {
+            $settings['wooCommerceOrderButtonPlacement'] = 'after_order_table';
+        }
+
+        $wc_cart_placements = ['before_cart', 'after_cart_table', 'cart_collaterals', 'proceed_to_checkout', 'after_cart', 'manual'];
+        if( ! isset( $settings['wooCommercePrePurchaseCartPlacement'] ) || ! in_array( $settings['wooCommercePrePurchaseCartPlacement'], $wc_cart_placements, true ) ) {
+            $settings['wooCommercePrePurchaseCartPlacement'] = 'after_cart_table';
+        }
+
+        $wc_checkout_placements = ['before_form', 'before_order_summary', 'after_order_summary', 'after_form', 'manual'];
+        if( ! isset( $settings['wooCommercePrePurchaseCheckoutPlacement'] ) || ! in_array( $settings['wooCommercePrePurchaseCheckoutPlacement'], $wc_checkout_placements, true ) ) {
+            $settings['wooCommercePrePurchaseCheckoutPlacement'] = 'after_order_summary';
+        }
+
         // Email template source validation (for BuddyPress sites)
         if( ! isset( $settings['emailTemplateSource'] ) || ! in_array( $settings['emailTemplateSource'], ['buddypress', 'custom'] ) ) {
             $settings['emailTemplateSource'] = 'buddypress';
@@ -1992,6 +2065,10 @@ class Better_Messages_Options
         } else {
             $settings['suggestedConversations'] = array_map('intval', $settings['suggestedConversations']);
         }
+
+        $settings['wooCommerceProductSupportUser']     = isset( $settings['wooCommerceProductSupportUser'] ) ? (int) $settings['wooCommerceProductSupportUser'] : 0;
+        $settings['wooCommerceOrderSupportUser']       = isset( $settings['wooCommerceOrderSupportUser'] ) ? (int) $settings['wooCommerceOrderSupportUser'] : 0;
+        $settings['wooCommercePrePurchaseSupportUser'] = isset( $settings['wooCommercePrePurchaseSupportUser'] ) ? (int) $settings['wooCommercePrePurchaseSupportUser'] : 0;
 
         $links_allowed = [
             'restrictBadWordsList',
@@ -2212,6 +2289,14 @@ class Better_Messages_Options
 
         if ( ! isset( $this->settings['bpGroupSlug'] ) || empty( $this->settings['bpGroupSlug'] ) ) {
             $this->settings['bpGroupSlug'] = 'bp-messages';
+        }
+
+        if ( ! isset( $this->settings['wooCommerceMessagesSlug'] ) ) {
+            $this->settings['wooCommerceMessagesSlug'] = 'messages';
+        }
+        $this->settings['wooCommerceMessagesSlug'] = sanitize_title( $this->settings['wooCommerceMessagesSlug'] );
+        if ( $this->settings['wooCommerceMessagesSlug'] === '' ) {
+            $this->settings['wooCommerceMessagesSlug'] = 'messages';
         }
 
         // Ensure required output formats are in attachmentsFormats when optimization is enabled

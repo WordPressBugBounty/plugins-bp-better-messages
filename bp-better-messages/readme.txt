@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.13
+Stable tag: 2.14.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -128,6 +128,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [BuddyPress](https://wordpress.org/plugins/buddypress)
 * [Ultimate Member](https://wordpress.org/plugins/ultimate-member)
 * [PeepSo](https://www.wordplus.org/peepso)
+* [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
@@ -137,11 +138,10 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
 * [wpForo](https://www.better-messages.com/docs/integrations/wpforo/)
 * [HivePress](https://www.wordplus.org/hivepress/)
-* [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
 * [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
+* [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
 * [WC Vendors](https://www.wordplus.org/knowledge-base/wc-vendors/)
 * [WCFM](https://www.wordplus.org/knowledge-base/wcfm/)
-* [WooCommerce](https://www.wordplus.org/knowledge-base/woocommerce-my-account/)
 * [Verified Member for BuddyPress](https://www.wordplus.org/bpvm) - verified badges for users
 * [AutomatorWP](https://www.wordplus.org/automatorwp)
 * [Uncanny Automator](https://www.wordplus.org/uncanny)
@@ -245,6 +245,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.14.14 =
+* Added [WooCommerce integration](https://www.better-messages.com/docs/integrations/woocommerce) — adds contact buttons on product, cart, checkout, and order pages with configurable placement and recipient
+    * Added Product Page contact button with 4 placement options (above/below summary, above/below add-to-cart) — works in both classic and block themes
+    * Added Order Page contact button on My Account → View Order
+    * Added Pre-purchase Help Button on cart and checkout pages
+    * Added automatic cart snapshot — when a customer starts a chat from cart or checkout, the contents of their cart are auto-posted as a rich message in the conversation.
+    * Added rich product cards in chat — plain WooCommerce product URLs pasted in any chat message are auto-expanded into rich cards with image, title, and price
+    * Fixed bug where saving plugin settings could wipe registered rewrite endpoints (WooCommerce, BuddyPress, Better Messages) until permalinks were manually re-saved
+* Removed hardcoded logo width and height in the email notifications template
+* Other minor bugfixes and improvements
 
 = 2.14.13 =
 * Added new "Floating Bubble" display style for mini widgets — replaces the classic bottom tab bar with a circular button that expands into a chat panel on click

@@ -205,7 +205,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 add_action( 'init', array( $this, 'woocommerce_add_messages_endpoint' ) );
                 add_filter( 'query_vars', array( $this, 'woocommerce_messages_query_vars' ), 0 );
 
-                $slug = Better_Messages()->settings['bpProfileSlug'];
+                $slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
                 add_filter( 'woocommerce_account_menu_items', array( $this, 'woocommerce_add_messages_link_my_account' ) );
                 add_action( 'woocommerce_account_' . $slug . '_endpoint', array( $this, 'woocommerce_messages_content' ) );
             }
@@ -303,7 +303,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_HivePress::instance();
             }
 
-            add_action('init', array( $this, 'flush_rewrite_rules' ) );
+            add_action('init', array( $this, 'flush_rewrite_rules' ), PHP_INT_MAX );
 
             add_action( 'better_messages_thread_updated', array( $this, 'thread_updated' ), 10, 1 );
 
@@ -588,13 +588,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function flush_rewrite_rules(){
             if( ! is_admin() ) return false;
-            global $wp_rewrite;
 
             $is_updated = get_option( 'bp-better-chat-settings-updated', false );
 
             if( $is_updated ) {
-                flush_rewrite_rules();
-                $wp_rewrite->init();
+                flush_rewrite_rules( false );
                 delete_option( 'bp-better-chat-settings-updated' );
             }
         }
@@ -832,7 +830,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $page = get_option('woocommerce_myaccount_page_id');
             $page = get_post($page);
 
-            $slug = Better_Messages()->settings['bpProfileSlug'];
+            $slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
 
             if( !! $page ) {
                 add_rewrite_endpoint($slug, EP_ROOT | EP_PAGES);
@@ -840,19 +838,19 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function woocommerce_messages_query_vars( $vars ){
-            $slug = Better_Messages()->settings['bpProfileSlug'];
+            $slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
             $vars[] = $slug;
             return $vars;
         }
 
         public function woocommerce_add_messages_link_my_account( $items ){
-            $slug = Better_Messages()->settings['bpProfileSlug'];
+            $slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
             $label = __('Messages', 'bp-better-messages');
 
             if( isset( $items['customer-logout']) ) {
                 $items = Better_Messages()->functions->array_insert_before('customer-logout', $items, $slug, $label);
             } else {
-                $items['bp-messages'] = $label;
+                $items[ $slug ] = $label;
             }
 
             return $items;

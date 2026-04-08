@@ -1596,9 +1596,23 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             }
 
             if ( ( Better_Messages()->settings['miniWidgetsStyle'] ?? 'classic' ) === 'bubble' ) {
-                $classes[] = 'bm-bubble-mode';
-                $position = get_theme_mod('bm-widgets-position', 'right');
-                $classes[] = 'bm-bubble-position-' . ( $position === 'left' ? 'left' : 'right' );
+                $has_mini_widget = false;
+
+                if ( is_user_logged_in() || Better_Messages()->guests->guest_access_enabled() ) {
+                    $script_variables = Better_Messages()->script_variables;
+
+                    $threads = isset( $script_variables['miniMessages'] ) && $script_variables['miniMessages'] === '1';
+                    $friends = is_user_logged_in() && isset( $script_variables['miniFriends'] ) && $script_variables['miniFriends'] === '1';
+                    $groups  = is_user_logged_in() && isset( $script_variables['miniGroups'] ) && $script_variables['miniGroups'] === '1';
+
+                    $has_mini_widget = ( $threads || $friends || $groups );
+                }
+
+                if ( $has_mini_widget ) {
+                    $classes[] = 'bm-bubble-mode';
+                    $position = get_theme_mod('bm-widgets-position', 'right');
+                    $classes[] = 'bm-bubble-position-' . ( $position === 'left' ? 'left' : 'right' );
+                }
             }
 
             return $classes;

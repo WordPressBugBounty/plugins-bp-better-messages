@@ -2446,35 +2446,171 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function render_login_form(){
+            Better_Messages()->enqueue_css();
+
             ob_start();
             ?>
             <style type="text/css">
                 .bm-login-form{
-                    background: white;
-                    border: 1px solid #ccc;
-                    color: black;
-                    padding: 15px 25px;
-                    margin: 15px auto;
+                    background: rgba(var(--bm-bg-color), 1);
+                    border: 1px solid rgba(var(--bm-border-color), 1);
+                    border-radius: var(--bm-border-radius);
+                    color: rgba(var(--bm-text-color), 1);
+                    font-family: var(--bm-font-family);
+                    padding: 28px 32px;
+                    margin: 20px auto;
                     width: 100%;
-                    max-width: 600px;
+                    max-width: 420px;
+                    box-sizing: border-box;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+
+                .bm-login-form *,
+                .bm-login-form *::before,
+                .bm-login-form *::after{
+                    box-sizing: border-box;
                 }
 
                 .bm-login-form .bm-login-text{
-                    color: black;
-                    font-size: 16px;
-                    margin: 10px 0 20px;
-                    font-weight: bold;
+                    color: rgba(var(--bm-text-color), 1);
+                    font-size: 18px;
+                    line-height: 1.3;
+                    margin: 0 0 22px;
+                    padding: 0;
+                    font-weight: 600;
+                    text-align: center;
+                }
+
+                .bm-login-form form p{
+                    margin: 0 0 14px;
+                    padding: 0;
                 }
 
                 .bm-login-form form label{
                     display: block;
                     width: 100%;
-                    margin-bottom: 10px;
+                    margin: 0 0 6px;
+                    padding: 0;
+                    color: rgba(var(--bm-text-color), 0.85);
+                    font-size: 13px;
+                    font-weight: 500;
+                    line-height: 1.4;
                 }
+
                 .bm-login-form form input[type="text"],
-                .bm-login-form form input[type="password"]{
+                .bm-login-form form input[type="password"],
+                .bm-login-form form input[type="email"]{
                     display: block;
                     width: 100%;
+                    height: auto;
+                    margin: 0;
+                    padding: 9px 12px;
+                    background: rgba(var(--bm-bg-secondary), 1);
+                    border: 1px solid rgba(var(--bm-border-color), 1);
+                    border-radius: var(--bm-border-radius);
+                    color: rgba(var(--bm-text-color), 1);
+                    font-family: inherit;
+                    font-size: 14px;
+                    line-height: 1.4;
+                    outline: none;
+                    box-shadow: none;
+                    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+
+                .bm-login-form form input[type="text"]:focus,
+                .bm-login-form form input[type="password"]:focus,
+                .bm-login-form form input[type="email"]:focus{
+                    border-color: rgba(var(--main-bm-color), 1);
+                    box-shadow: 0 0 0 3px rgba(var(--main-bm-color), 0.15);
+                }
+
+                .bm-login-form form .login-remember{
+                    margin: 4px 0 18px;
+                }
+
+                .bm-login-form form .login-remember label{
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin: 0;
+                    font-size: 13px;
+                    color: rgba(var(--bm-text-color), 0.8);
+                    cursor: pointer;
+                }
+
+                .bm-login-form form .login-remember input[type="checkbox"]{
+                    margin: 0;
+                    width: 16px;
+                    height: 16px;
+                    flex-shrink: 0;
+                    accent-color: rgba(var(--main-bm-color), 1);
+                }
+
+                .bm-login-form form .login-submit{
+                    margin: 0;
+                }
+
+                .bm-login-form form input[type="submit"],
+                .bm-login-form form button[type="submit"]{
+                    display: block;
+                    width: 100%;
+                    margin: 0;
+                    padding: 10px 16px;
+                    background: rgba(var(--main-bm-color), 1);
+                    border: 1px solid rgba(var(--main-bm-color), 1);
+                    border-radius: var(--bm-border-radius);
+                    color: #ffffff;
+                    font-family: inherit;
+                    font-size: 14px;
+                    font-weight: 500;
+                    line-height: 1.4;
+                    text-align: center;
+                    cursor: pointer;
+                    outline: none;
+                    box-shadow: none;
+                    text-shadow: none;
+                    transition: filter 0.15s ease, box-shadow 0.15s ease;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+
+                .bm-login-form form input[type="submit"]:hover,
+                .bm-login-form form button[type="submit"]:hover{
+                    filter: brightness(1.1);
+                }
+
+                .bm-login-form form input[type="submit"]:focus,
+                .bm-login-form form button[type="submit"]:focus{
+                    box-shadow: 0 0 0 3px rgba(var(--main-bm-color), 0.3);
+                }
+
+                body.bm-messages-dark .bm-login-form form input[type="text"],
+                body.bm-messages-dark .bm-login-form form input[type="password"],
+                body.bm-messages-dark .bm-login-form form input[type="email"]{
+                    background: rgba(var(--bm-bg-color), 1);
+                    border-color: rgba(var(--bm-border-color), 0.5);
+                }
+
+                body.bm-messages-dark .bm-login-form form input[type="text"]:focus,
+                body.bm-messages-dark .bm-login-form form input[type="password"]:focus,
+                body.bm-messages-dark .bm-login-form form input[type="email"]:focus{
+                    border-color: rgba(var(--bm-border-color), 1);
+                    box-shadow: 0 0 0 3px rgba(var(--bm-border-color), 0.4);
+                }
+
+                body.bm-messages-dark .bm-login-form form input[type="submit"],
+                body.bm-messages-dark .bm-login-form form button[type="submit"]{
+                    background: rgba(var(--bm-bg-secondary), 1);
+                    border: 1px solid rgba(var(--bm-border-color), 0.5);
+                    color: rgba(var(--bm-text-color), 1);
+                }
+
+                body.bm-messages-dark .bm-login-form form input[type="submit"]:focus,
+                body.bm-messages-dark .bm-login-form form button[type="submit"]:focus{
+                    box-shadow: 0 0 0 3px rgba(var(--bm-border-color), 0.5);
                 }
             </style>
             <div class="bm-login-form">

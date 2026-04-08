@@ -4907,4 +4907,188 @@ body.folded .bm-viewer-new-wrap .bm-viewer-new-content .bm-bulk-action-bar {
   justify-content: flex-end;
 }
 
+/* WooCommerce integration: cart snapshot + product link rendered inside the
+ * admin viewer message list. The frontend chat has its own copies in
+ * bp-messages.scss scoped under .bp-messages-wrap.
+ */
+.bm-message-content .bm-wc-cart-snapshot {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+.bm-message-content .bm-wc-cart-snapshot ul.bm-wc-cart-snapshot-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bm-message-content .bm-wc-cart-snapshot li.bm-wc-cart-snapshot-item {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bm-message-content .bm-wc-cart-snapshot li.bm-wc-cart-snapshot-item:before {
+  display: none;
+  content: none;
+}
+.bm-message-content .bm-wc-cart-snapshot a.bm-wc-cart-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+.bm-message-content .bm-wc-cart-snapshot a.bm-wc-cart-link:hover, .bm-message-content .bm-wc-cart-snapshot a.bm-wc-cart-link:focus {
+  text-decoration: none;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.08);
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-thumb {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  overflow: hidden;
+  display: block;
+  background: rgba(0, 0, 0, 0.06);
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-thumb img {
+  display: block;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  object-fit: cover;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-thumb-empty {
+  background: rgba(0, 0, 0, 0.08);
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-name {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-item-meta {
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.7;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+}
+.bm-message-content .bm-wc-cart-snapshot .bm-wc-cart-snapshot-total strong {
+  font-weight: 700;
+}
+
+.bm-message-content a.bm-wc-product-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin: 4px 0;
+  max-width: 100%;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.05);
+  border: 0;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+  box-sizing: border-box;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.bm-message-content a.bm-wc-product-link:hover, .bm-message-content a.bm-wc-product-link:focus {
+  text-decoration: none;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.08);
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-image {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  overflow: hidden;
+  display: block;
+  background: rgba(0, 0, 0, 0.06);
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-image img {
+  display: block;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  object-fit: cover;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-title {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-price {
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.7;
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-price del {
+  opacity: 0.5;
+  margin-right: 4px;
+}
+.bm-message-content a.bm-wc-product-link .bm-wc-product-link-price ins, .bm-message-content a.bm-wc-product-link .bm-wc-product-link-price mark {
+  background: none;
+  text-decoration: none;
+}
+
 /*# sourceMappingURL=admin.css.map*/

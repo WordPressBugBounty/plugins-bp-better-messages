@@ -1065,7 +1065,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             // Get logo HTML if logo is set
             $logo_html = '';
             if ( ! empty( $settings['emailLogoUrl'] ) ) {
-                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 200px; max-height: 60px;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
+                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 100%; height: auto;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
             }
 
             // Build the email HTML
@@ -1204,7 +1204,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             // Logo HTML
             $logo_html = '';
             if ( ! empty( $settings['emailLogoUrl'] ) ) {
-                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 200px; max-height: 60px;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
+                $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 100%; height: auto;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
             }
 
             // Unsubscribe HTML
