@@ -773,7 +773,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
 
                 if (class_exists('WooCommerce') && Better_Messages()->settings['chatPage'] === 'woocommerce') {
-                    $link = trailingslashit(get_permalink(get_option('woocommerce_myaccount_page_id'))) . $slug . '/';
+                    $woo_slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
+                    $link = trailingslashit(get_permalink(get_option('woocommerce_myaccount_page_id'))) . $woo_slug . '/';
                     return $link;
                 }
 

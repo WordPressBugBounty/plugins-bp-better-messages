@@ -2159,7 +2159,8 @@ class Better_Messages_Options
             'reactionsEmojies',
             'suggestedConversations',
             'messagesPremoderationRolesNewConv',
-            'messagesPremoderationRolesReplies'
+            'messagesPremoderationRolesReplies',
+            'stickerPacksSummary'
         ];
 
         foreach ( $settings as $key => $value ) {
@@ -2348,6 +2349,12 @@ class Better_Messages_Options
         do_action( 'bp_better_chat_settings_updated', $this->settings );
 
         update_option( 'bp-better-chat-settings-updated', true );
+
+        // Ensure user index is created if initial sync never completed
+        $last_sync = get_option( 'bm_sync_user_roles_index_finish', false );
+        if ( ! $last_sync ) {
+            Better_Messages()->users->sync_all_users();
+        }
     }
 
 }

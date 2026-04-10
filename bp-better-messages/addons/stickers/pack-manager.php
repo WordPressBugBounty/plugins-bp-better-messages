@@ -46,8 +46,9 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
      */
     class Better_Messages_Sticker_Pack_Manager
     {
-        const OPTION_KEY = 'better_messages_sticker_packs';
-        const HASH_KEY   = 'stickerPacksHash';
+        const OPTION_KEY   = 'better_messages_sticker_packs';
+        const HASH_KEY     = 'stickerPacksHash';
+        const SUMMARY_KEY  = 'stickerPacksSummary';
 
         private static $instance = null;
         private $packs_cache     = null;
@@ -444,6 +445,7 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
             update_option( self::OPTION_KEY, $packs, false );
             $this->packs_cache = $packs;
             $this->update_hash();
+            $this->auto_enable_builtin();
 
             // Trigger manifest regeneration on next frontend request.
             if ( class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
@@ -483,36 +485,63 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
          */
         public function update_hash()
         {
-            $packs = $this->get_all();
-            $hash  = substr( md5( wp_json_encode( $packs ) ), 0, 8 );
+            $packs   = $this->get_all();
+            $hash    = substr( md5( wp_json_encode( $packs ) ), 0, 8 );
+            $summary = array();
+
+            foreach ( $packs as $pack ) {
+                if ( empty( $pack['enabled'] ) || empty( $pack['stickers'] ) ) {
+                    continue;
+                }
+                $summary[] = array(
+                    'id'            => isset( $pack['id'] ) ? $pack['id'] : '',
+                    'allowed_roles' => isset( $pack['allowed_roles'] ) ? (array) $pack['allowed_roles'] : array(),
+                );
+            }
 
             $stored = get_option( 'bp-better-chat-settings', array() );
             if ( ! is_array( $stored ) ) {
                 $stored = array();
             }
 
-            $existing = isset( $stored[ self::HASH_KEY ] ) ? $stored[ self::HASH_KEY ] : '';
-            if ( $existing === $hash ) {
-                return $hash;
-            }
-
-            $stored[ self::HASH_KEY ] = $hash;
+            $stored[ self::HASH_KEY ]    = $hash;
+            $stored[ self::SUMMARY_KEY ] = $summary;
             update_option( 'bp-better-chat-settings', $stored );
 
-            // Keep the live instance in sync if it's already loaded.
             if ( isset( Better_Messages()->settings ) && is_array( Better_Messages()->settings ) ) {
-                Better_Messages()->settings[ self::HASH_KEY ] = $hash;
+                Better_Messages()->settings[ self::HASH_KEY ]    = $hash;
+                Better_Messages()->settings[ self::SUMMARY_KEY ] = $summary;
             }
 
             return $hash;
         }
 
-        /**
-         * Public accessor for the current hash. Reads from the live settings
-         * instance when available, otherwise falls back to the DB option.
-         * Does NOT auto-compute during early boot — only the hook-triggered
-         * update_hash() should write to the option.
-         */
+        protected function auto_enable_builtin()
+        {
+            $settings = Better_Messages()->settings;
+            $provider = isset( $settings['stickersProvider'] ) ? $settings['stickersProvider'] : '';
+
+            if ( $provider !== '' ) {
+                return;
+            }
+
+            if ( ! empty( $settings['stipopApiKey'] ) ) {
+                return;
+            }
+
+            $stored = get_option( 'bp-better-chat-settings', array() );
+            if ( ! is_array( $stored ) ) {
+                $stored = array();
+            }
+
+            $stored['stickersProvider'] = 'builtin';
+            update_option( 'bp-better-chat-settings', $stored );
+
+            if ( isset( Better_Messages()->settings ) && is_array( Better_Messages()->settings ) ) {
+                Better_Messages()->settings['stickersProvider'] = 'builtin';
+            }
+        }
+
         public function get_hash()
         {
             if ( isset( Better_Messages()->settings ) && is_array( Better_Messages()->settings ) ) {

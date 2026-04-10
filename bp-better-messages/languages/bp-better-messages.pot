@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.14.15\n"
+"Project-Id-Version: Better Messages 2.14.16\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-10T15:01:53+00:00\n"
+"POT-Creation-Date: 2026-04-10T17:13:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -905,7 +905,7 @@ msgid "GIFs are not enabled."
 msgstr ""
 
 #: addons/gifs/gifs.php:119
-#: addons/stickers/stickers.php:98
+#: addons/stickers/stickers.php:101
 #: addons/stickers/stipop.php:121
 msgid "You are not allowed to reply to this conversation."
 msgstr ""
@@ -1345,19 +1345,19 @@ msgstr ""
 msgid "Sticker pack archive for \"%s\" contains an invalid pack.json."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:127
+#: addons/stickers/pack-manager.php:128
 msgid "A sticker pack with this id already exists."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:131
+#: addons/stickers/pack-manager.php:132
 msgid "Sticker pack title is required."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:182
-#: addons/stickers/pack-manager.php:206
-#: addons/stickers/pack-manager.php:260
-#: addons/stickers/pack-manager.php:300
-#: addons/stickers/pack-manager.php:331
+#: addons/stickers/pack-manager.php:183
+#: addons/stickers/pack-manager.php:207
+#: addons/stickers/pack-manager.php:261
+#: addons/stickers/pack-manager.php:301
+#: addons/stickers/pack-manager.php:332
 #: addons/stickers/rest.php:192
 #: addons/stickers/rest.php:409
 #: addons/stickers/rest.php:514
@@ -1366,15 +1366,15 @@ msgstr ""
 msgid "Sticker pack not found."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:219
+#: addons/stickers/pack-manager.php:220
 msgid "Invalid order data."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:266
+#: addons/stickers/pack-manager.php:267
 msgid "Sticker file is required."
 msgstr ""
 
-#: addons/stickers/pack-manager.php:314
+#: addons/stickers/pack-manager.php:315
 #: addons/stickers/rest.php:421
 #: addons/stickers/rest.php:525
 msgid "Sticker not found."
@@ -1420,11 +1420,11 @@ msgstr ""
 msgid "Missing catalog pack id."
 msgstr ""
 
-#: addons/stickers/stickers.php:72
+#: addons/stickers/stickers.php:75
 msgid "Missing sticker URL."
 msgstr ""
 
-#: addons/stickers/stickers.php:78
+#: addons/stickers/stickers.php:81
 msgid "Invalid sticker URL."
 msgstr ""
 
@@ -2515,29 +2515,29 @@ msgctxt "WP Customizer"
 msgid "Border radius of the chat head avatar bubbles"
 msgstr ""
 
-#: inc/functions.php:936
-#: inc/functions.php:969
+#: inc/functions.php:937
+#: inc/functions.php:970
 #: inc/hooks.php:885
 msgid "Deleted User"
 msgstr ""
 
-#: inc/functions.php:981
+#: inc/functions.php:982
 #, php-format
 msgid "Profile picture of %s"
 msgstr ""
 
-#: inc/functions.php:1227
-#: inc/functions.php:1270
+#: inc/functions.php:1228
+#: inc/functions.php:1271
 msgctxt "Rest API Error"
 msgid "Error while creating new conversation"
 msgstr ""
 
-#: inc/functions.php:1234
+#: inc/functions.php:1235
 msgctxt "Rest API Error"
 msgid "User does not exists"
 msgstr ""
 
-#: inc/functions.php:1243
+#: inc/functions.php:1244
 #: inc/translations/strings.php:709
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -2549,7 +2549,7 @@ msgctxt "Shortcode error"
 msgid "You can not start a conversation with yourself"
 msgstr ""
 
-#: inc/functions.php:1764
+#: inc/functions.php:1765
 #: inc/mobile-app/inc/pushs.php:541
 #: inc/translations/strings.php:582
 #: assets/js/bp-messages-app.js:1
@@ -2569,34 +2569,34 @@ msgctxt "Thread Title (when subjects are disabled)"
 msgid "%s Participants"
 msgstr ""
 
-#: inc/functions.php:2187
+#: inc/functions.php:2188
 msgid "Get WebSocket License"
 msgstr ""
 
-#: inc/functions.php:2191
+#: inc/functions.php:2192
 #, php-format
 msgid "<a href=\"%s\" target=\"_blank\">Download</a> and install Premium version of plugin to use this feature"
 msgstr ""
 
-#: inc/functions.php:2618
+#: inc/functions.php:2619
 msgctxt "Login form for unlogged users"
 msgid "Login required"
 msgstr ""
 
-#: inc/functions.php:2720
+#: inc/functions.php:2721
 msgid "Your message was not sent. Please use a valid sender."
 msgstr ""
 
-#: inc/functions.php:2723
+#: inc/functions.php:2724
 msgid "Your message was not sent. Please enter some content."
 msgstr ""
 
-#: inc/functions.php:2772
+#: inc/functions.php:2773
 #, php-format
 msgid "Re: %s"
 msgstr ""
 
-#: inc/functions.php:2779
+#: inc/functions.php:2780
 #: inc/translations/strings.php:377
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -2612,7 +2612,7 @@ msgctxt "User tried to send message with no recipients"
 msgid "Please select recipient(s) before sending the message"
 msgstr ""
 
-#: inc/functions.php:2879
+#: inc/functions.php:2880
 msgid "Message was not sent. Please try again."
 msgstr ""
 

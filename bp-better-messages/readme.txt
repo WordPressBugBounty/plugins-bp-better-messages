@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.15
+Stable tag: 2.14.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -247,7 +247,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.14.15 =
+= 2.14.16 =
 * Making Stipop Sticker provider legacy as it increased price significantly since initial integration
 * Added [built-in sticker packs system](https://www.better-messages.com/docs/features/stickers) - create and manage your own sticker packs, with role-based access control and per-locale support
 * Added 8 pre-created sticker packs which can be installed from plugin settings

@@ -36,10 +36,13 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
         public function ensure_hash_exists()
         {
-            if ( Better_Messages_Sticker_Pack_Manager::instance()->get_hash() === '' ) {
-                $packs = Better_Messages_Sticker_Pack_Manager::instance()->get_all();
+            $pm   = Better_Messages_Sticker_Pack_Manager::instance();
+            $hash = $pm->get_hash();
+
+            if ( $hash === '' ) {
+                $packs = $pm->get_all();
                 if ( ! empty( $packs ) ) {
-                    Better_Messages_Sticker_Pack_Manager::instance()->update_hash();
+                    $pm->update_hash();
                 }
             }
         }
@@ -74,7 +77,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
             $upload = wp_upload_dir();
             $prefix = trailingslashit( $upload['baseurl'] ) . 'better-messages/stickers/packs/';
-            if ( strpos( $sticker_url, $prefix ) !== 0 ) {
+            if ( strpos( $sticker_url, $prefix ) !== 0 || strpos( $sticker_url, '..' ) !== false ) {
                 return new WP_Error( 'invalid_sticker', __( 'Invalid sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
             }
 
@@ -178,17 +181,27 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
             }
 
             // Empty provider: backward-compat detection.
-            // Stipop users keep working; everyone else (including new installs) gets disabled.
             return ! empty( $settings['stipopApiKey'] ) ? 'stipop' : 'disabled';
         }
 
         private function get_allowed_pack_ids(){
+            $settings = Better_Messages()->settings;
+            $summary  = isset( $settings['stickerPacksSummary'] ) ? $settings['stickerPacksSummary'] : null;
+
+            if ( ! is_array( $summary ) ) {
+                return array();
+            }
+
+            if ( empty( $summary ) ) {
+                return array();
+            }
+
             $user_id    = Better_Messages()->functions->get_current_user_id();
             $user_roles = Better_Messages()->functions->get_user_roles( $user_id );
             $ids        = array();
 
-            foreach ( Better_Messages_Sticker_Pack_Manager::instance()->get_all() as $pack ) {
-                if ( empty( $pack['enabled'] ) || empty( $pack['stickers'] ) ) {
+            foreach ( $summary as $pack ) {
+                if ( ! is_array( $pack ) || ! isset( $pack['id'] ) ) {
                     continue;
                 }
                 $allowed = isset( $pack['allowed_roles'] ) ? (array) $pack['allowed_roles'] : array();
