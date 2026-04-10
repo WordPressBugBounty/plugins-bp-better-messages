@@ -6713,6 +6713,44 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-mentions .bm-mention.bm-mention-active {
   background: rgb(var(--bm-hover-bg));
 }
+.bp-messages-wrap .bm-sticker-suggestions {
+  border-top: 1px solid rgb(var(--bm-border-secondary-color));
+  background: rgba(var(--bm-bg-secondary), 1);
+  width: 100%;
+  z-index: 2 !important;
+}
+.bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestions-scroller {
+  width: 100%;
+  padding: 6px 8px;
+}
+.bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestions-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+}
+.bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestion {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 4px;
+  transition: background 0.1s ease;
+}
+.bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestion img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+.bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestion:hover, .bp-messages-wrap .bm-sticker-suggestions .bm-sticker-suggestion.bm-sticker-suggestion-active {
+  background: rgba(var(--bm-text-color), 0.08);
+}
 .bp-messages-wrap .bm-thread-settings-container {
   overflow: auto;
   position: absolute;
@@ -8995,6 +9033,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap .bm-reply .bm-points-balance {
   align-self: center;
   opacity: 0.6;
+  height: 100%;
+  align-items: flex-end;
+  padding-bottom: 20px;
 }
 .bp-messages-wrap .bpbm-user-me-popup-balance {
   justify-content: center;
@@ -13706,6 +13747,7 @@ body.bp-messages-mobile .bp-better-messages-list {
 body.bp-messages-mobile {
   overflow: hidden !important;
   overscroll-behavior-x: none;
+  background: rgba(var(--bm-bg-color), 1) !important;
 }
 
 .bpbm-deleted-user-link {
@@ -13826,16 +13868,69 @@ body.bp-messages-mobile .bp-better-messages-mini {
   align-content: space-between;
   border-bottom: 1px solid rgba(var(--bm-border-color), 0.62);
   padding: 0;
+  min-height: 40px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs {
   width: 100%;
   display: block;
-  /* padding-bottom: 10px; */
+  height: 40px;
   max-width: calc(100% - 40px);
   white-space: nowrap;
   position: relative;
   border-right: 1px solid rgba(var(--bm-border-color), 0.62);
+}
+
+/* Single-pack mode: tabs row is replaced by a full-width search input. */
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs--search {
+  display: flex;
+  align-items: center;
+}
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs--search span[data-package-id=search] {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: auto;
+  max-width: none;
+  background: none !important;
+  margin: 0 5px;
+  padding: 0;
+  min-width: 0;
+}
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs--search span[data-package-id=search] input {
+  outline: none;
+  padding: 0 0 0 10px;
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 1px !important;
+  line-height: 35px;
+  font-size: 13px;
+  height: 35px;
+  min-height: 35px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(var(--bm-border-color), 0.62) !important;
+  color: rgba(var(--bm-text-color), 1) !important;
+  background: rgba(var(--bm-bg-color), 1) !important;
+}
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs--search span[data-package-id=search] input::placeholder {
+  color: rgba(var(--bm-placeholder), 0.33);
+}
+
+/* Horizontal scroller (OverlayScrollbars) wrapping the sticker tabs row */
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs-scroller {
+  width: 100%;
+  max-width: calc(100% - 40px);
+  height: 40px;
+  border-right: 1px solid rgba(var(--bm-border-color), 0.62);
+}
+.bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs-scroller .bpbm-stickers-tabs {
+  width: auto;
+  max-width: none;
+  border-right: none;
+  display: block;
+  height: 40px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs span {
@@ -13862,12 +13957,14 @@ body.bp-messages-mobile .bp-better-messages-mini {
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-close {
   display: block;
   width: 40px;
+  height: 40px;
   font-size: 28px;
   padding: 0;
   cursor: pointer;
   text-align: center;
   line-height: 40px;
   position: relative;
+  margin-left: auto;
 }
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-close svg {
   position: absolute;
@@ -13886,10 +13983,15 @@ body.bp-messages-mobile .bp-better-messages-mini {
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs span img {
   display: block;
   cursor: pointer;
-  padding: 5px;
-  max-height: 100%;
-  margin: 0;
-  max-width: 100%;
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  margin: auto;
+  max-width: calc(100% - 10px);
+  max-height: calc(100% - 10px);
+  object-fit: contain;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-head .bpbm-stickers-tabs span .fas {
@@ -13902,34 +14004,34 @@ body.bp-messages-mobile .bp-better-messages-mini {
   display: block;
 }
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-container > [data-overlayscrollbars-viewport] {
-  height: 160px;
+  height: 240px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-list {
-  padding: 0;
-  display: flex;
-  flex-flow: row wrap;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 70px);
   justify-content: space-between;
-}
-
-.bpbm-stickers-selector .bpbm-stickers-selector-sticker-list:after {
-  content: "";
-  flex: auto;
+  row-gap: 5px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-list .bpbm-stickers-selector-empty {
+  grid-column: 1/-1;
   width: 100%;
   text-align: center;
-  line-height: 150px;
+  line-height: 230px;
   font-size: 13px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-list .bpbm-stickers-selector-sticker {
-  margin: 5px;
+  margin: 0;
   height: 70px;
   width: 70px;
   cursor: pointer;
   border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-list .bpbm-stickers-selector-sticker:hover {
@@ -13938,15 +14040,18 @@ body.bp-messages-mobile .bp-better-messages-mini {
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-list .bpbm-stickers-selector-sticker img {
   max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
+  object-fit: contain;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-selector-sticker-container .loading-messages {
   display: block;
   position: relative;
-  height: 160px;
+  height: 240px;
   top: 0;
-  line-height: 160px;
+  line-height: 240px;
   width: 100%;
 }
 
@@ -13957,11 +14062,11 @@ body.bp-messages-mobile .bp-better-messages-mini {
 }
 
 .bpbm-stickers-selector .bpbm-stickers-search + .bpbm-stickers-selector-sticker-list {
-  height: 120px;
+  height: 200px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-search + .bpbm-stickers-selector-sticker-list .bpbm-stickers-selector-empty {
-  line-height: 120px;
+  line-height: 200px;
 }
 
 .bpbm-stickers-selector .bpbm-stickers-search input {
@@ -14003,18 +14108,13 @@ body.bp-messages-mobile .bp-better-messages-mini {
 
 .bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs {
   width: 100%;
-  display: block;
+  display: flex;
+  align-items: center;
   height: 40px;
-  /* padding-bottom: 10px; */
   max-width: calc(100% - 40px);
   white-space: nowrap;
-  /* overflow-x: auto; */
   position: relative;
   border-right: 1px solid rgba(var(--bm-border-color), 0.62);
-}
-
-.bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs {
-  height: 40px;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs span {
@@ -14023,19 +14123,38 @@ body.bp-messages-mobile .bp-better-messages-mini {
   width: 40px;
   padding: 0;
   font-size: 20px;
-  line-height: 20px;
+  line-height: 40px;
   position: relative;
   cursor: pointer;
   text-align: center;
   vertical-align: middle;
 }
 
+.bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs > span:not([data-package-id=search]) > svg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
 .bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs span[data-package-id=search] {
-  float: right;
-  width: 100%;
-  max-width: calc(100% - 50px);
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  float: none;
+  width: auto;
+  max-width: none;
   background: none !important;
-  margin: 2.5px 5px 2.5px 0px;
+  margin: 0 5px;
+  padding: 0;
+  min-width: 0;
+}
+
+.bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs > span:not([data-package-id=search]) {
+  flex: 0 0 40px;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-tabs span[data-package-id=search] input {
@@ -14062,11 +14181,20 @@ body.bp-messages-mobile .bp-better-messages-mini {
   height: 40px;
   display: block;
   position: relative;
-  font-size: 20px;
+  font-size: 28px;
+  line-height: 40px;
   width: 40px;
   padding: 0;
   cursor: pointer;
   text-align: center;
+}
+.bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-close svg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-head .bpbm-gifs-close > i {
@@ -14099,24 +14227,19 @@ body.bp-messages-mobile .bp-better-messages-mini {
   display: block;
 }
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-container > [data-overlayscrollbars-viewport] {
-  height: 200px;
+  height: 280px;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-list {
   padding: 0 10px;
-  min-height: 160px;
+  min-height: 240px;
   margin: 0;
-}
-
-.bpbm-gifs-selector .bpbm-gifs-selector-gif-list:after {
-  content: "";
-  flex: auto;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-list .bpbm-gifs-selector-empty {
   width: 100%;
   text-align: center;
-  line-height: 160px;
+  line-height: 240px;
   font-size: 13px;
 }
 
@@ -14140,12 +14263,42 @@ body.bp-messages-mobile .bp-better-messages-mini {
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-container .loading-messages {
   display: block;
   position: relative;
-  height: 160px;
+  height: 240px;
   top: 0;
-  line-height: 160px;
+  line-height: 240px;
   width: 100%;
 }
 
+/* GIF skeleton loader — mirrors the masonry column layout of the real grid.
+   Matches the real `.bpbm-gifs-selector-gif-list:not(.empty)` rules
+   (padding: 0; column-gap: 0; margin-top: 2px) so there's no horizontal
+   or vertical offset between the skeleton and the loaded grid. */
+.bpbm-gifs-selector-gif-skeleton {
+  display: block;
+  padding: 0;
+  margin-top: 2px;
+  column-width: 150px;
+  column-count: auto;
+  column-gap: 0;
+}
+
+.bpbm-gifs-skeleton-item {
+  display: block;
+  margin: 0 1.5px 3px; /* match .bpbm-gifs-selector-gif margins exactly */
+  break-inside: avoid;
+  background: linear-gradient(90deg, rgba(var(--bm-text-color), 0.05) 0%, rgba(var(--bm-text-color), 0.11) 50%, rgba(var(--bm-text-color), 0.05) 100%);
+  background-size: 200% 100%;
+  animation: bpbm-gifs-skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes bpbm-gifs-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 .bpbm-gifs-selector .bpbm-gifs-search {
   padding: 5px 10px;
   height: 40px;
@@ -14154,14 +14307,21 @@ body.bp-messages-mobile .bp-better-messages-mini {
 }
 
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-list:not(.empty) {
-  /* height: 160px; */
-  /* overflow: auto; */
-  display: block;
+  /* JS-driven round-robin column layout: each child is a flex-column
+     whose item order is permanent, so nothing ever reflows when new
+     pages of GIFs are appended. */
+  display: flex;
+  align-items: flex-start;
   padding: 0;
-  column-width: 150px;
-  column-count: auto;
-  column-gap: 0;
-  margin-top: 5px;
+  margin-top: 2px;
+  gap: 0;
+}
+
+.bpbm-gifs-selector-gif-column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-selector-gif-list.empty {
@@ -14173,11 +14333,11 @@ body.bp-messages-mobile .bp-better-messages-mini {
 }
 
 .bpbm-gifs-selector .bpbm-gifs-search + .bpbm-gifs-selector-gif-list {
-  height: 120px;
+  height: 200px;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-search + .bpbm-gifs-selector-gif-list .bpbm-gifs-selector-empty {
-  line-height: 120px;
+  line-height: 200px;
 }
 
 .bpbm-gifs-selector .bpbm-gifs-search input {
@@ -17892,5 +18052,9 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   border: 1px solid rgba(var(--bm-border-secondary-color), 0.5) !important;
   color: rgba(var(--bm-text-color), 1) !important;
 }
+
+/* New media picker uses the original `.bpbm-gifs-selector` and
+   `.bpbm-stickers-selector` class names (defined earlier in this file) so
+   no additional styles are required here. */
 
 /*# sourceMappingURL=bp-messages.css.map*/

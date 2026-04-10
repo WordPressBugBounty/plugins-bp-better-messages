@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.14
+Stable tag: 2.14.15
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -66,8 +66,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Embedded links with thumbnails and descriptions
 * oEmbed support for YouTube, Vimeo, Spotify, SoundCloud, Flickr and 20+ services
 * Emoji selector
-* Stickers
-* GIPHY integration
+* Built-in sticker packs with role-based access and per-locale support
+* GIF integration with GIPHY and Klipy providers
+* Inline sticker suggestions while typing
 * Markdown text formatting support
 
 **Notifications:**
@@ -125,31 +126,31 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **Compatible plugins:**
 
-* [BuddyPress](https://wordpress.org/plugins/buddypress)
-* [Ultimate Member](https://wordpress.org/plugins/ultimate-member)
-* [PeepSo](https://www.wordplus.org/peepso)
+* [BuddyPress](https://www.better-messages.com/docs/integrations/buddypress/)
+* [PeepSo](https://www.better-messages.com/docs/integrations/peepso/)
+* [Ultimate Member](https://www.better-messages.com/docs/integrations/ultimate-member/)
+* [BuddyBoss Platform](https://www.better-messages.com/docs/integrations/buddyboss/)
 * [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
-* [WP Job Manager](https://www.wordplus.org/wpjobmanager)
-* [ProfileGrid](https://www.wordplus.org/profilegrid)
-* [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
-* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/)
-* [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/)
-* [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/)
-* [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
-* [wpForo](https://www.better-messages.com/docs/integrations/wpforo/)
-* [HivePress](https://www.wordplus.org/hivepress/)
+* [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
 * [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
 * [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
+* [WP Job Manager](https://www.better-messages.com/docs/integrations/wp-job-manager/)
+* [ProfileGrid](https://www.better-messages.com/docs/integrations/profile-grid/)
+* [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
+* [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
+* [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/)
+* [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
+* [wpForo](https://www.better-messages.com/docs/integrations/wpforo/)
+* [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/)
+* [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/)
+* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/)
+* [Uncanny Automator](https://www.better-messages.com/docs/integrations/uncanny-automator/)
+* [AutomatorWP](https://www.better-messages.com/docs/integrations/automatorwp/)
+* [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) - charge for messages & calls with per-role pricing and balance display
+* [MyCRED](https://www.better-messages.com/docs/integrations/mycred/) - charge for messages & calls with per-role pricing and balance display
+* [Paid Memberships Pro](https://www.wordplus.org/pmpro)
 * [WC Vendors](https://www.wordplus.org/knowledge-base/wc-vendors/)
 * [WCFM](https://www.wordplus.org/knowledge-base/wcfm/)
-* [Verified Member for BuddyPress](https://www.wordplus.org/bpvm) - verified badges for users
-* [AutomatorWP](https://www.wordplus.org/automatorwp)
-* [Uncanny Automator](https://www.wordplus.org/uncanny)
-* [GamiPress](https://www.wordplus.org/gamipress) - charge for messages & calls with per-role pricing and balance display
-* [MyCRED](https://www.wordplus.org/mc) - charge for messages & calls with per-role pricing and balance display
-* [Block, Suspend, Report for BuddyPress](https://www.wordplus.org/BSRB) - allow users block each other
-* [Youzer](https://www.wordplus.org/youzer) (Youzify)
-* [Paid Memberships Pro](https://www.wordplus.org/pmpro)
 
 [Full list of integrations](https://www.better-messages.com/docs/category/integrations/)
 
@@ -245,6 +246,15 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.14.15 =
+* Making Stipop Sticker provider legacy as it increased price significantly since initial integration
+* Added [built-in sticker packs system](https://www.better-messages.com/docs/features/stickers) - create and manage your own sticker packs, with role-based access control and per-locale support
+* Added 8 pre-created sticker packs which can be installed from plugin settings
+* Added inline sticker suggestions — stickers are suggested as you type based on keywords if enabled in plugin settings
+* Rebuilt [GIF integration](https://www.better-messages.com/docs/features/giphy-integration/) into multi-provider system with support for GIPHY and Klipy providers — select your preferred provider in Settings → Integrations
+* Fixed pasted emojis being converted to WordPress emoji images in reply editor
+* Other minor bugfixes and improvements
 
 = 2.14.14 =
 * Added [WooCommerce integration](https://www.better-messages.com/docs/integrations/woocommerce) — adds contact buttons on product, cart, checkout, and order pages with configurable placement and recipient

@@ -106,6 +106,9 @@ class Better_Messages_Options
             'e2eDefault'                  => '0',
             'e2eForceSend'                => '0',
             'e2eAllowGuests'              => '0',
+            'stickersProvider'            => '',
+            'stickerPacksHash'            => '',
+            'stickerSuggestions'          => '0',
             'stipopApiKey'                => '',
             'stipopLanguage'              => 'en',
             'allowMuteThreads'            => '1',
@@ -134,9 +137,12 @@ class Better_Messages_Options
             'enableGroups'                => '0',
             'enableMiniGroups'            => '0',
             'allowGroupLeave'             => '0',
+            'gifsProvider'                => '',
             'giphyApiKey'                 => '',
             'giphyContentRating'          => 'g',
             'giphyLanguage'               => 'en',
+            'klipyApiKey'                 => '',
+            'klipyLocale'                 => 'en',
             'enableReplies'               => '1',
             'enableSelfReplies'           => '0',
             'messagesMinHeight'           => 450,
@@ -852,8 +858,12 @@ class Better_Messages_Options
             'hasFriends'         => $has_friends,
             'hasVoiceMessages'   => class_exists('BP_Better_Messages_Voice_Messages'),
             'translationLanguages' => class_exists('Better_Messages_AI') ? Better_Messages_AI::instance()->get_all_translation_languages() : array(),
-            'giphyError'         => get_option( 'bp_better_messages_giphy_error', false ),
+            'giphyError'         => get_option( 'better_messages_gifs_giphy_error', get_option( 'bp_better_messages_giphy_error', false ) ),
+            'klipyError'         => get_option( 'better_messages_gifs_klipy_error', false ),
+            'gifProviders'       => class_exists( 'Better_Messages_Gif_Provider_Factory' ) ? Better_Messages_Gif_Provider_Factory::get_providers_info() : array(),
             'stipopError'        => get_option( 'bp_better_messages_stipop_error', false ),
+            'stickerManifestUrl' => class_exists( 'Better_Messages_Stickers_Manager' ) ? Better_Messages_Stickers_Manager::instance()->get_manifest_url_for_current_locale() : '',
+            'siteLocales'        => array_values( array_unique( array_merge( array( get_locale() ), function_exists( 'get_available_languages' ) ? get_available_languages() : array() ) ) ),
             'ffmpegInstalled'    => class_exists('Better_Messages_Files') && Better_Messages_Files::is_ffmpeg_installed(),
             'cronJobsLate'       => $cron_jobs_late,
             'pluginVersion'      => Better_Messages()->version,
@@ -2016,6 +2026,14 @@ class Better_Messages_Options
 
         if( ! isset( $settings['giphyContentRating'] ) || ! in_array( $settings['giphyContentRating'], ['g', 'pg', 'pg-13', 'r'], true ) ) {
             $settings['giphyContentRating'] = 'g';
+        }
+
+        if ( isset( $settings['gifsProvider'] ) && ! in_array( $settings['gifsProvider'], [ '', 'giphy', 'klipy', 'disabled' ], true ) ) {
+            $settings['gifsProvider'] = '';
+        }
+
+        if ( isset( $settings['stickersProvider'] ) && ! in_array( $settings['stickersProvider'], [ '', 'builtin', 'stipop', 'disabled' ], true ) ) {
+            $settings['stickersProvider'] = '';
         }
 
         $wc_product_placements = ['before_summary', 'before_add_to_cart', 'after_add_to_cart', 'after_summary', 'manual'];

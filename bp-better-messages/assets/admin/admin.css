@@ -5091,4 +5091,741 @@ body.folded .bm-viewer-new-wrap .bm-viewer-new-content .bm-bulk-action-bar {
   text-decoration: none;
 }
 
+/* --- Sticker pack management ------------------------------------------------- */
+.bm-sticker-packs-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.bm-sticker-packs-empty {
+  padding: 24px 16px;
+  color: #666;
+  text-align: center;
+}
+
+.bm-sticker-packs-list {
+  padding: 8px 0;
+}
+
+.bm-sticker-packs-loading {
+  text-align: center;
+  padding: 24px 16px;
+  color: #666;
+  margin: 0;
+}
+
+.bm-sticker-pack-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+.bm-sticker-pack-row:last-child {
+  border-bottom: none;
+}
+.bm-sticker-pack-row.is-disabled {
+  opacity: 0.55;
+}
+
+.bm-sticker-pack-order {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bm-sticker-pack-order-btn {
+  background: #f1f1f1;
+  border: 1px solid #ccc;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+  color: #444;
+}
+.bm-sticker-pack-order-btn:hover:not(:disabled) {
+  background: #e5e5e5;
+}
+.bm-sticker-pack-order-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.bm-sticker-pack-cover,
+.bm-sticker-pack-cover-edit {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f6f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bm-sticker-pack-cover img,
+.bm-sticker-pack-cover-edit img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.bm-sticker-pack-cover-edit {
+  width: 130px;
+  height: 130px;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px dashed #ccc;
+  padding: 6px;
+  background: transparent;
+}
+.bm-sticker-pack-cover-edit img,
+.bm-sticker-pack-cover-edit .bm-sticker-pack-cover-placeholder {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.bm-sticker-pack-cover-edit .button {
+  flex: 0 0 auto;
+  font-size: 11px;
+  padding: 0 8px;
+  height: 24px;
+  line-height: 22px;
+}
+
+.bm-sticker-pack-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(45deg, #f1f1f1 0 8px, #e5e5e5 8px 16px);
+  border-radius: 4px;
+}
+
+.bm-sticker-pack-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bm-sticker-pack-title {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.bm-sticker-pack-badge {
+  background: var(--wp-admin-theme-color, #2271b1);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bm-sticker-pack-version {
+  color: #888;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.bm-sticker-pack-description {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bm-sticker-pack-meta {
+  font-size: 11px;
+  color: #888;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bm-sticker-pack-roles,
+.bm-sticker-pack-langs {
+  color: #666;
+}
+
+.bm-sticker-pack-langs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.bm-sticker-pack-langs .bm-inline-label {
+  color: #555;
+  margin-right: 2px;
+}
+
+/* Dedicated full-width row for the installed-languages badge list on each
+   installed pack row, so the chips don't crowd the "29 stickers" meta line. */
+.bm-sticker-pack-langs--row {
+  margin-top: 4px;
+}
+
+/* "+ Add languages" link button shown on installed catalog packs that have
+   more image-language variants available in the catalog. */
+.bm-sticker-add-langs-btn {
+  background: none;
+  border: none;
+  color: var(--wp-admin-theme-color, #2271b1);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+  text-decoration: underline;
+}
+.bm-sticker-add-langs-btn:hover {
+  color: #135e96;
+}
+
+/* Inline language picker that expands when "+ Add languages" is clicked. */
+.bm-sticker-add-langs-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.bm-sticker-add-langs-picker .button-small {
+  font-size: 11px;
+  padding: 0 10px;
+  height: 24px;
+  line-height: 22px;
+}
+
+/* Multi-select language chips used on the "Available sticker packs" list. */
+.bm-sticker-lang-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border: 1px solid #cfd4da;
+  border-radius: 999px;
+  background: #f6f7f7;
+  cursor: pointer;
+  font-size: 11px;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.bm-sticker-lang-chip input[type=checkbox] {
+  display: none;
+}
+.bm-sticker-lang-chip.is-checked {
+  background: var(--wp-admin-theme-color, #2271b1);
+  border-color: var(--wp-admin-theme-color, #2271b1);
+  color: #fff;
+}
+.bm-sticker-lang-chip:hover:not(.is-checked) {
+  background: #eaedf0;
+}
+
+/* Badge showing which languages are already imported for an installed pack. */
+.bm-sticker-installed-langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.bm-sticker-installed-langs .bm-sticker-installed-lang {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e5f0fa;
+  color: #1f4b73;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bm-sticker-pack-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.bm-sticker-pack-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #555;
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+.bm-sticker-pack-editor {
+  padding: 16px;
+}
+.bm-sticker-pack-editor h3 {
+  margin: 0;
+  flex: 1;
+  font-size: 16px;
+}
+.bm-sticker-pack-editor h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+}
+
+.bm-sticker-pack-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.bm-sticker-pack-editor-toolbar {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+  margin-bottom: 12px;
+}
+
+.bm-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.bm-inline-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.bm-sticker-pack-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.bm-sticker-pack-roles .bm-role-checkbox {
+  display: inline-flex;
+  gap: 4px;
+  font-size: 12px;
+  align-items: center;
+  cursor: pointer;
+  color: #444;
+}
+.bm-sticker-pack-roles .bm-role-hint {
+  font-style: italic;
+  color: #888;
+  font-size: 12px;
+}
+
+.bm-sticker-pack-locale-tabs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.bm-locale-tab {
+  background: none;
+  border: none;
+  padding: 8px 12px 6px 12px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -2px;
+}
+.bm-locale-tab:hover {
+  color: var(--wp-admin-theme-color, #2271b1);
+}
+.bm-locale-tab.active {
+  color: var(--wp-admin-theme-color, #2271b1);
+  border-bottom-color: var(--wp-admin-theme-color, #2271b1);
+  font-weight: 600;
+}
+
+.bm-locale-progress {
+  background: #eef2f5;
+  color: #555;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.bm-locale-remove {
+  color: #a00;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.bm-locale-remove:hover {
+  color: #d00;
+}
+
+.bm-locale-add {
+  position: relative;
+}
+
+.bm-locale-add-btn {
+  color: #2271b1;
+}
+
+.bm-locale-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 180px;
+  padding: 4px 0;
+}
+
+.bm-locale-picker-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.bm-locale-picker-item:hover {
+  background: #f0f6fc;
+}
+
+.bm-locale-picker-empty {
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+}
+
+.bm-sticker-pack-metadata {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.bm-sticker-pack-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bm-sticker-pack-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bm-sticker-pack-fields label span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+.bm-sticker-pack-fields label input,
+.bm-sticker-pack-fields label textarea {
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.bm-sticker-pack-fields label input::placeholder,
+.bm-sticker-pack-fields label textarea::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.bm-sticker-pack-stickers-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.bm-sticker-pack-dropzone {
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  padding: 18px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  background: #fafafa;
+  margin-bottom: 12px;
+}
+.bm-sticker-pack-dropzone:hover {
+  border-color: var(--wp-admin-theme-color, #2271b1);
+  color: #444;
+}
+
+.bm-sticker-pack-stickers-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bm-sticker-pack-sticker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 6px;
+}
+
+.bm-sticker-thumb {
+  width: 48px;
+  height: 48px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 48px;
+  overflow: hidden;
+  position: relative;
+}
+.bm-sticker-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.bm-sticker-thumb {
+  /* A sticker row on a non-primary locale tab with its own uploaded
+     localized image. The badge shows the locale code on the thumbnail. */
+}
+.bm-sticker-thumb.has-localized-image {
+  border-color: var(--wp-admin-theme-color, #2271b1);
+}
+
+.bm-sticker-thumb-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: var(--wp-admin-theme-color, #2271b1);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.3px;
+  line-height: 12px;
+  text-transform: uppercase;
+}
+
+/* Sticker row actions when on a translation locale tab — the Upload/Replace
+   button needs a real text-sized button (not the 24×24 icon button the
+   primary tab uses), so we override width/padding with a chained-class rule
+   that wins specificity. */
+.bm-sticker-actions.bm-sticker-actions--translation {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.bm-sticker-actions.bm-sticker-actions--translation button {
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  line-height: 26px;
+  white-space: nowrap;
+}
+.bm-sticker-actions.bm-sticker-actions--translation button.button-link-delete {
+  width: auto;
+  padding: 0 6px;
+  background: none;
+  border: none;
+  color: #a00;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 11px;
+}
+.bm-sticker-actions.bm-sticker-actions--translation button.button-link-delete:hover {
+  color: #dc3232;
+  background: none;
+}
+
+.bm-sticker-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bm-sticker-fields input {
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+.bm-sticker-fields input::placeholder {
+  color: #bbb;
+  font-style: italic;
+}
+
+.bm-sticker-actions {
+  display: flex;
+  gap: 4px;
+}
+.bm-sticker-actions button {
+  background: #f1f1f1;
+  border: 1px solid #ccc;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+}
+.bm-sticker-actions button:hover:not(:disabled) {
+  background: #e5e5e5;
+}
+.bm-sticker-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.bm-sticker-actions button.button-link-delete {
+  color: #a00;
+}
+
+.bm-sticker-pack-stickers-empty {
+  padding: 24px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  font-size: 12px;
+  border: 1px dashed #ddd;
+  border-radius: 6px;
+}
+
+/* Catalog browser */
+.bm-sticker-catalog {
+  padding: 8px 0;
+}
+
+.bm-sticker-catalog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 12px;
+}
+
+.bm-sticker-catalog-updated {
+  color: #888;
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.bm-sticker-catalog-loading,
+.bm-sticker-catalog-error {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+}
+
+.bm-sticker-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.bm-sticker-catalog-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+}
+.bm-sticker-catalog-item .bm-sticker-catalog-cover {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f6f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bm-sticker-catalog-item .bm-sticker-catalog-cover img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.bm-sticker-catalog-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bm-sticker-catalog-name {
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.bm-sticker-catalog-description {
+  font-size: 11px;
+  color: #666;
+  margin: 4px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bm-sticker-catalog-count {
+  font-size: 11px;
+  color: #888;
+}
+
+.bm-sticker-catalog-action {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.bm-sticker-catalog-installed {
+  color: #46b450;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /*# sourceMappingURL=admin.css.map*/
