@@ -1035,6 +1035,7 @@ table.build-info-table button {
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 .bm-messages-table .bm-deleted-message {
   opacity: 0.7;
@@ -1800,6 +1801,7 @@ body[class*=_page_better-messages-viewer] .update-nag {
   padding: 4px;
   background: #f0f0f1;
   border-radius: 6px;
+  align-items: center;
 }
 .bm-settings-subtabs .bm-settings-subtab {
   padding: 6px 14px;
@@ -1821,8 +1823,123 @@ body[class*=_page_better-messages-viewer] .update-nag {
 .bm-settings-subtabs .bm-settings-subtab.active {
   background: #fff;
   color: #1e1e1e;
-  font-weight: 500;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.bm-widget-contexts-empty {
+  padding: 20px;
+  background: #fcf9e8;
+  border: 1px solid #dba617;
+  border-radius: 6px;
+  margin: 16px;
+}
+.bm-widget-contexts-empty p {
+  margin: 0 0 10px 0;
+  color: #50575e;
+  font-size: 13px;
+}
+.bm-widget-contexts-empty p:last-child {
+  margin-bottom: 0;
+}
+.bm-widget-contexts-empty ul {
+  margin: 10px 0;
+  padding-left: 36px;
+  list-style: disc outside;
+}
+.bm-widget-contexts-empty ul li {
+  color: #50575e;
+  font-size: 13px;
+  line-height: 1.6;
+  padding-left: 4px;
+  list-style: disc outside;
+}
+
+.bm-widget-icon-field {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bm-display-mode-selector .bm-display-mode-panel {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f1;
+}
+.bm-display-mode-selector .bm-display-mode-list {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f1;
+}
+.bm-display-mode-selector .bm-display-mode-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.bm-display-mode-selector .bm-display-mode-list-actions .button-link {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--wp-admin-theme-color);
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+}
+.bm-display-mode-selector .bm-display-mode-list-actions .button-link:hover {
+  color: var(--wp-admin-theme-color);
+  text-decoration: none;
+}
+.bm-display-mode-selector .bm-display-mode-list-actions .bm-display-mode-list-sep {
+  color: #c3c4c7;
+  user-select: none;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list li {
+  margin: 0;
+  padding: 0;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list li:not(:last-child) {
+  border-bottom: 1px solid #f0f0f1;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list li label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list li label:hover {
+  background: #f6f7f7;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list li label input[type=checkbox] {
+  margin: 0;
+  flex-shrink: 0;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list .bm-display-mode-checkbox-title {
+  color: #1e1e1e;
+  font-size: 13px;
+  flex: 1;
+  min-width: 0;
+}
+.bm-display-mode-selector .bm-display-mode-checkbox-list .bm-display-mode-checkbox-muted {
+  display: inline-block;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  color: #646970;
+  flex-shrink: 0;
 }
 
 .bm-settings-notice {
@@ -2290,62 +2407,170 @@ body[class*=_page_better-messages-viewer] .update-nag {
   border-radius: 4px;
 }
 
-.bm-suggested-conversations {
+.bm-sortable-picker {
   width: 100%;
 }
-.bm-suggested-conversations .bm-suggested-conversations-empty {
-  margin: 12px 0 10px;
+.bm-sortable-picker .bm-sortable-picker-empty {
+  margin: 0 0 12px;
   padding: 0 16px;
   color: #757575;
   font-size: 13px;
+  font-style: italic;
 }
-.bm-suggested-conversations .bm-suggested-conversations-table {
-  width: 100%;
-  border-collapse: collapse;
+.bm-sortable-picker .bm-sortable-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 12px;
 }
-.bm-suggested-conversations .bm-suggested-conversations-table th, .bm-suggested-conversations .bm-suggested-conversations-table td {
-  padding: 8px 16px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-  font-size: 13px;
-}
-.bm-suggested-conversations .bm-suggested-conversations-table th {
-  font-weight: 600;
-  color: #1e1e1e;
-}
-.bm-suggested-conversations .bm-suggested-conversations-table th:last-child,
-.bm-suggested-conversations .bm-suggested-conversations-table td:last-child {
-  width: 80px;
-  text-align: right;
-}
-.bm-suggested-conversations .bm-suggested-conversations-table tr:last-child td {
-  border-bottom: none;
-}
-.bm-suggested-conversations .bm-suggested-conversations-table tr:hover td {
-  background: #f6f7f7;
-}
-.bm-suggested-conversations .bm-suggested-conversations-table .bm-suggested-conversations-user {
+.bm-sortable-picker .bm-sortable-picker-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  user-select: none;
+  position: relative;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.2s;
 }
-.bm-suggested-conversations .bm-suggested-conversations-table .bm-suggested-conversations-user img {
+.bm-sortable-picker .bm-sortable-picker-row:hover {
+  background: #f0f0f1;
+}
+.bm-sortable-picker .bm-sortable-picker-row.bm-sortable-picker-row-muted {
+  opacity: 0.55;
+}
+.bm-sortable-picker .bm-sortable-picker-row.bm-sortable-picker-row-dragging {
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.bm-sortable-picker .bm-sortable-picker-row.bm-sortable-picker-row-target {
+  border-color: var(--wp-admin-theme-color);
+  box-shadow: 0 0 0 2px var(--wp-admin-theme-color);
+}
+.bm-sortable-picker .bm-sortable-picker-handle {
+  color: #c3c4c7;
+  font-size: 18px;
+  line-height: 1;
+  cursor: grab;
+  padding: 4px 2px;
+  touch-action: none;
+  flex-shrink: 0;
+}
+.bm-sortable-picker .bm-sortable-picker-handle:hover {
+  color: #787c82;
+}
+.bm-sortable-picker .bm-sortable-picker-handle:active {
+  cursor: grabbing;
+  color: var(--wp-admin-theme-color);
+}
+.bm-sortable-picker .bm-sortable-picker-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   flex-shrink: 0;
+  object-fit: cover;
 }
-.bm-suggested-conversations .bm-suggested-conversations-actions {
-  padding: 0 16px 16px;
+.bm-sortable-picker .bm-sortable-picker-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #1e1e1e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.bm-suggested-conversations .bm-suggested-conversations-add {
-  max-width: 400px;
+.bm-sortable-picker .bm-sortable-picker-muted-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #50575e;
+  flex-shrink: 0;
 }
-.bm-suggested-conversations .bm-suggested-conversations-add .bm-suggested-conversations-add-buttons {
+.bm-sortable-picker .bm-sortable-picker-remove {
+  flex-shrink: 0;
+}
+.bm-sortable-picker .bm-sortable-picker-actions {
+  padding: 0;
+}
+.bm-sortable-picker .bm-sortable-picker-add {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 10px;
+  max-width: 480px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+}
+.bm-sortable-picker .bm-sortable-picker-search {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+}
+.bm-sortable-picker .bm-sortable-picker-search:focus {
+  border-color: var(--wp-admin-theme-color);
+  box-shadow: 0 0 0 1px var(--wp-admin-theme-color);
+  outline: none;
+}
+.bm-sortable-picker .bm-sortable-picker-results {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  background: #fff;
+}
+.bm-sortable-picker .bm-sortable-picker-status {
+  padding: 12px;
+  font-size: 12px;
+  color: #757575;
+  font-style: italic;
+  text-align: center;
+}
+.bm-sortable-picker .bm-sortable-picker-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f1;
+  transition: background-color 0.15s;
+}
+.bm-sortable-picker .bm-sortable-picker-result:last-child {
+  border-bottom: none;
+}
+.bm-sortable-picker .bm-sortable-picker-result:hover {
+  background: #f6f7f7;
+}
+.bm-sortable-picker .bm-sortable-picker-result.bm-sortable-picker-result-muted {
+  opacity: 0.55;
+}
+.bm-sortable-picker .bm-sortable-picker-result.bm-sortable-picker-result-added {
+  cursor: default;
+  opacity: 0.55;
+}
+.bm-sortable-picker .bm-sortable-picker-result.bm-sortable-picker-result-added:hover {
+  background: transparent;
+}
+.bm-sortable-picker .bm-sortable-picker-added-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  background: var(--wp-admin-theme-color);
+  color: #fff;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
 }
 
 .bm-settings-download-notice {
@@ -2915,6 +3140,12 @@ body[class*=_page_better-messages-viewer] .update-nag {
   background: #00a32a;
 }
 
+.bm-settings-sidebar-disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  user-select: none;
+}
+
 .bm-mobile-back-bar {
   display: none;
   padding: 12px 16px 0;
@@ -3061,6 +3292,160 @@ body[class*=_page_better-messages-viewer] .update-nag {
   min-height: 120px;
   box-sizing: border-box;
   resize: vertical;
+}
+
+.bm-ai-placeholders-block {
+  width: 100%;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f0f1;
+  box-sizing: border-box;
+}
+.bm-ai-placeholders-block:last-child {
+  border-bottom: none;
+}
+.bm-ai-placeholders-block .bm-ai-placeholders-block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 8px;
+}
+.bm-ai-placeholders-block .bm-ai-placeholders-block-head strong {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #1d2327;
+}
+.bm-ai-placeholders-block .bm-ai-placeholders-block-head .bm-ai-placeholders-block-desc {
+  font-size: 12px;
+  color: #50575e;
+}
+
+.bm-ai-placeholders-help {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.bm-ai-placeholders-help .bm-ai-placeholders-group {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: start;
+  gap: 8px 12px;
+}
+.bm-ai-placeholders-help .bm-ai-placeholders-group > strong {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #50575e;
+  padding-top: 3px;
+  line-height: 1.4;
+}
+.bm-ai-placeholders-help .bm-ai-placeholders-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  min-width: 0;
+}
+.bm-ai-placeholders-help .bm-ai-placeholder-desc {
+  display: block;
+  grid-column: 2;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #757575;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .bm-ai-placeholders-help .bm-ai-placeholders-group {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .bm-ai-placeholders-help .bm-ai-placeholders-group > strong {
+    padding-top: 0;
+  }
+  .bm-ai-placeholders-help .bm-ai-placeholder-desc {
+    grid-column: 1;
+  }
+}
+.bm-ai-preview {
+  width: 100%;
+  margin-top: 8px;
+}
+.bm-ai-preview .bm-ai-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bm-ai-preview .bm-ai-preview-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.bm-ai-preview .bm-ai-preview-hide {
+  font-size: 12px;
+  color: #757575;
+}
+.bm-ai-preview .bm-ai-preview-result {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1d2327;
+}
+.bm-ai-preview .bm-ai-preview-result pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+.bm-ai-preview .bm-ai-preview-result em {
+  color: #757575;
+  font-size: 12px;
+}
+
+.bm-ai-placeholder-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  background: #fff;
+  border: 1px solid #dcdcde;
+  border-radius: 3px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  line-height: 1.4;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.bm-ai-placeholder-chip code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 11px;
+  color: #1d2327;
+}
+.bm-ai-placeholder-chip:hover {
+  background: var(--wp-admin-theme-color, #2271b1);
+  border-color: var(--wp-admin-theme-color, #2271b1);
+}
+.bm-ai-placeholder-chip:hover code {
+  color: #fff;
+}
+.bm-ai-placeholder-chip:focus-visible {
+  outline: 2px solid var(--wp-admin-theme-color, #2271b1);
+  outline-offset: 1px;
+}
+.bm-ai-placeholder-chip.is-copied {
+  background: #00a32a;
+  border-color: #00a32a;
+}
+.bm-ai-placeholder-chip.is-copied code {
+  color: #fff;
 }
 
 .bm-button-danger {
@@ -3898,13 +4283,8 @@ body[class*=_page_better-messages-viewer] .update-nag {
   padding: 16px;
 }
 
-.bm-settings-row + .bm-widget-restrictions-section {
-  border-top: none;
-}
-
 .bm-widget-restrictions-section {
   padding: 14px 20px 0;
-  border-top: 1px solid #f0f0f1;
 }
 .bm-widget-restrictions-section .bm-widget-restrictions {
   margin: 0 -20px;
@@ -4049,6 +4429,39 @@ body[class*=_page_better-messages-viewer] .update-nag {
   border-radius: 10px;
   color: #50575e;
   white-space: nowrap;
+}
+
+.bm-sortable-tab-configure {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #787c82;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.bm-sortable-tab-configure .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+.bm-sortable-tab-configure:hover {
+  color: var(--wp-admin-theme-color);
+}
+.bm-sortable-tab-configure:focus-visible {
+  outline: 2px solid var(--wp-admin-theme-color);
+  outline-offset: 1px;
 }
 
 .bm-sortable-tab-reason {

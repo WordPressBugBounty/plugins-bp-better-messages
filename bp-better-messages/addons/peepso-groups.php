@@ -26,6 +26,7 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
                 add_action('peepso_action_group_update_unknown_property', array( $this, 'update_unknown_property'),10 ,3 );
 
                 add_filter('better_messages_groups_active', array($this, 'enabled') );
+                add_filter('better_messages_user_has_groups', array($this, 'user_has_groups'), 10, 2 );
                 add_filter('better_messages_has_access_to_group_chat', array( $this, 'has_access_to_group_chat'), 10, 3 );
                 add_filter('better_messages_can_send_message', array( $this, 'can_reply_to_group_chat'), 10, 3 );
 
@@ -194,6 +195,14 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
             $group    = new PeepSoGroup( (int) $group_id );
             return $group->get_url();
+        }
+
+        public function user_has_groups( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( ! class_exists( 'PeepSoGroups' ) ) return false;
+            $PeepSoGroups = new PeepSoGroups();
+            $groups = $PeepSoGroups->get_groups( 0, 1, 'post_title', 'ASC', '', $user_id );
+            return is_array( $groups ) && count( $groups ) > 0;
         }
 
         public function get_groups( $groups, $user_id ){

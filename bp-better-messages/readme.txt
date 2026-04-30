@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.14.16
+Stable tag: 2.15.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -200,7 +200,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Automatic message translation in 1-to-1 conversations — 53 languages, auto-detection
 * AI Content Moderation — 23 categories, custom rules, conversation context awareness
 * Voice message transcription — 99+ languages with auto-detection
-* No third-party API keys required — included with WebSocket license at no additional cost
+* No third-party    API keys required — included with WebSocket license at no additional cost
 
 **Security & Encryption:**
 
@@ -246,6 +246,24 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.15.0 =
+* Added three new [widgets](https://www.better-messages.com/docs/features/mini-widgets): **Users** (browse and message any site member, with optional online-only filtering, online-first ordering, sort by last activity or registration date, and three display modes — all / by role / hand-picked), **AI Bots** (start or continue conversations with configured AI chat bots), and **Chat Rooms** (browse public chat rooms with optional online-count badge)
+* Redesigned the Settings → Mini Widgets page into per-widget sub-tabs, with each widget exposing its own icon picker, search-box toggle, role restrictions matrix (mini bar / side panel / mobile bar), and widget-specific options
+* Added "Hide Tab When Empty" toggle per widget — hides the Friends / Groups / AI Bots / Chat Rooms / Users tab entirely when the current user has nothing to show, instead of rendering an empty list
+* Added AI Chat Bot [welcome message](https://www.better-messages.com/docs/features/ai-chat-bots#welcome-message) — bots can greet users with a configurable opening message and placeholder
+* Added dynamic [placeholders](https://www.better-messages.com/docs/features/ai-chat-bots#placeholders) which allows to dynamically change ai chat bots system prompts and welcome messages
+* Renamed [`better_messages_open_ai_bot_instruction`](https://www.better-messages.com/hooks/php-filters#better_messages_ai_bot_instruction) filter to `better_messages_ai_bot_instruction` since it applies to all AI providers, and added new `$thread_id` and `$message_id` arguments so callbacks can read the conversation context and the triggering user message — the old name remains available as a deprecated alias
+* Added per-message edit time limit — restrict how long users can edit their own messages after sending
+* Fixed fatal error when uploading attachments at the bulk messages screen
+* Fixed `hideParticipants` chat room setting being ignored when the attachments browser was enabled
+* Fixed stale sticker suggestions remaining visible in the composer after a sticker was sent
+* Fixed AI Chat Bots admin layout breaking on older PHP versions and removed a misleading missing-key error
+* Fixed sticker pack "Add language" button appearing when no remaining locales were available
+* Fixed reply form not being blocked for deleted conversations when PeepSo friendship filter was active
+* Fixed Private Message button still showing in chat room user list and message context menu when "Hide New Conversation Button" was enabled
+* Improved performance of reported-messages admin screen for sites with millions of messages — queries now scale cleanly instead of relying on transient caches
+* Other minor bugfixes and improvements
 
 = 2.14.16 =
 * Making Stipop Sticker provider legacy as it increased price significantly since initial integration

@@ -24,6 +24,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             if( function_exists('friends_check_friendship') ) {
                 add_filter( 'better_messages_friends_active', array($this, 'enabled') );
                 add_filter( 'better_messages_get_friends', array($this, 'get_friends'), 10, 2 );
+                add_filter( 'better_messages_user_has_friends', array($this, 'user_has_friends'), 10, 2 );
 
                 if( Better_Messages()->settings['friendsMode'] === '1' ){
                     add_filter( 'better_messages_only_friends_mode', array($this, 'enabled') );
@@ -33,6 +34,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             if( bm_bp_is_active( 'groups' ) && Better_Messages()->settings['enableGroups'] === '1' ){
                 add_filter( 'better_messages_groups_active', array($this, 'enabled') );
                 add_filter( 'better_messages_get_groups', array($this, 'get_groups'), 10, 2 );
+                add_filter( 'better_messages_user_has_groups', array($this, 'user_has_groups'), 10, 2 );
             }
 
             if( bm_bp_is_active( 'groups' ) ){
@@ -428,6 +430,23 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             }
 
             return $users;
+        }
+
+        public function user_has_friends( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( ! function_exists( 'bp_friends_total_friend_count' ) ) {
+                $args = array( 'is_confirmed' => 1, 'per_page' => 1 );
+                $list = BP_Friends_Friendship::get_friendships( $user_id, $args );
+                return is_array( $list ) && count( $list ) > 0;
+            }
+            return (int) bp_friends_total_friend_count( $user_id ) > 0;
+        }
+
+        public function user_has_groups( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( ! function_exists( 'groups_get_user_groups' ) ) return false;
+            $result = groups_get_user_groups( $user_id );
+            return isset( $result['groups'] ) && count( $result['groups'] ) > 0;
         }
 
         public function get_groups( $groups, $user_id ){

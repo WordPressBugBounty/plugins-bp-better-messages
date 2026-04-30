@@ -343,37 +343,35 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 }
             }
 
-            $return = false;
-
             if( count( $data ) > 0 ) {
                 $result = $wpdb->update( bm_get_table('guests'), $data, [ 'id' => absint($user_id) ] );
                 if ( false !== $result ) {
                     Better_Messages()->users->update_last_changed( absint($user_id) * -1 );
-
                     wp_cache_delete( 'guest_user_' . absint($user_id), 'bm_messages' );
-
                     $guest_user = $this->get_guest_user( $user_id );
-
-                    $user_item = Better_Messages()->functions->rest_user_item( $user_id );
-
-                    $return = [
-                        'id'     => (int) $guest_user->id,
-                        'secret' => $guest_user->secret,
-                        'name'   => $guest_user->name,
-                        'email'  => $guest_user->email,
-                        'user'   => $user_item
-                    ];
-
-                    if ( Better_Messages()->websocket ) {
-                        $ws_profile = Better_Messages()->functions->build_ws_profile( $user_id, $user_item );
-                        $return['pd']  = $ws_profile['pd'];
-                        $return['pdh'] = $ws_profile['pdh'];
-                        $return['pds'] = $ws_profile['pds'];
-                    }
 
                     do_action( 'better_messages_guest_updated', $user_id );
                     do_action( 'better_messages_user_updated', $user_id );
                 }
+            }
+
+            $user_item = Better_Messages()->functions->rest_user_item( $user_id );
+
+            $return = [
+                'id'     => (int) $guest_user->id,
+                'secret' => $guest_user->secret,
+                'name'   => $guest_user->name,
+                'email'  => $guest_user->email,
+                'user'   => $user_item
+            ];
+
+            if ( Better_Messages()->websocket ) {
+                $ws_profile = Better_Messages()->functions->build_ws_profile( $user_id, $user_item );
+                $return['pd']  = $ws_profile['pd'];
+                $return['pdh'] = $ws_profile['pdh'];
+                $return['pds'] = $ws_profile['pds'];
+                $return['role_hashes']     = $ws_profile['role_hashes'];
+                $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
             }
 
             return $return;
@@ -465,6 +463,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                     $return['pd']  = $ws_profile['pd'];
                     $return['pdh'] = $ws_profile['pdh'];
                     $return['pds'] = $ws_profile['pds'];
+                    $return['role_hashes'] = $ws_profile['role_hashes'];
                 }
 
                 return $return;

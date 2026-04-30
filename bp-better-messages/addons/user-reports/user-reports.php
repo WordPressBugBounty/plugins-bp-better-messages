@@ -201,15 +201,23 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
         {
             global $wpdb;
 
+            $meta_table     = bm_get_table('meta');
+            $messages_table = bm_get_table('messages');
+
+            $reported_ids = array_map( 'intval', $wpdb->get_col( "SELECT DISTINCT `bm_message_id` FROM `{$meta_table}` WHERE `meta_key` = 'user_reports'" ) );
+
+            if ( empty( $reported_ids ) ) {
+                return 0;
+            }
+
+            $ids_sql = implode( ',', $reported_ids );
+
             return (int) $wpdb->get_var( "
-            SELECT COUNT(*)
-            FROM `" . bm_get_table('messages') . "` `messages`
-            LEFT JOIN `" . bm_get_table('meta') . "` `user_reports_meta`
-                ON `messages`.`id` = `user_reports_meta`.`bm_message_id`
-                AND `user_reports_meta`.`meta_key` = 'user_reports'
-            WHERE `created_at` > 0
-            AND `user_reports_meta`.`meta_value` IS NOT NULL
-            AND `message` != '<!-- BBPM START THREAD -->'
+                SELECT COUNT(*)
+                FROM `{$messages_table}`
+                WHERE `id` IN ({$ids_sql})
+                  AND `created_at` > 0
+                  AND `message` != '<!-- BBPM START THREAD -->'
             " );
         }
     }

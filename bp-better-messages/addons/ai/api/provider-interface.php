@@ -282,6 +282,21 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
         }
 
         /**
+         * Apply the bot system-prompt filter (also fires the deprecated alias).
+         */
+        protected function get_bot_instruction( $instruction, $bot_id, $sender_id, $thread_id, $message_id )
+        {
+            $instruction = apply_filters( 'better_messages_ai_bot_instruction', $instruction, $bot_id, $sender_id, $thread_id, $message_id );
+
+            return apply_filters_deprecated(
+                'better_messages_open_ai_bot_instruction',
+                [ $instruction, $bot_id, $sender_id ],
+                '2.15.0',
+                'better_messages_ai_bot_instruction'
+            );
+        }
+
+        /**
          * Create a Guzzle HTTP client
          */
         protected function get_guzzle_client( $base_uri, $headers = [] )
@@ -321,17 +336,26 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
          * Get thread messages from database for building conversation history.
          * When $limit > 0, returns only the most recent $limit messages (in chronological order).
          */
-        protected function get_thread_messages( $thread_id, $up_to_created_at, $limit = 0 )
+        protected function get_thread_messages( $thread_id, $up_to_created_at, $limit = 0, $exclude_welcome = false )
         {
             global $wpdb;
 
+            $exclude_join  = '';
+            $exclude_where = '';
+            if ( $exclude_welcome ) {
+                $exclude_join  = "LEFT JOIN `" . bm_get_table('meta') . "` welcome_meta ON welcome_meta.bm_message_id = m.id AND welcome_meta.meta_key = 'ai_welcome_message'";
+                $exclude_where = "AND welcome_meta.meta_id IS NULL";
+            }
+
             if ( $limit > 0 ) {
                 $results = $wpdb->get_results( $wpdb->prepare(
-                    "SELECT id, sender_id, message
-                    FROM `" . bm_get_table('messages') . "`
-                    WHERE thread_id = %d
-                    AND created_at <= %d
-                    ORDER BY `created_at` DESC
+                    "SELECT m.id, m.sender_id, m.message
+                    FROM `" . bm_get_table('messages') . "` m
+                    $exclude_join
+                    WHERE m.thread_id = %d
+                    AND m.created_at <= %d
+                    $exclude_where
+                    ORDER BY m.created_at DESC
                     LIMIT %d",
                     $thread_id, $up_to_created_at, $limit
                 ) );
@@ -340,11 +364,13 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             }
 
             return $wpdb->get_results( $wpdb->prepare(
-                "SELECT id, sender_id, message
-                FROM `" . bm_get_table('messages') . "`
-                WHERE thread_id = %d
-                AND created_at <= %d
-                ORDER BY `created_at` ASC",
+                "SELECT m.id, m.sender_id, m.message
+                FROM `" . bm_get_table('messages') . "` m
+                $exclude_join
+                WHERE m.thread_id = %d
+                AND m.created_at <= %d
+                $exclude_where
+                ORDER BY m.created_at ASC",
                 $thread_id, $up_to_created_at
             ) );
         }
@@ -357,6 +383,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
          */
         protected function get_thread_messages_with_summary( $thread_id, $up_to_created_at, $limit, $bot_user_id, $bot_settings )
         {
+            $exclude_welcome = isset( $bot_settings['welcomeMessageInContext'] ) && $bot_settings['welcomeMessageInContext'] === '0';
+
             if ( ! empty( $bot_settings['useSummaryContext'] ) && $bot_settings['useSummaryContext'] === '1' ) {
                 global $wpdb;
 
@@ -378,13 +406,22 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     $summary_text = preg_replace( '/<!--(.|\s)*?-->/', '', $summary_text );
                     $summary_text = wp_strip_all_tags( html_entity_decode( $summary_text ) );
 
+                    $exclude_join  = '';
+                    $exclude_where = '';
+                    if ( $exclude_welcome ) {
+                        $exclude_join  = "LEFT JOIN `" . bm_get_table('meta') . "` welcome_meta ON welcome_meta.bm_message_id = m.id AND welcome_meta.meta_key = 'ai_welcome_message'";
+                        $exclude_where = "AND welcome_meta.meta_id IS NULL";
+                    }
+
                     $messages_after = $wpdb->get_results( $wpdb->prepare(
-                        "SELECT id, sender_id, message
-                        FROM `" . bm_get_table('messages') . "`
-                        WHERE thread_id = %d
-                        AND created_at > %d
-                        AND created_at <= %d
-                        ORDER BY `created_at` ASC",
+                        "SELECT m.id, m.sender_id, m.message
+                        FROM `" . bm_get_table('messages') . "` m
+                        $exclude_join
+                        WHERE m.thread_id = %d
+                        AND m.created_at > %d
+                        AND m.created_at <= %d
+                        $exclude_where
+                        ORDER BY m.created_at ASC",
                         $thread_id, $last_summary->created_at, $up_to_created_at
                     ) );
 
@@ -397,7 +434,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
             return array(
                 'summary'  => null,
-                'messages' => $this->get_thread_messages( $thread_id, $up_to_created_at, $limit )
+                'messages' => $this->get_thread_messages( $thread_id, $up_to_created_at, $limit, $exclude_welcome )
             );
         }
 
@@ -548,21 +585,31 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $instruction;
         }
 
-        /**
-         * Strip mention HTML from message text, replacing with plain @Name.
-         */
+        protected function clean_stored_message( $stored_text )
+        {
+            $text = preg_replace( '/<!--(.|\s)*?-->/', '', (string) $stored_text );
+            return html_entity_decode( $text, ENT_QUOTES | ENT_HTML401, 'UTF-8' );
+        }
+
         protected function strip_mention_html( $text, $sender_names = array() )
         {
-            // Entity-encoded format: &lt;span class=&quot;bm-mention&quot; data-user-id=&quot;ID&quot;&gt;@Name&lt;/span&gt;
+            $callback = function ( $m ) use ( $sender_names ) {
+                $uid = (int) $m[1];
+                if ( isset( $sender_names[ $uid ] ) ) {
+                    return '@' . $sender_names[ $uid ];
+                }
+                return $m[2];
+            };
+
             $text = preg_replace_callback(
                 '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+)&quot;&gt;(@[^&]*)&lt;\/span&gt;/',
-                function ( $m ) use ( $sender_names ) {
-                    $uid = (int) $m[1];
-                    if ( isset( $sender_names[ $uid ] ) ) {
-                        return '@' . $sender_names[ $uid ];
-                    }
-                    return $m[2]; // Keep the @Name from the HTML
-                },
+                $callback,
+                $text
+            );
+
+            $text = preg_replace_callback(
+                '/<span class="bm-mention" data-user-id="(-?\d+)">(@[^<]*)<\/span>/',
+                $callback,
                 $text
             );
 

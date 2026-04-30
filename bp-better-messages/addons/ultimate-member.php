@@ -37,6 +37,10 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
                 add_filter('um_ajax_get_members_data', array( $this, 'add_pm_button_to_directory_data' ), 10, 2);
             }
 
+            if ( class_exists( 'UM_Friends_API' ) || self::um_friends_table_exists() ) {
+                add_filter( 'better_messages_user_has_friends', array( $this, 'user_has_friends' ), 10, 2 );
+            }
+
             if(  class_exists('UM_Friends_API') ) {
                 add_filter( 'better_messages_friends_active', array($this, 'enabled') );
                 add_filter( 'better_messages_get_friends', array($this, 'get_friends'), 10, 2 );
@@ -63,7 +67,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
             add_action( 'wp_head', array( $this, 'um_counter_in_profile' ) );
 
-            if( class_exists('UM_Groups') ){
+            if ( class_exists( 'UM_Groups' ) || self::um_groups_table_exists() ) {
                 require_once Better_Messages()->path . 'addons/ultimate-member-groups.php';
                 Better_Messages_Ultimate_Member_Groups::instance();
             }
@@ -167,6 +171,48 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
         public function is_friends( $bool, $user_id_1, $user_id_2 ){
             return UM()->Friends_API()->api()->is_friend( $user_id_1, $user_id_2 );
+        }
+
+        public function user_has_friends( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( $user_id <= 0 ) return false;
+
+            if ( class_exists( 'UM_Friends_API' ) ) {
+                $list = UM()->Friends_API()->api()->friends( $user_id );
+                return is_array( $list ) && count( $list ) > 0;
+            }
+
+            if ( self::um_friends_table_exists() ) {
+                global $wpdb;
+                $table = $wpdb->prefix . 'um_friends';
+                $found = (int) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT 1 FROM `{$table}`
+                     WHERE `status` = 1 AND ( `user_id1` = %d OR `user_id2` = %d )
+                     LIMIT 1",
+                    $user_id, $user_id
+                ) );
+                return $found === 1;
+            }
+
+            return false;
+        }
+
+        public static function um_friends_table_exists() {
+            static $cached = null;
+            if ( $cached !== null ) return $cached;
+            global $wpdb;
+            $table  = $wpdb->prefix . 'um_friends';
+            $cached = (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+            return $cached;
+        }
+
+        public static function um_groups_table_exists() {
+            static $cached = null;
+            if ( $cached !== null ) return $cached;
+            global $wpdb;
+            $table  = $wpdb->prefix . 'um_groups_members';
+            $cached = (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+            return $cached;
         }
 
         public function get_friends( $friends, $user_id ){

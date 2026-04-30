@@ -50,6 +50,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 add_action( 'better_messages_before_message_delete', array( $this, 'before_delete_message' ), 10 , 3 );
 
                 add_action( 'bp_better_messages_new_thread_created', array( $this, 'on_new_thread_created'), 10, 2 );
+                add_filter( 'better_messages_ai_bot_instruction', array( $this, 'apply_placeholders_to_instruction' ), 10, 3 );
                 add_filter( 'better_messages_can_send_message', array( $this, 'block_reply_if_needed' ), 20, 3 );
                 add_filter( 'better_messages_can_send_message', array( $this, 'check_ai_bot_balance' ), 21, 3 );
                 add_action( 'better_messages_before_new_thread',  array( $this, 'restrict_new_thread_if_needed'), 10, 2 );
@@ -191,23 +192,191 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
-            if( count( $recipients ) === 2 ) {
-                foreach ($recipients as $user) {
-                    $user_id = $user->user_id;
-                    if ($user_id < 0) {
-                        $guest_id = absint($user_id);
-                        $guest = Better_Messages()->guests->get_guest_user($guest_id);
+            if( count( $recipients ) !== 2 ) {
+                return;
+            }
 
-                        if ($guest && $guest->ip && str_starts_with($guest->ip, 'ai-chat-bot-')) {
-                            $bot_id = str_replace('ai-chat-bot-', '', $guest->ip);
+            $bot_id = 0;
+            $other_user_id = 0;
 
-                            if( $this->bot_exists( $bot_id ) ){
-                                Better_Messages()->functions->update_thread_meta( $thread_id, 'ai_bot_thread', $bot_id );
-                            }
-                        }
-                    }
+            foreach ( $recipients as $user ) {
+                $user_id = (int) $user->user_id;
+                $candidate_bot_id = $user_id < 0 ? $this->get_bot_id_from_user( $user_id ) : false;
+
+                if ( $candidate_bot_id && $this->bot_exists( $candidate_bot_id ) ) {
+                    Better_Messages()->functions->update_thread_meta( $thread_id, 'ai_bot_thread', $candidate_bot_id );
+                    $bot_id = $candidate_bot_id;
+                } else {
+                    $other_user_id = $user_id;
                 }
             }
+
+            if ( $bot_id > 0 && $other_user_id !== 0 ) {
+                $this->maybe_send_welcome_message( $thread_id, $bot_id, $other_user_id, $message_id );
+            }
+        }
+
+        public function maybe_send_welcome_message( $thread_id, $bot_id, $user_id, $message_id = null )
+        {
+            $settings = $this->get_bot_settings( $bot_id );
+            $template = isset( $settings['welcomeMessage'] ) ? (string) $settings['welcomeMessage'] : '';
+
+            if ( trim( $template ) === '' ) {
+                return;
+            }
+
+            $text = $this->resolve_placeholders( $template, $user_id, $bot_id );
+            $text = apply_filters( 'better_messages_ai_welcome_message', $text, $bot_id, $user_id, $thread_id );
+
+            if ( trim( (string) $text ) === '' ) {
+                return;
+            }
+
+            $bot_user = $this->get_bot_user( $bot_id );
+            if ( ! $bot_user || empty( $bot_user->id ) ) {
+                return;
+            }
+            $bot_user_id = -1 * (int) $bot_user->id;
+
+            $created_at = Better_Messages()->functions->get_microtime();
+            if ( $message_id ) {
+                $first_message = Better_Messages()->functions->get_message( (int) $message_id );
+                if ( $first_message && isset( $first_message->created_at ) ) {
+                    // 10 = 1ms in the created_at format (ms * 10); place the welcome just before the user's first message.
+                    $created_at = (int) $first_message->created_at - 10;
+                }
+            }
+
+            Better_Messages()->functions->new_message( array(
+                'sender_id'    => $bot_user_id,
+                'thread_id'    => $thread_id,
+                'content'      => '<!-- BM-AI -->' . $text,
+                'count_unread' => false,
+                'send_push'    => false,
+                'mobile_push'  => false,
+                'send_global'  => false,
+                'created_at'   => $created_at,
+                'updated_at'   => $created_at,
+                'meta_data'    => array(
+                    'ai_bot_id'          => $bot_id,
+                    'ai_welcome_message' => '1',
+                    'ai_response_status' => 'completed',
+                ),
+            ) );
+        }
+
+        public function apply_placeholders_to_instruction( $instruction, $bot_id = 0, $sender_id = 0 )
+        {
+            return $this->resolve_placeholders( $instruction, (int) $sender_id, (int) $bot_id );
+        }
+
+        public function resolve_placeholders( $template, $user_id = 0, $bot_id = 0 )
+        {
+            $template = (string) $template;
+
+            if ( $template === '' || strpos( $template, '{' ) === false ) {
+                return $template;
+            }
+
+            $user_id = (int) $user_id;
+            $bot_id  = (int) $bot_id;
+
+            $name        = $user_id !== 0 ? (string) Better_Messages()->functions->get_name( $user_id ) : '';
+            $first_name  = '';
+            $last_name   = '';
+            $email       = '';
+            $user_roles  = array();
+
+            if ( $user_id > 0 ) {
+                $first_name = (string) get_user_meta( $user_id, 'first_name', true );
+                $last_name  = (string) get_user_meta( $user_id, 'last_name', true );
+
+                $user = get_userdata( $user_id );
+                if ( $user ) {
+                    if ( $email === '' ) $email = (string) $user->user_email;
+                    if ( is_array( $user->roles ) ) {
+                        $user_roles = array_map( 'strval', $user->roles );
+                    }
+                }
+            } elseif ( $user_id < 0 ) {
+                $guest = Better_Messages()->guests->get_guest_user( abs( $user_id ) );
+                if ( $guest ) {
+                    $email = isset( $guest->email ) ? (string) $guest->email : '';
+                }
+                $user_roles = array( 'guest' );
+            }
+
+            $user_role = ! empty( $user_roles ) ? $user_roles[0] : '';
+
+            if ( $first_name === '' ) {
+                $first_name = $name;
+            }
+
+            $hour_int = (int) wp_date( 'G' );
+            if ( $hour_int >= 5 && $hour_int <= 11 ) {
+                $time_of_day = 'morning';
+            } elseif ( $hour_int >= 12 && $hour_int <= 17 ) {
+                $time_of_day = 'afternoon';
+            } elseif ( $hour_int >= 18 && $hour_int <= 21 ) {
+                $time_of_day = 'evening';
+            } else {
+                $time_of_day = 'night';
+            }
+
+            $is_guest_bool = $user_id < 0;
+            $is_user_bool  = $user_id > 0;
+
+            $template = preg_replace_callback(
+                '/\{if_guest\}(.*?)\{\/if_guest\}/s',
+                function( $m ) use ( $is_guest_bool ) { return $is_guest_bool ? $m[1] : ''; },
+                $template
+            );
+            $template = preg_replace_callback(
+                '/\{if_user\}(.*?)\{\/if_user\}/s',
+                function( $m ) use ( $is_user_bool ) { return $is_user_bool ? $m[1] : ''; },
+                $template
+            );
+            $template = preg_replace_callback(
+                '/\{if_role:([a-zA-Z0-9_\-]+)\}(.*?)\{\/if_role:\1\}/s',
+                function( $m ) use ( $user_roles ) {
+                    return in_array( $m[1], $user_roles, true ) ? $m[2] : '';
+                },
+                $template
+            );
+            foreach ( array( 'morning', 'afternoon', 'evening', 'night' ) as $period ) {
+                $matches_period = ( $time_of_day === $period );
+                $template = preg_replace_callback(
+                    '/\{if_' . $period . '\}(.*?)\{\/if_' . $period . '\}/s',
+                    function( $m ) use ( $matches_period ) { return $matches_period ? $m[1] : ''; },
+                    $template
+                );
+            }
+
+            $replacements = array(
+                '{name}'              => esc_html( $name ),
+                '{display_name}'      => esc_html( $name ),
+                '{first_name}'        => esc_html( $first_name ),
+                '{last_name}'         => esc_html( $last_name ),
+                '{email}'             => esc_html( $email ),
+                '{user_id}'           => (string) $user_id,
+                '{user_role}'         => esc_html( $user_role ),
+                '{site_name}'         => esc_html( get_bloginfo( 'name' ) ),
+                '{site_url}'          => esc_url( home_url() ),
+                '{site_description}'  => esc_html( get_bloginfo( 'description' ) ),
+                '{current_date}'      => esc_html( wp_date( get_option( 'date_format' ) ) ),
+                '{current_time}'      => esc_html( wp_date( get_option( 'time_format' ) ) ),
+                '{current_datetime}'  => esc_html( wp_date( 'c' ) ),
+                '{current_year}'      => esc_html( wp_date( 'Y' ) ),
+                '{day_of_week}'       => esc_html( wp_date( 'l' ) ),
+                '{time_of_day}'       => $time_of_day,
+            );
+
+            if ( $bot_id > 0 ) {
+                $replacements['{bot_name}'] = esc_html( get_the_title( $bot_id ) );
+                $replacements['{bot_id}']   = (string) $bot_id;
+            }
+
+            return strtr( $template, $replacements );
         }
 
         public function bot_exists( $bot_id )
@@ -533,6 +702,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 ),
             ));
 
+            register_rest_route('better-messages/v1/ai', '/bots/(?P<bot_user_id>-?\d+)/welcomeMessage', array(
+                'methods' => 'GET',
+                'callback' => array( $this, 'handle_get_welcome_message' ),
+                'permission_callback' => array( Better_Messages()->api, 'is_user_authorized' ),
+                'args' => array(
+                    'bot_user_id' => array(
+                        'validate_callback' => function( $param ) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ));
+
             list( , $transcriptionAvailable ) = $this->is_transcription_available();
 
             if ( Better_Messages()->settings['voiceTranscription'] === '1' && $transcriptionAvailable ) {
@@ -569,6 +751,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     ),
                 ));
             }
+
+            register_rest_route('better-messages/v1', '/getAIBots', array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_get_user_facing_bots' ),
+                'permission_callback' => '__return_true',
+            ));
 
             register_rest_route('better-messages/v1/admin/ai', '/getModels', array(
                 'methods' => 'GET',
@@ -661,6 +849,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'args' => array(
                     'id' => array(
                         'validate_callback' => function($param) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/previewPlaceholders', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'handle_preview_placeholders' ),
+                'permission_callback' => array( $this, 'user_is_admin' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function( $param ) {
                             return is_numeric( $param );
                         }
                     ),
@@ -877,6 +1078,49 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
         }
 
+        public function handle_get_welcome_message( WP_REST_Request $request )
+        {
+            $bot_user_id = (int) $request->get_param( 'bot_user_id' );
+            $bot_id      = $bot_user_id < 0 ? $this->get_bot_id_from_user( $bot_user_id ) : false;
+
+            if ( ! $bot_id || ! $this->bot_exists( $bot_id ) ) {
+                return new WP_Error( 'bot_not_found', __( 'Bot not found.', 'bp-better-messages' ), array( 'status' => 404 ) );
+            }
+
+            $settings = $this->get_bot_settings( $bot_id );
+            $template = isset( $settings['welcomeMessage'] ) ? (string) $settings['welcomeMessage'] : '';
+
+            if ( trim( $template ) === '' ) {
+                return array( 'welcomeMessage' => '' );
+            }
+
+            $user_id = (int) Better_Messages()->functions->get_current_user_id();
+
+            return array(
+                'welcomeMessage' => (string) Better_Messages()->functions->messages_filter_kses(
+                    $this->resolve_placeholders( $template, $user_id, $bot_id )
+                ),
+            );
+        }
+
+        public function handle_preview_placeholders( WP_REST_Request $request )
+        {
+            $bot_id = (int) $request->get_param( 'id' );
+
+            if ( ! $this->bot_exists( $bot_id ) ) {
+                return new WP_Error( 'bot_not_found', __( 'Bot not found.', 'bp-better-messages' ), array( 'status' => 404 ) );
+            }
+
+            $template = (string) $request->get_param( 'template' );
+            $user_id  = (int) Better_Messages()->functions->get_current_user_id();
+
+            return array(
+                'preview' => (string) Better_Messages()->functions->messages_filter_kses(
+                    $this->resolve_placeholders( $template, $user_id, $bot_id )
+                ),
+            );
+        }
+
         /**
          * Get a provider instance using message meta for API key context
          */
@@ -933,6 +1177,103 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function handle_get_providers( WP_REST_Request $request )
         {
             return Better_Messages_AI_Provider_Factory::get_providers_info();
+        }
+
+        public function rest_get_user_facing_bots( WP_REST_Request $request )
+        {
+            global $wpdb;
+
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
+            $display_mode  = isset( Better_Messages()->settings['widgetAIBotsDisplayMode'] )
+                ? Better_Messages()->settings['widgetAIBotsDisplayMode']
+                : 'all';
+            $allowed_ids   = isset( Better_Messages()->settings['widgetAIBotsIds'] ) && is_array( Better_Messages()->settings['widgetAIBotsIds'] )
+                ? array_map( 'intval', Better_Messages()->settings['widgetAIBotsIds'] )
+                : array();
+            $filter_active = ( $display_mode === 'specific' );
+
+            $query_args = array(
+                'post_type'      => 'bm-ai-chat-bot',
+                'post_status'    => 'publish',
+                'posts_per_page' => 200,
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'no_found_rows'  => true,
+            );
+
+            if ( $filter_active ) {
+                if ( empty( $allowed_ids ) ) {
+                    return apply_filters( 'better_messages_get_ai_bots', array(), $current_user_id );
+                }
+                $query_args['post__in'] = $allowed_ids;
+                $query_args['orderby']  = 'post__in';
+            }
+
+            $query = new WP_Query( $query_args );
+
+            $bots = array();
+            $bot_user_ids_list = array();
+
+            foreach ( $query->posts as $post ) {
+                $settings = $this->get_bot_settings( $post->ID );
+                if ( ! isset( $settings['enabled'] ) || $settings['enabled'] !== '1' ) {
+                    continue;
+                }
+
+                $bot_user = $this->get_bot_user( $post->ID );
+                if ( ! $bot_user ) {
+                    continue;
+                }
+
+                $bot_user_id = absint( $bot_user->id ) * -1;
+                $user_item   = Better_Messages()->functions->rest_user_item( $bot_user_id );
+
+                $bots[] = array(
+                    'bot_user_id' => $bot_user_id,
+                    'name'        => isset( $user_item['name'] ) ? $user_item['name'] : $post->post_title,
+                    'avatar'      => isset( $user_item['avatar'] ) ? $user_item['avatar'] : '',
+                    'url'         => isset( $user_item['url'] ) ? $user_item['url'] : '',
+                    'thread_id'   => 0,
+                );
+                $bot_user_ids_list[] = $bot_user_id;
+            }
+
+            if ( $current_user_id !== 0 && ! empty( $bot_user_ids_list ) ) {
+                $recipients = bm_get_table( 'recipients' );
+                $placeholders = implode( ',', array_fill( 0, count( $bot_user_ids_list ), '%d' ) );
+
+                $params = array_merge( array( $current_user_id ), $bot_user_ids_list );
+
+                $rows = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT r2.user_id AS bot_user_id, MAX(r1.thread_id) AS thread_id
+                     FROM `{$recipients}` r1
+                     INNER JOIN `{$recipients}` r2
+                         ON r2.thread_id = r1.thread_id AND r2.user_id <> r1.user_id
+                     WHERE r1.user_id = %d
+                       AND r2.user_id IN ({$placeholders})
+                       AND (
+                           SELECT COUNT(*) FROM `{$recipients}` r3 WHERE r3.thread_id = r1.thread_id
+                       ) = 2
+                     GROUP BY r2.user_id",
+                    $params
+                ) );
+
+                if ( ! empty( $rows ) ) {
+                    $map = array();
+                    foreach ( $rows as $row ) {
+                        $map[ (int) $row->bot_user_id ] = (int) $row->thread_id;
+                    }
+                    foreach ( $bots as &$bot ) {
+                        if ( isset( $map[ $bot['bot_user_id'] ] ) ) {
+                            $bot['thread_id'] = $map[ $bot['bot_user_id'] ];
+                        }
+                    }
+                    unset( $bot );
+                }
+            }
+
+            return apply_filters( 'better_messages_get_ai_bots', $bots, $current_user_id );
         }
 
         /**
@@ -1053,7 +1394,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 // Sanitize
                 foreach ( $new_settings as $key => $value ) {
                     if ( is_string( $value ) ) {
-                        if ( $key === 'instruction' || $key === 'summarizationPrompt' ) {
+                        if ( $key === 'instruction' || $key === 'summarizationPrompt' || $key === 'welcomeMessage' ) {
                             $new_settings[$key] = sanitize_textarea_field( $value );
                         } else {
                             $new_settings[$key] = sanitize_text_field( $value );
@@ -3331,6 +3672,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 "thinkingBudget" => "",
                 "model"   => "",
                 "instruction" => _x( 'You are a helpful assistant', 'AI Chat Bots (WP Admin)', 'bp-better-messages' ),
+                "welcomeMessage" => "",
+                "welcomeMessageInContext" => "1",
                 "voice" => $voices[0],
                 "inputTokenPrice" => "",
                 "outputTokenPrice" => "",
@@ -3424,7 +3767,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 foreach( $settings as $key => $value ){
                     if( is_string($value) ){
-                        if( $key === 'instruction' || $key === 'summarizationPrompt' ){
+                        if( $key === 'instruction' || $key === 'summarizationPrompt' || $key === 'welcomeMessage' ){
                             $settings[$key] = sanitize_textarea_field( $value );
                         } else {
                             $settings[$key] = sanitize_text_field( $value );

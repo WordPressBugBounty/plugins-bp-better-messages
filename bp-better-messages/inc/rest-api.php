@@ -38,6 +38,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             require_once('api/groups.php');
             Better_Messages_Rest_Groups();
 
+            require_once('api/users.php');
+            Better_Messages_Rest_Users();
+
             require_once('api/favorited.php');
             Better_Messages_Rest_Api_Favorited();
 
@@ -421,7 +424,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 foreach ( $messages as $message_id ){
                     $message = Better_Messages()->functions->get_message( $message_id );
                     if( $message ){
-                        $has_access = Better_Messages()->functions->check_access( $message->thread_id, $current_user_id );
+                        $has_access = Better_Messages()->functions->check_access( $message->thread_id, $current_user_id )
+                            && Better_Messages()->functions->can_read_chat_messages( $message->thread_id, $current_user_id );
                         if( $has_access ){
                             $message->message_id = (int) $message->id;
                             unset( $message->id );
@@ -603,6 +607,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $return['currentTime'] = $time;
 
+            // Opt-in kill-switch. Hook this filter and return 'websocket' to tell
+            // fallback-polling clients to stop hitting REST (e.g. under high WP load).
+            $transport = apply_filters( 'better_messages_checknew_transport', null, $current_user_id );
+            if ( $transport === 'websocket' ) {
+                $return['transport'] = 'websocket';
+            }
+
             return apply_filters( 'better_messages_rest_api_update_data', $return, $current_user_id, $lastClient );
         }
 
@@ -676,9 +687,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 );
             } else {
                 // Allow addons (E2E) to process after thread creation (e.g. send actual encrypted message)
+                // Note: the bp_better_messages_new_thread_created action is fired from within new_message()
                 $sent = apply_filters( 'better_messages_new_thread_after_create', $sent, $request, $current_user_id );
-
-                do_action( 'bp_better_messages_new_thread_created', $sent['thread_id'], $sent['message_id'] );
 
                 return array(
                     'result'     => true,
@@ -1204,6 +1214,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 );
             }
 
+            $edit_time_limit = (int) Better_Messages()->settings['editMessageTimeLimit'];
+            if ( $edit_time_limit > 0 && ! current_user_can( 'bm_can_administrate' ) ) {
+                $threshold = Better_Messages()->functions->to_microtime( time() - $edit_time_limit * MINUTE_IN_SECONDS );
+
+                if ( (int) $message->created_at < $threshold ) {
+                    return new WP_Error(
+                        'rest_forbidden',
+                        _x( 'The edit time limit for this message has expired.', 'Rest API Error', 'bp-better-messages' ),
+                        array( 'status' => rest_authorization_required_code() )
+                    );
+                }
+            }
+
             $args = array(
                 'sender_id'   => $user_id,
                 'thread_id'   => $thread_id,
@@ -1700,12 +1723,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $to          = intval($request->get_param('to'));
             $mode        = sanitize_text_field($request->get_param('mode'));
 
-            $missed_messages = Better_Messages()->functions->get_missed_message_ids( $thread_id, $message_ids );
-
             $return = [
                 'messages' => [],
                 'users' => []
             ];
+
+            if( ! Better_Messages()->functions->can_read_chat_messages( $thread_id, Better_Messages()->functions->get_current_user_id() ) ){
+                return $return;
+            }
+
+            $missed_messages = Better_Messages()->functions->get_missed_message_ids( $thread_id, $message_ids );
 
             if( count( $missed_messages ) > 0 ){
                 $message_ids = array_unique( array_merge( $message_ids, $missed_messages ) );
@@ -1837,6 +1864,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $return['threads'][0]['unread'] = 0;
             $return['threads'][0]['mentions'] = [];
+
+            if( ! Better_Messages()->functions->can_read_chat_messages( $thread_id, $current_user_id ) ){
+                $return['messages'] = [];
+                return $return;
+            }
 
             $added_user_ids     = array_column($return['users'], 'user_id');
 
@@ -2093,6 +2125,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         'canDeleteOwnMessages' => Better_Messages()->settings['allowDeleteMessages'] === '1',
                         'canDeleteAllMessages' => current_user_can('bm_can_administrate'),
                         'canEditOwnMessages'   => Better_Messages()->settings['allowEditMessages'] === '1',
+                        'canEditAllMessages'   => current_user_can('bm_can_administrate'),
                         'canFavorite'          => Better_Messages()->settings['disableFavoriteMessages'] !== '1',
                         'canMuteThread'        => ( Better_Messages()->settings['allowMuteThreads'] === '1' && ! $admin_access ),
                         'canEraseThread'       => Better_Messages()->functions->can_erase_thread( $current_user_id, $thread->thread_id ),

@@ -749,8 +749,8 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
         protected function generate_unique_id( $seed )
         {
             $base = sanitize_title( $seed );
-            if ( empty( $base ) ) {
-                $base = 'pack';
+            if ( empty( $base ) || strlen( $base ) > 40 || strpos( $base, '%' ) !== false ) {
+                $base = 'pack-' . substr( md5( $seed . wp_rand() ), 0, 6 );
             }
             $id     = $base;
             $suffix = 1;
@@ -763,8 +763,10 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
         protected function generate_unique_sticker_id( $pack, $seed )
         {
             $base = sanitize_title( $seed );
-            if ( empty( $base ) ) {
-                $base = 'sticker';
+            // sanitize_title on non-Latin text produces long percent-encoded strings
+            // that break REST URLs. Fall back to a short random ID.
+            if ( empty( $base ) || strlen( $base ) > 40 || strpos( $base, '%' ) !== false ) {
+                $base = 'sticker-' . substr( md5( $seed . wp_rand() ), 0, 6 );
             }
             $taken = array();
             foreach ( $pack['stickers'] as $sticker ) {

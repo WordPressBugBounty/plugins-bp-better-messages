@@ -43,6 +43,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             if ( class_exists('PeepSoFriendsPlugin') ) {
                 add_filter('better_messages_friends_active', array($this, 'enabled'));
                 add_filter('better_messages_get_friends', array($this, 'get_friends'), 10, 2);
+                add_filter('better_messages_user_has_friends', array($this, 'user_has_friends'), 10, 2);
                 add_filter('better_messages_is_friends', array($this, 'is_friends'), 10, 3);
                 add_filter('better_messages_search_friends', array( $this, 'search_friends'), 10, 3 );
 
@@ -273,6 +274,13 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             return $users;
         }
 
+        public function user_has_friends( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( ! class_exists('PeepSoFriendsModel') ) return false;
+            $friend_ids = PeepSoFriendsModel::get_instance()->get_friends_ids( $user_id );
+            return is_array( $friend_ids ) && count( $friend_ids ) > 0;
+        }
+
 
         public function script_variables( $script_variables ){
             if( Better_Messages()->settings['PSminiGroupsEnable'] === '1' ) {
@@ -358,11 +366,12 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             }
 
 
-            $allowed = PeepSoFriendsModel::get_instance()->are_friends( $user_id, $friend_id );
+            $are_friends = (bool) PeepSoFriendsModel::get_instance()->are_friends( $user_id, $friend_id );
 
-            if( ! $allowed ){
+            if( ! $are_friends ){
                 global $bp_better_messages_restrict_send_message;
                 $bp_better_messages_restrict_send_message['friendship_needed'] = __('You must become friends to send messages', 'bp-better-messages');
+                return false;
             }
 
             return $allowed;

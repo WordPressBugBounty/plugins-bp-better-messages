@@ -465,54 +465,188 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $user_id = Better_Messages()->functions->get_current_user_id();
             $roles = Better_Messages()->functions->get_user_roles( $user_id );
 
-            if( isset($script_variables['miniMessages']) && $script_variables['miniMessages'] === '1' ){
-                $restricted_roles = Better_Messages()->settings['restrictViewMiniThreads'];
-                $is_restricted = false;
+            $restrict_map = array(
+                array( 'miniMessages',      'restrictViewMiniThreads' ),
+                array( 'miniFriends',       'restrictViewMiniFriends' ),
+                array( 'miniGroups',        'restrictViewMiniGroups' ),
+                array( 'miniAIBots',        'restrictViewMiniAIBots' ),
+                array( 'miniChatRooms',     'restrictViewMiniChatRooms' ),
+                array( 'miniUsers',         'restrictViewMiniUsers' ),
+                array( 'combinedFriends',   'restrictViewSideFriends' ),
+                array( 'combinedGroups',    'restrictViewSideGroups' ),
+                array( 'combinedAIBots',    'restrictViewSideAIBots' ),
+                array( 'combinedChatRooms', 'restrictViewSideChatRooms' ),
+                array( 'combinedUsers',     'restrictViewSideUsers' ),
+                array( 'mobileFriends',     'restrictViewMobileFriends' ),
+                array( 'mobileGroups',      'restrictViewMobileGroups' ),
+                array( 'mobileAIBots',      'restrictViewMobileAIBots' ),
+                array( 'mobileChatRooms',   'restrictViewMobileChatRooms' ),
+                array( 'mobileUsers',       'restrictViewMobileUsers' ),
+            );
 
-                if( count( $restricted_roles ) > 0 ) {
-                    foreach( $restricted_roles as $restricted_role ){
-                        if( in_array( $restricted_role, $roles ) ){
-                            $is_restricted = true;
-                        }
-                    }
+            foreach ( $restrict_map as $pair ) {
+                list( $var_key, $setting_key ) = $pair;
+
+                if ( ! isset( $script_variables[ $var_key ] ) || $script_variables[ $var_key ] !== '1' ) {
+                    continue;
                 }
 
-                if( $is_restricted ) {
-                    $script_variables['miniMessages'] = '0';
+                $restricted_roles = isset( Better_Messages()->settings[ $setting_key ] ) ? Better_Messages()->settings[ $setting_key ] : array();
+                if ( ! is_array( $restricted_roles ) || count( $restricted_roles ) === 0 ) {
+                    continue;
+                }
+
+                foreach ( $restricted_roles as $restricted_role ) {
+                    if ( in_array( $restricted_role, $roles, true ) ) {
+                        $script_variables[ $var_key ] = '0';
+                        break;
+                    }
                 }
             }
 
-            if( isset($script_variables['miniFriends']) && $script_variables['miniFriends'] === '1' ){
-                $restricted_roles = Better_Messages()->settings['restrictViewMiniFriends'];
-                $is_restricted = false;
+            $empty_hide_map = array(
+                array(
+                    'widgetFriendsHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_friends' ),
+                    array( 'miniFriends', 'combinedFriends', 'mobileFriends' ),
+                ),
+                array(
+                    'widgetGroupsHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_groups' ),
+                    array( 'miniGroups', 'combinedGroups', 'mobileGroups' ),
+                ),
+                array(
+                    'widgetAIBotsHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_ai_bots' ),
+                    array( 'miniAIBots', 'combinedAIBots', 'mobileAIBots' ),
+                ),
+                array(
+                    'widgetChatRoomsHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_chat_rooms' ),
+                    array( 'miniChatRooms', 'combinedChatRooms', 'mobileChatRooms' ),
+                ),
+                array(
+                    'widgetUsersHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_users' ),
+                    array( 'miniUsers', 'combinedUsers', 'mobileUsers' ),
+                ),
+            );
 
-                if( count( $restricted_roles ) > 0 ) {
-                    foreach( $restricted_roles as $restricted_role ){
-                        if( in_array( $restricted_role, $roles ) ){
-                            $is_restricted = true;
-                        }
-                    }
+            foreach ( $empty_hide_map as $entry ) {
+                list( $hide_setting_key, $has_any_fn, $affected_vars ) = $entry;
+
+                if ( ! isset( Better_Messages()->settings[ $hide_setting_key ] )
+                  || Better_Messages()->settings[ $hide_setting_key ] !== '1' ) {
+                    continue;
                 }
 
-                if( $is_restricted ) {
-                    $script_variables['miniFriends'] = '0';
+                $any_var_on = false;
+                foreach ( $affected_vars as $v ) {
+                    if ( isset( $script_variables[ $v ] ) && $script_variables[ $v ] === '1' ) {
+                        $any_var_on = true;
+                        break;
+                    }
+                }
+                if ( ! $any_var_on ) continue;
+
+                if ( ! call_user_func( $has_any_fn, $user_id ) ) {
+                    foreach ( $affected_vars as $v ) {
+                        if ( isset( $script_variables[ $v ] ) ) {
+                            $script_variables[ $v ] = '0';
+                        }
+                    }
                 }
             }
 
-            if( isset($script_variables['miniGroups']) && $script_variables['miniGroups'] === '1' ){
-                $restricted_roles = Better_Messages()->settings['restrictViewMiniGroups'];
-                $is_restricted = false;
+            $specific_empty_map = array(
+                array(
+                    'widgetAIBotsDisplayMode',
+                    array( 'specific' => 'widgetAIBotsIds' ),
+                    array( 'miniAIBots', 'combinedAIBots', 'mobileAIBots' ),
+                ),
+                array(
+                    'widgetChatRoomsDisplayMode',
+                    array( 'specific' => 'widgetChatRoomsIds' ),
+                    array( 'miniChatRooms', 'combinedChatRooms', 'mobileChatRooms' ),
+                ),
+                array(
+                    'widgetUsersDisplayMode',
+                    array(
+                        'roles'    => 'widgetUsersRoles',
+                        'specific' => 'widgetUsersIds',
+                    ),
+                    array( 'miniUsers', 'combinedUsers', 'mobileUsers' ),
+                ),
+            );
 
-                if( count( $restricted_roles ) > 0 ) {
-                    foreach( $restricted_roles as $restricted_role ){
-                        if( in_array( $restricted_role, $roles ) ){
-                            $is_restricted = true;
-                        }
+            foreach ( $specific_empty_map as $entry ) {
+                list( $mode_key, $mode_to_list_key, $affected_vars ) = $entry;
+
+                $mode = isset( Better_Messages()->settings[ $mode_key ] )
+                    ? Better_Messages()->settings[ $mode_key ]
+                    : 'all';
+                if ( ! isset( $mode_to_list_key[ $mode ] ) ) continue;
+
+                $list_key = $mode_to_list_key[ $mode ];
+                $list = isset( Better_Messages()->settings[ $list_key ] ) && is_array( Better_Messages()->settings[ $list_key ] )
+                    ? Better_Messages()->settings[ $list_key ]
+                    : array();
+                if ( ! empty( $list ) ) continue;
+
+                foreach ( $affected_vars as $v ) {
+                    if ( isset( $script_variables[ $v ] ) ) {
+                        $script_variables[ $v ] = '0';
                     }
                 }
+            }
 
-                if( $is_restricted ) {
-                    $script_variables['miniGroups'] = '0';
+            $post_count_map = array(
+                array(
+                    'bm-ai-chat-bot',
+                    array( 'miniAIBots', 'combinedAIBots', 'mobileAIBots' ),
+                ),
+                array(
+                    'bpbm-chat',
+                    array( 'miniChatRooms', 'combinedChatRooms', 'mobileChatRooms' ),
+                ),
+            );
+
+            foreach ( $post_count_map as $entry ) {
+                list( $post_type, $affected_vars ) = $entry;
+
+                $any_var_on = false;
+                foreach ( $affected_vars as $v ) {
+                    if ( isset( $script_variables[ $v ] ) && $script_variables[ $v ] === '1' ) {
+                        $any_var_on = true;
+                        break;
+                    }
+                }
+                if ( ! $any_var_on ) continue;
+
+                if ( ! post_type_exists( $post_type ) ) {
+                    foreach ( $affected_vars as $v ) {
+                        if ( isset( $script_variables[ $v ] ) ) {
+                            $script_variables[ $v ] = '0';
+                        }
+                    }
+                    continue;
+                }
+
+                $any_post = get_posts( array(
+                    'post_type'        => $post_type,
+                    'post_status'      => 'publish',
+                    'posts_per_page'   => 1,
+                    'fields'           => 'ids',
+                    'no_found_rows'    => true,
+                    'suppress_filters' => true,
+                ) );
+
+                if ( empty( $any_post ) ) {
+                    foreach ( $affected_vars as $v ) {
+                        if ( isset( $script_variables[ $v ] ) ) {
+                            $script_variables[ $v ] = '0';
+                        }
+                    }
                 }
             }
 

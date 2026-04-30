@@ -1818,6 +1818,161 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return apply_filters( 'better_messages_groups_active', false );
         }
 
+        public function user_has_friends( $user_id ) {
+            if ( $user_id <= 0 ) return false;
+            return (bool) apply_filters( 'better_messages_user_has_friends', false, $user_id );
+        }
+
+        public function user_has_groups( $user_id ) {
+            if ( $user_id <= 0 ) return false;
+            return (bool) apply_filters( 'better_messages_user_has_groups', false, $user_id );
+        }
+
+        public function user_has_users( $user_id ) {
+            global $wpdb;
+
+            $mode = isset( Better_Messages()->settings['widgetUsersDisplayMode'] )
+                ? Better_Messages()->settings['widgetUsersDisplayMode']
+                : 'all';
+
+            if ( $mode !== 'roles' && $mode !== 'specific' ) {
+                return true;
+            }
+
+            $users_table  = bm_get_table( 'users' );
+            $roles_table  = bm_get_table( 'roles' );
+            $guests_table = bm_get_table( 'guests' );
+
+            $exclude_self_sql = '';
+            if ( $user_id !== 0 ) {
+                $exclude_self_sql = $wpdb->prepare( ' AND bm_u.`ID` != %d', $user_id );
+            }
+
+            $existence_sql = '( '
+                . '( bm_u.`ID` > 0 AND wp_u.`ID` IS NOT NULL )'
+                . ' OR ( bm_u.`ID` < 0 AND bm_g.`id` IS NOT NULL AND bm_g.`deleted_at` IS NULL'
+                .       ' AND ( bm_g.`ip` IS NULL OR bm_g.`ip` NOT LIKE %s ) )'
+                . ' )';
+
+            if ( $mode === 'roles' ) {
+                $roles = isset( Better_Messages()->settings['widgetUsersRoles'] ) && is_array( Better_Messages()->settings['widgetUsersRoles'] )
+                    ? array_values( array_filter( array_map( 'strval', Better_Messages()->settings['widgetUsersRoles'] ) ) )
+                    : array();
+                if ( empty( $roles ) ) return false;
+
+                $placeholders = implode( ',', array_fill( 0, count( $roles ), '%s' ) );
+                $sql = "SELECT 1 FROM `{$users_table}` bm_u
+                        LEFT JOIN `{$wpdb->users}` wp_u ON wp_u.`ID` = bm_u.`ID`
+                        LEFT JOIN `{$guests_table}` bm_g ON bm_g.`id` = -bm_u.`ID`
+                        INNER JOIN `{$roles_table}` bm_r ON bm_r.`user_id` = bm_u.`ID`
+                        WHERE {$existence_sql} AND bm_r.`role` IN ({$placeholders}){$exclude_self_sql}
+                        LIMIT 1";
+                $found = $wpdb->get_var( $wpdb->prepare( $sql, array_merge( array( 'ai-chat-bot-%' ), $roles ) ) );
+                return ! empty( $found );
+            }
+
+            $ids = isset( Better_Messages()->settings['widgetUsersIds'] ) && is_array( Better_Messages()->settings['widgetUsersIds'] )
+                ? array_values( array_filter( array_map( 'intval', Better_Messages()->settings['widgetUsersIds'] ), function( $id ){ return $id !== 0; } ) )
+                : array();
+            if ( empty( $ids ) ) return false;
+
+            $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+            $sql = "SELECT 1 FROM `{$users_table}` bm_u
+                    LEFT JOIN `{$wpdb->users}` wp_u ON wp_u.`ID` = bm_u.`ID`
+                    LEFT JOIN `{$guests_table}` bm_g ON bm_g.`id` = -bm_u.`ID`
+                    WHERE {$existence_sql} AND bm_u.`ID` IN ({$placeholders}){$exclude_self_sql}
+                    LIMIT 1";
+            $found = $wpdb->get_var( $wpdb->prepare( $sql, array_merge( array( 'ai-chat-bot-%' ), $ids ) ) );
+            return ! empty( $found );
+        }
+
+        public function user_has_ai_bots( $user_id ) {
+            if ( ! class_exists( 'Better_Messages_AI' ) ) return false;
+
+            $display_mode = isset( Better_Messages()->settings['widgetAIBotsDisplayMode'] )
+                ? Better_Messages()->settings['widgetAIBotsDisplayMode']
+                : 'all';
+            $allowed_ids  = isset( Better_Messages()->settings['widgetAIBotsIds'] ) && is_array( Better_Messages()->settings['widgetAIBotsIds'] )
+                ? array_map( 'intval', Better_Messages()->settings['widgetAIBotsIds'] )
+                : array();
+
+            $args = array(
+                'post_type'        => 'bm-ai-chat-bot',
+                'post_status'      => 'publish',
+                'posts_per_page'   => 200,
+                'fields'           => 'ids',
+                'no_found_rows'    => true,
+                'suppress_filters' => true,
+            );
+
+            if ( $display_mode === 'specific' ) {
+                if ( empty( $allowed_ids ) ) return false;
+                $args['post__in'] = $allowed_ids;
+                $args['orderby']  = 'post__in';
+            }
+
+            $ai = Better_Messages_AI::instance();
+            $post_ids = get_posts( $args );
+            foreach ( $post_ids as $bot_post_id ) {
+                $settings = $ai->get_bot_settings( $bot_post_id );
+                if ( isset( $settings['enabled'] ) && $settings['enabled'] === '1' ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public function user_has_chat_rooms( $user_id ) {
+            if ( $user_id === 0 ) return false;
+
+            $display_mode = isset( Better_Messages()->settings['widgetChatRoomsDisplayMode'] )
+                ? Better_Messages()->settings['widgetChatRoomsDisplayMode']
+                : 'all';
+            $allowed_ids  = isset( Better_Messages()->settings['widgetChatRoomsIds'] ) && is_array( Better_Messages()->settings['widgetChatRoomsIds'] )
+                ? array_map( 'intval', Better_Messages()->settings['widgetChatRoomsIds'] )
+                : array();
+
+            $args = array(
+                'post_type'        => 'bpbm-chat',
+                'post_status'      => 'publish',
+                'posts_per_page'   => 100,
+                'fields'           => 'ids',
+                'no_found_rows'    => true,
+                'suppress_filters' => true,
+            );
+
+            if ( $display_mode === 'specific' ) {
+                if ( empty( $allowed_ids ) ) return false;
+                $args['post__in'] = $allowed_ids;
+                $args['orderby']  = 'post__in';
+            }
+
+            if ( ! isset( Better_Messages()->chats ) ) return false;
+            $chats = Better_Messages()->chats;
+
+            global $wpdb;
+            $recipients_table = bm_get_table( 'recipients' );
+
+            $post_ids = get_posts( $args );
+            foreach ( $post_ids as $chat_id ) {
+                $thread_id = (int) $chats->get_chat_thread_id( $chat_id );
+                if ( ! $thread_id ) continue;
+
+                if ( $user_id !== 0 ) {
+                    $is_joined = (bool) $wpdb->get_var( $wpdb->prepare(
+                        "SELECT 1 FROM `{$recipients_table}` WHERE `thread_id` = %d AND `user_id` = %d LIMIT 1",
+                        $thread_id, $user_id
+                    ) );
+                    if ( $is_joined ) return true;
+                }
+
+                if ( $chats->user_can_join( $user_id, $chat_id ) ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public function is_followers( $user_id_1, $user_id_2 ){
             return apply_filters( 'better_messages_is_followers', false, $user_id_1, $user_id_2 );
         }
@@ -1893,12 +2048,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $user_data = $this->rest_user_item( $user_id, false );
             }
 
+            $role_hashes = $this->get_user_role_hashes( $user_id );
+
             $plaintext = [
-                'user_id'  => (int) $user_id,
-                'name'     => $user_data['name'],
-                'avatar'   => $user_data['avatar'],
-                'url'      => $user_data['url'] ?? '',
-                'verified' => (int) ( $user_data['verified'] ?? 0 ),
+                'user_id'     => (int) $user_id,
+                'name'        => $user_data['name'],
+                'avatar'      => $user_data['avatar'],
+                'url'         => $user_data['url'] ?? '',
+                'verified'    => (int) ( $user_data['verified'] ?? 0 ),
+                'role_hashes' => $role_hashes,
             ];
 
             $hash = md5( json_encode( $plaintext ) );
@@ -1917,11 +2075,53 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $sig = hash_hmac( 'sha256', $hash, Better_Messages_WebSocket()->secret_key );
 
+            $role_hashes_for_sig = $role_hashes;
+            sort( $role_hashes_for_sig );
+            $role_hashes_sig = hash_hmac( 'sha256', implode( ',', $role_hashes_for_sig ), Better_Messages_WebSocket()->secret_key );
+
             return [
-                'pd'  => $encrypted,
-                'pdh' => $hash,
-                'pds' => $sig,
+                'pd'              => $encrypted,
+                'pdh'             => $hash,
+                'pds'             => $sig,
+                'role_hashes'     => $role_hashes,
+                'role_hashes_sig' => $role_hashes_sig,
             ];
+        }
+
+        public function get_user_role_hashes( $user_id ) {
+            $roles = $this->get_user_roles( $user_id );
+            if ( ! is_array( $roles ) || empty( $roles ) ) {
+                return array();
+            }
+            $secret = $this->role_hash_secret();
+            $hashes = array();
+            foreach ( $roles as $role ) {
+                $hashes[] = hash_hmac( 'sha256', (string) $role, $secret );
+            }
+            return array_values( array_unique( $hashes ) );
+        }
+
+        public function hash_role_slugs( $role_slugs ) {
+            if ( ! is_array( $role_slugs ) || empty( $role_slugs ) ) {
+                return array();
+            }
+            $secret = $this->role_hash_secret();
+            $hashes = array();
+            foreach ( $role_slugs as $slug ) {
+                $slug = (string) $slug;
+                if ( $slug === '' ) continue;
+                $hashes[] = hash_hmac( 'sha256', $slug, $secret );
+            }
+            return array_values( array_unique( $hashes ) );
+        }
+
+        private function role_hash_secret() {
+            $license_secret = '';
+            if ( class_exists( 'Better_Messages_WebSocket' ) ) {
+                $license_secret = (string) Better_Messages_WebSocket()->secret_key;
+            }
+            if ( $license_secret !== '' ) return $license_secret;
+            return wp_salt( 'auth' );
         }
 
         public function get_message_by_order( $thread_id, $message_number = 1 ){
@@ -2710,7 +2910,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'is_update'        => false,
                 'ai_moderation_result' => null,
                 'ai_moderation_provider' => null,
-                'ai_moderation_deferred' => false
+                'ai_moderation_deferred' => false,
+                'suppress_new_thread_created' => false,
             ), 'bm_new_message' );
 
             // Bail if no sender or no content.
@@ -2888,6 +3089,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 Better_Messages()->functions->delete_all_thread_meta( $message->thread_id );
                 Better_Messages()->functions->update_thread_meta( $message->thread_id, 'thread_starter_user_id', $r['sender_id'] );
                 Better_Messages()->functions->update_thread_meta( $message->thread_id, 'thread_start_time', time() );
+
+                if ( empty( $r['suppress_new_thread_created'] ) ) {
+                    do_action( 'bp_better_messages_new_thread_created', $message->thread_id, $message->id );
+                }
             }
 
             $this->delete_all_message_meta( $message->id );
@@ -3202,6 +3407,36 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             return true;
+        }
+
+        public function can_read_chat_messages( $thread_id, $user_id ){
+            if( $this->get_thread_type( $thread_id ) !== 'chat-room' ){
+                return true;
+            }
+
+            $chat_id = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
+
+            if( ! $chat_id ){
+                return true;
+            }
+
+            $settings = Better_Messages_Chats()->get_chat_settings( $chat_id );
+
+            if( $settings['only_joined_can_read'] !== '1' ){
+                return true;
+            }
+
+            if( $user_id > 0 && user_can( $user_id, 'manage_options' ) ){
+                return true;
+            }
+
+            if( $this->is_thread_moderator( $thread_id, $user_id ) ){
+                return true;
+            }
+
+            $recipients = $this->get_recipients( $thread_id );
+
+            return isset( $recipients[ $user_id ] );
         }
 
         public function user_has_role( $user_id, $roles = [] ){

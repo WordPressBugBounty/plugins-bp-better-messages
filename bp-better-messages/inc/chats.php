@@ -122,6 +122,12 @@ class Better_Messages_Chats
             'permission_callback' => array($this, 'user_is_admin'),
         ));
 
+        register_rest_route( 'better-messages/v1', '/getChatRooms', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'rest_get_user_facing_chat_rooms' ),
+            'permission_callback' => '__return_true',
+        ) );
+
         register_rest_route( 'better-messages/v1', '/chat/(?P<id>\d+)/join', array(
             'methods' => 'POST',
             'callback' => array( $this, 'join_chat' ),
@@ -252,6 +258,246 @@ class Better_Messages_Chats
 
 
         return $result;
+    }
+
+    public function rest_get_user_facing_chat_rooms( WP_REST_Request $request ) {
+        global $wpdb;
+
+        $user_id = Better_Messages()->functions->get_current_user_id();
+
+        $display_mode  = isset( Better_Messages()->settings['widgetChatRoomsDisplayMode'] )
+            ? Better_Messages()->settings['widgetChatRoomsDisplayMode']
+            : 'all';
+        $allowed_ids   = isset( Better_Messages()->settings['widgetChatRoomsIds'] ) && is_array( Better_Messages()->settings['widgetChatRoomsIds'] )
+            ? array_map( 'intval', Better_Messages()->settings['widgetChatRoomsIds'] )
+            : array();
+        $filter_active = ( $display_mode === 'specific' );
+
+        if ( $filter_active && empty( $allowed_ids ) ) {
+            return array();
+        }
+
+        $query_args = array(
+            'post_type'      => 'bpbm-chat',
+            'post_status'    => 'publish',
+            'posts_per_page' => 100,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+        );
+
+        if ( $filter_active ) {
+            $query_args['post__in'] = $allowed_ids;
+            $query_args['orderby']  = 'post__in';
+        }
+
+        $query = new WP_Query( $query_args );
+
+        $recipients_table = bm_get_table( 'recipients' );
+        $rooms            = array();
+        $thread_ids       = array();
+
+        foreach ( $query->posts as $post ) {
+            $chat_id   = (int) $post->ID;
+            $thread_id = (int) $this->get_chat_thread_id( $chat_id );
+            if ( ! $thread_id ) continue;
+
+            $is_joined = false;
+            if ( $user_id !== 0 ) {
+                $is_joined = (bool) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT 1 FROM `{$recipients_table}` WHERE `thread_id` = %d AND `user_id` = %d LIMIT 1",
+                    $thread_id, $user_id
+                ) );
+            }
+
+            $can_join = $this->user_can_join( $user_id, $chat_id );
+
+            if ( ! $is_joined && ! $can_join ) {
+                continue;
+            }
+
+            $image_url = '';
+            if ( has_post_thumbnail( $chat_id ) ) {
+                $image_id = (int) get_post_thumbnail_id( $chat_id );
+                if ( $image_id ) {
+                    $src = wp_get_attachment_image_src( $image_id, array( 100, 100 ) );
+                    if ( $src ) {
+                        $image_url = $src[0];
+                    }
+                }
+            }
+
+            $member_count = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(*) FROM `{$recipients_table}` WHERE `thread_id` = %d",
+                $thread_id
+            ) );
+
+            $rooms[] = array(
+                'chat_id'      => $chat_id,
+                'thread_id'    => $thread_id,
+                'title'        => $post->post_title,
+                'image'        => $image_url,
+                'isJoined'     => $is_joined ? 1 : 0,
+                'canJoin'      => $can_join ? 1 : 0,
+                'memberCount'  => $member_count,
+                'participants' => array(),
+                'showOnline'   => 0,
+            );
+            $thread_ids[] = $thread_id;
+        }
+
+        if ( ! empty( $thread_ids ) ) {
+            $thread_placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
+
+            $by_thread = $this->fetch_packed_recipients( $thread_ids, $thread_placeholders );
+
+            foreach ( $rooms as &$room ) {
+                $room['participants'] = isset( $by_thread[ $room['thread_id'] ] )
+                    ? $by_thread[ $room['thread_id'] ]
+                    : array();
+            }
+            unset( $room );
+        }
+
+        $show_online = Better_Messages()->realtime
+            && ! empty( Better_Messages()->settings['chatRoomsShowOnline'] )
+            && Better_Messages()->settings['chatRoomsShowOnline'] === '1';
+
+        if ( $show_online ) {
+            foreach ( $rooms as &$room ) {
+                $room['showOnline'] = 1;
+            }
+            unset( $room );
+        }
+
+        return apply_filters( 'better_messages_get_chat_rooms', $rooms, $user_id );
+    }
+
+    private function fetch_packed_recipients( array $thread_ids, $thread_placeholders ) {
+        global $wpdb;
+
+        if ( $this->db_supports_window_functions() ) {
+            $recipients = bm_get_table( 'recipients' );
+
+            $prev_suppress = $wpdb->suppress_errors( true );
+            $prev_show     = $wpdb->show_errors( false );
+
+            $rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT `thread_id`, MIN(`user_id`) AS `rs`, MAX(`user_id`) AS `re`
+                 FROM (
+                    SELECT `thread_id`, `user_id`,
+                        `user_id` - CAST(ROW_NUMBER() OVER (PARTITION BY `thread_id` ORDER BY `user_id`) AS SIGNED) AS `grp`
+                    FROM `{$recipients}`
+                    WHERE `thread_id` IN ({$thread_placeholders})
+                      AND `is_deleted` = 0
+                 ) `t`
+                 GROUP BY `thread_id`, `grp`
+                 ORDER BY `thread_id` ASC, `rs` ASC",
+                $thread_ids
+            ) );
+
+            $error = $wpdb->last_error;
+            $wpdb->show_errors( $prev_show );
+            $wpdb->suppress_errors( $prev_suppress );
+
+            if ( empty( $error ) && is_array( $rows ) ) {
+                $by_thread = array();
+                foreach ( $rows as $row ) {
+                    $tid = (int) $row->thread_id;
+                    $rs  = (int) $row->rs;
+                    $re  = (int) $row->re;
+                    if ( ! isset( $by_thread[ $tid ] ) ) $by_thread[ $tid ] = array();
+                    $by_thread[ $tid ][] = ( $rs === $re ) ? $rs : array( $rs, $re );
+                }
+                return $by_thread;
+            }
+        }
+
+        return $this->fetch_packed_recipients_php( $thread_ids, $thread_placeholders );
+    }
+
+    private function db_supports_window_functions() {
+        static $supports = null;
+        if ( $supports !== null ) return $supports;
+
+        global $wpdb;
+
+        $version = $wpdb->db_version();
+        $server  = '';
+        if ( method_exists( $wpdb, 'db_server_info' ) ) {
+            $server = (string) $wpdb->db_server_info();
+        }
+
+        if ( empty( $version ) ) {
+            return $supports = false;
+        }
+
+        if ( stripos( $server, 'mariadb' ) !== false ) {
+            $supports = version_compare( $version, '10.2', '>=' );
+        } else {
+            $supports = version_compare( $version, '8.0', '>=' );
+        }
+
+        return $supports;
+    }
+
+    private function fetch_packed_recipients_php( array $thread_ids, $thread_placeholders ) {
+        global $wpdb;
+
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT `thread_id`, `user_id`
+             FROM `" . bm_get_table( 'recipients' ) . "`
+             WHERE `thread_id` IN ({$thread_placeholders})
+               AND `is_deleted` = 0
+             ORDER BY `thread_id` ASC, `user_id` ASC",
+            $thread_ids
+        ) );
+
+        $by_thread       = array();
+        $current_tid     = null;
+        $current_entries = array();
+        $range_start     = null;
+        $range_end       = null;
+
+        $flush_run = function() use ( &$current_entries, &$range_start, &$range_end ) {
+            if ( $range_start === null ) return;
+            $current_entries[] = ( $range_start === $range_end )
+                ? $range_start
+                : array( $range_start, $range_end );
+            $range_start = null;
+            $range_end   = null;
+        };
+
+        foreach ( $rows as $row ) {
+            $tid = (int) $row->thread_id;
+            $uid = (int) $row->user_id;
+
+            if ( $current_tid !== $tid ) {
+                if ( $current_tid !== null ) {
+                    $flush_run();
+                    $by_thread[ $current_tid ] = $current_entries;
+                }
+                $current_tid     = $tid;
+                $current_entries = array();
+                $range_start     = $uid;
+                $range_end       = $uid;
+                continue;
+            }
+
+            if ( $uid === $range_end + 1 ) {
+                $range_end = $uid;
+            } else {
+                $flush_run();
+                $range_start = $uid;
+                $range_end   = $uid;
+            }
+        }
+        if ( $current_tid !== null ) {
+            $flush_run();
+            $by_thread[ $current_tid ] = $current_entries;
+        }
+
+        return $by_thread;
     }
 
     public function rest_admin_list_chat_rooms( WP_REST_Request $request ) {

@@ -371,7 +371,7 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                 if ( $is_error ) continue;
 
-                $message_text = preg_replace( '/<!--(.|\s)*?-->/', '', $_message->message );
+                $message_text = $this->clean_stored_message( $_message->message );
                 if ( empty( trim( $message_text ) ) && (int) $_message->id !== (int) $current_user_msg_id ) {
                     $has_processable_attachments = false;
                     if ( $bot_settings['images'] || $bot_settings['files'] ) {
@@ -500,7 +500,7 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             // System prompt
             $system_prompt = '';
             if ( ! empty( $bot_settings['instruction'] ) ) {
-                $system_prompt = apply_filters( 'better_messages_open_ai_bot_instruction', $bot_settings['instruction'], $bot_id, $message->sender_id );
+                $system_prompt = $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id );
             }
 
             if ( $is_group ) {

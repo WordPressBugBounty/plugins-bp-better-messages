@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.14.16
+    Version: 2.15.0
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.14.16';
+        public  $version = '2.15.0';
 
         public  $db_version = '1.0.4';
 
@@ -680,6 +680,67 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
         }
 
         public function get_script_variables(){
+            $vars = $this->_compute_script_variables_inner();
+            $vars = $this->_filter_default_equal_entries( $vars );
+
+            $this->script_variables = apply_filters( 'bp_better_messages_script_variable', $vars );
+
+            return $this->script_variables;
+        }
+
+        private static $_always_send_keys = array(
+            'hash', 'user_id', 'version', 'workerVersion', 'blogId',
+            'ajaxUrl', 'restUrl', 'nonce', 'authToken',
+            'url', 'threadUrl', 'baseUrl',
+            'assets', 'sounds', 'soundLevels',
+            'notificationSoundUrl', 'sentSoundUrl', 'callSoundUrl', 'dialingSoundUrl',
+            'sprite', 'emojiHash',
+            'loginUrl', 'registerUrl', 'adminUrl',
+            'total_unread', 'enableSound',
+            'realtime', 'friends', 'groups', 'guests',
+            'me', 'ukey',
+            'translationLanguage',
+            'isAdmin', 'canBulk',
+            'pointsBalance', 'pointsBalanceUrl',
+            'pointsBalanceHeader', 'pointsBalanceThreadsList', 'pointsBalanceThreadsListBottom',
+            'pointsBalanceUserMenu', 'pointsBalanceUserMenuPopup', 'pointsBalanceReplyForm',
+            'reactions',
+            'userStatuses',
+            'suggestedConversations',
+            'voiceMaxDuration',
+            'unreadCounter',
+            'ws', 'socket_server', 'turn_server', 'video_server', 'site_id', 'secret_key',
+            'callRequestTimeLimit', 'fast', 'le', 'encryption', 'ekey',
+            'vapidPublicKey', 'PNworker',
+            'badWords',
+            'fileSigningKey',
+            'mobile',
+            'miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder',
+            'color', 'darkColor', 'locale', 'widgetsPosition',
+            'datePosition', 'timeFormat', 'avatars', 'subName',
+        );
+
+        private function _filter_default_equal_entries( array $vars ) {
+            static $defaults_snapshot = null;
+
+            if ( $defaults_snapshot === null ) {
+                $real = $this->settings;
+                $this->settings = $this->options->defaults;
+                $defaults_snapshot = $this->_compute_script_variables_inner();
+                $this->settings = $real;
+            }
+
+            foreach ( $defaults_snapshot as $key => $default_value ) {
+                if ( in_array( $key, self::$_always_send_keys, true ) ) continue;
+                if ( array_key_exists( $key, $vars ) && $vars[ $key ] === $default_value ) {
+                    unset( $vars[ $key ] );
+                }
+            }
+
+            return $vars;
+        }
+
+        private function _compute_script_variables_inner(){
             $enableSound = '1';
 
             if( Better_Messages()->settings['allowSoundDisable'] === '1' ){
@@ -756,6 +817,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'selfReplies'           => ( $this->settings['enableSelfReplies'] == '1' ? '1' : '0' ),
                 'privateReplies'        => ( $this->settings['privateReplies'] == '1' ? '1' : '0' ),
                 'forwardMessages'       => ( $this->settings['enableForwardMessages'] == '1' ? '1' : '0' ),
+                'editMessageTimeLimit'  => (int) $this->settings['editMessageTimeLimit'],
                 'template'              => $this->settings['template'],
                 'layout'                => $this->settings['modernLayout'],
                 'singleThread'          => ( $this->settings['singleThreadMode'] == '1' ? '1' : '0' ),
@@ -787,6 +849,45 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'miniClose'              => ( $this->settings['enableMiniCloseButton'] ? '1' : '0' ),
                 'miniChats'              => ( $this->realtime && $this->settings['miniChatsEnable'] ? '1' : '0' ),
                 'miniMessages'           => ( $this->realtime && $this->settings['miniThreadsEnable'] ? '1' : '0' ),
+                'miniAIBots'             => ( $this->settings['miniAIBotsEnable'] == '1' ? '1' : '0' ),
+                'miniChatRooms'          => ( $this->settings['miniChatRoomsEnable'] == '1' ? '1' : '0' ),
+                'miniUsers'              => ( $this->settings['miniUsersEnable'] == '1' ? '1' : '0' ),
+                'combinedAIBots'         => ( $this->settings['combinedAIBotsEnable'] == '1' ? '1' : '0' ),
+                'combinedChatRooms'      => ( $this->settings['combinedChatRoomsEnable'] == '1' ? '1' : '0' ),
+                'combinedUsers'          => ( $this->settings['combinedUsersEnable'] == '1' ? '1' : '0' ),
+                'mobileAIBots'           => ( $this->settings['mobileAIBotsEnable'] == '1' ? '1' : '0' ),
+                'mobileChatRooms'        => ( $this->settings['mobileChatRoomsEnable'] == '1' ? '1' : '0' ),
+                'mobileUsers'            => ( $this->settings['mobileUsersEnable'] == '1' ? '1' : '0' ),
+                'miniWidgetsIconsOnly'   => ( $this->settings['miniWidgetsIconsOnly'] == '1' ? '1' : '0' ),
+                'sidePanelIconsOnly'     => ( $this->settings['sidePanelIconsOnly'] == '1' ? '1' : '0' ),
+                'mobileTabsIconsOnly'    => ( $this->settings['mobileTabsIconsOnly'] == '1' ? '1' : '0' ),
+                'widgetIconMessages'     => (string) ( $this->settings['widgetIconMessages'] ?? '' ),
+                'widgetIconFriends'      => (string) ( $this->settings['widgetIconFriends'] ?? '' ),
+                'widgetIconGroups'       => (string) ( $this->settings['widgetIconGroups'] ?? '' ),
+                'widgetIconAIBots'       => (string) ( $this->settings['widgetIconAIBots'] ?? '' ),
+                'widgetIconChatRooms'    => (string) ( $this->settings['widgetIconChatRooms'] ?? '' ),
+                'widgetIconUsers'        => (string) ( $this->settings['widgetIconUsers'] ?? '' ),
+                'widgetFriendsHideWhenEmpty'   => ( ( $this->settings['widgetFriendsHideWhenEmpty']  ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetGroupsHideWhenEmpty'    => ( ( $this->settings['widgetGroupsHideWhenEmpty']   ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetAIBotsHideWhenEmpty'    => ( ( $this->settings['widgetAIBotsHideWhenEmpty']   ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetChatRoomsHideWhenEmpty' => ( ( $this->settings['widgetChatRoomsHideWhenEmpty'] ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetUsersHideWhenEmpty'     => ( ( $this->settings['widgetUsersHideWhenEmpty']    ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetUsersOnlineOnly'  => ( ( $this->settings['widgetUsersOnlineOnly']  ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetUsersOnlineFirst' => ( ( $this->settings['widgetUsersOnlineFirst'] ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetUsersShowOnlineCount' => ( ( $this->settings['widgetUsersShowOnlineCount'] ?? '0' ) === '1' ? '1' : '0' ),
+                'widgetUsersSortBy'      => ( in_array( ( $this->settings['widgetUsersSortBy'] ?? '' ), array( 'last_active', 'display_name', 'newest' ), true ) ? $this->settings['widgetUsersSortBy'] : 'last_active' ),
+                'widgetUsersDisplayMode' => ( in_array( ( $this->settings['widgetUsersDisplayMode'] ?? '' ), array( 'all', 'roles', 'specific' ), true ) ? $this->settings['widgetUsersDisplayMode'] : 'all' ),
+                'widgetUsersIds'         => ( is_array( $this->settings['widgetUsersIds'] ?? null )
+                    ? array_values( array_filter( array_map( 'intval', $this->settings['widgetUsersIds'] ), function( $id ){ return $id > 0; } ) )
+                    : array() ),
+                'widgetUsersRoleHashes'  => Better_Messages()->functions->hash_role_slugs(
+                    is_array( $this->settings['widgetUsersRoles'] ?? null ) ? $this->settings['widgetUsersRoles'] : array()
+                ),
+                'widgetFriendsShowSearch'   => ( ( $this->settings['widgetFriendsShowSearch']   ?? '1' ) === '1' ? '1' : '0' ),
+                'widgetGroupsShowSearch'    => ( ( $this->settings['widgetGroupsShowSearch']    ?? '1' ) === '1' ? '1' : '0' ),
+                'widgetAIBotsShowSearch'    => ( ( $this->settings['widgetAIBotsShowSearch']    ?? '1' ) === '1' ? '1' : '0' ),
+                'widgetChatRoomsShowSearch' => ( ( $this->settings['widgetChatRoomsShowSearch'] ?? '1' ) === '1' ? '1' : '0' ),
+                'widgetUsersShowSearch'     => ( ( $this->settings['widgetUsersShowSearch']     ?? '1' ) === '1' ? '1' : '0' ),
                 'combinedChats'          => ( $this->realtime && $this->settings['combinedChatsEnable'] == '1' ? '1' : '0' ),
                 'miniWidgetsStyle'       => ( $this->settings['miniWidgetsStyle'] ?? 'classic' ),
                 'widgetsPosition'        => ( get_theme_mod('bm-widgets-position', 'right') === 'left' ? 'left' : 'right' ),
@@ -942,6 +1043,8 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                     $script_variables['me']['pd']  = $profile['pd'];
                     $script_variables['me']['pdh'] = $profile['pdh'];
                     $script_variables['me']['pds'] = $profile['pds'];
+                    $script_variables['me']['role_hashes']     = $profile['role_hashes'];
+                    $script_variables['me']['role_hashes_sig'] = $profile['role_hashes_sig'];
                 }
             }
 
@@ -1002,9 +1105,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 $script_variables['voiceMaxDuration'] = $voice_max_duration;
             }
 
-            $this->script_variables = apply_filters( 'bp_better_messages_script_variable', $script_variables );
-
-            return $this->script_variables;
+            return $script_variables;
         }
     }
 

@@ -523,7 +523,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             if( ! empty( $bot_settings['instruction'] ) ) {
                 $request_messages[] = [
                     'role' => 'system',
-                    'content' => apply_filters( 'better_messages_open_ai_bot_instruction', $bot_settings['instruction'], $bot_id, $message->sender_id )
+                    'content' => $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id )
                 ];
             }
 
@@ -535,14 +535,14 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                 $content[] = [
                     'type' => 'text',
-                    'text' => preg_replace('/<!--(.|\s)*?-->/', '', $_message->message)
+                    'text' => $this->clean_stored_message( $_message->message )
                 ];
 
                 $role = (int) $_message->sender_id === (int) $bot_user_id ? 'assistant' : 'user';
 
                 if( $role === 'assistant' ) {
                     $audio_id = Better_Messages()->functions->get_message_meta( $_message->id, 'openai_audio_id' );
-                    $message_content = preg_replace('/<!--(.|\s)*?-->/', '', $_message->message);
+                    $message_content = $this->clean_stored_message( $_message->message );
 
                     if( $audio_id ){
                         $audio_expires_at = Better_Messages()->functions->get_message_meta( $_message->id, 'openai_audio_expires_at' );
@@ -557,7 +557,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                         } else {
                             $request_messages[] = [
                                 'role' => 'system',
-                                'content' => apply_filters( 'better_messages_open_ai_bot_instruction', $bot_settings['instruction'], $bot_id, $message->sender_id )
+                                'content' => $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id )
                             ];
                         }
                     } else if( $transcript = Better_Messages()->functions->get_message_meta( $_message->id, 'openai_audio_transcript') ){
@@ -591,7 +591,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     } else {
                         $content[] = [
                             'type' => 'text',
-                            'text' => preg_replace('/<!--(.|\s)*?-->/', '', $_message->message)
+                            'text' => $this->clean_stored_message( $_message->message )
                         ];
                     }
                 }
@@ -972,7 +972,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                     if ( $is_error ) continue;
 
-                    $msg_text = preg_replace( '/<!--(.|\s)*?-->/', '', $_message->message );
+                    $msg_text = $this->clean_stored_message( $_message->message );
                     if ( empty( trim( $msg_text ) ) ) {
                         $has_processable_attachments = false;
                         if ( $bot_settings['images'] || $bot_settings['files'] ) {
@@ -1030,7 +1030,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     ];
                 }
             } else {
-                $message_content = preg_replace( '/<!--(.|\s)*?-->/', '', $message->message );
+                $message_content = $this->clean_stored_message( $message->message );
 
                 $content = [];
 
@@ -1131,7 +1131,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
 
             $params += [
-                'instructions' => apply_filters( 'better_messages_open_ai_bot_instruction', $bot_settings['instruction'], $bot_id, $message->sender_id )
+                'instructions' => $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id )
                     . $group_instruction
                     . '. This is very important you to use correct markdown format for providing response, especially for code blocks and snippets.'
                     . ( ! empty( $bot_settings['maxImagesPerResponse'] ) && intval( $bot_settings['maxImagesPerResponse'] ) > 0
@@ -1626,7 +1626,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             if( ! empty( $bot_settings['instruction'] ) ) {
                 $request_messages[] = [
                     'role' => 'system',
-                    'content' => apply_filters( 'better_messages_open_ai_bot_instruction', $bot_settings['instruction'], $bot_id, $message->sender_id )
+                    'content' => $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id )
                 ];
             }
 
@@ -1638,7 +1638,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                 $content[] = [
                     'type' => 'text',
-                    'text' => preg_replace('/<!--(.|\s)*?-->/', '', $_message->message)
+                    'text' => $this->clean_stored_message( $_message->message )
                 ];
 
                 $attachments = Better_Messages()->functions->get_message_meta($_message->id, 'attachments', true);

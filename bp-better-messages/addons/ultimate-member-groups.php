@@ -19,6 +19,10 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
         }
 
         public function __construct(){
+            if ( class_exists( 'UM_Groups' ) || Better_Messages_Ultimate_Member::um_groups_table_exists() ) {
+                add_filter( 'better_messages_user_has_groups', array( $this, 'user_has_groups' ), 10, 2 );
+            }
+
             if(  Better_Messages()->settings['UMenableGroups'] === '1' ) {
                 add_filter('better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
                 add_filter('um_groups_tabs', array($this, 'add_group_tab'), 20, 3);
@@ -128,6 +132,35 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
             }
 
             return $avatar;
+        }
+
+        public function user_has_groups( $has, $user_id ) {
+            if ( $has ) return true;
+            if ( $user_id <= 0 ) return false;
+
+            if ( class_exists( 'UM_Groups' ) ) {
+                $user_groups = UM()->Groups()->member()->get_groups_joined( $user_id );
+                return is_array( $user_groups ) && count( $user_groups ) > 0;
+            }
+
+            if ( Better_Messages_Ultimate_Member::um_groups_table_exists() ) {
+                global $wpdb;
+                $table = $wpdb->prefix . 'um_groups_members';
+                $found = (int) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT 1 FROM `{$table}` AS gm
+                     WHERE gm.user_id1 = %d
+                       AND gm.status   = 'approved'
+                       AND gm.group_id IN (
+                           SELECT p.ID FROM `{$wpdb->posts}` AS p
+                           WHERE p.post_type = 'um_groups' AND p.post_status = 'publish'
+                       )
+                     LIMIT 1",
+                    $user_id
+                ) );
+                return $found === 1;
+            }
+
+            return false;
         }
 
         public function get_groups( $groups, $user_id ){

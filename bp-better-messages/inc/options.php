@@ -70,6 +70,25 @@ class Better_Messages_Options
             'fastStart'                   => '1',
             'miniThreadsEnable'           => '0',
             'miniFriendsEnable'           => '0',
+            'miniAIBotsEnable'            => '0',
+            'miniChatRoomsEnable'         => '0',
+            'miniUsersEnable'             => '0',
+            'combinedAIBotsEnable'        => '0',
+            'combinedChatRoomsEnable'     => '0',
+            'combinedUsersEnable'         => '0',
+            'mobileAIBotsEnable'          => '0',
+            'mobileChatRoomsEnable'       => '0',
+            'mobileUsersEnable'           => '0',
+            'miniWidgetsIconsOnly'        => '0',
+            'sidePanelIconsOnly'          => '0',
+            'mobileTabsIconsOnly'         => '0',
+            'widgetIconMessages'          => '',
+            'widgetIconFriends'           => '',
+            'widgetIconGroups'            => '',
+            'widgetIconAIBots'            => '',
+            'widgetIconChatRooms'         => '',
+            'widgetIconUsers'             => '',
+            'chatRoomsShowOnline'         => '0',
             'friendsMode'                 => '0',
             'singleThreadMode'            => '0',
             'newThreadMode'               => '0',
@@ -91,6 +110,42 @@ class Better_Messages_Options
             'restrictViewMiniThreads'     => [],
             'restrictViewMiniFriends'     => [],
             'restrictViewMiniGroups'      => [],
+            'restrictViewMiniAIBots'      => [],
+            'restrictViewMiniChatRooms'   => [],
+            'restrictViewMiniUsers'       => [],
+            'restrictViewSideThreads'     => [],
+            'restrictViewSideFriends'     => [],
+            'restrictViewSideGroups'      => [],
+            'restrictViewSideAIBots'      => [],
+            'restrictViewSideChatRooms'   => [],
+            'restrictViewSideUsers'       => [],
+            'restrictViewMobileThreads'   => [],
+            'restrictViewMobileFriends'   => [],
+            'restrictViewMobileGroups'    => [],
+            'restrictViewMobileAIBots'    => [],
+            'restrictViewMobileChatRooms' => [],
+            'restrictViewMobileUsers'     => [],
+            'widgetAIBotsDisplayMode'     => 'all',
+            'widgetAIBotsIds'             => [],
+            'widgetChatRoomsDisplayMode'  => 'all',
+            'widgetChatRoomsIds'          => [],
+            'widgetUsersDisplayMode'      => 'all',
+            'widgetUsersRoles'            => [],
+            'widgetUsersIds'              => [],
+            'widgetUsersSortBy'           => 'last_active',
+            'widgetUsersOnlineOnly'       => '0',
+            'widgetUsersOnlineFirst'      => '0',
+            'widgetUsersShowOnlineCount'  => '0',
+            'widgetFriendsHideWhenEmpty'  => '0',
+            'widgetGroupsHideWhenEmpty'   => '0',
+            'widgetAIBotsHideWhenEmpty'   => '0',
+            'widgetChatRoomsHideWhenEmpty' => '0',
+            'widgetUsersHideWhenEmpty'    => '0',
+            'widgetFriendsShowSearch'     => '1',
+            'widgetGroupsShowSearch'      => '1',
+            'widgetAIBotsShowSearch'      => '1',
+            'widgetChatRoomsShowSearch'   => '1',
+            'widgetUsersShowSearch'       => '1',
             'restrictMobilePopup'         => [],
             'videoCalls'                  => '0',
             'audioCalls'                  => '0',
@@ -173,6 +228,7 @@ class Better_Messages_Options
             'deletedBehaviour'            => 'ignore',
             'unreadCounter'               => 'messages',
             'allowEditMessages'           => '0',
+            'editMessageTimeLimit'        => 0,
             'enableNiceLinks'             => '1',
             'userStatuses'                => '0',
             'myProfileButton'             => '1',
@@ -524,11 +580,11 @@ class Better_Messages_Options
 
         add_submenu_page(
             'bp-better-messages',
-            _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
-            _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
-            'manage_options',
-            'bp-better-messages-ai',
-            array( $this, 'ai_bots_page_new_html' ),
+            _x( 'Administration', 'WP Admin', 'bp-better-messages' ),
+            $administration_menu_title,
+            'bm_can_administrate',
+            'better-messages-viewer',
+            array($this, 'viewer_page_new_html'),
             2
         );
 
@@ -544,12 +600,12 @@ class Better_Messages_Options
 
         add_submenu_page(
             'bp-better-messages',
-            _x( 'Administration', 'WP Admin', 'bp-better-messages' ),
-            $administration_menu_title,
-            'bm_can_administrate',
-            'better-messages-viewer',
-            array($this, 'viewer_page_new_html'),
-            10
+            _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
+            _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
+            'manage_options',
+            'bp-better-messages-ai',
+            array( $this, 'ai_bots_page_new_html' ),
+            4
         );
         //}
 
@@ -780,21 +836,6 @@ class Better_Messages_Options
             $emoji_sets = Better_Messages_Emojis()->emoji_sets;
         }
 
-        // Suggested conversations users (resolve IDs to labels)
-        $suggested_conversations_users = array();
-        if ( is_array( $this->settings['suggestedConversations'] ) ) {
-            foreach ( $this->settings['suggestedConversations'] as $user_id ) {
-                if ( Better_Messages()->functions->is_user_exists( $user_id ) ) {
-                    $user = Better_Messages()->functions->rest_user_item( $user_id );
-                    $suggested_conversations_users[] = array(
-                        'value'  => $user['user_id'],
-                        'label'  => $user['name'],
-                        'avatar' => $user['avatar'],
-                    );
-                }
-            }
-        }
-
         $resolve_support_user = function( $user_id ){
             $user_id = (int) $user_id;
             if ( $user_id <= 0 || ! Better_Messages()->functions->is_user_exists( $user_id ) ) {
@@ -811,6 +852,18 @@ class Better_Messages_Options
         $woocommerce_product_support_user      = $resolve_support_user( $this->settings['wooCommerceProductSupportUser'] );
         $woocommerce_order_support_user        = $resolve_support_user( $this->settings['wooCommerceOrderSupportUser'] );
         $woocommerce_pre_purchase_support_user = $resolve_support_user( $this->settings['wooCommercePrePurchaseSupportUser'] );
+
+        $ai_bots_count = 0;
+        if ( post_type_exists( 'bm-ai-chat-bot' ) ) {
+            $counts = (array) wp_count_posts( 'bm-ai-chat-bot' );
+            $ai_bots_count = isset( $counts['publish'] ) ? (int) $counts['publish'] : 0;
+        }
+
+        $chat_rooms_count = 0;
+        if ( post_type_exists( 'bpbm-chat' ) ) {
+            $counts = (array) wp_count_posts( 'bpbm-chat' );
+            $chat_rooms_count = isset( $counts['publish'] ) ? (int) $counts['publish'] : 0;
+        }
 
         // Load emailCustomHtml from separate option for frontend display
         $settings_for_frontend = $this->settings;
@@ -902,7 +955,8 @@ class Better_Messages_Options
                 array( 'name' => 'ffmpeg', 'url' => class_exists('Better_Messages_Files') && Better_Messages_Files::get_ffmpeg_wasm_url() ? Better_Messages_Files::get_ffmpeg_wasm_url() . 'ffmpeg-core.wasm' : false ),
             ),
             'ffmpegSize'         => class_exists('Better_Messages_Files') ? Better_Messages_Files::get_ffmpeg_info()['size'] : '',
-            'suggestedConversationsUsers' => $suggested_conversations_users,
+            'aiBotsCount'                => $ai_bots_count,
+            'chatRoomsCount'             => $chat_rooms_count,
             'wooCommerceProductSupportUserData'     => $woocommerce_product_support_user,
             'wooCommerceOrderSupportUserData'       => $woocommerce_order_support_user,
             'wooCommercePrePurchaseSupportUserData' => $woocommerce_pre_purchase_support_user,
@@ -971,9 +1025,6 @@ class Better_Messages_Options
             'pluginUrl'        => Better_Messages()->url,
             'pluginVersion'    => Better_Messages()->version,
             'phpVersion'       => phpversion(),
-            'hasAnyApiKey'     => ! empty( Better_Messages()->settings['openAiApiKey'] )
-                || ! empty( Better_Messages()->settings['anthropicApiKey'] )
-                || ! empty( Better_Messages()->settings['geminiApiKey'] ),
             'settingsUrl'      => add_query_arg( 'page', 'bp-better-messages', admin_url('admin.php') ) . '#/integrations/openai',
             'pointsSystemActive' => class_exists( 'Better_Messages_Points' ) && Better_Messages_Points()->get_provider() !== null,
             'pointsSystemName'   => ( class_exists( 'Better_Messages_Points' ) && Better_Messages_Points()->get_provider() )
@@ -1381,6 +1432,94 @@ class Better_Messages_Options
         if ( !isset( $settings['miniThreadsEnable'] ) ) {
             $settings['miniThreadsEnable'] = '0';
         }
+        if ( !isset( $settings['miniAIBotsEnable'] ) ) {
+            $settings['miniAIBotsEnable'] = '0';
+        }
+        if ( !isset( $settings['miniChatRoomsEnable'] ) ) {
+            $settings['miniChatRoomsEnable'] = '0';
+        }
+        if ( !isset( $settings['miniUsersEnable'] ) ) {
+            $settings['miniUsersEnable'] = '0';
+        }
+        if ( !isset( $settings['chatRoomsShowOnline'] ) ) {
+            $settings['chatRoomsShowOnline'] = '0';
+        }
+        foreach ( array(
+            'combinedAIBotsEnable', 'combinedChatRoomsEnable', 'combinedUsersEnable',
+            'mobileAIBotsEnable', 'mobileChatRoomsEnable', 'mobileUsersEnable',
+            'miniWidgetsIconsOnly', 'sidePanelIconsOnly', 'mobileTabsIconsOnly',
+            'widgetUsersOnlineOnly', 'widgetUsersOnlineFirst',
+            'widgetUsersShowOnlineCount'
+        ) as $bm_flag ) {
+            if ( ! isset( $settings[ $bm_flag ] ) ) $settings[ $bm_flag ] = '0';
+        }
+        foreach ( array(
+            'widgetIconMessages', 'widgetIconFriends', 'widgetIconGroups',
+            'widgetIconAIBots', 'widgetIconChatRooms', 'widgetIconUsers'
+        ) as $bm_icon_key ) {
+            if ( ! isset( $settings[ $bm_icon_key ] ) ) $settings[ $bm_icon_key ] = '';
+        }
+        if ( !isset( $settings['restrictViewMiniAIBots'] ) ) {
+            $settings['restrictViewMiniAIBots'] = [];
+        }
+        if ( !isset( $settings['restrictViewMiniChatRooms'] ) ) {
+            $settings['restrictViewMiniChatRooms'] = [];
+        }
+        if ( !isset( $settings['restrictViewMiniUsers'] ) ) {
+            $settings['restrictViewMiniUsers'] = [];
+        }
+        foreach ( array(
+            'restrictViewSideThreads', 'restrictViewSideFriends', 'restrictViewSideGroups',
+            'restrictViewSideAIBots', 'restrictViewSideChatRooms', 'restrictViewSideUsers',
+            'restrictViewMobileThreads', 'restrictViewMobileFriends', 'restrictViewMobileGroups',
+            'restrictViewMobileAIBots', 'restrictViewMobileChatRooms', 'restrictViewMobileUsers',
+        ) as $bm_restrict_key ) {
+            if ( ! isset( $settings[ $bm_restrict_key ] ) || ! is_array( $settings[ $bm_restrict_key ] ) ) {
+                $settings[ $bm_restrict_key ] = [];
+            }
+        }
+        if ( ! isset( $settings['widgetAIBotsDisplayMode'] ) || ! in_array( $settings['widgetAIBotsDisplayMode'], array( 'all', 'specific' ), true ) ) {
+            $settings['widgetAIBotsDisplayMode'] = 'all';
+        }
+        if ( ! isset( $settings['widgetAIBotsIds'] ) || ! is_array( $settings['widgetAIBotsIds'] ) ) {
+            $settings['widgetAIBotsIds'] = array();
+        }
+        if ( ! isset( $settings['widgetChatRoomsDisplayMode'] ) || ! in_array( $settings['widgetChatRoomsDisplayMode'], array( 'all', 'specific' ), true ) ) {
+            $settings['widgetChatRoomsDisplayMode'] = 'all';
+        }
+        if ( ! isset( $settings['widgetChatRoomsIds'] ) || ! is_array( $settings['widgetChatRoomsIds'] ) ) {
+            $settings['widgetChatRoomsIds'] = array();
+        }
+        if ( ! isset( $settings['widgetUsersDisplayMode'] ) || ! in_array( $settings['widgetUsersDisplayMode'], array( 'all', 'roles', 'specific' ), true ) ) {
+            $settings['widgetUsersDisplayMode'] = 'all';
+        }
+        if ( ! isset( $settings['widgetUsersRoles'] ) || ! is_array( $settings['widgetUsersRoles'] ) ) {
+            $settings['widgetUsersRoles'] = array();
+        }
+        if ( ! isset( $settings['widgetUsersIds'] ) || ! is_array( $settings['widgetUsersIds'] ) ) {
+            $settings['widgetUsersIds'] = array();
+        }
+        if ( ! isset( $settings['widgetUsersSortBy'] ) || ! in_array( $settings['widgetUsersSortBy'], array( 'last_active', 'display_name', 'newest' ), true ) ) {
+            $settings['widgetUsersSortBy'] = 'last_active';
+        }
+        foreach ( array(
+            'widgetFriendsHideWhenEmpty', 'widgetGroupsHideWhenEmpty',
+            'widgetAIBotsHideWhenEmpty', 'widgetChatRoomsHideWhenEmpty',
+            'widgetUsersHideWhenEmpty',
+        ) as $bm_hide_key ) {
+            if ( ! isset( $settings[ $bm_hide_key ] ) ) {
+                $settings[ $bm_hide_key ] = '0';
+            }
+        }
+        foreach ( array(
+            'widgetFriendsShowSearch', 'widgetGroupsShowSearch',
+            'widgetAIBotsShowSearch', 'widgetChatRoomsShowSearch',
+            'widgetUsersShowSearch',
+        ) as $bm_show_search_key ) {
+            if ( ! isset( $settings[ $bm_show_search_key ] ) ) {
+                $settings[ $bm_show_search_key ] = '1';
+            }
+        }
         if ( !isset( $settings['friendsMode'] ) ) {
             $settings['friendsMode'] = '0';
         }
@@ -1654,6 +1793,10 @@ class Better_Messages_Options
 
         if ( !isset( $settings['allowEditMessages'] ) ) {
             $settings['allowEditMessages'] = '0';
+        }
+
+        if ( !isset( $settings['editMessageTimeLimit'] ) ) {
+            $settings['editMessageTimeLimit'] = 0;
         }
 
         if ( !isset( $settings['enableNiceLinks'] ) ) {
@@ -2140,7 +2283,8 @@ class Better_Messages_Options
             'voiceMessagesMaxDuration'  => 0,
             'voiceMessagesAutoDelete'   => 0,
             'deleteOldMessages'         => 0,
-            'emailLogoId'               => 0
+            'emailLogoId'               => 0,
+            'editMessageTimeLimit'      => 0,
         ];
 
         $arrays = [

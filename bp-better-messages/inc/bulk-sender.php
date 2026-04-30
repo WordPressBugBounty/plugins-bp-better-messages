@@ -250,6 +250,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 'bulk_hide'     => (bool) $job->hide_thread,
                 'recipients'    => $user_ids,
                 'attachments'   => $attachment_ids,
+                'suppress_new_thread_created' => true,
             );
 
             $thread_id = Better_Messages()->functions->new_message( $args );
@@ -483,6 +484,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 'bulk_hide'     => (bool) $job->hide_thread,
                 'recipients'    => array( $user_id ),
                 'attachments'   => $attachment_ids,
+                'suppress_new_thread_created' => true,
             );
 
             $result = Better_Messages()->functions->new_message( $args );

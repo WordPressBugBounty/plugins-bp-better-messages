@@ -1219,6 +1219,17 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $can_upload;
         }
 
+        /** Decode the base64-wrapped UTF-8 filename sent from the client (wrapped to slip past WAFs). */
+        public function decode_original_name( $encoded ) {
+            if ( ! is_string( $encoded ) ) {
+                return '';
+            }
+
+            $decoded = base64_decode( $encoded, true );
+
+            return $decoded !== false ? wp_basename( $decoded ) : '';
+        }
+
         /**
          * Truncate a filename to fit within the filesystem byte limit (255 bytes for ext4).
          * Preserves the file extension and avoids splitting multibyte characters.

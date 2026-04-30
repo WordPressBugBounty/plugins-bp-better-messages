@@ -198,6 +198,9 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
             $user_id    = Better_Messages()->functions->get_current_user_id();
             $user_roles = Better_Messages()->functions->get_user_roles( $user_id );
+            // Admins bypass per-role restrictions so a pack limited to e.g.
+            // "editor" is still visible to site administrators.
+            $is_admin   = $user_id > 0 && user_can( $user_id, 'bm_can_administrate' );
             $ids        = array();
 
             foreach ( $summary as $pack ) {
@@ -205,7 +208,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                     continue;
                 }
                 $allowed = isset( $pack['allowed_roles'] ) ? (array) $pack['allowed_roles'] : array();
-                if ( empty( $allowed ) || array_intersect( $allowed, $user_roles ) ) {
+                if ( $is_admin || empty( $allowed ) || array_intersect( $allowed, $user_roles ) ) {
                     $ids[] = $pack['id'];
                 }
             }
