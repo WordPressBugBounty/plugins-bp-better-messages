@@ -8357,6 +8357,20 @@ body.bp-messages-mobile #better-messages-modals-container input {
   cursor: not-allowed;
   pointer-events: none;
 }
+.bp-messages-wrap .bm-reply .bm-char-counter {
+  align-self: flex-end;
+  padding: 0 8px 22px;
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(var(--bm-text-color), 0.45);
+  white-space: nowrap;
+  user-select: none;
+  cursor: help;
+}
+.bp-messages-wrap .bm-reply .bm-char-counter.bm-char-counter-over {
+  color: #d63638;
+  font-weight: 600;
+}
 .bp-messages-wrap .bm-reply.bm-attachments .bm-editor {
   padding-left: 0;
 }
@@ -12320,6 +12334,22 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 .bp-messages-group-list .group .pic img {
   width: 30px;
   height: 30px;
+}
+
+.bp-messages-group-list .group .pic.bm-pic-fallback {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.bp-messages-group-list .group .pic.bm-pic-fallback svg {
+  width: 18px;
+  height: 18px;
 }
 
 .bp-messages-group-list .group .name {

@@ -38,6 +38,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             require_once('api/groups.php');
             Better_Messages_Rest_Groups();
 
+            require_once('api/courses.php');
+            Better_Messages_Rest_Courses();
+
             require_once('api/users.php');
             Better_Messages_Rest_Users();
 
@@ -947,6 +950,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $args['content'] .= ' ';
             }
 
+            $max_length = (int) Better_Messages()->settings['maximumMessageLength'];
+            if ( $max_length > 0 && Better_Messages()->functions->message_text_length( $raw_message ) > $max_length ) {
+                $errors['maxLength'] = sprintf(
+                    _x( 'Message is too long. Maximum allowed length is %d characters', 'Send message error', 'bp-better-messages' ),
+                    $max_length
+                );
+            }
+
             if( ! empty( $uploaded_files ) ){
                 $args['attachments'] = $uploaded_files;
             }
@@ -971,7 +982,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 $redirect = 'refresh';
 
-                if( count( $errors ) === 1 && ( isset( $errors['empty'] ) || isset( $errors['restrictBadWord'] ) ) ){
+                if( count( $errors ) === 1 && ( isset( $errors['empty'] ) || isset( $errors['restrictBadWord'] ) || isset( $errors['maxLength'] ) ) ){
                     $redirect = false;
                 }
 
@@ -1160,16 +1171,29 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             global $wpdb;
 
-            $user_id    = Better_Messages()->functions->get_current_user_id();
-            $thread_id  = intval( $request->get_param('id') );
-            $message_id = intval( $request->get_param('message_id') );
-            $content    = Better_Messages()->functions->filter_message_content($request->get_param('message'));
+            $user_id     = Better_Messages()->functions->get_current_user_id();
+            $thread_id   = intval( $request->get_param('id') );
+            $message_id  = intval( $request->get_param('message_id') );
+            $raw_message = $request->get_param('message');
+            $content     = Better_Messages()->functions->filter_message_content( $raw_message );
 
             if( trim($content) == '') {
                 return new WP_Error(
                     'rest_forbidden',
                     __( 'Message content was empty.', 'bp-better-messages' ),
                     array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
+            $max_length = (int) Better_Messages()->settings['maximumMessageLength'];
+            if ( $max_length > 0 && Better_Messages()->functions->message_text_length( $raw_message ) > $max_length ) {
+                return new WP_Error(
+                    'too_long',
+                    sprintf(
+                        _x( 'Message is too long. Maximum allowed length is %d characters', 'Edit message error', 'bp-better-messages' ),
+                        $max_length
+                    ),
+                    array( 'status' => 400 )
                 );
             }
 

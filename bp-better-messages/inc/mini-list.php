@@ -38,11 +38,12 @@ class Better_Messages_Mini_List
 
         $friends    = is_user_logged_in() && isset( Better_Messages()->script_variables['miniFriends'] ) && Better_Messages()->script_variables['miniFriends'];
         $groups     = is_user_logged_in() && isset( Better_Messages()->script_variables['miniGroups'] ) && Better_Messages()->script_variables['miniGroups'];
+        $courses    = is_user_logged_in() && isset( Better_Messages()->script_variables['miniCourses'] ) && Better_Messages()->script_variables['miniCourses'];
         $ai_bots    = isset( Better_Messages()->script_variables['miniAIBots'] ) && Better_Messages()->script_variables['miniAIBots'] === '1';
         $chat_rooms = isset( Better_Messages()->script_variables['miniChatRooms'] ) && Better_Messages()->script_variables['miniChatRooms'] === '1';
         $users      = isset( Better_Messages()->script_variables['miniUsers'] ) && Better_Messages()->script_variables['miniUsers'] === '1';
 
-        if( $threads || $friends || $groups || $ai_bots || $chat_rooms || $users ) {
+        if( $threads || $friends || $groups || $courses || $ai_bots || $chat_rooms || $users ) {
             $class = "bp-messages-wrap bp-better-messages-list";
 
             $mod = get_theme_mod('bm-mini-widgets-bottom', 0 );

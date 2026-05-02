@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.0
+    Version: 2.15.1
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.0';
+        public  $version = '2.15.1';
 
         public  $db_version = '1.0.4';
 
@@ -697,7 +697,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'sprite', 'emojiHash',
             'loginUrl', 'registerUrl', 'adminUrl',
             'total_unread', 'enableSound',
-            'realtime', 'friends', 'groups', 'guests',
+            'realtime', 'friends', 'groups', 'courses', 'guests',
             'me', 'ukey',
             'translationLanguage',
             'isAdmin', 'canBulk',
@@ -764,6 +764,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
             $friends = Better_Messages()->functions->is_friends_active();
             $groups  = Better_Messages()->functions->is_groups_active();
+            $courses = Better_Messages()->functions->is_courses_active();
 
             $localEncryption = ( $this->settings['encryptionLocal'] === '1' );
 
@@ -818,6 +819,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'privateReplies'        => ( $this->settings['privateReplies'] == '1' ? '1' : '0' ),
                 'forwardMessages'       => ( $this->settings['enableForwardMessages'] == '1' ? '1' : '0' ),
                 'editMessageTimeLimit'  => (int) $this->settings['editMessageTimeLimit'],
+                'maximumMessageLength'  => (int) $this->settings['maximumMessageLength'],
                 'template'              => $this->settings['template'],
                 'layout'                => $this->settings['modernLayout'],
                 'singleThread'          => ( $this->settings['singleThreadMode'] == '1' ? '1' : '0' ),
@@ -827,6 +829,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'suggestions'           => ( $this->settings['enableUsersSuggestions'] == '1' ? '1' : '0' ),
                 'friends'               => ( $friends ? '1' : '0' ),
                 'groups'                => ( $groups ? '1' : '0' ),
+                'courses'               => ( $courses ? '1' : '0' ),
                 'newThread'             => ( ( $this->settings['disableNewThread'] == '1' && ! current_user_can('manage_options') ) ? '0' : '1' ),
                 'mobileFullScreen'      => ( $this->settings['mobileFullScreen'] == '1' ? '1' : '0' ),
                 'mobileSwipeBack'       => ( $this->settings['mobileSwipeBack'] == '1' ? '1' : '0' ),
@@ -995,10 +998,35 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 $script_variables['mobileGroups']   = ( $this->settings['mobileGroupsEnable'] == '1' ? '1' : '0' );
             }
 
+            if( $courses ){
+                $mini_courses = (
+                    $this->settings['TLminiCoursesEnable'] == '1' ||
+                    $this->settings['LPminiCoursesEnable'] == '1' ||
+                    $this->settings['LDminiCoursesEnable'] == '1' ||
+                    $this->settings['FCminiCoursesEnable'] == '1'
+                );
+                $combined_courses = (
+                    $this->settings['TLcombinedCoursesEnable'] == '1' ||
+                    $this->settings['LPcombinedCoursesEnable'] == '1' ||
+                    $this->settings['LDcombinedCoursesEnable'] == '1' ||
+                    $this->settings['FCcombinedCoursesEnable'] == '1'
+                );
+                $mobile_courses = (
+                    $this->settings['TLmobileCoursesEnable'] == '1' ||
+                    $this->settings['LPmobileCoursesEnable'] == '1' ||
+                    $this->settings['LDmobileCoursesEnable'] == '1' ||
+                    $this->settings['FCmobileCoursesEnable'] == '1'
+                );
+                $script_variables['miniCourses']     = $mini_courses ? '1' : '0';
+                $script_variables['combinedCourses'] = $combined_courses ? '1' : '0';
+                $script_variables['mobileCourses']   = $mobile_courses ? '1' : '0';
+            }
+
             // Resolve widget order arrays for frontend (map integration-specific IDs to generic)
             $order_map = [
                 'bp-friends' => 'friends', 'um-friends' => 'friends', 'ps-friends' => 'friends',
                 'bp-groups'  => 'groups',  'um-groups'  => 'groups',  'ps-groups'  => 'groups',  'fc-groups' => 'groups',
+                'tl-courses' => 'courses', 'lp-courses' => 'courses', 'ld-courses' => 'courses', 'fc-courses' => 'courses',
             ];
 
             foreach ( ['miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder'] as $order_key ) {

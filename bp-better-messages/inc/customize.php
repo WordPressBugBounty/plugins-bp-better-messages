@@ -1604,8 +1604,9 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
                     $threads = isset( $script_variables['miniMessages'] ) && $script_variables['miniMessages'] === '1';
                     $friends = is_user_logged_in() && isset( $script_variables['miniFriends'] ) && $script_variables['miniFriends'] === '1';
                     $groups  = is_user_logged_in() && isset( $script_variables['miniGroups'] ) && $script_variables['miniGroups'] === '1';
+                    $courses = is_user_logged_in() && isset( $script_variables['miniCourses'] ) && $script_variables['miniCourses'] === '1';
 
-                    $has_mini_widget = ( $threads || $friends || $groups );
+                    $has_mini_widget = ( $threads || $friends || $groups || $courses );
                 }
 
                 if ( $has_mini_widget ) {

@@ -47,6 +47,13 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 Better_Messages_Fluent_Community_Spaces::instance();
             }
 
+            $courses_messages_enabled = Better_Messages()->settings['FCenableCourses'] === '1';
+
+            if( $courses_messages_enabled && class_exists( 'FluentCommunity\\Modules\\Course\\Model\\Course' ) ){
+                require_once 'fluent-community-courses.php';
+                Better_Messages_Fluent_Community_Courses::instance();
+            }
+
             add_filter( 'fluent_community/profile_view_data', array( $this, 'profile_button' ), 10, 2 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
 
@@ -62,6 +69,15 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             }
             if( Better_Messages()->settings['FCmobileGroupsEnable'] === '1' ) {
                 $script_variables['mobileGroups'] = '1';
+            }
+            if( Better_Messages()->settings['FCminiCoursesEnable'] === '1' ) {
+                $script_variables['miniCourses'] = '1';
+            }
+            if( Better_Messages()->settings['FCcombinedCoursesEnable'] === '1' ) {
+                $script_variables['combinedCourses'] = '1';
+            }
+            if( Better_Messages()->settings['FCmobileCoursesEnable'] === '1' ) {
+                $script_variables['mobileCourses'] = '1';
             }
 
             $script_variables['groupsLabel'] = _x('Spaces', 'FluentCommunity Integration', 'bp-better-messages');
@@ -296,11 +312,22 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 }
             }
 
-            $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?=' . $version;
+            $script_path = Better_Messages()->path . 'addons/fluent-community/scripts.js';
+            $script_ver  = ( defined( 'BM_DEV' ) && BM_DEV && file_exists( $script_path ) ) ? filemtime( $script_path ) : $version;
+            $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?v=' . $script_ver;
 
             $vars = [
                     'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
                     'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
+                    'courseChatButton' => (
+                        Better_Messages()->settings['FCenableCourses'] === '1'
+                        && Better_Messages()->settings['FCcourseChatButton'] === '1'
+                    ),
+                    'courseInstructorButton' => Better_Messages()->settings['FCcourseInstructorButton'] === '1',
+                    'i18n' => [
+                        'courseChat'        => _x('Course Chat', 'FluentCommunity Integration (Course Page Button)', 'bp-better-messages'),
+                        'messageInstructor' => _x('Message Instructor', 'FluentCommunity Integration (Course Page Button)', 'bp-better-messages'),
+                    ],
             ];
 
             echo '<script type="text/javascript">var BM_Fluent_Community=' . wp_json_encode( $vars ) . ';</script>';

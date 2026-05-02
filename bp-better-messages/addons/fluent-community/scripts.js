@@ -55,7 +55,6 @@ const header = ( ! isMobile && typeof settings !== 'undefined' && settings.title
 document.addEventListener('fluentCommunityUtilReady', function () {
   updateDynamicCSS();
 
-  // When clicking bottom bar icon while already on messages page, navigate back to threads list
   document.addEventListener('click', function(e) {
     var link = e.target.closest('.fcom_mobile_menu a');
     if( link && link.querySelector('.bm-unread-badge') && window.location.pathname.endsWith(path) && window.location.hash && window.location.hash !== '#/' && window.location.hash !== '#' ) {
@@ -99,7 +98,100 @@ document.addEventListener('fluentCommunityUtilReady', function () {
       meta: {active: "better-messages"}
     }), a;
   });
+
+  if (wantCourseChatButton || wantCourseInstructorButton) {
+    window.FluentCommunityUtil.hooks.addFilter('fluent_com_portal_app', 'bm_fluent_com_buttons', bmFluentCommunityCourseButtonsMixin);
+  }
 });
+
+const wantCourseChatButton       = !!(settings && settings.courseChatButton);
+const wantCourseInstructorButton = !!(settings && settings.courseInstructorButton);
+
+function bmFcResolveCourse(component) {
+  if (!component) return null;
+  if (component.course && typeof component.course === 'object') return component.course;
+  if (component.$root && component.$root.course) return component.$root.course;
+  let parent = component.$parent;
+  let depth = 0;
+  while (parent && depth < 8) {
+    if (parent.course && typeof parent.course === 'object') return parent.course;
+    parent = parent.$parent;
+    depth += 1;
+  }
+  return null;
+}
+
+function bmFcOpenCourseChat(course) {
+    if (!course || !course.bm_chat) return;
+    const threadId = parseInt(course.bm_chat.thread_id, 10);
+    if (!threadId) return;
+
+    const realtime  = window.Better_Messages && window.Better_Messages.realtime === '1';
+    const miniChats = window.Better_Messages && window.Better_Messages.miniChats === '1';
+
+    if (realtime && miniChats && typeof BetterMessages !== 'undefined' && typeof BetterMessages.miniChatOpen === 'function') {
+      BetterMessages.miniChatOpen(threadId);
+      return;
+    }
+
+    const threadUrl = (window.Better_Messages && window.Better_Messages.threadUrl) || '/messages#/conversation/';
+    location.href = threadUrl + threadId + '?&scrollToContainer';
+}
+
+function bmFluentCommunityCourseButtonsMixin(app) {
+  app.mixin({
+    mounted() {
+      const el = this.$el;
+      if (!el || el.nodeType !== 1) return;
+
+      if (wantCourseChatButton) {
+        const actions = el.matches && el.matches('.fcom_course_actions') ? el : (el.querySelector ? el.querySelector('.fcom_course_actions') : null);
+        if (actions && !actions.dataset.bmCourseChatInjected) {
+          const course = bmFcResolveCourse(this);
+          if (course && course.bm_chat && course.bm_chat.chat_enabled && parseInt(course.bm_chat.thread_id, 10) > 0) {
+            actions.dataset.bmCourseChatInjected = '1';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'el-button fcom_secondary_button bm-fc-course-chat-btn';
+            btn.innerHTML = '<span>' + settings.i18n.courseChat + '</span>';
+            btn.style.marginRight = '8px';
+            btn.addEventListener('click', function (e) {
+              e.preventDefault();
+              bmFcOpenCourseChat(course);
+            });
+            actions.insertBefore(btn, actions.firstChild);
+          }
+        }
+      }
+
+      if (wantCourseInstructorButton) {
+        const creators = el.matches && el.matches('.creator_details_item') ? [el] : (el.querySelectorAll ? Array.from(el.querySelectorAll('.creator_details_item')) : []);
+        for (const creatorEl of creators) {
+          if (creatorEl.dataset.bmInstructorInjected) continue;
+          const course = bmFcResolveCourse(this);
+          if (!course) continue;
+          const userId = parseInt(course.created_by || (course.creator && course.creator.user_id) || 0, 10);
+          if (!userId) continue;
+          const currentUserId = parseInt(window.Better_Messages && window.Better_Messages.user_id, 10);
+          if (currentUserId && userId === currentUserId) continue;
+          creatorEl.dataset.bmInstructorInjected = '1';
+          const courseId = parseInt(course.id, 10) || 0;
+          const link = document.createElement('a');
+          link.href = '#';
+          link.className = 'el-button fcom_primary_button bm-lc-button bm-no-loader bm-fc-instructor-btn bm-lc-user-' + userId;
+          if (courseId) {
+            link.setAttribute('data-bm-unique-key', 'fluentcommunity_course_chat_' + courseId);
+          }
+          link.innerHTML = '<span>' + settings.i18n.messageInstructor + '</span>';
+          link.style.marginTop = '12px';
+          link.style.width = '100%';
+          creatorEl.appendChild(link);
+        }
+      }
+    }
+  });
+  return app;
+}
 
 function updateDynamicCSS(){
   var body = document.body;
@@ -150,7 +242,6 @@ function updateDynamicCSS(){
 
 const config = { attributes: true, attributeFilter: ['class'] };
 
-// Callback function to execute when mutations are observed
 const callback = function(mutationsList, observer) {
   for(let mutation of mutationsList) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -159,13 +250,10 @@ const callback = function(mutationsList, observer) {
   }
 };
 
-// Create an observer instance linked to the callback function
 const observer = new MutationObserver(callback);
 
-// Start observing the target node for configured mutations
 observer.observe(html, config);
 
-// Detect keyboard dismiss on iOS Chrome via visualViewport resize
 if( window.visualViewport ){
   var lastViewportHeight = window.visualViewport.height;
 
@@ -174,7 +262,6 @@ if( window.visualViewport ){
     var diff = currentHeight - lastViewportHeight;
     lastViewportHeight = currentHeight;
 
-    // Viewport grew significantly = keyboard closed (small changes are keyboard mode switches)
     if( diff > 100 && document.body.classList.contains('bm-reply-area-focused') ){
       document.body.classList.remove('bm-reply-area-focused');
     }

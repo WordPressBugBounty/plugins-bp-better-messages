@@ -283,7 +283,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Dokan::instance();
             }
 
-            if( defined('MVX_PLUGIN_VERSION') ){
+            if( defined('MULTIVENDORX_PLUGIN_VERSION') && version_compare( MULTIVENDORX_PLUGIN_VERSION, '5.0.0', '>=' ) ){
+                require_once Better_Messages()->path . 'addons/multi-vendor-x-v5/multi-vendor-x-v5.php';
+                Better_Messages_MultiVendorX_V5::instance();
+            } elseif( defined('MVX_PLUGIN_VERSION') ){
                 require_once Better_Messages()->path . 'addons/multi-vendor-x.php';
                 Better_Messages_MultiVendorX::instance();
             }
@@ -301,6 +304,21 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( function_exists('hivepress') ){
                 require_once Better_Messages()->path . 'addons/hivepress.php';
                 Better_Messages_HivePress::instance();
+            }
+
+            if( class_exists('LearnPress') ){
+                require_once Better_Messages()->path . 'addons/learnpress.php';
+                Better_Messages_LearnPress::instance();
+            }
+
+            if( defined('TUTOR_VERSION') ){
+                require_once Better_Messages()->path . 'addons/tutorlms.php';
+                Better_Messages_TutorLMS::instance();
+            }
+
+            if( defined('LEARNDASH_VERSION') ){
+                require_once Better_Messages()->path . 'addons/learndash.php';
+                Better_Messages_LearnDash::instance();
             }
 
             add_action('init', array( $this, 'flush_rewrite_rules' ), PHP_INT_MAX );
@@ -482,6 +500,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 array( 'mobileAIBots',      'restrictViewMobileAIBots' ),
                 array( 'mobileChatRooms',   'restrictViewMobileChatRooms' ),
                 array( 'mobileUsers',       'restrictViewMobileUsers' ),
+                array( 'miniCourses',       'restrictViewMiniCourses' ),
+                array( 'combinedCourses',   'restrictViewSideCourses' ),
+                array( 'mobileCourses',     'restrictViewMobileCourses' ),
             );
 
             foreach ( $restrict_map as $pair ) {
@@ -529,6 +550,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     'widgetUsersHideWhenEmpty',
                     array( Better_Messages()->functions, 'user_has_users' ),
                     array( 'miniUsers', 'combinedUsers', 'mobileUsers' ),
+                ),
+                array(
+                    'widgetCoursesHideWhenEmpty',
+                    array( Better_Messages()->functions, 'user_has_courses' ),
+                    array( 'miniCourses', 'combinedCourses', 'mobileCourses' ),
                 ),
             );
 

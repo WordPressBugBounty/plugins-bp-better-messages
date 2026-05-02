@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.0
+Stable tag: 2.15.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -100,6 +100,16 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Mass messaging from WP Admin with scheduling, file attachments, and background processing
 * Suggested conversations for new users
 
+**[Mini Widgets](https://www.better-messages.com/docs/features/mini-widgets):**
+
+* Embed conversation entry points anywhere on your site without using shortcodes
+* Five widgets: Friends, Groups, Users, AI Bots, Chat Rooms
+* Two display styles: Classic Bar or Floating Bubble (with chat heads)
+* Three placement surfaces: bottom bar, side panel, mobile tab bar
+* Per-widget icon picker, search box, role restrictions, and "Hide Tab When Empty" toggle
+* Users widget with three display modes (all / by role / hand-picked) and sorting by last activity or registration date
+* Customizable order of tabs in mini widgets, side panel and mobile view
+
 **Customization:**
 
 * Modern, fully customizable design
@@ -130,6 +140,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [PeepSo](https://www.better-messages.com/docs/integrations/peepso/)
 * [Ultimate Member](https://www.better-messages.com/docs/integrations/ultimate-member/)
 * [BuddyBoss Platform](https://www.better-messages.com/docs/integrations/buddyboss/)
+* [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/)
+* [Tutor LMS](https://www.better-messages.com/docs/integrations/tutor-lms/)
+* [LearnDash](https://www.better-messages.com/docs/integrations/learndash/)
 * [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
 * [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
 * [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
@@ -193,14 +206,15 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 * Online/Offline presence indicator
 * User statuses (Online, Away, Do Not Disturb)
 * Mini Chats - chat windows anywhere on your site
-* Mini Conversations widget
+* Mini Conversations widget - list and continue recent threads from any page
+* Online-only filter and online-first ordering for the Users mini widget
 
 **Better Messages Cloud AI:**
 
 * Automatic message translation in 1-to-1 conversations — 53 languages, auto-detection
 * AI Content Moderation — 23 categories, custom rules, conversation context awareness
 * Voice message transcription — 99+ languages with auto-detection
-* No third-party    API keys required — included with WebSocket license at no additional cost
+* No third-party API keys required — included with WebSocket license at no additional cost
 
 **Security & Encryption:**
 
@@ -246,6 +260,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.15.1 =
+* Added initial [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/) LMS integration
+* Added initial [Tutor LMS](https://www.better-messages.com/docs/integrations/tutor-lms/) integration
+* Added initial [LearnDash](https://www.better-messages.com/docs/integrations/learndash/) LMS integration
+* Added [MultiVendorX 5.0+](https://www.better-messages.com/docs/integrations/multivendorx/) integration alongside the existing < 5.0 support
+* Older MultiVendorX 4.x sites are unaffected — the previous integration continues to load on those installations
+* Added FluentCommunity Courses integration
+* Added a dedicated [Courses widget](https://www.better-messages.com/docs/features/mini-widgets) to the Mini Widgets which will be showing user enrolled courses in LMS
+* Added "Maximum Message Length" setting (Settings → Messaging) — cap the number of characters allowed in each message
+* Other minor bugfixes and improvements
 
 = 2.15.0 =
 * Added three new [widgets](https://www.better-messages.com/docs/features/mini-widgets): **Users** (browse and message any site member, with optional online-only filtering, online-first ordering, sort by last activity or registration date, and three display modes — all / by role / hand-picked), **AI Bots** (start or continue conversations with configured AI chat bots), and **Chat Rooms** (browse public chat rooms with optional online-count badge)

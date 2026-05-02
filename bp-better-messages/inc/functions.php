@@ -782,6 +782,34 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $community_slug = function_exists('suredash_get_community_slug') ? suredash_get_community_slug() : 'portal';
                     return home_url( '/' . $community_slug . '/messages/' );
                 }
+
+                if ( class_exists('LearnPress') && Better_Messages()->settings['chatPage'] === 'learnpress-profile' && function_exists('learn_press_user_profile_link') ) {
+                    $profile_url = learn_press_user_profile_link( $user_id, 'messages' );
+                    if ( $profile_url && strpos( $profile_url, '//messages' ) === false ) {
+                        return $profile_url;
+                    }
+
+                    if ( class_exists( '\LearnPress\Models\UserModel' ) ) {
+                        $wp_user = get_userdata( $user_id );
+                        if ( $wp_user instanceof WP_User ) {
+                            $user_model = new \LearnPress\Models\UserModel( $wp_user );
+                            if ( method_exists( $user_model, 'generate_pretty_slug' ) ) {
+                                $user_model->generate_pretty_slug();
+                                $profile_url = learn_press_user_profile_link( $user_id, 'messages' );
+                                if ( $profile_url && strpos( $profile_url, '//messages' ) === false ) {
+                                    return $profile_url;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ( defined('TUTOR_VERSION') && Better_Messages()->settings['chatPage'] === 'tutor-dashboard' ) {
+                    $dashboard_url = tutor_utils()->get_tutor_dashboard_page_permalink( 'messages' );
+                    if ( $dashboard_url ) {
+                        return $dashboard_url;
+                    }
+                }
             }
 
             if( Better_Messages()->settings['chatPage'] !== '0' ){
@@ -881,6 +909,24 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $content = trim(str_replace(array("&nbsp;", '&amp;nbsp;'), " ", $content));
 
             return $content;
+        }
+
+        public function message_text_length( $content ) {
+            $text = html_entity_decode( (string) $content, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+            $text = trim( wp_strip_all_tags( $text ) );
+
+            if ( $text === '' ) {
+                return 0;
+            }
+
+            if ( function_exists( 'grapheme_strlen' ) ) {
+                $length = grapheme_strlen( $text );
+                if ( $length !== false && $length !== null ) {
+                    return $length;
+                }
+            }
+
+            return mb_strlen( $text );
         }
 
 
@@ -1818,6 +1864,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return apply_filters( 'better_messages_groups_active', false );
         }
 
+        public function is_courses_active(){
+            return apply_filters( 'better_messages_courses_active', false );
+        }
+
         public function user_has_friends( $user_id ) {
             if ( $user_id <= 0 ) return false;
             return (bool) apply_filters( 'better_messages_user_has_friends', false, $user_id );
@@ -1826,6 +1876,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function user_has_groups( $user_id ) {
             if ( $user_id <= 0 ) return false;
             return (bool) apply_filters( 'better_messages_user_has_groups', false, $user_id );
+        }
+
+        public function user_has_courses( $user_id ) {
+            if ( $user_id <= 0 ) return false;
+            return (bool) apply_filters( 'better_messages_user_has_courses', false, $user_id );
         }
 
         public function user_has_users( $user_id ) {
