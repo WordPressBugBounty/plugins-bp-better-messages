@@ -463,7 +463,8 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                     $return['pd']  = $ws_profile['pd'];
                     $return['pdh'] = $ws_profile['pdh'];
                     $return['pds'] = $ws_profile['pds'];
-                    $return['role_hashes'] = $ws_profile['role_hashes'];
+                    $return['role_hashes']     = $ws_profile['role_hashes'];
+                    $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
                 }
 
                 return $return;

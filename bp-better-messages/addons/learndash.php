@@ -50,7 +50,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             ) {
                 add_filter( 'better_messages_bulk_get_all_groups', array( $this, 'bulk_get_all_groups' ), 10, 1 );
                 add_filter( 'better_messages_bulk_get_group_members', array( $this, 'bulk_get_group_members' ), 10, 2 );
-                add_filter( 'better_messages_is_valid_group', array( $this, 'is_valid_group' ), 10, 2 );
+                add_filter( 'better_messages_is_valid_course', array( $this, 'is_valid_group' ), 10, 2 );
                 add_filter( 'better_messages_has_access_to_group_chat', array( $this, 'has_access_to_group_chat' ), 10, 3 );
                 add_filter( 'better_messages_thread_image', array( $this, 'group_thread_image' ), 10, 3 );
                 add_filter( 'better_messages_thread_url', array( $this, 'group_thread_url' ), 10, 3 );
@@ -69,7 +69,6 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             $target_user_id = (int) $target_user_id;
             if ( $target_user_id <= 0 ) return false;
             if ( $target_user_id === (int) Better_Messages()->functions->get_current_user_id() ) return false;
-            if ( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ) return false;
 
             return true;
         }
@@ -604,7 +603,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
                 $threads_table,
                 array(
                     'subject' => $course->post_title,
-                    'type'    => 'group',
+                    'type'    => 'course',
                 )
             );
 
@@ -649,7 +648,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
                 $threads_table,
                 array(
                     'subject' => $group->post_title,
-                    'type'    => 'group',
+                    'type'    => 'course',
                 )
             );
 

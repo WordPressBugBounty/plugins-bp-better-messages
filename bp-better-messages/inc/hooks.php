@@ -306,6 +306,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_HivePress::instance();
             }
 
+            if( defined('ATBDP_VERSION') ){
+                require_once Better_Messages()->path . 'addons/directorist.php';
+                Better_Messages_Directorist::instance();
+            }
+
+            if( defined('GEODIRECTORY_VERSION') ){
+                require_once Better_Messages()->path . 'addons/geodirectory.php';
+                Better_Messages_GeoDirectory::instance();
+            }
+
             if( class_exists('LearnPress') ){
                 require_once Better_Messages()->path . 'addons/learnpress.php';
                 Better_Messages_LearnPress::instance();
@@ -319,6 +329,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( defined('LEARNDASH_VERSION') ){
                 require_once Better_Messages()->path . 'addons/learndash.php';
                 Better_Messages_LearnDash::instance();
+            }
+
+            if( defined('STM_LMS_VERSION') ){
+                require_once Better_Messages()->path . 'addons/masterstudy.php';
+                Better_Messages_MasterStudy::instance();
             }
 
             add_action('init', array( $this, 'flush_rewrite_rules' ), PHP_INT_MAX );

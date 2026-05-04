@@ -23,7 +23,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
 
         public function __construct()
         {
-            add_filter( 'better_messages_is_valid_group',          array( $this, 'is_valid_group' ), 10, 2 );
+            add_filter( 'better_messages_is_valid_course',         array( $this, 'is_valid_group' ), 10, 2 );
             add_filter( 'better_messages_has_access_to_group_chat',array( $this, 'has_access_to_group_chat' ), 10, 3 );
             add_filter( 'better_messages_can_send_message',        array( $this, 'can_reply_to_group_chat' ), 10, 3 );
 
@@ -195,7 +195,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
         {
             $type = Better_Messages()->functions->get_thread_type( $thread_id );
 
-            if ( $type === 'group' ) {
+            if ( $type === 'course' ) {
                 $course_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_course_id' );
 
                 if ( $course_id ) {
@@ -292,7 +292,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
         public function course_thread_url( $url, $thread_id, $thread )
         {
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
-            if ( $thread_type !== 'group' ) return $url;
+            if ( $thread_type !== 'course' ) return $url;
 
             $course_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_course_id' );
             if ( ! $course_id ) return $url;
@@ -308,7 +308,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
         public function course_thread_title( $title, $thread_id, $thread )
         {
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
-            if ( $thread_type !== 'group' ) return $title;
+            if ( $thread_type !== 'course' ) return $title;
 
             $course_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_course_id' );
             if ( ! $course_id ) return $title;
@@ -324,7 +324,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
         public function course_thread_image( $image, $thread_id, $thread )
         {
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
-            if ( $thread_type !== 'group' ) return $image;
+            if ( $thread_type !== 'course' ) return $image;
 
             $course_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_course_id' );
             if ( ! $course_id ) return $image;
@@ -469,7 +469,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
                         bm_get_table( 'threads' ),
                         array(
                             'subject' => $course->title,
-                            'type'    => 'group',
+                            'type'    => 'course',
                         )
                     );
 

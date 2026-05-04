@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.1
+    Version: 2.15.2
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.1';
+        public  $version = '2.15.2';
 
         public  $db_version = '1.0.4';
 
@@ -1003,18 +1003,21 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                     $this->settings['TLminiCoursesEnable'] == '1' ||
                     $this->settings['LPminiCoursesEnable'] == '1' ||
                     $this->settings['LDminiCoursesEnable'] == '1' ||
+                    $this->settings['MSminiCoursesEnable'] == '1' ||
                     $this->settings['FCminiCoursesEnable'] == '1'
                 );
                 $combined_courses = (
                     $this->settings['TLcombinedCoursesEnable'] == '1' ||
                     $this->settings['LPcombinedCoursesEnable'] == '1' ||
                     $this->settings['LDcombinedCoursesEnable'] == '1' ||
+                    $this->settings['MScombinedCoursesEnable'] == '1' ||
                     $this->settings['FCcombinedCoursesEnable'] == '1'
                 );
                 $mobile_courses = (
                     $this->settings['TLmobileCoursesEnable'] == '1' ||
                     $this->settings['LPmobileCoursesEnable'] == '1' ||
                     $this->settings['LDmobileCoursesEnable'] == '1' ||
+                    $this->settings['MSmobileCoursesEnable'] == '1' ||
                     $this->settings['FCmobileCoursesEnable'] == '1'
                 );
                 $script_variables['miniCourses']     = $mini_courses ? '1' : '0';
@@ -1026,7 +1029,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             $order_map = [
                 'bp-friends' => 'friends', 'um-friends' => 'friends', 'ps-friends' => 'friends',
                 'bp-groups'  => 'groups',  'um-groups'  => 'groups',  'ps-groups'  => 'groups',  'fc-groups' => 'groups',
-                'tl-courses' => 'courses', 'lp-courses' => 'courses', 'ld-courses' => 'courses', 'fc-courses' => 'courses',
+                'tl-courses' => 'courses', 'lp-courses' => 'courses', 'ld-courses' => 'courses', 'ms-courses' => 'courses', 'fc-courses' => 'courses',
             ];
 
             foreach ( ['miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder'] as $order_key ) {

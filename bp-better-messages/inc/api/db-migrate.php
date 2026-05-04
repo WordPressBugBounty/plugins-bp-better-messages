@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.0;
+        private $db_version = 2.1;
 
         public static function instance()
         {
@@ -22,7 +22,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             add_action( 'wp_ajax_bp_messages_admin_import_options', array( $this, 'import_admin_options' ) );
             add_action( 'wp_ajax_bp_messages_admin_export_options', array( $this, 'export_admin_options' ) );
             add_action( 'wp_ajax_better_messages_admin_reset_database', array( $this, 'reset_database' ) );
-            add_action( 'wp_ajax_better_messages_admin_convert_database', array( $this, 'convert_database' ) );
             add_action( 'wp_ajax_better_messages_admin_sync_users', array( $this, 'sync_users' ) );
         }
 
@@ -39,21 +38,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             Better_Messages()->users->sync_all_users();
 
             wp_send_json("User synchronization is finished");
-        }
-
-        public function convert_database(){
-            $nonce    = $_POST['nonce'];
-            if ( ! wp_verify_nonce($nonce, 'bm-convert-database') ){
-                exit;
-            }
-
-            if( ! current_user_can('manage_options') ){
-                exit;
-            }
-
-            $this->update_collate();
-
-            wp_send_json("Database was converted");
         }
 
         public function reset_database(){
@@ -139,24 +123,27 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
         public function update_collate(){
             global $wpdb;
 
-            $actions = [
-                "ALTER TABLE `" . bm_get_table('mentions') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('messages') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('meta') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('recipients') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('threadsmeta') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('threads') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('moderation') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('guests') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('users') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('roles') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('bulk_jobs') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('bulk_job_threads') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
-                "ALTER TABLE `" . bm_get_table('ai_usage') ."` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
+            $charset   = $wpdb->charset ? $wpdb->charset : 'utf8mb4';
+            $collation = $wpdb->collate ? $wpdb->collate : 'utf8mb4_unicode_ci';
+
+            $tables = [
+                bm_get_table('mentions'),
+                bm_get_table('messages'),
+                bm_get_table('meta'),
+                bm_get_table('recipients'),
+                bm_get_table('threadsmeta'),
+                bm_get_table('threads'),
+                bm_get_table('moderation'),
+                bm_get_table('guests'),
+                bm_get_table('users'),
+                bm_get_table('roles'),
+                bm_get_table('bulk_jobs'),
+                bm_get_table('bulk_job_threads'),
+                bm_get_table('ai_usage'),
             ];
 
-            foreach( $actions as $sql ){
-                $wpdb->query( $sql );
+            foreach( $tables as $table ){
+                $wpdb->query( "ALTER TABLE `{$table}` CONVERT TO CHARACTER SET {$charset} COLLATE {$collation};" );
             }
 
             return null;
@@ -265,7 +252,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 "CREATE TABLE `" . bm_get_table('threads') ."` (
                       `id` bigint(20) NOT NULL AUTO_INCREMENT,
                       `subject` varchar(255) NOT NULL,
-                      `type` enum('thread','group','chat-room') NOT NULL DEFAULT 'thread',
+                      `type` enum('thread','group','chat-room','course') NOT NULL DEFAULT 'thread',
                       PRIMARY KEY (`id`)
                     ) ENGINE=InnoDB;",
 
@@ -761,6 +748,32 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             Better_Messages()->settings['pointsSystem'] = $detected;
                         }
                     }
+                ],
+                '2.1' => [
+                    function () {
+                        global $wpdb;
+                        $threads_table     = bm_get_table('threads');
+                        $threadsmeta_table = bm_get_table('threadsmeta');
+
+                        $wpdb->query( "ALTER TABLE `{$threads_table}` MODIFY `type` ENUM('thread','group','chat-room','course') NOT NULL DEFAULT 'thread'" );
+
+                        $course_meta_keys = "'learnpress_course_id', 'tutorlms_course_id', 'learndash_course_id', 'learndash_group_id', 'fluentcommunity_course_id'";
+                        $wpdb->query( "
+                            UPDATE `{$threads_table}` t
+                            INNER JOIN `{$threadsmeta_table}` tm ON tm.bm_thread_id = t.id
+                            SET t.type = 'course'
+                            WHERE t.type IN ('group', '')
+                              AND tm.meta_key IN ({$course_meta_keys})
+                        " );
+                    },
+                    function () {
+                        global $wpdb;
+                        $guests_table = bm_get_table('guests');
+                        $col = $wpdb->get_results( "SHOW COLUMNS FROM `{$guests_table}` LIKE 'last_changed'" );
+                        if ( ! empty( $col ) ) {
+                            $wpdb->query( "ALTER TABLE `{$guests_table}` DROP COLUMN `last_changed`" );
+                        }
+                    }
                 ]
             ];
 
@@ -788,6 +801,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             }
 
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function get_target_db_version(){
+            return (string) $this->db_version;
+        }
+
+        public function get_installed_db_version(){
+            return (string) get_option( 'better_messages_2_db_version', '0' );
         }
 
         public function install_tables(){
@@ -880,6 +901,904 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
 
                 update_option( 'better_messages_db_migrated', true, false );
             }
+        }
+
+        public function get_schemas(){
+            $schemas = [
+                'mentions' => [
+                    'columns' => [
+                        'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'thread_id'  => "bigint(20) NOT NULL",
+                        'message_id' => "bigint(20) NOT NULL",
+                        'user_id'    => "bigint(20) NOT NULL",
+                        'type'       => "enum('mention','reply','reaction') NOT NULL",
+                    ],
+                    'primary_key' => 'id',
+                ],
+                'messages' => [
+                    'columns' => [
+                        'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'thread_id'  => "bigint(20) NOT NULL",
+                        'sender_id'  => "bigint(20) NOT NULL",
+                        'message'    => "longtext NOT NULL",
+                        'date_sent'  => "datetime NOT NULL",
+                        'created_at' => "bigint(20) NOT NULL DEFAULT '0'",
+                        'updated_at' => "bigint(20) NOT NULL DEFAULT '0'",
+                        'temp_id'    => "varchar(50) DEFAULT NULL",
+                        'is_pending' => "tinyint(1) NOT NULL DEFAULT '0'",
+                    ],
+                    'primary_key' => 'id',
+                    'keys' => [
+                        'sender_id'            => 'sender_id',
+                        'thread_id'            => 'thread_id',
+                        'created_at'           => 'created_at',
+                        'updated_at'           => 'updated_at',
+                        'temp_id'              => 'temp_id',
+                        'thread_id_created_at' => 'thread_id, created_at',
+                        'is_pending_index'     => 'is_pending',
+                    ],
+                ],
+                'meta' => [
+                    'columns' => [
+                        'meta_id'       => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'bm_message_id' => "bigint(20) NOT NULL",
+                        'meta_key'      => "varchar(255) DEFAULT NULL",
+                        'meta_value'    => "longtext",
+                    ],
+                    'primary_key' => 'meta_id',
+                    'keys' => [
+                        'bm_message_id' => 'bm_message_id',
+                        'meta_key'      => 'meta_key(191)',
+                    ],
+                ],
+                'recipients' => [
+                    'columns' => [
+                        'id'             => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'user_id'        => "bigint(20) NOT NULL",
+                        'thread_id'      => "bigint(20) NOT NULL",
+                        'unread_count'   => "int(10) NOT NULL DEFAULT '0'",
+                        'last_read'      => "datetime NOT NULL DEFAULT '1970-01-01'",
+                        'last_delivered' => "datetime NOT NULL DEFAULT '1970-01-01'",
+                        'last_email'     => "datetime NOT NULL DEFAULT '1970-01-01'",
+                        'is_muted'       => "tinyint(1) NOT NULL DEFAULT '0'",
+                        'is_pinned'      => "tinyint(1) NOT NULL DEFAULT '0'",
+                        'is_deleted'     => "tinyint(1) NOT NULL DEFAULT '0'",
+                        'last_update'    => "bigint(20) NOT NULL DEFAULT '0'",
+                    ],
+                    'primary_key' => 'id',
+                    'unique_keys' => [
+                        'user_thread' => 'user_id, thread_id',
+                    ],
+                    'keys' => [
+                        'user_id'            => 'user_id',
+                        'thread_id'          => 'thread_id',
+                        'is_deleted'         => 'is_deleted',
+                        'unread_count'       => 'unread_count',
+                        'is_pinned'          => 'is_pinned',
+                        'unread_count_index' => 'user_id, is_deleted, unread_count',
+                    ],
+                ],
+                'threadsmeta' => [
+                    'columns' => [
+                        'meta_id'      => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'bm_thread_id' => "bigint(20) NOT NULL",
+                        'meta_key'     => "varchar(255) DEFAULT NULL",
+                        'meta_value'   => "longtext",
+                    ],
+                    'primary_key' => 'meta_id',
+                    'keys' => [
+                        'meta_key'  => 'meta_key(191)',
+                        'thread_id' => 'bm_thread_id',
+                    ],
+                ],
+                'threads' => [
+                    'columns' => [
+                        'id'      => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'subject' => "varchar(255) NOT NULL",
+                        'type'    => "enum('thread','group','chat-room','course') NOT NULL DEFAULT 'thread'",
+                    ],
+                    'primary_key' => 'id',
+                ],
+                'moderation' => [
+                    'columns' => [
+                        'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'user_id'    => "bigint(20) NOT NULL",
+                        'thread_id'  => "bigint(20) NOT NULL",
+                        'type'       => "enum('ban','mute','bypass_moderation','force_moderation') NOT NULL",
+                        'expiration' => "datetime NULL DEFAULT NULL",
+                        'admin_id'   => "bigint(20) NOT NULL",
+                        'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                        'updated_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                    ],
+                    'primary_key' => 'id',
+                    'unique_keys' => [
+                        'user_thread_type' => 'user_id, thread_id, type',
+                    ],
+                ],
+                'guests' => [
+                    'columns' => [
+                        'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'secret'     => "varchar(30) NOT NULL",
+                        'name'       => "varchar(255) NOT NULL",
+                        'email'      => "varchar(100) DEFAULT NULL",
+                        'ip'         => "varchar(40) NOT NULL",
+                        'meta'       => "longtext NOT NULL",
+                        'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                        'updated_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                        'deleted_at' => "datetime DEFAULT NULL",
+                    ],
+                    'primary_key' => 'id',
+                ],
+                'roles' => [
+                    'columns' => [
+                        'user_id' => "bigint(20) NOT NULL",
+                        'role'    => "varchar(50) NOT NULL",
+                    ],
+                    'primary_key' => null,
+                    'unique_keys' => [
+                        'user_role_unique' => 'user_id, role',
+                    ],
+                    'keys' => [
+                        'roles_index' => 'user_id',
+                    ],
+                ],
+                'users' => [
+                    'columns' => [
+                        'ID'            => "bigint(20) NOT NULL",
+                        'user_nicename' => "varchar(50) NOT NULL DEFAULT ''",
+                        'display_name'  => "varchar(250) NOT NULL DEFAULT ''",
+                        'nickname'      => "varchar(255) DEFAULT NULL",
+                        'first_name'    => "varchar(255) DEFAULT NULL",
+                        'last_name'     => "varchar(255) DEFAULT NULL",
+                        'last_activity' => "datetime NOT NULL DEFAULT '1970-01-01 00:00:00'",
+                        'last_changed'  => "bigint(20) DEFAULT NULL",
+                    ],
+                    'primary_key' => 'ID',
+                    'keys' => [
+                        'last_activity_index' => 'last_activity',
+                        'last_changed_index'  => 'last_changed',
+                    ],
+                ],
+                'bulk_jobs' => [
+                    'columns' => [
+                        'id'                  => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'sender_id'           => "bigint(20) NOT NULL",
+                        'subject'             => "varchar(255) NOT NULL DEFAULT ''",
+                        'message'             => "longtext NOT NULL",
+                        'selectors'           => "longtext NOT NULL",
+                        'attachment_ids'      => "text NOT NULL DEFAULT ''",
+                        'status'              => "varchar(20) NOT NULL DEFAULT 'pending'",
+                        'disable_reply'       => "tinyint(1) NOT NULL DEFAULT 0",
+                        'use_existing_thread' => "tinyint(1) NOT NULL DEFAULT 0",
+                        'hide_thread'         => "tinyint(1) NOT NULL DEFAULT 0",
+                        'single_thread'       => "tinyint(1) NOT NULL DEFAULT 0",
+                        'parent_job_id'       => "bigint(20) NOT NULL DEFAULT 0",
+                        'total_users'         => "int(11) NOT NULL DEFAULT 0",
+                        'processed_count'     => "int(11) NOT NULL DEFAULT 0",
+                        'error_count'         => "int(11) NOT NULL DEFAULT 0",
+                        'current_page'        => "int(11) NOT NULL DEFAULT 1",
+                        'scheduled_at'        => "datetime DEFAULT NULL",
+                        'batch_size'          => "int(11) NOT NULL DEFAULT 0",
+                        'error_log'           => "longtext DEFAULT NULL",
+                        'created_at'          => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                        'started_at'          => "datetime DEFAULT NULL",
+                        'completed_at'        => "datetime DEFAULT NULL",
+                    ],
+                    'primary_key' => 'id',
+                    'keys' => [
+                        'status_index' => 'status',
+                    ],
+                ],
+                'bulk_job_threads' => [
+                    'columns' => [
+                        'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'job_id'     => "bigint(20) NOT NULL",
+                        'thread_id'  => "bigint(20) NOT NULL",
+                        'message_id' => "bigint(20) NOT NULL DEFAULT 0",
+                        'user_id'    => "bigint(20) NOT NULL DEFAULT 0",
+                    ],
+                    'primary_key' => 'id',
+                    'keys' => [
+                        'job_id_index'    => 'job_id',
+                        'thread_id_index' => 'thread_id',
+                    ],
+                ],
+                'ai_usage' => [
+                    'columns' => [
+                        'id'             => "bigint(20) NOT NULL AUTO_INCREMENT",
+                        'bot_id'         => "bigint(20) NOT NULL",
+                        'message_id'     => "bigint(20) NOT NULL DEFAULT 0",
+                        'thread_id'      => "bigint(20) NOT NULL DEFAULT 0",
+                        'user_id'        => "bigint(20) NOT NULL DEFAULT 0",
+                        'is_summary'     => "tinyint(1) NOT NULL DEFAULT 0",
+                        'points_charged' => "int(11) NOT NULL DEFAULT 0",
+                        'cost_data'      => "longtext NOT NULL",
+                        'created_at'     => "bigint(20) NOT NULL DEFAULT 0",
+                    ],
+                    'primary_key' => 'id',
+                    'keys' => [
+                        'bot_id_index'      => 'bot_id',
+                        'bot_id_created_at' => 'bot_id, created_at',
+                        'message_id_index'  => 'message_id',
+                    ],
+                ],
+            ];
+
+            return apply_filters( 'better_messages_db_schemas', $schemas );
+        }
+
+        public function build_create_sql( $table_name, $schema ){
+            $lines = [];
+
+            foreach ( $schema['columns'] as $col_name => $col_def ) {
+                $lines[] = "{$col_name} {$col_def}";
+            }
+
+            $pk = isset( $schema['primary_key'] ) ? $schema['primary_key'] : null;
+            if ( ! empty( $pk ) ) {
+                if ( is_array( $pk ) ) {
+                    $lines[] = 'PRIMARY KEY (' . implode( ', ', $pk ) . ')';
+                } else {
+                    $lines[] = "PRIMARY KEY ({$pk})";
+                }
+            }
+
+            if ( ! empty( $schema['unique_keys'] ) ) {
+                foreach ( $schema['unique_keys'] as $key_name => $key_cols ) {
+                    $lines[] = "UNIQUE KEY {$key_name} ({$key_cols})";
+                }
+            }
+
+            if ( ! empty( $schema['keys'] ) ) {
+                foreach ( $schema['keys'] as $key_name => $key_cols ) {
+                    $lines[] = "KEY {$key_name} ({$key_cols})";
+                }
+            }
+
+            $body = implode( ",\n  ", $lines );
+
+            return "CREATE TABLE {$table_name} (\n  {$body}\n) ENGINE=InnoDB";
+        }
+
+        public function resolve_table_name( $logical, $schema = null ){
+            if ( $schema === null ) {
+                $schemas = $this->get_schemas();
+                $schema  = isset( $schemas[ $logical ] ) ? $schemas[ $logical ] : null;
+            }
+            if ( is_array( $schema ) && ! empty( $schema['table_name'] ) ) {
+                return $schema['table_name'];
+            }
+            return bm_get_table( $logical );
+        }
+
+        private function get_logical_to_table_map(){
+            $schemas = $this->get_schemas();
+            $map = [];
+            foreach ( $schemas as $logical => $schema ) {
+                $map[ $logical ] = $this->resolve_table_name( $logical, $schema );
+            }
+            return $map;
+        }
+
+        public function get_actual_schema(){
+            global $wpdb;
+
+            $logical_to_table = $this->get_logical_to_table_map();
+            $table_names      = array_values( $logical_to_table );
+
+            if ( empty( $table_names ) ) {
+                return [];
+            }
+
+            $placeholders = implode( ', ', array_fill( 0, count( $table_names ), '%s' ) );
+
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders}) ORDER BY TABLE_NAME, ORDINAL_POSITION",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $table_to_logical = array_flip( $logical_to_table );
+            $result = [];
+
+            if ( is_array( $rows ) ) {
+                foreach ( $rows as $row ) {
+                    if ( isset( $table_to_logical[ $row->TABLE_NAME ] ) ) {
+                        $logical = $table_to_logical[ $row->TABLE_NAME ];
+                        if ( ! isset( $result[ $logical ] ) ) {
+                            $result[ $logical ] = [];
+                        }
+                        $result[ $logical ][] = $row->COLUMN_NAME;
+                    }
+                }
+            }
+
+            return $result;
+        }
+
+        public function compare_schemas(){
+            $expected         = $this->get_schemas();
+            $actual           = $this->get_actual_schema();
+            $actual_enums     = $this->get_actual_enum_types();
+            $actual_indexes   = $this->get_actual_indexes();
+            $result           = [];
+
+            foreach ( $expected as $logical => $schema ) {
+                $expected_cols = array_keys( $schema['columns'] );
+                $actual_cols   = isset( $actual[ $logical ] ) ? $actual[ $logical ] : [];
+
+                if ( empty( $actual_cols ) ) {
+                    $result[ $logical ] = [
+                        'exists'           => false,
+                        'status'           => 'missing',
+                        'expected_columns' => $expected_cols,
+                        'actual_columns'   => [],
+                        'missing_columns'  => $expected_cols,
+                        'extra_columns'    => [],
+                        'enum_mismatches'  => [],
+                        'missing_indexes'  => [],
+                        'extra_indexes'    => [],
+                    ];
+                    continue;
+                }
+
+                $missing = array_values( array_diff( $expected_cols, $actual_cols ) );
+                $extra   = array_values( array_diff( $actual_cols, $expected_cols ) );
+
+                $enum_mismatches = [];
+                foreach ( $schema['columns'] as $col_name => $col_def ) {
+                    $expected_values = self::parse_enum_values( $col_def );
+                    if ( $expected_values === null ) {
+                        continue;
+                    }
+                    $actual_type   = isset( $actual_enums[ $logical ][ $col_name ] ) ? $actual_enums[ $logical ][ $col_name ] : null;
+                    $actual_values = $actual_type !== null ? self::parse_enum_values( $actual_type ) : [];
+                    if ( ! is_array( $actual_values ) ) {
+                        $actual_values = [];
+                    }
+                    $miss_v = array_values( array_diff( $expected_values, $actual_values ) );
+                    $extra_v = array_values( array_diff( $actual_values, $expected_values ) );
+                    if ( ! empty( $miss_v ) || ! empty( $extra_v ) ) {
+                        $enum_mismatches[] = [
+                            'column'          => $col_name,
+                            'expected_values' => $expected_values,
+                            'actual_values'   => $actual_values,
+                            'missing_values'  => $miss_v,
+                            'extra_values'    => $extra_v,
+                        ];
+                    }
+                }
+
+                $expected_indexes = [];
+                if ( ! empty( $schema['primary_key'] ) ) {
+                    $pk_cols = is_array( $schema['primary_key'] ) ? $schema['primary_key'] : [ $schema['primary_key'] ];
+                    $expected_indexes['PRIMARY'] = [
+                        'unique'  => true,
+                        'columns' => self::normalize_index_columns( $pk_cols ),
+                    ];
+                }
+                if ( ! empty( $schema['unique_keys'] ) ) {
+                    foreach ( $schema['unique_keys'] as $key_name => $cols ) {
+                        $expected_indexes[ $key_name ] = [
+                            'unique'  => true,
+                            'columns' => self::normalize_index_columns( $cols ),
+                        ];
+                    }
+                }
+                if ( ! empty( $schema['keys'] ) ) {
+                    foreach ( $schema['keys'] as $key_name => $cols ) {
+                        $expected_indexes[ $key_name ] = [
+                            'unique'  => false,
+                            'columns' => self::normalize_index_columns( $cols ),
+                        ];
+                    }
+                }
+
+                $actual_idx_normalized = [];
+                if ( isset( $actual_indexes[ $logical ] ) ) {
+                    foreach ( $actual_indexes[ $logical ] as $idx_name => $info ) {
+                        $actual_idx_normalized[ $idx_name ] = [
+                            'unique'  => $info['unique'],
+                            'columns' => self::normalize_index_columns( $info['columns'] ),
+                        ];
+                    }
+                }
+
+                $missing_indexes = [];
+                $extra_indexes   = [];
+                foreach ( $expected_indexes as $name => $exp ) {
+                    if ( ! isset( $actual_idx_normalized[ $name ] )
+                         || $actual_idx_normalized[ $name ]['columns'] !== $exp['columns']
+                         || $actual_idx_normalized[ $name ]['unique'] !== $exp['unique'] ) {
+                        $missing_indexes[] = [
+                            'name'    => $name,
+                            'unique'  => $exp['unique'],
+                            'columns' => $exp['columns'],
+                        ];
+                    }
+                }
+                foreach ( $actual_idx_normalized as $name => $act ) {
+                    if ( ! isset( $expected_indexes[ $name ] ) ) {
+                        $extra_indexes[] = [
+                            'name'    => $name,
+                            'unique'  => $act['unique'],
+                            'columns' => $act['columns'],
+                        ];
+                    }
+                }
+
+                $status = ( empty( $missing ) && empty( $extra ) && empty( $enum_mismatches ) && empty( $missing_indexes ) && empty( $extra_indexes ) ) ? 'ok' : 'mismatch';
+
+                $result[ $logical ] = [
+                    'exists'           => true,
+                    'status'           => $status,
+                    'expected_columns' => $expected_cols,
+                    'actual_columns'   => $actual_cols,
+                    'missing_columns'  => $missing,
+                    'extra_columns'    => $extra,
+                    'enum_mismatches'  => $enum_mismatches,
+                    'missing_indexes'  => $missing_indexes,
+                    'extra_indexes'    => $extra_indexes,
+                ];
+            }
+
+            return $result;
+        }
+
+        public static function parse_enum_values( $col_def ){
+            if ( ! preg_match( '/^\s*enum\s*\(([^)]+)\)/i', $col_def, $m ) ) {
+                return null;
+            }
+            $parts  = explode( ',', $m[1] );
+            $values = [];
+            foreach ( $parts as $p ) {
+                $values[] = trim( $p, " '\"" );
+            }
+            return $values;
+        }
+
+        public function get_actual_indexes(){
+            global $wpdb;
+
+            $logical_to_table = $this->get_logical_to_table_map();
+            $table_names      = array_values( $logical_to_table );
+
+            if ( empty( $table_names ) ) {
+                return [];
+            }
+
+            $placeholders = implode( ', ', array_fill( 0, count( $table_names ), '%s' ) );
+
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX, NON_UNIQUE, SUB_PART FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders}) ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $table_to_logical = array_flip( $logical_to_table );
+            $result = [];
+
+            if ( is_array( $rows ) ) {
+                foreach ( $rows as $row ) {
+                    if ( ! isset( $table_to_logical[ $row->TABLE_NAME ] ) ) {
+                        continue;
+                    }
+                    $logical = $table_to_logical[ $row->TABLE_NAME ];
+                    $index   = $row->INDEX_NAME;
+                    if ( ! isset( $result[ $logical ][ $index ] ) ) {
+                        $result[ $logical ][ $index ] = [
+                            'unique'  => (int) $row->NON_UNIQUE === 0,
+                            'columns' => [],
+                        ];
+                    }
+                    $col = $row->COLUMN_NAME;
+                    if ( $row->SUB_PART !== null ) {
+                        $col .= '(' . (int) $row->SUB_PART . ')';
+                    }
+                    $result[ $logical ][ $index ]['columns'][] = $col;
+                }
+            }
+
+            return $result;
+        }
+
+        public static function normalize_index_columns( $cols ){
+            $parts = is_array( $cols ) ? $cols : explode( ',', (string) $cols );
+            $out   = [];
+            foreach ( $parts as $p ) {
+                $out[] = strtolower( trim( $p ) );
+            }
+            return implode( ',', $out );
+        }
+
+        public function get_actual_enum_types(){
+            global $wpdb;
+
+            $logical_to_table = $this->get_logical_to_table_map();
+            $table_names      = array_values( $logical_to_table );
+
+            if ( empty( $table_names ) ) {
+                return [];
+            }
+
+            $placeholders = implode( ', ', array_fill( 0, count( $table_names ), '%s' ) );
+
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders}) AND DATA_TYPE = 'enum'",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $table_to_logical = array_flip( $logical_to_table );
+            $result = [];
+
+            if ( is_array( $rows ) ) {
+                foreach ( $rows as $row ) {
+                    if ( isset( $table_to_logical[ $row->TABLE_NAME ] ) ) {
+                        $logical = $table_to_logical[ $row->TABLE_NAME ];
+                        if ( ! isset( $result[ $logical ] ) ) {
+                            $result[ $logical ] = [];
+                        }
+                        $result[ $logical ][ $row->COLUMN_NAME ] = $row->COLUMN_TYPE;
+                    }
+                }
+            }
+
+            return $result;
+        }
+
+        public function get_row_counts(){
+            global $wpdb;
+
+            $logical_to_table = $this->get_logical_to_table_map();
+            $table_names      = array_values( $logical_to_table );
+
+            $result = [];
+            foreach ( array_keys( $logical_to_table ) as $logical ) {
+                $result[ $logical ] = 0;
+            }
+
+            if ( empty( $table_names ) ) {
+                return $result;
+            }
+
+            $placeholders = implode( ', ', array_fill( 0, count( $table_names ), '%s' ) );
+
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders})",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $table_to_logical = array_flip( $logical_to_table );
+            if ( is_array( $rows ) ) {
+                foreach ( $rows as $row ) {
+                    if ( isset( $table_to_logical[ $row->TABLE_NAME ] ) ) {
+                        $logical = $table_to_logical[ $row->TABLE_NAME ];
+                        $result[ $logical ] = (int) $row->TABLE_ROWS;
+                    }
+                }
+            }
+
+            return $result;
+        }
+
+        public function get_collation_info(){
+            global $wpdb;
+
+            $expected_collation = $wpdb->collate ? $wpdb->collate : 'utf8mb4_unicode_ci';
+            $expected_charset   = $wpdb->charset ? $wpdb->charset : 'utf8mb4';
+
+            $logical_to_table = $this->get_logical_to_table_map();
+            $table_names      = array_values( $logical_to_table );
+
+            $tables_result = [];
+            foreach ( array_keys( $logical_to_table ) as $logical ) {
+                $tables_result[ $logical ] = [
+                    'table_collation'    => null,
+                    'collation_mismatch' => false,
+                    'mismatched_columns' => [],
+                ];
+            }
+
+            if ( empty( $table_names ) ) {
+                return [
+                    'expected_collation' => $expected_collation,
+                    'expected_charset'   => $expected_charset,
+                    'tables'             => $tables_result,
+                ];
+            }
+
+            $placeholders = implode( ', ', array_fill( 0, count( $table_names ), '%s' ) );
+
+            $table_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, TABLE_COLLATION FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders})",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $col_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT TABLE_NAME, COLUMN_NAME, COLLATION_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({$placeholders}) AND COLLATION_NAME IS NOT NULL ORDER BY TABLE_NAME, ORDINAL_POSITION",
+                    array_merge( [ DB_NAME ], $table_names )
+                )
+            );
+
+            $table_to_logical = array_flip( $logical_to_table );
+
+            $table_collations = [];
+            if ( is_array( $table_rows ) ) {
+                foreach ( $table_rows as $row ) {
+                    if ( isset( $table_to_logical[ $row->TABLE_NAME ] ) ) {
+                        $table_collations[ $table_to_logical[ $row->TABLE_NAME ] ] = $row->TABLE_COLLATION;
+                    }
+                }
+            }
+
+            $col_mismatches = [];
+            if ( is_array( $col_rows ) ) {
+                foreach ( $col_rows as $row ) {
+                    if ( isset( $table_to_logical[ $row->TABLE_NAME ] ) && $row->COLLATION_NAME !== $expected_collation ) {
+                        $logical = $table_to_logical[ $row->TABLE_NAME ];
+                        if ( ! isset( $col_mismatches[ $logical ] ) ) {
+                            $col_mismatches[ $logical ] = [];
+                        }
+                        $col_mismatches[ $logical ][] = [
+                            'column'    => $row->COLUMN_NAME,
+                            'collation' => $row->COLLATION_NAME,
+                        ];
+                    }
+                }
+            }
+
+            foreach ( array_keys( $logical_to_table ) as $logical ) {
+                $table_collation     = isset( $table_collations[ $logical ] ) ? $table_collations[ $logical ] : null;
+                $mismatched_cols     = isset( $col_mismatches[ $logical ] ) ? $col_mismatches[ $logical ] : [];
+                $table_level_mismatch = ( $table_collation !== null && $table_collation !== $expected_collation );
+
+                $tables_result[ $logical ] = [
+                    'table_collation'    => $table_collation,
+                    'collation_mismatch' => $table_level_mismatch || ! empty( $mismatched_cols ),
+                    'mismatched_columns' => $mismatched_cols,
+                ];
+            }
+
+            return [
+                'expected_collation' => $expected_collation,
+                'expected_charset'   => $expected_charset,
+                'tables'             => $tables_result,
+            ];
+        }
+
+        public function repair_table( $logical ){
+            global $wpdb;
+
+            $schemas = $this->get_schemas();
+            if ( ! isset( $schemas[ $logical ] ) ) {
+                return false;
+            }
+
+            set_time_limit( 0 );
+            ignore_user_abort( true );
+            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+            $table_name      = $this->resolve_table_name( $logical, $schemas[ $logical ] );
+            $charset_collate = $wpdb->get_charset_collate();
+
+            $cmp = $this->compare_schemas();
+            if ( isset( $cmp[ $logical ]['missing_indexes'] ) && ! empty( $cmp[ $logical ]['missing_indexes'] ) ) {
+                $actual_indexes = $this->get_actual_indexes();
+                foreach ( $cmp[ $logical ]['missing_indexes'] as $mi ) {
+                    $name = $mi['name'];
+                    if ( $name === 'PRIMARY' ) {
+                        continue;
+                    }
+                    if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $name ) ) {
+                        continue;
+                    }
+                    if ( isset( $actual_indexes[ $logical ][ $name ] ) ) {
+                        $wpdb->query( "ALTER TABLE `{$table_name}` DROP INDEX `{$name}`" );
+                    }
+                }
+            }
+
+            $sql = $this->build_create_sql( $table_name, $schemas[ $logical ] ) . " {$charset_collate};";
+
+            dbDelta( $sql );
+
+            return $wpdb->last_error === '';
+        }
+
+        public function fix_collation( $logical ){
+            global $wpdb;
+
+            $schemas = $this->get_schemas();
+            if ( ! isset( $schemas[ $logical ] ) ) {
+                return false;
+            }
+
+            $charset    = $wpdb->charset ? $wpdb->charset : 'utf8mb4';
+            $collation  = $wpdb->collate ? $wpdb->collate : 'utf8mb4_unicode_ci';
+            $table_name = $this->resolve_table_name( $logical, $schemas[ $logical ] );
+
+            $wpdb->query( "ALTER TABLE `{$table_name}` CONVERT TO CHARACTER SET {$charset} COLLATE {$collation}" );
+
+            return $wpdb->last_error === '';
+        }
+
+        public function drop_indexes( $logical, $indexes ){
+            global $wpdb;
+
+            $schemas = $this->get_schemas();
+            if ( ! isset( $schemas[ $logical ] ) ) {
+                return [ 'dropped' => [], 'errors' => [ "Unknown table: {$logical}" ] ];
+            }
+
+            $expected_index_names = [ 'PRIMARY' ];
+            if ( ! empty( $schemas[ $logical ]['unique_keys'] ) ) {
+                $expected_index_names = array_merge( $expected_index_names, array_keys( $schemas[ $logical ]['unique_keys'] ) );
+            }
+            if ( ! empty( $schemas[ $logical ]['keys'] ) ) {
+                $expected_index_names = array_merge( $expected_index_names, array_keys( $schemas[ $logical ]['keys'] ) );
+            }
+
+            $table_name = $this->resolve_table_name( $logical, $schemas[ $logical ] );
+            $dropped    = [];
+            $errors     = [];
+
+            foreach ( $indexes as $idx ) {
+                if ( ! is_string( $idx ) || ! preg_match( '/^[a-zA-Z0-9_]+$/', $idx ) ) {
+                    $errors[] = "Invalid index name: '{$idx}'";
+                    continue;
+                }
+
+                if ( in_array( $idx, $expected_index_names, true ) ) {
+                    $errors[] = "Index '{$idx}' is part of the expected schema and cannot be dropped.";
+                    continue;
+                }
+
+                $wpdb->query( "ALTER TABLE `{$table_name}` DROP INDEX `{$idx}`" );
+
+                if ( $wpdb->last_error ) {
+                    $errors[] = "Failed to drop index '{$idx}': " . $wpdb->last_error;
+                } else {
+                    $dropped[] = $idx;
+                }
+            }
+
+            return [ 'dropped' => $dropped, 'errors' => $errors ];
+        }
+
+        public function drop_columns( $logical, $columns ){
+            global $wpdb;
+
+            $schemas = $this->get_schemas();
+            if ( ! isset( $schemas[ $logical ] ) ) {
+                return [ 'dropped' => [], 'errors' => [ "Unknown table: {$logical}" ] ];
+            }
+
+            $expected_cols = array_keys( $schemas[ $logical ]['columns'] );
+            $table_name    = $this->resolve_table_name( $logical, $schemas[ $logical ] );
+            $dropped       = [];
+            $errors        = [];
+
+            foreach ( $columns as $col ) {
+                if ( ! is_string( $col ) || ! preg_match( '/^[a-zA-Z0-9_]+$/', $col ) ) {
+                    $errors[] = "Invalid column name: '{$col}'";
+                    continue;
+                }
+
+                if ( in_array( $col, $expected_cols, true ) ) {
+                    $errors[] = "Column '{$col}' is part of the expected schema and cannot be dropped.";
+                    continue;
+                }
+
+                $wpdb->query( "ALTER TABLE `{$table_name}` DROP COLUMN `{$col}`" );
+
+                if ( $wpdb->last_error ) {
+                    $errors[] = "Failed to drop '{$col}': " . $wpdb->last_error;
+                } else {
+                    $dropped[] = $col;
+                }
+            }
+
+            return [ 'dropped' => $dropped, 'errors' => $errors ];
+        }
+
+        public function repair_all(){
+            set_time_limit( 0 );
+            ignore_user_abort( true );
+
+            $compare   = $this->compare_schemas();
+            $collation = $this->get_collation_info();
+
+            $repaired = [];
+            foreach ( $compare as $logical => $info ) {
+                if ( $info['status'] !== 'ok' ) {
+                    $this->repair_table( $logical );
+                    $repaired[] = $logical;
+                }
+            }
+
+            $collation_fixed = [];
+            foreach ( $collation['tables'] as $logical => $info ) {
+                if ( $info['collation_mismatch'] ) {
+                    $this->fix_collation( $logical );
+                    $collation_fixed[] = $logical;
+                }
+            }
+
+            return [
+                'repaired'        => $repaired,
+                'collation_fixed' => $collation_fixed,
+            ];
+        }
+
+        public function get_full_inspect(){
+            $schemas   = $this->get_schemas();
+            $compare   = $this->compare_schemas();
+            $row_counts = $this->get_row_counts();
+            $coll      = $this->get_collation_info();
+
+            $tables = [];
+            $totals = [ 'ok' => 0, 'mismatch' => 0, 'missing' => 0, 'collation_mismatch' => 0 ];
+
+            foreach ( $schemas as $logical => $schema ) {
+                $cmp = isset( $compare[ $logical ] ) ? $compare[ $logical ] : null;
+                $col = isset( $coll['tables'][ $logical ] ) ? $coll['tables'][ $logical ] : [
+                    'table_collation'    => null,
+                    'collation_mismatch' => false,
+                    'mismatched_columns' => [],
+                ];
+
+                $expected_cols = array_keys( $schema['columns'] );
+
+                $tables[] = [
+                    'name'               => $logical,
+                    'table_name'         => $this->resolve_table_name( $logical, $schema ),
+                    'status'             => $cmp ? $cmp['status'] : 'missing',
+                    'exists'             => $cmp ? $cmp['exists'] : false,
+                    'expected_columns'   => $expected_cols,
+                    'actual_columns'     => $cmp ? $cmp['actual_columns'] : [],
+                    'missing_columns'    => $cmp ? $cmp['missing_columns'] : $expected_cols,
+                    'extra_columns'      => $cmp ? $cmp['extra_columns'] : [],
+                    'enum_mismatches'    => $cmp ? $cmp['enum_mismatches'] : [],
+                    'missing_indexes'    => $cmp ? $cmp['missing_indexes'] : [],
+                    'extra_indexes'      => $cmp ? $cmp['extra_indexes'] : [],
+                    'row_count'          => isset( $row_counts[ $logical ] ) ? $row_counts[ $logical ] : 0,
+                    'table_collation'    => $col['table_collation'],
+                    'collation_mismatch' => $col['collation_mismatch'],
+                    'mismatched_columns' => $col['mismatched_columns'],
+                ];
+
+                $status = $cmp ? $cmp['status'] : 'missing';
+                if ( isset( $totals[ $status ] ) ) {
+                    $totals[ $status ]++;
+                }
+                if ( $col['collation_mismatch'] ) {
+                    $totals['collation_mismatch']++;
+                }
+            }
+
+            return [
+                'tables'               => $tables,
+                'expected_collation'   => $coll['expected_collation'],
+                'expected_charset'     => $coll['expected_charset'],
+                'db_version'           => (string) $this->db_version,
+                'installed_db_version' => (string) get_option( 'better_messages_2_db_version', '0' ),
+                'totals'               => $totals,
+                'utf8mb4_supported'    => $this->is_utf8mb4_supported(),
+            ];
+        }
+
+        private function is_utf8mb4_supported(){
+            global $wpdb;
+            return $wpdb->has_cap( 'utf8mb4' );
         }
 
         public function get_thread_type( $thread_id ){

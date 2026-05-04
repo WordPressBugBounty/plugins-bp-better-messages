@@ -10309,6 +10309,10 @@ body.bp-messages-mobile .bm-medium-editor-mention-panel {
   border-radius: var(--bm-avatar-radius) !important;
 }
 
+.bp-messages-wrap .threads-list .thread .pic:not(.group) > * {
+  vertical-align: top;
+}
+
 .bp-messages-wrap .threads-list .thread .pic.group > * {
   margin: 0.5px 0.5px !important;
   width: 25px !important;
@@ -12017,6 +12021,8 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   opacity: initial;
   position: relative;
   z-index: 1;
+  line-height: 0;
+  font-size: 0;
 }
 
 .bp-messages-wrap.bp-better-messages-list .threads-list .thread .pic.group {
@@ -12334,22 +12340,6 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 .bp-messages-group-list .group .pic img {
   width: 30px;
   height: 30px;
-}
-
-.bp-messages-group-list .group .pic.bm-pic-fallback {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  margin-left: 10px;
-  margin-right: 10px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.bp-messages-group-list .group .pic.bm-pic-fallback svg {
-  width: 18px;
-  height: 18px;
 }
 
 .bp-messages-group-list .group .name {

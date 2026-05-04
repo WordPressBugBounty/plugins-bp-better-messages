@@ -393,6 +393,17 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                             }
                         }
 
+                        if( $type === 'course' ) {
+                            if ( Better_Messages()->settings['enableCoursesEmails'] !== '1' ) {
+                                if ( $user_has_mentions ) {
+                                    $mention_override = true;
+                                } else {
+                                    $this->update_last_email( $user_id, $thread_id, $thread->last_date );
+                                    continue;
+                                }
+                            }
+                        }
+
                         if( $type === 'chat-room' ) {
                             $chat_id = Better_Messages()->functions->get_thread_meta($thread_id, 'chat_id');
 

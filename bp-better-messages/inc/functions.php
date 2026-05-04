@@ -198,7 +198,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function can_invite( $user_id, $thread_id ){
             $type = $this->get_thread_type( $thread_id );
             if( $type === 'chat-room' ) return false;
-            if( $type === 'group' ) return false;
+            if( $type === 'group' || $type === 'course' ) return false;
             if( $user_id <= 0 ) return false;
 
             $participants = $this->get_participants( $thread_id );
@@ -229,7 +229,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         {
             $type = $this->get_thread_type( $thread_id );
             if( $type === 'chat-room' ) return false;
-            if( $type === 'group' ) return false;
+            if( $type === 'group' || $type === 'course' ) return false;
 
             if( Better_Messages()->settings['allowGroupLeave'] === '1' ) {
                 $participants = $this->get_participants( $thread_id );
@@ -808,6 +808,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $dashboard_url = tutor_utils()->get_tutor_dashboard_page_permalink( 'messages' );
                     if ( $dashboard_url ) {
                         return $dashboard_url;
+                    }
+                }
+
+                if ( defined('STM_LMS_VERSION') && Better_Messages()->settings['chatPage'] === 'masterstudy-account' && function_exists('ms_plugin_user_account_url') ) {
+                    $account_url = ms_plugin_user_account_url( 'messages' );
+                    if ( $account_url ) {
+                        return $account_url;
+                    }
+                }
+
+                if ( defined('ATBDP_VERSION') && Better_Messages()->settings['chatPage'] === 'directorist-dashboard' && class_exists('ATBDP_Permalink') ) {
+                    $dashboard_url = ATBDP_Permalink::get_dashboard_page_link();
+                    if ( $dashboard_url ) {
+                        return trailingslashit( $dashboard_url ) . '#bm_messages';
                     }
                 }
             }
@@ -1783,6 +1797,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( $is_valid_group ){
                     $thread_type = 'group';
                 }
+            } else if( $thread->type === 'course' ) {
+                $is_valid_course = apply_filters( 'better_messages_is_valid_course', false, $thread_id );
+
+                if( $is_valid_course ){
+                    $thread_type = 'course';
+                }
             } else {
                 $chat_id = Better_Messages()->functions->get_thread_meta($thread_id, 'chat_id');
 
@@ -1796,6 +1816,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             wp_cache_set('thread_' . $thread_id . '_type', $thread_type, 'bm_messages');
 
             return $thread_type;
+        }
+
+        public function is_group_like_thread_type( $type ){
+            return $type === 'group' || $type === 'course';
         }
 
         public function get_thread_title( int $thread_id ){
@@ -3114,6 +3138,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                        }
                    }
                }
+
+               if( $type === 'course' ) {
+                   if ( Better_Messages()->settings['enableCoursesPushs'] !== '1' ) {
+                       $message->send_push = false;
+                       $message->mobile_push = false;
+                   }
+               }
             }
 
             /*if( $is_pending !== 0 ){
@@ -3412,7 +3443,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return $this->check_chat_room_access( $thread_id, $user_id, $acccess_type );
             }
 
-            if( $type === 'group' ){
+            if( $type === 'group' || $type === 'course' ){
                 return apply_filters( 'better_messages_has_access_to_group_chat', false, $thread_id, $user_id );
             }
 

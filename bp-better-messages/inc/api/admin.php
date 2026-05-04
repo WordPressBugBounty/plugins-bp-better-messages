@@ -204,12 +204,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
-            register_rest_route('better-messages/v1/admin', '/tools/convert-utf8mb4', array(
-                'methods'             => 'POST',
-                'callback'            => array($this, 'rest_convert_utf8mb4'),
-                'permission_callback' => array($this, 'user_is_admin'),
-            ));
-
             register_rest_route('better-messages/v1/admin', '/tools/reset-database', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'rest_reset_database'),
@@ -219,6 +213,74 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             register_rest_route('better-messages/v1/admin', '/tools/import-settings', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'rest_import_settings'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/inspect', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'rest_database_inspect'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/repair-table', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_database_repair_table'),
+                'permission_callback' => array($this, 'user_is_admin'),
+                'args'                => array(
+                    'table' => array(
+                        'required' => true,
+                        'type'     => 'string',
+                    ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/drop-columns', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_database_drop_columns'),
+                'permission_callback' => array($this, 'user_is_admin'),
+                'args'                => array(
+                    'table' => array(
+                        'required' => true,
+                        'type'     => 'string',
+                    ),
+                    'columns' => array(
+                        'required' => true,
+                        'type'     => 'array',
+                    ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/drop-indexes', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_database_drop_indexes'),
+                'permission_callback' => array($this, 'user_is_admin'),
+                'args'                => array(
+                    'table' => array(
+                        'required' => true,
+                        'type'     => 'string',
+                    ),
+                    'indexes' => array(
+                        'required' => true,
+                        'type'     => 'array',
+                    ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/fix-collation', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_database_fix_collation'),
+                'permission_callback' => array($this, 'user_is_admin'),
+                'args'                => array(
+                    'table' => array(
+                        'required' => true,
+                        'type'     => 'string',
+                    ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/database/repair-all', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_database_repair_all'),
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
@@ -1475,17 +1537,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             ) );
         }
 
-        public function rest_convert_utf8mb4( WP_REST_Request $request ) {
-            if ( class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ) {
-                Better_Messages_Rest_Api_DB_Migrate()->update_collate();
-            }
-
-            return rest_ensure_response( array(
-                'success' => true,
-                'message' => 'Database was converted',
-            ) );
-        }
-
         public function rest_reset_database( WP_REST_Request $request ) {
             if ( class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ) {
                 $migrate = Better_Messages_Rest_Api_DB_Migrate();
@@ -1554,6 +1605,95 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'settings' => $settings,
                 'roles'    => $roles,
                 'pages'    => $pages,
+            ) );
+        }
+
+        public function rest_database_inspect( WP_REST_Request $request ){
+            return rest_ensure_response( Better_Messages_Rest_Api_DB_Migrate()->get_full_inspect() );
+        }
+
+        public function rest_database_repair_table( WP_REST_Request $request ){
+            $table   = sanitize_key( (string) $request->get_param( 'table' ) );
+            $migrate = Better_Messages_Rest_Api_DB_Migrate();
+
+            if ( ! isset( $migrate->get_schemas()[ $table ] ) ) {
+                return new WP_Error( 'unknown_table', "Unknown table: {$table}", array( 'status' => 400 ) );
+            }
+
+            $ok = $migrate->repair_table( $table );
+
+            return rest_ensure_response( array(
+                'success' => $ok,
+                'inspect' => $migrate->get_full_inspect(),
+            ) );
+        }
+
+        public function rest_database_drop_columns( WP_REST_Request $request ){
+            $table   = sanitize_key( (string) $request->get_param( 'table' ) );
+            $columns = array_values( array_filter( array_map( function( $c ){
+                return is_string( $c ) && preg_match( '/^[a-zA-Z0-9_]+$/', $c ) ? $c : '';
+            }, (array) $request->get_param( 'columns' ) ) ) );
+
+            $migrate = Better_Messages_Rest_Api_DB_Migrate();
+
+            if ( ! isset( $migrate->get_schemas()[ $table ] ) ) {
+                return new WP_Error( 'unknown_table', "Unknown table: {$table}", array( 'status' => 400 ) );
+            }
+
+            $result = $migrate->drop_columns( $table, $columns );
+
+            return rest_ensure_response( array(
+                'dropped' => $result['dropped'],
+                'errors'  => $result['errors'],
+                'inspect' => $migrate->get_full_inspect(),
+            ) );
+        }
+
+        public function rest_database_drop_indexes( WP_REST_Request $request ){
+            $table   = sanitize_key( (string) $request->get_param( 'table' ) );
+            $indexes = array_values( array_filter( array_map( function( $i ){
+                return is_string( $i ) && preg_match( '/^[a-zA-Z0-9_]+$/', $i ) ? $i : '';
+            }, (array) $request->get_param( 'indexes' ) ) ) );
+
+            $migrate = Better_Messages_Rest_Api_DB_Migrate();
+
+            if ( ! isset( $migrate->get_schemas()[ $table ] ) ) {
+                return new WP_Error( 'unknown_table', "Unknown table: {$table}", array( 'status' => 400 ) );
+            }
+
+            $result = $migrate->drop_indexes( $table, $indexes );
+
+            return rest_ensure_response( array(
+                'dropped' => $result['dropped'],
+                'errors'  => $result['errors'],
+                'inspect' => $migrate->get_full_inspect(),
+            ) );
+        }
+
+        public function rest_database_fix_collation( WP_REST_Request $request ){
+            $table   = sanitize_key( (string) $request->get_param( 'table' ) );
+            $migrate = Better_Messages_Rest_Api_DB_Migrate();
+
+            if ( ! isset( $migrate->get_schemas()[ $table ] ) ) {
+                return new WP_Error( 'unknown_table', "Unknown table: {$table}", array( 'status' => 400 ) );
+            }
+
+            $ok = $migrate->fix_collation( $table );
+
+            return rest_ensure_response( array(
+                'success' => $ok,
+                'inspect' => $migrate->get_full_inspect(),
+            ) );
+        }
+
+        public function rest_database_repair_all( WP_REST_Request $request ){
+            $migrate = Better_Messages_Rest_Api_DB_Migrate();
+            $result  = $migrate->repair_all();
+
+            return rest_ensure_response( array(
+                'repaired'        => $result['repaired'],
+                'collation_fixed' => $result['collation_fixed'],
+                'inspect'         => $migrate->get_full_inspect(),
             ) );
         }
     }

@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.1
+Stable tag: 2.15.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -143,8 +143,11 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/)
 * [Tutor LMS](https://www.better-messages.com/docs/integrations/tutor-lms/)
 * [LearnDash](https://www.better-messages.com/docs/integrations/learndash/)
+* [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/)
 * [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
 * [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
+* [Directorist](https://www.better-messages.com/docs/integrations/directorist/)
+* [GeoDirectory](https://www.better-messages.com/docs/integrations/geodirectory/)
 * [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
 * [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
 * [WP Job Manager](https://www.better-messages.com/docs/integrations/wp-job-manager/)
@@ -260,6 +263,15 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.15.2 =
+* Added initial [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/) integration
+* Added initial [Directorist](https://www.better-messages.com/docs/integrations/directorist/) integration
+* Added initial [GeoDirectory](https://www.better-messages.com/docs/integrations/geodirectory/) integration
+* Remake database displaying in plugin settings which make it easier to fix database if something not migrated properly
+* LMS course chats are now their own thread type in database
+* Added "Email Notifications" and "Push Notifications" toggles for LMS course chats under Settings → Integrations → LMS → Shared Course Settings
+* Other minor bugfixes and improvements
 
 = 2.15.1 =
 * Added initial [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/) LMS integration

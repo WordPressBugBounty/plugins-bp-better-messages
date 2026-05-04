@@ -4345,6 +4345,52 @@ body[class*=_page_better-messages-viewer] .update-nag {
   margin: 0;
 }
 
+.bm-db-health {
+  border-bottom: 1px solid #f0f0f1;
+}
+.bm-db-health .bm-db-health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px 8px;
+}
+.bm-db-health .bm-db-health-summary {
+  font-size: 12px;
+  color: #757575;
+}
+.bm-db-health .bm-db-health-actions {
+  display: flex;
+  gap: 8px;
+}
+.bm-db-health .bm-db-health-hint {
+  margin: 0;
+  padding: 0 20px 12px;
+  font-size: 12px;
+  color: #757575;
+}
+.bm-db-health .bm-db-health-state {
+  padding: 14px 20px;
+  font-size: 13px;
+}
+.bm-db-health table {
+  table-layout: auto;
+}
+.bm-db-health tbody tr.bm-db-health-detail-row td {
+  text-align: left;
+  padding: 12px 20px;
+}
+.bm-db-health .bm-db-health-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #1e1e1e;
+  background-color: #f0f0f1;
+  border-radius: 2px;
+}
+
 .bm-sortable-widgets {
   padding: 16px 20px;
 }

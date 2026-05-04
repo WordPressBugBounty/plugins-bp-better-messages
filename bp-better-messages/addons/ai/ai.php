@@ -1731,7 +1731,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $label = '';
                 if ( $thread_type === 'chat-room' && isset( $chat_labels[ $thread_id ] ) ) {
                     $label = $chat_labels[ $thread_id ];
-                } else if ( $thread_type === 'group' ) {
+                } else if ( $thread_type === 'group' || $thread_type === 'course' ) {
                     $label = apply_filters( 'better_messages_thread_title', '', $thread_id );
                 }
 
