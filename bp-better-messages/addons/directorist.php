@@ -18,6 +18,9 @@ if ( ! class_exists( 'Better_Messages_Directorist' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_directorist_listing_button', array( $this, 'listing_button_shortcode' ) );
+            add_shortcode( 'better_messages_directorist_author_button',  array( $this, 'author_button_shortcode' ) );
+
             if ( Better_Messages()->settings['directoristIntegration'] !== '1' ) return;
 
             if ( Better_Messages()->settings['directoristListingPageButton'] === '1' ) {
@@ -187,6 +190,91 @@ if ( ! class_exists( 'Better_Messages_Directorist' ) ) {
                 echo '<div class="bm-directorist-author-button-wrap" data-bm-author-relocate hidden style="margin-top:12px;">' . $html . '</div>';
                 echo "<script>document.addEventListener('DOMContentLoaded',function(){var w=document.querySelector('[data-bm-author-relocate]');if(!w)return;var info=document.querySelector('.directorist-author-avatar__info');if(info){info.appendChild(w);w.removeAttribute('hidden');}});</script>";
             }
+        }
+
+        public function listing_button_shortcode( $atts = array() )
+        {
+            if ( ! defined( 'ATBDP_POST_TYPE' ) ) return '';
+
+            $atts = shortcode_atts( array(
+                'listing_id' => 0,
+                'user_id'    => 0,
+                'class'      => '',
+                'text'       => '',
+            ), $atts, 'better_messages_directorist_listing_button' );
+
+            $listing_id = (int) ( $atts['listing_id'] ?: get_queried_object_id() ?: get_the_ID() );
+            if ( ! $listing_id || get_post_type( $listing_id ) !== ATBDP_POST_TYPE ) return '';
+
+            $author_id = (int) ( $atts['user_id'] ?: get_post_field( 'post_author', $listing_id ) );
+            if ( ! $this->can_render_message_button( $author_id ) ) return '';
+
+            $subject = sprintf(
+                _x( 'Question about listing "%s"', 'Directorist Integration (Listing page)', 'bp-better-messages' ),
+                get_the_title( $listing_id )
+            );
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'directorist-btn directorist-btn-primary directorist-btn-md bm-directorist-listing-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'Directorist Integration (Listing page)', 'bp-better-messages' ),
+                'user_id'    => $author_id,
+                'unique_tag' => 'directorist_listing_chat_' . $listing_id,
+                'subject'    => esc_attr( $subject ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-directorist-listing-button-wrap">' . $html . '</div>';
+        }
+
+        public function author_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'user_id' => 0,
+                'class'   => '',
+                'text'    => '',
+            ), $atts, 'better_messages_directorist_author_button' );
+
+            $author_id = (int) $atts['user_id'];
+
+            if ( ! $author_id ) {
+                $author_id = (int) get_query_var( 'author_id' );
+            }
+
+            if ( ! $author_id ) {
+                $login = get_query_var( 'author_id' );
+                if ( is_string( $login ) && $login !== '' ) {
+                    $user = get_user_by( 'login', $login );
+                    if ( $user ) {
+                        $author_id = (int) $user->ID;
+                    }
+                }
+            }
+
+            if ( ! $author_id && is_author() ) {
+                $author_id = (int) get_queried_object_id();
+            }
+
+            if ( ! $this->can_render_message_button( $author_id ) ) return '';
+
+            $author = get_userdata( $author_id );
+            $name   = $author ? $author->display_name : '';
+
+            $subject = $name
+                ? sprintf( _x( 'Send a message to %s', 'Directorist Integration (Author profile)', 'bp-better-messages' ), $name )
+                : _x( 'Send a message', 'Directorist Integration (Author profile)', 'bp-better-messages' );
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'directorist-btn directorist-btn-primary directorist-btn-sm bm-directorist-author-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'Directorist Integration (Author profile)', 'bp-better-messages' ),
+                'user_id'    => $author_id,
+                'unique_tag' => 'directorist_author_chat_' . $author_id,
+                'subject'    => esc_attr( $subject ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-directorist-author-button-wrap">' . $html . '</div>';
         }
 
         public function add_dashboard_messages_tab( $tabs )

@@ -19,6 +19,10 @@ if ( ! class_exists( 'Better_Messages_TutorLMS' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_tutorlms_course_button',     array( $this, 'course_button_shortcode' ) );
+            add_shortcode( 'better_messages_tutorlms_instructor_button', array( $this, 'instructor_button_shortcode' ) );
+            add_shortcode( 'better_messages_tutorlms_student_button',    array( $this, 'student_button_shortcode' ) );
+
             if ( Better_Messages()->settings['tutorLmsIntegration'] !== '1' ) return;
 
             if ( Better_Messages()->settings['tutorLmsMessageButton'] === '1' ) {
@@ -134,6 +138,78 @@ if ( ! class_exists( 'Better_Messages_TutorLMS' ) ) {
             if ( ! empty( $html ) ) {
                 echo '<div class="bm-tutor-pm-wrap">' . $html . '</div>';
             }
+        }
+
+        public function course_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'course_id' => 0,
+                'user_id'   => 0,
+                'class'     => '',
+                'text'      => '',
+            ), $atts, 'better_messages_tutorlms_course_button' );
+
+            $course_id = (int) ( $atts['course_id'] ?: get_the_ID() );
+            if ( ! $course_id || get_post_type( $course_id ) !== 'courses' ) return '';
+
+            $instructor_id = (int) ( $atts['user_id'] ?: get_post_field( 'post_author', $course_id ) );
+            if ( ! $this->can_render_message_button( $instructor_id ) ) return '';
+
+            $course_title = get_the_title( $course_id );
+            if ( ! $course_title ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'tutor-btn tutor-btn-outline-primary tutor-btn-md tutor-btn-block bm-tutor-message-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Message Instructor', 'Tutor LMS Integration', 'bp-better-messages' ),
+                'user_id'    => $instructor_id,
+                'unique_tag' => 'tutorlms_course_chat_' . $course_id,
+                'subject'    => esc_attr( sprintf(
+                    _x( 'Question about course "%s"', 'Tutor LMS Integration', 'bp-better-messages' ),
+                    $course_title
+                ) ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-tutor-pm-wrap">' . $html . '</div>';
+        }
+
+        public function instructor_button_shortcode( $atts = array() )
+        {
+            return $this->profile_button_shortcode( $atts, 'instructor' );
+        }
+
+        public function student_button_shortcode( $atts = array() )
+        {
+            return $this->profile_button_shortcode( $atts, 'student' );
+        }
+
+        private function profile_button_shortcode( $atts, $kind )
+        {
+            $atts = shortcode_atts( array(
+                'user_id' => 0,
+                'class'   => '',
+                'text'    => '',
+            ), $atts, 'better_messages_tutorlms_' . $kind . '_button' );
+
+            $user_id = (int) $atts['user_id'] ?: $this->get_profile_user_id();
+
+            if ( ! $user_id && is_author() ) {
+                $user_id = (int) get_queried_object_id();
+            }
+
+            if ( ! $this->can_render_message_button( $user_id ) ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'tutor-btn tutor-btn-outline-primary bm-tutor-' . $kind . '-msg-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'Tutor LMS Integration', 'bp-better-messages' ),
+                'user_id'    => $user_id,
+                'unique_tag' => 'tutorlms_' . $kind . '_chat_' . $user_id,
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-tutor-pm-wrap">' . $html . '</div>';
         }
 
         public function instructor_profile_message_button()

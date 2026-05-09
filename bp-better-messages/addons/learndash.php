@@ -19,6 +19,9 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_learndash_course_button',     array( $this, 'course_button_shortcode' ) );
+            add_shortcode( 'better_messages_learndash_instructor_button', array( $this, 'instructor_button_shortcode' ) );
+
             if ( Better_Messages()->settings['learnDashIntegration'] !== '1' ) return;
 
             if ( Better_Messages()->settings['learnDashMessageButton'] === '1' ) {
@@ -33,6 +36,14 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             if ( Better_Messages()->settings['learnDashGroupChat'] === '1' ) {
                 add_action( 'ld_added_group_access', array( $this, 'on_user_added_to_group' ), 10, 2 );
                 add_action( 'ld_removed_group_access', array( $this, 'on_user_removed_from_group' ), 10, 2 );
+            }
+
+            if (
+                Better_Messages()->settings['learnDashInstructorRoleProfileButton'] === '1'
+                && defined( 'INSTRUCTOR_ROLE_PLUGIN_VERSION' )
+            ) {
+                add_action( 'ir_action_profile_header_end', array( $this, 'instructor_role_profile_button' ), 10, 1 );
+                add_action( 'wp_footer', array( $this, 'instructor_role_profile_button_position_script' ), 50 );
             }
 
             if (
@@ -135,6 +146,124 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             if ( ! empty( $html ) ) {
                 echo '<div class="bm-learndash-pm-wrap">' . $html . '</div>';
             }
+        }
+
+        public function course_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'course_id' => 0,
+                'user_id'   => 0,
+                'class'     => '',
+                'text'      => '',
+            ), $atts, 'better_messages_learndash_course_button' );
+
+            $course_id = (int) ( $atts['course_id'] ?: get_the_ID() );
+            if ( ! $course_id || get_post_type( $course_id ) !== 'sfwd-courses' ) return '';
+
+            $instructor_id = (int) ( $atts['user_id'] ?: get_post_field( 'post_author', $course_id ) );
+            if ( ! $this->can_render_message_button( $instructor_id ) ) return '';
+
+            $course_title = get_the_title( $course_id );
+            if ( ! $course_title ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'ld-button bm-learndash-message-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Message Instructor', 'LearnDash Integration', 'bp-better-messages' ),
+                'user_id'    => $instructor_id,
+                'unique_tag' => 'learndash_course_chat_' . $course_id,
+                'subject'    => esc_attr( sprintf(
+                    _x( 'Question about course "%s"', 'LearnDash Integration', 'bp-better-messages' ),
+                    $course_title
+                ) ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-learndash-pm-wrap">' . $html . '</div>';
+        }
+
+        public function instructor_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'user_id' => 0,
+                'class'   => '',
+                'text'    => '',
+            ), $atts, 'better_messages_learndash_instructor_button' );
+
+            $user_id = (int) $atts['user_id'];
+
+            if ( ! $user_id ) {
+                $user_id = (int) get_query_var( 'ir_instructor_profile' );
+            }
+
+            if ( ! $user_id && is_author() ) {
+                $user_id = (int) get_queried_object_id();
+            }
+
+            if ( ! $this->can_render_message_button( $user_id ) ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'ld-button bm-learndash-ir-profile-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'LearnDash Integration', 'bp-better-messages' ),
+                'user_id'    => $user_id,
+                'unique_tag' => 'learndash_ir_profile_chat_' . $user_id,
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-learndash-ir-profile-wrap">' . $html . '</div>';
+        }
+
+        public function instructor_role_profile_button( $author_data )
+        {
+            if ( ! is_object( $author_data ) || empty( $author_data->ID ) ) return;
+            $user_id = (int) $author_data->ID;
+            if ( ! $this->can_render_message_button( $user_id ) ) return;
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => 'bm-learndash-ir-profile-btn',
+                'text'       => esc_attr_x( 'Send Message', 'LearnDash Integration', 'bp-better-messages' ),
+                'user_id'    => $user_id,
+                'unique_tag' => 'learndash_ir_profile_chat_' . $user_id,
+            ) );
+
+            if ( ! empty( $html ) ) {
+                echo '<div class="bm-learndash-ir-profile-wrap" style="display:none;">' . $html . '</div>';
+            }
+        }
+
+        public function instructor_role_profile_button_position_script()
+        {
+            if ( ! get_query_var( 'ir_instructor_profile' ) ) return;
+            ?>
+            <style>
+            .bm-learndash-ir-profile-wrap { margin: 14px 0 8px; }
+            .bm-learndash-ir-profile-btn {
+                display: inline-flex; align-items: center; justify-content: center;
+                padding: 10px 22px; background: #2680ec; color: #fff;
+                border: none; border-radius: 6px;
+                font-weight: 600; font-size: 14px; line-height: 1.2;
+                text-decoration: none; cursor: pointer;
+                box-shadow: 0 1px 2px rgba(38, 128, 236, 0.2);
+                transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+            }
+            .bm-learndash-ir-profile-btn:hover,
+            .bm-learndash-ir-profile-btn:focus {
+                background: #1a6cd2; color: #fff; outline: none;
+                box-shadow: 0 2px 6px rgba(38, 128, 236, 0.3);
+            }
+            .bm-learndash-ir-profile-btn:active { transform: translateY(1px); }
+            </style>
+            <script>
+            (function(){
+                var wrap = document.querySelector( '.bm-learndash-ir-profile-wrap' );
+                var info = document.querySelector( '.ir-profile .irp-left .irp-info' );
+                if ( ! wrap || ! info ) return;
+                wrap.style.display = '';
+                info.parentNode.insertBefore( wrap, info.nextSibling );
+            })();
+            </script>
+            <?php
         }
 
         public function on_user_course_access_changed( $user_id, $course_id, $access_list, $remove )

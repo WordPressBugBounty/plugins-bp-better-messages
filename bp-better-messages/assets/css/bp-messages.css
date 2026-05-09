@@ -6570,13 +6570,13 @@ body.bp-messages-mobile #better-messages-modals-container input {
   max-width: 100%;
   overflow: hidden;
   min-width: 1px;
-  height: 14px;
+  min-height: 14px;
   contain: layout;
 }
 .bp-messages-wrap .bm-typing-container .bm-typing-text {
   margin-left: 8px;
   font-size: 12px;
-  line-height: 12px;
+  line-height: 14px;
 }
 .bp-messages-wrap .bm-typing {
   display: inline-block;
@@ -7174,14 +7174,20 @@ body.bp-messages-mobile #better-messages-modals-container input {
   font-size: 80%;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-system-message {
+  display: block;
+  text-align: center;
   color: rgba(var(--bm-text-color), 0.5);
   font-style: italic;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  font-size: var(--bm-message-font-size);
+  line-height: var(--bm-message-line-height);
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-system-message svg {
-  font-size: 14px;
+  font-size: 1em;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-system-message .bm-mention {
+  white-space: nowrap;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack {
   /** Left Side Color **/
@@ -7984,6 +7990,21 @@ body.bp-messages-mobile #better-messages-modals-container input {
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .images a img {
   display: block !important;
+}
+.bp-messages-wrap .bm-messages-list.bm-template-standard .bm-list .bm-messages-stack.bm-system {
+  text-align: center;
+}
+.bp-messages-wrap .bm-messages-list.bm-template-standard .bm-list .bm-messages-stack.bm-system .bm-content .bm-messages-listing .bm-message {
+  max-width: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+.bp-messages-wrap .bm-messages-list.bm-template-standard .bm-list .bm-messages-stack.bm-system .bm-content .bm-messages-listing .bm-message .bm-message-content {
+  width: auto !important;
+  max-width: 100% !important;
+  padding: 3px 8px !important;
+  text-align: center;
 }
 .bp-messages-wrap .bm-messages-list.bm-template-standard .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message {
   max-width: calc(100% - 15px) !important;
@@ -9613,6 +9634,7 @@ body.bm-mobile-device-ios-old .bp-messages-wrap .bm-reply {
   width: 100%;
   text-align: right;
   padding: 5px;
+  box-sizing: border-box;
 }
 .bm-modal-window .bm-modal-window-inner {
   display: flex;
@@ -11292,6 +11314,30 @@ body.bm-messages-dark .bm-bubble-button > svg {
   min-height: 0;
 }
 
+.bm-mini-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.bp-better-messages-list:not(.bm-widget-bubble) .bm-mini-panel-body {
+  transform: translateY(100%);
+}
+.bp-better-messages-list:not(.bm-widget-bubble).bm-opened .bm-mini-panel-body {
+  transform: translateY(0);
+}
+.bp-better-messages-list:not(.bm-widget-bubble).bm-animated .bm-mini-panel-body {
+  transition: transform 0.25s ease-out;
+}
+.bp-better-messages-list:not(.bm-widget-bubble).bm-animated .tabs-content > div {
+  transition: visibility 0s linear 0.25s;
+}
+.bp-better-messages-list:not(.bm-widget-bubble).bm-animated .tabs-content > div.active {
+  transition: visibility 0s linear 0s;
+}
+
 .bm-combined-chat {
   position: absolute;
   top: 0;
@@ -11986,15 +12032,20 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .bp-better-messages-list .tabs-content > div {
-  display: none;
+  position: absolute;
+  inset: 0;
   height: 100%;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .bp-better-messages-list .tabs-content > div.active {
-  display: block;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .bp-messages-wrap.bp-better-messages-list .threads-list .thread .pic img {
@@ -12192,6 +12243,12 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   position: relative;
   opacity: 1;
   z-index: 1;
+  line-height: 0;
+  font-size: 0;
+}
+
+.bp-messages-user-list .user .pic > * {
+  vertical-align: top;
 }
 
 .bp-messages-user-list .user .pic img {
@@ -13821,11 +13878,6 @@ body.bm-bubble-mode.bm-bubble-position-left:not(.bm-bubble-open) .Toastify__toas
 body.bp-messages-full-screen #wpadminbar,
 body.bp-messages-mobile #wpadminbar {
   display: none !important;
-}
-body.bp-messages-full-screen .bp-messages-call-wrap .bp-messages-call-container,
-body.bp-messages-mobile .bp-messages-call-wrap .bp-messages-call-container {
-  border-left: 0;
-  border-right: 0;
 }
 body.bp-messages-full-screen .bm-editor-format-tooltip,
 body.bp-messages-mobile .bm-editor-format-tooltip {

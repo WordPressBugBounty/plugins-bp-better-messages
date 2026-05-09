@@ -27,6 +27,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             $this->table = bm_get_table('guests');
 
             $this->check_guest_auth();
+            $this->maybe_load_mini_widget_for_guest_fallback();
 
             add_action('wp_enqueue_scripts', array($this, 'load_scripts'));
             #add_action('wp_footer', array($this, 'html_element'), 999);
@@ -83,6 +84,24 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         }
         public function guest_access_enabled(){
             return Better_Messages()->settings['guestChat'] === '1';
+        }
+
+        public function force_mini_for_guest_on_restricted_chat_page(){
+            if ( is_user_logged_in() ) return false;
+            if ( ! $this->guest_access_enabled() ) return false;
+            $restricted = apply_filters( 'better_messages_restricted_chat_pages', array( 'woocommerce', 'buddypress' ) );
+            return in_array( Better_Messages()->settings['chatPage'], $restricted, true );
+        }
+
+        public function maybe_load_mini_widget_for_guest_fallback(){
+            static $loaded = false;
+            if ( $loaded ) return;
+            if ( ! $this->force_mini_for_guest_on_restricted_chat_page() ) return;
+            $path = Better_Messages()->path . 'inc/mini.php';
+            if ( ! file_exists( $path ) ) return;
+            require_once $path;
+            Better_Messages_Mini();
+            $loaded = true;
         }
 
         public function guest_user_id( $user_id ){

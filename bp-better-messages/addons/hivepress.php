@@ -60,6 +60,10 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
 
         public function counter_script()
         {
+            if ( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ) {
+                return;
+            }
+
             $is_dev = defined( 'BM_DEV' );
             $suffix = ( $is_dev ? '' : '.min' );
 

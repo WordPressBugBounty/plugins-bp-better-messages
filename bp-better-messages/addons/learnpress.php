@@ -19,6 +19,9 @@ if ( ! class_exists( 'Better_Messages_LearnPress' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_learnpress_course_button',     array( $this, 'course_button_shortcode' ) );
+            add_shortcode( 'better_messages_learnpress_instructor_button', array( $this, 'instructor_button_shortcode' ) );
+
             if ( Better_Messages()->settings['learnPressIntegration'] !== '1' ) return;
 
             add_filter( 'learn-press/single-course/modern/section-right/buttons', array( $this, 'course_message_button_modern' ), 10, 3 );
@@ -168,6 +171,64 @@ if ( ! class_exists( 'Better_Messages_LearnPress' ) ) {
             if ( ! empty( $html ) ) {
                 echo $html;
             }
+        }
+
+        public function course_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'course_id' => 0,
+                'user_id'   => 0,
+                'class'     => '',
+                'text'      => '',
+            ), $atts, 'better_messages_learnpress_course_button' );
+
+            $course_id = (int) ( $atts['course_id'] ?: get_the_ID() );
+            if ( ! $course_id || get_post_type( $course_id ) !== 'lp_course' ) return '';
+
+            $instructor_id = (int) $atts['user_id'] ?: $this->get_course_instructor_id( $course_id );
+            if ( ! $this->can_render_message_button( $instructor_id ) ) return '';
+
+            $course_title = get_the_title( $course_id );
+            if ( ! $course_title ) return '';
+
+            return $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'wp-block-learnpress-course-button lp-button bm-lp-message-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Message Instructor', 'LearnPress Integration', 'bp-better-messages' ),
+                'user_id'    => $instructor_id,
+                'unique_tag' => 'learnpress_course_chat_' . $course_id,
+                'subject'    => esc_attr( sprintf(
+                    _x( 'Question about course "%s"', 'LearnPress Integration', 'bp-better-messages' ),
+                    $course_title
+                ) ),
+            ) );
+        }
+
+        public function instructor_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'user_id' => 0,
+                'class'   => '',
+                'text'    => '',
+            ), $atts, 'better_messages_learnpress_instructor_button' );
+
+            $instructor_id = (int) $atts['user_id'];
+
+            if ( ! $instructor_id && is_author() ) {
+                $instructor_id = (int) get_queried_object_id();
+            }
+
+            if ( ! $this->can_render_message_button( $instructor_id ) ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'wp-block-learnpress-course-button lp-button bm-lp-instructor-msg-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'LearnPress Integration', 'bp-better-messages' ),
+                'user_id'    => $instructor_id,
+                'unique_tag' => 'learnpress_instructor_chat_' . $instructor_id,
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-instructor-pm-wrap">' . $html . '</div>';
         }
 
         public function on_user_enrolled( $order_id, $course_id, $user_id )

@@ -704,7 +704,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         public function suggest_thread( WP_REST_Request $request ){
             $current_user_id = Better_Messages()->functions->get_current_user_id();
             $recipients = (array) $request->get_param( 'recipients');
-            $forceNew   = (boolean) $request->get_param( 'forceNew');
+            $forceNew   = (bool) $request->get_param( 'forceNew');
 
             if( count( $recipients ) === 0 ) return false;
 
@@ -753,6 +753,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $replaceMethod = Better_Messages()->settings['deleteMethod'] === 'replace';
 
             $deleted_messages = [];
+            $hard_deleted_messages = [];
             $errors = [];
 
             foreach( $messages_ids as $message_id ){
@@ -773,15 +774,29 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
 
                 if( $canDelete ){
+                    $is_system = $message->sender_id === 0 && is_string( $message->message ) && strpos( $message->message, '<!-- BM-SYSTEM-MESSAGE:' ) === 0;
+
                     Better_Messages()->functions->delete_message( $message_id, $message->thread_id );
                     $deleted_messages[] = $message_id;
+
+                    if ( $is_system ) {
+                        $hard_deleted_messages[] = $message_id;
+                    }
                 }
             }
 
             $return = [];
 
             if( $replaceMethod ){
-                $return = Better_Messages()->api->get_messages(null, $deleted_messages);
+                $replaced_messages = array_values( array_diff( $deleted_messages, $hard_deleted_messages ) );
+                if ( ! empty( $replaced_messages ) ) {
+                    $return = Better_Messages()->api->get_messages(null, $replaced_messages);
+                } else {
+                    $return = array( 'users' => array(), 'messages' => array() );
+                }
+                if ( ! empty( $hard_deleted_messages ) ) {
+                    $return['deleted'] = $hard_deleted_messages;
+                }
             } else {
                 $return['deleted'] = $deleted_messages;
             }
@@ -1649,7 +1664,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     ORDER BY `created_at` DESC
                     LIMIT 1
                 ) as `message_id`,
-                COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
+                COALESCE(" . Better_Messages()->functions->thread_last_message_at_expr() . ", 0) as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 INNER JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`
@@ -1690,7 +1705,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         ORDER BY `created_at` DESC
                         LIMIT 1
                     ) as `message_id`,
-                    COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
+                    COALESCE(" . Better_Messages()->functions->thread_last_message_at_expr() . ", 0) as `created_at`
                     FROM " . bm_get_table('threads') . " threads
                     INNER JOIN " . bm_get_table('recipients') . " recipients
                         ON threads.`id` = recipients.`thread_id`
@@ -1981,7 +1996,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 `recipients`.`is_muted`     as `is_muted`,
                 `recipients`.`is_pinned`    as `is_pinned`,
                 `recipients`.`last_update`  as `last_update`,
-                COALESCE(MAX(`messages`.`created_at`), 0) as `created_at`
+                COALESCE(" . Better_Messages()->functions->thread_last_message_at_expr() . ", 0) as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 INNER JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`
@@ -2011,7 +2026,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 `recipients`.`is_pinned`     as `is_pinned`,
                 `recipients`.`last_update`   as `last_update`,
                 `recipients`.`is_deleted`    as `is_deleted`,
-                MAX(`messages`.`created_at`) as `created_at`
+                " . Better_Messages()->functions->thread_last_message_at_expr() . " as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 LEFT JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`
@@ -2036,13 +2051,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     `threads`.`id`    	         as `thread_id`,
                     `threads`.`type`    	     as `type`,
                     `threads`.`subject`    	     as `subject`,
-                    MAX(`messages`.`created_at`) as `created_at`
+                    " . Better_Messages()->functions->thread_last_message_at_expr() . " as `created_at`
                     FROM " . bm_get_table('threads') . " threads
-                    LEFT JOIN " . bm_get_table('messages') . " messages 
+                    LEFT JOIN " . bm_get_table('messages') . " messages
                         ON threads.`id` = messages.`thread_id` $pending_sql
                     WHERE  `threads`.`id` IN (" . implode(',', array_map('intval', $thread_ids)) . ")
                     GROUP BY `threads`.`id`
-                    ORDER BY `messages`.`created_at` DESC";
+                    ORDER BY `created_at` DESC";
                 }
             }
 
@@ -2168,6 +2183,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                         'preventVoiceMessages' => $prevent_voice_messages,
                     ];
 
+                    if ( $thread_type !== 'thread' || count( $_all_user_ids ) > 2 ) {
+                        $thread_item['systemMessages'] = Better_Messages()->system_messages->get_thread_payload(
+                            $thread_id,
+                            $current_user_id,
+                            $thread_type,
+                            count( $_all_user_ids ),
+                            (bool) $thread_item['permissions']['isModerator']
+                        );
+                    }
+
                     $mentions = [];
 
                     $thread_item['mentions'] = $mentions;
@@ -2273,7 +2298,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 `threads`.`type`            as `type`,
                 `threads`.`subject`         as `subject`,
                 `recipients`.`is_pinned`    as `is_pinned`,
-                (SELECT MAX(m.created_at) FROM {$messages_table} m WHERE m.thread_id = threads.id) as `created_at`
+                (SELECT " . Better_Messages()->functions->thread_last_message_at_expr( 'm.created_at', 'm.sender_id' ) . " FROM {$messages_table} m WHERE m.thread_id = threads.id) as `created_at`
                 FROM " . bm_get_table('threads') . " threads
                 INNER JOIN " . bm_get_table('recipients') . " recipients
                     ON threads.`id` = recipients.`thread_id`

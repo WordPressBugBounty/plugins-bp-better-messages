@@ -3,6 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 class Better_Messages_Chats
 {
+    public const AUTO_REMOVE_INACTIVE_MODES = array( 'site', 'no-message', 'no-visit' );
 
     public static function instance()
     {
@@ -698,7 +699,7 @@ class Better_Messages_Chats
 
         foreach ( $user_ids as $user_id ) {
             if ( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ) {
-                Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id );
+                Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id, 'admin' );
                 $added++;
             }
         }
@@ -777,7 +778,7 @@ class Better_Messages_Chats
                 if ( $new_thread_id ) {
                     $recipient_ids = Better_Messages()->functions->get_recipients_ids( $source_thread_id );
                     foreach ( $recipient_ids as $user_id ) {
-                        Better_Messages()->functions->add_participant_to_thread( $new_thread_id, $user_id );
+                        Better_Messages()->functions->add_participant_to_thread( $new_thread_id, $user_id, 'admin' );
                     }
                 }
             }
@@ -918,9 +919,10 @@ class Better_Messages_Chats
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
         $checkbox_fields = array(
-            'only_joined_can_read', 'auto_join', 'auto_exclude', 'hide_participants',
-            'hide_participants_count', 'enable_chat_email_notifications', 'enable_files',
-            'hide_from_thread_list', 'enable_notifications', 'allow_guests', 'show_online_users'
+            'only_joined_can_read', 'auto_join', 'auto_exclude', 'auto_remove_inactive',
+            'hide_participants', 'hide_participants_count', 'enable_chat_email_notifications',
+            'enable_files', 'hide_from_thread_list', 'enable_notifications', 'allow_guests',
+            'show_online_users', 'enable_system_messages'
         );
 
         foreach ( $checkbox_fields as $field ) {
@@ -928,6 +930,8 @@ class Better_Messages_Chats
                 $settings[ $field ] = '0';
             }
         }
+
+        $this->sanitize_auto_remove_inactive_settings( $settings );
 
         if ( ! isset( $settings['auto_exclude'] ) || $settings['auto_exclude'] !== '1' ) {
             Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
@@ -947,6 +951,11 @@ class Better_Messages_Chats
             }
         }
 
+        $valid_event_keys = Better_Messages_System_Messages::get_event_keys();
+        $settings['system_messages_disabled_types'] = isset( $settings['system_messages_disabled_types'] ) && is_array( $settings['system_messages_disabled_types'] )
+            ? array_values( array_intersect( $settings['system_messages_disabled_types'], $valid_event_keys ) )
+            : array();
+
         update_post_meta( $chat_id, 'bpbm-chat-settings', $settings );
 
         $notifications_enabled = true;
@@ -963,6 +972,18 @@ class Better_Messages_Chats
         } else {
             Better_Messages()->functions->delete_thread_meta( $thread_id, 'enable_notifications' );
             $notifications_enabled = false;
+        }
+
+        if ( $settings['enable_system_messages'] === '1' ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'enable_system_messages', 'yes' );
+        } else {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'enable_system_messages', 'no' );
+        }
+
+        if ( ! empty( $settings['system_messages_disabled_types'] ) ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'system_messages_disabled_types', $settings['system_messages_disabled_types'] );
+        } else {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'system_messages_disabled_types' );
         }
 
         if ( ! $notifications_enabled ) {
@@ -989,6 +1010,16 @@ class Better_Messages_Chats
 
         do_action( 'better_messages_thread_updated', $thread_id );
         do_action( 'better_messages_info_changed', $thread_id );
+    }
+
+    private function sanitize_auto_remove_inactive_settings( array &$settings ) {
+        $settings['auto_remove_inactive_days'] = isset( $settings['auto_remove_inactive_days'] )
+            ? (string) max( 1, (int) $settings['auto_remove_inactive_days'] )
+            : '30';
+
+        if ( ! isset( $settings['auto_remove_inactive_mode'] ) || ! in_array( $settings['auto_remove_inactive_mode'], self::AUTO_REMOVE_INACTIVE_MODES, true ) ) {
+            $settings['auto_remove_inactive_mode'] = 'site';
+        }
     }
 
     public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
@@ -1109,7 +1140,7 @@ class Better_Messages_Chats
 
         if( count( $chat_ids ) > 0 ){
             foreach ( $chat_ids as $chat_id ) {
-                $this->add_to_chat( $user_id, $chat_id );
+                $this->add_to_chat( $user_id, $chat_id, 'admin' );
             }
         }
     }
@@ -1132,7 +1163,7 @@ class Better_Messages_Chats
 
         if( count( $chat_ids ) > 0 ){
             foreach ( $chat_ids as $chat_id ) {
-                $this->add_to_chat( $guest_id, $chat_id );
+                $this->add_to_chat( $guest_id, $chat_id, 'admin' );
             }
         }
     }
@@ -1203,8 +1234,6 @@ class Better_Messages_Chats
     }
 
     public function leave_chat( WP_REST_Request $request ){
-        global $wpdb;
-
         $user_id = Better_Messages()->functions->get_current_user_id();
         $chat_id = intval($request->get_param('id'));
 
@@ -1220,22 +1249,7 @@ class Better_Messages_Chats
             );
         }
 
-        $result = false;
-
-        $userIsParticipant = (bool) $wpdb->get_var($wpdb->prepare("
-        SELECT COUNT(*) FROM `" . bm_get_table('recipients') . "` WHERE `user_id` = %d AND `thread_id` = %d
-        ", $user_id, $thread_id));
-
-        if( $userIsParticipant ) {
-            $result = (bool) $wpdb->delete(
-                bm_get_table('recipients'),
-                array(
-                    'user_id'   => $user_id,
-                    'thread_id' => $thread_id
-                ),
-                array( '%d', '%d' )
-            );
-        }
+        $result = Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
 
         Better_Messages()->hooks->clean_thread_cache( $thread_id );
 
@@ -1264,14 +1278,14 @@ class Better_Messages_Chats
         return $return;
     }
 
-    public function add_to_chat( $user_id, $chat_id ){
+    public function add_to_chat( $user_id, $chat_id, $context = '' ){
         if( ! $this->user_can_join( $user_id, $chat_id ) ){
             return false;
         }
 
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
-        $result = Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id );
+        $result = Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id, $context );
 
         do_action( 'better_messages_after_chat_join', $thread_id, $chat_id );
         do_action( 'better_messages_thread_updated', $thread_id );
@@ -1328,6 +1342,11 @@ class Better_Messages_Chats
             'modernLayout'                    => 'default',
             'auto_join'                       => '0',
             'auto_exclude'                    => '0',
+            'auto_remove_inactive'            => '0',
+            'auto_remove_inactive_days'       => '30',
+            'auto_remove_inactive_mode'       => 'site',
+            'enable_system_messages'          => '0',
+            'system_messages_disabled_types'  => array(),
             'enable_notifications'            => '0',
             'allow_guests'                    => '0',
             'hide_participants'               => '0',
@@ -1393,6 +1412,12 @@ class Better_Messages_Chats
                 $settings['auto_exclude'] = '0';
                 Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
             }
+
+            if ( ! isset( $settings['auto_remove_inactive'] ) ) {
+                $settings['auto_remove_inactive'] = '0';
+            }
+
+            $this->sanitize_auto_remove_inactive_settings( $settings );
 
             if ( ! isset( $settings['hide_participants'] ) ) {
                 $settings['hide_participants'] = '0';

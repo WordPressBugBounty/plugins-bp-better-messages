@@ -75,6 +75,8 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                 return new WP_Error( 'missing_sticker', __( 'Missing sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
             }
 
+            $sticker_url = Better_Messages_Sticker_Pack_Manager::rewrite_url( $sticker_url );
+
             $upload = wp_upload_dir();
             $prefix = trailingslashit( $upload['baseurl'] ) . 'better-messages/stickers/packs/';
             if ( strpos( $sticker_url, $prefix ) !== 0 || strpos( $sticker_url, '..' ) !== false ) {

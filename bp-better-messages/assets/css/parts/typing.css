@@ -7,14 +7,14 @@
     max-width: 100%;
     overflow: hidden;
     min-width: 1px;
-    height: 14px;
+    min-height: 14px;
     contain: layout;
 }
 
 .bm-typing-container .bm-typing-text{
     margin-left: 8px;
     font-size: 12px;
-    line-height: 12px;
+    line-height: 14px;
 }
 
 .bm-typing {

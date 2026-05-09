@@ -363,6 +363,14 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
+            $actor_id = (int) Better_Messages()->functions->get_current_user_id();
+
+            if ( isset( Better_Messages()->system_messages ) ) {
+                Better_Messages()->system_messages->suppress_user_left( $thread_id, $user_id );
+            }
+
+            do_action( 'better_messages_user_kicked', (int) $thread_id, (int) $user_id, $actor_id );
+
             return Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
         }
 
@@ -507,6 +515,31 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             switch( $key ){
                 case 'allow_invite':
                     Better_Messages()->functions->update_thread_meta( $thread_id, 'allow_invite', $value );
+                    do_action( 'better_messages_thread_updated', $thread_id );
+                    do_action( 'better_messages_info_changed', $thread_id );
+                    break;
+                case 'enable_system_messages':
+                    $allow_override = isset( Better_Messages()->settings['enableSystemMessagesOverride'] )
+                        ? Better_Messages()->settings['enableSystemMessagesOverride']
+                        : '1';
+
+                    if ( $allow_override !== '1' ) {
+                        return new WP_Error(
+                            'rest_forbidden',
+                            _x( 'Per-conversation override is disabled by site settings', 'Rest API Error', 'bp-better-messages' ),
+                            array( 'status' => 403 )
+                        );
+                    }
+
+                    if ( ! in_array( $value, array( 'yes', 'no' ), true ) ) {
+                        return new WP_Error(
+                            'rest_invalid_param',
+                            _x( 'Invalid value for enable_system_messages', 'Rest API Error', 'bp-better-messages' ),
+                            array( 'status' => 400 )
+                        );
+                    }
+
+                    Better_Messages()->functions->update_thread_meta( $thread_id, 'enable_system_messages', $value );
                     do_action( 'better_messages_thread_updated', $thread_id );
                     do_action( 'better_messages_info_changed', $thread_id );
                     break;

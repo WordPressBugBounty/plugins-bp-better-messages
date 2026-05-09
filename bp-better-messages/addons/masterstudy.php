@@ -19,6 +19,10 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_masterstudy_course_button',     array( $this, 'course_button_shortcode' ) );
+            add_shortcode( 'better_messages_masterstudy_instructor_button', array( $this, 'instructor_button_shortcode' ) );
+            add_shortcode( 'better_messages_masterstudy_student_button',    array( $this, 'student_button_shortcode' ) );
+
             if ( Better_Messages()->settings['masterStudyIntegration'] !== '1' ) return;
 
             if ( Better_Messages()->settings['masterStudyMessageButton'] === '1' ) {
@@ -168,6 +172,78 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
             })();
             </script>
             <?php
+        }
+
+        public function course_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'course_id' => 0,
+                'user_id'   => 0,
+                'class'     => '',
+                'text'      => '',
+            ), $atts, 'better_messages_masterstudy_course_button' );
+
+            $course_id = (int) ( $atts['course_id'] ?: get_the_ID() );
+            if ( ! $course_id || get_post_type( $course_id ) !== 'stm-courses' ) return '';
+
+            $instructor_id = (int) ( $atts['user_id'] ?: get_post_field( 'post_author', $course_id ) );
+            if ( ! $this->can_render_message_button( $instructor_id ) ) return '';
+
+            $course_title = get_the_title( $course_id );
+            if ( ! $course_title ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'masterstudy-button masterstudy-button_style-outline masterstudy-button_size-md bm-masterstudy-message-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Message Instructor', 'MasterStudy Integration', 'bp-better-messages' ),
+                'user_id'    => $instructor_id,
+                'unique_tag' => 'masterstudy_course_chat_' . $course_id,
+                'subject'    => esc_attr( sprintf(
+                    _x( 'Question about course "%s"', 'MasterStudy Integration', 'bp-better-messages' ),
+                    $course_title
+                ) ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-masterstudy-pm-wrap">' . $html . '</div>';
+        }
+
+        public function instructor_button_shortcode( $atts = array() )
+        {
+            return $this->profile_button_shortcode( $atts, 'instructor' );
+        }
+
+        public function student_button_shortcode( $atts = array() )
+        {
+            return $this->profile_button_shortcode( $atts, 'student' );
+        }
+
+        private function profile_button_shortcode( $atts, $kind )
+        {
+            $atts = shortcode_atts( array(
+                'user_id' => 0,
+                'class'   => '',
+                'text'    => '',
+            ), $atts, 'better_messages_masterstudy_' . $kind . '_button' );
+
+            $user_id = (int) $atts['user_id'] ?: $this->get_profile_user_id( $kind );
+
+            if ( ! $user_id && is_author() ) {
+                $user_id = (int) get_queried_object_id();
+            }
+
+            if ( ! $this->can_render_message_button( $user_id ) ) return '';
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'masterstudy-button masterstudy-button_style-primary masterstudy-button_size-sm bm-masterstudy-' . $kind . '-msg-btn',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'MasterStudy Integration', 'bp-better-messages' ),
+                'user_id'    => $user_id,
+                'unique_tag' => 'masterstudy_' . $kind . '_chat_' . $user_id,
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-masterstudy-pm-wrap bm-masterstudy-pm-wrap-' . esc_attr( $kind ) . '">' . $html . '</div>';
         }
 
         public function instructor_profile_button()

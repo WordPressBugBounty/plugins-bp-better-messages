@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.2
+    Version: 2.15.3
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.2';
+        public  $version = '2.15.3';
 
         public  $db_version = '1.0.4';
 
@@ -98,6 +98,9 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
         /** @var Better_Messages_Cleaner $cleaner */
         public $cleaner;
+
+        /** @var Better_Messages_System_Messages $system_messages */
+        public $system_messages;
 
         /** @var Better_Messages_Bulk_Sender $bulk_sender */
         public $bulk_sender;
@@ -197,6 +200,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/capabilities.php';
             require_once 'inc/translations/translations.php';
             require_once 'inc/cleaner.php';
+            require_once 'inc/system-messages.php';
             require_once 'inc/bulk-sender.php';
             require_once 'inc/moderation.php';
             require_once 'inc/guests.php';
@@ -256,6 +260,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             $this->shortcodes   = Better_Messages_Shortcodes();
             $this->api          = Better_Messages_Rest_Api();
             $this->cleaner      = Better_Messages_Cleaner();
+            $this->system_messages = Better_Messages_System_Messages();
             $this->bulk_sender  = Better_Messages_Bulk_Sender();
             $this->moderation   = Better_Messages_Moderation();
             $this->ai           = Better_Messages_AI();
@@ -850,7 +855,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'total_unread'           => (int) $unread_count,
                 'disableEnter'           => ( $this->settings['disableEnterForDesktop'] == '1' ? '1' : '0' ),
                 'miniClose'              => ( $this->settings['enableMiniCloseButton'] ? '1' : '0' ),
-                'miniChats'              => ( $this->realtime && $this->settings['miniChatsEnable'] ? '1' : '0' ),
+                'miniChats'              => ( ( $this->realtime && $this->settings['miniChatsEnable'] ) || $this->guests->force_mini_for_guest_on_restricted_chat_page() ? '1' : '0' ),
                 'miniMessages'           => ( $this->realtime && $this->settings['miniThreadsEnable'] ? '1' : '0' ),
                 'miniAIBots'             => ( $this->settings['miniAIBotsEnable'] == '1' ? '1' : '0' ),
                 'miniChatRooms'          => ( $this->settings['miniChatRoomsEnable'] == '1' ? '1' : '0' ),
@@ -901,6 +906,8 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'bubbleCloseOnOutside'   => ( $this->settings['bubbleCloseOnOutside'] ?? '0' ),
                 'miniAudio'              => ( $this->realtime && $this->settings['miniChatAudioCall'] ? '1' : '0' ),
                 'miniVideo'              => ( $this->realtime && $this->settings['miniChatVideoCall'] ? '1' : '0' ),
+                'miniGroupAudio'         => ( $this->realtime && $this->settings['miniChatGroupAudioCall'] ? '1' : '0' ),
+                'miniGroupVideo'         => ( $this->realtime && $this->settings['miniChatGroupVideoCall'] ? '1' : '0' ),
                 'messagesStatus'         => ( $this->realtime && $this->settings['messagesStatus'] ? '1' : '0' ),
                 'listStatus'             => ( $this->realtime && $this->settings['messagesStatusList'] ? '1' : '0' ),
                 'statusDetails'          => ( $this->realtime && $this->settings['messagesStatusDetailed'] ? '1' : '0' ),
@@ -1202,7 +1209,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 case 'moderation' :
                     return $bp_prefix . 'bm_moderation';
                     break;
-                case 'guests';
+                case 'guests' :
                     return $bp_prefix . 'bm_guests';
                 case 'users' :
                     return $bp_prefix . 'bm_user_index';
@@ -1241,7 +1248,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 case 'notifications' :
                     return false;
                     break;
-                case 'guests';
+                case 'guests' :
                     return $bp_prefix . 'bm_guests';
                 case 'users' :
                     return $bp_prefix . 'bm_user_index';

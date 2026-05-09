@@ -301,6 +301,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $deleteMethod = Better_Messages()->settings['deleteMethod'];
             }
 
+            $message = new BM_Messages_Message( $message_id );
+
+            if ( (int) $message->sender_id === 0 && is_string( $message->message ) && strpos( $message->message, '<!-- BM-SYSTEM-MESSAGE:' ) === 0 ) {
+                $deleteMethod = 'delete';
+            }
+
             do_action( 'better_messages_before_message_delete', $message_id, $thread_id, $deleteMethod );
 
             $sql = $wpdb->prepare("SELECT {$wpdb->posts}.ID
@@ -335,8 +341,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             if( $deleteMethod === 'replace' ) {
-                $message = new BM_Messages_Message( $message_id );
-
                 Better_Messages()->functions->update_message([
                     'sender_id'    => $message->sender_id,
                     'thread_id'    => $thread_id,
@@ -532,6 +536,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function change_thread_subject($thread_id, $new_subject){
             global $wpdb;
 
+            $old_subject = $wpdb->get_var( $wpdb->prepare( "SELECT subject FROM " . bm_get_table('threads') . " WHERE id = %d LIMIT 1", $thread_id ) );
+
             $wpdb->update(
                 bm_get_table('threads'),
                 array( 'subject' => $new_subject ),
@@ -540,6 +546,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             do_action( 'better_messages_thread_updated', $thread_id );
             do_action( 'better_messages_info_changed', $thread_id );
+
+            if ( (string) $old_subject !== (string) $new_subject ) {
+                do_action( 'better_messages_thread_subject_changed', $thread_id, $new_subject, $old_subject );
+            }
 
             return wp_unslash( esc_attr( $new_subject ) );
         }
@@ -1104,7 +1114,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
          * @param int $user_id
          * @return bool
          */
-        public function add_participant_to_thread( int $thread_id, int $user_id ): bool
+        public function add_participant_to_thread( int $thread_id, int $user_id, string $context = '' ): bool
         {
             if( ! $this->is_conversation_exists( $thread_id ) || ! $this->is_user_exists( $user_id ) ){
                 return false;
@@ -1135,7 +1145,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( $return ) {
                     do_action('better_messages_thread_updated', $thread_id);
                     do_action('better_messages_info_changed', $thread_id, [ $user_id ] );
-                    do_action('better_messages_participant_added', $thread_id, $user_id );
+                    do_action('better_messages_participant_added', $thread_id, $user_id, $context );
                     return true;
                 }
             }
@@ -3724,6 +3734,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $this->update_thread_meta( $thread_id, 'moderators', array_unique( $moderators ) );
                 do_action( 'better_messages_thread_updated', $thread_id );
                 do_action( 'better_messages_info_changed', $thread_id );
+                do_action( 'better_messages_user_promoted', (int) $thread_id, (int) $user_id, (int) $this->get_current_user_id() );
             }
         }
 
@@ -3745,6 +3756,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $this->update_thread_meta( $thread_id, 'moderators', array_unique( $moderators ) );
                 do_action( 'better_messages_thread_updated', $thread_id );
                 do_action( 'better_messages_info_changed', $thread_id );
+                do_action( 'better_messages_user_demoted', (int) $thread_id, (int) $user_id, (int) $this->get_current_user_id() );
             }
 
         }
@@ -3949,6 +3961,14 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     ['%d'], ['%d', '%d']
                 );
             }
+        }
+
+        public function thread_last_message_at_expr( $created_at_ref = '`messages`.`created_at`', $sender_id_ref = '`messages`.`sender_id`' ){
+            if( Better_Messages()->settings['systemMessagesIgnoreInSort'] === '1' ){
+                return "MAX(CASE WHEN {$sender_id_ref} != 0 THEN {$created_at_ref} END)";
+            }
+
+            return "MAX({$created_at_ref})";
         }
 
         public function threads_order_sql(){

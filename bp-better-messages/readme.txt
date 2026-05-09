@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.2
+Stable tag: 2.15.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -263,6 +263,21 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.15.3 =
+* Added [System Messages](https://www.better-messages.com/docs/features/system-messages/)
+* Added per-role restrictions for group calls — Settings → Group Calls → Group Call Restrictions lets admins block specific WordPress roles from starting and / or joining group audio and video calls
+* Group calls are now available to guest visitors
+* Added possibility to auto-remove inactive chat room participants
+* Added possibility to enable group audio/video calls button in mini chats
+* Added support for [LearnDash Instructor Role](https://www.learndash.com/instructor-role/) add-on
+* Added shortcodes for every Send Message / Message Instructor button in the GeoDirectory, Directorist, LearnDash, LearnPress, Tutor LMS and MasterStudy LMS integrations, so they are possible to use with page builder. Check Integrations tab in plugin settings to find appropriate shortcode
+* Reorganized Settings → General tab — added a Quick Actions dashboard with shortcuts to the Chat Rooms, AI Chat Bots and Administration screens and added easy access to detected integrations
+* End to end encryption is moved to Messaging settings tab
+* Fixed PHP 8.5 deprecation notices
+* Fixed sticker images pointing to the previous site URL after a domain migration
+* Fixed guest visitors being redirected to wp-login after starting a chat from a WooCommerce
+* Other minor bugfixes and improvements
 
 = 2.15.2 =
 * Added initial [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/) integration

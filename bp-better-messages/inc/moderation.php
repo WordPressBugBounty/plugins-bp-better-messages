@@ -775,6 +775,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $result = $this->restrict_user( 'ban', $user_id, $thread_id, $duration );
 
             if( $result ){
+                if ( isset( Better_Messages()->system_messages ) ) {
+                    Better_Messages()->system_messages->suppress_user_left( $thread_id, $user_id );
+                }
                 Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
                 return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
             }
@@ -1023,17 +1026,17 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
         public function restrict_user( string $type, int $user_id, int $thread_id, int $time = 1 ){
             global $wpdb;
 
-            $admin_id = Better_Messages()->functions->get_current_user_id();
+            $admin_id = (int) Better_Messages()->functions->get_current_user_id();
             if( $time < 1 ) $time = 1;
 
             $seconds = $time * 60;
 
             $table = bm_get_table('moderation');
 
-            $query = $wpdb->prepare("INSERT INTO {$table} 
+            $query = $wpdb->prepare("INSERT INTO {$table}
             (user_id, thread_id, type, expiration, admin_id)
             VALUES (%d, %d, %s, DATE_ADD(NOW(), INTERVAL %d SECOND), %d)
-            ON DUPLICATE KEY 
+            ON DUPLICATE KEY
             UPDATE expiration = DATE_ADD(NOW(), INTERVAL %d SECOND), admin_id = %d", $user_id, $thread_id, $type, $seconds, $admin_id, $seconds, $admin_id);
 
             $result = $wpdb->query( $query );
@@ -1045,6 +1048,12 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
                 if( ! wp_get_scheduled_event( 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] ) ){
                     wp_schedule_single_event( time() + $seconds + 1, 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] );
+                }
+
+                if ( $type === 'mute' ) {
+                    do_action( 'better_messages_user_muted', $thread_id, $user_id, $admin_id, $seconds );
+                } elseif ( $type === 'ban' ) {
+                    do_action( 'better_messages_user_banned', $thread_id, $user_id, $admin_id, $seconds );
                 }
             }
 

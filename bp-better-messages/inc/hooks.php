@@ -422,6 +422,13 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
                     $name = is_array($data) && isset($data['user_name']) ? $data['user_name'] : __('A user', 'bp-better-messages');
                     return sprintf(__('%s left the conversation', 'bp-better-messages'), $name);
+                case 'subject_changed':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $name = is_array($data) && isset($data['user_name']) && $data['user_name'] !== '' ? $data['user_name'] : __('A user', 'bp-better-messages');
+                    $subject = is_array($data) && isset($data['new_subject']) ? $data['new_subject'] : '';
+                    return sprintf(__('%1$s changed the subject to "%2$s"', 'bp-better-messages'), $name, $subject);
+                case 'image_changed':
+                    return __('Conversation image was changed', 'bp-better-messages');
                 default:
                     return '';
             }
@@ -430,6 +437,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         public function system_message_meta( $meta, $message_id, $thread_id, $message_content )
         {
             if ( ! is_string($message_content) || strpos($message_content, '<!-- BM-SYSTEM-MESSAGE:') !== 0 ) return $meta;
+
+            if ( preg_match( '/<!-- BM-SYSTEM-MESSAGE:(\w+)/', $message_content, $matches ) ) {
+                $meta['systemType'] = $matches[1];
+            }
 
             $system_data = Better_Messages()->functions->get_message_meta( $message_id, 'system_data', true );
             if ( $system_data && is_array($system_data) ) {

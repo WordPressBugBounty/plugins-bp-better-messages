@@ -68,6 +68,20 @@ class Better_Messages_Options
             'allowDeleteMessages'         => '0',
             'deleteMethod'                => 'delete',
             'fastStart'                   => '1',
+            'enableSystemMessages'        => '0',
+            'enableSystemMessagesOverride' => '1',
+            'enableSystemMessagesUserJoined'      => '1',
+            'enableSystemMessagesUserLeft'        => '1',
+            'enableSystemMessagesSubjectChanged'  => '1',
+            'enableSystemMessagesImageChanged'    => '1',
+            'enableSystemMessagesUserPromoted'    => '1',
+            'enableSystemMessagesUserDemoted'     => '1',
+            'enableSystemMessagesUserKicked'      => '1',
+            'enableSystemMessagesUserMuted'       => '1',
+            'enableSystemMessagesUserBanned'      => '1',
+            'enableSystemMessagesCallStarted'     => '1',
+            'systemMessagesUserCooldownSeconds'   => 0,
+            'systemMessagesIgnoreInSort'          => '0',
             'miniThreadsEnable'           => '0',
             'miniFriendsEnable'           => '0',
             'miniAIBotsEnable'            => '0',
@@ -106,6 +120,8 @@ class Better_Messages_Options
             'restrictNewRepliesMessage'   => 'You are not allowed to continue conversation',
             'restrictCalls'               => [],
             'restrictCallsMessage'        => 'You are not allowed to make a call',
+            'restrictGroupCallsStart'     => [],
+            'restrictGroupCallsJoin'      => [],
             'restrictViewMessages'        => [],
             'restrictViewMessagesMessage' => 'Message hidden',
             'restrictViewMiniThreads'     => [],
@@ -188,6 +204,8 @@ class Better_Messages_Options
             'profileAudioCall'            => '0',
             'miniChatAudioCall'           => '0',
             'miniChatVideoCall'           => '0',
+            'miniChatGroupAudioCall'      => '0',
+            'miniChatGroupVideoCall'      => '0',
             'disableUsersSearch'          => '0',
             'fixedHeaderHeight'           => '0',
             'mobilePopupLocationBottom'   => 20,
@@ -463,6 +481,7 @@ class Better_Messages_Options
             'learnDashMessageButton'        => '1',
             'learnDashCourseGroupChat'      => '0',
             'learnDashGroupChat'            => '0',
+            'learnDashInstructorRoleProfileButton' => '0',
             'masterStudyIntegration'         => '0',
             'masterStudyMessageButton'       => '0',
             'masterStudyInstructorPMButton'  => '0',
@@ -724,6 +743,7 @@ class Better_Messages_Options
                 $pages[] = array(
                     'id'    => $page->ID,
                     'title' => $page->post_title,
+                    'url'   => get_permalink( $page->ID ),
                 );
             }
         }
@@ -799,6 +819,7 @@ class Better_Messages_Options
         $has_learnpress  = class_exists('LearnPress');
         $has_tutorlms    = defined('TUTOR_VERSION');
         $has_learndash   = defined('LEARNDASH_VERSION');
+        $has_learndash_instructor_role = defined('INSTRUCTOR_ROLE_PLUGIN_VERSION');
         $has_masterstudy = defined('STM_LMS_VERSION');
         $has_friends     = Better_Messages()->functions->is_friends_active();
         $has_peepso      = class_exists('PeepSo');
@@ -978,6 +999,7 @@ class Better_Messages_Options
             'hasLearnPress'      => $has_learnpress,
             'hasTutorLMS'        => $has_tutorlms,
             'hasLearnDash'       => $has_learndash,
+            'hasLearnDashInstructorRole' => $has_learndash_instructor_role,
             'hasMasterStudy'     => $has_masterstudy,
             'hasFriends'         => $has_friends,
             'hasVoiceMessages'   => class_exists('BP_Better_Messages_Voice_Messages'),
@@ -2260,6 +2282,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['learnDashGroupChat'] ) ) {
             $settings['learnDashGroupChat'] = '0';
+        }
+
+        if( ! isset( $settings['learnDashInstructorRoleProfileButton'] ) ) {
+            $settings['learnDashInstructorRoleProfileButton'] = '0';
         }
 
         if( ! isset( $settings['masterStudyIntegration'] ) ) {

@@ -47,10 +47,11 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
                 $locale = determine_locale();
             }
 
-            $hash      = Better_Messages_Sticker_Pack_Manager::instance()->get_hash();
-            $file_name = 'bm-stickers-' . $locale . '-' . $hash . '.json';
-            $file_path = $this->upload_dir . $file_name;
-            $file_url  = $this->upload_url . $file_name;
+            $hash         = Better_Messages_Sticker_Pack_Manager::instance()->get_hash();
+            $baseurl_hash = substr( md5( $this->upload_url ), 0, 8 );
+            $file_name    = 'bm-stickers-' . $locale . '-' . $hash . '-' . $baseurl_hash . '.json';
+            $file_path    = $this->upload_dir . $file_name;
+            $file_url     = $this->upload_url . $file_name;
 
             if ( file_exists( $file_path ) ) {
                 return $file_url;
@@ -200,7 +201,7 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
                 'id'            => isset( $pack['id'] ) ? $pack['id'] : '',
                 'title'         => isset( $pack['title'] ) ? $pack['title'] : '',
                 'description'   => isset( $pack['description'] ) ? $pack['description'] : '',
-                'cover'         => isset( $pack['cover'] ) ? $pack['cover'] : '',
+                'cover'         => isset( $pack['cover'] ) ? Better_Messages_Sticker_Pack_Manager::rewrite_url( $pack['cover'] ) : '',
                 'type'          => isset( $pack['type'] ) ? $pack['type'] : '',
                 'sort_order'    => isset( $pack['sort_order'] ) ? (int) $pack['sort_order'] : 0,
                 'suggestions'   => isset( $pack['suggestions'] ) ? (bool) $pack['suggestions'] : true,
@@ -218,7 +219,7 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
                 // Per-locale cover override (for packs where the cover image
                 // itself is a language-specific version).
                 if ( ! empty( $tr['cover'] ) ) {
-                    $out['cover'] = $tr['cover'];
+                    $out['cover'] = Better_Messages_Sticker_Pack_Manager::rewrite_url( $tr['cover'] );
                 }
             }
 
@@ -240,7 +241,7 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
             $out = array(
                 'id'       => $sticker_id,
                 'name'     => isset( $sticker['name'] ) ? $sticker['name'] : '',
-                'file'     => isset( $sticker['file'] ) ? $sticker['file'] : '',
+                'file'     => isset( $sticker['file'] ) ? Better_Messages_Sticker_Pack_Manager::rewrite_url( $sticker['file'] ) : '',
                 'width'    => isset( $sticker['width'] ) ? (int) $sticker['width'] : 0,
                 'height'   => isset( $sticker['height'] ) ? (int) $sticker['height'] : 0,
                 'keywords' => isset( $sticker['keywords'] ) && is_array( $sticker['keywords'] ) ? array_values( $sticker['keywords'] ) : array(),
@@ -258,7 +259,7 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
                 // image itself contains text, like "HELLO" → "HOLA"), use it in
                 // place of the primary sticker's file. Dimensions follow suit.
                 if ( ! empty( $tr['file'] ) ) {
-                    $out['file'] = $tr['file'];
+                    $out['file'] = Better_Messages_Sticker_Pack_Manager::rewrite_url( $tr['file'] );
                     if ( isset( $tr['width'] ) ) {
                         $out['width'] = (int) $tr['width'];
                     }

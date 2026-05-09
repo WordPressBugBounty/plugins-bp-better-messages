@@ -277,6 +277,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_REST' ) ) {
 
             // Best-effort delete of the underlying file if it's inside our uploads folder.
             if ( $file_to_delete ) {
+                $file_to_delete = Better_Messages_Sticker_Pack_Manager::rewrite_url( $file_to_delete );
                 $upload = wp_upload_dir();
                 $prefix = $upload['baseurl'] . '/better-messages/stickers/packs/';
                 if ( strpos( $file_to_delete, $prefix ) === 0 ) {
@@ -714,6 +715,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_REST' ) ) {
             if ( empty( $url ) || ! is_string( $url ) ) {
                 return null;
             }
+            $url = Better_Messages_Sticker_Pack_Manager::rewrite_url( $url );
             $upload = wp_upload_dir();
             $base_url = trailingslashit( $upload['baseurl'] ) . 'better-messages/stickers/packs/';
             if ( strpos( $url, $base_url ) !== 0 ) {

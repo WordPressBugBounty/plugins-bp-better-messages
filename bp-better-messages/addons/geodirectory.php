@@ -18,6 +18,8 @@ if ( ! class_exists( 'Better_Messages_GeoDirectory' ) ) {
 
         public function __construct()
         {
+            add_shortcode( 'better_messages_geodirectory_listing_button', array( $this, 'listing_button_shortcode' ) );
+
             if ( Better_Messages()->settings['geodirIntegration'] !== '1' ) return;
 
             if ( Better_Messages()->settings['geodirSingleListingButton'] === '1' ) {
@@ -26,6 +28,39 @@ if ( ! class_exists( 'Better_Messages_GeoDirectory' ) ) {
 
             add_filter( 'better_messages_rest_thread_item', array( $this, 'thread_item' ), 10, 5 );
             add_filter( 'better_messages_rest_user_item', array( $this, 'user_meta' ), 20, 3 );
+        }
+
+        public function listing_button_shortcode( $atts = array() )
+        {
+            $atts = shortcode_atts( array(
+                'listing_id' => 0,
+                'user_id'    => 0,
+                'class'      => '',
+                'text'       => '',
+            ), $atts, 'better_messages_geodirectory_listing_button' );
+
+            $listing_id = (int) ( $atts['listing_id'] ?: get_queried_object_id() ?: get_the_ID() );
+            if ( ! $listing_id || ! $this->is_geodir_post( $listing_id ) ) return '';
+
+            $author_id = (int) ( $atts['user_id'] ?: get_post_field( 'post_author', $listing_id ) );
+            if ( ! $this->can_render_message_button( $author_id ) ) return '';
+
+            $subject = sprintf(
+                _x( 'Question about listing "%s"', 'GeoDirectory Integration (Listing page)', 'bp-better-messages' ),
+                get_the_title( $listing_id )
+            );
+
+            $html = $this->render_live_chat_button( array(
+                'class'      => $atts['class'] ?: 'geodir-bm-btn geodir-bm-btn-listing btn btn-primary',
+                'text'       => $atts['text'] ?: esc_attr_x( 'Send Message', 'GeoDirectory Integration (Listing page)', 'bp-better-messages' ),
+                'user_id'    => $author_id,
+                'unique_tag' => 'geodir_listing_chat_' . $listing_id,
+                'subject'    => esc_attr( $subject ),
+            ) );
+
+            if ( empty( $html ) ) return '';
+
+            return '<div class="bm-geodir-listing-button-wrap">' . $html . '</div>';
         }
 
         private function can_render_message_button( $target_user_id )

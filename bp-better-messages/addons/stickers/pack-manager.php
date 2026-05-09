@@ -75,7 +75,6 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
             if ( ! is_array( $packs ) ) {
                 $packs = array();
             }
-            // Ensure consistent sort order.
             usort( $packs, function( $a, $b ) {
                 $oa = isset( $a['sort_order'] ) ? (int) $a['sort_order'] : 0;
                 $ob = isset( $b['sort_order'] ) ? (int) $b['sort_order'] : 0;
@@ -84,8 +83,128 @@ if ( ! class_exists( 'Better_Messages_Sticker_Pack_Manager' ) ) {
                 }
                 return $oa - $ob;
             } );
-            $this->packs_cache = $packs;
+
+            $rewritten = $this->rewrite_packs_urls( $packs, $changed );
+            $this->packs_cache = $rewritten;
+
+            if ( $changed ) {
+                update_option( self::OPTION_KEY, $rewritten, false );
+                if ( class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
+                    Better_Messages_Sticker_Manifest::instance()->delete_manifests();
+                }
+                $this->update_hash();
+            }
+
+            return $rewritten;
+        }
+
+        public function rewrite_packs_urls( $packs, &$changed = null )
+        {
+            $changed = false;
+            if ( ! is_array( $packs ) || empty( $packs ) ) {
+                return $packs;
+            }
+
+            $first_pack    = $packs[0];
+            $sample_cover  = isset( $first_pack['cover'] ) ? $first_pack['cover'] : '';
+            $sample_file   = '';
+            if ( ! empty( $first_pack['stickers'] ) && is_array( $first_pack['stickers'] ) ) {
+                $first_sticker = $first_pack['stickers'][0];
+                if ( isset( $first_sticker['file'] ) ) {
+                    $sample_file = $first_sticker['file'];
+                }
+            }
+
+            if ( $this->url_is_current( $sample_cover ) && $this->url_is_current( $sample_file ) ) {
+                return $packs;
+            }
+
+            foreach ( $packs as $pi => $pack ) {
+                if ( isset( $pack['cover'] ) ) {
+                    $new = self::rewrite_url( $pack['cover'] );
+                    if ( $new !== $pack['cover'] ) {
+                        $packs[ $pi ]['cover'] = $new;
+                        $changed = true;
+                    }
+                }
+
+                if ( ! empty( $pack['translations'] ) && is_array( $pack['translations'] ) ) {
+                    foreach ( $pack['translations'] as $loc => $entry ) {
+                        if ( isset( $entry['cover'] ) ) {
+                            $new = self::rewrite_url( $entry['cover'] );
+                            if ( $new !== $entry['cover'] ) {
+                                $packs[ $pi ]['translations'][ $loc ]['cover'] = $new;
+                                $changed = true;
+                            }
+                        }
+                    }
+                }
+
+                if ( ! empty( $pack['stickers'] ) && is_array( $pack['stickers'] ) ) {
+                    foreach ( $pack['stickers'] as $si => $sticker ) {
+                        if ( isset( $sticker['file'] ) ) {
+                            $new = self::rewrite_url( $sticker['file'] );
+                            if ( $new !== $sticker['file'] ) {
+                                $packs[ $pi ]['stickers'][ $si ]['file'] = $new;
+                                $changed = true;
+                            }
+                        }
+                        if ( ! empty( $sticker['translations'] ) && is_array( $sticker['translations'] ) ) {
+                            foreach ( $sticker['translations'] as $loc => $entry ) {
+                                if ( isset( $entry['file'] ) ) {
+                                    $new = self::rewrite_url( $entry['file'] );
+                                    if ( $new !== $entry['file'] ) {
+                                        $packs[ $pi ]['stickers'][ $si ]['translations'][ $loc ]['file'] = $new;
+                                        $changed = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return $packs;
+        }
+
+        protected function url_is_current( $url )
+        {
+            if ( ! is_string( $url ) || $url === '' ) {
+                return true;
+            }
+            $path = wp_parse_url( $url, PHP_URL_PATH );
+            if ( ! $path || strpos( $path, '/better-messages/stickers/' ) === false ) {
+                return true;
+            }
+            $upload = wp_upload_dir();
+            $current_prefix = trailingslashit( $upload['baseurl'] );
+            return strpos( $url, $current_prefix ) === 0;
+        }
+
+        public static function rewrite_url( $url )
+        {
+            if ( ! is_string( $url ) || $url === '' ) {
+                return $url;
+            }
+            $path = wp_parse_url( $url, PHP_URL_PATH );
+            if ( ! $path ) {
+                return $url;
+            }
+            $needle = '/better-messages/stickers/';
+            $pos    = strpos( $path, $needle );
+            if ( $pos === false ) {
+                return $url;
+            }
+            $upload = wp_upload_dir();
+            if ( empty( $upload['baseurl'] ) ) {
+                return $url;
+            }
+            $current_prefix = trailingslashit( $upload['baseurl'] );
+            if ( strpos( $url, $current_prefix ) === 0 ) {
+                return $url;
+            }
+            $tail = substr( $path, $pos + 1 );
+            return esc_url_raw( $current_prefix . $tail );
         }
 
         /**
