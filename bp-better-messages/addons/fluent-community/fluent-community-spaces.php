@@ -381,10 +381,14 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             }
 
             if( ! $thread_id ) {
+                if( ! $this->is_group_messages_enabled( $group_id ) ){
+                    return false;
+                }
+
                 $wpdb->query( $wpdb->prepare( "
-                DELETE  
-                FROM `" . bm_get_table('threadsmeta') . "` 
-                WHERE `meta_key` = 'fluentcommunity_group_id' 
+                DELETE
+                FROM `" . bm_get_table('threadsmeta') . "`
+                WHERE `meta_key` = 'fluentcommunity_group_id'
                 AND   `meta_value` = %s
                 ", $group_id ) );
 

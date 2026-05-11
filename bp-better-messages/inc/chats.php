@@ -1020,6 +1020,22 @@ class Better_Messages_Chats
         if ( ! isset( $settings['auto_remove_inactive_mode'] ) || ! in_array( $settings['auto_remove_inactive_mode'], self::AUTO_REMOVE_INACTIVE_MODES, true ) ) {
             $settings['auto_remove_inactive_mode'] = 'site';
         }
+
+        if ( ! function_exists( 'get_editable_roles' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/user.php';
+        }
+
+        $valid_roles   = array_keys( get_editable_roles() );
+        $valid_roles[] = 'bm-guest';
+
+        $submitted = isset( $settings['auto_remove_inactive_roles'] ) && is_array( $settings['auto_remove_inactive_roles'] )
+            ? $settings['auto_remove_inactive_roles']
+            : array();
+
+        $settings['auto_remove_inactive_roles'] = array_values( array_unique( array_intersect(
+            array_map( 'sanitize_key', $submitted ),
+            $valid_roles
+        ) ) );
     }
 
     public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
@@ -1345,6 +1361,7 @@ class Better_Messages_Chats
             'auto_remove_inactive'            => '0',
             'auto_remove_inactive_days'       => '30',
             'auto_remove_inactive_mode'       => 'site',
+            'auto_remove_inactive_roles'      => array(),
             'enable_system_messages'          => '0',
             'system_messages_disabled_types'  => array(),
             'enable_notifications'            => '0',

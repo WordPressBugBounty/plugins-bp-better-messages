@@ -330,10 +330,14 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             }
 
             if( ! $thread_id ) {
+                if( $this->is_group_messages_enabled( $group_id ) !== 'enabled' ){
+                    return false;
+                }
+
                 $wpdb->query( $wpdb->prepare( "
-                DELETE  
-                FROM `" . bm_get_table('threadsmeta') . "` 
-                WHERE `meta_key` = 'peepso_group_id' 
+                DELETE
+                FROM `" . bm_get_table('threadsmeta') . "`
+                WHERE `meta_key` = 'peepso_group_id'
                 AND   `meta_value` = %s
                 ", $group_id ) );
 

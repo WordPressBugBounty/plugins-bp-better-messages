@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.3
+Stable tag: 2.15.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -264,6 +264,13 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
+= 2.15.4 =
+* Added per-role filter for the auto-remove inactive chat room participants feature, so an admin can target guests or other specific roles only and leave members untouched
+* Fixed new chat room participants could be remove if auto-removal option is enabled for users who did not wrote any message in the chat room
+* Fixed online participant count in the chat rooms list not updating in real time when a user joined or was added to a room
+* Fixed some group chats threads could reappear after the admin deleted them
+* Other minor bugfixes and improvements
+
 = 2.15.3 =
 * Added [System Messages](https://www.better-messages.com/docs/features/system-messages/)
 * Added per-role restrictions for group calls — Settings → Group Calls → Group Call Restrictions lets admins block specific WordPress roles from starting and / or joining group audio and video calls
@@ -277,7 +284,6 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 * Fixed PHP 8.5 deprecation notices
 * Fixed sticker images pointing to the previous site URL after a domain migration
 * Fixed guest visitors being redirected to wp-login after starting a chat from a WooCommerce
-* Other minor bugfixes and improvements
 
 = 2.15.2 =
 * Added initial [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/) integration

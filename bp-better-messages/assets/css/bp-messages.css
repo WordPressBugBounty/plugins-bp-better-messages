@@ -7174,7 +7174,11 @@ body.bp-messages-mobile #better-messages-modals-container input {
   font-size: 80%;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-system-message {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  column-gap: 0.25em;
   text-align: center;
   color: rgba(var(--bm-text-color), 0.5);
   font-style: italic;
@@ -11312,14 +11316,18 @@ body.bm-messages-dark .bm-bubble-button > svg {
   width: 100%;
   height: 100%;
   min-height: 0;
+  position: relative;
 }
 
 .bm-mini-panel-body {
-  flex: 1;
-  min-height: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--bm-mini-widgets-height, 450px) - 35px);
   display: flex;
   flex-direction: column;
-  width: 100%;
+  box-sizing: border-box;
 }
 
 .bp-better-messages-list:not(.bm-widget-bubble) .bm-mini-panel-body {
@@ -11970,8 +11978,8 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
   flex-flow: nowrap;
 }
 
-.bp-better-messages-list.bm-opened .tabs {
-  border-bottom: 1px solid rgba(var(--bm-border-color), 0.62);
+.bp-better-messages-list .bm-mini-panel-body {
+  border-top: 1px solid rgba(var(--bm-border-color), 0.62);
 }
 
 .bp-better-messages-list .tabs > div {

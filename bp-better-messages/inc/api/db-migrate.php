@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.1;
+        private $db_version = 2.2;
 
         public static function instance()
         {
@@ -229,6 +229,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
                       `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
                       `last_update` bigint(20) NOT NULL DEFAULT '0',
+                      `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                       PRIMARY KEY (`id`),
                       UNIQUE KEY `user_thread` (`user_id`,`thread_id`),
                       KEY `user_id` (`user_id`),
@@ -236,7 +237,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       KEY `is_deleted` (`is_deleted`),
                       KEY `unread_count` (`unread_count`),
                       KEY `is_pinned` (`is_pinned`),
-                      KEY `unread_count_index` (`user_id`, `is_deleted`, `unread_count`)
+                      KEY `unread_count_index` (`user_id`, `is_deleted`, `unread_count`),
+                      KEY `created_at_index` (`created_at`)
                     ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('threadsmeta') ."` (
@@ -774,6 +776,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             $wpdb->query( "ALTER TABLE `{$guests_table}` DROP COLUMN `last_changed`" );
                         }
                     }
+                ],
+                '2.2' => [
+                    function () {
+                        global $wpdb;
+                        $recipients_table = bm_get_table('recipients');
+                        $col = $wpdb->get_results( "SHOW COLUMNS FROM `{$recipients_table}` LIKE 'created_at'" );
+                        if ( empty( $col ) ) {
+                            $wpdb->query( "ALTER TABLE `{$recipients_table}` ADD COLUMN `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" );
+                            $wpdb->query( "ALTER TABLE `{$recipients_table}` ADD KEY `created_at_index` (`created_at`)" );
+                        }
+                    }
                 ]
             ];
 
@@ -964,6 +977,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'is_pinned'      => "tinyint(1) NOT NULL DEFAULT '0'",
                         'is_deleted'     => "tinyint(1) NOT NULL DEFAULT '0'",
                         'last_update'    => "bigint(20) NOT NULL DEFAULT '0'",
+                        'created_at'     => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
                     ],
                     'primary_key' => 'id',
                     'unique_keys' => [
@@ -976,6 +990,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'unread_count'       => 'unread_count',
                         'is_pinned'          => 'is_pinned',
                         'unread_count_index' => 'user_id, is_deleted, unread_count',
+                        'created_at_index'   => 'created_at',
                     ],
                 ],
                 'threadsmeta' => [

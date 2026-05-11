@@ -1199,6 +1199,8 @@ function _bm_js_translation_strings() {
     _x('User has not visited the site', 'Chat rooms settings page', 'bp-better-messages');
     _x('User has not sent a message in this chat room', 'Chat rooms settings page', 'bp-better-messages');
     _x('User has not opened this chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Apply to roles', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Only remove inactive participants who have one of these roles. Leave all unchecked to remove inactive participants of any role', 'Chat rooms settings page', 'bp-better-messages');
     _x('System messages', 'Chat rooms settings page', 'bp-better-messages');
     _x('Post automated notices when users join or leave the chat room, when the subject changes, or when the cover image changes', 'Chat rooms settings page', 'bp-better-messages');
     _x('System Messages Types', 'Chat rooms settings page', 'bp-better-messages');

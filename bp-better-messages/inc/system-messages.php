@@ -453,11 +453,9 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
             return array_keys( self::$event_setting_keys );
         }
 
-        public function get_thread_payload( $thread_id, $user_id, $type, $participants_count, $is_moderator )
+        public function get_thread_payload( $thread_id, $type, $participants_count, $is_moderator )
         {
             $thread_id = (int) $thread_id;
-
-            $enabled = $this->is_enabled_for_thread( $thread_id );
 
             $allow_override = ( Better_Messages()->settings['enableSystemMessagesOverride'] ?? '1' ) === '1';
             $can_override   = (bool) (
@@ -467,17 +465,11 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
                 && ( $type !== 'thread' || $participants_count > 2 )
             );
 
-            $stored = Better_Messages()->functions->get_thread_meta( $thread_id, 'enable_system_messages' );
-            if ( $stored === 'yes' ) {
-                $override = true;
-            } elseif ( $stored === 'no' ) {
-                $override = false;
-            } else {
-                $override = null;
-            }
+            $stored   = Better_Messages()->functions->get_thread_meta( $thread_id, 'enable_system_messages' );
+            $override = $stored === 'yes' ? true : ( $stored === 'no' ? false : null );
 
             return [
-                'enabled'     => (bool) $enabled,
+                'enabled'     => (bool) $this->is_enabled_for_thread( $thread_id ),
                 'canOverride' => $can_override,
                 'override'    => $override,
             ];

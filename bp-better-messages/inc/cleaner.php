@@ -207,6 +207,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
             $recipients_table = bm_get_table( 'recipients' );
             $bm_users_table   = bm_get_table( 'users' );
             $messages_table   = bm_get_table( 'messages' );
+            $roles_table      = bm_get_table( 'roles' );
 
             foreach ( $chat_ids as $chat_id ) {
                 $settings = Better_Messages()->chats->get_chat_settings( (int) $chat_id );
@@ -236,19 +237,47 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                 }
                 $cutoff_datetime = gmdate( 'Y-m-d H:i:s', $cutoff_unix );
 
+                $roles_filter   = is_array( $settings['auto_remove_inactive_roles'] ) ? $settings['auto_remove_inactive_roles'] : array();
+                $include_guests = in_array( 'bm-guest', $roles_filter, true );
+                $wp_roles       = array_values( array_diff( $roles_filter, array( 'bm-guest' ) ) );
+
+                $participant_join  = '';
+                $participant_where = '';
+                $participant_args  = array();
+
+                if ( empty( $roles_filter ) ) {
+                    $participant_where = " AND ( ( r.user_id >= 0 AND u.ID IS NOT NULL ) OR ( r.user_id < 0 ) )";
+                } elseif ( $include_guests && empty( $wp_roles ) ) {
+                    $participant_where = " AND r.user_id < 0";
+                } else {
+                    $role_placeholders = implode( ',', array_fill( 0, count( $wp_roles ), '%s' ) );
+                    $join_type         = $include_guests ? 'LEFT JOIN' : 'INNER JOIN';
+                    $participant_join  = " {$join_type} `{$roles_table}` br ON br.user_id = r.user_id AND br.role IN ({$role_placeholders})";
+                    $participant_args  = $wp_roles;
+
+                    if ( $include_guests ) {
+                        $participant_where = " AND ( r.user_id < 0 OR ( r.user_id >= 0 AND u.ID IS NOT NULL AND br.user_id IS NOT NULL ) )";
+                    } else {
+                        $participant_where = " AND r.user_id >= 0 AND u.ID IS NOT NULL AND br.user_id IS NOT NULL";
+                    }
+                }
+
                 if ( $mode === 'site' ) {
                     $sql = $wpdb->prepare(
                         "SELECT r.user_id
                          FROM `{$recipients_table}` r
                          LEFT JOIN {$wpdb->users} u ON u.ID = r.user_id
                          LEFT JOIN `{$bm_users_table}` bmu ON bmu.ID = r.user_id
+                         {$participant_join}
                          WHERE r.thread_id = %d
-                           AND ( ( r.user_id >= 0 AND u.ID IS NOT NULL ) OR ( r.user_id < 0 ) )
+                           AND r.created_at <= %s
+                           {$participant_where}
                            AND ( bmu.last_activity IS NULL OR bmu.last_activity < %s )
                          LIMIT %d",
-                        $thread_id,
-                        $cutoff_datetime,
-                        $batch_size
+                        array_merge(
+                            $participant_args,
+                            array( $thread_id, $cutoff_datetime, $cutoff_datetime, $batch_size )
+                        )
                     );
                 } elseif ( $mode === 'no-message' ) {
                     $sql = $wpdb->prepare(
@@ -261,27 +290,33 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                              WHERE thread_id = %d
                              GROUP BY sender_id
                          ) lm ON lm.sender_id = r.user_id
+                         {$participant_join}
                          WHERE r.thread_id = %d
-                           AND ( ( r.user_id >= 0 AND u.ID IS NOT NULL ) OR ( r.user_id < 0 ) )
+                           AND r.created_at <= %s
+                           {$participant_where}
                            AND ( lm.last_msg_unix IS NULL OR lm.last_msg_unix < %d )
                          LIMIT %d",
-                        $thread_id,
-                        $thread_id,
-                        $cutoff_unix,
-                        $batch_size
+                        array_merge(
+                            array( $thread_id ),
+                            $participant_args,
+                            array( $thread_id, $cutoff_datetime, $cutoff_unix, $batch_size )
+                        )
                     );
                 } else {
                     $sql = $wpdb->prepare(
                         "SELECT r.user_id
                          FROM `{$recipients_table}` r
                          LEFT JOIN {$wpdb->users} u ON u.ID = r.user_id
+                         {$participant_join}
                          WHERE r.thread_id = %d
-                           AND ( ( r.user_id >= 0 AND u.ID IS NOT NULL ) OR ( r.user_id < 0 ) )
+                           AND r.created_at <= %s
+                           {$participant_where}
                            AND r.last_read < %s
                          LIMIT %d",
-                        $thread_id,
-                        $cutoff_datetime,
-                        $batch_size
+                        array_merge(
+                            $participant_args,
+                            array( $thread_id, $cutoff_datetime, $cutoff_datetime, $batch_size )
+                        )
                     );
                 }
 

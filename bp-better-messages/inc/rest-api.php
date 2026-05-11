@@ -2186,7 +2186,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     if ( $thread_type !== 'thread' || count( $_all_user_ids ) > 2 ) {
                         $thread_item['systemMessages'] = Better_Messages()->system_messages->get_thread_payload(
                             $thread_id,
-                            $current_user_id,
                             $thread_type,
                             count( $_all_user_ids ),
                             (bool) $thread_item['permissions']['isModerator']
