@@ -2399,8 +2399,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
         public function can_reply(WP_REST_Request $request) {
 
-            if( ! $this->is_user_authorized( $request ) ){
-                return false;
+            $authorized = $this->is_user_authorized( $request );
+            if ( $authorized !== true ) {
+                return $authorized;
             }
 
             $user_id    = Better_Messages()->functions->get_current_user_id();
@@ -2507,7 +2508,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         }
 
         public function check_thread_access(WP_REST_Request $request) {
-            $this->is_user_authorized( $request );
+            $authorized = $this->is_user_authorized( $request );
+            if ( is_wp_error( $authorized ) ) {
+                return $authorized;
+            }
 
             $user_id    = Better_Messages()->functions->get_current_user_id();
             $thread_id  = intval($request->get_param('id'));

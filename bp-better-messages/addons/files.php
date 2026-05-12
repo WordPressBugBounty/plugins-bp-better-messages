@@ -1196,8 +1196,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         public function user_can_upload_callback(WP_REST_Request $request) {
             if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! class_exists( 'BP_Better_Messages_Voice_Messages' ) ) return false;
 
-            if( ! Better_Messages_Rest_Api()->is_user_authorized( $request ) ){
-                return false;
+            $authorized = Better_Messages_Rest_Api()->is_user_authorized( $request );
+            if ( $authorized !== true ) {
+                return $authorized;
             }
 
             $user_id    = Better_Messages()->functions->get_current_user_id();
@@ -1715,8 +1716,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
          * Permission callback for TUS upload endpoints.
          */
         public function check_tus_upload_permission( WP_REST_Request $request ) {
-            if ( ! Better_Messages_Rest_Api()->is_user_authorized( $request ) ) {
-                return false;
+            $authorized = Better_Messages_Rest_Api()->is_user_authorized( $request );
+            if ( $authorized !== true ) {
+                return $authorized;
             }
 
             $user_id   = Better_Messages()->functions->get_current_user_id();
