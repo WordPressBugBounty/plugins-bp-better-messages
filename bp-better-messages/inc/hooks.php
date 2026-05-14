@@ -311,9 +311,19 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Directorist::instance();
             }
 
+            if( defined('RTCL_VERSION') || function_exists('rtcl') ){
+                require_once Better_Messages()->path . 'addons/classified-listing.php';
+                Better_Messages_Classified_Listing::instance();
+            }
+
             if( defined('GEODIRECTORY_VERSION') ){
                 require_once Better_Messages()->path . 'addons/geodirectory.php';
                 Better_Messages_GeoDirectory::instance();
+            }
+
+            if( defined('STM_LISTINGS_V') ){
+                require_once Better_Messages()->path . 'addons/motors/motors.php';
+                Better_Messages_Motors::instance();
             }
 
             if( class_exists('LearnPress') ){

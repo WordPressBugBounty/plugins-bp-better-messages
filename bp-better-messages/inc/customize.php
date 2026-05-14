@@ -1582,6 +1582,7 @@ if ( !class_exists( 'Better_Messages_Customize' ) ):
             $mod = get_theme_mod('bm-secondary-border-dark', '#3f485f');
             echo '--bm-border-secondary-color-dark:'. $this->hex2rgba($mod) . ';';
 
+            echo '}';
             /* DARK MODE END */
             return ob_get_clean();
         }

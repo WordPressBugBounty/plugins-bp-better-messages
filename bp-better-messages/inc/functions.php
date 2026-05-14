@@ -834,6 +834,23 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         return trailingslashit( $dashboard_url ) . '#bm_messages';
                     }
                 }
+
+                if ( ( defined('RTCL_VERSION') || function_exists('rtcl') ) && Better_Messages()->settings['chatPage'] === 'classified-listing-dashboard' && class_exists('\\Rtcl\\Helpers\\Link') ) {
+                    $messages_url = \Rtcl\Helpers\Link::get_account_endpoint_url( 'better-messages' );
+                    if ( $messages_url ) {
+                        return $messages_url;
+                    }
+                }
+
+                if ( defined('STM_LISTINGS_V') && Better_Messages()->settings['chatPage'] === 'motors-dashboard' && $user_id > 0 ) {
+                    $author_url = apply_filters( 'stm_get_author_link', $user_id );
+                    if ( ! $author_url ) {
+                        $author_url = get_author_posts_url( $user_id );
+                    }
+                    if ( $author_url ) {
+                        return add_query_arg( 'page', 'better-messages', $author_url );
+                    }
+                }
             }
 
             if( Better_Messages()->settings['chatPage'] !== '0' ){

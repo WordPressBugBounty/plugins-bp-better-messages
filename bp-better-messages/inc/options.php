@@ -202,6 +202,8 @@ class Better_Messages_Options
             'disableNewThread'            => '0',
             'profileVideoCall'            => '0',
             'profileAudioCall'            => '0',
+            'directoryAudioCall'          => '0',
+            'directoryVideoCall'          => '0',
             'miniChatAudioCall'           => '0',
             'miniChatVideoCall'           => '0',
             'miniChatGroupAudioCall'      => '0',
@@ -465,8 +467,19 @@ class Better_Messages_Options
             'directoristListingCardButton'   => '0',
             'directoristAuthorProfileButton' => '1',
             'directoristDashboardTab'        => '1',
+            'classifiedListingIntegration'         => '0',
+            'classifiedListingListingPageButton'   => '1',
+            'classifiedListingListingCardButton'   => '0',
+            'classifiedListingAuthorProfileButton' => '1',
+            'classifiedListingDashboardTab'        => '1',
+            'classifiedListingHeaderButton'        => '0',
             'geodirIntegration'              => '0',
             'geodirSingleListingButton'      => '1',
+            'motorsIntegration'              => '0',
+            'motorsSingleListingButton'      => '1',
+            'motorsListingCardButton'        => '1',
+            'motorsDealerProfileButton'      => '1',
+            'motorsDashboardTab'             => '1',
             'learnPressIntegration'         => '0',
             'learnPressGroupChat'           => '0',
             'learnPressProfileTab'          => '0',
@@ -797,6 +810,7 @@ class Better_Messages_Options
         $customize_url = Better_Messages()->customize->customization_link(array( 'panel' => 'better_messages' ));
 
         $has_buddypress  = class_exists('BuddyPress');
+        $has_buddyboss   = defined('BP_PLATFORM_VERSION');
         $has_um          = defined('ultimatemember_version');
         $has_asgaros     = class_exists('AsgarosForum');
         $has_woocommerce = class_exists('WooCommerce');
@@ -812,8 +826,10 @@ class Better_Messages_Options
             || ( defined('MULTIVENDORX_PLUGIN_VERSION') && version_compare( MULTIVENDORX_PLUGIN_VERSION, '5.0.0', '>=' ) );
         $has_hivepress   = function_exists('hivepress');
         $has_directorist = defined('ATBDP_VERSION');
+        $has_classified_listing = defined('RTCL_VERSION') || function_exists('rtcl');
         $has_geodirectory = defined('GEODIRECTORY_VERSION');
         $has_wp_job_manager = class_exists('WP_Job_Manager');
+        $has_motors = defined('STM_LISTINGS_V');
         $has_bbpress     = class_exists('bbPress');
         $has_jetengine   = function_exists('jet_engine');
         $has_learnpress  = class_exists('LearnPress');
@@ -977,6 +993,7 @@ class Better_Messages_Options
             'customizeUrl'       => $customize_url,
             'isSsl'              => is_ssl() || defined('BM_DEV'),
             'hasBuddyPress'      => $has_buddypress,
+            'hasBuddyBoss'       => $has_buddyboss,
             'hasUltimateMember'  => $has_um,
             'hasAsgarosForum'    => $has_asgaros,
             'hasWooCommerce'     => $has_woocommerce,
@@ -992,8 +1009,10 @@ class Better_Messages_Options
             'hasMultiVendorX'    => $has_multivendorx,
             'hasHivePress'       => $has_hivepress,
             'hasDirectorist'     => $has_directorist,
+            'hasClassifiedListing' => $has_classified_listing,
             'hasGeoDirectory'    => $has_geodirectory,
             'hasWpJobManager'    => $has_wp_job_manager,
+            'hasMotors'          => $has_motors,
             'hasBbPress'         => $has_bbpress,
             'hasJetEngine'       => $has_jetengine,
             'hasLearnPress'      => $has_learnpress,
@@ -1894,6 +1913,12 @@ class Better_Messages_Options
         if ( !isset( $settings['profileAudioCall'] ) ) {
             $settings['profileAudioCall'] = '0';
         }
+        if ( !isset( $settings['directoryAudioCall'] ) ) {
+            $settings['directoryAudioCall'] = '0';
+        }
+        if ( !isset( $settings['directoryVideoCall'] ) ) {
+            $settings['directoryVideoCall'] = '0';
+        }
         if ( !isset( $settings['peepsoProfileVideoCall'] ) ) {
             $settings['peepsoProfileVideoCall'] = '0';
         }
@@ -2216,6 +2241,30 @@ class Better_Messages_Options
             $settings['directoristAuthorProfileButton'] = '1';
         }
 
+        if( ! isset( $settings['classifiedListingIntegration'] ) ) {
+            $settings['classifiedListingIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['classifiedListingListingPageButton'] ) ) {
+            $settings['classifiedListingListingPageButton'] = '1';
+        }
+
+        if( ! isset( $settings['classifiedListingListingCardButton'] ) ) {
+            $settings['classifiedListingListingCardButton'] = '0';
+        }
+
+        if( ! isset( $settings['classifiedListingAuthorProfileButton'] ) ) {
+            $settings['classifiedListingAuthorProfileButton'] = '1';
+        }
+
+        if( ! isset( $settings['classifiedListingDashboardTab'] ) ) {
+            $settings['classifiedListingDashboardTab'] = '1';
+        }
+
+        if( ! isset( $settings['classifiedListingHeaderButton'] ) ) {
+            $settings['classifiedListingHeaderButton'] = '0';
+        }
+
         if( ! isset( $settings['directoristDashboardTab'] ) ) {
             $settings['directoristDashboardTab'] = '1';
         }
@@ -2226,6 +2275,26 @@ class Better_Messages_Options
 
         if( ! isset( $settings['geodirSingleListingButton'] ) ) {
             $settings['geodirSingleListingButton'] = '1';
+        }
+
+        if( ! isset( $settings['motorsIntegration'] ) ) {
+            $settings['motorsIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['motorsSingleListingButton'] ) ) {
+            $settings['motorsSingleListingButton'] = '1';
+        }
+
+        if( ! isset( $settings['motorsListingCardButton'] ) ) {
+            $settings['motorsListingCardButton'] = '1';
+        }
+
+        if( ! isset( $settings['motorsDealerProfileButton'] ) ) {
+            $settings['motorsDealerProfileButton'] = '1';
+        }
+
+        if( ! isset( $settings['motorsDashboardTab'] ) ) {
+            $settings['motorsDashboardTab'] = '1';
         }
 
         if( ! isset( $settings['learnPressIntegration'] ) ) {

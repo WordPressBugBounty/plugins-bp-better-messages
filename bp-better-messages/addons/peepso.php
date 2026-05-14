@@ -420,18 +420,22 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             if ($current_user !== $user_id ) {
 
+                $is_modern_peepso = version_compare( PeepSo::PLUGIN_VERSION, '7.1.0.0', '>=' );
+                $action_class     = $is_modern_peepso ? 'pso-member__action pso-member__action--message' : 'ps-member__action ps-member__action--message';
+                $icon_class       = $is_modern_peepso ? 'pso-i-messages' : 'gcir gci-envelope';
+
                 if( Better_Messages()->settings['psForceMiniChat'] === '0' ) {
                     $options['bm_message'] = array(
-                            'class' => 'ps-member__action ps-member__action--message',
+                            'class' => $action_class,
                             'click' => 'BPBMOpenUrlOrNewTab("' . Better_Messages()->functions->pm_link($user_id) . '"); event.preventDefault()',
-                            'icon' => 'gcir gci-envelope',
+                            'icon' => $icon_class,
                             'loading' => FALSE,
                     );
                 } else {
                     $options['bm_message'] = array(
-                            'class' => 'ps-member__action ps-member__action--message bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
+                            'class' => $action_class . ' bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
                             'click' => 'event.preventDefault()',
-                            'icon' => 'gcir gci-envelope',
+                            'icon' => $icon_class,
                             'loading' => FALSE,
                             'extra' => 'data-user-id="' . $user_id . '"'
                     );

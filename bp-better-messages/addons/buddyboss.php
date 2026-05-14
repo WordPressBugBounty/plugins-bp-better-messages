@@ -24,6 +24,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             add_filter( 'bp_better_messages_after_format_message', array($this, 'buddyboss_group_messages'), 10, 4);
             add_filter( 'heartbeat_received', array($this, 'heartbeat_unread_notifications'), 12);
             add_filter( 'bb_pusher_enabled_features', array( $this, 'disable_bb_pusher') );
+            add_filter( 'bb_member_directories_get_profile_actions', array($this, 'directory_call_buttons'), 10, 2 );
 
             add_action('wp_ajax_buddyboss_theme_get_header_unread_messages', array($this, 'buddyboss_theme_get_header_unread_messages'), 9);
 
@@ -88,10 +89,67 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                     }
 
                     return attributes;
-            });";
+            });
+
+            wp.hooks.addAction('better_messages_update_unread', 'better_messages_bb_profile_menu', function( unread ){
+                var parent = document.querySelector('#wp-admin-bar-my-account-messages > a.ab-item');
+                if( ! parent ) return;
+
+                var element = parent.querySelector('.bp-better-messages-unread');
+                if( ! element ){
+                    var staticCount = parent.querySelector('span.count');
+                    if( staticCount ) staticCount.remove();
+
+                    element = document.createElement('span');
+                    element.className = 'count bp-better-messages-unread';
+                    parent.appendChild(element);
+                }
+                element.textContent = unread;
+                element.classList.toggle('no-count', ! unread);
+            });
+
+            (function(){
+                function relocateBBPressPMLink(){
+                    document.querySelectorAll('.bs-reply-list-item').forEach(function(reply){
+                        var pm = reply.querySelector('.bpbm-private-message-link-buddypress');
+                        if( ! pm || pm.dataset.bmRelocated ) return;
+                        var target = reply.querySelector('.bbp-meta .bs-dropdown-wrap-inner');
+                        if( ! target ) return;
+
+                        var label = pm.textContent.trim();
+                        var link = document.createElement('a');
+                        link.href = pm.href;
+                        link.className = 'bbp-reply-to-link bpbm-private-message-link-buddyboss';
+                        link.setAttribute('data-balloon', label);
+                        link.setAttribute('data-balloon-pos', 'up');
+                        var icon = document.createElement('i');
+                        icon.className = 'bb-icon-l bb-icon-envelope';
+                        var text = document.createElement('span');
+                        text.className = 'bb-forum-reply-text';
+                        text.textContent = label;
+                        link.appendChild(icon);
+                        link.appendChild(text);
+                        var dropdownTrigger = target.querySelector('.bs-dropdown-link.bb-reply-actions-button');
+                        if( dropdownTrigger ){
+                            target.insertBefore(link, dropdownTrigger);
+                        } else {
+                            target.appendChild(link);
+                        }
+                        pm.dataset.bmRelocated = '1';
+                    });
+                }
+                if( document.readyState === 'loading' ){
+                    document.addEventListener('DOMContentLoaded', relocateBBPressPMLink);
+                } else {
+                    relocateBBPressPMLink();
+                }
+            })();";
 
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js($script), 'before' );
+
+            $css = '.bs-reply-list-item .bbp-after-author-hook .bpbm-private-message-link-buddypress{display:none}.bs-reply-list-item .bs-dropdown-wrap-inner .bpbm-private-message-link-buddyboss .bb-icon-l.bb-icon-envelope{margin-left:-4px;margin-right:5px;border-radius:0 !important}';
+            wp_add_inline_style( 'better-messages', Better_Messages()->functions->minify_css($css) );
         }
 
         public function register_bb_notifications()
@@ -445,6 +503,49 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 }
             }
             return $options;
+        }
+
+        public function directory_call_buttons( $buttons, $user_id ){
+            if( ! is_user_logged_in() ) return $buttons;
+            if( ! class_exists( 'Better_Messages_Calls' ) ) return $buttons;
+            if( (int) $user_id === Better_Messages()->functions->get_current_user_id() ) return $buttons;
+
+            $audio_enabled = Better_Messages()->settings['audioCalls'] === '1' && Better_Messages()->settings['directoryAudioCall'] === '1';
+            $video_enabled = Better_Messages()->settings['videoCalls'] === '1' && Better_Messages()->settings['directoryVideoCall'] === '1';
+
+            if( ! $audio_enabled && ! $video_enabled ) return $buttons;
+
+            if( Better_Messages()->settings['callsLimitFriends'] === '1' && function_exists('friends_check_friendship') && ! current_user_can('manage_options') ){
+                if( ! friends_check_friendship( Better_Messages()->functions->get_current_user_id(), $user_id ) ){
+                    return $buttons;
+                }
+            }
+
+            $base_link = Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() );
+
+            if( ! isset( $buttons['secondary'] ) ) $buttons['secondary'] = '';
+
+            if( $audio_enabled ){
+                $link = add_query_arg( array( 'fast-call' => '', 'to' => $user_id, 'type' => 'audio' ), $base_link );
+                $buttons['secondary'] .= sprintf(
+                    '<div id="bpbm-audio-call-%1$d" class="generic-button"><a class="bpbm-audio-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-phone"></i></a></div>',
+                    (int) $user_id,
+                    esc_url( $link ),
+                    esc_attr__( 'Audio Call', 'bp-better-messages' )
+                );
+            }
+
+            if( $video_enabled ){
+                $link = add_query_arg( array( 'fast-call' => '', 'to' => $user_id, 'type' => 'video' ), $base_link );
+                $buttons['secondary'] .= sprintf(
+                    '<div id="bpbm-video-call-%1$d" class="generic-button"><a class="bpbm-video-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-video"></i></a></div>',
+                    (int) $user_id,
+                    esc_url( $link ),
+                    esc_attr__( 'Video Call', 'bp-better-messages' )
+                );
+            }
+
+            return $buttons;
         }
 
         public function buddyboss_notifications_fix( $array ){

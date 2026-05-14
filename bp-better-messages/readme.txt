@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.5
+Stable tag: 2.15.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -147,7 +147,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
 * [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
 * [Directorist](https://www.better-messages.com/docs/integrations/directorist/)
+* [Classified Listing](https://www.better-messages.com/docs/integrations/classified-listing/)
 * [GeoDirectory](https://www.better-messages.com/docs/integrations/geodirectory/)
+* [Motors – Car Dealer, Classifieds & Listing](https://www.better-messages.com/docs/integrations/motors/)
 * [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
 * [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
 * [WP Job Manager](https://www.better-messages.com/docs/integrations/wp-job-manager/)
@@ -263,6 +265,17 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 1. Onsite notifications
 
 == Changelog ==
+
+= 2.15.6 =
+* Added JavaScript filter slots in the guest authentication screen — [`better_messages_auth_required_top`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_top), [`better_messages_auth_required_between`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_between), and [`better_messages_auth_required_bottom`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_bottom) — for injecting custom HTML into the pre-chat popup, mini-widget banner, and full messages page wall
+* Added live unread counter badge to the BuddyBoss Theme profile dropdown Messages item
+* Added Audio Call and Video Call buttons to the members directory and group member rows for both BuddyPress (Nouveau theme) and BuddyBoss Platform
+* Added [`better_messages_group_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters#better_messages_group_call_join_custom_error) PHP filter for blocking group audio/video call join with a custom error message, mirroring the existing [`better_messages_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters#better_messages_call_join_custom_error) filter for 1-to-1 calls
+* Settings → Integrations tab label and section titles now read "BuddyBoss" instead of "BuddyPress" when the BuddyBoss Platform is active
+* Improved the bbPress reply Private Message link layout in BuddyBoss Theme
+* Added initial [Motors – Car Dealer, Classifieds & Listing](https://www.better-messages.com/docs/integrations/motors/) integration
+* Added initial [Classified Listing](https://www.better-messages.com/docs/integrations/classified-listing/) integration
+* Other minor bugfixes and improvements
 
 = 2.15.5 =
 * Added per-role filter for the auto-remove inactive chat room participants feature, so an admin can target guests or other specific roles only and leave members untouched

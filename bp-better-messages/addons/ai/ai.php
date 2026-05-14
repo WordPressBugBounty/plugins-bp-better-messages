@@ -3520,27 +3520,68 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         }
 
         public function get_ai_request_secret(){
-            $secret = get_transient('better_messages_ai_request_secret');
-            if( ! empty( $secret ) ){
-                return $secret;
+            $data = $this->load_ai_request_secret_data();
+            $now  = time();
+
+            if ( ( $now - $data['issued_at'] ) < 1800 ) {
+                return $data['current'];
             }
 
-            $old = get_transient( 'better_messages_ai_request_secret_prev' );
-            $secret = wp_generate_password( 32, false );
-            set_transient( 'better_messages_ai_request_secret', $secret, 1800 );
-            set_transient( 'better_messages_ai_request_secret_prev', ! empty( $old ) ? $old : $secret, 3600 );
-            return $secret;
+            $next = array(
+                'current'   => wp_generate_password( 32, false ),
+                'issued_at' => $now,
+                'prev'      => $data['current'],
+                'prev_at'   => $data['issued_at'],
+            );
+            update_option( 'better_messages_ai_request_secret', $next, false );
+            return $next['current'];
         }
 
         public function verify_ai_request_secret( $provided ) {
-            if ( empty( $provided ) ) {
+            if ( empty( $provided ) || ! is_string( $provided ) ) {
                 return false;
             }
-            if ( $provided === $this->get_ai_request_secret() ) {
+
+            $data = $this->load_ai_request_secret_data();
+
+            if ( hash_equals( $data['current'], $provided ) ) {
                 return true;
             }
-            $prev = get_transient( 'better_messages_ai_request_secret_prev' );
-            return ! empty( $prev ) && $provided === $prev;
+
+            if ( $data['prev'] !== '' && ( time() - $data['prev_at'] ) < 3600 ) {
+                return hash_equals( $data['prev'], $provided );
+            }
+
+            return false;
+        }
+
+        private function load_ai_request_secret_data() {
+            $data = get_option( 'better_messages_ai_request_secret', null );
+            if ( is_array( $data ) && ! empty( $data['current'] ) && is_string( $data['current'] ) ) {
+                return array(
+                    'current'   => $data['current'],
+                    'issued_at' => isset( $data['issued_at'] ) ? intval( $data['issued_at'] ) : 0,
+                    'prev'      => ( ! empty( $data['prev'] ) && is_string( $data['prev'] ) ) ? $data['prev'] : '',
+                    'prev_at'   => isset( $data['prev_at'] ) ? intval( $data['prev_at'] ) : 0,
+                );
+            }
+
+            $now            = time();
+            $legacy_current = get_transient( 'better_messages_ai_request_secret' );
+            $legacy_prev    = get_transient( 'better_messages_ai_request_secret_prev' );
+            $has_legacy_prev = ! empty( $legacy_prev ) && is_string( $legacy_prev );
+
+            $fresh = array(
+                'current'   => ( ! empty( $legacy_current ) && is_string( $legacy_current ) ) ? $legacy_current : wp_generate_password( 32, false ),
+                'issued_at' => $now,
+                'prev'      => $has_legacy_prev ? $legacy_prev : '',
+                'prev_at'   => $has_legacy_prev ? $now : 0,
+            );
+
+            update_option( 'better_messages_ai_request_secret', $fresh, false );
+            delete_transient( 'better_messages_ai_request_secret' );
+            delete_transient( 'better_messages_ai_request_secret_prev' );
+            return $fresh;
         }
 
         public function register_post_type(){
