@@ -35,6 +35,11 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             add_action('wp_footer', array( $this, 'messages_js' ) );
 
+            if ( Better_Messages()->settings['peepsoHovercard'] === '1' ) {
+                add_filter('peepso_hovercard', array( $this, 'hovercard_data' ), 10, 2);
+                add_action('wp_footer', array( $this, 'hovercard_js' ), 11);
+            }
+
             if (Better_Messages()->settings['peepsoHeader'] === '1' && !wp_doing_ajax()) {
                 add_action('bp_better_messages_before_main_template_rendered', array($this, 'before_main_template_rendered'));
                 add_action('bp_better_messages_after_main_template_rendered', array($this, 'after_main_template_rendered'));
@@ -672,6 +677,129 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 // Start observing the target node for configured mutations
                 observer.observe(document.body, config);
                 <?php } ?>
+            </script>
+            <?php
+            $script = ob_get_clean();
+
+            echo Better_Messages()->functions->minify_js( $script );
+        }
+
+        public function hovercard_data( $data, $user_id ){
+            $user_id = (int) $user_id;
+            $current_user = (int) get_current_user_id();
+
+            if ( ! $current_user || $current_user === $user_id || $user_id <= 0 ) {
+                return $data;
+            }
+
+            if ( ! $this->hovercard_can_message( $current_user, $user_id ) ) {
+                return $data;
+            }
+
+            $base_link = Better_Messages()->functions->get_link( $current_user );
+            $fast_call = function( $type ) use ( $base_link, $user_id ) {
+                return add_query_arg( array( 'fast-call' => '', 'to' => $user_id, 'type' => $type ), $base_link );
+            };
+
+            $data['bm'] = array(
+                'userId'     => $user_id,
+                'messageUrl' => Better_Messages()->functions->pm_link( $user_id ),
+                'forceMini'  => Better_Messages()->settings['psForceMiniChat'] === '1',
+                'audioCall'  => Better_Messages()->settings['peepsoProfileAudioCall'] === '1' ? $fast_call('audio') : '',
+                'videoCall'  => Better_Messages()->settings['peepsoProfileVideoCall'] === '1' ? $fast_call('video') : '',
+            );
+
+            return $data;
+        }
+
+        private function hovercard_can_message( $current_user, $user_id ){
+            if ( class_exists('PeepSoBlockUsers') && PeepSo::get_option('user_blocking_enable', 0) === 1 ) {
+                $blocker = new PeepSoBlockUsers();
+                if ( $blocker->is_user_blocking( $current_user, $user_id ) || $blocker->is_user_blocking( $user_id, $current_user ) ) {
+                    return false;
+                }
+            }
+
+            if (
+                Better_Messages()->settings['PSonlyFriendsMode'] === '1'
+                && class_exists('PeepSoFriendsModel')
+                && ! current_user_can('manage_options')
+                && ! user_can( $user_id, 'manage_options' )
+                && ! PeepSoFriendsModel::get_instance()->are_friends( $current_user, $user_id )
+            ) {
+                return false;
+            }
+
+            return true;
+        }
+
+        public function hovercard_js(){
+            if ( ! is_user_logged_in() ) return false;
+            if ( PeepSo::get_option('hovercards_enable', 1) != 1 ) return false;
+
+            $config = wp_json_encode( array(
+                'currentUserId' => (int) get_current_user_id(),
+                'icons'         => array(
+                    'message' => version_compare( PeepSo::PLUGIN_VERSION, '7.1.0.0', '>=' ) ? 'pso-i-messages' : 'gci gci-envelope',
+                    'audio'   => 'gci gci-phone',
+                    'video'   => 'gci gci-video',
+                ),
+                'labels'        => array(
+                    'message' => _x('Send Message', 'PeepSo Integration', 'bp-better-messages'),
+                    'audio'   => _x('Audio Call', 'PeepSo Integration', 'bp-better-messages'),
+                    'video'   => _x('Video Call', 'PeepSo Integration', 'bp-better-messages'),
+                ),
+            ) );
+
+            ?>
+            <style>
+                .ps-hovercard__actions.ps-hovercard__actions--bm > i { line-height: inherit; }
+            </style>
+            <?php
+
+            ob_start(); ?>
+            <script type="text/javascript">
+            (function(){
+                var cfg = <?php echo $config; ?>;
+                var BASE = 'ps-hovercard__actions ps-hovercard__actions--bm bpbm-pm-button bm-no-style bm-no-loader';
+
+                function cell( kind, href, dataUrl, extraClass, bm ) {
+                    var cls = BASE + ( extraClass ? ' ' + extraClass : '' );
+                    var attr = ' data-user-id="' + bm.userId + '"';
+                    if ( dataUrl ) attr += ' data-url="' + dataUrl + '"';
+                    return '<a href="' + href + '" class="' + cls + '"' + attr +
+                        ' title="' + cfg.labels[kind] + '" aria-label="' + cfg.labels[kind] + '">' +
+                        '<i class="' + cfg.icons[kind] + '"></i></a>';
+                }
+
+                var tries = 0;
+                function init(){
+                    if ( typeof window.peepso === 'undefined' || ! window.peepso.observer ) {
+                        if ( tries++ > 40 ) return;
+                        return setTimeout( init, 250 );
+                    }
+
+                    window.peepso.observer.addAction( 'hovercard_update_html', function( $card, data ) {
+                        $card.find('.ps-hovercard__actions--bm').remove();
+
+                        var bm = data && data.bm;
+                        if ( ! bm || ! cfg.currentUserId || cfg.currentUserId === parseInt( bm.userId, 10 ) ) return;
+
+                        var $details = $card.find('.ps-hovercard__details');
+                        if ( ! $details.length ) return;
+
+                        var html = cell( 'message', bm.forceMini ? '#' : bm.messageUrl, '', bm.forceMini ? 'open-mini-chat' : '', bm );
+                        if ( bm.audioCall ) html += cell( 'audio', '#', bm.audioCall, 'audio-call', bm );
+                        if ( bm.videoCall ) html += cell( 'video', '#', bm.videoCall, 'video-call', bm );
+
+                        var $visit = $details.find('.ps-hovercard__actions').not('.ps-hovercard__actions--bm').first();
+                        if ( $visit.length ) $visit.before( html );
+                        else $details.append( html );
+                    }, 10, 2 );
+                }
+
+                init();
+            })();
             </script>
             <?php
             $script = ob_get_clean();

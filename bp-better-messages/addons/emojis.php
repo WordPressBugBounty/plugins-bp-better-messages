@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/emojis/emoji-manifest.php';
+require_once __DIR__ . '/emojis/annotation-downloader.php';
+
 if ( !class_exists('Better_Messages_Emojis') ):
 
     class Better_Messages_Emojis
@@ -42,14 +45,24 @@ if ( !class_exists('Better_Messages_Emojis') ):
             $selected_set = Better_Messages()->settings['emojiSet'];
             $this->set = $selected_set;
 
+            Better_Messages_Emoji_Manifest::instance();
+            Better_Messages_Emoji_Annotations::instance();
+
             add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
+            add_filter( 'bp_better_messages_script_variables', array( $this, 'script_variables' ) );
+        }
+
+        public function script_variables( $vars ){
+            $vars['emojiDataUrl'] = Better_Messages_Emoji_Manifest::instance()->get_manifest_url();
+            $vars['emojiHash']    = (string) get_option( 'bm-emoji-hash', '' );
+            return $vars;
         }
 
         public function rest_api_init(){
             register_rest_route( 'better-messages/v1', '/getEmojiData', array(
-                'methods' => 'GET',
-                'callback' => array( $this, 'get_emoji_settings' ),
-                'permission_callback' => '__return_true'
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_get_emoji_data_legacy' ),
+                'permission_callback' => '__return_true',
             ) );
 
             register_rest_route( 'better-messages/v1/admin', '/downloadEmojiSprite', array(
@@ -122,9 +135,18 @@ if ( !class_exists('Better_Messages_Emojis') ):
             return new \WP_REST_Response( $this->getLocalStatus() );
         }
 
-        public function getDataset(){
-            $emoji_path = Better_Messages()->path . 'assets/emojies/' . $this->set . '.json';
-            return json_decode(file_get_contents( $emoji_path ), true );
+        public function rest_get_emoji_data_legacy() {
+            $manifest = Better_Messages_Emoji_Manifest::instance();
+            $data     = $manifest->get_manifest_data();
+
+            if ( ! is_array( $data ) ) {
+                return new \WP_REST_Response( array( 'error' => 'Manifest could not be generated' ), 500 );
+            }
+
+            $response = new \WP_REST_Response( $data );
+            $response->header( 'Deprecation', 'true' );
+            $response->header( 'Link', '<' . $manifest->get_manifest_url() . '>; rel="successor-version"' );
+            return $response;
         }
 
         public function getSpriteUrl(){
@@ -225,31 +247,6 @@ if ( !class_exists('Better_Messages_Emojis') ):
             return $result;
         }
 
-        public function get_emoji_settings(){
-            $dataset = $this->getDataset();
-
-            $emojis = get_option('bm-emoji-set-2');
-
-            foreach( $dataset['categories'] as $category_index => $category ){
-                $category = strtolower($category['id']);
-
-                if( isset( $emojis[ $category ] ) ){
-                    $emojis_overwrite = $emojis[$category];
-                    $emojis_overwrite = array_filter( $emojis_overwrite, function( $id ){ return $id !== '__none__'; } );
-
-                    if( count( $emojis_overwrite ) === 0 ){
-                        unset( $dataset['categories'][ $category_index ] );
-                    } else {
-                        $dataset['categories'][ $category_index ]['emojis'] = array_values( $emojis_overwrite );
-                    }
-                }
-
-            }
-
-            $dataset['categories'] = array_values( $dataset['categories'] );
-
-            return apply_filters('better_messages_get_emoji_dataset', $dataset);
-        }
     }
 
 endif;

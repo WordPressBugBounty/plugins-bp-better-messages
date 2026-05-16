@@ -2235,10 +2235,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 'serverTime' => $server_time
             ], $current_user_id, 0 );
 
-            if( isset( $request ) && count($excluded) === 0 ){
-                $return['emojis'] = Better_Messages_Emojis()->get_emoji_settings();
-            }
-
             return $return;
         }
 

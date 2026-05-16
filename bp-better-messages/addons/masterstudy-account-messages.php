@@ -17,6 +17,10 @@ if ( wp_style_is( 'masterstudy-account-main', 'registered' ) ) {
     wp_enqueue_style( 'masterstudy-account-main' );
 }
 ?>
+<style>
+body.bp-messages-mobile .masterstudy-account-mobile-menu { display: none !important; }
+body.bp-messages-mobile .masterstudy-account { padding-bottom: 20px; }
+</style>
 <div class="masterstudy-account">
     <?php do_action( 'stm_lms_admin_after_wrapper_start', $lms_current_user ); ?>
 

@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.6
+    Version: 2.15.7
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.6';
+        public  $version = '2.15.7';
 
         public  $db_version = '1.0.4';
 
@@ -699,7 +699,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'url', 'threadUrl', 'baseUrl',
             'assets', 'sounds', 'soundLevels',
             'notificationSoundUrl', 'sentSoundUrl', 'callSoundUrl', 'dialingSoundUrl',
-            'sprite', 'emojiHash',
+            'sprite', 'emojiDataUrl', 'emojiHash',
             'loginUrl', 'registerUrl', 'adminUrl',
             'total_unread', 'enableSound',
             'realtime', 'friends', 'groups', 'courses', 'guests',
@@ -840,7 +840,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'mobileSwipeBack'       => ( $this->settings['mobileSwipeBack'] == '1' ? '1' : '0' ),
                 'autoFullScreen'        => ( $this->settings['autoFullScreen'] == '1' ? '1' : '0' ),
                 'tapToOpen'             => ( $this->settings['tapToOpenMsg'] == '1' ? '1' : '0' ),
-                'emojiHash'             => get_option('bm-emoji-hash', ''),
                 'emojiSet'              => $this->settings['emojiSet'],
                 'smileToEmoji'          => ( $this->settings['smileToEmoji'] === '1' ? '1' : '0' ),
                 'emojiPicker'           => ( $this->settings['emojiPicker'] === '1' ? '1' : '0' ),

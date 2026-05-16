@@ -74,6 +74,8 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
                 return false;
             }
 
+            $this->ensure_htaccess();
+
             // Clean old versions for this locale.
             $old_pattern = $this->upload_dir . 'bm-stickers-' . $locale . '-*.json';
             foreach ( glob( $old_pattern ) as $old_file ) {
@@ -83,6 +85,18 @@ if ( ! class_exists( 'Better_Messages_Sticker_Manifest' ) ) {
             }
 
             return $file_url;
+        }
+
+        protected function ensure_htaccess()
+        {
+            $path = $this->upload_dir . '.htaccess';
+            if ( file_exists( $path ) ) {
+                return;
+            }
+            $rules  = "<FilesMatch \"bm-stickers-.*\\.json$\">\n";
+            $rules .= "  Header set Cache-Control \"public, max-age=31536000, immutable\"\n";
+            $rules .= "</FilesMatch>\n";
+            @file_put_contents( $path, $rules );
         }
 
         /**

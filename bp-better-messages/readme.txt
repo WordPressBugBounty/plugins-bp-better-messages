@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.6
+Stable tag: 2.15.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -167,8 +167,8 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) - charge for messages & calls with per-role pricing and balance display
 * [MyCRED](https://www.better-messages.com/docs/integrations/mycred/) - charge for messages & calls with per-role pricing and balance display
 * [Paid Memberships Pro](https://www.wordplus.org/pmpro)
-* [WC Vendors](https://www.wordplus.org/knowledge-base/wc-vendors/)
-* [WCFM](https://www.wordplus.org/knowledge-base/wcfm/)
+* [WC Vendors](https://www.better-messages.com/docs/integrations/wc-vendors/)
+* [WCFM](https://www.better-messages.com/docs/integrations/wcfm/)
 
 [Full list of integrations](https://www.better-messages.com/docs/category/integrations/)
 
@@ -245,9 +245,49 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Frequently Asked Questions ==
 
-= Please visit KnowledgeBase =
+= Is Better Messages free? =
 
-[https://www.better-messages.com/](https://www.better-messages.com/)
+Yes — install the free version from WordPress.org. It supports private and group conversations, chat rooms, file sharing, oEmbed previews, smart-batched email notifications, role-based access, guest chat, and the standard messenger feature set. The WebSocket version is paid and unlocks instant delivery, one-on-one and group voice / video calls, AI Chat Bots, AI Content Moderation, AI Message Translation, Voice Message Transcription, web push, and end-to-end encryption.
+
+= Which WordPress plugins does Better Messages integrate with? =
+
+30+ native integrations including BuddyPress, BuddyBoss Platform, PeepSo, Ultimate Member, FluentCommunity, LearnDash, LearnPress, Tutor LMS, MasterStudy LMS, WooCommerce, Dokan, WCFM, WC Vendors, MultiVendorX, WP Job Manager, HivePress, Directorist, GeoDirectory, Classified Listing, Motors, ProfileGrid, UsersWP, WP User Manager, wpForo, SureDash, GamiPress, MyCred, JetEngine, AutomatorWP, Uncanny Automator, OneSignal, and Progressify. See the [full list of integrations](https://www.better-messages.com/docs/category/integrations/).
+
+= Does it support group conversations? =
+
+Yes — first-class group chats with shared history, mentions, reactions, file uploads, replies, edit / delete / forward, and group voice / video calls (WebSocket version). Group chats can be auto-paired with BuddyPress / BuddyBoss / PeepSo / Ultimate Member / FluentCommunity groups, with members joining and leaving the chat in sync with the source community group.
+
+= Can unregistered visitors (guests) chat? =
+
+Yes — Guest Chat lets unregistered visitors join chat rooms, message vendors on marketplaces, ask questions on directory listings, or chat with site support. Guests enter a display name (and optionally an email), then participate as a guest user. Their thread history is preserved if they later register.
+
+= Does it support voice and video calls on WordPress? =
+
+Yes (WebSocket version) — one-on-one and group voice / video calls live inside the messenger thread, not as a separate Zoom / Whereby integration. Hosted media relay is included with the WebSocket license; no separate Twilio account, no Daily / Whereby subscription, no Zoom developer plan. Calls are full-screen on mobile and picture-in-picture on desktop.
+
+= Is Better Messages GDPR-compatible? =
+
+Yes. All message data is stored only in your WordPress database. The WebSocket cloud relay is blind to message content — it routes encrypted events but does not read, store, or inspect what passes through. Better Messages also integrates with WordPress's built-in Personal Data Export and Erasure tools. For sites with stricter data-sovereignty requirements (GDPR Article 9, HIPAA-adjacent, regulated-data workloads), a self-hosted plan is available — contact support.
+
+= Does it have AI features? =
+
+Yes (WebSocket version, AI add-on). AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) act as full participants in any thread, with custom system prompts and per-bot points charging via GamiPress / MyCred. Better Messages Cloud AI provides AI Content Moderation (23+ categories including spam, scam, doxxing, contact sharing), AI Message Translation (53 languages with auto-detection), and Voice Message Transcription (99+ languages) — all included with the WebSocket license, no third-party API key required.
+
+= Does it have native iOS and Android apps? =
+
+Yes — Better Messages ships native iOS and Android mobile apps built on Capacitor, with push notifications, real-time delivery, voice / video calls, and full messenger feature parity with the web. White-label rebuild is available for sites that want their own branded app on the App Store / Play Store under their own developer accounts.
+
+= Can I translate the messenger interface to my language? =
+
+Yes — Better Messages is fully translatable through standard WordPress translation tools (Loco Translate, WPML, Polylang) using the `bp-better-messages` text domain. Ships with 30+ community translations. Contribute or improve a translation at [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/).
+
+= Does it support end-to-end encryption? =
+
+Yes (WebSocket version). End-to-end encryption is enabled per thread — messages and file attachments are encrypted in the sender's browser with AES-256-GCM before transmission, stay encrypted at rest in the database, and decrypt only in the recipient's browser. The server stores ciphertext only; no admin, host engineer, or attacker with database access can read the message content of an E2E thread.
+
+= Where can I find detailed documentation? =
+
+The complete documentation, integration guides, REST API reference, hooks reference, video tutorials, and 80+ blog posts are at [www.better-messages.com](https://www.better-messages.com/).
 
 == Installation ==
 
@@ -257,14 +297,22 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Screenshots ==
 
-1. Thread screen
-1. Embedded links
-1. Thread list screen
-1. New Thread screen
-1. Writing notification
-1. Onsite notifications
+1. Real-time private messaging thread with group conversation, file sharing, reactions, and emoji
+2. Embedded video and link previews — YouTube, Vimeo, Spotify, and 20+ oEmbed providers
+3. Conversations inbox with unread badges, pinned chats, and full-text search across messages
+4. Start a new conversation with recipient search and friends list
+5. Real-time typing indicator and online presence (WebSocket version)
+6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.7 =
+* Added Send Message, Audio Call and Video Call buttons to the [PeepSo user hovercard](https://www.better-messages.com/docs/integrations/peepso/#user-hovercard)
+* Added [emoji search translations](https://www.better-messages.com/docs/features/emoji-selector/#multilingual-search) — admin can download per-locale annotations so emoji picker search works in 30+ languages (e.g. German "gesicht" finds 😀)
+* Optimized emoji and stickers data delivery
+* Fixed guest users seeing their own name and avatar in one-on-one conversation headers, mini chat heads, and thread list previews instead of the other participant in some cases
+* Fixed MasterStudy LMS account mobile bottom menu overlapping the chat on the Messages page in full-screen mobile view
+* Other minor bugfixes and improvements
 
 = 2.15.6 =
 * Added JavaScript filter slots in the guest authentication screen — [`better_messages_auth_required_top`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_top), [`better_messages_auth_required_between`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_between), and [`better_messages_auth_required_bottom`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_bottom) — for injecting custom HTML into the pre-chat popup, mini-widget banner, and full messages page wall

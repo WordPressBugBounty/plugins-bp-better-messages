@@ -366,6 +366,7 @@ class Better_Messages_Options
             'UMmobileGroupsEnable'          => '0',
 
             'peepsoHeader'                  => '1',
+            'peepsoHovercard'                => '1',
             'peepsoProfileVideoCall'        => '0',
             'peepsoProfileAudioCall'        => '0',
             'PSonlyFriendsMode'             => '0',
@@ -1084,6 +1085,9 @@ class Better_Messages_Options
             ),
             'emojiDatasetBaseUrl' => Better_Messages()->url . 'assets/emojies/',
             'emojiSpriteStatus'  => Better_Messages_Emojis()->getLocalStatus(),
+            'emojiAnnotationStatus' => Better_Messages_Emoji_Annotations()->get_status(),
+            'emojiAnnotationIndex'  => Better_Messages_Emoji_Annotations()->get_index(),
+            'currentLocale'         => determine_locale(),
             'contactUrl'         => method_exists( bpbm_fs(), 'contact_url' ) ? bpbm_fs()->contact_url() : '',
             'emailPreviewStrings' => array(
                 'testConversation' => __( 'Test Conversation', 'bp-better-messages' ),
@@ -2115,6 +2119,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['peepsoHeader'] ) ) {
             $settings['peepsoHeader'] = '0';
+        }
+
+        if ( ! isset( $settings['peepsoHovercard'] ) ) {
+            $settings['peepsoHovercard'] = '1';
         }
 
         if( ! isset( $settings['bpForceMiniChat'] ) ) {
