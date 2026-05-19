@@ -326,6 +326,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Motors::instance();
             }
 
+            add_action( 'after_setup_theme', array( $this, 'load_houzez_addon' ), 20 );
+            add_action( 'after_setup_theme', array( $this, 'load_realhomes_addon' ), 20 );
+
             if( class_exists('LearnPress') ){
                 require_once Better_Messages()->path . 'addons/learnpress.php';
                 Better_Messages_LearnPress::instance();
@@ -408,6 +411,24 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter('bp_better_messages_after_format_message', array($this, 'system_message_formatting'), 101, 4);
             add_filter('better_messages_rest_message_meta', array($this, 'system_message_meta'), 10, 4);
+        }
+
+        public function load_houzez_addon()
+        {
+            if( ! defined('HOUZEZ_THEME_VERSION') ) return;
+            require_once Better_Messages()->path . 'addons/houzez.php';
+            if( class_exists('Better_Messages_Houzez') ){
+                Better_Messages_Houzez::instance();
+            }
+        }
+
+        public function load_realhomes_addon()
+        {
+            if( ! defined('RH_TEXT_DOMAIN') ) return;
+            require_once Better_Messages()->path . 'addons/realhomes.php';
+            if( class_exists('Better_Messages_RealHomes') ){
+                Better_Messages_RealHomes::instance();
+            }
         }
 
         public function system_message_formatting( $message, $message_id, $context, $user_id )
@@ -1029,7 +1050,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $slug = Better_Messages()->settings['wooCommerceMessagesSlug'];
 
             if( !! $page ) {
-                add_rewrite_endpoint($slug, EP_ROOT | EP_PAGES);
+                add_rewrite_endpoint($slug, EP_PAGES);
             }
         }
 
@@ -2166,16 +2187,27 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function chat_page($content){
-            $page_id = get_the_ID();
+            $page_id = (int) get_the_ID();
             $chat_page_id = Better_Messages()->settings['chatPage'];
+            $guest_chat_page_id = Better_Messages()->guests->guest_chat_page_id();
 
-            if( ! is_numeric( $chat_page_id ) ) return $content;
-
-            if( defined('ICL_LANGUAGE_CODE') ){
-                $chat_page_id = apply_filters( 'wpml_object_id', $chat_page_id, 'page', true, ICL_LANGUAGE_CODE );
+            $candidate_ids = array();
+            if( is_numeric( $chat_page_id ) && (int) $chat_page_id > 0 ){
+                $candidate_ids[] = (int) $chat_page_id;
+            }
+            if( $guest_chat_page_id ){
+                $candidate_ids[] = $guest_chat_page_id;
             }
 
-            if( $chat_page_id != $page_id ) return $content;
+            if( empty( $candidate_ids ) ) return $content;
+
+            if( defined('ICL_LANGUAGE_CODE') ){
+                foreach( $candidate_ids as $i => $cid ){
+                    $candidate_ids[ $i ] = (int) apply_filters( 'wpml_object_id', $cid, 'page', true, ICL_LANGUAGE_CODE );
+                }
+            }
+
+            if( ! in_array( $page_id, $candidate_ids, true ) ) return $content;
 
             if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ){
                 $messages_content = Better_Messages()->functions->render_login_form();

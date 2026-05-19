@@ -443,6 +443,7 @@ class Better_Messages_Options
             'enableDrafts'                  => '1',
             'bpAppPush'                     => '0',
             'guestChat'                     => '0',
+            'guestChatPage'                 => '0',
             'deleteMessagesOnUserDelete'    => '0',
             'dokanIntegration'              => '0',
             'MultiVendorXIntegration'       => '0',
@@ -481,6 +482,19 @@ class Better_Messages_Options
             'motorsListingCardButton'        => '1',
             'motorsDealerProfileButton'      => '1',
             'motorsDashboardTab'             => '1',
+            'houzezIntegration'              => '0',
+            'houzezPropertyButton'           => '1',
+            'houzezAgentButton'              => '1',
+            'houzezCardButton'               => '0',
+            'houzezDashboardTab'             => '1',
+            'houzezDisableNativeMessages'    => '1',
+            'realhomesIntegration'           => '0',
+            'realhomesPropertyButton'        => '1',
+            'realhomesAgentButton'           => '1',
+            'realhomesAgentCardButton'       => '1',
+            'realhomesCardButton'            => '1',
+            'realhomesDashboardTab'          => '1',
+            'realhomesDisableNativeMessages' => '1',
             'learnPressIntegration'         => '0',
             'learnPressGroupChat'           => '0',
             'learnPressProfileTab'          => '0',
@@ -831,6 +845,8 @@ class Better_Messages_Options
         $has_geodirectory = defined('GEODIRECTORY_VERSION');
         $has_wp_job_manager = class_exists('WP_Job_Manager');
         $has_motors = defined('STM_LISTINGS_V');
+        $has_houzez = defined('HOUZEZ_THEME_VERSION');
+        $has_realhomes = defined('RH_TEXT_DOMAIN');
         $has_bbpress     = class_exists('bbPress');
         $has_jetengine   = function_exists('jet_engine');
         $has_learnpress  = class_exists('LearnPress');
@@ -1014,6 +1030,8 @@ class Better_Messages_Options
             'hasGeoDirectory'    => $has_geodirectory,
             'hasWpJobManager'    => $has_wp_job_manager,
             'hasMotors'          => $has_motors,
+            'hasHouzez'          => $has_houzez,
+            'hasRealHomes'       => $has_realhomes,
             'hasBbPress'         => $has_bbpress,
             'hasJetEngine'       => $has_jetengine,
             'hasLearnPress'      => $has_learnpress,
@@ -1085,8 +1103,6 @@ class Better_Messages_Options
             ),
             'emojiDatasetBaseUrl' => Better_Messages()->url . 'assets/emojies/',
             'emojiSpriteStatus'  => Better_Messages_Emojis()->getLocalStatus(),
-            'emojiAnnotationStatus' => Better_Messages_Emoji_Annotations()->get_status(),
-            'emojiAnnotationIndex'  => Better_Messages_Emoji_Annotations()->get_index(),
             'currentLocale'         => determine_locale(),
             'contactUrl'         => method_exists( bpbm_fs(), 'contact_url' ) ? bpbm_fs()->contact_url() : '',
             'emailPreviewStrings' => array(

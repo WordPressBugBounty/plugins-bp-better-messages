@@ -1511,9 +1511,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
         }
 
         public function rest_create_messages_page( WP_REST_Request $request ) {
-            $page_title = _x( 'Messages', 'Default page title', 'bp-better-messages' );
+            $target = (string) $request->get_param( 'target' );
+            if ( ! in_array( $target, array( 'chatPage', 'guestChatPage' ), true ) ) {
+                $target = 'chatPage';
+            }
 
-            // Use Gutenberg block if block editor is available, otherwise shortcode
+            $page_title = $target === 'guestChatPage'
+                ? _x( 'Guest Messages', 'Default page title', 'bp-better-messages' )
+                : _x( 'Messages', 'Default page title', 'bp-better-messages' );
+
             if ( function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( 'page' ) ) {
                 $page_content = '<!-- wp:better-messages/user-inbox /-->';
             } else {
@@ -1531,9 +1537,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'create_failed', $page_id->get_error_message(), array( 'status' => 500 ) );
             }
 
-            // Auto-select the new page as messages location
             $existing = Better_Messages_Options::instance()->settings;
-            $existing['chatPage'] = (string) $page_id;
+            $existing[ $target ] = (string) $page_id;
             Better_Messages_Options::instance()->update_settings( $existing );
 
             return rest_ensure_response( array(
@@ -1541,6 +1546,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'pageId'    => $page_id,
                 'pageTitle' => $page_title,
                 'pageUrl'   => get_permalink( $page_id ),
+                'target'    => $target,
                 'settings'  => Better_Messages_Options::instance()->settings,
             ) );
         }

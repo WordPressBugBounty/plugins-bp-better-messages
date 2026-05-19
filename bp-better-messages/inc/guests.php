@@ -27,7 +27,6 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             $this->table = bm_get_table('guests');
 
             $this->check_guest_auth();
-            $this->maybe_load_mini_widget_for_guest_fallback();
 
             add_action('wp_enqueue_scripts', array($this, 'load_scripts'));
             #add_action('wp_footer', array($this, 'html_element'), 999);
@@ -86,22 +85,23 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             return Better_Messages()->settings['guestChat'] === '1';
         }
 
-        public function force_mini_for_guest_on_restricted_chat_page(){
-            if ( is_user_logged_in() ) return false;
-            if ( ! $this->guest_access_enabled() ) return false;
-            $restricted = apply_filters( 'better_messages_restricted_chat_pages', array( 'woocommerce', 'buddypress' ) );
-            return in_array( Better_Messages()->settings['chatPage'], $restricted, true );
+        public function chat_page_is_public_wp_page(){
+            $chat_page = Better_Messages()->settings['chatPage'];
+            return is_numeric( $chat_page ) && (int) $chat_page > 0;
         }
 
-        public function maybe_load_mini_widget_for_guest_fallback(){
-            static $loaded = false;
-            if ( $loaded ) return;
-            if ( ! $this->force_mini_for_guest_on_restricted_chat_page() ) return;
-            $path = Better_Messages()->path . 'inc/mini.php';
-            if ( ! file_exists( $path ) ) return;
-            require_once $path;
-            Better_Messages_Mini();
-            $loaded = true;
+        public function guest_chat_page_id(){
+            if ( ! $this->guest_access_enabled() ) return 0;
+            if ( $this->chat_page_is_public_wp_page() ) return 0;
+            $id = (int) Better_Messages()->settings['guestChatPage'];
+            return $id > 0 ? $id : 0;
+        }
+
+        public function guest_has_entry_point(){
+            if ( ! $this->guest_access_enabled() ) return false;
+            if ( $this->chat_page_is_public_wp_page() ) return true;
+            if ( $this->guest_chat_page_id() ) return true;
+            return Better_Messages()->settings['miniChatsEnable'] === '1';
         }
 
         public function guest_user_id( $user_id ){

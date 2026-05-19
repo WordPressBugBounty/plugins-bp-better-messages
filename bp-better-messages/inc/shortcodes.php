@@ -114,8 +114,8 @@ class Better_Messages_Shortcodes
 
         if( ! is_user_logged_in() ) {
             $link = Better_Messages()->functions->get_link(Better_Messages()->functions->get_current_user_id());
-            if( ! Better_Messages()->guests->guest_access_enabled() ){
-                $attrs .= ' onclick="event.preventDefault(); location.href = \'' . $link . '\'; "';
+            if( ! Better_Messages()->guests->guest_has_entry_point() ){
+                $attrs .= ' onclick="event.preventDefault(); event.stopImmediatePropagation(); event.stopPropagation(); location.href = \'' . $link . '\';"';
             }
         }
 

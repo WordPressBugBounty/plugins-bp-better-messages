@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.7
+Stable tag: 2.15.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -305,6 +305,15 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.8 =
+* Fixed pages with the slug `messages` returning 404 on sites that use WooCommerce as the Messages Location
+* Fixed the compact-sidebar hover tooltip lingering on the conversation screen after tapping an avatar on mobile
+* Added [Guest Messages Page](https://www.better-messages.com/docs/features/guest-access/#guest-messages-page) setting
+* Added per-thread participant override mechanism — addons can display a participant under a different name, avatar and profile URL inside one specific thread without touching their real WordPress identity elsewhere. Same WP user can wear different identities in different threads at the same time. See the [developer guide](https://www.better-messages.com/docs/development/guides/per-thread-fake-users/) for the reusable pattern
+* Added initial [Houzez Real Estate Theme](https://www.better-messages.com/docs/integrations/houzez/) integration
+* Added initial [RealHomes Real Estate Theme](https://www.better-messages.com/docs/integrations/realhomes/) integration
+* Other minor bugfixes and improvements
 
 = 2.15.7 =
 * Added Send Message, Audio Call and Video Call buttons to the [PeepSo user hovercard](https://www.better-messages.com/docs/integrations/peepso/#user-hovercard)

@@ -756,6 +756,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function get_link( $user_id = false )
         {
             if( ! is_user_logged_in() && ! Better_Messages()->notifications->is_sending_notifications() ) {
+                $guest_chat_page_id = Better_Messages()->guests->guest_chat_page_id();
+                if( $guest_chat_page_id ) {
+                    return get_permalink( $guest_chat_page_id );
+                }
                 if( ! is_numeric( Better_Messages()->settings['chatPage'] ) || Better_Messages()->settings['chatPage'] === '0' ) {
                     return apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg([]) ) );
                 }
@@ -849,6 +853,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     }
                     if ( $author_url ) {
                         return add_query_arg( 'page', 'better-messages', $author_url );
+                    }
+                }
+
+                if ( defined('HOUZEZ_THEME_VERSION') && Better_Messages()->settings['chatPage'] === 'houzez-dashboard' && class_exists('Better_Messages_Houzez') ) {
+                    $houzez_page_id = Better_Messages_Houzez::instance()->get_live_chat_page_id();
+                    if ( $houzez_page_id ) {
+                        return get_permalink( $houzez_page_id );
+                    }
+                }
+
+                if ( defined('RH_TEXT_DOMAIN') && Better_Messages()->settings['chatPage'] === 'realhomes-dashboard' && class_exists('Better_Messages_RealHomes') ) {
+                    $realhomes_url = Better_Messages_RealHomes::instance()->get_live_chat_url();
+                    if ( $realhomes_url ) {
+                        return $realhomes_url;
                     }
                 }
             }

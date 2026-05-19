@@ -1006,11 +1006,22 @@ table.build-info-table button {
 .bm-messages-location:last-child {
   border-bottom: none;
 }
+.bm-messages-location .bm-messages-location-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e1e1e;
+  line-height: 1.4;
+}
 .bm-messages-location .bm-messages-location-desc {
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
   color: #1e1e1e;
+}
+.bm-messages-location .bm-messages-location-label + .bm-messages-location-desc {
+  margin-top: -4px;
+  font-size: 12px;
+  color: #757575;
 }
 .bm-messages-location .bm-messages-location-hint {
   margin: 0;
