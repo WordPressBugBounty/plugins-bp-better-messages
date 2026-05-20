@@ -51,6 +51,8 @@ class Better_Messages_Shortcodes
         add_shortcode( 'better_messages_user_conversation', array( $this, 'better_messages_user_conversation' ) );
 
         add_shortcode( 'better_messages_live_chat_button',  array( $this, 'better_messages_live_chat_button' ) );
+
+        add_filter( 'better_messages_rest_thread_item', array( $this, 'apply_thread_info_banner' ), 20, 5 );
     }
 
     function esc_brackets($text = ''){
@@ -58,50 +60,48 @@ class Better_Messages_Shortcodes
     }
 
     public function better_messages_live_chat_button($args){
-        $class  = 'bm-lc-button';
-        $attrs  = '';
-        $alt    = '';
-        $text   = __('Live Chat', 'bp-better-messages');
-        $type   = 'link';
+        $post  = $this->get_context_post();
+        $class = 'bm-lc-button';
+        $attrs = '';
 
         if( isset( $args['class'] ) ) {
             $class .= ' ' . $args['class'];
         }
 
-        if( isset( $args['type']) && $args['type'] === 'button' ){
-            $type = 'button';
-        }
+        $tag  = ( isset( $args['type'] ) && $args['type'] === 'button' ) ? 'button' : 'a';
+        $text = $this->resolve_text_token( isset( $args['text'] ) ? (string) $args['text'] : '', $post );
 
-        if( isset( $args['text'] ) ) {
-            $text = $args['text'];
-        }
-
-        if( isset( $args['alt'] ) ) {
-            $alt = $args['alt'];
-        }
-
-        if( isset( $args['subject'] ) ) {
-            $attrs .= ' data-subject="' . esc_attr($args['subject']) . '"';
+        if( isset( $args['subject'] ) && $args['subject'] !== '' ) {
+            $subject = $this->resolve_context_token( (string) $args['subject'], $post );
+            if( $subject !== '' ){
+                $attrs .= ' data-subject="' . esc_attr( $subject ) . '"';
+            }
         }
 
         if( isset( $args['target'] ) ) {
             $attrs .= ' target="' . esc_attr( $args['target'] ) . '"';
         }
 
-        if( isset( $args['unique_tag'] ) ) {
-            $attrs .= ' data-bm-unique-key="' . esc_attr($args['unique_tag']) . '"';
+        if( isset( $args['unique_tag'] ) && $args['unique_tag'] !== '' ) {
+            $unique_tag = $this->resolve_unique_tag_token( (string) $args['unique_tag'], $post );
+            if( $unique_tag !== '' ){
+                $attrs .= ' data-bm-unique-key="' . esc_attr( $unique_tag ) . '"';
+            }
         }
 
-        if( isset( $args['object_id'] ) ) {
-            $attrs .= ' data-bm-object-id="' . intval($args['object_id']) . '"';
+        if( isset( $args['object_id'] ) && $args['object_id'] !== '' ) {
+            $object_id = $this->resolve_object_id_token( (string) $args['object_id'], $post );
+            if( $object_id > 0 ){
+                $attrs .= ' data-bm-object-id="' . $object_id . '"';
+            }
         }
 
-        if( $alt !== '' ){
-            $attrs .= ' title="' . esc_html( $alt ) . '"';
+        if( isset( $args['alt'] ) && $args['alt'] !== '' ){
+            $attrs .= ' title="' . esc_html( $args['alt'] ) . '"';
         }
 
-        if( isset( $args['user_id'] ) ) {
-            $user_id = (int) $args['user_id'];
+        if( isset( $args['user_id'] ) && $args['user_id'] !== '' ) {
+            $user_id = $this->resolve_user_id_token( (string) $args['user_id'], $post );
         } else {
             $user_id = (int) Better_Messages()->functions->get_member_id();
         }
@@ -110,22 +110,165 @@ class Better_Messages_Shortcodes
             $class .= ' bm-self-button';
         }
 
-        $link = '#';
-
-        if( ! is_user_logged_in() ) {
-            $link = Better_Messages()->functions->get_link(Better_Messages()->functions->get_current_user_id());
-            if( ! Better_Messages()->guests->guest_has_entry_point() ){
-                $attrs .= ' onclick="event.preventDefault(); event.stopImmediatePropagation(); event.stopPropagation(); location.href = \'' . $link . '\';"';
-            }
+        if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_has_entry_point() ) {
+            $link = Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() );
+            $attrs .= ' onclick="event.preventDefault(); event.stopImmediatePropagation(); event.stopPropagation(); location.href = \'' . $link . '\';"';
         }
+
+        $style_attr = $this->build_inline_style_attr( $args );
+        $icon_html  = $this->build_icon_html( isset( $args['icon'] ) ? (string) $args['icon'] : '' );
 
         Better_Messages()->enqueue_css();
 
-        if( $type === 'button'){
-            return '<button class="' . esc_attr($class) . '" data-user-id="' . $user_id . '" ' . $attrs . '><span class="bm-button-text">' . wp_kses($text, ['i' => [ 'class' => [] ]]) . '</span></button>';
-        } else {
-            return '<a class="' . esc_attr($class) . '" data-user-id="' . $user_id . '" ' . $attrs . '><span class="bm-button-text">' . wp_kses($text, ['i' => [ 'class' => [] ]]) . '</span></a>';
+        $inner = $icon_html . '<span class="bm-button-text">' . wp_kses( $text, [ 'i' => [ 'class' => [] ] ] ) . '</span>';
+
+        return '<' . $tag . ' class="' . esc_attr( $class ) . '" data-user-id="' . $user_id . '"' . $style_attr . ' ' . $attrs . '>' . $inner . '</' . $tag . '>';
+    }
+
+    public function build_inline_style_attr( $args ){
+        $map = array(
+            'bg_color'      => 'background-color',
+            'text_color'    => 'color',
+            'font_size'     => 'font-size',
+            'padding'       => 'padding',
+            'margin'        => 'margin',
+            'border_radius' => 'border-radius',
+        );
+
+        $parts = array();
+        foreach( $map as $arg_key => $css_prop ){
+            if( ! isset( $args[ $arg_key ] ) ) continue;
+            $value = trim( (string) $args[ $arg_key ] );
+            if( $value === '' ) continue;
+            $parts[] = $css_prop . ': ' . $value;
         }
+
+        if( empty( $parts ) ) return '';
+
+        $style = safecss_filter_attr( implode( '; ', $parts ) );
+        if( $style === '' ) return '';
+
+        return ' style="' . esc_attr( $style ) . '"';
+    }
+
+    public function build_icon_html( $icon_value ){
+        $svg = $this->sanitize_icon_svg( $icon_value );
+        if( $svg === '' ) return '';
+
+        return '<span class="bm-button-icon" aria-hidden="true">' . $svg . '</span>';
+    }
+
+    public function sanitize_icon_svg( $svg ){
+        $svg = trim( (string) $svg );
+        if( $svg === '' ) return '';
+        if( stripos( ltrim( $svg ), '<svg' ) !== 0 ) return '';
+
+        $svg = preg_replace( '/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/is', '', $svg );
+        $svg = preg_replace( '/<foreignObject\b[^<]*(?:(?!<\/foreignObject>)<[^<]*)*<\/foreignObject>/is', '', $svg );
+        $svg = preg_replace( '/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/is', '', $svg );
+        $svg = preg_replace( '/<(object|embed)\b[^>]*>/i', '', $svg );
+        $svg = preg_replace( '/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/is', '', $svg );
+        $svg = preg_replace( '/\son\w+\s*=\s*["\'][^"\']*["\']/i', '', $svg );
+        $svg = preg_replace( '/\son\w+\s*=\s*[^\s>]*/i', '', $svg );
+        $svg = preg_replace( '/(href|xlink:href|src)\s*=\s*["\']\s*(javascript|data|vbscript):[^"\']*["\']/i', '$1=""', $svg );
+        $svg = preg_replace( '/(href|xlink:href|src)\s*=\s*(javascript|data|vbscript):[^\s>]*/i', '$1=""', $svg );
+
+        if( $svg === null || stripos( ltrim( $svg ), '<svg' ) !== 0 ) return '';
+
+        return $svg;
+    }
+
+    public function get_context_post(){
+        $post_id = get_the_ID();
+        if( ! $post_id ) return null;
+        $post = get_post( $post_id );
+        return ( $post instanceof WP_Post ) ? $post : null;
+    }
+
+    public function resolve_context_token( $value, $post ){
+        $value = (string) $value;
+        if( $value === '' ) return '';
+
+        if( $post instanceof WP_Post ){
+            $author_id   = (int) $post->post_author;
+            $author      = $author_id ? get_userdata( $author_id ) : null;
+            $author_name = $author ? $author->display_name : '';
+
+            $replacements = [
+                '{post_id}'     => (string) $post->ID,
+                '{post_type}'   => $post->post_type,
+                '{post_title}'  => $post->post_title,
+                '{author_id}'   => (string) $author_id,
+                '{author_name}' => $author_name,
+            ];
+
+            $value = strtr( $value, $replacements );
+        } else {
+            $value = preg_replace( '/\{[a-z_]+\}/', '', $value );
+        }
+
+        return $value;
+    }
+
+    public function resolve_text_token( $value, $post ){
+        $value = (string) $value;
+
+        if( $value === '' ){
+            return __( 'Live Chat', 'bp-better-messages' );
+        }
+
+        if( $value === 'auto' ){
+            $default = $post instanceof WP_Post
+                ? _x( 'Chat with {author_name}', 'Live Chat Button auto label', 'bp-better-messages' )
+                : __( 'Live Chat', 'bp-better-messages' );
+
+            $value = apply_filters( 'better_messages_live_chat_button_auto_text', $default, $post );
+        }
+
+        $resolved = $this->resolve_context_token( $value, $post );
+
+        return $resolved !== '' ? $resolved : __( 'Live Chat', 'bp-better-messages' );
+    }
+
+    public function resolve_unique_tag_token( $value, $post ){
+        $value = (string) $value;
+        if( $value === '' ) return '';
+
+        if( $value === 'auto' ){
+            if( ! $post instanceof WP_Post ) return '';
+            return $post->post_type . '-' . $post->ID;
+        }
+
+        return $this->resolve_context_token( $value, $post );
+    }
+
+    public function resolve_object_id_token( $value, $post ){
+        $value = (string) $value;
+        if( $value === '' ) return 0;
+
+        if( $value === 'auto' ){
+            return $post instanceof WP_Post ? (int) $post->ID : 0;
+        }
+
+        return (int) $value;
+    }
+
+    public function resolve_user_id_token( $value, $post ){
+        $value = (string) $value;
+        if( $value === '' ) return 0;
+
+        if( $value === 'post_author' ){
+            return $post instanceof WP_Post ? (int) $post->post_author : 0;
+        }
+
+        if( strpos( $value, 'postmeta:' ) === 0 ){
+            if( ! $post instanceof WP_Post ) return 0;
+            $meta_key   = substr( $value, strlen( 'postmeta:' ) );
+            $meta_value = get_post_meta( $post->ID, $meta_key, true );
+            return is_numeric( $meta_value ) ? (int) $meta_value : 0;
+        }
+
+        return (int) $value;
     }
 
     public function better_messages_single_conversation( $args ){
@@ -446,9 +589,56 @@ class Better_Messages_Shortcodes
         }
     }
 
+    public function apply_thread_info_banner( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
+        if( $thread_type !== 'thread' ) return $thread_item;
+        if( ! empty( $thread_item['threadInfo'] ) ) return $thread_item;
+
+        $context_post_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'context_post_id' );
+        if( $context_post_id <= 0 ) return $thread_item;
+
+        $post = get_post( $context_post_id );
+        if( ! $post instanceof WP_Post ) return $thread_item;
+        if( $post->post_status !== 'publish' ) return $thread_item;
+        if( function_exists( 'is_post_publicly_viewable' ) && ! is_post_publicly_viewable( $post ) ) return $thread_item;
+
+        $html = $this->build_thread_info_banner_html( $post, $thread_id );
+        if( $html !== '' ) $thread_item['threadInfo'] = $html;
+
+        return $thread_item;
+    }
+
+    public function build_thread_info_banner_html( WP_Post $post, $thread_id ){
+        $title = get_the_title( $post );
+        $url   = get_permalink( $post );
+        $image = '';
+
+        if( has_post_thumbnail( $post ) ){
+            $image = (string) wp_get_attachment_image_url( get_post_thumbnail_id( $post ), 'thumbnail' );
+        }
+
+        $html  = '<div class="bm-product-info bm-thread-context-info">';
+        if( $image ){
+            $html .= '<div class="bm-product-image">';
+            $html .= '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener"><img src="' . esc_url( $image ) . '" alt="' . esc_attr( $title ) . '" /></a>';
+            $html .= '</div>';
+        }
+        $html .= '<div class="bm-product-details">';
+        $html .= '<div class="bm-product-title"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $title ) . '</a></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return apply_filters( 'better_messages_thread_info_banner_html', $html, $post, $thread_id );
+    }
+
 }
 
 function Better_Messages_Shortcodes()
 {
     return Better_Messages_Shortcodes::instance();
+}
+
+if( ! function_exists( 'better_messages_live_chat_button' ) ){
+    function better_messages_live_chat_button( array $args = [] ): string {
+        return Better_Messages_Shortcodes::instance()->better_messages_live_chat_button( $args );
+    }
 }

@@ -2304,6 +2304,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 'display'  => 'Every Minute' ,
             );
 
+            $schedules[ 'ba_every_five_minutes' ] = array(
+                'interval' => 60 * 5,
+                'display'  => 'Every Five Minutes',
+            );
+
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $notifications_interval < 1 ) $notifications_interval = 1;
 

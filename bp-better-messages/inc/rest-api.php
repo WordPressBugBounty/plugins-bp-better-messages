@@ -50,6 +50,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             require_once('api/admin.php');
             Better_Messages_Rest_Api_Admin();
 
+            require_once('api/live-chat-builder.php');
+            Better_Messages_Live_Chat_Builder();
+
             require_once('api/bulk-message.php');
             Better_Messages_Rest_Api_Bulk_Message();
 
@@ -719,6 +722,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $user_id   = intval( $request->get_param('user_id') );
             $create    = boolval( $request->get_param('create') );
             $subject   = trim( sanitize_text_field( urldecode( $request->get_param('subject') ) ) );
+            $object_id = intval( $request->get_param('objectId') );
 
             $uniqueKeyParam = $request->get_param('uniqueKey');
             $uniqueKey = $uniqueKeyParam !== null ? trim( sanitize_text_field( urldecode( $request->get_param('uniqueKey') ) ) ) : '';
@@ -729,8 +733,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $result = Better_Messages()->functions->get_unique_pm_thread_id( $uniqueKey, $user_id, Better_Messages()->functions->get_current_user_id(), $create, $subject );
             }
 
-            // Allow addons (E2E) to process newly created PM threads
             $result = apply_filters( 'better_messages_private_thread_result', $result, $user_id, Better_Messages()->functions->get_current_user_id() );
+
+            if( $result['result'] === 'thread_created' && $object_id > 0 && isset( $result['thread_id'] ) ){
+                $thread_id = (int) $result['thread_id'];
+                $existing  = Better_Messages()->functions->get_thread_meta( $thread_id, 'context_post_id' );
+                if( empty( $existing ) ){
+                    Better_Messages()->functions->update_thread_meta( $thread_id, 'context_post_id', $object_id );
+                }
+            }
 
             if( $result['result'] === 'thread_found' || $result['result'] === 'thread_created' ){
                 $thread_id = (int) $result['thread_id'];

@@ -75,12 +75,15 @@ document.addEventListener('fluentCommunityUtilReady', function () {
           '</div>',
         mounted() {
           updateDynamicCSS();
-          BetterMessages.initialize();
-          BetterMessages.parseHash();
-
+          if (window.BetterMessages && typeof window.BetterMessages.initialize === 'function') {
+            window.BetterMessages.initialize();
+          }
+          if (window.BetterMessages && typeof window.BetterMessages.parseHash === 'function') {
+            window.BetterMessages.parseHash();
+          }
         },
         beforeRouteLeave(e, n) {
-          if( BetterMessages.isInCall()){
+          if (window.BetterMessages && typeof window.BetterMessages.isInCall === 'function' && window.BetterMessages.isInCall()) {
             return false;
           }
 
@@ -92,7 +95,9 @@ document.addEventListener('fluentCommunityUtilReady', function () {
             container.remove();
           }
 
-          BetterMessages.resetMainVisibleThread();
+          if (window.BetterMessages && typeof window.BetterMessages.resetMainVisibleThread === 'function') {
+            window.BetterMessages.resetMainVisibleThread();
+          }
         }
       },
       meta: {active: "better-messages"}

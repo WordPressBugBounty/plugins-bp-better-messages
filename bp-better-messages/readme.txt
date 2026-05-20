@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.8
+Stable tag: 2.15.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -305,6 +305,12 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.9 =
+* Added **Shortcode Builder** — visual admin tool at *Settings → Shortcodes* that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
+* Migration to new [Roadmap](https://www.better-messages.com/roadmap/)
+* Fixed image download from the lightbox opening a stuck Quick Look preview when Better Messages is used in an iPhone PWA — now uses the native iOS share sheet
+* Other minor bugfixes and improvements
 
 = 2.15.8 =
 * Fixed pages with the slug `messages` returning 404 on sites that use WooCommerce as the Messages Location
