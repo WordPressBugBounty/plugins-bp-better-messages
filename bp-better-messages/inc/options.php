@@ -369,6 +369,14 @@ class Better_Messages_Options
             'peepsoHovercard'                => '1',
             'peepsoProfileVideoCall'        => '0',
             'peepsoProfileAudioCall'        => '0',
+
+            'bbRLStandaloneMessages'        => '0',
+            'bbRLFullScreen'                => '0',
+            'bbRLPageTitle'                 => '0',
+            'bbRLHideMiniWidget'            => '0',
+            'bbClassicStandaloneMessages'   => '0',
+            'bbClassicPageTitle'            => '0',
+            'bbClassicHideMiniWidget'       => '0',
             'PSonlyFriendsMode'             => '0',
             'PSminiFriendsEnable'           => '0',
             'PScombinedFriendsEnable'       => '0',
@@ -826,6 +834,9 @@ class Better_Messages_Options
 
         $has_buddypress  = class_exists('BuddyPress');
         $has_buddyboss   = defined('BP_PLATFORM_VERSION');
+        $has_buddyboss_theme = $has_buddyboss && function_exists( 'get_template' ) && get_template() === 'buddyboss-theme';
+        $bb_rl_enabled_opt = $has_buddyboss ? get_option( 'bb_rl_enabled' ) : null;
+        $has_readylaunch   = $has_buddyboss && ( $bb_rl_enabled_opt === '1' || $bb_rl_enabled_opt === 1 || $bb_rl_enabled_opt === true );
         $has_um          = defined('ultimatemember_version');
         $has_asgaros     = class_exists('AsgarosForum');
         $has_woocommerce = class_exists('WooCommerce');
@@ -1011,6 +1022,8 @@ class Better_Messages_Options
             'isSsl'              => is_ssl() || defined('BM_DEV'),
             'hasBuddyPress'      => $has_buddypress,
             'hasBuddyBoss'       => $has_buddyboss,
+            'hasBuddyBossTheme'  => $has_buddyboss_theme,
+            'hasReadyLaunch'     => $has_readylaunch,
             'hasUltimateMember'  => $has_um,
             'hasAsgarosForum'    => $has_asgaros,
             'hasWooCommerce'     => $has_woocommerce,

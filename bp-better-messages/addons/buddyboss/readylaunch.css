@@ -1,0 +1,349 @@
+.bm-bb-readylaunch .bb-rl-left-panel-menu-link {
+    position: relative;
+}
+
+.bm-bb-readylaunch .bb-rl-left-panel-menu-link .bm-bb-rl-side-unread {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    margin-left: auto;
+    border-radius: 999px;
+    background-color: var(--bb-rl-primary-color, #3E34FF);
+    color: var(--bb-rl-text-white-color, #fff);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.25px;
+    box-sizing: border-box;
+}
+
+.bm-bb-readylaunch #object-nav #user-bp_better_messages_tab,
+.bm-bb-readylaunch #object-nav #user-messages {
+    position: relative;
+}
+
+.bm-bb-readylaunch #object-nav #user-bp_better_messages_tab .bm-bb-rl-nav-unread,
+.bm-bb-readylaunch #object-nav #user-messages .bm-bb-rl-nav-unread {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    margin-left: 6px;
+    border-radius: 999px;
+    background-color: var(--bb-rl-primary-color, #3E34FF);
+    color: var(--bb-rl-text-white-color, #fff);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.25px;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+/* RL ships `svg { display: block; max-width: 100% }` which collapses BM's
+ * inline icons to 0 inside zero-width inline parents. */
+.bm-bb-readylaunch .bp-messages-wrap svg,
+.bm-bb-readylaunch .bm-notification-list svg {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: none;
+}
+
+/* Mobile launcher centers its icon via text-align + line-height, needs inline. */
+.bm-bb-readylaunch #bp-better-messages-mini-mobile-open svg {
+    display: inline;
+    vertical-align: initial;
+}
+
+.bm-bb-readylaunch .bpbm-empty-icon svg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bm-bb-readylaunch #header-messages-dropdown-elem .notification-dropdown {
+    overflow: hidden;
+}
+
+.bm-bb-readylaunch #header-messages-dropdown-elem .notification-dropdown .header-ajax-container,
+.bm-bb-readylaunch #header-messages-dropdown-elem .notification-dropdown .bm-notification-list {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.bm-bb-readylaunch #header-messages-dropdown-elem .notification-dropdown .bm-notification-list .bp-messages-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.bm-bb-readylaunch #header-messages-dropdown-elem .notification-dropdown .bm-notification-list .bp-messages-wrap .threads-list .thread .actions {
+    width: auto;
+}
+
+/* Top spacing only — side padding triggers BM's icon-only mode below 800px. */
+.bm-bb-readylaunch.bp-user.bp-messages #item-body > .bp-messages-wrap-main {
+    margin-top: 20px !important;
+}
+
+body.bm-bb-rl-fullpage-msg #item-header,
+body.bm-bb-rl-fullpage-msg .bb-rl-secondary-container {
+    display: none !important;
+}
+
+body.bm-bb-rl-fullpage-msg.bm-bb-readylaunch.bp-user.bp-messages #item-body > .bp-messages-wrap-main {
+    margin-top: 0 !important;
+}
+
+body.bm-bb-rl-fullscreen .bb-rl-content-wrapper {
+    padding: 0 !important;
+}
+
+body.bm-bb-rl-fullscreen .bp-messages-wrap {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Scope to .bb-rl-content-wrapper so the header-dropdown messenger isn't stretched. */
+body.bm-bb-rl-fullscreen .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-mobile) .bp-messages-wrap-main,
+body.bm-bb-rl-fullscreen .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-full-screen):not(.bp-messages-mobile),
+body.bm-bb-rl-fullscreen .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-mobile) .bp-messages-threads-wrapper {
+    height: calc(100vh - var(--wp-admin--admin-bar--height, 0px) - 66px) !important;
+}
+
+body.bm-bb-rl-fullscreen.bm-bb-rl-page-title .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-mobile) .bp-messages-wrap-main,
+body.bm-bb-rl-fullscreen.bm-bb-rl-page-title .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-full-screen):not(.bp-messages-mobile),
+body.bm-bb-rl-fullscreen.bm-bb-rl-page-title .bb-rl-content-wrapper .bp-messages-wrap:not(.bp-messages-mobile) .bp-messages-threads-wrapper {
+    height: calc(100vh - var(--wp-admin--admin-bar--height, 0px) - 66px - 60px) !important;
+}
+
+.bm-bb-rl-msg-page-header {
+    min-height: 57px;
+}
+
+body.bm-bb-rl-fullscreen .bm-bb-rl-msg-page-header {
+    border-radius: 0 !important;
+    border-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+body.bm-bb-rl-hide-mini .bp-better-messages-list,
+body.bm-bb-rl-hide-mini .bp-messages-wrap.bm-widget-bubble,
+body.bm-bb-rl-hide-mini .bpbm-minimize {
+    display: none !important;
+}
+
+/* Inherit BB's native line-height — overriding to 1 shrinks the line box
+ * and pushes the text off-center. */
+.bm-bb-readylaunch .bb-profile-card.bb-rl-popup-card .bb-rl-card-action a.card-button.bpbm-pm-button.send-message {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.bm-bb-readylaunch .bb-profile-card.bb-rl-popup-card .bb-rl-card-action a.card-button.bpbm-pm-button.send-message > .bm-loader-container {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto !important;
+    height: auto !important;
+}
+
+.bm-bb-readylaunch .bb-profile-card.bb-rl-popup-card .bb-rl-card-action a.card-button.bpbm-pm-button.send-message > .bm-loader-container > i,
+.bm-bb-readylaunch .bb-profile-card.bb-rl-popup-card .bb-rl-card-action a.card-button.bpbm-pm-button.send-message > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-pm-button.send-message,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-pm-button.send-message {
+    background: transparent;
+    color: var(--bb-rl-icon-secondary-color, #6d6d6e);
+    border: 0;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    line-height: 1;
+    min-width: 0;
+    box-shadow: none;
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-pm-button.send-message:hover,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-pm-button.send-message:hover {
+    background: var(--bb-rl-background-secondary-color, #f6f6f6);
+    color: var(--bb-rl-primary-color, #3E34FF);
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-pm-button.send-message > i,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-pm-button.send-message > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    color: inherit;
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-pm-button.send-message > i::before,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-pm-button.send-message > i::before {
+    content: "\e16e";
+    font-family: 'bb-icons-rl';
+    font-size: 18px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+}
+
+/* Override !important to defeat the legacy inline display:block + #21759b
+ * background set by the existing BB addon JS. */
+.bm-bb-readylaunch .bb-rl-member-header-actions .generic-button a.bpbm-pm-button.send-message {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 31px;
+    padding: 4px 16px !important;
+    border-radius: 6px;
+    background: var(--bb-rl-primary-color, #3E34FF) !important;
+    color: var(--bb-rl-text-white-color, #fff) !important;
+    border: 1px solid var(--bb-rl-primary-color, #3E34FF);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+    box-shadow: none;
+    min-width: 0;
+    min-height: 0 !important;
+    width: auto !important;
+}
+
+.bm-bb-readylaunch .bb-rl-member-header-actions .generic-button a.bpbm-pm-button.send-message:hover {
+    background: var(--bb-rl-background-brand-primary-hover-color, #4937f4) !important;
+    border-color: var(--bb-rl-background-brand-primary-hover-color, #4937f4);
+    color: var(--bb-rl-text-white-color, #fff) !important;
+}
+
+.bm-bb-readylaunch .bb-rl-member-header-actions .generic-button a.bpbm-pm-button.send-message > .bm-loader-container {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    width: auto !important;
+    height: auto !important;
+    line-height: 1;
+}
+
+.bm-bb-readylaunch .bb-rl-member-header-actions .generic-button a.bpbm-pm-button.send-message > .bm-loader-container > i,
+.bm-bb-readylaunch .bb-rl-member-header-actions .generic-button a.bpbm-pm-button.send-message > i {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    line-height: 1;
+}
+
+/* Hide until JS relocates the PM link into the reply actions dropdown. */
+.bm-bb-readylaunch .bb-rl-forum-reply-list-item .bpbm-private-message-link-buddypress {
+    display: none !important;
+}
+
+.bm-bb-readylaunch .bb_more_options_list .bm-bb-rl-pm-item {
+    display: block;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.bm-bb-readylaunch .bb_more_options_list .bm-bb-rl-pm-item > a.bpbm-private-message-link-buddyboss {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    color: var(--bb-rl-text-secondary-color, #555556);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.bm-bb-readylaunch .bb_more_options_list .bm-bb-rl-pm-item > a.bpbm-private-message-link-buddyboss::before {
+    content: "\e214";
+    font-family: 'bb-icons-rl';
+    font-size: 20px;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--bb-rl-icon-primary-color, #3d3d3d);
+    margin-right: 8px;
+    line-height: 1;
+    display: block;
+}
+
+.bm-bb-readylaunch .bb_more_options_list .bm-bb-rl-pm-item > a.bpbm-private-message-link-buddyboss:hover {
+    background-color: var(--bb-rl-background-secondary-hover-color, #f3f3f3);
+    color: var(--bb-rl-text-color, #242425);
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-audio-call,
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-video-call,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-audio-call,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-video-call {
+    background: transparent;
+    color: var(--bb-rl-icon-secondary-color, #6d6d6e);
+    border: 0;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    line-height: 1;
+    min-width: 0;
+    box-shadow: none;
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-audio-call:hover,
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-video-call:hover,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-audio-call:hover,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-video-call:hover {
+    background: var(--bb-rl-background-secondary-color, #f6f6f6);
+    color: var(--bb-rl-primary-color, #3E34FF);
+}
+
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-audio-call > i,
+.bm-bb-readylaunch #members-list .item-entry .generic-button a.bpbm-video-call > i,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-audio-call > i,
+.bm-bb-readylaunch .bb-rl-members-list .item-entry .generic-button a.bpbm-video-call > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    color: inherit;
+    font-size: 18px;
+}
+
+/* Lift contexify menus above the RL header (z-index 1030). */
+body.bm-bb-readylaunch {
+    --bm-contexify-zIndex: 1031;
+}

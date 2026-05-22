@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.9
+Stable tag: 2.15.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -100,7 +100,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * Mass messaging from WP Admin with scheduling, file attachments, and background processing
 * Suggested conversations for new users
 
-**[Mini Widgets](https://www.better-messages.com/docs/features/mini-widgets):**
+**[Mini Widgets](https://www.better-messages.com/docs/features/mini-widgets/):**
 
 * Embed conversation entry points anywhere on your site without using shortcodes
 * Five widgets: Friends, Groups, Users, AI Bots, Chat Rooms
@@ -306,9 +306,13 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.9 =
-* Added **Shortcode Builder** — visual admin tool at *Settings → Shortcodes* that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
+= 2.15.9 - 2.15.10 =
 * Migration to new [Roadmap](https://www.better-messages.com/roadmap/)
+* Added **Shortcode Builder** — visual admin tool at *Settings → Shortcodes* that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
+* Added initial [BuddyBoss ReadyLaunch theme](https://www.better-messages.com/docs/integrations/buddyboss/#buddyboss-readylaunch) integration
+* Added new BuddyBoss settings group at *Better Messages → Settings → Integrations → BuddyPress* — separate **Full-page messenger**, **Full Width**, **Page Title**, and **Hide Mini Widget on Messages Page** toggles for the ReadyLaunch theme and the classic BuddyBoss Theme
+* Fixed FluentCommunity integration script throwing `Cannot read properties of null` on non-FluentCommunity pages
+* Hide the messenger Minimize button on the FluentCommunity `/messages` route — the mini widgets are hidden there, so minimize had no surface to restore from
 * Fixed image download from the lightbox opening a stuck Quick Look preview when Better Messages is used in an iPhone PWA — now uses the native iOS share sheet
 * Other minor bugfixes and improvements
 
@@ -377,12 +381,12 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Added [MultiVendorX 5.0+](https://www.better-messages.com/docs/integrations/multivendorx/) integration alongside the existing < 5.0 support
 * Older MultiVendorX 4.x sites are unaffected — the previous integration continues to load on those installations
 * Added FluentCommunity Courses integration
-* Added a dedicated [Courses widget](https://www.better-messages.com/docs/features/mini-widgets) to the Mini Widgets which will be showing user enrolled courses in LMS
+* Added a dedicated [Courses widget](https://www.better-messages.com/docs/features/mini-widgets/) to the Mini Widgets which will be showing user enrolled courses in LMS
 * Added "Maximum Message Length" setting (Settings → Messaging) — cap the number of characters allowed in each message
 * Other minor bugfixes and improvements
 
 = 2.15.0 =
-* Added three new [widgets](https://www.better-messages.com/docs/features/mini-widgets): **Users** (browse and message any site member, with optional online-only filtering, online-first ordering, sort by last activity or registration date, and three display modes — all / by role / hand-picked), **AI Bots** (start or continue conversations with configured AI chat bots), and **Chat Rooms** (browse public chat rooms with optional online-count badge)
+* Added three new [widgets](https://www.better-messages.com/docs/features/mini-widgets/): **Users** (browse and message any site member, with optional online-only filtering, online-first ordering, sort by last activity or registration date, and three display modes — all / by role / hand-picked), **AI Bots** (start or continue conversations with configured AI chat bots), and **Chat Rooms** (browse public chat rooms with optional online-count badge)
 * Redesigned the Settings → Mini Widgets page into per-widget sub-tabs, with each widget exposing its own icon picker, search-box toggle, role restrictions matrix (mini bar / side panel / mobile bar), and widget-specific options
 * Added "Hide Tab When Empty" toggle per widget — hides the Friends / Groups / AI Bots / Chat Rooms / Users tab entirely when the current user has nothing to show, instead of rendering an empty list
 * Added AI Chat Bot [welcome message](https://www.better-messages.com/docs/features/ai-chat-bots#welcome-message) — bots can greet users with a configurable opening message and placeholder
@@ -401,7 +405,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 = 2.14.16 =
 * Making Stipop Sticker provider legacy as it increased price significantly since initial integration
-* Added [built-in sticker packs system](https://www.better-messages.com/docs/features/stickers) - create and manage your own sticker packs, with role-based access control and per-locale support
+* Added [built-in sticker packs system](https://www.better-messages.com/docs/features/stickers/) - create and manage your own sticker packs, with role-based access control and per-locale support
 * Added 8 pre-created sticker packs which can be installed from plugin settings
 * Added inline sticker suggestions — stickers are suggested as you type based on keywords if enabled in plugin settings
 * Rebuilt [GIF integration](https://www.better-messages.com/docs/features/giphy-integration/) into multi-provider system with support for GIPHY and Klipy providers — select your preferred provider in Settings → Integrations
@@ -409,7 +413,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Other minor bugfixes and improvements
 
 = 2.14.14 =
-* Added [WooCommerce integration](https://www.better-messages.com/docs/integrations/woocommerce) — adds contact buttons on product, cart, checkout, and order pages with configurable placement and recipient
+* Added [WooCommerce integration](https://www.better-messages.com/docs/integrations/woocommerce/) — adds contact buttons on product, cart, checkout, and order pages with configurable placement and recipient
     * Added Product Page contact button with 4 placement options (above/below summary, above/below add-to-cart) — works in both classic and block themes
     * Added Order Page contact button on My Account → View Order
     * Added Pre-purchase Help Button on cart and checkout pages
@@ -430,10 +434,10 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Other minor bugfixes and improvements
 
 = 2.14.11 - 2.14.12 =
-* Added [Better Messages Translation AI](https://www.better-messages.com/docs/features/ai-message-translation) — automatic message translation for 1-to-1 conversations
-* Added [Better Messages Transcription AI](https://www.better-messages.com/docs/websocket/cloud-ai) — voice message transcriptions
+* Added [Better Messages Translation AI](https://www.better-messages.com/docs/features/ai-message-translation/) — automatic message translation for 1-to-1 conversations
+* Added [Better Messages Transcription AI](https://www.better-messages.com/docs/websocket/cloud-ai/) — voice message transcriptions
 * Added Test [Callback URL](https://www.better-messages.com/docs/websocket/cloud-ai/#callback-url) button to the Settings page in the WebSocket version, which allows testing the callback URL for the Better Messages Cloud AI
-* Initial integration with [WordPress Abilities API](https://www.better-messages.com/docs/ai-mcp/ai-mcp-integration), which allows using MCP and AI
+* Initial integration with [WordPress Abilities API](https://www.better-messages.com/docs/ai-mcp/ai-mcp-integration/), which allows using MCP and AI
 * Fixed bug with AI Chat Bots not allowing to select model if no global api key setting
 * Fixed bug with attachments being sent to previously opened conversation when using "Send now" button in the file uploader popup
 * Fixed bug where disabling End-to-End Encryption would lock users out of previously encrypted conversations and prevent starting new ones with the same participants when the Single Conversation Per Recipient option is enabled
@@ -441,7 +445,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 = 2.14.8 - 2.14.10 =
 * Initial release of Better Messages Cloud AI
-* Added [Better Messages Moderation AI](https://www.better-messages.com/docs/features/ai-content-moderation) — included with WebSocket license at no additional cost, no third-party API keys required.
+* Added [Better Messages Moderation AI](https://www.better-messages.com/docs/features/ai-content-moderation/) — included with WebSocket license at no additional cost, no third-party API keys required.
     * Cloud-powered content moderation with extended categories, custom rules, and conversation context awareness
     * Added AI moderation provider selection: choose between OpenAI Moderation API and Better Messages Moderation AI
     * Added custom moderation rules — define your own rules in plain text (e.g. block contact sharing, promotions)

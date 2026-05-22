@@ -174,7 +174,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
                 body[data-route="better_messages"] #fcom-chat-widget-container,
                 body[data-route="better_messages"] .bp-better-messages-list,
-                body[data-route="better_messages"] .bp-better-messages-mini{
+                body[data-route="better_messages"] .bp-better-messages-mini,
+                body[data-route="better_messages"] .bp-messages-wrap-main .chat-header .bpbm-minimize{
                     display: none !important;
                 }
 

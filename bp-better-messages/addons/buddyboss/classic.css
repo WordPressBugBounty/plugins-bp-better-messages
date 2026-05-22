@@ -1,0 +1,22 @@
+body.bm-bb-classic-fullpage-msg #item-header,
+body.bm-bb-classic-fullpage-msg #object-nav.bp-navs.single-screen-navs {
+    display: none !important;
+}
+
+body.bm-bb-classic-fullpage-msg #buddypress.buddypress-wrap > .bp-wrap {
+    margin-top: 0 !important;
+}
+
+/* `.single` context bumps `.entry-title` to 32px — revert to directory size (28px). */
+.single .bm-bb-classic-msg-page-header .entry-title {
+    font-size: 1.75rem;
+    line-height: 1.5rem;
+    margin: 0;
+    letter-spacing: normal;
+}
+
+body.bm-bb-classic-hide-mini .bp-better-messages-list,
+body.bm-bb-classic-hide-mini .bp-messages-wrap.bm-widget-bubble,
+body.bm-bb-classic-hide-mini .bpbm-minimize {
+    display: none !important;
+}

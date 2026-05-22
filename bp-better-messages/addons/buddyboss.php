@@ -79,19 +79,18 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts') );
 
+            require_once trailingslashit( dirname( __FILE__ ) ) . 'buddyboss/readylaunch.php';
+            require_once trailingslashit( dirname( __FILE__ ) ) . 'buddyboss/classic.php';
+            if ( Better_Messages_BuddyBoss_ReadyLaunch::is_active() ) {
+                Better_Messages_BuddyBoss_ReadyLaunch::instance();
+            } else {
+                Better_Messages_BuddyBoss_Classic::instance();
+            }
         }
 
         public function enqueue_scripts()
         {
-            $script = "wp.hooks.addFilter('better_messages_avatar_attributes', 'better_messages_bb_hooks', function(attributes, user){
-                    if( user && user.id ) {
-                        attributes['data-bb-hp-profile'] = user.id;
-                    }
-
-                    return attributes;
-            });
-
-            wp.hooks.addAction('better_messages_update_unread', 'better_messages_bb_profile_menu', function( unread ){
+            $script = "wp.hooks.addAction('better_messages_update_unread', 'better_messages_bb_profile_menu', function( unread ){
                 var parent = document.querySelector('#wp-admin-bar-my-account-messages > a.ab-item');
                 if( ! parent ) return;
 
@@ -143,6 +142,18 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 } else {
                     relocateBBPressPMLink();
                 }
+
+                document.addEventListener('click', function(e){
+                    if( ! e.target || typeof e.target.closest !== 'function' ) return;
+                    var thread = e.target.closest('#header-messages-dropdown-elem .thread');
+                    if( ! thread ) return;
+                    setTimeout(function(){
+                        var dd = document.getElementById('header-messages-dropdown-elem');
+                        if( dd && dd.classList.contains('selected') ){
+                            dd.classList.remove('selected');
+                        }
+                    }, 0);
+                });
             })();";
 
 

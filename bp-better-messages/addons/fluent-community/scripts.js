@@ -46,13 +46,13 @@ wp.hooks.addFilter('better_messages_navigate_url', 'bm_fluent_com', function( re
 });
 
 
-const isMobile = document.body.classList.contains('bp-messages-mobile');
-const fullSize = ( typeof settings !== 'undefined' && typeof settings.fullScreen !== 'undefined' ) ? settings.fullScreen : false;
-const containerClass = fullSize ? 'fcom_full_size_container' : 'fcom_boxed_container';
-const containerStyle = fullSize ? 'padding: 0;' : 'padding: 20px;';
-const header = ( ! isMobile && typeof settings !== 'undefined' && settings.title !== '' ) ? '<div class="fhr_content_layout_header"><h1 class="fcom_page_title">' + settings.title + '</h1></div>' : '';
-
 document.addEventListener('fluentCommunityUtilReady', function () {
+  const isMobile = document.body.classList.contains('bp-messages-mobile');
+  const fullSize = ( typeof settings !== 'undefined' && typeof settings.fullScreen !== 'undefined' ) ? settings.fullScreen : false;
+  const containerClass = fullSize ? 'fcom_full_size_container' : 'fcom_boxed_container';
+  const containerStyle = fullSize ? 'padding: 0;' : 'padding: 20px;';
+  const header = ( ! isMobile && typeof settings !== 'undefined' && settings.title !== '' ) ? '<div class="fhr_content_layout_header"><h1 class="fcom_page_title">' + settings.title + '</h1></div>' : '';
+
   updateDynamicCSS();
 
   document.addEventListener('click', function(e) {
