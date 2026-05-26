@@ -6314,7 +6314,7 @@ body.bm-messages-dark .bp-messages-wrap .bm-reply .bm-stickers,
 body.bm-messages-dark .bp-messages-wrap .bm-reply .bm-emojies {
   color: rgba(var(--main-bm-color), 1) !important;
 }
-body.bm-messages-dark .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .message-controls > span,
+body.bm-messages-dark .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .message-controls > span:not(.bm-status),
 body.bm-messages-dark .bp-messages-wrap .empty,
 body.bm-messages-dark .bp-messages-wrap .empty-thread span,
 body.bm-messages-dark .bp-messages-wrap .empty-thread svg,
@@ -7859,7 +7859,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: block;
   width: 100%;
-  text-decoration: none;
+  text-decoration: none !important;
   margin: 5px 0;
   outline: 0;
   color: rgba(var(--bm-text-color), 1);

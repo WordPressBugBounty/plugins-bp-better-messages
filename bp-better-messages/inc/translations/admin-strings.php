@@ -1486,6 +1486,8 @@ function _bm_admin_translations_map() {
         array( '_x', 'Allow file uploads in Ultimate Member group messages', 'Settings page' ),
         array( '_x', 'Only Followers Mode', 'Settings page' ),
         array( '_x', 'Only allow messaging between users who follow each other or have a follower relationship', 'Settings page' ),
+        array( '_x', 'Hide Messages tab when vendor disables live chat', 'Settings page' ),
+        array( '_x', 'When a vendor turns off the live chat toggle in their dashboard settings, also hide the Messages tab from their dashboard sidebar', 'Settings page' ),
         array( '_x', 'WooCommerce Integration', 'Settings page' ),
         array( '_x', 'Enable WooCommerce Integration', 'Settings page' ),
         array( '_x', 'Let customers chat with your support team from product, shop, and order pages', 'Settings page' ),

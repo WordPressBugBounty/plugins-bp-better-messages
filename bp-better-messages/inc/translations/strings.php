@@ -2284,6 +2284,8 @@ function _bm_js_translation_strings() {
     _x('Allow file uploads in Ultimate Member group messages', 'Settings page', 'bp-better-messages');
     _x('Only Followers Mode', 'Settings page', 'bp-better-messages');
     _x('Only allow messaging between users who follow each other or have a follower relationship', 'Settings page', 'bp-better-messages');
+    _x('Hide Messages tab when vendor disables live chat', 'Settings page', 'bp-better-messages');
+    _x('When a vendor turns off the live chat toggle in their dashboard settings, also hide the Messages tab from their dashboard sidebar', 'Settings page', 'bp-better-messages');
     _x('WooCommerce Integration', 'Settings page', 'bp-better-messages');
     _x('Enable WooCommerce Integration', 'Settings page', 'bp-better-messages');
     _x('Let customers chat with your support team from product, shop, and order pages', 'Settings page', 'bp-better-messages');

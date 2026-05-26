@@ -92,8 +92,15 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             global $processedUrls;
 
             $links = array();
+            $wrap_token = function( $url ) use ( &$links ) {
+                return '<' . array_push( $links, '<a target="_blank" href="' . $url . '">' . $url . '</a>' ) . '>';
+            };
 
-            $message = preg_replace_callback('~(<a .*?>.*?</a>|<.*?>)~i', function ($match) use (&$links) { return '<' . array_push($links, $match[1]) . '>'; }, $message);
+            $message = preg_replace_callback('~(<a\s.*?>.*?</a>|<.*?>)~is', function ($match) use (&$links) { return '<' . array_push($links, $match[1]) . '>'; }, $message);
+
+            $message = preg_replace_callback('~```[\s\S]*?```~', function ($match) use (&$links) { return '<' . array_push($links, $match[0]) . '>'; }, $message);
+
+            $message = preg_replace_callback('~`[^`\n]+`~', function ($match) use (&$links) { return '<' . array_push($links, $match[0]) . '>'; }, $message);
 
             $message = preg_replace_callback('~!?\[.*?\]\(.*?\)~sU', function ($match) use (&$links) { return '<' . array_push($links, $match[0]) . '>'; }, $message);
 
@@ -102,6 +109,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
             if( ! empty( $urls[0] ) ){
                 $urls[0] = array_unique($urls[0]);
+                usort( $urls[0], function( $a, $b ) { return strlen( $b ) - strlen( $a ); } );
             }
 
             foreach ( $urls[ 0 ] as $_url ) {
@@ -219,16 +227,15 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                             }
 
                             if( $html ) {
-                                $message = str_replace($_url, '', $message);
+                                $message = str_replace( $_url, '', $message );
                             } else {
-                                $message = str_replace($_url, '<a target="_blank" href="' . $_url . '">' . $_url . '</a>', $message);
+                                $message = str_replace( $_url, $wrap_token( $_url ), $message );
                             }
                         } else {
-                            $message = str_replace( $_url, '<a target="_blank" href="' . $_url . '">' . $_url . '</a>', $message );
+                            $message = str_replace( $_url, $wrap_token( $_url ), $message );
                         }
                     } else {
-
-                        $message = str_replace( $_url, '<a target="_blank" href="' . $_url . '">' . $_url . '</a>', $message );
+                        $message = str_replace( $_url, $wrap_token( $_url ), $message );
                     }
 
                     if( isset( $link ) ) {

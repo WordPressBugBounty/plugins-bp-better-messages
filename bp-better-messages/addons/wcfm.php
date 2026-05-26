@@ -165,7 +165,8 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js( $js ) );
 
-            $css = '.wcfm_menu_bpbm-messages .wcfm_menu_item .text .bp-better-messages-unread{ margin-left: 10px; }';
+            $css = '.wcfm_menu_bpbm-messages .wcfm_menu_item .text .bp-better-messages-unread{ margin-left: 10px; }
+                #wcfm_bpbm_messages{ padding-bottom: 0 !important; }';
 
             wp_add_inline_style( 'better-messages', Better_Messages()->functions->minify_css( $css ) );
         }

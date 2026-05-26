@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.10\n"
+"Project-Id-Version: Better Messages 2.15.11\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-22T22:06:18+00:00\n"
+"POT-Creation-Date: 2026-05-26T23:15:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -71,7 +71,7 @@ msgid "Bot name is required"
 msgstr ""
 
 #: addons/ai/ai.php:2843
-#: addons/buddyboss.php:470
+#: addons/buddyboss.php:472
 #: inc/websocket.php:1109
 #: inc/websocket.php:1166
 #, php-format
@@ -79,7 +79,7 @@ msgid "New message from %s"
 msgstr ""
 
 #: addons/ai/ai.php:2844
-#: addons/buddyboss.php:471
+#: addons/buddyboss.php:473
 #: inc/websocket.php:1110
 #: inc/websocket.php:1167
 #, php-format
@@ -156,9 +156,9 @@ msgstr ""
 #: addons/ai/ai.php:3637
 #: inc/api/admin.php:1614
 #: inc/chats.php:1575
-#: inc/options.php:762
-#: inc/options.php:772
-#: inc/options.php:1206
+#: inc/options.php:763
+#: inc/options.php:773
+#: inc/options.php:1207
 msgctxt "Settings page"
 msgid "Guests"
 msgstr ""
@@ -186,7 +186,7 @@ msgstr ""
 #: inc/chats.php:1585
 #: inc/translations/strings.php:806
 #: inc/translations/strings.php:1027
-#: inc/translations/strings.php:3149
+#: inc/translations/strings.php:3151
 msgctxt "WP Admin"
 msgid "Loading"
 msgstr ""
@@ -414,12 +414,12 @@ msgctxt "Uncanny AutomatorWP Integration"
 msgid "Content"
 msgstr ""
 
-#: addons/buddyboss.php:363
+#: addons/buddyboss.php:365
 msgctxt "Settings page"
 msgid "The BuddyBoss OneSignal integration is active and will be used, this option do not need to be enabled"
 msgstr ""
 
-#: addons/buddyboss.php:545
+#: addons/buddyboss.php:547
 #: addons/calls.php:735
 #: addons/calls.php:776
 #: addons/calls.php:828
@@ -429,7 +429,7 @@ msgstr ""
 msgid "Audio Call"
 msgstr ""
 
-#: addons/buddyboss.php:555
+#: addons/buddyboss.php:557
 #: addons/calls.php:736
 #: addons/calls.php:788
 #: addons/calls.php:839
@@ -439,25 +439,25 @@ msgstr ""
 msgid "Video Call"
 msgstr ""
 
-#: addons/buddyboss.php:633
+#: addons/buddyboss.php:635
 #, php-format
 msgid "Left \"%s\""
 msgstr ""
 
-#: addons/buddyboss.php:635
+#: addons/buddyboss.php:637
 #, php-format
 msgid "Joined \"%s\""
 msgstr ""
 
-#: addons/buddyboss.php:640
+#: addons/buddyboss.php:642
 msgid "This message was deleted."
 msgstr ""
 
-#: addons/buddyboss.php:670
+#: addons/buddyboss.php:672
 msgid "You can't message a blocked member."
 msgstr ""
 
-#: addons/buddyboss.php:692
+#: addons/buddyboss.php:694
 msgid "You can't message this member."
 msgstr ""
 
@@ -762,16 +762,16 @@ msgstr ""
 
 #: addons/dokan.php:362
 #: addons/multi-vendor-x.php:108
-#: addons/wc-vendors.php:227
-#: addons/wcfm.php:325
+#: addons/wc-vendors.php:241
+#: addons/wcfm.php:326
 msgctxt "Marketplace Integrations"
 msgid "Live Chats"
 msgstr ""
 
 #: addons/dokan.php:367
 #: addons/multi-vendor-x.php:113
-#: addons/wc-vendors.php:233
-#: addons/wcfm.php:332
+#: addons/wc-vendors.php:247
+#: addons/wcfm.php:333
 msgctxt "Marketplace Integrations"
 msgid "Enable live chat in store"
 msgstr ""
@@ -1333,47 +1333,47 @@ msgctxt "Motors Integration (Dashboard tab)"
 msgid "Please log in to view your messages."
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:139
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:124
 #: addons/multi-vendor-x.php:69
 msgctxt "MultiVendorX Integration (Store page)"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:163
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:148
 #: addons/multi-vendor-x.php:213
 #, php-format
 msgctxt "MultiVendorX Integration (Product page)"
 msgid "Question about your product %s"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:170
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:155
 #: addons/multi-vendor-x.php:217
 msgctxt "MultiVendorX Integration (Product page)"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:272
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:304
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:293
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:325
 msgctxt "MultiVendorX dashboard menu"
 msgid "Messages"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:305
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:326
 msgctxt "MultiVendorX vendor settings"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:306
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:327
 msgctxt "MultiVendorX vendor settings"
 msgid "Allow customers to message you about your store"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:307
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:328
 msgctxt "MultiVendorX vendor settings"
 msgid "Enable live chat"
 msgstr ""
 
-#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:308
+#: addons/multi-vendor-x-v5/multi-vendor-x-v5.php:329
 msgctxt "MultiVendorX vendor settings"
 msgid "Show a Live Chat button on your store and product pages"
 msgstr ""
@@ -1518,9 +1518,9 @@ msgstr ""
 #: inc/moderation.php:798
 #: inc/moderation.php:824
 #: inc/moderation.php:849
-#: inc/rest-api.php:1059
-#: inc/rest-api.php:1083
-#: inc/rest-api.php:1193
+#: inc/rest-api.php:1069
+#: inc/rest-api.php:1093
+#: inc/rest-api.php:1203
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to do that"
 msgstr ""
@@ -1529,7 +1529,7 @@ msgstr ""
 #: addons/pinned-message.php:121
 #: addons/reactions.php:102
 #: addons/user-reports/user-reports.php:139
-#: inc/rest-api.php:1262
+#: inc/rest-api.php:1272
 msgid "Message not found"
 msgstr ""
 
@@ -2098,35 +2098,35 @@ msgid "Messages"
 msgstr ""
 
 #: addons/wc-vendors.php:133
-#: addons/wc-vendors.php:153
+#: addons/wc-vendors.php:167
 msgctxt "WC Vendors Integration (Store page)"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/wc-vendors.php:176
+#: addons/wc-vendors.php:190
 #, php-format
 msgctxt "WC Vendors Integration (Product page)"
 msgid "Question about your product %s"
 msgstr ""
 
-#: addons/wc-vendors.php:181
+#: addons/wc-vendors.php:195
 msgctxt "WC Vendors Integration (Product page)"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/wcfm.php:236
-#: addons/wcfm.php:256
+#: addons/wcfm.php:237
+#: addons/wcfm.php:257
 msgctxt "WCFM Integration (Store page)"
 msgid "Live Chat"
 msgstr ""
 
-#: addons/wcfm.php:281
+#: addons/wcfm.php:282
 #, php-format
 msgctxt "WCFM Integration (Product page)"
 msgid "Question about your product %s"
 msgstr ""
 
-#: addons/wcfm.php:286
+#: addons/wcfm.php:287
 msgctxt "WCFM Integration (Product page)"
 msgid "Live Chat"
 msgstr ""
@@ -3729,14 +3729,14 @@ msgstr ""
 #: inc/notifications.php:547
 #: inc/notifications.php:1003
 #: inc/notifications.php:1010
-#: inc/options.php:1125
+#: inc/options.php:1126
 #, php-format
 msgid "%s wrote:"
 msgstr ""
 
 #: inc/notifications.php:630
 #: inc/notifications.php:826
-#: inc/options.php:1123
+#: inc/options.php:1124
 #, php-format
 msgctxt "Email notification header for non BuddyPress websites"
 msgid "You have unread messages: \"%s\""
@@ -3752,8 +3752,8 @@ msgid "Please enter a valid email address."
 msgstr ""
 
 #: inc/notifications.php:825
-#: inc/options.php:1122
 #: inc/options.php:1123
+#: inc/options.php:1124
 msgid "Test Conversation"
 msgstr ""
 
@@ -3793,57 +3793,57 @@ msgstr ""
 
 #: inc/notifications.php:1056
 #: inc/notifications.php:1193
-#: inc/options.php:1126
+#: inc/options.php:1127
 msgid "View Conversation"
 msgstr ""
 
 #: inc/notifications.php:1060
 #: inc/notifications.php:1198
-#: inc/options.php:1124
+#: inc/options.php:1125
 #, php-format
 msgid "Hi %s,"
 msgstr ""
 
 #: inc/notifications.php:1161
 #: inc/notifications.php:1224
-#: inc/options.php:1127
+#: inc/options.php:1128
 msgctxt "Email footer"
 msgid "Unsubscribe from email notifications about unread messages"
 msgstr ""
 
-#: inc/options.php:646
-#: inc/options.php:696
-#: inc/translations/strings.php:3227
+#: inc/options.php:647
+#: inc/options.php:697
+#: inc/translations/strings.php:3229
 #: views/layout-viewer.php:11
 msgctxt "WP Admin"
 msgid "Administration"
 msgstr ""
 
-#: inc/options.php:647
+#: inc/options.php:648
 msgctxt "WP Admin"
 msgid "Better Messages"
 msgstr ""
 
-#: inc/options.php:686
 #: inc/options.php:687
+#: inc/options.php:688
 #: inc/translations/strings.php:1419
 msgctxt "WP Admin"
 msgid "Settings"
 msgstr ""
 
-#: inc/options.php:706
 #: inc/options.php:707
+#: inc/options.php:708
 msgctxt "WP Admin"
 msgid "Chat Rooms"
 msgstr ""
 
-#: inc/options.php:716
 #: inc/options.php:717
+#: inc/options.php:718
 msgctxt "WP Admin"
 msgid "AI Chat Bots"
 msgstr ""
 
-#: inc/options.php:773
+#: inc/options.php:774
 #: inc/translations/strings.php:1879
 msgctxt "Settings page"
 msgid "AI Chat Bots"
@@ -3860,7 +3860,18 @@ msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to restore this conversation"
 msgstr ""
 
-#: inc/rest-api.php:973
+#: inc/rest-api.php:936
+#: inc/rest-api.php:1134
+#: inc/rest-api.php:2437
+#: inc/rest-api.php:2455
+#: inc/rest-api.php:2467
+#: inc/rest-api.php:2479
+#: inc/rest-api.php:2491
+msgctxt "Rest API Error"
+msgid "Sorry, you are not allowed to reply into this conversation"
+msgstr ""
+
+#: inc/rest-api.php:983
 #: inc/translations/strings.php:731
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3870,7 +3881,7 @@ msgctxt "User tried to send empty message error"
 msgid "The message you were trying to send was empty"
 msgstr ""
 
-#: inc/rest-api.php:982
+#: inc/rest-api.php:992
 #: inc/translations/strings.php:401
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3881,31 +3892,21 @@ msgctxt "Send message error"
 msgid "Message is too long. Maximum allowed length is %d characters"
 msgstr ""
 
-#: inc/rest-api.php:1073
+#: inc/rest-api.php:1083
 msgctxt "Rest API Error"
 msgid "Message not found"
 msgstr ""
 
-#: inc/rest-api.php:1096
+#: inc/rest-api.php:1106
 msgctxt "Rest API Error"
 msgid "No destination conversations specified"
 msgstr ""
 
-#: inc/rest-api.php:1124
-#: inc/rest-api.php:2427
-#: inc/rest-api.php:2445
-#: inc/rest-api.php:2457
-#: inc/rest-api.php:2469
-#: inc/rest-api.php:2481
-msgctxt "Rest API Error"
-msgid "Sorry, you are not allowed to reply into this conversation"
-msgstr ""
-
-#: inc/rest-api.php:1209
+#: inc/rest-api.php:1219
 msgid "Message content was empty."
 msgstr ""
 
-#: inc/rest-api.php:1219
+#: inc/rest-api.php:1229
 #: inc/translations/strings.php:402
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3916,26 +3917,26 @@ msgctxt "Edit message error"
 msgid "Message is too long. Maximum allowed length is %d characters"
 msgstr ""
 
-#: inc/rest-api.php:1232
+#: inc/rest-api.php:1242
 msgctxt "Rest API Error"
 msgid "Forwarded messages cannot be edited"
 msgstr ""
 
-#: inc/rest-api.php:1274
+#: inc/rest-api.php:1284
 msgctxt "Rest API Error"
 msgid "The edit time limit for this message has expired."
 msgstr ""
 
-#: inc/rest-api.php:1822
+#: inc/rest-api.php:1832
 msgid "Message not found in this conversation"
 msgstr ""
 
-#: inc/rest-api.php:2530
+#: inc/rest-api.php:2540
 msgctxt "Rest API Error"
 msgid "Sorry, the conversation which you tried to access does not exists"
 msgstr ""
 
-#: inc/rest-api.php:2544
+#: inc/rest-api.php:2554
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to access this conversation"
 msgstr ""
@@ -11130,7 +11131,7 @@ msgstr ""
 
 #: inc/translations/strings.php:867
 #: inc/translations/strings.php:1541
-#: inc/translations/strings.php:3198
+#: inc/translations/strings.php:3200
 msgctxt "WP Admin"
 msgid "Loading..."
 msgstr ""
@@ -12292,7 +12293,7 @@ msgid "Subject"
 msgstr ""
 
 #: inc/translations/strings.php:1103
-#: inc/translations/strings.php:3188
+#: inc/translations/strings.php:3190
 msgctxt "WP Admin"
 msgid "Message"
 msgstr ""
@@ -12483,13 +12484,13 @@ msgid "Follow-up"
 msgstr ""
 
 #: inc/translations/strings.php:1141
-#: inc/translations/strings.php:3215
+#: inc/translations/strings.php:3217
 msgctxt "WP Admin"
 msgid "Deleting..."
 msgstr ""
 
 #: inc/translations/strings.php:1142
-#: inc/translations/strings.php:3223
+#: inc/translations/strings.php:3225
 msgctxt "WP Admin"
 msgid "Delete"
 msgstr ""
@@ -12535,8 +12536,8 @@ msgid "No bulk messaging jobs yet."
 msgstr ""
 
 #: inc/translations/strings.php:1151
-#: inc/translations/strings.php:3151
-#: inc/translations/strings.php:3187
+#: inc/translations/strings.php:3153
+#: inc/translations/strings.php:3189
 msgctxt "WP Admin"
 msgid "ID"
 msgstr ""
@@ -13330,13 +13331,13 @@ msgid "User"
 msgstr ""
 
 #: inc/translations/strings.php:1310
-#: inc/translations/strings.php:3154
+#: inc/translations/strings.php:3156
 msgctxt "WP Admin"
 msgid "next"
 msgstr ""
 
 #: inc/translations/strings.php:1311
-#: inc/translations/strings.php:3155
+#: inc/translations/strings.php:3157
 msgctxt "WP Admin"
 msgid "previous"
 msgstr ""
@@ -16111,7 +16112,7 @@ msgid "Quick Actions"
 msgstr ""
 
 #: inc/translations/strings.php:1877
-#: inc/translations/strings.php:3120
+#: inc/translations/strings.php:3122
 msgctxt "Settings page"
 msgid "Chat Rooms"
 msgstr ""
@@ -16157,7 +16158,7 @@ msgid "HD group video chat for up to 32 participants per conversation"
 msgstr ""
 
 #: inc/translations/strings.php:1887
-#: inc/translations/strings.php:3117
+#: inc/translations/strings.php:3119
 msgctxt "Settings page"
 msgid "Groups"
 msgstr ""
@@ -16525,7 +16526,7 @@ msgid "How it works?"
 msgstr ""
 
 #: inc/translations/strings.php:1957
-#: inc/translations/strings.php:3116
+#: inc/translations/strings.php:3118
 msgctxt "Settings page"
 msgid "Friends"
 msgstr ""
@@ -18191,4319 +18192,4329 @@ msgstr ""
 
 #: inc/translations/strings.php:2287
 msgctxt "Settings page"
-msgid "WooCommerce Integration"
+msgid "Hide Messages tab when vendor disables live chat"
 msgstr ""
 
 #: inc/translations/strings.php:2288
 msgctxt "Settings page"
-msgid "Enable WooCommerce Integration"
+msgid "When a vendor turns off the live chat toggle in their dashboard settings, also hide the Messages tab from their dashboard sidebar"
 msgstr ""
 
 #: inc/translations/strings.php:2289
 msgctxt "Settings page"
-msgid "Let customers chat with your support team from product, shop, and order pages"
+msgid "WooCommerce Integration"
 msgstr ""
 
 #: inc/translations/strings.php:2290
 msgctxt "Settings page"
-msgid "Product Page Button"
+msgid "Enable WooCommerce Integration"
 msgstr ""
 
 #: inc/translations/strings.php:2291
 msgctxt "Settings page"
-msgid "Show a contact button on single product pages. You can override the recipient on a per-product basis from the product edit screen"
+msgid "Let customers chat with your support team from product, shop, and order pages"
 msgstr ""
 
 #: inc/translations/strings.php:2292
 msgctxt "Settings page"
-msgid "Automatic Placement"
+msgid "Product Page Button"
 msgstr ""
 
 #: inc/translations/strings.php:2293
 msgctxt "Settings page"
-msgid "Above product summary"
+msgid "Show a contact button on single product pages. You can override the recipient on a per-product basis from the product edit screen"
 msgstr ""
 
 #: inc/translations/strings.php:2294
 msgctxt "Settings page"
-msgid "Below product summary"
+msgid "Automatic Placement"
 msgstr ""
 
 #: inc/translations/strings.php:2295
 msgctxt "Settings page"
-msgid "Above Add to Cart"
+msgid "Above product summary"
 msgstr ""
 
 #: inc/translations/strings.php:2296
 msgctxt "Settings page"
-msgid "Below Add to Cart"
+msgid "Below product summary"
 msgstr ""
 
 #: inc/translations/strings.php:2297
 msgctxt "Settings page"
-msgid "Recipient"
+msgid "Above Add to Cart"
 msgstr ""
 
 #: inc/translations/strings.php:2298
 msgctxt "Settings page"
-msgid "Shortcode:"
+msgid "Below Add to Cart"
 msgstr ""
 
 #: inc/translations/strings.php:2299
 msgctxt "Settings page"
-msgid "Order Page Button"
+msgid "Recipient"
 msgstr ""
 
 #: inc/translations/strings.php:2300
 msgctxt "Settings page"
-msgid "Show a contact button on the order detail page in My Account. Customers can ask questions about a specific order"
+msgid "Shortcode:"
 msgstr ""
 
 #: inc/translations/strings.php:2301
 msgctxt "Settings page"
-msgid "After order table"
+msgid "Order Page Button"
 msgstr ""
 
 #: inc/translations/strings.php:2302
 msgctxt "Settings page"
-msgid "Before order table"
+msgid "Show a contact button on the order detail page in My Account. Customers can ask questions about a specific order"
 msgstr ""
 
 #: inc/translations/strings.php:2303
 msgctxt "Settings page"
-msgid "After customer details"
+msgid "After order table"
 msgstr ""
 
 #: inc/translations/strings.php:2304
 msgctxt "Settings page"
-msgid "Pre-purchase Help Button"
+msgid "Before order table"
 msgstr ""
 
 #: inc/translations/strings.php:2305
 msgctxt "Settings page"
-msgid "Show a contact button on cart and checkout pages so customers can ask questions before completing their purchase"
+msgid "After customer details"
 msgstr ""
 
 #: inc/translations/strings.php:2306
 msgctxt "Settings page"
-msgid "Cart Page Automatic Placement"
+msgid "Pre-purchase Help Button"
 msgstr ""
 
 #: inc/translations/strings.php:2307
 msgctxt "Settings page"
-msgid "Below cart items"
+msgid "Show a contact button on cart and checkout pages so customers can ask questions before completing their purchase"
 msgstr ""
 
 #: inc/translations/strings.php:2308
 msgctxt "Settings page"
-msgid "Top of cart page"
+msgid "Cart Page Automatic Placement"
 msgstr ""
 
 #: inc/translations/strings.php:2309
 msgctxt "Settings page"
-msgid "Near cart totals"
+msgid "Below cart items"
 msgstr ""
 
 #: inc/translations/strings.php:2310
 msgctxt "Settings page"
-msgid "Next to \"Proceed to checkout\""
+msgid "Top of cart page"
 msgstr ""
 
 #: inc/translations/strings.php:2311
 msgctxt "Settings page"
-msgid "Bottom of cart page"
+msgid "Near cart totals"
 msgstr ""
 
 #: inc/translations/strings.php:2312
 msgctxt "Settings page"
-msgid "Checkout Page Automatic Placement"
+msgid "Next to \"Proceed to checkout\""
 msgstr ""
 
 #: inc/translations/strings.php:2313
 msgctxt "Settings page"
-msgid "After order summary"
+msgid "Bottom of cart page"
 msgstr ""
 
 #: inc/translations/strings.php:2314
 msgctxt "Settings page"
-msgid "Top of checkout page"
+msgid "Checkout Page Automatic Placement"
 msgstr ""
 
 #: inc/translations/strings.php:2315
 msgctxt "Settings page"
-msgid "Above order summary"
+msgid "After order summary"
 msgstr ""
 
 #: inc/translations/strings.php:2316
 msgctxt "Settings page"
-msgid "Bottom of checkout page"
+msgid "Top of checkout page"
 msgstr ""
 
 #: inc/translations/strings.php:2317
 msgctxt "Settings page"
-msgid "Messages link in My Account"
+msgid "Above order summary"
 msgstr ""
 
 #: inc/translations/strings.php:2318
 msgctxt "Settings page"
-msgid "Add a \"Messages\" link to the WooCommerce My Account menu pointing at the configured chat page"
+msgid "Bottom of checkout page"
 msgstr ""
 
 #: inc/translations/strings.php:2319
 msgctxt "Settings page"
-msgid "Already enabled — your chat page is set to WooCommerce My Account."
+msgid "Messages link in My Account"
 msgstr ""
 
 #: inc/translations/strings.php:2320
 msgctxt "Settings page"
-msgid "Vendor Live Chat"
+msgid "Add a \"Messages\" link to the WooCommerce My Account menu pointing at the configured chat page"
 msgstr ""
 
 #: inc/translations/strings.php:2321
 msgctxt "Settings page"
-msgid "Allow vendors to enable a live chat button on their store and product pages so buyers can contact them directly"
+msgid "Already enabled — your chat page is set to WooCommerce My Account."
 msgstr ""
 
 #: inc/translations/strings.php:2322
 msgctxt "Settings page"
-msgid "Select a user…"
+msgid "Vendor Live Chat"
 msgstr ""
 
 #: inc/translations/strings.php:2323
 msgctxt "Settings page"
-msgid "Select a recipient — without one the button will not be displayed."
+msgid "Allow vendors to enable a live chat button on their store and product pages so buyers can contact them directly"
 msgstr ""
 
 #: inc/translations/strings.php:2324
 msgctxt "Settings page"
-msgid "BuddyBoss"
+msgid "Select a user…"
 msgstr ""
 
 #: inc/translations/strings.php:2325
 msgctxt "Settings page"
-msgid "BuddyPress"
+msgid "Select a recipient — without one the button will not be displayed."
 msgstr ""
 
 #: inc/translations/strings.php:2326
 msgctxt "Settings page"
-msgid "PeepSo"
+msgid "BuddyBoss"
 msgstr ""
 
 #: inc/translations/strings.php:2327
 msgctxt "Settings page"
-msgid "FluentCommunity"
+msgid "BuddyPress"
 msgstr ""
 
 #: inc/translations/strings.php:2328
 msgctxt "Settings page"
-msgid "SureDash"
+msgid "PeepSo"
 msgstr ""
 
 #: inc/translations/strings.php:2329
 msgctxt "Settings page"
-msgid "WooCommerce"
+msgid "FluentCommunity"
 msgstr ""
 
 #: inc/translations/strings.php:2330
 msgctxt "Settings page"
-msgid "LMS"
+msgid "SureDash"
 msgstr ""
 
 #: inc/translations/strings.php:2331
 msgctxt "Settings page"
-msgid "Directories"
+msgid "WooCommerce"
 msgstr ""
 
 #: inc/translations/strings.php:2332
 msgctxt "Settings page"
-msgid "Other Plugins"
+msgid "LMS"
 msgstr ""
 
 #: inc/translations/strings.php:2333
 msgctxt "Settings page"
-msgid "Emojis"
+msgid "Directories"
 msgstr ""
 
 #: inc/translations/strings.php:2334
 msgctxt "Settings page"
-msgid "GIFs"
+msgid "Other Plugins"
 msgstr ""
 
 #: inc/translations/strings.php:2335
 msgctxt "Settings page"
-msgid "AI Services"
+msgid "Emojis"
 msgstr ""
 
 #: inc/translations/strings.php:2336
 msgctxt "Settings page"
-msgid "Points Systems"
+msgid "GIFs"
 msgstr ""
 
 #: inc/translations/strings.php:2337
-msgctxt "Live Chat Builder"
-msgid "inherit"
+msgctxt "Settings page"
+msgid "AI Services"
 msgstr ""
 
 #: inc/translations/strings.php:2338
-msgctxt "Live Chat Builder"
-msgid "Clear"
+msgctxt "Settings page"
+msgid "Points Systems"
 msgstr ""
 
 #: inc/translations/strings.php:2339
 msgctxt "Live Chat Builder"
-msgid "No posts found"
+msgid "inherit"
 msgstr ""
 
 #: inc/translations/strings.php:2340
 msgctxt "Live Chat Builder"
-msgid "Start typing to search posts"
+msgid "Clear"
 msgstr ""
 
 #: inc/translations/strings.php:2341
 msgctxt "Live Chat Builder"
-msgid "Shortcode copied to clipboard"
+msgid "No posts found"
 msgstr ""
 
 #: inc/translations/strings.php:2342
 msgctxt "Live Chat Builder"
-msgid "Pick a target post to enable testing"
+msgid "Start typing to search posts"
 msgstr ""
 
 #: inc/translations/strings.php:2343
 msgctxt "Live Chat Builder"
-msgid "Target user could not be resolved against the chosen post"
+msgid "Shortcode copied to clipboard"
 msgstr ""
 
 #: inc/translations/strings.php:2344
 msgctxt "Live Chat Builder"
-msgid "Opens the real chat in a new tab so you can verify the configuration"
+msgid "Pick a target post to enable testing"
 msgstr ""
 
 #: inc/translations/strings.php:2345
 msgctxt "Live Chat Builder"
-msgid "Shortcode Builder"
+msgid "Target user could not be resolved against the chosen post"
 msgstr ""
 
 #: inc/translations/strings.php:2346
 msgctxt "Live Chat Builder"
-msgid "Configure a Live Chat Button visually, preview it, send a test message, then copy the shortcode wherever you need it (post body, page builder, theme template)."
+msgid "Opens the real chat in a new tab so you can verify the configuration"
 msgstr ""
 
 #: inc/translations/strings.php:2347
 msgctxt "Live Chat Builder"
-msgid "Target post"
+msgid "Shortcode Builder"
 msgstr ""
 
 #: inc/translations/strings.php:2348
 msgctxt "Live Chat Builder"
-msgid "Pick a real post to anchor the configuration. Author, custom field, banner image, and the test button all resolve against this post. It is not written into the generated shortcode — the shortcode you copy will work on any post of the same shape."
+msgid "Configure a Live Chat Button visually, preview it, send a test message, then copy the shortcode wherever you need it (post body, page builder, theme template)."
 msgstr ""
 
 #: inc/translations/strings.php:2349
 msgctxt "Live Chat Builder"
-msgid "Search posts, pages, or custom post types"
+msgid "Target post"
 msgstr ""
 
 #: inc/translations/strings.php:2350
 msgctxt "Live Chat Builder"
-msgid "Target user"
+msgid "Pick a real post to anchor the configuration. Author, custom field, banner image, and the test button all resolve against this post. It is not written into the generated shortcode — the shortcode you copy will work on any post of the same shape."
 msgstr ""
 
 #: inc/translations/strings.php:2351
 msgctxt "Live Chat Builder"
-msgid "Who should receive the chat when a visitor clicks the button."
+msgid "Search posts, pages, or custom post types"
 msgstr ""
 
 #: inc/translations/strings.php:2352
 msgctxt "Live Chat Builder"
-msgid "Author of the current post"
+msgid "Target user"
 msgstr ""
 
 #: inc/translations/strings.php:2353
 msgctxt "Live Chat Builder"
-msgid "User stored in a custom field on the post"
+msgid "Who should receive the chat when a visitor clicks the button."
 msgstr ""
 
 #: inc/translations/strings.php:2354
 msgctxt "Live Chat Builder"
-msgid "Fixed user (a single inbox for the whole site)"
+msgid "Author of the current post"
 msgstr ""
 
 #: inc/translations/strings.php:2355
 msgctxt "Live Chat Builder"
-msgid "Unique tag"
+msgid "User stored in a custom field on the post"
 msgstr ""
 
 #: inc/translations/strings.php:2356
 msgctxt "Live Chat Builder"
-msgid "Lets repeat visitors land in the same conversation instead of opening a new thread each time."
+msgid "Fixed user (a single inbox for the whole site)"
 msgstr ""
 
 #: inc/translations/strings.php:2357
 msgctxt "Live Chat Builder"
-msgid "Auto — one thread per post"
+msgid "Unique tag"
 msgstr ""
 
 #: inc/translations/strings.php:2358
 msgctxt "Live Chat Builder"
-msgid "Custom pattern"
+msgid "Lets repeat visitors land in the same conversation instead of opening a new thread each time."
 msgstr ""
 
 #: inc/translations/strings.php:2359
 msgctxt "Live Chat Builder"
-msgid "None — a new thread per visitor"
+msgid "Auto — one thread per post"
 msgstr ""
 
 #: inc/translations/strings.php:2360
 msgctxt "Live Chat Builder"
-msgid "Button label"
+msgid "Custom pattern"
 msgstr ""
 
 #: inc/translations/strings.php:2361
 msgctxt "Live Chat Builder"
-msgid "Auto — \"Chat with {author_name}\""
+msgid "None — a new thread per visitor"
 msgstr ""
 
 #: inc/translations/strings.php:2362
 msgctxt "Live Chat Builder"
-msgid "Custom text with placeholders"
+msgid "Button label"
 msgstr ""
 
 #: inc/translations/strings.php:2363
 msgctxt "Live Chat Builder"
-msgid "Ask {author_name} about {post_title}"
+msgid "Auto — \"Chat with {author_name}\""
 msgstr ""
 
 #: inc/translations/strings.php:2364
 msgctxt "Live Chat Builder"
-msgid "\"Live Chat\" (no personalization)"
+msgid "Custom text with placeholders"
 msgstr ""
 
 #: inc/translations/strings.php:2365
 msgctxt "Live Chat Builder"
-msgid "Button style"
+msgid "Ask {author_name} about {post_title}"
 msgstr ""
 
 #: inc/translations/strings.php:2366
 msgctxt "Live Chat Builder"
-msgid "Element"
+msgid "\"Live Chat\" (no personalization)"
 msgstr ""
 
 #: inc/translations/strings.php:2367
 msgctxt "Live Chat Builder"
-msgid "Link"
+msgid "Button style"
 msgstr ""
 
 #: inc/translations/strings.php:2368
 msgctxt "Live Chat Builder"
-msgid "Button"
+msgid "Element"
 msgstr ""
 
 #: inc/translations/strings.php:2369
 msgctxt "Live Chat Builder"
-msgid "CSS class"
+msgid "Link"
 msgstr ""
 
 #: inc/translations/strings.php:2370
 msgctxt "Live Chat Builder"
-msgid "Optional"
+msgid "Button"
 msgstr ""
 
 #: inc/translations/strings.php:2371
 msgctxt "Live Chat Builder"
-msgid "Subject"
+msgid "CSS class"
 msgstr ""
 
 #: inc/translations/strings.php:2372
 msgctxt "Live Chat Builder"
-msgid "Optional pre-filled subject"
+msgid "Optional"
 msgstr ""
 
 #: inc/translations/strings.php:2373
 msgctxt "Live Chat Builder"
-msgid "Background"
+msgid "Subject"
 msgstr ""
 
 #: inc/translations/strings.php:2374
 msgctxt "Live Chat Builder"
-msgid "Text color"
+msgid "Optional pre-filled subject"
 msgstr ""
 
 #: inc/translations/strings.php:2375
 msgctxt "Live Chat Builder"
-msgid "Font size"
+msgid "Background"
 msgstr ""
 
 #: inc/translations/strings.php:2376
 msgctxt "Live Chat Builder"
-msgid "Border radius"
+msgid "Text color"
 msgstr ""
 
 #: inc/translations/strings.php:2377
 msgctxt "Live Chat Builder"
-msgid "Padding"
+msgid "Font size"
 msgstr ""
 
 #: inc/translations/strings.php:2378
 msgctxt "Live Chat Builder"
-msgid "Margin"
+msgid "Border radius"
 msgstr ""
 
 #: inc/translations/strings.php:2379
 msgctxt "Live Chat Builder"
-msgid "Icon"
+msgid "Padding"
 msgstr ""
 
 #: inc/translations/strings.php:2380
 msgctxt "Live Chat Builder"
-msgid "Pick from the preset library or paste a custom SVG. The icon is embedded inline in the shortcode — no extra stylesheet needed on the frontend"
+msgid "Margin"
 msgstr ""
 
 #: inc/translations/strings.php:2381
 msgctxt "Live Chat Builder"
-msgid "Attach a thread information banner"
+msgid "Icon"
 msgstr ""
 
 #: inc/translations/strings.php:2382
 msgctxt "Live Chat Builder"
-msgid "Shows the post title, image, and link inside the conversation so both sides see what the chat is about."
+msgid "Pick from the preset library or paste a custom SVG. The icon is embedded inline in the shortcode — no extra stylesheet needed on the frontend"
 msgstr ""
 
 #: inc/translations/strings.php:2383
 msgctxt "Live Chat Builder"
-msgid "Live preview"
+msgid "Attach a thread information banner"
 msgstr ""
 
 #: inc/translations/strings.php:2384
 msgctxt "Live Chat Builder"
-msgid "Live button preview"
+msgid "Shows the post title, image, and link inside the conversation so both sides see what the chat is about."
 msgstr ""
 
 #: inc/translations/strings.php:2385
 msgctxt "Live Chat Builder"
-msgid "Pick a target post above to resolve the author, banner, and test button against a real post"
+msgid "Live preview"
 msgstr ""
 
 #: inc/translations/strings.php:2386
 msgctxt "Live Chat Builder"
-msgid "Thread information banner"
+msgid "Live button preview"
 msgstr ""
 
 #: inc/translations/strings.php:2387
 msgctxt "Live Chat Builder"
-msgid "Pick a target post above to see the banner"
+msgid "Pick a target post above to resolve the author, banner, and test button against a real post"
 msgstr ""
 
 #: inc/translations/strings.php:2388
 msgctxt "Live Chat Builder"
-msgid "Resolved against the target post"
+msgid "Thread information banner"
 msgstr ""
 
 #: inc/translations/strings.php:2389
 msgctxt "Live Chat Builder"
-msgid "not resolved"
+msgid "Pick a target post above to see the banner"
 msgstr ""
 
 #: inc/translations/strings.php:2390
 msgctxt "Live Chat Builder"
-msgid "none — new thread every time"
+msgid "Resolved against the target post"
 msgstr ""
 
 #: inc/translations/strings.php:2391
 msgctxt "Live Chat Builder"
-msgid "Live Chat"
+msgid "not resolved"
 msgstr ""
 
 #: inc/translations/strings.php:2392
 msgctxt "Live Chat Builder"
-msgid "Banner post"
+msgid "none — new thread every time"
 msgstr ""
 
 #: inc/translations/strings.php:2393
 msgctxt "Live Chat Builder"
-msgid "disabled"
+msgid "Live Chat"
 msgstr ""
 
 #: inc/translations/strings.php:2394
 msgctxt "Live Chat Builder"
-msgid "Generated shortcode"
+msgid "Banner post"
 msgstr ""
 
 #: inc/translations/strings.php:2395
 msgctxt "Live Chat Builder"
-msgid "Copy"
+msgid "disabled"
 msgstr ""
 
 #: inc/translations/strings.php:2396
 msgctxt "Live Chat Builder"
-msgid "Opening…"
+msgid "Generated shortcode"
 msgstr ""
 
 #: inc/translations/strings.php:2397
 msgctxt "Live Chat Builder"
-msgid "Test in real chat"
+msgid "Copy"
 msgstr ""
 
 #: inc/translations/strings.php:2398
-msgctxt "Settings page"
-msgid "Starting New Conversation"
+msgctxt "Live Chat Builder"
+msgid "Opening…"
 msgstr ""
 
 #: inc/translations/strings.php:2399
-msgctxt "Settings page"
-msgid "Fast Start"
+msgctxt "Live Chat Builder"
+msgid "Test in real chat"
 msgstr ""
 
 #: inc/translations/strings.php:2400
 msgctxt "Settings page"
-msgid "Skip the new conversation screen — clicking a Private Message button opens a conversation with the recipient immediately"
+msgid "Starting New Conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2401
 msgctxt "Settings page"
-msgid "Single Conversation Per Recipient"
+msgid "Fast Start"
 msgstr ""
 
 #: inc/translations/strings.php:2402
 msgctxt "Settings page"
-msgid "Prevent users from creating a new conversation if they already have one with the same recipient. The existing conversation will be opened instead"
+msgid "Skip the new conversation screen — clicking a Private Message button opens a conversation with the recipient immediately"
 msgstr ""
 
 #: inc/translations/strings.php:2403
 msgctxt "Settings page"
-msgid "Always Create New Conversation"
+msgid "Single Conversation Per Recipient"
 msgstr ""
 
 #: inc/translations/strings.php:2404
 msgctxt "Settings page"
-msgid "Always start a new conversation even if one already exists with the same recipient. Users will not be offered to continue an existing conversation"
+msgid "Prevent users from creating a new conversation if they already have one with the same recipient. The existing conversation will be opened instead"
 msgstr ""
 
 #: inc/translations/strings.php:2405
 msgctxt "Settings page"
-msgid "Group Conversations"
+msgid "Always Create New Conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2406
 msgctxt "Settings page"
-msgid "Allow users to create conversations with multiple participants"
+msgid "Always start a new conversation even if one already exists with the same recipient. Users will not be offered to continue an existing conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2407
 msgctxt "Settings page"
-msgid "Conversation Subject"
+msgid "Group Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2408
 msgctxt "Settings page"
-msgid "Show a subject field when starting a new conversation"
+msgid "Allow users to create conversations with multiple participants"
 msgstr ""
 
 #: inc/translations/strings.php:2409
 msgctxt "Settings page"
-msgid "Searching Users"
+msgid "Conversation Subject"
 msgstr ""
 
 #: inc/translations/strings.php:2410
 msgctxt "Settings page"
-msgid "User Search"
+msgid "Show a subject field when starting a new conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2411
 msgctxt "Settings page"
-msgid "Allow users to search for recipients when starting a new conversation. Admins can always search regardless of this setting"
+msgid "Searching Users"
 msgstr ""
 
 #: inc/translations/strings.php:2412
 msgctxt "Settings page"
-msgid "User Suggestions"
+msgid "User Search"
 msgstr ""
 
 #: inc/translations/strings.php:2413
 msgctxt "Settings page"
-msgid "Show a list of suggested users on the new conversation screen for quick recipient selection"
+msgid "Allow users to search for recipients when starting a new conversation. Admins can always search regardless of this setting"
 msgstr ""
 
 #: inc/translations/strings.php:2414
 msgctxt "Settings page"
-msgid "Friends are listed first, followed by recently active users"
+msgid "User Suggestions"
 msgstr ""
 
 #: inc/translations/strings.php:2415
 msgctxt "Settings page"
-msgid "Recently active users are shown as suggestions"
+msgid "Show a list of suggested users on the new conversation screen for quick recipient selection"
 msgstr ""
 
 #: inc/translations/strings.php:2416
 msgctxt "Settings page"
-msgid "Search All Users"
+msgid "Friends are listed first, followed by recently active users"
 msgstr ""
 
 #: inc/translations/strings.php:2417
 msgctxt "Settings page"
-msgid "Allow searching among all site users, not just friends. Admins can always search all users regardless of this setting"
+msgid "Recently active users are shown as suggestions"
 msgstr ""
 
 #: inc/translations/strings.php:2418
 msgctxt "Settings page"
-msgid "Suggested Conversations"
+msgid "Search All Users"
 msgstr ""
 
 #: inc/translations/strings.php:2419
 msgctxt "Settings page"
-msgid "When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty inbox"
+msgid "Allow searching among all site users, not just friends. Admins can always search all users regardless of this setting"
 msgstr ""
 
 #: inc/translations/strings.php:2420
 msgctxt "Settings page"
-msgid "Conversation Features"
+msgid "Suggested Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2421
 msgctxt "Settings page"
-msgid "Pinned Conversations"
+msgid "When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty inbox"
 msgstr ""
 
 #: inc/translations/strings.php:2422
 msgctxt "Settings page"
-msgid "Allow users to pin conversations to the top of their conversation list for quick access"
+msgid "Conversation Features"
 msgstr ""
 
 #: inc/translations/strings.php:2423
 msgctxt "Settings page"
-msgid "Draft Messages"
+msgid "Pinned Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2424
 msgctxt "Settings page"
-msgid "Automatically save unsent messages as drafts and restore them when the user returns to the conversation"
+msgid "Allow users to pin conversations to the top of their conversation list for quick access"
 msgstr ""
 
 #: inc/translations/strings.php:2425
 msgctxt "Settings page"
-msgid "Encryption"
+msgid "Draft Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2426
 msgctxt "Settings page"
-msgid "Enable Encryption"
+msgid "Automatically save unsent messages as drafts and restore them when the user returns to the conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2427
 msgctxt "Settings page"
-msgid "Encrypts all sensitive content before transfer to websocket server and decrypt on client site with special secret keys not known by our side"
+msgid "Encryption"
 msgstr ""
 
 #: inc/translations/strings.php:2428
 msgctxt "Settings page"
-msgid "Enable Browser Database Encryption"
+msgid "Enable Encryption"
 msgstr ""
 
 #: inc/translations/strings.php:2429
 msgctxt "Settings page"
-msgid "Encrypts all sensitive content in local browser database to enhance the security"
+msgid "Encrypts all sensitive content before transfer to websocket server and decrypt on client site with special secret keys not known by our side"
 msgstr ""
 
 #: inc/translations/strings.php:2430
 msgctxt "Settings page"
-msgid "Enable End-to-End Encryption"
+msgid "Enable Browser Database Encryption"
 msgstr ""
 
 #: inc/translations/strings.php:2431
 msgctxt "Settings page"
-msgid "Allow users to create end-to-end encrypted conversations where only participants can decrypt messages and files. The server never sees the message and files content"
+msgid "Encrypts all sensitive content in local browser database to enhance the security"
 msgstr ""
 
 #: inc/translations/strings.php:2432
 msgctxt "Settings page"
-msgid "End-to-end encryption requires HTTPS. Please enable SSL on your site to use this feature."
+msgid "Enable End-to-End Encryption"
 msgstr ""
 
 #: inc/translations/strings.php:2433
 msgctxt "Settings page"
-msgid "Enabled by Default"
+msgid "Allow users to create end-to-end encrypted conversations where only participants can decrypt messages and files. The server never sees the message and files content"
 msgstr ""
 
 #: inc/translations/strings.php:2434
 msgctxt "Settings page"
-msgid "The encryption toggle will be pre-checked when users create new conversations"
+msgid "End-to-end encryption requires HTTPS. Please enable SSL on your site to use this feature."
 msgstr ""
 
 #: inc/translations/strings.php:2435
 msgctxt "Settings page"
-msgid "Force for All Conversations"
+msgid "Enabled by Default"
 msgstr ""
 
 #: inc/translations/strings.php:2436
 msgctxt "Settings page"
-msgid "All new private conversations will be end-to-end encrypted. Users cannot disable encryption"
+msgid "The encryption toggle will be pre-checked when users create new conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2437
 msgctxt "Settings page"
-msgid "Allow Guest Users"
+msgid "Force for All Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2438
 msgctxt "Settings page"
-msgid "Allow guest chat users to participate in end-to-end encrypted conversations. AI chat bots are always excluded"
+msgid "All new private conversations will be end-to-end encrypted. Users cannot disable encryption"
 msgstr ""
 
 #: inc/translations/strings.php:2439
 msgctxt "Settings page"
-msgid "Message Features"
+msgid "Allow Guest Users"
 msgstr ""
 
 #: inc/translations/strings.php:2440
 msgctxt "Settings page"
-msgid "Replies"
+msgid "Allow guest chat users to participate in end-to-end encrypted conversations. AI chat bots are always excluded"
 msgstr ""
 
 #: inc/translations/strings.php:2441
 msgctxt "Settings page"
-msgid "Allow users to reply to specific messages with a quoted reference"
+msgid "Message Features"
 msgstr ""
 
 #: inc/translations/strings.php:2442
 msgctxt "Settings page"
-msgid "Replies to Own Messages"
+msgid "Replies"
 msgstr ""
 
 #: inc/translations/strings.php:2443
 msgctxt "Settings page"
-msgid "Allow users to reply to their own messages"
+msgid "Allow users to reply to specific messages with a quoted reference"
 msgstr ""
 
 #: inc/translations/strings.php:2444
 msgctxt "Settings page"
-msgid "Edit Messages"
+msgid "Replies to Own Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2445
 msgctxt "Settings page"
-msgid "Allow users to edit their own sent messages"
+msgid "Allow users to reply to their own messages"
 msgstr ""
 
 #: inc/translations/strings.php:2446
 msgctxt "Settings page"
-msgid "Edit Time Limit"
+msgid "Edit Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2447
 msgctxt "Settings page"
-msgid "Maximum time in minutes after sending during which a message can be edited. Set to 0 for no limit. Administrators are always exempt"
+msgid "Allow users to edit their own sent messages"
 msgstr ""
 
 #: inc/translations/strings.php:2448
 msgctxt "Settings page"
-msgid "Maximum Message Length"
+msgid "Edit Time Limit"
 msgstr ""
 
 #: inc/translations/strings.php:2449
 msgctxt "Settings page"
-msgid "Maximum number of characters allowed in a single message. Set to 0 for no limit"
+msgid "Maximum time in minutes after sending during which a message can be edited. Set to 0 for no limit. Administrators are always exempt"
 msgstr ""
 
 #: inc/translations/strings.php:2450
 msgctxt "Settings page"
-msgid "Pinned Messages"
+msgid "Maximum Message Length"
 msgstr ""
 
 #: inc/translations/strings.php:2451
 msgctxt "Settings page"
-msgid "Allow conversation moderators to pin important messages to the top of the conversation"
+msgid "Maximum number of characters allowed in a single message. Set to 0 for no limit"
 msgstr ""
 
 #: inc/translations/strings.php:2452
 msgctxt "Settings page"
-msgid "Private Message in Context Menu"
+msgid "Pinned Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2453
 msgctxt "Settings page"
-msgid "Add a \"Private Message\" option to the message context menu in group conversations, allowing users to quickly start a private chat with the message author"
+msgid "Allow conversation moderators to pin important messages to the top of the conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2454
 msgctxt "Settings page"
-msgid "Forward Messages"
+msgid "Private Message in Context Menu"
 msgstr ""
 
 #: inc/translations/strings.php:2455
 msgctxt "Settings page"
-msgid "Allow users to forward messages to other conversations"
+msgid "Add a \"Private Message\" option to the message context menu in group conversations, allowing users to quickly start a private chat with the message author"
 msgstr ""
 
 #: inc/translations/strings.php:2456
 msgctxt "Settings page"
-msgid "Forward Attribution"
+msgid "Forward Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2457
 msgctxt "Settings page"
-msgid "Show \"Forwarded from\" label with the original sender's name on forwarded messages"
+msgid "Allow users to forward messages to other conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2458
 msgctxt "Settings page"
-msgid "Delete Messages"
+msgid "Forward Attribution"
 msgstr ""
 
 #: inc/translations/strings.php:2459
 msgctxt "Settings page"
-msgid "Allow users to delete their own sent messages"
+msgid "Show \"Forwarded from\" label with the original sender's name on forwarded messages"
 msgstr ""
 
 #: inc/translations/strings.php:2460
 msgctxt "Settings page"
-msgid "Delete Method"
+msgid "Delete Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2461
 msgctxt "Settings page"
-msgid "Remove completely"
+msgid "Allow users to delete their own sent messages"
 msgstr ""
 
 #: inc/translations/strings.php:2462
 msgctxt "Settings page"
-msgid "Replace with placeholder"
+msgid "Delete Method"
 msgstr ""
 
 #: inc/translations/strings.php:2463
 msgctxt "Settings page"
-msgid "The message is permanently removed and disappears from the conversation"
+msgid "Remove completely"
 msgstr ""
 
 #: inc/translations/strings.php:2464
 msgctxt "Settings page"
-msgid "The message content is replaced with a \"This message was deleted\" label"
+msgid "Replace with placeholder"
 msgstr ""
 
 #: inc/translations/strings.php:2465
 msgctxt "Settings page"
-msgid "oEmbed"
+msgid "The message is permanently removed and disappears from the conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2466
 msgctxt "Settings page"
-msgid "Embed rich previews for links to YouTube, Vimeo, VideoPress, Flickr, DailyMotion, Kickstarter, Mixcloud, SoundCloud, and other supported services"
+msgid "The message content is replaced with a \"This message was deleted\" label"
 msgstr ""
 
 #: inc/translations/strings.php:2467
 msgctxt "Settings page"
-msgid "Link Previews"
+msgid "oEmbed"
 msgstr ""
 
 #: inc/translations/strings.php:2468
 msgctxt "Settings page"
-msgid "Automatically fetch and display a title and description preview for links shared in messages"
+msgid "Embed rich previews for links to YouTube, Vimeo, VideoPress, Flickr, DailyMotion, Kickstarter, Mixcloud, SoundCloud, and other supported services"
 msgstr ""
 
 #: inc/translations/strings.php:2469
 msgctxt "Settings page"
-msgid "Message Reactions"
+msgid "Link Previews"
 msgstr ""
 
 #: inc/translations/strings.php:2470
 msgctxt "Settings page"
-msgid "Reactions"
+msgid "Automatically fetch and display a title and description preview for links shared in messages"
 msgstr ""
 
 #: inc/translations/strings.php:2471
 msgctxt "Settings page"
-msgid "Allow users to react to messages with emoji"
+msgid "Message Reactions"
 msgstr ""
 
 #: inc/translations/strings.php:2472
 msgctxt "Settings page"
-msgid "Configure available reactions"
+msgid "Reactions"
 msgstr ""
 
 #: inc/translations/strings.php:2473
 msgctxt "Settings page"
-msgid "Detailed Reactions"
+msgid "Allow users to react to messages with emoji"
 msgstr ""
 
 #: inc/translations/strings.php:2474
 msgctxt "Settings page"
-msgid "Show who reacted to a message when clicking on the reaction count"
+msgid "Configure available reactions"
 msgstr ""
 
 #: inc/translations/strings.php:2475
 msgctxt "Settings page"
-msgid "Message Status"
+msgid "Detailed Reactions"
 msgstr ""
 
 #: inc/translations/strings.php:2476
 msgctxt "Settings page"
-msgid "Show delivery status indicators on messages: sent, delivered, and seen"
+msgid "Show who reacted to a message when clicking on the reaction count"
 msgstr ""
 
 #: inc/translations/strings.php:2477
 msgctxt "Settings page"
-msgid "Status in Conversation List"
+msgid "Message Status"
 msgstr ""
 
 #: inc/translations/strings.php:2478
 msgctxt "Settings page"
-msgid "Show the delivery status of the last message in the conversation list preview"
+msgid "Show delivery status indicators on messages: sent, delivered, and seen"
 msgstr ""
 
 #: inc/translations/strings.php:2479
 msgctxt "Settings page"
-msgid "Detailed Message Status"
+msgid "Status in Conversation List"
 msgstr ""
 
 #: inc/translations/strings.php:2480
 msgctxt "Settings page"
-msgid "Allow users to see who has read a message in group conversations by clicking the status indicator"
+msgid "Show the delivery status of the last message in the conversation list preview"
 msgstr ""
 
 #: inc/translations/strings.php:2481
 msgctxt "Settings page"
-msgid "Group Conversation Settings"
+msgid "Detailed Message Status"
 msgstr ""
 
 #: inc/translations/strings.php:2482
 msgctxt "Settings page"
-msgid "Invite Participants"
+msgid "Allow users to see who has read a message in group conversations by clicking the status indicator"
 msgstr ""
 
 #: inc/translations/strings.php:2483
 msgctxt "Settings page"
-msgid "Allow users to invite additional participants to private conversations, converting them into group conversations. Admins can always add participants regardless of this setting"
+msgid "Group Conversation Settings"
 msgstr ""
 
 #: inc/translations/strings.php:2484
 msgctxt "Settings page"
-msgid "Leave Conversation"
+msgid "Invite Participants"
 msgstr ""
 
 #: inc/translations/strings.php:2485
 msgctxt "Settings page"
-msgid "Allow users to leave group conversations. The conversation creator cannot leave their own conversation"
+msgid "Allow users to invite additional participants to private conversations, converting them into group conversations. Admins can always add participants regardless of this setting"
 msgstr ""
 
 #: inc/translations/strings.php:2486
 msgctxt "Settings page"
-msgid "System Messages"
+msgid "Leave Conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2487
 msgctxt "Settings page"
-msgid "Show automated notices in group conversations and chat rooms when participants join or leave, the subject or cover image changes, moderation actions happen, or a group call starts"
+msgid "Allow users to leave group conversations. The conversation creator cannot leave their own conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2488
 msgctxt "Settings page"
-msgid "Allow per-conversation override"
+msgid "System Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2489
 msgctxt "Settings page"
-msgid "Allow conversation moderators to enable or disable system messages for individual conversations from the chat info sidebar. When disabled, the site setting above is enforced everywhere"
+msgid "Show automated notices in group conversations and chat rooms when participants join or leave, the subject or cover image changes, moderation actions happen, or a group call starts"
 msgstr ""
 
 #: inc/translations/strings.php:2490
 msgctxt "Settings page"
-msgid "Ignore in conversations list sort"
+msgid "Allow per-conversation override"
 msgstr ""
 
 #: inc/translations/strings.php:2491
 msgctxt "Settings page"
-msgid "When on, system messages will not move a conversation to the top of the list. The list keeps the order from the last real chat message, so a conversation with only a recent join, leave or subject change stays where it was"
+msgid "Allow conversation moderators to enable or disable system messages for individual conversations from the chat info sidebar. When disabled, the site setting above is enforced everywhere"
 msgstr ""
 
 #: inc/translations/strings.php:2492
 msgctxt "Settings page"
-msgid "System Messages Types"
+msgid "Ignore in conversations list sort"
 msgstr ""
 
 #: inc/translations/strings.php:2493
 msgctxt "Settings page"
-msgid "Choose which events emit a notice in the conversation"
+msgid "When on, system messages will not move a conversation to the top of the list. The list keeps the order from the last real chat message, so a conversation with only a recent join, leave or subject change stays where it was"
 msgstr ""
 
 #: inc/translations/strings.php:2494
 msgctxt "Settings page"
-msgid "Participant joined"
+msgid "System Messages Types"
 msgstr ""
 
 #: inc/translations/strings.php:2495
 msgctxt "Settings page"
-msgid "Participant left"
+msgid "Choose which events emit a notice in the conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2496
 msgctxt "Settings page"
-msgid "Subject changed"
+msgid "Participant joined"
 msgstr ""
 
 #: inc/translations/strings.php:2497
 msgctxt "Settings page"
-msgid "Cover image changed"
+msgid "Participant left"
 msgstr ""
 
 #: inc/translations/strings.php:2498
 msgctxt "Settings page"
-msgid "Promoted to moderator"
+msgid "Subject changed"
 msgstr ""
 
 #: inc/translations/strings.php:2499
 msgctxt "Settings page"
-msgid "Removed as moderator"
+msgid "Cover image changed"
 msgstr ""
 
 #: inc/translations/strings.php:2500
 msgctxt "Settings page"
-msgid "Removed from conversation"
+msgid "Promoted to moderator"
 msgstr ""
 
 #: inc/translations/strings.php:2501
 msgctxt "Settings page"
-msgid "Muted"
+msgid "Removed as moderator"
 msgstr ""
 
 #: inc/translations/strings.php:2502
 msgctxt "Settings page"
-msgid "Banned"
+msgid "Removed from conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2503
 msgctxt "Settings page"
-msgid "Group call started"
+msgid "Muted"
 msgstr ""
 
 #: inc/translations/strings.php:2504
 msgctxt "Settings page"
-msgid "Repeat suppression window"
+msgid "Banned"
 msgstr ""
 
 #: inc/translations/strings.php:2505
 msgctxt "Settings page"
-msgid "Optional extra suppression on top of the rolling-message coalescer. Number of seconds during which a repeated event for the same user is hard-suppressed in the same conversation. Default 0 (disabled — coalescer handles dedup). Set to a positive number to enable"
+msgid "Group call started"
 msgstr ""
 
 #: inc/translations/strings.php:2506
 msgctxt "Settings page"
-msgid "Unread Counter"
+msgid "Repeat suppression window"
 msgstr ""
 
 #: inc/translations/strings.php:2507
 msgctxt "Settings page"
-msgid "Unread Counter Mode"
+msgid "Optional extra suppression on top of the rolling-message coalescer. Number of seconds during which a repeated event for the same user is hard-suppressed in the same conversation. Default 0 (disabled — coalescer handles dedup). Set to a positive number to enable"
 msgstr ""
 
 #: inc/translations/strings.php:2508
 msgctxt "Settings page"
-msgid "Choose what the unread badge counts — individual unread messages or conversations with unread messages"
+msgid "Unread Counter"
 msgstr ""
 
 #: inc/translations/strings.php:2509
 msgctxt "Settings page"
-msgid "Count unread messages"
+msgid "Unread Counter Mode"
 msgstr ""
 
 #: inc/translations/strings.php:2510
 msgctxt "Settings page"
-msgid "Count unread conversations"
+msgid "Choose what the unread badge counts — individual unread messages or conversations with unread messages"
 msgstr ""
 
 #: inc/translations/strings.php:2511
 msgctxt "Settings page"
-msgid "Deleted Conversations"
+msgid "Count unread messages"
 msgstr ""
 
 #: inc/translations/strings.php:2512
 msgctxt "Settings page"
-msgid "Deleted Conversation Behavior"
+msgid "Count unread conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2513
 msgctxt "Settings page"
-msgid "Control how deleted conversations are handled when a user starts a new conversation with the same recipient"
+msgid "Deleted Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2514
 msgctxt "Settings page"
-msgid "Ignore deleted conversations"
+msgid "Deleted Conversation Behavior"
 msgstr ""
 
 #: inc/translations/strings.php:2515
 msgctxt "Settings page"
-msgid "Offer to restore deleted conversations"
+msgid "Control how deleted conversations are handled when a user starts a new conversation with the same recipient"
 msgstr ""
 
 #: inc/translations/strings.php:2516
 msgctxt "Settings page"
-msgid "A new conversation will be created as if the deleted one never existed"
+msgid "Ignore deleted conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2517
 msgctxt "Settings page"
-msgid "If a deleted conversation with the same recipient exists, the user will be offered to restore and continue it"
+msgid "Offer to restore deleted conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2518
 msgctxt "Settings page"
-msgid "Miscellaneous"
+msgid "A new conversation will be created as if the deleted one never existed"
 msgstr ""
 
 #: inc/translations/strings.php:2519
 msgctxt "Settings page"
-msgid "Send on Enter"
+msgid "If a deleted conversation with the same recipient exists, the user will be offered to restore and continue it"
 msgstr ""
 
 #: inc/translations/strings.php:2520
 msgctxt "Settings page"
-msgid "On desktop, pressing Enter sends the message. When disabled, Enter adds a new line and users must click the send button or use Ctrl+Enter"
+msgid "Miscellaneous"
 msgstr ""
 
 #: inc/translations/strings.php:2521
 msgctxt "Settings page"
-msgid "Delete Messages on Account Deletion"
+msgid "Send on Enter"
 msgstr ""
 
 #: inc/translations/strings.php:2522
 msgctxt "Settings page"
-msgid "Permanently delete all messages sent by a user when their WordPress account is deleted"
+msgid "On desktop, pressing Enter sends the message. When disabled, Enter adds a new line and users must click the send button or use Ctrl+Enter"
 msgstr ""
 
 #: inc/translations/strings.php:2523
 msgctxt "Settings page"
-msgid "Sound Notification Control"
+msgid "Delete Messages on Account Deletion"
 msgstr ""
 
 #: inc/translations/strings.php:2524
 msgctxt "Settings page"
-msgid "Allow users to mute sound notifications from their user settings"
+msgid "Permanently delete all messages sent by a user when their WordPress account is deleted"
 msgstr ""
 
 #: inc/translations/strings.php:2525
 msgctxt "Settings page"
-msgid "Auto-Delete Old Messages"
+msgid "Sound Notification Control"
 msgstr ""
 
 #: inc/translations/strings.php:2526
 msgctxt "Settings page"
-msgid "Auto-Delete After"
+msgid "Allow users to mute sound notifications from their user settings"
 msgstr ""
 
 #: inc/translations/strings.php:2527
 msgctxt "Settings page"
-msgid "Automatically and permanently delete messages older than the specified number of days. Set to 0 to keep all messages"
+msgid "Auto-Delete Old Messages"
 msgstr ""
 
 #: inc/translations/strings.php:2528
 msgctxt "Settings page"
-msgid "Deleted messages cannot be recovered. Use with caution."
+msgid "Auto-Delete After"
 msgstr ""
 
 #: inc/translations/strings.php:2529
 msgctxt "Settings page"
-msgid "Search users\\u2026"
+msgid "Automatically and permanently delete messages older than the specified number of days. Set to 0 to keep all messages"
 msgstr ""
 
 #: inc/translations/strings.php:2530
 msgctxt "Settings page"
-msgid "Add user"
+msgid "Deleted messages cannot be recovered. Use with caution."
 msgstr ""
 
 #: inc/translations/strings.php:2531
 msgctxt "Settings page"
-msgid "No users selected"
+msgid "Search users\\u2026"
 msgstr ""
 
 #: inc/translations/strings.php:2532
 msgctxt "Settings page"
-msgid "Widgets"
+msgid "Add user"
 msgstr ""
 
 #: inc/translations/strings.php:2533
 msgctxt "Settings page"
-msgid "Customization"
+msgid "No users selected"
 msgstr ""
 
 #: inc/translations/strings.php:2534
 msgctxt "Settings page"
-msgid "Mini Conversations"
+msgid "Widgets"
 msgstr ""
 
 #: inc/translations/strings.php:2535
 msgctxt "Settings page"
-msgid "Show a mini conversation list widget fixed to the bottom of the browser window"
+msgid "Customization"
 msgstr ""
 
 #: inc/translations/strings.php:2536
 msgctxt "Settings page"
-msgid "Mini Chats"
+msgid "Mini Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2537
 msgctxt "Settings page"
-msgid "Show mini chat windows fixed to the bottom of the browser window"
+msgid "Show a mini conversation list widget fixed to the bottom of the browser window"
 msgstr ""
 
 #: inc/translations/strings.php:2538
 msgctxt "Settings page"
-msgid "Combined Mode"
+msgid "Mini Chats"
 msgstr ""
 
 #: inc/translations/strings.php:2539
 msgctxt "Settings page"
-msgid "Open chats inside the Mini Conversations widget instead of showing them as separate windows"
+msgid "Show mini chat windows fixed to the bottom of the browser window"
 msgstr ""
 
 #: inc/translations/strings.php:2540
 msgctxt "Settings page"
-msgid "Requires both Mini Conversations and Mini Chats to be enabled"
+msgid "Combined Mode"
 msgstr ""
 
 #: inc/translations/strings.php:2541
 msgctxt "Settings page"
-msgid "Close Button"
+msgid "Open chats inside the Mini Conversations widget instead of showing them as separate windows"
 msgstr ""
 
 #: inc/translations/strings.php:2542
 msgctxt "Settings page"
-msgid "Add a close button to mini widgets when they are expanded"
+msgid "Requires both Mini Conversations and Mini Chats to be enabled"
 msgstr ""
 
 #: inc/translations/strings.php:2543
 msgctxt "Settings page"
-msgid "Mini AI Bots"
+msgid "Close Button"
 msgstr ""
 
 #: inc/translations/strings.php:2544
 msgctxt "Settings page"
-msgid "Show a mini list of available AI bots so users can start a chat with one click"
+msgid "Add a close button to mini widgets when they are expanded"
 msgstr ""
 
 #: inc/translations/strings.php:2545
 msgctxt "Settings page"
-msgid "Mini Chat Rooms"
+msgid "Mini AI Bots"
 msgstr ""
 
 #: inc/translations/strings.php:2546
 msgctxt "Settings page"
-msgid "Show a mini list of chat rooms the user can join or has already joined"
+msgid "Show a mini list of available AI bots so users can start a chat with one click"
 msgstr ""
 
 #: inc/translations/strings.php:2547
 msgctxt "Settings page"
-msgid "Mini Chat Options"
+msgid "Mini Chat Rooms"
 msgstr ""
 
 #: inc/translations/strings.php:2548
 msgctxt "Settings page"
-msgid "Show an audio call button in mini chat windows"
+msgid "Show a mini list of chat rooms the user can join or has already joined"
 msgstr ""
 
 #: inc/translations/strings.php:2549
 msgctxt "Settings page"
-msgid "Show a video call button in mini chat windows"
+msgid "Mini Chat Options"
 msgstr ""
 
 #: inc/translations/strings.php:2550
 msgctxt "Settings page"
-msgid "Sync Between Tabs"
+msgid "Show an audio call button in mini chat windows"
 msgstr ""
 
 #: inc/translations/strings.php:2551
 msgctxt "Settings page"
-msgid "Keep open mini chats in sync across browser tabs"
+msgid "Show a video call button in mini chat windows"
 msgstr ""
 
 #: inc/translations/strings.php:2552
 msgctxt "Settings page"
-msgid "Hide from Roles"
+msgid "Sync Between Tabs"
 msgstr ""
 
 #: inc/translations/strings.php:2553
 msgctxt "Settings page"
-msgid "Hide specific mini widgets from selected user roles"
+msgid "Keep open mini chats in sync across browser tabs"
 msgstr ""
 
 #: inc/translations/strings.php:2554
 msgctxt "Settings page"
-msgid "Role"
+msgid "Hide from Roles"
 msgstr ""
 
 #: inc/translations/strings.php:2555
-#: inc/translations/strings.php:3119
 msgctxt "Settings page"
-msgid "AI Bots"
+msgid "Hide specific mini widgets from selected user roles"
 msgstr ""
 
 #: inc/translations/strings.php:2556
 msgctxt "Settings page"
-msgid "Open the messages page in full screen on mobile devices"
+msgid "Role"
 msgstr ""
 
 #: inc/translations/strings.php:2557
+#: inc/translations/strings.php:3121
 msgctxt "Settings page"
-msgid "Recommended"
+msgid "AI Bots"
 msgstr ""
 
 #: inc/translations/strings.php:2558
 msgctxt "Settings page"
-msgid "Auto Open Full Screen"
+msgid "Open the messages page in full screen on mobile devices"
 msgstr ""
 
 #: inc/translations/strings.php:2559
 msgctxt "Settings page"
-msgid "Automatically enter full screen when opening the messages page"
+msgid "Recommended"
 msgstr ""
 
 #: inc/translations/strings.php:2560
 msgctxt "Settings page"
-msgid "Tap to Open Overlay"
+msgid "Auto Open Full Screen"
 msgstr ""
 
 #: inc/translations/strings.php:2561
 msgctxt "Settings page"
-msgid "Show a \"Tap to open\" overlay on the message container"
+msgid "Automatically enter full screen when opening the messages page"
 msgstr ""
 
 #: inc/translations/strings.php:2562
 msgctxt "Settings page"
-msgid "Swipe to Go Back"
+msgid "Tap to Open Overlay"
 msgstr ""
 
 #: inc/translations/strings.php:2563
 msgctxt "Settings page"
-msgid "Allow swiping left to return to the conversation list"
+msgid "Show a \"Tap to open\" overlay on the message container"
 msgstr ""
 
 #: inc/translations/strings.php:2564
 msgctxt "Settings page"
-msgid "Floating Chat Button"
+msgid "Swipe to Go Back"
 msgstr ""
 
 #: inc/translations/strings.php:2565
 msgctxt "Settings page"
-msgid "Show a floating button on mobile devices that opens the messaging interface in full screen"
+msgid "Allow swiping left to return to the conversation list"
 msgstr ""
 
 #: inc/translations/strings.php:2566
 msgctxt "Settings page"
-msgid "Button Position"
+msgid "Floating Chat Button"
 msgstr ""
 
 #: inc/translations/strings.php:2567
 msgctxt "Settings page"
-msgid "Left"
+msgid "Show a floating button on mobile devices that opens the messaging interface in full screen"
 msgstr ""
 
 #: inc/translations/strings.php:2568
 msgctxt "Settings page"
-msgid "Right"
+msgid "Button Position"
 msgstr ""
 
 #: inc/translations/strings.php:2569
 msgctxt "Settings page"
-msgid "Onsite Notifications"
+msgid "Left"
 msgstr ""
 
 #: inc/translations/strings.php:2570
 msgctxt "Settings page"
-msgid "Notification Position"
+msgid "Right"
 msgstr ""
 
 #: inc/translations/strings.php:2571
 msgctxt "Settings page"
-msgid "Automatic"
+msgid "Onsite Notifications"
 msgstr ""
 
 #: inc/translations/strings.php:2572
 msgctxt "Settings page"
-msgid "Show at the bottom by default, but at the top in conversation view to avoid covering the reply area"
+msgid "Notification Position"
 msgstr ""
 
 #: inc/translations/strings.php:2573
 msgctxt "Settings page"
-msgid "Always Top"
+msgid "Automatic"
 msgstr ""
 
 #: inc/translations/strings.php:2574
 msgctxt "Settings page"
-msgid "Always Bottom"
+msgid "Show at the bottom by default, but at the top in conversation view to avoid covering the reply area"
 msgstr ""
 
 #: inc/translations/strings.php:2575
 msgctxt "Settings page"
-msgid "Additional Settings"
+msgid "Always Top"
 msgstr ""
 
 #: inc/translations/strings.php:2576
 msgctxt "Settings page"
-msgid "Button Bottom Margin"
+msgid "Always Bottom"
 msgstr ""
 
 #: inc/translations/strings.php:2577
 msgctxt "Settings page"
-msgid "Distance from the bottom of the screen for the floating chat button, in pixels"
+msgid "Additional Settings"
 msgstr ""
 
 #: inc/translations/strings.php:2578
 msgctxt "Settings page"
-msgid "Hide Chat Button for Roles"
+msgid "Button Bottom Margin"
 msgstr ""
 
 #: inc/translations/strings.php:2579
 msgctxt "Settings page"
-msgid "Hide the floating chat button for selected roles"
+msgid "Distance from the bottom of the screen for the floating chat button, in pixels"
 msgstr ""
 
 #: inc/translations/strings.php:2580
 msgctxt "Settings page"
-msgid "Send messages by pressing Enter on mobile devices"
+msgid "Hide Chat Button for Roles"
 msgstr ""
 
 #: inc/translations/strings.php:2581
 msgctxt "Settings page"
-msgid "Hide Overlapping Elements"
+msgid "Hide the floating chat button for selected roles"
 msgstr ""
 
 #: inc/translations/strings.php:2582
 msgctxt "Settings page"
-msgid "Hide theme elements that may overlap the messages interface in mobile full screen mode"
+msgid "Send messages by pressing Enter on mobile devices"
 msgstr ""
 
 #: inc/translations/strings.php:2583
 msgctxt "Settings page"
-msgid "Hate"
+msgid "Hide Overlapping Elements"
 msgstr ""
 
 #: inc/translations/strings.php:2584
 msgctxt "Settings page"
-msgid "Content that promotes hate based on race, gender, ethnicity, religion, nationality, sexual orientation, disability, or caste"
+msgid "Hide theme elements that may overlap the messages interface in mobile full screen mode"
 msgstr ""
 
 #: inc/translations/strings.php:2585
 msgctxt "Settings page"
-msgid "Hate / Threatening"
+msgid "Hate"
 msgstr ""
 
 #: inc/translations/strings.php:2586
 msgctxt "Settings page"
-msgid "Hateful content that includes violence or serious harm towards targeted groups"
+msgid "Content that promotes hate based on race, gender, ethnicity, religion, nationality, sexual orientation, disability, or caste"
 msgstr ""
 
 #: inc/translations/strings.php:2587
 msgctxt "Settings page"
-msgid "Harassment"
+msgid "Hate / Threatening"
 msgstr ""
 
 #: inc/translations/strings.php:2588
 msgctxt "Settings page"
-msgid "Content that expresses, incites, or promotes harassing language towards any target"
+msgid "Hateful content that includes violence or serious harm towards targeted groups"
 msgstr ""
 
 #: inc/translations/strings.php:2589
 msgctxt "Settings page"
-msgid "Harassment / Threatening"
+msgid "Harassment"
 msgstr ""
 
 #: inc/translations/strings.php:2590
 msgctxt "Settings page"
-msgid "Harassment content that includes violence or serious harm towards any target"
+msgid "Content that expresses, incites, or promotes harassing language towards any target"
 msgstr ""
 
 #: inc/translations/strings.php:2591
 msgctxt "Settings page"
-msgid "Sexual Content"
+msgid "Harassment / Threatening"
 msgstr ""
 
 #: inc/translations/strings.php:2592
 msgctxt "Settings page"
-msgid "Content meant to arouse sexual excitement or that promotes sexual services (excluding sex education and wellness)"
+msgid "Harassment content that includes violence or serious harm towards any target"
 msgstr ""
 
 #: inc/translations/strings.php:2593
 msgctxt "Settings page"
-msgid "Sexual / Minors"
+msgid "Sexual Content"
 msgstr ""
 
 #: inc/translations/strings.php:2594
 msgctxt "Settings page"
-msgid "Sexual content that involves individuals under 18 years old"
+msgid "Content meant to arouse sexual excitement or that promotes sexual services (excluding sex education and wellness)"
 msgstr ""
 
 #: inc/translations/strings.php:2595
 msgctxt "Settings page"
-msgid "Violence"
+msgid "Sexual / Minors"
 msgstr ""
 
 #: inc/translations/strings.php:2596
 msgctxt "Settings page"
-msgid "Content that depicts death, violence, or physical injury"
+msgid "Sexual content that involves individuals under 18 years old"
 msgstr ""
 
 #: inc/translations/strings.php:2597
 msgctxt "Settings page"
-msgid "Violence / Graphic"
+msgid "Violence"
 msgstr ""
 
 #: inc/translations/strings.php:2598
 msgctxt "Settings page"
-msgid "Content that depicts death, violence, or physical injury in graphic detail"
+msgid "Content that depicts death, violence, or physical injury"
 msgstr ""
 
 #: inc/translations/strings.php:2599
 msgctxt "Settings page"
-msgid "Self-Harm"
+msgid "Violence / Graphic"
 msgstr ""
 
 #: inc/translations/strings.php:2600
 msgctxt "Settings page"
-msgid "Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting, and eating disorders"
+msgid "Content that depicts death, violence, or physical injury in graphic detail"
 msgstr ""
 
 #: inc/translations/strings.php:2601
 msgctxt "Settings page"
-msgid "Self-Harm / Intent"
+msgid "Self-Harm"
 msgstr ""
 
 #: inc/translations/strings.php:2602
 msgctxt "Settings page"
-msgid "Content where the speaker expresses that they are engaging or intend to engage in acts of self-harm"
+msgid "Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting, and eating disorders"
 msgstr ""
 
 #: inc/translations/strings.php:2603
 msgctxt "Settings page"
-msgid "Self-Harm / Instructions"
+msgid "Self-Harm / Intent"
 msgstr ""
 
 #: inc/translations/strings.php:2604
 msgctxt "Settings page"
-msgid "Content that encourages or provides instructions on how to commit acts of self-harm"
+msgid "Content where the speaker expresses that they are engaging or intend to engage in acts of self-harm"
 msgstr ""
 
 #: inc/translations/strings.php:2605
 msgctxt "Settings page"
-msgid "Illicit"
+msgid "Self-Harm / Instructions"
 msgstr ""
 
 #: inc/translations/strings.php:2606
 msgctxt "Settings page"
-msgid "Content that gives advice or instruction on how to commit illicit acts (e.g. fraud, scams)"
+msgid "Content that encourages or provides instructions on how to commit acts of self-harm"
 msgstr ""
 
 #: inc/translations/strings.php:2607
 msgctxt "Settings page"
-msgid "Illicit / Violent"
+msgid "Illicit"
 msgstr ""
 
 #: inc/translations/strings.php:2608
 msgctxt "Settings page"
-msgid "Illicit content that also references violence or procurement of weapons"
+msgid "Content that gives advice or instruction on how to commit illicit acts (e.g. fraud, scams)"
 msgstr ""
 
 #: inc/translations/strings.php:2609
 msgctxt "Settings page"
-msgid "Spam"
+msgid "Illicit / Violent"
 msgstr ""
 
 #: inc/translations/strings.php:2610
 msgctxt "Settings page"
-msgid "Unsolicited bulk messages, repetitive content, or messages with no meaningful purpose"
+msgid "Illicit content that also references violence or procurement of weapons"
 msgstr ""
 
 #: inc/translations/strings.php:2611
 msgctxt "Settings page"
-msgid "Scam / Phishing"
+msgid "Spam"
 msgstr ""
 
 #: inc/translations/strings.php:2612
 msgctxt "Settings page"
-msgid "Attempts to deceive users into revealing personal information, credentials, or financial details"
+msgid "Unsolicited bulk messages, repetitive content, or messages with no meaningful purpose"
 msgstr ""
 
 #: inc/translations/strings.php:2613
 msgctxt "Settings page"
-msgid "Minor Safety"
+msgid "Scam / Phishing"
 msgstr ""
 
 #: inc/translations/strings.php:2614
 msgctxt "Settings page"
-msgid "Content that poses risks to minors, including grooming, inappropriate contact, or age-inappropriate material"
+msgid "Attempts to deceive users into revealing personal information, credentials, or financial details"
 msgstr ""
 
 #: inc/translations/strings.php:2615
 msgctxt "Settings page"
-msgid "Contact Sharing"
+msgid "Minor Safety"
 msgstr ""
 
 #: inc/translations/strings.php:2616
 msgctxt "Settings page"
-msgid "Sharing personal contact information such as phone numbers, email addresses, or social media handles"
+msgid "Content that poses risks to minors, including grooming, inappropriate contact, or age-inappropriate material"
 msgstr ""
 
 #: inc/translations/strings.php:2617
 msgctxt "Settings page"
-msgid "Profanity"
+msgid "Contact Sharing"
 msgstr ""
 
 #: inc/translations/strings.php:2618
 msgctxt "Settings page"
-msgid "Vulgar or obscene language, swear words, and crude expressions regardless of intent"
+msgid "Sharing personal contact information such as phone numbers, email addresses, or social media handles"
 msgstr ""
 
 #: inc/translations/strings.php:2619
 msgctxt "Settings page"
-msgid "Impersonation"
+msgid "Profanity"
 msgstr ""
 
 #: inc/translations/strings.php:2620
 msgctxt "Settings page"
-msgid "Pretending to be an admin, moderator, staff member, or another user"
+msgid "Vulgar or obscene language, swear words, and crude expressions regardless of intent"
 msgstr ""
 
 #: inc/translations/strings.php:2621
 msgctxt "Settings page"
-msgid "Doxxing"
+msgid "Impersonation"
 msgstr ""
 
 #: inc/translations/strings.php:2622
 msgctxt "Settings page"
-msgid "Sharing or threatening to share another person's private information without their consent"
+msgid "Pretending to be an admin, moderator, staff member, or another user"
 msgstr ""
 
 #: inc/translations/strings.php:2623
 msgctxt "Settings page"
-msgid "Drugs / Alcohol"
+msgid "Doxxing"
 msgstr ""
 
 #: inc/translations/strings.php:2624
 msgctxt "Settings page"
-msgid "Promoting or glorifying drug use, alcohol abuse, or substance-related content"
+msgid "Sharing or threatening to share another person's private information without their consent"
 msgstr ""
 
 #: inc/translations/strings.php:2625
 msgctxt "Settings page"
-msgid "Threats"
+msgid "Drugs / Alcohol"
 msgstr ""
 
 #: inc/translations/strings.php:2626
 msgctxt "Settings page"
-msgid "Direct or implied threats of physical harm, stalking, or intimidation not covered by other categories"
+msgid "Promoting or glorifying drug use, alcohol abuse, or substance-related content"
 msgstr ""
 
 #: inc/translations/strings.php:2627
 msgctxt "Settings page"
-msgid "Commercial Promotion"
+msgid "Threats"
 msgstr ""
 
 #: inc/translations/strings.php:2628
 msgctxt "Settings page"
-msgid "Advertising, affiliate links, recruitment, or promotional content not relevant to the conversation"
+msgid "Direct or implied threats of physical harm, stalking, or intimidation not covered by other categories"
 msgstr ""
 
 #: inc/translations/strings.php:2629
 msgctxt "Settings page"
-msgid "Messages Viewer"
+msgid "Commercial Promotion"
 msgstr ""
 
 #: inc/translations/strings.php:2630
 msgctxt "Settings page"
-msgid "Show a messages viewer in the WordPress admin area"
+msgid "Advertising, affiliate links, recruitment, or promotional content not relevant to the conversation"
 msgstr ""
 
 #: inc/translations/strings.php:2631
 msgctxt "Settings page"
-msgid "Message Reports"
+msgid "Messages Viewer"
 msgstr ""
 
 #: inc/translations/strings.php:2632
 msgctxt "Settings page"
-msgid "Allow users to report messages for admin review"
+msgid "Show a messages viewer in the WordPress admin area"
 msgstr ""
 
 #: inc/translations/strings.php:2633
 msgctxt "Settings page"
-msgid "Pre-Moderation"
+msgid "Message Reports"
 msgstr ""
 
 #: inc/translations/strings.php:2634
 msgctxt "Settings page"
-msgid "Require admin approval before messages appear in the chat"
+msgid "Allow users to report messages for admin review"
 msgstr ""
 
 #: inc/translations/strings.php:2635
 msgctxt "Settings page"
-msgid "Enable Pre-Moderation"
+msgid "Pre-Moderation"
 msgstr ""
 
 #: inc/translations/strings.php:2636
 msgctxt "Settings page"
-msgid "First-Time Senders"
+msgid "Require admin approval before messages appear in the chat"
 msgstr ""
 
 #: inc/translations/strings.php:2637
 msgctxt "Settings page"
-msgid "Always moderate users sending their first message on the site"
+msgid "Enable Pre-Moderation"
 msgstr ""
 
 #: inc/translations/strings.php:2638
 msgctxt "Settings page"
-msgid "New Conversations"
+msgid "First-Time Senders"
 msgstr ""
 
 #: inc/translations/strings.php:2639
 msgctxt "Settings page"
-msgid "AI Content Moderation"
+msgid "Always moderate users sending their first message on the site"
 msgstr ""
 
 #: inc/translations/strings.php:2640
 msgctxt "Settings page"
-msgid "Automatically review message content using AI moderation"
+msgid "New Conversations"
 msgstr ""
 
 #: inc/translations/strings.php:2641
 msgctxt "Settings page"
-msgid "Moderation Provider"
+msgid "AI Content Moderation"
 msgstr ""
 
 #: inc/translations/strings.php:2642
 msgctxt "Settings page"
-msgid "OpenAI Moderation API"
+msgid "Automatically review message content using AI moderation"
 msgstr ""
 
 #: inc/translations/strings.php:2643
 msgctxt "Settings page"
-msgid "Free to use. Requires an OpenAI API key. Fixed set of content categories"
+msgid "Moderation Provider"
 msgstr ""
 
 #: inc/translations/strings.php:2644
 msgctxt "Settings page"
-msgid "Better Messages Moderation AI"
+msgid "OpenAI Moderation API"
 msgstr ""
 
 #: inc/translations/strings.php:2645
 msgctxt "Settings page"
-msgid "Included with WebSocket license at no additional cost. No third-party API keys required. Extended categories, custom rules, conversation context awareness"
+msgid "Free to use. Requires an OpenAI API key. Fixed set of content categories"
 msgstr ""
 
 #: inc/translations/strings.php:2646
+msgctxt "Settings page"
+msgid "Better Messages Moderation AI"
+msgstr ""
+
+#: inc/translations/strings.php:2647
+msgctxt "Settings page"
+msgid "Included with WebSocket license at no additional cost. No third-party API keys required. Extended categories, custom rules, conversation context awareness"
+msgstr ""
+
+#: inc/translations/strings.php:2648
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "An %s is required to use AI moderation."
 msgstr ""
 
-#: inc/translations/strings.php:2647
+#: inc/translations/strings.php:2649
 msgctxt "Settings page"
 msgid "OpenAI API key"
 msgstr ""
 
-#: inc/translations/strings.php:2648
+#: inc/translations/strings.php:2650
 msgctxt "Settings page"
 msgid "Enable AI Moderation"
 msgstr ""
 
-#: inc/translations/strings.php:2649
+#: inc/translations/strings.php:2651
 msgctxt "Settings page"
 msgid "Message content is sent unencrypted to OpenAI servers for analysis. Please review OpenAI's data usage policy to ensure compliance with your privacy requirements."
 msgstr ""
 
-#: inc/translations/strings.php:2650
+#: inc/translations/strings.php:2652
 msgctxt "Settings page"
 msgid "Message content is sent unencrypted to Better Messages Cloud for analysis. Better Messages Cloud does not store any message data — content is analyzed in real time and immediately discarded."
 msgstr ""
 
-#: inc/translations/strings.php:2651
+#: inc/translations/strings.php:2653
 msgctxt "Settings page"
 msgid "Flagged Message Action"
 msgstr ""
 
-#: inc/translations/strings.php:2652
+#: inc/translations/strings.php:2654
 msgctxt "Settings page"
 msgid "Flag Only (Recommended)"
 msgstr ""
 
-#: inc/translations/strings.php:2653
+#: inc/translations/strings.php:2655
 msgctxt "Settings page"
 msgid "Message is delivered normally but marked for admin review. Best for user experience — no AI is 100% accurate, so legitimate messages won't be blocked"
 msgstr ""
 
-#: inc/translations/strings.php:2654
+#: inc/translations/strings.php:2656
 msgctxt "Settings page"
 msgid "Hold for Review"
 msgstr ""
 
-#: inc/translations/strings.php:2655
+#: inc/translations/strings.php:2657
 msgctxt "Settings page"
 msgid "Message is held until an admin approves or rejects it. More strict, but may delay legitimate messages if AI makes a mistake"
 msgstr ""
 
-#: inc/translations/strings.php:2656
+#: inc/translations/strings.php:2658
 msgctxt "Settings page"
 msgid "Moderate Images"
 msgstr ""
 
-#: inc/translations/strings.php:2657
+#: inc/translations/strings.php:2659
 msgctxt "Settings page"
 msgid "Analyze attached images along with message text"
 msgstr ""
 
-#: inc/translations/strings.php:2658
+#: inc/translations/strings.php:2660
 msgctxt "Settings page"
 msgid "Custom rules and content categories work independently. You can use either one alone or combine both for more comprehensive moderation."
 msgstr ""
 
-#: inc/translations/strings.php:2659
+#: inc/translations/strings.php:2661
 msgctxt "Settings page"
 msgid "Custom Rules"
 msgstr ""
 
-#: inc/translations/strings.php:2660
+#: inc/translations/strings.php:2662
 msgctxt "Settings page"
 msgid "Define your own moderation rules. One rule per line"
 msgstr ""
 
-#: inc/translations/strings.php:2661
+#: inc/translations/strings.php:2663
 msgctxt "Settings page"
 msgid "Block contact info (phones, emails, social handles) and off-platform moves\\nBlock promotions, affiliate links, recruitment"
 msgstr ""
 
-#: inc/translations/strings.php:2662
+#: inc/translations/strings.php:2664
 msgctxt "Settings page"
 msgid "Conversation Context"
 msgstr ""
 
-#: inc/translations/strings.php:2663
+#: inc/translations/strings.php:2665
 msgctxt "Settings page"
 msgid "Number of previous messages to include for context. Helps detect patterns like phone numbers or emails split across multiple messages"
 msgstr ""
 
-#: inc/translations/strings.php:2664
+#: inc/translations/strings.php:2666
 msgctxt "Settings page"
 msgid "Leave empty or 0 to moderate only the current message. Recommended: 5–10."
 msgstr ""
 
-#: inc/translations/strings.php:2665
+#: inc/translations/strings.php:2667
 msgctxt "Settings page"
 msgid "Content Categories"
 msgstr ""
 
-#: inc/translations/strings.php:2666
+#: inc/translations/strings.php:2668
 msgctxt "Settings page"
 msgid "Selecting a parent category automatically covers its subcategories"
 msgstr ""
 
-#: inc/translations/strings.php:2667
+#: inc/translations/strings.php:2669
 msgctxt "Settings page"
 msgid "Sensitivity Threshold"
 msgstr ""
 
-#: inc/translations/strings.php:2668
+#: inc/translations/strings.php:2670
 msgctxt "Settings page"
 msgid "Confidence score for flagging (0–1). Lower = stricter"
 msgstr ""
 
-#: inc/translations/strings.php:2669
+#: inc/translations/strings.php:2671
 msgctxt "Settings page"
 msgid "Recommended: 0.5. Use 0.3 for strict, 0.7 for lenient."
 msgstr ""
 
-#: inc/translations/strings.php:2670
+#: inc/translations/strings.php:2672
 msgctxt "Settings page"
 msgid "Bypass Roles"
 msgstr ""
 
-#: inc/translations/strings.php:2671
+#: inc/translations/strings.php:2673
 msgctxt "Settings page"
 msgid "Skip AI checks for these roles. Administrators always bypass"
 msgstr ""
 
-#: inc/translations/strings.php:2672
+#: inc/translations/strings.php:2674
 msgctxt "Settings page"
 msgid "Notification Emails"
 msgstr ""
 
-#: inc/translations/strings.php:2673
+#: inc/translations/strings.php:2675
 msgctxt "Settings page"
 msgid "Receive email notifications for pre-moderated, AI-flagged, and reported messages"
 msgstr ""
 
-#: inc/translations/strings.php:2674
+#: inc/translations/strings.php:2676
 msgctxt "Settings page"
 msgid "Email Addresses"
 msgstr ""
 
-#: inc/translations/strings.php:2675
+#: inc/translations/strings.php:2677
 msgctxt "Settings page"
 msgid "One email address per line"
 msgstr ""
 
-#: inc/translations/strings.php:2676
+#: inc/translations/strings.php:2678
 msgctxt "Settings page"
 msgid "Select MP3 file"
 msgstr ""
 
-#: inc/translations/strings.php:2677
+#: inc/translations/strings.php:2679
 msgctxt "Settings page"
 msgid "Are you sure you want to reset to default sound?"
 msgstr ""
 
-#: inc/translations/strings.php:2678
+#: inc/translations/strings.php:2680
 msgctxt "Settings page"
 msgid "Browser Tab Notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2679
+#: inc/translations/strings.php:2681
 msgctxt "Settings page"
 msgid "Show the unread conversation count in the browser tab title"
 msgstr ""
 
-#: inc/translations/strings.php:2680
+#: inc/translations/strings.php:2682
 msgctxt "Settings page"
 msgid "Mute Conversations"
 msgstr ""
 
-#: inc/translations/strings.php:2681
+#: inc/translations/strings.php:2683
 msgctxt "Settings page"
 msgid "Allow users to mute individual conversations to stop receiving notifications from them"
 msgstr ""
 
-#: inc/translations/strings.php:2682
+#: inc/translations/strings.php:2684
 msgctxt "Settings page"
 msgid "Force Notifications for Mentions"
 msgstr ""
 
-#: inc/translations/strings.php:2683
+#: inc/translations/strings.php:2685
 msgctxt "Settings page"
 msgid "Always send notifications (push, email) to mentioned users even if they muted the conversation, disabled their email notifications, or notifications are disabled in chat room or group settings"
 msgstr ""
 
-#: inc/translations/strings.php:2684
+#: inc/translations/strings.php:2686
 msgctxt "Settings page"
 msgid "Notification Interval"
 msgstr ""
 
-#: inc/translations/strings.php:2685
+#: inc/translations/strings.php:2687
 msgctxt "Settings page"
 msgid "How often to send email notifications about unread messages, in minutes. Set to 0 to disable"
 msgstr ""
 
-#: inc/translations/strings.php:2686
+#: inc/translations/strings.php:2688
 msgctxt "Settings page"
 msgid "minutes"
 msgstr ""
 
-#: inc/translations/strings.php:2687
+#: inc/translations/strings.php:2689
 msgctxt "Settings page"
 msgid "Offline Delay"
 msgstr ""
 
-#: inc/translations/strings.php:2688
+#: inc/translations/strings.php:2690
 msgctxt "Settings page"
 msgid "Only send email notifications after the user has been offline for this many minutes. Set to 0 to always send"
 msgstr ""
 
-#: inc/translations/strings.php:2689
+#: inc/translations/strings.php:2691
 msgctxt "Settings page"
 msgid "OneSignal plugin detected. Push notifications will be delivered through OneSignal instead of the built-in system."
 msgstr ""
 
-#: inc/translations/strings.php:2690
+#: inc/translations/strings.php:2692
 msgctxt "Settings page"
 msgid "Progressify plugin detected. Push notifications will be delivered through Progressify instead of the built-in system."
 msgstr ""
 
-#: inc/translations/strings.php:2691
+#: inc/translations/strings.php:2693
 msgctxt "Settings page"
 msgid "WebSocket version is required."
 msgstr ""
 
-#: inc/translations/strings.php:2692
+#: inc/translations/strings.php:2694
 msgctxt "Settings page"
 msgid "Browser Push Notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2693
+#: inc/translations/strings.php:2695
 msgctxt "Settings page"
 msgid "Allow users to receive web push notifications for new messages, even when the website is closed or in another tab"
 msgstr ""
 
-#: inc/translations/strings.php:2694
+#: inc/translations/strings.php:2696
 msgctxt "Settings page"
 msgid "Send Push Notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2695
+#: inc/translations/strings.php:2697
 msgctxt "Settings page"
 msgid "When user is offline"
 msgstr ""
 
-#: inc/translations/strings.php:2696
+#: inc/translations/strings.php:2698
 msgctxt "Settings page"
 msgid "When offline or message is unread for 5 seconds"
 msgstr ""
 
-#: inc/translations/strings.php:2697
+#: inc/translations/strings.php:2699
 msgctxt "Settings page"
 msgid "New Message Notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2698
+#: inc/translations/strings.php:2700
 msgctxt "Settings page"
 msgid "Show popup notifications on the page when a new message is received"
 msgstr ""
 
-#: inc/translations/strings.php:2699
+#: inc/translations/strings.php:2701
 msgctxt "Settings page"
 msgid "Email Template"
 msgstr ""
 
-#: inc/translations/strings.php:2700
+#: inc/translations/strings.php:2702
 msgctxt "Settings page"
 msgid "Customize the appearance of message email notifications sent to users"
 msgstr ""
 
-#: inc/translations/strings.php:2701
+#: inc/translations/strings.php:2703
 msgctxt "Settings page"
 msgid "Template Source"
 msgstr ""
 
-#: inc/translations/strings.php:2702
+#: inc/translations/strings.php:2704
 msgctxt "Settings page"
 msgid "Choose whether to use BuddyPress email templates or custom templates for message notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2703
+#: inc/translations/strings.php:2705
 msgctxt "Settings page"
 msgid "BuddyPress Email Template"
 msgstr ""
 
-#: inc/translations/strings.php:2704
+#: inc/translations/strings.php:2706
 msgctxt "Settings page"
 msgid "Custom Template"
 msgstr ""
 
-#: inc/translations/strings.php:2705
+#: inc/translations/strings.php:2707
 msgctxt "Settings page"
 msgid "Auto-Create Email Template"
 msgstr ""
 
-#: inc/translations/strings.php:2706
+#: inc/translations/strings.php:2708
 msgctxt "Settings page"
 msgid "Automatically create the BuddyPress email template if it is missing. Disable this if you have customized the template and want to prevent it from being overwritten"
 msgstr ""
 
-#: inc/translations/strings.php:2707
+#: inc/translations/strings.php:2709
 msgctxt "Settings page"
 msgid "Template Mode"
 msgstr ""
 
-#: inc/translations/strings.php:2708
+#: inc/translations/strings.php:2710
 msgctxt "Settings page"
 msgid "Simple"
 msgstr ""
 
-#: inc/translations/strings.php:2709
+#: inc/translations/strings.php:2711
 msgctxt "Settings page"
 msgid "Custom HTML"
 msgstr ""
 
-#: inc/translations/strings.php:2710
+#: inc/translations/strings.php:2712
 msgctxt "Settings page"
 msgid "Email Logo"
 msgstr ""
 
-#: inc/translations/strings.php:2711
+#: inc/translations/strings.php:2713
 msgctxt "Settings page"
 msgid "The logo will be displayed at its uploaded size, scaled down only if it exceeds the email width"
 msgstr ""
 
-#: inc/translations/strings.php:2712
+#: inc/translations/strings.php:2714
 msgctxt "Settings page"
 msgid "Select Email Logo"
 msgstr ""
 
-#: inc/translations/strings.php:2713
+#: inc/translations/strings.php:2715
 msgctxt "Settings page"
 msgid "Select Logo"
 msgstr ""
 
-#: inc/translations/strings.php:2714
+#: inc/translations/strings.php:2716
 msgctxt "Settings page"
 msgid "Are you sure you want to remove the logo?"
 msgstr ""
 
-#: inc/translations/strings.php:2715
+#: inc/translations/strings.php:2717
 msgctxt "Settings page"
 msgid "Remove Logo"
 msgstr ""
 
-#: inc/translations/strings.php:2716
+#: inc/translations/strings.php:2718
 msgctxt "Settings page"
 msgid "Primary Color"
 msgstr ""
 
-#: inc/translations/strings.php:2717
+#: inc/translations/strings.php:2719
 msgctxt "Settings page"
 msgid "Used for buttons and links"
 msgstr ""
 
-#: inc/translations/strings.php:2718
+#: inc/translations/strings.php:2720
 msgctxt "Settings page"
 msgid "Background Color"
 msgstr ""
 
-#: inc/translations/strings.php:2719
+#: inc/translations/strings.php:2721
 msgctxt "Settings page"
 msgid "Email outer background"
 msgstr ""
 
-#: inc/translations/strings.php:2720
+#: inc/translations/strings.php:2722
 msgctxt "Settings page"
 msgid "Content Background Color"
 msgstr ""
 
-#: inc/translations/strings.php:2721
+#: inc/translations/strings.php:2723
 msgctxt "Settings page"
 msgid "Main content area background"
 msgstr ""
 
-#: inc/translations/strings.php:2722
+#: inc/translations/strings.php:2724
 msgctxt "Settings page"
 msgid "Text Color"
 msgstr ""
 
-#: inc/translations/strings.php:2723
+#: inc/translations/strings.php:2725
 msgctxt "Settings page"
 msgid "Header Text"
 msgstr ""
 
-#: inc/translations/strings.php:2724
+#: inc/translations/strings.php:2726
 msgctxt "Settings page"
 msgid "Use {{user_name}} for recipient name. Leave empty for default \"Hi {{user_name}},\""
 msgstr ""
 
-#: inc/translations/strings.php:2725
+#: inc/translations/strings.php:2727
 msgctxt "Settings page"
 msgid "Hi {{user_name}},"
 msgstr ""
 
-#: inc/translations/strings.php:2726
+#: inc/translations/strings.php:2728
 msgctxt "Settings page"
 msgid "Footer Text"
 msgstr ""
 
-#: inc/translations/strings.php:2727
+#: inc/translations/strings.php:2729
 msgctxt "Settings page"
 msgid "Custom footer text. Use {{site_name}} and {{site_url}} placeholders"
 msgstr ""
 
-#: inc/translations/strings.php:2728
+#: inc/translations/strings.php:2730
 msgctxt "Settings page"
 msgid "Button Text"
 msgstr ""
 
-#: inc/translations/strings.php:2729
+#: inc/translations/strings.php:2731
 msgctxt "Settings page"
 msgid "Text for the \"View Conversation\" button. Leave empty for default"
 msgstr ""
 
-#: inc/translations/strings.php:2730
+#: inc/translations/strings.php:2732
 msgctxt "Settings page"
 msgid "View Conversation"
 msgstr ""
 
-#: inc/translations/strings.php:2731
+#: inc/translations/strings.php:2733
 msgctxt "Settings page"
 msgid "Preview & Reset"
 msgstr ""
 
-#: inc/translations/strings.php:2732
+#: inc/translations/strings.php:2734
 msgctxt "Settings page"
 msgid "Preview Email"
 msgstr ""
 
-#: inc/translations/strings.php:2733
+#: inc/translations/strings.php:2735
 msgctxt "Settings page"
 msgid "Are you sure you want to reset colors to default?"
 msgstr ""
 
-#: inc/translations/strings.php:2734
+#: inc/translations/strings.php:2736
 msgctxt "Settings page"
 msgid "Reset Colors to Default"
 msgstr ""
 
-#: inc/translations/strings.php:2735
+#: inc/translations/strings.php:2737
 msgctxt "Settings page"
 msgid "Available Placeholders"
 msgstr ""
 
-#: inc/translations/strings.php:2736
+#: inc/translations/strings.php:2738
 msgctxt "Settings page"
 msgid "Custom HTML Template"
 msgstr ""
 
-#: inc/translations/strings.php:2737
+#: inc/translations/strings.php:2739
 msgctxt "Settings page"
 msgid "Enter your complete HTML email template. Make sure to include the placeholders where you want the dynamic content to appear"
 msgstr ""
 
-#: inc/translations/strings.php:2738
+#: inc/translations/strings.php:2740
 msgctxt "Settings page"
 msgid "This will replace your current custom template. Continue?"
 msgstr ""
 
-#: inc/translations/strings.php:2739
+#: inc/translations/strings.php:2741
 msgctxt "Settings page"
 msgid "Load Default Template"
 msgstr ""
 
-#: inc/translations/strings.php:2740
+#: inc/translations/strings.php:2742
 msgctxt "Settings page"
 msgid "Preview Template"
 msgstr ""
 
-#: inc/translations/strings.php:2741
+#: inc/translations/strings.php:2743
 msgctxt "Settings page"
 msgid "Unsubscribe Link"
 msgstr ""
 
-#: inc/translations/strings.php:2742
+#: inc/translations/strings.php:2744
 msgctxt "Settings page"
 msgid "Add an unsubscribe link to message notification emails. Users can click it to stop receiving message email notifications"
 msgstr ""
 
-#: inc/translations/strings.php:2743
+#: inc/translations/strings.php:2745
 msgctxt "Settings page"
 msgid "Sounds"
 msgstr ""
 
-#: inc/translations/strings.php:2744
+#: inc/translations/strings.php:2746
 msgctxt "Settings page"
 msgid "Notification Volume"
 msgstr ""
 
-#: inc/translations/strings.php:2745
+#: inc/translations/strings.php:2747
 msgctxt "Settings page"
 msgid "Set to 0 to disable"
 msgstr ""
 
-#: inc/translations/strings.php:2746
+#: inc/translations/strings.php:2748
 msgctxt "Settings page"
 msgid "Notification Sound"
 msgstr ""
 
-#: inc/translations/strings.php:2747
+#: inc/translations/strings.php:2749
 msgctxt "Settings page"
 msgid "Play"
 msgstr ""
 
-#: inc/translations/strings.php:2748
+#: inc/translations/strings.php:2750
 msgctxt "Settings page"
 msgid "Custom Sound"
 msgstr ""
 
-#: inc/translations/strings.php:2749
+#: inc/translations/strings.php:2751
 msgctxt "Settings page"
 msgid "Sent Message Volume"
 msgstr ""
 
-#: inc/translations/strings.php:2750
+#: inc/translations/strings.php:2752
 msgctxt "Settings page"
 msgid "Sent Message Sound"
 msgstr ""
 
-#: inc/translations/strings.php:2751
+#: inc/translations/strings.php:2753
 msgctxt "Settings page"
 msgid "Incoming Call Volume"
 msgstr ""
 
-#: inc/translations/strings.php:2752
+#: inc/translations/strings.php:2754
 msgctxt "Settings page"
 msgid "Incoming Call Sound"
 msgstr ""
 
-#: inc/translations/strings.php:2753
+#: inc/translations/strings.php:2755
 msgctxt "Settings page"
 msgid "Outgoing Call Volume"
 msgstr ""
 
-#: inc/translations/strings.php:2754
+#: inc/translations/strings.php:2756
 msgctxt "Settings page"
 msgid "Outgoing Call Sound"
 msgstr ""
 
-#: inc/translations/strings.php:2755
+#: inc/translations/strings.php:2757
 msgctxt "Settings page"
 msgid "Sending..."
 msgstr ""
 
-#: inc/translations/strings.php:2756
+#: inc/translations/strings.php:2758
 msgctxt "Settings page"
 msgid "Test email sent!"
 msgstr ""
 
-#: inc/translations/strings.php:2757
+#: inc/translations/strings.php:2759
 msgctxt "Settings page"
 msgid "Failed to send test email"
 msgstr ""
 
-#: inc/translations/strings.php:2758
+#: inc/translations/strings.php:2760
 msgctxt "Settings page"
 msgid "Send Test Email"
 msgstr ""
 
-#: inc/translations/strings.php:2759
+#: inc/translations/strings.php:2761
 msgctxt "Settings page"
 msgid "Send a test email to verify your template looks correct. Save settings first to test any changes"
 msgstr ""
 
-#: inc/translations/strings.php:2760
+#: inc/translations/strings.php:2762
 msgctxt "Settings page"
 msgid "Enter email address"
 msgstr ""
 
-#: inc/translations/strings.php:2761
+#: inc/translations/strings.php:2763
 msgctxt "Settings page"
 msgid "This tab is under development"
 msgstr ""
 
-#: inc/translations/strings.php:2762
+#: inc/translations/strings.php:2764
 msgctxt "Settings page"
 msgid "GDPR Compliance"
 msgstr ""
 
-#: inc/translations/strings.php:2763
+#: inc/translations/strings.php:2765
 msgctxt "Settings page"
 msgid "Better Messages is designed with privacy in mind. Here is how the plugin handles user data:"
 msgstr ""
 
-#: inc/translations/strings.php:2764
+#: inc/translations/strings.php:2766
 msgctxt "Settings page"
 msgid "All message data is stored on your own server in your WordPress database. When the WebSocket version is used for real-time delivery, data is transmitted encrypted and is not stored on external servers. An additional end-to-end encryption (E2EE) option is available for maximum privacy in WebSocket version."
 msgstr ""
 
-#: inc/translations/strings.php:2765
+#: inc/translations/strings.php:2767
 msgctxt "Settings page"
 msgid "The plugin supports WordPress built-in personal data export and erasure tools (Tools → Export/Erase Personal Data). When a user requests data erasure, their message content is anonymized and attachments can be deleted."
 msgstr ""
 
-#: inc/translations/strings.php:2766
+#: inc/translations/strings.php:2768
 msgctxt "Settings page"
 msgid "A suggested privacy policy text is automatically provided to WordPress, covering all data the plugin collects. The text adapts based on which features are enabled."
 msgstr ""
 
-#: inc/translations/strings.php:2767
+#: inc/translations/strings.php:2769
 msgctxt "Settings page"
 msgid "Emoji images can be self-hosted to avoid loading resources from external CDNs."
 msgstr ""
 
-#: inc/translations/strings.php:2768
+#: inc/translations/strings.php:2770
 msgctxt "Settings page"
 msgid "Video embeds (YouTube, Vimeo, etc.) can be configured to load only after user clicks, preventing automatic third-party tracking."
 msgstr ""
 
-#: inc/translations/strings.php:2769
+#: inc/translations/strings.php:2771
 msgctxt "Settings page"
 msgid "GIF and sticker images are loaded from third-party servers (Giphy, Stipop) when a user sends or views them in a conversation. These features are optional and can be disabled by removing the API key."
 msgstr ""
 
-#: inc/translations/strings.php:2770
+#: inc/translations/strings.php:2772
 msgctxt "Settings page"
 msgid "Browser-cached data (IndexedDB) stays on the user's device and is not shared. Users can clear it by clearing their browser data. In WebSocket version, cached data can be additionally encrypted for extra protection."
 msgstr ""
 
-#: inc/translations/strings.php:2771
+#: inc/translations/strings.php:2773
 msgctxt "Settings page"
 msgid "No cookies are set by the plugin. No analytics or tracking scripts are loaded."
 msgstr ""
 
-#: inc/translations/strings.php:2772
+#: inc/translations/strings.php:2774
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "If you believe we missed something or have a suggestion to improve privacy compliance, please %s."
 msgstr ""
 
-#: inc/translations/strings.php:2773
+#: inc/translations/strings.php:2775
 msgctxt "Settings page"
 msgid "contact us"
 msgstr ""
 
-#: inc/translations/strings.php:2774
+#: inc/translations/strings.php:2776
 msgctxt "Settings page"
 msgid "Emoji Images"
 msgstr ""
 
-#: inc/translations/strings.php:2775
+#: inc/translations/strings.php:2777
 msgctxt "Settings page"
 msgid "Emoji Sprite Delivery"
 msgstr ""
 
-#: inc/translations/strings.php:2776
+#: inc/translations/strings.php:2778
 msgctxt "Settings page"
 msgid "How emoji images are loaded. Self-hosted is recommended for GDPR compliance"
 msgstr ""
 
-#: inc/translations/strings.php:2777
+#: inc/translations/strings.php:2779
 msgctxt "Settings page"
 msgid "CDN (jsdelivr.net)"
 msgstr ""
 
-#: inc/translations/strings.php:2778
+#: inc/translations/strings.php:2780
 msgctxt "Settings page"
 msgid "Fast, but sends user IP to a third-party server"
 msgstr ""
 
-#: inc/translations/strings.php:2779
+#: inc/translations/strings.php:2781
 msgctxt "Settings page"
 msgid "Self-hosted"
 msgstr ""
 
-#: inc/translations/strings.php:2780
+#: inc/translations/strings.php:2782
 msgctxt "Settings page"
 msgid "Download emoji images to your server (GDPR compliant)"
 msgstr ""
 
-#: inc/translations/strings.php:2781
+#: inc/translations/strings.php:2783
 msgctxt "Settings page"
 msgid "Sprite Status"
 msgstr ""
 
-#: inc/translations/strings.php:2782
+#: inc/translations/strings.php:2784
 msgctxt "Settings page"
 msgid "Embedded Content"
 msgstr ""
 
-#: inc/translations/strings.php:2783
+#: inc/translations/strings.php:2785
 msgctxt "Settings page"
 msgid "Privacy-friendly oEmbeds"
 msgstr ""
 
-#: inc/translations/strings.php:2784
+#: inc/translations/strings.php:2786
 msgctxt "Settings page"
 msgid "YouTube, Vimeo, DailyMotion and VideoPress embeds will show a thumbnail preview instead of loading the video automatically. The video loads only after the user clicks. Other embed providers (SoundCloud, Flickr, etc.) will be shown as plain links. Recommended for GDPR compliance"
 msgstr ""
 
-#: inc/translations/strings.php:2785
+#: inc/translations/strings.php:2787
 msgctxt "Settings page"
 msgid "oEmbed is disabled. No third-party content is loaded in messages."
 msgstr ""
 
-#: inc/translations/strings.php:2786
+#: inc/translations/strings.php:2788
 msgctxt "Settings page"
 msgid "Data Erasure"
 msgstr ""
 
-#: inc/translations/strings.php:2787
+#: inc/translations/strings.php:2789
 msgctxt "Settings page"
 msgid "Delete attachments on data erasure"
 msgstr ""
 
-#: inc/translations/strings.php:2788
+#: inc/translations/strings.php:2790
 msgctxt "Settings page"
 msgid "When a user requests data erasure via WordPress privacy tools, also delete file attachments (images, documents, etc.) they uploaded in messages"
 msgstr ""
 
-#: inc/translations/strings.php:2789
+#: inc/translations/strings.php:2791
 msgctxt "Settings page"
 msgid "Privacy Policy"
 msgstr ""
 
-#: inc/translations/strings.php:2790
+#: inc/translations/strings.php:2792
 msgctxt "Settings page"
 msgid "Suggested Privacy Policy"
 msgstr ""
 
-#: inc/translations/strings.php:2791
+#: inc/translations/strings.php:2793
 msgctxt "Settings page"
 msgid "A suggested privacy policy text is automatically provided to WordPress. You can find it in <a href=\"options-privacy.php?tab=policyguide\">Settings → Privacy</a> and add it to your privacy policy page."
 msgstr ""
 
-#: inc/translations/strings.php:2792
+#: inc/translations/strings.php:2794
 msgctxt "Settings page"
 msgid "Download sprite for current emoji set"
 msgstr ""
 
-#: inc/translations/strings.php:2793
+#: inc/translations/strings.php:2795
 msgctxt "Settings page"
 msgid "You cannot send messages to this user"
 msgstr ""
 
-#: inc/translations/strings.php:2794
+#: inc/translations/strings.php:2796
 msgctxt "Settings page"
 msgid "User Controls"
 msgstr ""
 
-#: inc/translations/strings.php:2795
+#: inc/translations/strings.php:2797
 msgctxt "Settings page"
 msgid "User Conversation Restrictions"
 msgstr ""
 
-#: inc/translations/strings.php:2796
+#: inc/translations/strings.php:2798
 msgctxt "Settings page"
 msgid "Allow users to choose who can start conversations with them in their settings"
 msgstr ""
 
-#: inc/translations/strings.php:2797
+#: inc/translations/strings.php:2799
 msgctxt "Settings page"
 msgid "Delete Conversations"
 msgstr ""
 
-#: inc/translations/strings.php:2798
+#: inc/translations/strings.php:2800
 msgctxt "Settings page"
 msgid "Allow users to delete conversations. Administrators can always delete"
 msgstr ""
 
-#: inc/translations/strings.php:2799
+#: inc/translations/strings.php:2801
 msgctxt "Settings page"
 msgid "User Blocking"
 msgstr ""
 
-#: inc/translations/strings.php:2800
+#: inc/translations/strings.php:2802
 msgctxt "Settings page"
 msgid "Allow users to block other users from sending them messages. Administrators cannot be blocked"
 msgstr ""
 
-#: inc/translations/strings.php:2801
+#: inc/translations/strings.php:2803
 msgctxt "Settings page"
 msgid "Enable Blocking"
 msgstr ""
 
-#: inc/translations/strings.php:2802
+#: inc/translations/strings.php:2804
 msgctxt "Settings page"
 msgid "Cannot Block Others"
 msgstr ""
 
-#: inc/translations/strings.php:2803
+#: inc/translations/strings.php:2805
 msgctxt "Settings page"
 msgid "Cannot Be Blocked"
 msgstr ""
 
-#: inc/translations/strings.php:2804
+#: inc/translations/strings.php:2806
 msgctxt "Settings page"
 msgid "Role-to-Role Restrictions"
 msgstr ""
 
-#: inc/translations/strings.php:2805
+#: inc/translations/strings.php:2807
 msgctxt "Settings page"
 msgid "Restrict messaging between roles. Restricted users will also be hidden from search results"
 msgstr ""
 
-#: inc/translations/strings.php:2806
+#: inc/translations/strings.php:2808
 msgctxt "Settings page"
 msgid "Default Behavior"
 msgstr ""
 
-#: inc/translations/strings.php:2807
+#: inc/translations/strings.php:2809
 msgctxt "Settings page"
 msgid "All users can message each other"
 msgstr ""
 
-#: inc/translations/strings.php:2808
+#: inc/translations/strings.php:2810
 msgctxt "Settings page"
 msgid "No one can message each other"
 msgstr ""
 
-#: inc/translations/strings.php:2809
+#: inc/translations/strings.php:2811
 msgctxt "Settings page"
 msgid "From"
 msgstr ""
 
-#: inc/translations/strings.php:2810
+#: inc/translations/strings.php:2812
 msgctxt "Settings page"
 msgid "To"
 msgstr ""
 
-#: inc/translations/strings.php:2811
+#: inc/translations/strings.php:2813
 msgctxt "Settings page"
 msgid "Message"
 msgstr ""
 
-#: inc/translations/strings.php:2812
+#: inc/translations/strings.php:2814
 msgctxt "Settings page"
 msgid "No rules added"
 msgstr ""
 
-#: inc/translations/strings.php:2813
+#: inc/translations/strings.php:2815
 msgctxt "Settings page"
 msgid "Add Rule"
 msgstr ""
 
-#: inc/translations/strings.php:2814
+#: inc/translations/strings.php:2816
 msgctxt "Settings page"
 msgid "Reply Rate Limit"
 msgstr ""
 
-#: inc/translations/strings.php:2815
+#: inc/translations/strings.php:2817
 msgctxt "Settings page"
 msgid "Limit the number of replies a user can send within a time period"
 msgstr ""
 
-#: inc/translations/strings.php:2816
+#: inc/translations/strings.php:2818
 msgctxt "Settings page"
 msgid "Limit (0 = off)"
 msgstr ""
 
-#: inc/translations/strings.php:2817
+#: inc/translations/strings.php:2819
 msgctxt "Settings page"
 msgid "per"
 msgstr ""
 
-#: inc/translations/strings.php:2818
+#: inc/translations/strings.php:2820
 msgctxt "Settings page"
 msgid "Hour"
 msgstr ""
 
-#: inc/translations/strings.php:2819
+#: inc/translations/strings.php:2821
 msgctxt "Settings page"
 msgid "Day"
 msgstr ""
 
-#: inc/translations/strings.php:2820
+#: inc/translations/strings.php:2822
 msgctxt "Settings page"
 msgid "Rate Limit Message"
 msgstr ""
 
-#: inc/translations/strings.php:2821
+#: inc/translations/strings.php:2823
 msgctxt "Settings page"
 msgid "Restrict New Conversations"
 msgstr ""
 
-#: inc/translations/strings.php:2822
+#: inc/translations/strings.php:2824
 msgctxt "Settings page"
 msgid "Selected roles will not be allowed to start new conversations"
 msgstr ""
 
-#: inc/translations/strings.php:2823
+#: inc/translations/strings.php:2825
 msgctxt "Settings page"
 msgid "New Conversation Rate Limit"
 msgstr ""
 
-#: inc/translations/strings.php:2824
+#: inc/translations/strings.php:2826
 msgctxt "Settings page"
 msgid "Minimum time between new conversations, in seconds. Set to 0 to disable"
 msgstr ""
 
-#: inc/translations/strings.php:2825
+#: inc/translations/strings.php:2827
 msgctxt "Settings page"
 msgid "Hide New Conversation Button"
 msgstr ""
 
-#: inc/translations/strings.php:2826
+#: inc/translations/strings.php:2828
 msgctxt "Settings page"
 msgid "Remove the new conversation button for restricted users"
 msgstr ""
 
-#: inc/translations/strings.php:2827
+#: inc/translations/strings.php:2829
 msgctxt "Settings page"
 msgid "Restrict Replies"
 msgstr ""
 
-#: inc/translations/strings.php:2828
+#: inc/translations/strings.php:2830
 msgctxt "Settings page"
 msgid "Selected roles will not be allowed to reply to conversations"
 msgstr ""
 
-#: inc/translations/strings.php:2829
+#: inc/translations/strings.php:2831
 msgctxt "Settings page"
 msgid "Restrict Message Viewing"
 msgstr ""
 
-#: inc/translations/strings.php:2830
+#: inc/translations/strings.php:2832
 msgctxt "Settings page"
 msgid "Selected roles will see a replacement message instead of the actual content"
 msgstr ""
 
-#: inc/translations/strings.php:2831
+#: inc/translations/strings.php:2833
 msgctxt "Settings page"
 msgid "Replacement Message"
 msgstr ""
 
-#: inc/translations/strings.php:2832
+#: inc/translations/strings.php:2834
 msgctxt "Settings page"
 msgid "Bad Words Filter"
 msgstr ""
 
-#: inc/translations/strings.php:2833
+#: inc/translations/strings.php:2835
 msgctxt "Settings page"
 msgid "One word per line"
 msgstr ""
 
-#: inc/translations/strings.php:2834
+#: inc/translations/strings.php:2836
 msgctxt "Settings page"
 msgid "Bad Words List"
 msgstr ""
 
-#: inc/translations/strings.php:2835
+#: inc/translations/strings.php:2837
 msgctxt "Settings page"
 msgid "Skip Administrators"
 msgstr ""
 
-#: inc/translations/strings.php:2836
+#: inc/translations/strings.php:2838
 msgctxt "Settings page"
 msgid "Allow administrators to bypass the bad words filter"
 msgstr ""
 
-#: inc/translations/strings.php:2837
+#: inc/translations/strings.php:2839
 msgctxt "Settings page"
 msgid "Filter Message"
 msgstr ""
 
-#: inc/translations/strings.php:2838
+#: inc/translations/strings.php:2840
 msgctxt "Settings page"
 msgid "Docs"
 msgstr ""
 
-#: inc/translations/strings.php:2839
+#: inc/translations/strings.php:2841
 msgctxt "Settings page"
 msgid "Unread Messages Counter"
 msgstr ""
 
-#: inc/translations/strings.php:2840
+#: inc/translations/strings.php:2842
 msgctxt "Settings page"
 msgid "Display an unread messages counter anywhere on your site."
 msgstr ""
 
-#: inc/translations/strings.php:2841
+#: inc/translations/strings.php:2843
 msgctxt "Settings page"
 msgid "To add this shortcode to your menu item you can use <a href=\"https://www.wordplus.org/shortcode-in-menus\" target=\"_blank\">Shortcode in Menus</a> plugin."
 msgstr ""
 
-#: inc/translations/strings.php:2842
+#: inc/translations/strings.php:2844
 msgctxt "Settings page"
 msgid "My Messages URL"
 msgstr ""
 
-#: inc/translations/strings.php:2843
+#: inc/translations/strings.php:2845
 msgctxt "Settings page"
 msgid "Returns the URL to the current user's inbox."
 msgstr ""
 
-#: inc/translations/strings.php:2844
+#: inc/translations/strings.php:2846
 msgctxt "Settings page"
 msgid "Example:"
 msgstr ""
 
-#: inc/translations/strings.php:2845
+#: inc/translations/strings.php:2847
 msgctxt "Settings page"
 msgid "Live Chat Button (reference)"
 msgstr ""
 
-#: inc/translations/strings.php:2846
+#: inc/translations/strings.php:2848
 msgctxt "Settings page"
 msgid "Raw shortcode reference for the Live Chat Button. Use the Shortcode Builder above for a visual configurator. Magic values such as user_id=\"post_author\", unique_tag=\"auto\", object_id=\"auto\" and placeholders like {author_name} are resolved against the current post automatically."
 msgstr ""
 
-#: inc/translations/strings.php:2847
+#: inc/translations/strings.php:2849
 msgctxt "Settings page"
 msgid "Single Conversation Display"
 msgstr ""
 
-#: inc/translations/strings.php:2848
+#: inc/translations/strings.php:2850
 msgctxt "Settings page"
 msgid "Embed a single conversation on any page."
 msgstr ""
 
-#: inc/translations/strings.php:2849
+#: inc/translations/strings.php:2851
 msgctxt "Settings page"
 msgid "Display a video call button. Automatically detects the target user from context, or use user_id=\"1\" to specify."
 msgstr ""
 
-#: inc/translations/strings.php:2850
+#: inc/translations/strings.php:2852
 msgctxt "Settings page"
 msgid "Display an audio call button. Automatically detects the target user from context, or use user_id=\"1\" to specify."
 msgstr ""
 
-#: inc/translations/strings.php:2851
+#: inc/translations/strings.php:2853
 msgctxt "Settings page"
 msgid "Private Message Button (Legacy)"
 msgstr ""
 
-#: inc/translations/strings.php:2852
+#: inc/translations/strings.php:2854
 msgctxt "Settings page"
 msgid "Legacy shortcode. Use Live Chat Button instead — it auto-decides between mini chat and full page based on settings, and reliably handles guest visitors."
 msgstr ""
 
-#: inc/translations/strings.php:2853
+#: inc/translations/strings.php:2855
 msgctxt "Settings page"
 msgid "Display a private message button. Automatically detects the target user from context (e.g. post author), or use user_id=\"1\" to specify."
 msgstr ""
 
-#: inc/translations/strings.php:2854
+#: inc/translations/strings.php:2856
 msgctxt "Settings page"
 msgid "Mini Chat Button (Legacy)"
 msgstr ""
 
-#: inc/translations/strings.php:2855
+#: inc/translations/strings.php:2857
 msgctxt "Settings page"
 msgid "Open a mini chat window on click. Requires Mini Chats to be enabled. Automatically detects the target user from context, or use user_id=\"1\" to specify."
 msgstr ""
 
-#: inc/translations/strings.php:2856
+#: inc/translations/strings.php:2858
 msgctxt "Settings page"
 msgid "OK"
 msgstr ""
 
-#: inc/translations/strings.php:2857
+#: inc/translations/strings.php:2859
 msgctxt "Settings page"
 msgid "Mismatch"
 msgstr ""
 
-#: inc/translations/strings.php:2858
+#: inc/translations/strings.php:2860
 msgctxt "Settings page"
 msgid "Missing"
 msgstr ""
 
-#: inc/translations/strings.php:2859
+#: inc/translations/strings.php:2861
 msgctxt "Settings page"
 msgid "Recreate Table"
 msgstr ""
 
-#: inc/translations/strings.php:2860
+#: inc/translations/strings.php:2862
 msgctxt "Settings page"
 msgid "Sync Schema"
 msgstr ""
 
-#: inc/translations/strings.php:2861
+#: inc/translations/strings.php:2863
 msgctxt "Settings page"
 msgid "Working..."
 msgstr ""
 
-#: inc/translations/strings.php:2862
+#: inc/translations/strings.php:2864
 msgctxt "Settings page"
 msgid "Missing columns"
 msgstr ""
 
-#: inc/translations/strings.php:2863
+#: inc/translations/strings.php:2865
 msgctxt "Settings page"
 msgid "Extra columns"
 msgstr ""
 
-#: inc/translations/strings.php:2864
+#: inc/translations/strings.php:2866
 #, php-format
 msgctxt "Settings page"
 msgid "Drop these columns from %1$s?\\n\\n%2$s\\n\\nThis cannot be undone."
 msgstr ""
 
-#: inc/translations/strings.php:2865
+#: inc/translations/strings.php:2867
 msgctxt "Settings page"
 msgid "Dropping..."
 msgstr ""
 
-#: inc/translations/strings.php:2866
+#: inc/translations/strings.php:2868
 msgctxt "Settings page"
 msgid "Drop Extra Columns"
 msgstr ""
 
-#: inc/translations/strings.php:2867
+#: inc/translations/strings.php:2869
 msgctxt "Settings page"
 msgid "Missing indexes"
 msgstr ""
 
-#: inc/translations/strings.php:2868
+#: inc/translations/strings.php:2870
 msgctxt "Settings page"
 msgid "Extra indexes"
 msgstr ""
 
-#: inc/translations/strings.php:2869
+#: inc/translations/strings.php:2871
 #, php-format
 msgctxt "Settings page"
 msgid "Drop these indexes from %1$s?\\n\\n%2$s\\n\\nThis cannot be undone."
 msgstr ""
 
-#: inc/translations/strings.php:2870
+#: inc/translations/strings.php:2872
 msgctxt "Settings page"
 msgid "Drop Extra Indexes"
 msgstr ""
 
-#: inc/translations/strings.php:2871
+#: inc/translations/strings.php:2873
 msgctxt "Settings page"
 msgid "Enum mismatches"
 msgstr ""
 
-#: inc/translations/strings.php:2872
+#: inc/translations/strings.php:2874
 msgctxt "Settings page"
 msgid "missing:"
 msgstr ""
 
-#: inc/translations/strings.php:2873
+#: inc/translations/strings.php:2875
 msgctxt "Settings page"
 msgid "extra:"
 msgstr ""
 
-#: inc/translations/strings.php:2874
+#: inc/translations/strings.php:2876
 msgctxt "Settings page"
 msgid "Collation"
 msgstr ""
 
-#: inc/translations/strings.php:2875
+#: inc/translations/strings.php:2877
 msgctxt "Settings page"
 msgid "expected"
 msgstr ""
 
-#: inc/translations/strings.php:2876
+#: inc/translations/strings.php:2878
 msgctxt "Settings page"
 msgid "table missing"
 msgstr ""
 
-#: inc/translations/strings.php:2877
+#: inc/translations/strings.php:2879
 msgctxt "Settings page"
 msgid "Fixing..."
 msgstr ""
 
-#: inc/translations/strings.php:2878
+#: inc/translations/strings.php:2880
 msgctxt "Settings page"
 msgid "Fix Collation"
 msgstr ""
 
-#: inc/translations/strings.php:2879
+#: inc/translations/strings.php:2881
 msgctxt "Settings page"
 msgid "Columns with wrong collation"
 msgstr ""
 
-#: inc/translations/strings.php:2880
+#: inc/translations/strings.php:2882
 msgctxt "Settings page"
 msgid "Table repaired"
 msgstr ""
 
-#: inc/translations/strings.php:2881
+#: inc/translations/strings.php:2883
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "Dropped %d column(s)"
 msgstr ""
 
-#: inc/translations/strings.php:2882
+#: inc/translations/strings.php:2884
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "Dropped %d index(es)"
 msgstr ""
 
-#: inc/translations/strings.php:2883
+#: inc/translations/strings.php:2885
 msgctxt "Settings page"
 msgid "Collation fixed"
 msgstr ""
 
-#: inc/translations/strings.php:2884
+#: inc/translations/strings.php:2886
 msgctxt "Settings page"
 msgid "Repair all tables and fix collation issues? Large tables may take a while."
 msgstr ""
 
-#: inc/translations/strings.php:2885
+#: inc/translations/strings.php:2887
 msgctxt "Settings page"
 msgid "Database repair complete"
 msgstr ""
 
-#: inc/translations/strings.php:2886
+#: inc/translations/strings.php:2888
 msgctxt "Settings page"
 msgid "Loading database status..."
 msgstr ""
 
-#: inc/translations/strings.php:2887
+#: inc/translations/strings.php:2889
 msgctxt "Settings page"
 msgid "Could not load database status"
 msgstr ""
 
-#: inc/translations/strings.php:2888
+#: inc/translations/strings.php:2890
 msgctxt "Settings page"
 msgid "Retry"
 msgstr ""
 
-#: inc/translations/strings.php:2889
+#: inc/translations/strings.php:2891
 msgctxt "Settings page"
 msgid "tables"
 msgstr ""
 
-#: inc/translations/strings.php:2890
+#: inc/translations/strings.php:2892
 msgctxt "Settings page"
 msgid "missing"
 msgstr ""
 
-#: inc/translations/strings.php:2891
+#: inc/translations/strings.php:2893
 msgctxt "Settings page"
 msgid "mismatch"
 msgstr ""
 
-#: inc/translations/strings.php:2892
+#: inc/translations/strings.php:2894
 msgctxt "Settings page"
 msgid "collation"
 msgstr ""
 
-#: inc/translations/strings.php:2893
+#: inc/translations/strings.php:2895
 msgctxt "Settings page"
 msgid "all OK"
 msgstr ""
 
-#: inc/translations/strings.php:2894
+#: inc/translations/strings.php:2896
 msgctxt "Settings page"
 msgid "Refresh"
 msgstr ""
 
-#: inc/translations/strings.php:2895
+#: inc/translations/strings.php:2897
 msgctxt "Settings page"
 msgid "Repairing..."
 msgstr ""
 
-#: inc/translations/strings.php:2896
+#: inc/translations/strings.php:2898
 msgctxt "Settings page"
 msgid "Repair All"
 msgstr ""
 
-#: inc/translations/strings.php:2897
+#: inc/translations/strings.php:2899
 msgctxt "Settings page"
 msgid "Expected collation:"
 msgstr ""
 
-#: inc/translations/strings.php:2898
+#: inc/translations/strings.php:2900
 msgctxt "Settings page"
 msgid "Checks column presence, enum values, indexes and collation; does not check column types or sizes"
 msgstr ""
 
-#: inc/translations/strings.php:2899
+#: inc/translations/strings.php:2901
 msgctxt "Settings page"
 msgid "Table"
 msgstr ""
 
-#: inc/translations/strings.php:2900
+#: inc/translations/strings.php:2902
 msgctxt "Settings page"
 msgid "Cols"
 msgstr ""
 
-#: inc/translations/strings.php:2901
+#: inc/translations/strings.php:2903
 msgctxt "Settings page"
 msgid "Rows"
 msgstr ""
 
-#: inc/translations/strings.php:2902
+#: inc/translations/strings.php:2904
 msgctxt "Settings page"
 msgid "Please confirm the action. If you have many users, this action can take a few minutes to complete."
 msgstr ""
 
-#: inc/translations/strings.php:2903
+#: inc/translations/strings.php:2905
 msgctxt "Settings page"
 msgid "User index synced successfully"
 msgstr ""
 
-#: inc/translations/strings.php:2904
+#: inc/translations/strings.php:2906
 msgctxt "Settings page"
 msgid "This will permanently delete all messages and reinstall database tables. This action cannot be undone. Please make a backup first. Type RESET to confirm."
 msgstr ""
 
-#: inc/translations/strings.php:2905
+#: inc/translations/strings.php:2907
 msgctxt "Settings page"
 msgid "Database reset successfully"
 msgstr ""
 
-#: inc/translations/strings.php:2906
+#: inc/translations/strings.php:2908
 msgctxt "Settings page"
 msgid "Settings imported successfully"
 msgstr ""
 
-#: inc/translations/strings.php:2907
+#: inc/translations/strings.php:2909
 msgctxt "Settings page"
 msgid "WP Cron Jobs"
 msgstr ""
 
-#: inc/translations/strings.php:2908
+#: inc/translations/strings.php:2910
 msgctxt "Settings page"
 msgid "WP Cron is not working properly on this site."
 msgstr ""
 
-#: inc/translations/strings.php:2909
+#: inc/translations/strings.php:2911
 msgctxt "Settings page"
 msgid "You can try installing <a href=\"https://www.wordplus.org/wp-crontrol\" target=\"_blank\">WP Crontrol</a> to get more details about your WP Cron system and check <a href=\"https://www.wordplus.org/cron-help\" target=\"_blank\">possible issues and fixes</a>."
 msgstr ""
 
-#: inc/translations/strings.php:2910
+#: inc/translations/strings.php:2912
 msgctxt "Settings page"
 msgid "Hook"
 msgstr ""
 
-#: inc/translations/strings.php:2911
+#: inc/translations/strings.php:2913
 msgctxt "Settings page"
 msgid "Next Run"
 msgstr ""
 
-#: inc/translations/strings.php:2912
+#: inc/translations/strings.php:2914
 msgctxt "Settings page"
 msgid "Database"
 msgstr ""
 
-#: inc/translations/strings.php:2913
+#: inc/translations/strings.php:2915
 msgctxt "Settings page"
 msgid "UTF8MB4 Encoding"
 msgstr ""
 
-#: inc/translations/strings.php:2914
+#: inc/translations/strings.php:2916
 msgctxt "Settings page"
 msgid "Supported"
 msgstr ""
 
-#: inc/translations/strings.php:2915
+#: inc/translations/strings.php:2917
 msgctxt "Settings page"
 msgid "Not Supported"
 msgstr ""
 
-#: inc/translations/strings.php:2916
+#: inc/translations/strings.php:2918
 msgctxt "Settings page"
 msgid "Schema Version"
 msgstr ""
 
-#: inc/translations/strings.php:2917
+#: inc/translations/strings.php:2919
 msgctxt "Settings page"
 msgid "latest:"
 msgstr ""
 
-#: inc/translations/strings.php:2918
+#: inc/translations/strings.php:2920
 msgctxt "Settings page"
 msgid "upgrade pending"
 msgstr ""
 
-#: inc/translations/strings.php:2919
+#: inc/translations/strings.php:2921
 msgctxt "Settings page"
 msgid "User Index"
 msgstr ""
 
-#: inc/translations/strings.php:2920
+#: inc/translations/strings.php:2922
 msgctxt "Settings page"
 msgid "Last sync:"
 msgstr ""
 
-#: inc/translations/strings.php:2921
+#: inc/translations/strings.php:2923
 msgctxt "Settings page"
 msgid "Next sync:"
 msgstr ""
 
-#: inc/translations/strings.php:2922
+#: inc/translations/strings.php:2924
 msgctxt "Settings page"
 msgid "Synchronizing..."
 msgstr ""
 
-#: inc/translations/strings.php:2923
+#: inc/translations/strings.php:2925
 msgctxt "Settings page"
 msgid "Synchronize Now"
 msgstr ""
 
-#: inc/translations/strings.php:2924
+#: inc/translations/strings.php:2926
 msgctxt "Settings page"
 msgid "Reset Database"
 msgstr ""
 
-#: inc/translations/strings.php:2925
+#: inc/translations/strings.php:2927
 msgctxt "Settings page"
 msgid "Delete all messages and reinstall database tables. This cannot be undone"
 msgstr ""
 
-#: inc/translations/strings.php:2926
+#: inc/translations/strings.php:2928
 msgctxt "Settings page"
 msgid "Resetting..."
 msgstr ""
 
-#: inc/translations/strings.php:2927
+#: inc/translations/strings.php:2929
 msgctxt "Settings page"
 msgid "Settings Transfer"
 msgstr ""
 
-#: inc/translations/strings.php:2928
+#: inc/translations/strings.php:2930
 msgctxt "Settings page"
 msgid "Export or import plugin settings as a JSON file"
 msgstr ""
 
-#: inc/translations/strings.php:2929
+#: inc/translations/strings.php:2931
 msgctxt "Settings page"
 msgid "Export"
 msgstr ""
 
-#: inc/translations/strings.php:2930
+#: inc/translations/strings.php:2932
 msgctxt "Settings page"
 msgid "Download Settings"
 msgstr ""
 
-#: inc/translations/strings.php:2931
+#: inc/translations/strings.php:2933
 msgctxt "Settings page"
 msgid "Import"
 msgstr ""
 
-#: inc/translations/strings.php:2932
+#: inc/translations/strings.php:2934
 msgctxt "Settings page"
 msgid "Importing..."
 msgstr ""
 
-#: inc/translations/strings.php:2933
+#: inc/translations/strings.php:2935
 msgctxt "Settings page"
 msgid "selected"
 msgstr ""
 
-#: inc/translations/strings.php:2934
+#: inc/translations/strings.php:2936
 msgctxt "Settings page"
 msgid "Message Translation"
 msgstr ""
 
-#: inc/translations/strings.php:2935
+#: inc/translations/strings.php:2937
 msgctxt "Settings page"
 msgid "Automatically translate incoming messages to each user's preferred language using AI"
 msgstr ""
 
-#: inc/translations/strings.php:2936
+#: inc/translations/strings.php:2938
 msgctxt "Settings page"
 msgid "Message Translation feature is currently only available with Better Messages Cloud AI, currently available in 1-to-1 conversations only, each user can select their preferred language in the messaging settings panel and all incoming messages will be automatically translated to their selected language"
 msgstr ""
 
-#: inc/translations/strings.php:2937
+#: inc/translations/strings.php:2939
 msgctxt "Settings page"
 msgid "Enable Translation"
 msgstr ""
 
-#: inc/translations/strings.php:2938
+#: inc/translations/strings.php:2940
 msgctxt "Settings page"
 msgid "Message content is sent to Better Messages Cloud for translation. Better Messages Cloud does not store any message data — content is translated in real time and immediately discarded."
 msgstr ""
 
-#: inc/translations/strings.php:2939
+#: inc/translations/strings.php:2941
 msgctxt "Settings page"
 msgid "Available Languages"
 msgstr ""
 
-#: inc/translations/strings.php:2940
+#: inc/translations/strings.php:2942
 msgctxt "Settings page"
 msgid "Select which languages users can choose from"
 msgstr ""
 
-#: inc/translations/strings.php:2941
+#: inc/translations/strings.php:2943
 msgctxt "Settings page"
 msgid "Failed to load models. Make sure an OpenAI API key is configured."
 msgstr ""
 
-#: inc/translations/strings.php:2942
+#: inc/translations/strings.php:2944
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "The %s add-on is required for these settings."
 msgstr ""
 
-#: inc/translations/strings.php:2943
+#: inc/translations/strings.php:2945
 msgctxt "Settings page"
 msgid "Max Duration"
 msgstr ""
 
-#: inc/translations/strings.php:2944
+#: inc/translations/strings.php:2946
 msgctxt "Settings page"
 msgid "Maximum recording duration in seconds. Set to 0 for no limit. Recording will auto-stop when the limit is reached"
 msgstr ""
 
-#: inc/translations/strings.php:2945
+#: inc/translations/strings.php:2947
 msgctxt "Settings page"
 msgid "Auto-Delete Voice Messages"
 msgstr ""
 
-#: inc/translations/strings.php:2946
+#: inc/translations/strings.php:2948
 msgctxt "Settings page"
 msgid "Delete After"
 msgstr ""
 
-#: inc/translations/strings.php:2947
+#: inc/translations/strings.php:2949
 msgctxt "Settings page"
 msgid "Automatically delete voice messages older than the specified number of days. Set to 0 to keep all voice messages"
 msgstr ""
 
-#: inc/translations/strings.php:2948
+#: inc/translations/strings.php:2950
 msgctxt "Settings page"
 msgid "Deletion Mode"
 msgstr ""
 
-#: inc/translations/strings.php:2949
+#: inc/translations/strings.php:2951
 msgctxt "Settings page"
 msgid "Replace with \"Voice message expired\" notice"
 msgstr ""
 
-#: inc/translations/strings.php:2950
+#: inc/translations/strings.php:2952
 msgctxt "Settings page"
 msgid "The entire message will be permanently deleted, including any transcription."
 msgstr ""
 
-#: inc/translations/strings.php:2951
+#: inc/translations/strings.php:2953
 msgctxt "Settings page"
 msgid "The audio file will be removed but the message will remain with an expired notice."
 msgstr ""
 
-#: inc/translations/strings.php:2952
+#: inc/translations/strings.php:2954
 msgctxt "Settings page"
 msgid "Voice Transcription"
 msgstr ""
 
-#: inc/translations/strings.php:2953
+#: inc/translations/strings.php:2955
 msgctxt "Settings page"
 msgid "Automatically transcribe voice messages to text using AI"
 msgstr ""
 
-#: inc/translations/strings.php:2954
+#: inc/translations/strings.php:2956
 msgctxt "Settings page"
 msgid "Transcription Provider"
 msgstr ""
 
-#: inc/translations/strings.php:2955
+#: inc/translations/strings.php:2957
 msgctxt "Settings page"
 msgid "OpenAI Transcription API"
 msgstr ""
 
-#: inc/translations/strings.php:2956
+#: inc/translations/strings.php:2958
 msgctxt "Settings page"
 msgid "Requires an OpenAI API key. Supports model and prompt selection"
 msgstr ""
 
-#: inc/translations/strings.php:2957
+#: inc/translations/strings.php:2959
 msgctxt "Settings page"
 msgid "Better Messages Transcription AI"
 msgstr ""
 
-#: inc/translations/strings.php:2958
+#: inc/translations/strings.php:2960
 msgctxt "Settings page"
 msgid "Included with WebSocket license at no additional cost. No third-party API keys required"
 msgstr ""
 
-#: inc/translations/strings.php:2959
+#: inc/translations/strings.php:2961
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "An %s is required for OpenAI voice transcription."
 msgstr ""
 
-#: inc/translations/strings.php:2960
+#: inc/translations/strings.php:2962
 msgctxt "Settings page"
 msgid "Enable Transcription"
 msgstr ""
 
-#: inc/translations/strings.php:2961
+#: inc/translations/strings.php:2963
 msgctxt "Settings page"
 msgid "Voice message audio is sent to OpenAI servers for transcription. Please review OpenAI's data usage policy to ensure compliance with your privacy requirements."
 msgstr ""
 
-#: inc/translations/strings.php:2962
+#: inc/translations/strings.php:2964
 msgctxt "Settings page"
 msgid "Voice message audio is sent to Better Messages Cloud for transcription. Better Messages Cloud does not store any audio data — files are transcribed in real time and immediately discarded."
 msgstr ""
 
-#: inc/translations/strings.php:2963
+#: inc/translations/strings.php:2965
 msgctxt "Settings page"
 msgid "Transcription Model"
 msgstr ""
 
-#: inc/translations/strings.php:2964
+#: inc/translations/strings.php:2966
 msgctxt "Settings page"
 msgid "Loading..."
 msgstr ""
 
-#: inc/translations/strings.php:2965
+#: inc/translations/strings.php:2967
 msgctxt "Settings page"
 msgid "No models found"
 msgstr ""
 
-#: inc/translations/strings.php:2966
+#: inc/translations/strings.php:2968
 msgctxt "Settings page"
 msgid "Leave empty for automatic detection, or enter a language code (e.g. en, ru, es) for better accuracy"
 msgstr ""
 
-#: inc/translations/strings.php:2967
+#: inc/translations/strings.php:2969
 msgctxt "Settings page"
 msgid "auto"
 msgstr ""
 
-#: inc/translations/strings.php:2968
+#: inc/translations/strings.php:2970
 msgctxt "Settings page"
 msgid "Transcription Prompt"
 msgstr ""
 
-#: inc/translations/strings.php:2969
+#: inc/translations/strings.php:2971
 msgctxt "Settings page"
 msgid "Optional instructions for the transcription model. Specifying the expected language improves accuracy and speed"
 msgstr ""
 
-#: inc/translations/strings.php:2970
+#: inc/translations/strings.php:2972
 #, php-format,js-format
 msgctxt "Settings page"
 msgid "Example: %s"
 msgstr ""
 
-#: inc/translations/strings.php:2971
+#: inc/translations/strings.php:2973
 msgctxt "Settings page"
 msgid "Voice Messages Restrictions"
 msgstr ""
 
-#: inc/translations/strings.php:2972
+#: inc/translations/strings.php:2974
 msgctxt "Settings page"
 msgid "Restricted roles cannot send voice messages"
 msgstr ""
 
-#: inc/translations/strings.php:2973
+#: inc/translations/strings.php:2975
 msgctxt "Settings page"
 msgid "List of available AI chat bots. Lets users start or continue conversations with configured bots"
 msgstr ""
 
-#: inc/translations/strings.php:2974
+#: inc/translations/strings.php:2976
 msgctxt "Settings page"
 msgid "Widget Icon"
 msgstr ""
 
-#: inc/translations/strings.php:2975
+#: inc/translations/strings.php:2977
 msgctxt "Settings page"
 msgid "Icon shown for the AI Bots tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:2976
+#: inc/translations/strings.php:2978
 msgctxt "Settings page"
 msgid "Bots to Display"
 msgstr ""
 
-#: inc/translations/strings.php:2977
+#: inc/translations/strings.php:2979
 msgctxt "Settings page"
 msgid "Choose whether the widget lists every enabled bot or only a curated subset"
 msgstr ""
 
-#: inc/translations/strings.php:2978
+#: inc/translations/strings.php:2980
 msgctxt "Settings page"
 msgid "Display Mode"
 msgstr ""
 
-#: inc/translations/strings.php:2979
+#: inc/translations/strings.php:2981
 msgctxt "Settings page"
 msgid "All enabled bots are shown by default. Use \"Specific\" to hand-pick the bots that appear"
 msgstr ""
 
-#: inc/translations/strings.php:2980
+#: inc/translations/strings.php:2982
 msgctxt "Settings page"
 msgid "Show all enabled bots"
 msgstr ""
 
-#: inc/translations/strings.php:2981
+#: inc/translations/strings.php:2983
 msgctxt "Settings page"
 msgid "Automatically includes new bots when you add them"
 msgstr ""
 
-#: inc/translations/strings.php:2982
+#: inc/translations/strings.php:2984
 msgctxt "Settings page"
 msgid "Show specific bots only"
 msgstr ""
 
-#: inc/translations/strings.php:2983
+#: inc/translations/strings.php:2985
 msgctxt "Settings page"
 msgid "Only the selected bots appear in the widget"
 msgstr ""
 
-#: inc/translations/strings.php:2984
+#: inc/translations/strings.php:2986
 msgctxt "Settings page"
 msgid "Search bots\\u2026"
 msgstr ""
 
-#: inc/translations/strings.php:2985
+#: inc/translations/strings.php:2987
 msgctxt "Settings page"
 msgid "Add bot"
 msgstr ""
 
-#: inc/translations/strings.php:2986
+#: inc/translations/strings.php:2988
 msgctxt "Settings page"
 msgid "No bots selected"
 msgstr ""
 
-#: inc/translations/strings.php:2987
+#: inc/translations/strings.php:2989
 msgctxt "Settings page"
 msgid "Hide Tab When Empty"
 msgstr ""
 
-#: inc/translations/strings.php:2988
+#: inc/translations/strings.php:2990
 msgctxt "Settings page"
 msgid "Hide the AI Bots tab entirely when the current user has no available bots to show"
 msgstr ""
 
-#: inc/translations/strings.php:2989
+#: inc/translations/strings.php:2991
 msgctxt "Settings page"
 msgid "Show Search Box"
 msgstr ""
 
-#: inc/translations/strings.php:2990
+#: inc/translations/strings.php:2992
 msgctxt "Settings page"
 msgid "Render the search input above the list. Turn off for sites with only a handful of bots where search adds visual noise"
 msgstr ""
 
-#: inc/translations/strings.php:2991
+#: inc/translations/strings.php:2993
 msgctxt "Settings page"
 msgid "Role Restrictions"
 msgstr ""
 
-#: inc/translations/strings.php:2992
+#: inc/translations/strings.php:2994
 msgctxt "Settings page"
 msgid "List of available chat rooms the user can join. Great for public topic channels, support rooms, event chats"
 msgstr ""
 
-#: inc/translations/strings.php:2993
+#: inc/translations/strings.php:2995
 msgctxt "Settings page"
 msgid "Icon shown for the Chat Rooms tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:2994
+#: inc/translations/strings.php:2996
 msgctxt "Settings page"
 msgid "Rooms to Display"
 msgstr ""
 
-#: inc/translations/strings.php:2995
+#: inc/translations/strings.php:2997
 msgctxt "Settings page"
 msgid "Choose whether the widget lists every room the user can access or only a curated subset"
 msgstr ""
 
-#: inc/translations/strings.php:2996
+#: inc/translations/strings.php:2998
 msgctxt "Settings page"
 msgid "All accessible rooms are shown by default. Use \"Specific\" to hand-pick the rooms that appear"
 msgstr ""
 
-#: inc/translations/strings.php:2997
+#: inc/translations/strings.php:2999
 msgctxt "Settings page"
 msgid "Show all accessible rooms"
 msgstr ""
 
-#: inc/translations/strings.php:2998
+#: inc/translations/strings.php:3000
 msgctxt "Settings page"
 msgid "Automatically includes new rooms when you add them"
 msgstr ""
 
-#: inc/translations/strings.php:2999
+#: inc/translations/strings.php:3001
 msgctxt "Settings page"
 msgid "Show specific rooms only"
 msgstr ""
 
-#: inc/translations/strings.php:3000
+#: inc/translations/strings.php:3002
 msgctxt "Settings page"
 msgid "Only the selected rooms appear in the widget"
 msgstr ""
 
-#: inc/translations/strings.php:3001
+#: inc/translations/strings.php:3003
 msgctxt "Settings page"
 msgid "Search chat rooms\\u2026"
 msgstr ""
 
-#: inc/translations/strings.php:3002
+#: inc/translations/strings.php:3004
 msgctxt "Settings page"
 msgid "Add chat room"
 msgstr ""
 
-#: inc/translations/strings.php:3003
+#: inc/translations/strings.php:3005
 msgctxt "Settings page"
 msgid "No chat rooms selected"
 msgstr ""
 
-#: inc/translations/strings.php:3004
+#: inc/translations/strings.php:3006
 msgctxt "Settings page"
 msgid "Hide the Chat Rooms tab entirely when the current user has no accessible rooms to show"
 msgstr ""
 
-#: inc/translations/strings.php:3005
+#: inc/translations/strings.php:3007
 msgctxt "Settings page"
 msgid "Render the search input above the list. Turn off for sites with only a handful of rooms where search adds visual noise"
 msgstr ""
 
-#: inc/translations/strings.php:3006
+#: inc/translations/strings.php:3008
 msgctxt "Settings page"
 msgid "Widget Settings"
 msgstr ""
 
-#: inc/translations/strings.php:3007
+#: inc/translations/strings.php:3009
 msgctxt "Settings page"
 msgid "Options specific to the Chat Rooms widget"
 msgstr ""
 
-#: inc/translations/strings.php:3008
+#: inc/translations/strings.php:3010
 msgctxt "Settings page"
 msgid "Show Online Users Count"
 msgstr ""
 
-#: inc/translations/strings.php:3009
+#: inc/translations/strings.php:3011
 msgctxt "Settings page"
 msgid "Display how many users are currently online next to each chat room. Live presence data is delivered over the realtime connection"
 msgstr ""
 
-#: inc/translations/strings.php:3010
+#: inc/translations/strings.php:3012
 msgctxt "Settings page"
 msgid "The threads/inbox list widget. Shows the user's recent conversations"
 msgstr ""
 
-#: inc/translations/strings.php:3011
+#: inc/translations/strings.php:3013
 msgctxt "Settings page"
 msgid "Icon shown for the Conversations tab in Mini Widgets, Side Panel and Mobile tab bars"
 msgstr ""
 
-#: inc/translations/strings.php:3012
+#: inc/translations/strings.php:3014
 msgctxt "Settings page"
 msgid "Hide the Conversations Mini Widget tab from selected roles. Side Panel and Mobile Conversations views cannot be hidden because they are the primary messaging UI"
 msgstr ""
 
-#: inc/translations/strings.php:3013
+#: inc/translations/strings.php:3015
 msgctxt "Settings page"
 msgid "List of courses the user is enrolled in or instructs. Sourced from Tutor LMS, LearnPress, LearnDash, or MasterStudy LMS"
 msgstr ""
 
-#: inc/translations/strings.php:3014
+#: inc/translations/strings.php:3016
 msgctxt "Settings page"
 msgid "The Courses widget requires one of:"
 msgstr ""
 
-#: inc/translations/strings.php:3015
+#: inc/translations/strings.php:3017
 msgctxt "Settings page"
 msgid "Tutor LMS"
 msgstr ""
 
-#: inc/translations/strings.php:3016
+#: inc/translations/strings.php:3018
 msgctxt "Settings page"
 msgid "LearnPress"
 msgstr ""
 
-#: inc/translations/strings.php:3017
+#: inc/translations/strings.php:3019
 msgctxt "Settings page"
 msgid "LearnDash"
 msgstr ""
 
-#: inc/translations/strings.php:3018
+#: inc/translations/strings.php:3020
 msgctxt "Settings page"
 msgid "MasterStudy LMS"
 msgstr ""
 
-#: inc/translations/strings.php:3019
+#: inc/translations/strings.php:3021
 msgctxt "Settings page"
 msgid "Activate any of the above plugins to enable this widget"
 msgstr ""
 
-#: inc/translations/strings.php:3020
+#: inc/translations/strings.php:3022
 msgctxt "Settings page"
 msgid "Icon shown for the Courses tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:3021
+#: inc/translations/strings.php:3023
 msgctxt "Settings page"
 msgid "Hide the Courses tab entirely when the current user has no courses to show"
 msgstr ""
 
-#: inc/translations/strings.php:3022
+#: inc/translations/strings.php:3024
 msgctxt "Settings page"
 msgid "Render the search input above the list. Turn off for sites where the list is short enough that search adds visual noise"
 msgstr ""
 
-#: inc/translations/strings.php:3023
+#: inc/translations/strings.php:3025
 msgctxt "Settings page"
 msgid "List of the user's friends. Sourced from BuddyPress, Ultimate Member or PeepSo"
 msgstr ""
 
-#: inc/translations/strings.php:3024
+#: inc/translations/strings.php:3026
 msgctxt "Settings page"
 msgid "The Friends widget requires one of:"
 msgstr ""
 
-#: inc/translations/strings.php:3025
+#: inc/translations/strings.php:3027
 msgctxt "Settings page"
 msgid "BuddyPress with the Friends component enabled"
 msgstr ""
 
-#: inc/translations/strings.php:3026
+#: inc/translations/strings.php:3028
 msgctxt "Settings page"
 msgid "Ultimate Member with the Friends addon"
 msgstr ""
 
-#: inc/translations/strings.php:3027
+#: inc/translations/strings.php:3029
 msgctxt "Settings page"
 msgid "PeepSo with the Friends addon"
 msgstr ""
 
-#: inc/translations/strings.php:3028
+#: inc/translations/strings.php:3030
 msgctxt "Settings page"
 msgid "Icon shown for the Friends tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:3029
+#: inc/translations/strings.php:3031
 msgctxt "Settings page"
 msgid "Hide the Friends tab entirely when the current user has no friends to show"
 msgstr ""
 
-#: inc/translations/strings.php:3030
+#: inc/translations/strings.php:3032
 msgctxt "Settings page"
 msgid "List of groups/communities the user belongs to. Sourced from BuddyPress, Ultimate Member, PeepSo or FluentCommunity"
 msgstr ""
 
-#: inc/translations/strings.php:3031
+#: inc/translations/strings.php:3033
 msgctxt "Settings page"
 msgid "The Groups widget requires one of:"
 msgstr ""
 
-#: inc/translations/strings.php:3032
+#: inc/translations/strings.php:3034
 msgctxt "Settings page"
 msgid "BuddyPress with the Groups component enabled"
 msgstr ""
 
-#: inc/translations/strings.php:3033
+#: inc/translations/strings.php:3035
 msgctxt "Settings page"
 msgid "Ultimate Member with the Groups addon"
 msgstr ""
 
-#: inc/translations/strings.php:3034
+#: inc/translations/strings.php:3036
 msgctxt "Settings page"
 msgid "PeepSo with the Groups addon"
 msgstr ""
 
-#: inc/translations/strings.php:3035
+#: inc/translations/strings.php:3037
 msgctxt "Settings page"
 msgid "FluentCommunity with Spaces"
 msgstr ""
 
-#: inc/translations/strings.php:3036
+#: inc/translations/strings.php:3038
 msgctxt "Settings page"
 msgid "Icon shown for the Groups tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:3037
+#: inc/translations/strings.php:3039
 msgctxt "Settings page"
 msgid "Hide the Groups tab entirely when the current user has no groups to show"
 msgstr ""
 
-#: inc/translations/strings.php:3038
+#: inc/translations/strings.php:3040
 msgctxt "Settings page"
 msgid "Mini Widgets Bar"
 msgstr ""
 
-#: inc/translations/strings.php:3039
+#: inc/translations/strings.php:3041
 msgctxt "Settings page"
 msgid "Tab strip or floating bubble fixed to the bottom of the screen. Drag tabs to reorder. Click the gear icon on a tab to configure it"
 msgstr ""
 
-#: inc/translations/strings.php:3040
+#: inc/translations/strings.php:3042
 msgctxt "Settings page"
 msgid "Display Style"
 msgstr ""
 
-#: inc/translations/strings.php:3041
+#: inc/translations/strings.php:3043
 msgctxt "Settings page"
 msgid "How the mini widget appears on the page"
 msgstr ""
 
-#: inc/translations/strings.php:3042
+#: inc/translations/strings.php:3044
 msgctxt "Settings page"
 msgid "Classic Bar"
 msgstr ""
 
-#: inc/translations/strings.php:3043
+#: inc/translations/strings.php:3045
 msgctxt "Settings page"
 msgid "Tab bar fixed to the bottom of the screen"
 msgstr ""
 
-#: inc/translations/strings.php:3044
+#: inc/translations/strings.php:3046
 msgctxt "Settings page"
 msgid "Floating Bubble"
 msgstr ""
 
-#: inc/translations/strings.php:3045
+#: inc/translations/strings.php:3047
 msgctxt "Settings page"
 msgid "Floating circular button that expands into a panel on click"
 msgstr ""
 
-#: inc/translations/strings.php:3046
+#: inc/translations/strings.php:3048
 msgctxt "Settings page"
 msgid "Bubble Icon"
 msgstr ""
 
-#: inc/translations/strings.php:3047
+#: inc/translations/strings.php:3049
 msgctxt "Settings page"
 msgid "Icon displayed on the floating bubble button"
 msgstr ""
 
-#: inc/translations/strings.php:3048
+#: inc/translations/strings.php:3050
 msgctxt "Settings page"
 msgid "Close on Outside Click"
 msgstr ""
 
-#: inc/translations/strings.php:3049
+#: inc/translations/strings.php:3051
 msgctxt "Settings page"
 msgid "Close the bubble panel when clicking outside it"
 msgstr ""
 
-#: inc/translations/strings.php:3050
+#: inc/translations/strings.php:3052
 msgctxt "Settings page"
 msgid "Animation"
 msgstr ""
 
-#: inc/translations/strings.php:3051
+#: inc/translations/strings.php:3053
 msgctxt "Settings page"
 msgid "Animate mini widgets when opening and closing"
 msgstr ""
 
-#: inc/translations/strings.php:3052
+#: inc/translations/strings.php:3054
 msgctxt "Settings page"
 msgid "Show Only Icons"
 msgstr ""
 
-#: inc/translations/strings.php:3053
+#: inc/translations/strings.php:3055
 msgctxt "Settings page"
 msgid "Hide tab labels in the mini widgets. Labels appear as tooltips on hover"
 msgstr ""
 
-#: inc/translations/strings.php:3054
+#: inc/translations/strings.php:3056
 msgctxt "Settings page"
 msgid "Keep mini widgets and mini chats in sync across browser tabs"
 msgstr ""
 
-#: inc/translations/strings.php:3055
+#: inc/translations/strings.php:3057
 msgctxt "Settings page"
 msgid "Side Panel"
 msgstr ""
 
-#: inc/translations/strings.php:3056
+#: inc/translations/strings.php:3058
 msgctxt "Settings page"
 msgid "Vertical tab strip on the full inbox page. Conversations is always the first tab"
 msgstr ""
 
-#: inc/translations/strings.php:3057
+#: inc/translations/strings.php:3059
 msgctxt "Settings page"
 msgid "Hide tab labels in the side panel. Labels appear as tooltips on hover"
 msgstr ""
 
-#: inc/translations/strings.php:3058
+#: inc/translations/strings.php:3060
 msgctxt "Settings page"
 msgid "Mobile Tab Bar"
 msgstr ""
 
-#: inc/translations/strings.php:3059
+#: inc/translations/strings.php:3061
 msgctxt "Settings page"
 msgid "Bottom tab bar shown when mobile full-screen mode is active. Conversations is always the first tab"
 msgstr ""
 
-#: inc/translations/strings.php:3060
+#: inc/translations/strings.php:3062
 msgctxt "Settings page"
 msgid "Hide tab labels in the mobile bottom bar. Labels appear as tooltips on hover"
 msgstr ""
 
-#: inc/translations/strings.php:3061
+#: inc/translations/strings.php:3063
 msgctxt "Settings page"
 msgid "Small chat windows that appear fixed to the bottom of the browser window when a user opens a conversation"
 msgstr ""
 
-#: inc/translations/strings.php:3062
+#: inc/translations/strings.php:3064
 msgctxt "Settings page"
 msgid "Bubble Chat Heads"
 msgstr ""
 
-#: inc/translations/strings.php:3063
+#: inc/translations/strings.php:3065
 msgctxt "Settings page"
 msgid "Show recently closed conversations as avatar bubbles above the floating bubble button"
 msgstr ""
 
-#: inc/translations/strings.php:3064
+#: inc/translations/strings.php:3066
 msgctxt "Settings page"
 msgid "Requires Floating Bubble display style and Mini Chats to be enabled"
 msgstr ""
 
-#: inc/translations/strings.php:3065
+#: inc/translations/strings.php:3067
 msgctxt "Settings page"
 msgid "Chat Heads Limit"
 msgstr ""
 
-#: inc/translations/strings.php:3066
+#: inc/translations/strings.php:3068
 msgctxt "Settings page"
 msgid "Maximum number of chat head bubbles to show"
 msgstr ""
 
-#: inc/translations/strings.php:3067
+#: inc/translations/strings.php:3069
 msgctxt "Settings page"
 msgid "Group Audio Call Button"
 msgstr ""
 
-#: inc/translations/strings.php:3068
+#: inc/translations/strings.php:3070
 msgctxt "Settings page"
 msgid "Show a group audio call button in mini chat windows"
 msgstr ""
 
-#: inc/translations/strings.php:3069
+#: inc/translations/strings.php:3071
 msgctxt "Settings page"
 msgid "Group Video Call Button"
 msgstr ""
 
-#: inc/translations/strings.php:3070
+#: inc/translations/strings.php:3072
 msgctxt "Settings page"
 msgid "Show a group video call button in mini chat windows"
 msgstr ""
 
-#: inc/translations/strings.php:3071
+#: inc/translations/strings.php:3073
 msgctxt "Settings page"
 msgid "No roles available on this site"
 msgstr ""
 
-#: inc/translations/strings.php:3072
+#: inc/translations/strings.php:3074
 msgctxt "Settings page"
 msgid "Hide this widget from selected user roles per context"
 msgstr ""
 
-#: inc/translations/strings.php:3073
+#: inc/translations/strings.php:3075
 msgctxt "Settings page"
 msgid "Mini Widget"
 msgstr ""
 
-#: inc/translations/strings.php:3074
+#: inc/translations/strings.php:3076
 msgctxt "Settings page"
 msgid "BuddyPress Friends component is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3075
+#: inc/translations/strings.php:3077
 msgctxt "Settings page"
 msgid "Ultimate Member Friends addon is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3076
+#: inc/translations/strings.php:3078
 msgctxt "Settings page"
 msgid "PeepSo Friends addon is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3077
+#: inc/translations/strings.php:3079
 msgctxt "Settings page"
 msgid "BuddyPress Groups component is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3078
+#: inc/translations/strings.php:3080
 msgctxt "Settings page"
 msgid "Ultimate Member Groups addon is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3079
+#: inc/translations/strings.php:3081
 msgctxt "Settings page"
 msgid "PeepSo Groups addon is not active"
 msgstr ""
 
-#: inc/translations/strings.php:3080
+#: inc/translations/strings.php:3082
 msgctxt "Settings page"
 msgid "Spaces"
 msgstr ""
 
-#: inc/translations/strings.php:3081
-#: inc/translations/strings.php:3118
+#: inc/translations/strings.php:3083
+#: inc/translations/strings.php:3120
 msgctxt "Settings page"
 msgid "Courses"
 msgstr ""
 
-#: inc/translations/strings.php:3082
+#: inc/translations/strings.php:3084
 msgctxt "Settings page"
 msgid "Requires BuddyPress, Ultimate Member, or PeepSo with friends component"
 msgstr ""
 
-#: inc/translations/strings.php:3083
+#: inc/translations/strings.php:3085
 msgctxt "Settings page"
 msgid "Requires BuddyPress, Ultimate Member, PeepSo, or FluentCommunity with groups component"
 msgstr ""
 
-#: inc/translations/strings.php:3084
+#: inc/translations/strings.php:3086
 msgctxt "Settings page"
 msgid "Requires Tutor LMS, LearnPress, LearnDash, or MasterStudy LMS"
 msgstr ""
 
-#: inc/translations/strings.php:3085
+#: inc/translations/strings.php:3087
 msgctxt "Settings page"
 msgid "No AI bots have been created yet. Add one from the AI Chat Bots admin page"
 msgstr ""
 
-#: inc/translations/strings.php:3086
+#: inc/translations/strings.php:3088
 msgctxt "Settings page"
 msgid "No chat rooms have been created yet. Add one from the Chat Rooms admin page"
 msgstr ""
 
-#: inc/translations/strings.php:3087
-#: inc/translations/strings.php:3121
+#: inc/translations/strings.php:3089
+#: inc/translations/strings.php:3123
 msgctxt "Settings page"
 msgid "Users"
 msgstr ""
 
-#: inc/translations/strings.php:3088
+#: inc/translations/strings.php:3090
 msgctxt "Settings page"
 msgid "Mini"
 msgstr ""
 
-#: inc/translations/strings.php:3089
+#: inc/translations/strings.php:3091
 msgctxt "Settings page"
 msgid "Configure widget"
 msgstr ""
 
-#: inc/translations/strings.php:3090
+#: inc/translations/strings.php:3092
 msgctxt "Settings page"
 msgid "Show a list of site members so users can start a direct conversation with anyone on the site"
 msgstr ""
 
-#: inc/translations/strings.php:3091
+#: inc/translations/strings.php:3093
 msgctxt "Settings page"
 msgid "Icon shown for the Users tab in Mini Widgets, Side Panel and Mobile bars"
 msgstr ""
 
-#: inc/translations/strings.php:3092
+#: inc/translations/strings.php:3094
 msgctxt "Settings page"
 msgid "Users to Display"
 msgstr ""
 
-#: inc/translations/strings.php:3093
+#: inc/translations/strings.php:3095
 msgctxt "Settings page"
 msgid "Choose whether the widget lists every user, only users of specific roles, or a curated subset"
 msgstr ""
 
-#: inc/translations/strings.php:3094
+#: inc/translations/strings.php:3096
 msgctxt "Settings page"
 msgid "\"All\" is the default. Use \"Roles\" or \"Specific\" to narrow the list"
 msgstr ""
 
-#: inc/translations/strings.php:3095
+#: inc/translations/strings.php:3097
 msgctxt "Settings page"
 msgid "Show all users"
 msgstr ""
 
-#: inc/translations/strings.php:3096
+#: inc/translations/strings.php:3098
 msgctxt "Settings page"
 msgid "Every registered user on the site (except the current user)"
 msgstr ""
 
-#: inc/translations/strings.php:3097
+#: inc/translations/strings.php:3099
 msgctxt "Settings page"
 msgid "Show users with specific roles"
 msgstr ""
 
-#: inc/translations/strings.php:3098
+#: inc/translations/strings.php:3100
 msgctxt "Settings page"
 msgid "Only users whose role matches one of the selected roles"
 msgstr ""
 
-#: inc/translations/strings.php:3099
+#: inc/translations/strings.php:3101
 msgctxt "Settings page"
 msgid "Show specific users only"
 msgstr ""
 
-#: inc/translations/strings.php:3100
+#: inc/translations/strings.php:3102
 msgctxt "Settings page"
 msgid "Only the selected users appear in the widget"
 msgstr ""
 
-#: inc/translations/strings.php:3101
+#: inc/translations/strings.php:3103
 msgctxt "Settings page"
 msgid "Hide the Users tab entirely when the current user has no users to show"
 msgstr ""
 
-#: inc/translations/strings.php:3102
+#: inc/translations/strings.php:3104
 msgctxt "Settings page"
 msgid "Display Options"
 msgstr ""
 
-#: inc/translations/strings.php:3103
+#: inc/translations/strings.php:3105
 msgctxt "Settings page"
 msgid "Choose how users are ordered in the list. The base sort runs server-side; the online-aware options below layer on top over the realtime presence channel"
 msgstr ""
 
-#: inc/translations/strings.php:3104
+#: inc/translations/strings.php:3106
 msgctxt "Settings page"
 msgid "Sort Order"
 msgstr ""
 
-#: inc/translations/strings.php:3105
+#: inc/translations/strings.php:3107
 msgctxt "Settings page"
 msgid "Determines the base order of users. \"Show Online Users First\" (below) can stack on top when realtime is available"
 msgstr ""
 
-#: inc/translations/strings.php:3106
+#: inc/translations/strings.php:3108
 msgctxt "Settings page"
 msgid "Most recently active first"
 msgstr ""
 
-#: inc/translations/strings.php:3107
+#: inc/translations/strings.php:3109
 msgctxt "Settings page"
 msgid "Alphabetical (A\\u2013Z)"
 msgstr ""
 
-#: inc/translations/strings.php:3108
+#: inc/translations/strings.php:3110
 msgctxt "Settings page"
 msgid "Newest members first"
 msgstr ""
 
-#: inc/translations/strings.php:3109
+#: inc/translations/strings.php:3111
 msgctxt "Settings page"
 msgid "Show Online Users Only"
 msgstr ""
 
-#: inc/translations/strings.php:3110
+#: inc/translations/strings.php:3112
 msgctxt "Settings page"
 msgid "Hide offline users entirely. Presence updates live as users come online / go offline"
 msgstr ""
 
-#: inc/translations/strings.php:3111
+#: inc/translations/strings.php:3113
 msgctxt "Settings page"
 msgid "Show Online Users First"
 msgstr ""
 
-#: inc/translations/strings.php:3112
+#: inc/translations/strings.php:3114
 msgctxt "Settings page"
 msgid "Sort online users to the top; offline users appear below"
 msgstr ""
 
-#: inc/translations/strings.php:3113
+#: inc/translations/strings.php:3115
 msgctxt "Settings page"
 msgid "Already applied by the current sort order — online users naturally appear at the top of the \"Most recently active first\" list"
 msgstr ""
 
-#: inc/translations/strings.php:3114
+#: inc/translations/strings.php:3116
 msgctxt "Settings page"
 msgid "Render a small pill with the number of online users matching the widget\\u2019s display mode next to the Users tab icon. Live-updated as users come online / go offline"
 msgstr ""
 
-#: inc/translations/strings.php:3115
+#: inc/translations/strings.php:3117
 msgctxt "Settings page"
 msgid "Mini Widgets & Mini Chats"
 msgstr ""
 
-#: inc/translations/strings.php:3122
+#: inc/translations/strings.php:3124
 msgctxt "Settings page"
 msgid "An error occurred"
 msgstr ""
 
-#: inc/translations/strings.php:3123
+#: inc/translations/strings.php:3125
 msgctxt "WP Admin"
 msgid "Failed to load user data"
 msgstr ""
 
-#: inc/translations/strings.php:3124
+#: inc/translations/strings.php:3126
 msgctxt "WP Admin"
 msgid "Messages Sent"
 msgstr ""
 
-#: inc/translations/strings.php:3125
-#: inc/translations/strings.php:3152
+#: inc/translations/strings.php:3127
+#: inc/translations/strings.php:3154
 msgctxt "WP Admin"
 msgid "Conversations"
-msgstr ""
-
-#: inc/translations/strings.php:3126
-#: inc/translations/strings.php:3206
-msgctxt "WP Admin"
-msgid "Moderation Status"
-msgstr ""
-
-#: inc/translations/strings.php:3127
-#: inc/translations/strings.php:3207
-msgctxt "WP Admin"
-msgid "Whitelisted"
 msgstr ""
 
 #: inc/translations/strings.php:3128
 #: inc/translations/strings.php:3208
 msgctxt "WP Admin"
-msgid "Blacklisted"
+msgid "Moderation Status"
 msgstr ""
 
 #: inc/translations/strings.php:3129
+#: inc/translations/strings.php:3209
 msgctxt "WP Admin"
-msgid "Default"
+msgid "Whitelisted"
 msgstr ""
 
 #: inc/translations/strings.php:3130
+#: inc/translations/strings.php:3210
 msgctxt "WP Admin"
-msgid "Messages from this user will bypass pre-moderation."
+msgid "Blacklisted"
 msgstr ""
 
 #: inc/translations/strings.php:3131
 msgctxt "WP Admin"
-msgid "Messages from this user will always require pre-moderation."
+msgid "Default"
 msgstr ""
 
 #: inc/translations/strings.php:3132
 msgctxt "WP Admin"
-msgid "Default moderation rules will apply to this user."
+msgid "Messages from this user will bypass pre-moderation."
 msgstr ""
 
 #: inc/translations/strings.php:3133
 msgctxt "WP Admin"
-msgid "Moderation Actions"
+msgid "Messages from this user will always require pre-moderation."
 msgstr ""
 
 #: inc/translations/strings.php:3134
-#: inc/translations/strings.php:3211
 msgctxt "WP Admin"
-msgid "Add to Whitelist"
+msgid "Default moderation rules will apply to this user."
 msgstr ""
 
 #: inc/translations/strings.php:3135
-#: inc/translations/strings.php:3210
 msgctxt "WP Admin"
-msgid "Remove from Whitelist"
+msgid "Moderation Actions"
 msgstr ""
 
 #: inc/translations/strings.php:3136
 #: inc/translations/strings.php:3213
 msgctxt "WP Admin"
-msgid "Add to Blacklist"
+msgid "Add to Whitelist"
 msgstr ""
 
 #: inc/translations/strings.php:3137
 #: inc/translations/strings.php:3212
 msgctxt "WP Admin"
-msgid "Remove from Blacklist"
+msgid "Remove from Whitelist"
 msgstr ""
 
 #: inc/translations/strings.php:3138
+#: inc/translations/strings.php:3215
+msgctxt "WP Admin"
+msgid "Add to Blacklist"
+msgstr ""
+
+#: inc/translations/strings.php:3139
+#: inc/translations/strings.php:3214
+msgctxt "WP Admin"
+msgid "Remove from Blacklist"
+msgstr ""
+
+#: inc/translations/strings.php:3140
 msgctxt "WP Admin"
 msgid "Whitelist: Messages bypass pre-moderation. Blacklist: Messages always require pre-moderation."
 msgstr ""
 
-#: inc/translations/strings.php:3139
+#: inc/translations/strings.php:3141
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "User ID: %s"
 msgstr ""
 
-#: inc/translations/strings.php:3140
+#: inc/translations/strings.php:3142
 msgctxt "WP Admin"
 msgid "Whitelisted (bypasses premoderation)"
 msgstr ""
 
-#: inc/translations/strings.php:3141
+#: inc/translations/strings.php:3143
 msgctxt "WP Admin"
 msgid "Blacklisted (requires premoderation)"
 msgstr ""
 
-#: inc/translations/strings.php:3142
+#: inc/translations/strings.php:3144
 msgctxt "WP Admin"
 msgid "Edit user in WP Admin"
 msgstr ""
 
-#: inc/translations/strings.php:3143
+#: inc/translations/strings.php:3145
 msgctxt "WP Admin"
 msgid "View guest info"
 msgstr ""
 
-#: inc/translations/strings.php:3144
-#: inc/translations/strings.php:3224
+#: inc/translations/strings.php:3146
+#: inc/translations/strings.php:3226
 msgctxt "WP Admin"
 msgid "Messages"
 msgstr ""
 
-#: inc/translations/strings.php:3145
-#: inc/translations/strings.php:3225
+#: inc/translations/strings.php:3147
+#: inc/translations/strings.php:3227
 msgctxt "WP Admin"
 msgid "Guests"
 msgstr ""
 
-#: inc/translations/strings.php:3146
+#: inc/translations/strings.php:3148
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "Are you sure you want to delete %s account(s)?"
 msgstr ""
 
-#: inc/translations/strings.php:3147
+#: inc/translations/strings.php:3149
 msgctxt "WP Admin"
 msgid "Search"
 msgstr ""
 
-#: inc/translations/strings.php:3148
+#: inc/translations/strings.php:3150
 msgctxt "WP Admin"
 msgid "Number of users"
 msgstr ""
 
-#: inc/translations/strings.php:3150
+#: inc/translations/strings.php:3152
 msgctxt "WP Admin"
 msgid "No guests found"
 msgstr ""
 
-#: inc/translations/strings.php:3153
+#: inc/translations/strings.php:3155
 msgctxt "WP Admin"
 msgid "Delete Account"
 msgstr ""
 
-#: inc/translations/strings.php:3156
+#: inc/translations/strings.php:3158
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "%s reported message is available"
@@ -22511,7 +22522,7 @@ msgid_plural "%s reported messages are available"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/translations/strings.php:3157
+#: inc/translations/strings.php:3159
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "%s pending message is available"
@@ -22519,290 +22530,290 @@ msgid_plural "%s pending messages are available"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/translations/strings.php:3158
+#: inc/translations/strings.php:3160
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "Are you sure you want to delete %s message(s)?"
 msgstr ""
 
-#: inc/translations/strings.php:3159
+#: inc/translations/strings.php:3161
 msgctxt "WP Admin"
 msgid "Add this user to whitelist? Their messages will bypass premoderation."
 msgstr ""
 
-#: inc/translations/strings.php:3160
+#: inc/translations/strings.php:3162
 msgctxt "WP Admin"
 msgid "Remove this user from whitelist?"
 msgstr ""
 
-#: inc/translations/strings.php:3161
+#: inc/translations/strings.php:3163
 msgctxt "WP Admin"
 msgid "Add this user to blacklist? Their messages will require premoderation."
 msgstr ""
 
-#: inc/translations/strings.php:3162
+#: inc/translations/strings.php:3164
 msgctxt "WP Admin"
 msgid "Remove this user from blacklist?"
 msgstr ""
 
-#: inc/translations/strings.php:3163
+#: inc/translations/strings.php:3165
 msgctxt "WP Admin"
 msgid "Filter by Sender"
 msgstr ""
 
-#: inc/translations/strings.php:3164
+#: inc/translations/strings.php:3166
 msgctxt "WP Admin"
 msgid "Conversation ID"
 msgstr ""
 
-#: inc/translations/strings.php:3165
+#: inc/translations/strings.php:3167
 msgctxt "WP Admin"
 msgid "Enter Conversation ID Number"
 msgstr ""
 
-#: inc/translations/strings.php:3166
+#: inc/translations/strings.php:3168
 msgctxt "WP Admin"
 msgid "Number of messages"
 msgstr ""
 
-#: inc/translations/strings.php:3167
+#: inc/translations/strings.php:3169
 msgctxt "WP Admin"
 msgid "No messages found"
 msgstr ""
 
-#: inc/translations/strings.php:3168
+#: inc/translations/strings.php:3170
 msgctxt "WP Admin"
 msgid "Info"
 msgstr ""
 
-#: inc/translations/strings.php:3169
+#: inc/translations/strings.php:3171
 msgctxt "WP Admin"
 msgid "participants"
 msgstr ""
 
-#: inc/translations/strings.php:3170
+#: inc/translations/strings.php:3172
 msgctxt "WP Admin"
 msgid "Click to filter by this conversation"
 msgstr ""
 
-#: inc/translations/strings.php:3171
+#: inc/translations/strings.php:3173
 msgctxt "WP Admin"
 msgid "Thread"
 msgstr ""
 
-#: inc/translations/strings.php:3172
+#: inc/translations/strings.php:3174
 msgctxt "WP Admin"
 msgid "View conversation"
 msgstr ""
 
-#: inc/translations/strings.php:3173
+#: inc/translations/strings.php:3175
 msgctxt "WP Admin"
 msgid "E2E"
 msgstr ""
 
-#: inc/translations/strings.php:3174
+#: inc/translations/strings.php:3176
 msgctxt "WP Admin"
 msgid "Points:"
 msgstr ""
 
-#: inc/translations/strings.php:3175
+#: inc/translations/strings.php:3177
 msgctxt "WP Admin"
 msgid "User Report"
 msgstr ""
 
-#: inc/translations/strings.php:3176
+#: inc/translations/strings.php:3178
 msgctxt "WP Admin"
 msgid "by"
 msgstr ""
 
-#: inc/translations/strings.php:3177
+#: inc/translations/strings.php:3179
 msgctxt "User Reports"
 msgid "Are you sure you want to delete this report?"
 msgstr ""
 
-#: inc/translations/strings.php:3178
+#: inc/translations/strings.php:3180
 msgctxt "WP Admin"
 msgid "Dismiss"
 msgstr ""
 
-#: inc/translations/strings.php:3179
+#: inc/translations/strings.php:3181
 msgctxt "User Reports"
 msgid "Are you sure you want to delete this message?"
 msgstr ""
 
-#: inc/translations/strings.php:3180
+#: inc/translations/strings.php:3182
 msgctxt "WP Admin"
 msgid "Delete message"
 msgstr ""
 
-#: inc/translations/strings.php:3181
+#: inc/translations/strings.php:3183
 msgctxt "WP Admin"
 msgid "AI Flagged"
 msgstr ""
 
-#: inc/translations/strings.php:3182
+#: inc/translations/strings.php:3184
 msgctxt "WP Admin"
 msgid "Are you sure you want to dismiss this AI flag?"
 msgstr ""
 
-#: inc/translations/strings.php:3183
+#: inc/translations/strings.php:3185
 msgctxt "WP Admin"
 msgid "Are you sure you want to delete this message?"
 msgstr ""
 
-#: inc/translations/strings.php:3184
+#: inc/translations/strings.php:3186
 msgctxt "WP Admin"
 msgid "Approve"
 msgstr ""
 
-#: inc/translations/strings.php:3185
+#: inc/translations/strings.php:3187
 msgctxt "WP Admin"
 msgid "Reject"
 msgstr ""
 
-#: inc/translations/strings.php:3186
+#: inc/translations/strings.php:3188
 msgctxt "WP Admin"
 msgid "Approve Message"
 msgstr ""
 
-#: inc/translations/strings.php:3189
+#: inc/translations/strings.php:3191
 msgctxt "WP Admin"
 msgid "Sender"
 msgstr ""
 
-#: inc/translations/strings.php:3190
+#: inc/translations/strings.php:3192
 msgctxt "WP Admin"
 msgid "Approving..."
 msgstr ""
 
-#: inc/translations/strings.php:3191
+#: inc/translations/strings.php:3193
 msgctxt "WP Admin"
 msgid "Only approve this message"
 msgstr ""
 
-#: inc/translations/strings.php:3192
+#: inc/translations/strings.php:3194
 msgctxt "WP Admin"
 msgid "This action will only approve this message and it will be shown to recipient."
 msgstr ""
 
-#: inc/translations/strings.php:3193
+#: inc/translations/strings.php:3195
 msgctxt "WP Admin"
 msgid "Processing..."
 msgstr ""
 
-#: inc/translations/strings.php:3194
+#: inc/translations/strings.php:3196
 msgctxt "WP Admin"
 msgid "Approve all user messages and whitelist the user"
 msgstr ""
 
-#: inc/translations/strings.php:3195
+#: inc/translations/strings.php:3197
 msgctxt "WP Admin"
 msgid "This action will whitelist the user and approve all his messages, so his messages will not be pre-moderated anymore."
 msgstr ""
 
-#: inc/translations/strings.php:3196
+#: inc/translations/strings.php:3198
 msgctxt "WP Admin"
 msgid "Enable Messages Pre-moderation in settings to use whitelist functionality and bypass moderation for this user."
 msgstr ""
 
-#: inc/translations/strings.php:3197
+#: inc/translations/strings.php:3199
 msgctxt "WP Admin"
 msgid "Guest Info"
 msgstr ""
 
-#: inc/translations/strings.php:3199
+#: inc/translations/strings.php:3201
 msgctxt "WP Admin"
 msgid "Failed to load guest data"
 msgstr ""
 
-#: inc/translations/strings.php:3200
+#: inc/translations/strings.php:3202
 msgctxt "WP Admin"
 msgid "Display Name"
 msgstr ""
 
-#: inc/translations/strings.php:3201
+#: inc/translations/strings.php:3203
 msgctxt "WP Admin"
 msgid "Messages sent"
 msgstr ""
 
-#: inc/translations/strings.php:3202
+#: inc/translations/strings.php:3204
 msgctxt "WP Admin"
 msgid "Participant of conversations"
 msgstr ""
 
-#: inc/translations/strings.php:3203
+#: inc/translations/strings.php:3205
 msgctxt "WP Admin"
 msgid "Email Address"
 msgstr ""
 
-#: inc/translations/strings.php:3204
+#: inc/translations/strings.php:3206
 msgctxt "WP Admin"
 msgid "Last IP Address"
 msgstr ""
 
-#: inc/translations/strings.php:3205
+#: inc/translations/strings.php:3207
 msgctxt "WP Admin"
 msgid "Registered at"
 msgstr ""
 
-#: inc/translations/strings.php:3209
+#: inc/translations/strings.php:3211
 msgctxt "WP Admin"
 msgid "Normal"
 msgstr ""
 
-#: inc/translations/strings.php:3214
+#: inc/translations/strings.php:3216
 msgctxt "WP Admin"
 msgid "Reject Message"
 msgstr ""
 
-#: inc/translations/strings.php:3216
+#: inc/translations/strings.php:3218
 msgctxt "WP Admin"
 msgid "Only delete this message"
 msgstr ""
 
-#: inc/translations/strings.php:3217
+#: inc/translations/strings.php:3219
 msgctxt "WP Admin"
 msgid "This action will only delete this message. The sender can still send new messages."
 msgstr ""
 
-#: inc/translations/strings.php:3218
+#: inc/translations/strings.php:3220
 msgctxt "WP Admin"
 msgid "Delete this message and blacklist the user"
 msgstr ""
 
-#: inc/translations/strings.php:3219
+#: inc/translations/strings.php:3221
 msgctxt "WP Admin"
 msgid "This action will delete this message and add the user to the blacklist, so all their future messages will require pre-moderation."
 msgstr ""
 
-#: inc/translations/strings.php:3220
+#: inc/translations/strings.php:3222
 msgctxt "WP Admin"
 msgid "Delete all pending messages and blacklist the user"
 msgstr ""
 
-#: inc/translations/strings.php:3221
+#: inc/translations/strings.php:3223
 msgctxt "WP Admin"
 msgid "This action will delete all pending messages from this user and add them to the blacklist, so all their future messages will require pre-moderation."
 msgstr ""
 
-#: inc/translations/strings.php:3222
+#: inc/translations/strings.php:3224
 msgctxt "WP Admin"
 msgid "Enable Messages Pre-moderation in settings to use blacklist functionality and moderate all future messages from this user."
 msgstr ""
 
-#: inc/translations/strings.php:3226
+#: inc/translations/strings.php:3228
 #: views/layout-bulk-messaging.php:5
 msgctxt "WP Admin"
 msgid "Bulk Messaging"
 msgstr ""
 
-#: inc/translations/strings.php:3228
+#: inc/translations/strings.php:3230
 #, php-format,js-format
 msgctxt "WP Admin"
 msgid "Use default (%s)"
 msgstr ""
 
-#: inc/translations/strings.php:3229
+#: inc/translations/strings.php:3231
 msgctxt "WP Admin"
 msgid "Use default"
 msgstr ""

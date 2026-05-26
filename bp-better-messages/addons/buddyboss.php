@@ -91,20 +91,22 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
         public function enqueue_scripts()
         {
             $script = "wp.hooks.addAction('better_messages_update_unread', 'better_messages_bb_profile_menu', function( unread ){
-                var parent = document.querySelector('#wp-admin-bar-my-account-messages > a.ab-item');
-                if( ! parent ) return;
+                var parents = document.querySelectorAll('#wp-admin-bar-my-account-messages > a.ab-item, li.bp-messages-nav > a');
+                if( ! parents.length ) return;
 
-                var element = parent.querySelector('.bp-better-messages-unread');
-                if( ! element ){
-                    var staticCount = parent.querySelector('span.count');
-                    if( staticCount ) staticCount.remove();
+                parents.forEach(function( parent ){
+                    var element = parent.querySelector('.bp-better-messages-unread');
+                    if( ! element ){
+                        var staticCount = parent.querySelector('span.count');
+                        if( staticCount ) staticCount.remove();
 
-                    element = document.createElement('span');
-                    element.className = 'count bp-better-messages-unread';
-                    parent.appendChild(element);
-                }
-                element.textContent = unread;
-                element.classList.toggle('no-count', ! unread);
+                        element = document.createElement('span');
+                        element.className = 'count bp-better-messages-unread';
+                        parent.appendChild(element);
+                    }
+                    element.textContent = unread;
+                    element.classList.toggle('no-count', ! unread);
+                });
             });
 
             (function(){

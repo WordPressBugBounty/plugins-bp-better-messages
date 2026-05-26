@@ -455,6 +455,7 @@ class Better_Messages_Options
             'deleteMessagesOnUserDelete'    => '0',
             'dokanIntegration'              => '0',
             'MultiVendorXIntegration'       => '0',
+            'MultiVendorXHideTabWhenDisabled' => '0',
             'wcVendorsIntegration'          => '0',
             'wcfmIntegration'               => '0',
             'wooCommerceIntegration'                  => '0',
@@ -2220,6 +2221,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['MultiVendorXIntegration'] ) ) {
             $settings['MultiVendorXIntegration'] = '0';
+        }
+
+        if( ! isset( $settings['MultiVendorXHideTabWhenDisabled'] ) ) {
+            $settings['MultiVendorXHideTabWhenDisabled'] = '0';
         }
 
         if( ! isset( $settings['wcVendorsIntegration'] ) ) {

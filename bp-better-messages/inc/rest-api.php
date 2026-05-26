@@ -928,6 +928,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 
+            if ( $current_user_id === 0 ) {
+                do_action( 'better_messages_on_message_not_sent', $thread_id, $temp_id, [] );
+
+                return new WP_Error(
+                    'rest_anonymous_sender',
+                    _x( 'Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
             $is_pending = (int) Better_Messages()->moderation->is_moderation_enabled( $current_user_id, $thread_id, false );
 
             $args = array(

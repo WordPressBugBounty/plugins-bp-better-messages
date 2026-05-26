@@ -4245,9 +4245,14 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     'class'          => array(),
                     'data-livestamp' => array(),
                 ),
-                'ul' => array(),
-                'ol' => array(),
-                'li' => array(),
+                'ul'  => array(),
+                'ol'  => array(),
+                'li'  => array(),
+                'u'   => array(),
+                'sub' => array(),
+                'sup' => array(),
+                'p'   => array(),
+                'br'  => array(),
             ) );
         }
 

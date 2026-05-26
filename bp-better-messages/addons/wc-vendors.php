@@ -137,11 +137,25 @@ if ( ! class_exists( 'Better_Messages_WC_Vendors' ) ) {
         }
 
         public function store_page_contact_button_shortcode(){
-            if( ! class_exists('WCV_Vendors') ) return '';
-            $vendor_id = WCV_Vendors::get_vendor_from_shop();
+            $vendor_id = $this->resolve_current_vendor_id();
             if( ! $vendor_id ) return '';
 
             return $this->_render_store_button( $vendor_id );
+        }
+
+        private function resolve_current_vendor_id(){
+            if( ! class_exists('WCV_Vendors') ) return 0;
+
+            if( method_exists( 'WCV_Vendors', 'get_vendor_from_shop' ) ){
+                $vendor_id = (int) WCV_Vendors::get_vendor_from_shop();
+                if( $vendor_id ) return $vendor_id;
+            }
+
+            $shop_slug = urldecode( (string) get_query_var( 'vendor_shop' ) );
+            if( $shop_slug === '' ) return 0;
+
+            $vendor_id = (int) WCV_Vendors::get_vendor_id( $shop_slug );
+            return $vendor_id;
         }
 
         private function _render_store_button( $vendor_id ){

@@ -11,10 +11,6 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
         const ROUTE_SLUG      = 'bm-messages';
         const ASSET_HANDLE    = 'better-messages-multivendorx-v5';
 
-        private $cache_enabled    = array();
-        private $cache_user_store = array();
-        private $cache_product    = array();
-
         public static function instance()
         {
             static $instance = null;
@@ -39,8 +35,8 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
             add_filter( 'better_messages_rest_thread_item', array( $this, 'thread_item' ), 10, 5 );
             add_filter( 'better_messages_rest_user_item',   array( $this, 'vendor_user_meta' ), 20, 3 );
 
-            add_filter( 'bp_better_messages_page',     array( $this, 'vendor_messages_page' ), 20, 2 );
-            add_filter( 'multivendorx_dashboard_menu', array( $this, 'dashboard_menu' ), 20, 1 );
+            add_filter( 'bp_better_messages_page',   array( $this, 'vendor_messages_page' ), 20, 2 );
+            add_filter( 'dashboard_other_endpoints', array( $this, 'dashboard_menu' ), 20, 1 );
 
             add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_dashboard_script' ), 99 );
             add_action( 'wp_print_styles',    array( $this, 'restore_dashboard_styles' ), 100 );
@@ -67,39 +63,28 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
             $user_id = (int) $user_id;
             if ( $user_id <= 0 ) return 0;
 
-            if ( array_key_exists( $user_id, $this->cache_user_store ) ) {
-                return $this->cache_user_store[ $user_id ];
-            }
-
-            $stores   = \MultiVendorX\Store\Store::get_store( $user_id, 'user' );
-            $store_id = ( is_array( $stores ) && ! empty( $stores ) ) ? (int) ( $stores[0]['id'] ?? 0 ) : 0;
-
-            return $this->cache_user_store[ $user_id ] = $store_id;
+            $stores = \MultiVendorX\Store\Store::get_store( $user_id, 'user' );
+            return ( is_array( $stores ) && ! empty( $stores ) ) ? (int) ( $stores[0]['id'] ?? 0 ) : 0;
         }
 
         public function is_livechat_enabled( $store_id, $user_id = 0 )
         {
             $store_id = (int) $store_id;
+            $enabled  = true;
 
-            if ( ! isset( $this->cache_enabled[ $store_id ] ) ) {
-                $enabled = true;
-
-                if ( $store_id ) {
-                    $store = new \MultiVendorX\Store\Store( $store_id );
-                    if ( $store->get_id() ) {
-                        $meta = $store->get_meta( self::META_KEY );
-                        if ( is_array( $meta ) ) {
-                            $enabled = in_array( self::META_KEY, $meta, true );
-                        } elseif ( $meta !== '' && $meta !== null ) {
-                            $enabled = (bool) $meta;
-                        }
+            if ( $store_id ) {
+                $store = new \MultiVendorX\Store\Store( $store_id );
+                if ( $store->get_id() ) {
+                    $meta = $store->get_meta( self::META_KEY );
+                    if ( is_array( $meta ) ) {
+                        $enabled = in_array( self::META_KEY, $meta, true );
+                    } elseif ( $meta !== '' && $meta !== null ) {
+                        $enabled = (bool) $meta;
                     }
                 }
-
-                $this->cache_enabled[ $store_id ] = $enabled;
             }
 
-            return (bool) apply_filters( 'better_messages_multivendorx_store_default', $this->cache_enabled[ $store_id ], $store_id, $user_id );
+            return (bool) apply_filters( 'better_messages_multivendorx_store_default', $enabled, $store_id, $user_id );
         }
 
         public function store_page_contact_button_shortcode()
@@ -246,19 +231,49 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
 
         private function thread_info( $product_id )
         {
-            $product_id = (int) $product_id;
+            if ( ! function_exists( 'wc_get_product' ) ) return '';
 
-            if ( ! isset( $this->cache_product[ $product_id ] ) ) {
-                $wc = function_exists( 'Better_Messages_WooCommerce' ) ? Better_Messages_WooCommerce::instance() : null;
-                $this->cache_product[ $product_id ] = $wc ? $wc->render_product_info( $product_id ) : '';
+            $product = wc_get_product( (int) $product_id );
+            if ( ! $product ) return '';
+
+            $image_id  = $product->get_image_id();
+            $image_src = wp_get_attachment_image_src( $image_id, array( 100, 100 ) );
+            $image     = $image_src ? $image_src[0] : false;
+            $title     = $product->get_title();
+            $url       = $product->get_permalink();
+            $price     = $product->get_price_html();
+
+            $html = '<div class="bm-product-info">';
+
+            if ( $image ) {
+                $html .= '<div class="bm-product-image">';
+                $html .= '<a href="' . esc_url( $url ) . '" target="_blank"><img src="' . esc_url( $image ) . '" alt="' . esc_attr( $title ) . '" /></a>';
+                $html .= '</div>';
             }
 
-            return $this->cache_product[ $product_id ];
+            $html .= '<div class="bm-product-details">';
+            $html .= '<div class="bm-product-title"><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $title ) . '</a></div>';
+            $html .= '<div class="bm-product-price">' . $price . '</div>';
+            $html .= '</div>';
+
+            $html .= '</div>';
+
+            return $html;
         }
 
         public function vendor_messages_page( $url, $user_id )
         {
-            return $this->get_user_store_id( $user_id ) ? $this->dashboard_messages_url() : $url;
+            $store_id = $this->get_user_store_id( $user_id );
+            if ( ! $store_id ) return $url;
+
+            if (
+                Better_Messages()->settings['MultiVendorXHideTabWhenDisabled'] === '1'
+                && ! $this->is_livechat_enabled( $store_id, $user_id )
+            ) {
+                return $url;
+            }
+
+            return $this->dashboard_messages_url();
         }
 
         public function dashboard_messages_url()
@@ -268,10 +283,16 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
 
         public function dashboard_menu( $endpoints )
         {
+            if ( Better_Messages()->settings['MultiVendorXHideTabWhenDisabled'] === '1' ) {
+                $user_id  = get_current_user_id();
+                $store_id = $this->get_user_store_id( $user_id );
+                if ( $store_id && ! $this->is_livechat_enabled( $store_id, $user_id ) ) return $endpoints;
+            }
+
             $endpoints[ self::ROUTE_SLUG ] = array(
                 'name'       => _x( 'Messages', 'MultiVendorX dashboard menu', 'bp-better-messages' ),
                 'slug'       => self::ROUTE_SLUG,
-                'icon'       => 'customer-service',
+                'icon'       => 'live-chat',
                 'submenu'    => array(),
                 'capability' => array( 'create_stores' ),
             );
@@ -310,10 +331,64 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
             );
 
             wp_enqueue_script( self::ASSET_HANDLE );
+            wp_add_inline_script( self::ASSET_HANDLE, Better_Messages()->functions->minify_js( $this->unread_counter_js() ), 'after' );
 
             wp_register_style( self::ASSET_HANDLE, false, array( 'better-messages' ), Better_Messages()->version );
             wp_add_inline_style( self::ASSET_HANDLE, Better_Messages()->functions->minify_css( $this->dashboard_css() ) );
             wp_enqueue_style( self::ASSET_HANDLE );
+        }
+
+        private function unread_counter_js()
+        {
+            $selector = 'a.tab[href$="/dashboard/' . self::ROUTE_SLUG . '"], a.tab[href*="/dashboard/' . self::ROUTE_SLUG . '/"]';
+            $selector_js = wp_json_encode( $selector );
+
+            return '(function(){
+                var current = 0;
+
+                function ensureCounter(){
+                    var links = document.querySelectorAll(' . $selector_js . ');
+                    if( ! links.length ) return;
+                    links.forEach(function( link ){
+                        var counter = link.querySelector(".bp-better-messages-unread");
+                        if( ! counter ){
+                            counter = document.createElement("span");
+                            counter.className = "bp-better-messages-unread bpbmuc bpbmuc-hide-when-null bm-mvx-unread";
+                            link.appendChild( counter );
+                        }
+                        counter.dataset.count = current;
+                        counter.textContent = current > 0 ? current : "";
+                    });
+                }
+
+                if( window.wp && wp.hooks && wp.hooks.addAction ){
+                    wp.hooks.addAction("better_messages_update_unread", "better_messages_mvx", function( unread ){
+                        current = parseInt( unread, 10 ) || 0;
+                        ensureCounter();
+                    });
+                }
+
+                function init(){
+                    ensureCounter();
+                    var sidebar = document.querySelector(".mvx-dashboard, .dashboard-content, .vendor-dashboard, body");
+                    if( ! sidebar || typeof MutationObserver === "undefined" ) return;
+                    var rebindTimer = 0;
+                    var observer = new MutationObserver(function(){
+                        if( rebindTimer ) return;
+                        rebindTimer = ( window.requestAnimationFrame || function( cb ){ return setTimeout( cb, 16 ); } )( function(){
+                            rebindTimer = 0;
+                            ensureCounter();
+                        });
+                    });
+                    observer.observe( sidebar, { childList: true, subtree: true } );
+                }
+
+                if( document.readyState === "loading" ){
+                    document.addEventListener("DOMContentLoaded", init);
+                } else {
+                    init();
+                }
+            })();';
         }
 
         private function dashboard_css()
@@ -343,11 +418,20 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
                     border-radius: 0 !important;
                     box-shadow: none !important;
                 }
-                .bm-mvx-dashboard-root .bm-list-content{
-                    min-height: 100% !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: flex-end !important;
+                a.tab .bm-mvx-unread{
+                    margin-left: auto;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 18px;
+                    height: 18px;
+                    padding: 0 6px;
+                    border-radius: 9px;
+                    background: var(--bm-primary-color, #2271b1);
+                    color: #fff;
+                    font-size: 11px;
+                    line-height: 1;
+                    font-weight: 600;
                 }
             ';
         }

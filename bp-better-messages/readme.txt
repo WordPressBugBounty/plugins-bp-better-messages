@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.10
+Stable tag: 2.15.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -306,14 +306,19 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.9 - 2.15.10 =
+= 2.15.9 - 2.15.11 =
 * Migration to new [Roadmap](https://www.better-messages.com/roadmap/)
-* Added **Shortcode Builder** — visual admin tool at *Settings → Shortcodes* that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
+* Added **Shortcode Builder** — visual admin tool at Settings → Shortcodes that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
 * Added initial [BuddyBoss ReadyLaunch theme](https://www.better-messages.com/docs/integrations/buddyboss/#buddyboss-readylaunch) integration
-* Added new BuddyBoss settings group at *Better Messages → Settings → Integrations → BuddyPress* — separate **Full-page messenger**, **Full Width**, **Page Title**, and **Hide Mini Widget on Messages Page** toggles for the ReadyLaunch theme and the classic BuddyBoss Theme
+* Added new BuddyBoss settings group at Better Messages → Settings → Integrations → BuddyPress — separate **Full-page messenger**, **Full Width**, **Page Title**, and **Hide Mini Widget on Messages Page** toggles for the ReadyLaunch theme and the classic BuddyBoss Theme
 * Fixed FluentCommunity integration script throwing `Cannot read properties of null` on non-FluentCommunity pages
 * Hide the messenger Minimize button on the FluentCommunity `/messages` route — the mini widgets are hidden there, so minimize had no surface to restore from
 * Fixed image download from the lightbox opening a stuck Quick Look preview when Better Messages is used in an iPhone PWA — now uses the native iOS share sheet
+* Fixed guest authentication being silently dropped after long tab-idle periods in some websites
+* Fixed BuddyBoss user-dropdown My Messages item not showing the unread counter on sites where the BuddyBoss Theme renders the user dropdown from a WordPress nav menu instead of the standard admin-bar nodes
+* Fixed MultiVendorX vendor dashboard "Messages" sidebar link missing on some sites
+* Fixed in-thread message Delivered tick rendering white in dark mode
+* Added Settings → Integrations → WooCommerce → MultiVendorX toggle "Hide Messages tab when vendor disables live chat" — off by default
 * Other minor bugfixes and improvements
 
 = 2.15.8 =
