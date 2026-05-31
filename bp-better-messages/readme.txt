@@ -1,10 +1,10 @@
-=== Better Messages - Live Chat, Chat Rooms, Real-Time Messaging & Private Messages ===
+=== Better Messages - Chat Rooms, Group Chat, Private Messages & AI Chat Bots ===
 Contributors: wordplus
-Tags: BuddyPress, Ultimate Member, private message, chat, messaging
+Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.11
+Stable tag: 2.15.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,15 +12,50 @@ Real-time messaging and chat rooms for WordPress ecosystem: private conversation
 
 == Description ==
 
-**Better Messages** – is the most feature-rich **realtime private messaging system for WordPress**, with native integrations for **BuddyPress, BuddyBoss Platform, Ultimate Member, PeepSo** and any other WordPress powered websites.
+**Better Messages** is the most feature-rich **realtime private messaging system for WordPress**, with native integrations for **BuddyPress, BuddyBoss Platform, Ultimate Member, PeepSo** and any other WordPress powered websites.
 
 Transform your WordPress site into a powerful communication platform with **private messaging**, **chat rooms**, **video and audio calls**, **group video chats**, **AI chat bots**, and **native mobile apps**.
 
-Whether you're building a social network, online community, marketplace, or membership site – Better Messages provides enterprise-level messaging features with an easy-to-use interface.
+Whether you're building a private or public community, social network, intranet, chat-rooms site, marketplace, membership site, dating platform, or creator economy site – Better Messages provides enterprise-level messaging features with an easy-to-use interface.
+
+**Try Better Messages:**
+
+* **[Live Demo](https://www.wordplus.org/demo.php)** — fully functional demo site
+* **[Documentation & Knowledge Base](https://www.better-messages.com/docs/getting-started/about/)** — setup guides, features, FAQ
+* **[All Integrations](https://www.better-messages.com/docs/category/integrations/)** — every supported plugin and theme
+* **[Pricing](https://www.better-messages.com/docs/pricing/)** — free vs WebSocket version comparison
+* **[Blog & Tutorials](https://www.better-messages.com/blog/)** — guides, walkthroughs, integration deep-dives
+
+**For developers:**
+
+* **[REST API Reference](https://www.better-messages.com/rest-api/)** — every endpoint and parameter
+* **[PHP Hooks](https://www.better-messages.com/hooks/php-actions/)** — actions, filters, helper functions
+* **[JavaScript Hooks](https://www.better-messages.com/hooks/js-actions/)** — frontend events and customization API
+* **[Changelog](https://www.better-messages.com/changelog/)** — every release and bug fix
+* **[Roadmap](https://www.better-messages.com/roadmap/)** — upcoming features and votes
+
+**Popular use cases:**
+
+Better Messages is widely used to power messaging for:
+
+* **Private communities** — paid and members-only community platforms, mastermind groups, alumni networks, course cohorts, coaching circles, role-restricted messaging, group chats, AI Chat Bots for onboarding and FAQs, end-to-end encryption for sensitive conversations
+* **Public communities and social networks** — open social platforms, hobby and interest communities, BuddyPress / BuddyBoss / PeepSo / FluentCommunity-powered sites, private messaging, group conversations, chat rooms, mini chat widgets that follow users across the site
+* **Intranet and corporate websites** — internal employee communication, team and department channels, role-restricted access by WordPress role, file sharing, voice and video calls for remote teams, self-hosted plan for sites with data-sovereignty requirements
+* **Chat rooms websites** — sites built around real-time chat rooms as the primary feature, public and private rooms, topic-based discussion, guest access for unregistered visitors, AJAX or WebSocket delivery
+* **Dating and matchmaking sites** — private 1-on-1 chat, photo and video attachments, voice and video calls, profile-to-profile chat buttons on member directories, guest chat for browsing visitors, end-to-end encryption for private conversations
+* **Creator economy and fan platforms** — **paid messaging** with per-message and per-call billing via [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) or [MyCRED](https://www.better-messages.com/docs/integrations/mycred/), private video calls, mass messaging to fans, always-on mini chat widgets
+* **Premium and monetized DM platforms** — charge per direct message or per call with per-role pricing, balance display, role-restricted messaging, AI Content Moderation to filter spam and scam attempts
+* **Coaching and mentorship platforms** — client-to-coach DMs, scheduled video calls, voice messages, file sharing, course chat rooms via LMS integrations
+* **Online stores ([WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/))** — pre-sales chat on product pages, post-purchase order support, cart-context-aware messages, embedded inbox in My Account
+* **Multi-vendor marketplaces and classifieds** — buyer-to-seller chat on every listing, per-listing threads, guest chat for unregistered visitors
+* **Online courses (LMS)** — course chat rooms, instructor-to-student DMs, group conversations for cohort-based courses
+* **Forums and Q&A communities** — Private Message link on every reply, follow-up chat for thread participants
+* **Real estate and listings sites** — agent inquiry messaging, property-context chat threads, guest chat for browsing visitors
+* **Live events and webinars** — event lobby chat rooms, guest access for non-registered attendees, group voice and video calls for AMAs, pinned messages with event agendas
+* **Booking and appointment platforms** — guest-to-host messaging on listings and bookings, file sharing for documents, voice and video calls before check-in
+* **Crypto and Web3 communities** — token-gated chat rooms via membership plugin and WordPress roles, AMA group calls, AI knowledge bots for whitepaper questions, mobile apps for on-the-go engagement
 
 "**Better Messages**" plugin is formerly called "**BP Better Messages**".
-
-**[More Info & Demo & Knowledge Base](https://www.better-messages.com/)**
 
 **[Translate Better Messages to your language](https://www.wordplus.org/bm-translate/)**
 
@@ -124,7 +159,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 * Dedicated Privacy & GDPR settings page
 * All message data stored on your own server
-* AI moderation (when enabled) sends message content for analysis — Better Messages Cloud does not store any data; review OpenAI's data policy if using OpenAI provider
+* AI moderation (when enabled) sends message content for analysis — Better Messages Cloud does not store any data, review OpenAI's data policy if using OpenAI provider
 * WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
 * Suggested privacy policy text that adapts based on enabled features
 * Self-hosted emoji images option — no external CDN requests
@@ -134,55 +169,93 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 **This is not a complete list of features** - Better Messages has many more small features and options that are not listed here. We are constantly adding new features and improvements based on user feedback.
 
-**Compatible plugins:**
+**Compatible plugins & themes — 35+ native integrations:**
+
+Better Messages works on **any** WordPress site out of the box. If your site already runs a community plugin, an LMS, a marketplace, or a directory, Better Messages plugs into it directly — inheriting members, profiles, groups, courses, listings, and posts so chat surfaces appear in the right places without setup.
+
+**Community & Membership Platforms** — replaces the built-in messenger and inherits members, profiles, friends, and groups:
 
 * [BuddyPress](https://www.better-messages.com/docs/integrations/buddypress/)
+* [BuddyBoss Platform](https://www.better-messages.com/docs/integrations/buddyboss/) — including BuddyBoss Theme and ReadyLaunch
 * [PeepSo](https://www.better-messages.com/docs/integrations/peepso/)
 * [Ultimate Member](https://www.better-messages.com/docs/integrations/ultimate-member/)
-* [BuddyBoss Platform](https://www.better-messages.com/docs/integrations/buddyboss/)
-* [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/)
-* [Tutor LMS](https://www.better-messages.com/docs/integrations/tutor-lms/)
-* [LearnDash](https://www.better-messages.com/docs/integrations/learndash/)
-* [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/)
-* [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/)
-* [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
-* [Directorist](https://www.better-messages.com/docs/integrations/directorist/)
-* [Classified Listing](https://www.better-messages.com/docs/integrations/classified-listing/)
-* [GeoDirectory](https://www.better-messages.com/docs/integrations/geodirectory/)
-* [Motors – Car Dealer, Classifieds & Listing](https://www.better-messages.com/docs/integrations/motors/)
-* [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
-* [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
-* [WP Job Manager](https://www.better-messages.com/docs/integrations/wp-job-manager/)
+* [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) — including Spaces and Courses
+* [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
 * [ProfileGrid](https://www.better-messages.com/docs/integrations/profile-grid/)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
 * [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
-* [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/)
-* [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
-* [wpForo](https://www.better-messages.com/docs/integrations/wpforo/)
-* [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/)
-* [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/)
-* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/)
-* [Uncanny Automator](https://www.better-messages.com/docs/integrations/uncanny-automator/)
-* [AutomatorWP](https://www.better-messages.com/docs/integrations/automatorwp/)
-* [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) - charge for messages & calls with per-role pricing and balance display
-* [MyCRED](https://www.better-messages.com/docs/integrations/mycred/) - charge for messages & calls with per-role pricing and balance display
-* [Paid Memberships Pro](https://www.wordplus.org/pmpro)
-* [WC Vendors](https://www.better-messages.com/docs/integrations/wc-vendors/)
+
+**Learning Management Systems (LMS)** — course chat rooms, instructor messaging, and student-to-student conversations:
+
+* [LearnDash](https://www.better-messages.com/docs/integrations/learndash/) — including Instructor Role add-on
+* [LearnPress](https://www.better-messages.com/docs/integrations/learnpress/)
+* [Tutor LMS](https://www.better-messages.com/docs/integrations/tutor-lms/)
+* [MasterStudy LMS](https://www.better-messages.com/docs/integrations/masterstudy-lms/)
+* FluentCommunity Courses
+
+**E-commerce — WooCommerce** — pre-sales and order support chat for online stores:
+
+* [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/) — Contact buttons on **product**, **cart**, **checkout**, and **order** pages. Cart contents are auto-posted into the conversation as a rich message so your support agent immediately sees what the customer is looking at, order pages post a structured order context card. Plain product URLs pasted into any chat are expanded into rich product cards. Embedded inbox lives inside WooCommerce **My Account**. **HPOS-compatible**, block-theme-compatible, works with **guest checkout**. Available on **both the free and WebSocket versions** — the WebSocket version opens chats as a popup mini-widget overlay instead of navigating away.
+
+**Marketplaces & Multi-Vendor** — buyer-to-vendor chat on top of WooCommerce, with per-vendor opt-in and contact buttons on vendor stores, product pages, and order details:
+
+* [Dokan Marketplace](https://www.better-messages.com/docs/integrations/dokan/)
+* [MultiVendorX](https://www.better-messages.com/docs/integrations/multivendorx/)
 * [WCFM](https://www.better-messages.com/docs/integrations/wcfm/)
+* [WC Vendors](https://www.better-messages.com/docs/integrations/wc-vendors/)
+
+**Listings, Directories & Classifieds** — contact buttons on every listing, with per-listing threads:
+
+* [HivePress](https://www.better-messages.com/docs/integrations/hivepress/)
+* [Directorist](https://www.better-messages.com/docs/integrations/directorist/)
+* [GeoDirectory](https://www.better-messages.com/docs/integrations/geodirectory/)
+* [Classified Listing](https://www.better-messages.com/docs/integrations/classified-listing/)
+* [Motors – Car Dealer, Classifieds & Listing](https://www.better-messages.com/docs/integrations/motors/)
+* [WP Job Manager](https://www.better-messages.com/docs/integrations/wp-job-manager/)
+
+**Real Estate Themes** — agent and inquiry messaging on property listings:
+
+* [Houzez](https://www.better-messages.com/docs/integrations/houzez/)
+* [RealHomes](https://www.better-messages.com/docs/integrations/realhomes/)
+
+**Forums** — Private Message link on every reply:
+
+* [wpForo](https://www.better-messages.com/docs/integrations/wpforo/)
+* bbPress
+
+**Gamification, Points & Paid Access** — charge per message or call with per-role pricing and balance display:
+
+* [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/)
+* [MyCRED](https://www.better-messages.com/docs/integrations/mycred/)
+
+**Automation & Page Builders:**
+
+* [Uncanny Automator](https://www.better-messages.com/docs/integrations/uncanny-automator/) — triggers and actions for chat events
+* [AutomatorWP](https://www.better-messages.com/docs/integrations/automatorwp/) — triggers and actions for chat events
+* [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/) — profile and chat shortcodes for JetEngine listings
+
+**Push & PWA:**
+
+* [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/) — web push notifications
+* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) — install-to-home-screen prompts on the messenger
+
+**Universal Shortcode Builder — add chat to anything else:**
+
+Don't see your plugin or theme in the list? Better Messages ships a visual [Shortcode Builder](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) at **WP Admin → Better Messages → Shortcodes** that lets you drop a Live Chat Button onto any custom post type, directory, marketplace listing, agent profile, or page builder block — **without writing PHP**. Point it at a sample post, choose how the target user is resolved (post author, postmeta-stored user ID, or a fixed inbox), set a thread strategy and label, and copy the generated shortcode. The same shortcode then works for every post of the same shape, with automatic per-post threading and an optional in-chat banner. Paste it into Gutenberg, Elementor, Bricks, Divi, or directly into a theme template.
 
 [Full list of integrations](https://www.better-messages.com/docs/category/integrations/)
 
-**Feel free to report any incompatibility or request more integrations, that is very important to help to improve Better Messages plugin!**
+**Feel free to report any incompatibility or request more integrations — that is very important and helps improve Better Messages!**
 
 **WebSocket version:**
 
 WebSocket version is a paid option, you can get license key on our website.
 
-We use our dedicated servers to implement WebSocket communications between your site and users. Our servers are completely private and do not store or track any private data - all messages remain in your database.
+We use our dedicated servers to implement WebSocket communications between your site and users. Our servers are completely private and do not store or track any private data — all messages remain in your database.
 
 **Performance & Reliability:**
 
-* **Significantly** reduces the load on your server (up to 200x less requests)
+* **Significantly** reduces the load on your server (up to 200x fewer requests)
 * **Instant** message delivery in realtime
 * Works with any hosting including shared hosting
 * No limits on concurrent connections or monthly active users
@@ -223,7 +296,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 
 **Security & Encryption:**
 
-* Optional End-to-End Encryption (E2EE) — can be enabled at the website level and per conversation; messages and files encrypted in users' browsers with AES-256-GCM, server never sees plaintext
+* Optional End-to-End Encryption (E2EE) — can be enabled at the website level and per conversation, messages and files encrypted in users' browsers with AES-256-GCM, server never sees plaintext
 * Local browser encryption (AES256) for offline message storage
 * Web Push Notifications (works even when the browser is closed)
 * All data encrypted in transit, so we can't read it on our servers
@@ -239,7 +312,7 @@ Note: Mobile apps are currently in alpha stage. Core functionality works, but so
 
 [Languages](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/)
 
-RTL Layout built in to plugin.
+RTL layout is built into the plugin.
 
 You can translate plugin to your language with LocoTranslate or [participate in plugin translation](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/).
 
@@ -251,7 +324,7 @@ Yes — install the free version from WordPress.org. It supports private and gro
 
 = Which WordPress plugins does Better Messages integrate with? =
 
-30+ native integrations including BuddyPress, BuddyBoss Platform, PeepSo, Ultimate Member, FluentCommunity, LearnDash, LearnPress, Tutor LMS, MasterStudy LMS, WooCommerce, Dokan, WCFM, WC Vendors, MultiVendorX, WP Job Manager, HivePress, Directorist, GeoDirectory, Classified Listing, Motors, ProfileGrid, UsersWP, WP User Manager, wpForo, SureDash, GamiPress, MyCred, JetEngine, AutomatorWP, Uncanny Automator, OneSignal, and Progressify. See the [full list of integrations](https://www.better-messages.com/docs/category/integrations/).
+35+ native integrations across community platforms (BuddyPress, BuddyBoss Platform, PeepSo, Ultimate Member, FluentCommunity, SureDash, ProfileGrid, UsersWP, WP User Manager), LMS (LearnDash, LearnPress, Tutor LMS, MasterStudy LMS), e-commerce (WooCommerce — pre-sales and order support chat with contact buttons on product, cart, checkout, and order pages), multi-vendor marketplaces (Dokan, WCFM, WC Vendors, MultiVendorX), listings and directories (HivePress, Directorist, GeoDirectory, Classified Listing, Motors, WP Job Manager), real estate themes (Houzez, RealHomes), forums (wpForo, bbPress), gamification (GamiPress, MyCRED), automation (Uncanny Automator, AutomatorWP), page builders (Crocoblock JetEngine), and push / PWA (OneSignal, Progressify). If your plugin isn't listed, the built-in visual Shortcode Builder lets you add a Live Chat Button to any custom post type without writing PHP. See the [full list of integrations](https://www.better-messages.com/docs/category/integrations/).
 
 = Does it support group conversations? =
 
@@ -263,7 +336,7 @@ Yes — Guest Chat lets unregistered visitors join chat rooms, message vendors o
 
 = Does it support voice and video calls on WordPress? =
 
-Yes (WebSocket version) — one-on-one and group voice / video calls live inside the messenger thread, not as a separate Zoom / Whereby integration. Hosted media relay is included with the WebSocket license; no separate Twilio account, no Daily / Whereby subscription, no Zoom developer plan. Calls are full-screen on mobile and picture-in-picture on desktop.
+Yes (WebSocket version) — one-on-one and group voice / video calls live inside the messenger thread, not as a separate Zoom / Whereby integration. Hosted media relay is included with the WebSocket license, no separate Twilio account, no Daily / Whereby subscription, no Zoom developer plan. Calls are full-screen on mobile and picture-in-picture on desktop.
 
 = Is Better Messages GDPR-compatible? =
 
@@ -271,7 +344,7 @@ Yes. All message data is stored only in your WordPress database. The WebSocket c
 
 = Does it have AI features? =
 
-Yes (WebSocket version, AI add-on). AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) act as full participants in any thread, with custom system prompts and per-bot points charging via GamiPress / MyCred. Better Messages Cloud AI provides AI Content Moderation (23+ categories including spam, scam, doxxing, contact sharing), AI Message Translation (53 languages with auto-detection), and Voice Message Transcription (99+ languages) — all included with the WebSocket license, no third-party API key required.
+Yes (WebSocket version, AI add-on). AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) act as full participants in any thread, with custom system prompts and per-bot points charging via GamiPress / MyCRED. Better Messages Cloud AI provides AI Content Moderation (23+ categories including spam, scam, doxxing, contact sharing), AI Message Translation (53 languages with auto-detection), and Voice Message Transcription (99+ languages) — all included with the WebSocket license, no third-party API key required.
 
 = Does it have native iOS and Android apps? =
 
@@ -283,7 +356,7 @@ Yes — Better Messages is fully translatable through standard WordPress transla
 
 = Does it support end-to-end encryption? =
 
-Yes (WebSocket version). End-to-end encryption is enabled per thread — messages and file attachments are encrypted in the sender's browser with AES-256-GCM before transmission, stay encrypted at rest in the database, and decrypt only in the recipient's browser. The server stores ciphertext only; no admin, host engineer, or attacker with database access can read the message content of an E2E thread.
+Yes (WebSocket version). End-to-end encryption is enabled per thread — messages and file attachments are encrypted in the sender's browser with AES-256-GCM before transmission, stay encrypted at rest in the database, and decrypt only in the recipient's browser. The server stores ciphertext only, no admin, host engineer, or attacker with database access can read the message content of an E2E thread.
 
 = Where can I find detailed documentation? =
 
@@ -306,7 +379,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.9 - 2.15.11 =
+= 2.15.9 - 2.15.12 =
 * Migration to new [Roadmap](https://www.better-messages.com/roadmap/)
 * Added **Shortcode Builder** — visual admin tool at Settings → Shortcodes that configures the [`[better_messages_live_chat_button]`](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) shortcode without code.
 * Added initial [BuddyBoss ReadyLaunch theme](https://www.better-messages.com/docs/integrations/buddyboss/#buddyboss-readylaunch) integration
@@ -319,6 +392,9 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed MultiVendorX vendor dashboard "Messages" sidebar link missing on some sites
 * Fixed in-thread message Delivered tick rendering white in dark mode
 * Added Settings → Integrations → WooCommerce → MultiVendorX toggle "Hide Messages tab when vendor disables live chat" — off by default
+* Fixed the "Sound Notification Control" setting not hiding the sound mute toggle from user settings when disabled
+* Fixed the [Guest Messages Page](https://www.better-messages.com/docs/features/guest-access/#guest-messages-page) rendering the raw `[bp-better-messages]` placeholder instead of the messenger when no main Messages Location page is set
+* Fixed user avatars and names not loading for not-yet-registered guests in chat rooms and the mini widget
 * Other minor bugfixes and improvements
 
 = 2.15.8 =
@@ -518,7 +594,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * AI Chat Bots: Added support for adding chat bots to group conversations and ability to respond when they are mentioned
 * AI Chat Bots: Added support for Anthropic (Claude) and Google Gemini providers alongside OpenAI
 * AI Chat Bots: Added conversation summarization and scheduled digests features for Group Conversations
-* AI Chat Bots: Added token usage tracking with cost estimation and ability to charge with MyCred or GamiPress points
+* AI Chat Bots: Added token usage tracking with cost estimation and ability to charge with MyCRED or GamiPress points
 * AI Chat Bots: Bots now appear as online users and show typing indicators while generating responses in WebSocket Version
 * AI Chat Bots: Added dedicated admin page for bot management
 * Added activity indicators for voice recording and file uploading in addition to typing indicator in WebSocket Version

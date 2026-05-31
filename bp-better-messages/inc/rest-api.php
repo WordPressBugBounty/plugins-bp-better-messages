@@ -346,6 +346,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 'permission_callback' => array( $this, 'is_user_authorized' )
             ) );
 
+            register_rest_route( 'better-messages/v1', '/publicProfiles', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'public_profiles' ),
+                'permission_callback' => '__return_true'
+            ) );
+
             if( ! empty( trim(Better_Messages()->settings['badWordsList']) ) ) {
                 register_rest_route('better-messages/v1', '/getBlockList', array(
                     'methods' => 'GET',
@@ -463,6 +469,26 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                     $return['users'][] = $item;
                 }
+            }
+
+            return $return;
+        }
+
+        public function public_profiles( WP_REST_Request $request ){
+            $return = [ 'users' => [] ];
+
+            if( ! Better_Messages()->guests->guest_access_enabled() ){
+                return $return;
+            }
+
+            $users = (array) $request->get_param('users');
+            $users = array_slice( array_values( array_unique( array_map( 'intval', $users ) ) ), 0, 100 );
+
+            foreach ( $users as $user_id ){
+                if( $user_id === 0 ) continue;
+                if( ! Better_Messages()->functions->is_user_exists( $user_id ) ) continue;
+
+                $return['users'][] = Better_Messages()->functions->rest_user_item( $user_id, false );
             }
 
             return $return;

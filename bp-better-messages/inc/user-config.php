@@ -155,7 +155,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 ) {
+            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' ) {
                 $notifications_options[] = [
                     'id' => 'sound_notifications',
                     'label' => _x('Disable new message sound notification', 'User settings', 'bp-better-messages'),
