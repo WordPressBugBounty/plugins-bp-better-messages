@@ -2151,13 +2151,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
 
                 $_all_user_ids = array_map( 'intval', array_keys($recipients) );
-                foreach ( array_slice($_all_user_ids, 0, 10) as $user_id ){ $user_ids[] = $user_id; }
 
                 if( $is_participant ){
                     $_all_user_ids[] = intval($current_user_id);
                 }
 
                 $thread_type = Better_Messages()->functions->get_thread_type( $thread->thread_id );
+
+                $_all_user_ids = Better_Messages()->functions->maybe_sort_participants( $_all_user_ids, $thread_type );
+
+                foreach ( array_slice($_all_user_ids, 0, 10) as $user_id ){ $user_ids[] = $user_id; }
 
                 $title    = Better_Messages()->functions->get_thread_title( $thread->thread_id );
                 $image    = Better_Messages()->functions->get_thread_image( $thread->thread_id );
@@ -2391,6 +2394,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $_all_user_ids[] = intval($current_user_id);
 
                 $thread_type = Better_Messages()->functions->get_thread_type( $thread->thread_id );
+
+                $_all_user_ids = Better_Messages()->functions->maybe_sort_participants( $_all_user_ids, $thread_type );
 
                 foreach ( array_slice($_all_user_ids, 0, 10) as $user_id ){
                     $user_ids[] = $user_id;

@@ -43,6 +43,12 @@
   margin: 5px 0;
 }
 
+.bm-user-name-html img {
+  max-height: 14px;
+  width: auto;
+  vertical-align: middle;
+}
+
 .bm-text-label {
   font-weight: normal;
 }
@@ -3644,6 +3650,7 @@ body[class*=_page_better-messages-viewer] .update-nag {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-wrap: wrap;
 }
 .bm-paginated-sidebar .bm-sidebar-item-badge {
   font-size: 11px;

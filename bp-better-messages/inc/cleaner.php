@@ -25,6 +25,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_orphaned_bulk_attachments' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_old_voice_messages' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_inactive_chat_users' ) );
+            add_action( 'better_messages_cleaner_job', array( $this, 'clean_chat_rooms_auto_cleanup' ) );
         }
 
         public function register_event(){
@@ -334,6 +335,153 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                     Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
                 }
             }
+        }
+
+        public function clean_chat_rooms_auto_cleanup()
+        {
+            $chat_ids = get_posts( array(
+                'post_type'      => 'bpbm-chat',
+                'post_status'    => array( 'publish', 'draft' ),
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                'no_found_rows'  => true,
+                'meta_key'       => 'bpbm-chat-auto-cleanup',
+                'meta_compare'   => 'EXISTS',
+            ) );
+
+            if ( empty( $chat_ids ) ) {
+                return;
+            }
+
+            $max_batches = (int) apply_filters( 'better_messages_auto_cleanup_max_batches', 20 );
+            $batch_size  = (int) apply_filters( 'better_messages_auto_cleanup_batch_size', 100 );
+
+            if ( $max_batches <= 0 || $batch_size <= 0 ) {
+                return;
+            }
+
+            foreach ( $chat_ids as $chat_id ) {
+                $chat_id  = (int) $chat_id;
+                $settings = Better_Messages()->chats->get_chat_settings( $chat_id );
+                $mode     = $settings['auto_cleanup'];
+
+                if ( ! in_array( $mode, Better_Messages_Chats::AUTO_CLEANUP_MODES, true ) ) {
+                    delete_post_meta( $chat_id, 'bpbm-chat-auto-cleanup' );
+                    continue;
+                }
+
+                $thread_id = Better_Messages()->chats->get_chat_thread_id( $chat_id );
+
+                if ( ! $thread_id ) {
+                    continue;
+                }
+
+                if ( $mode === 'schedule' ) {
+                    $this->auto_cleanup_scheduled_wipe( $chat_id, $thread_id, $settings, $max_batches, $batch_size );
+                } else {
+                    $this->auto_cleanup_limit_trim( $chat_id, $thread_id, $settings, $max_batches, $batch_size );
+                }
+            }
+        }
+
+        private function auto_cleanup_scheduled_wipe( $chat_id, $thread_id, $settings, $max_batches, $batch_size )
+        {
+            $occurrences = Better_Messages()->chats->get_auto_cleanup_occurrences( $settings );
+
+            if ( ! $occurrences ) {
+                return;
+            }
+
+            $last_run = (int) get_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run', true );
+
+            if ( $last_run >= $occurrences['previous'] ) {
+                return;
+            }
+
+            global $wpdb;
+
+            $messages_table = bm_get_table( 'messages' );
+
+            $latest_content = $wpdb->get_var( $wpdb->prepare(
+                "SELECT `message` FROM `{$messages_table}` WHERE `thread_id` = %d ORDER BY `created_at` DESC LIMIT 1",
+                $thread_id
+            ) );
+
+            if ( $latest_content === null || strpos( (string) $latest_content, '<!-- BM-SYSTEM-MESSAGE:history_cleared' ) === 0 ) {
+                update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run', (string) time() );
+                return;
+            }
+
+            $deleted_total = 0;
+            $done          = false;
+
+            for ( $i = 0; $i < $max_batches; $i++ ) {
+                $result = Better_Messages()->chats->clear_thread_messages( $thread_id, $batch_size );
+
+                $deleted_total += $result['deleted'];
+
+                if ( $result['done'] ) {
+                    $done = true;
+                    break;
+                }
+
+                if ( $result['deleted'] === 0 ) {
+                    break;
+                }
+            }
+
+            if ( ! $done ) {
+                return;
+            }
+
+            if ( $deleted_total > 0 ) {
+                Better_Messages()->functions->send_system_message( $thread_id, 'history_cleared', array() );
+                update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-cleaned', (string) time() );
+            }
+
+            update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run', (string) time() );
+
+            do_action( 'better_messages_chat_room_auto_cleanup', $thread_id, $chat_id, 'schedule', $deleted_total );
+        }
+
+        private function auto_cleanup_limit_trim( $chat_id, $thread_id, $settings, $max_batches, $batch_size )
+        {
+            global $wpdb;
+
+            $messages_table = bm_get_table( 'messages' );
+
+            $limit = max( 1, (int) $settings['auto_cleanup_limit'] );
+
+            $count = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(*) FROM `{$messages_table}` WHERE `thread_id` = %d",
+                $thread_id
+            ) );
+
+            $excess = $count - $limit;
+
+            if ( $excess <= 0 ) {
+                return;
+            }
+
+            $to_delete = min( $excess, $max_batches * $batch_size );
+
+            $message_ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare(
+                "SELECT `id` FROM `{$messages_table}` WHERE `thread_id` = %d ORDER BY `created_at` ASC LIMIT %d",
+                $thread_id, $to_delete
+            ) ) );
+
+            if ( empty( $message_ids ) ) {
+                return;
+            }
+
+            foreach ( $message_ids as $message_id ) {
+                Better_Messages()->functions->delete_message( $message_id, $thread_id, false, 'delete' );
+            }
+
+            update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-cleaned', (string) time() );
+
+            do_action( 'better_messages_thread_updated', $thread_id );
+            do_action( 'better_messages_chat_room_auto_cleanup', $thread_id, $chat_id, 'limit', count( $message_ids ) );
         }
 
         public function clean_preview_messages(){

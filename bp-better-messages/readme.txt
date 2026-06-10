@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.12
+Stable tag: 2.15.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -378,6 +378,14 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.13 =
+* Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
+* Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings
+* Better Messages → Administration moderation area now showing message timestamps in the site timezone from Settings → General
+* Fixed user badge icons (e.g. PeepSo VIP icons) showing as HTML code instead of images in WP Admin user lists
+* Fixed encrypted conversations staying locked forever after a participant reset their encryption keys — the conversation key is now reliably re-shared as soon as any other participant visits the site or unlocks their encryption keys
+* Other minor bugfixes and improvements
 
 = 2.15.9 - 2.15.12 =
 * Migration to new [Roadmap](https://www.better-messages.com/roadmap/)

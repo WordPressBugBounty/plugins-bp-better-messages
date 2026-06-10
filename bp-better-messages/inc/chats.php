@@ -4,6 +4,8 @@ defined( 'ABSPATH' ) || exit;
 class Better_Messages_Chats
 {
     public const AUTO_REMOVE_INACTIVE_MODES = array( 'site', 'no-message', 'no-visit' );
+    public const AUTO_CLEANUP_MODES = array( 'schedule', 'limit' );
+    public const AUTO_CLEANUP_FREQUENCIES = array( 'daily', 'weekly' );
 
     public static function instance()
     {
@@ -788,8 +790,6 @@ class Better_Messages_Chats
     }
 
     public function rest_admin_clear_chat_room( WP_REST_Request $request ) {
-        global $wpdb;
-
         $chat_id = intval( $request->get_param( 'id' ) );
         $post    = get_post( $chat_id );
 
@@ -803,49 +803,7 @@ class Better_Messages_Chats
             return new WP_Error( 'no_thread', __( 'Chat room has no thread', 'bp-better-messages' ), array( 'status' => 400 ) );
         }
 
-        $batch_size = 50;
-
-        $message_ids = $wpdb->get_col( $wpdb->prepare(
-            "SELECT id FROM " . bm_get_table('messages') . " WHERE `thread_id` = %d LIMIT %d",
-            $thread_id, $batch_size
-        ) );
-
-        $deleted = count( $message_ids );
-
-        if ( $deleted > 0 ) {
-            foreach ( $message_ids as $message_id ) {
-                Better_Messages()->functions->delete_message( $message_id, $thread_id, false, 'delete' );
-            }
-        }
-
-        $remaining = (int) $wpdb->get_var( $wpdb->prepare(
-            "SELECT COUNT(*) FROM " . bm_get_table('messages') . " WHERE `thread_id` = %d",
-            $thread_id
-        ) );
-
-        $done = $remaining === 0;
-
-        if ( $done ) {
-            $time = bp_core_current_time();
-
-            $wpdb->query( $wpdb->prepare(
-                "UPDATE " . bm_get_table('recipients') . "
-                SET unread_count = 0,
-                last_read = %s,
-                last_delivered = %s
-                WHERE thread_id = %d",
-                $time, $time, $thread_id
-            ) );
-
-            do_action( 'better_messages_thread_updated', $thread_id );
-            do_action( 'better_messages_thread_cleared', $thread_id );
-        }
-
-        return array(
-            'done'      => $done,
-            'deleted'   => $deleted,
-            'remaining' => $remaining,
-        );
+        return $this->clear_thread_messages( $thread_id, 50 );
     }
 
     public function rest_admin_remove_all_participants( WP_REST_Request $request ) {
@@ -902,16 +860,37 @@ class Better_Messages_Chats
             $message_count = (int) Better_Messages()->functions->get_thread_message_count( $thread_id );
         }
 
+        $auto_cleanup_next = null;
+        $auto_cleanup_last = null;
+
+        if ( in_array( $settings['auto_cleanup'], self::AUTO_CLEANUP_MODES, true ) ) {
+            $datetime_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+
+            if ( $settings['auto_cleanup'] === 'schedule' ) {
+                $occurrences = $this->get_auto_cleanup_occurrences( $settings );
+                if ( $occurrences ) {
+                    $auto_cleanup_next = wp_date( $datetime_format, $occurrences['next'] );
+                }
+            }
+
+            $last_cleaned = (int) get_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-cleaned', true );
+            if ( $last_cleaned > 0 ) {
+                $auto_cleanup_last = wp_date( $datetime_format, $last_cleaned );
+            }
+        }
+
         return array(
-            'id'           => (int) $post->ID,
-            'title'        => $post->post_title,
-            'status'       => $post->post_status,
-            'threadId'     => (int) $thread_id,
-            'inboxUrl'     => $inbox_url,
-            'imageId'      => $image_id,
-            'imageUrl'     => $image_url,
-            'settings'     => $settings,
-            'messageCount' => $message_count,
+            'id'              => (int) $post->ID,
+            'title'           => $post->post_title,
+            'status'          => $post->post_status,
+            'threadId'        => (int) $thread_id,
+            'inboxUrl'        => $inbox_url,
+            'imageId'         => $image_id,
+            'imageUrl'        => $image_url,
+            'settings'        => $settings,
+            'messageCount'    => $message_count,
+            'autoCleanupNext' => $auto_cleanup_next,
+            'autoCleanupLast' => $auto_cleanup_last,
         );
     }
 
@@ -932,6 +911,21 @@ class Better_Messages_Chats
         }
 
         $this->sanitize_auto_remove_inactive_settings( $settings );
+        $this->sanitize_auto_cleanup_settings( $settings );
+
+        if ( in_array( $settings['auto_cleanup'], self::AUTO_CLEANUP_MODES, true ) ) {
+            update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup', $settings['auto_cleanup'] );
+        } else {
+            delete_post_meta( $chat_id, 'bpbm-chat-auto-cleanup' );
+        }
+
+        if ( $settings['auto_cleanup'] === 'schedule' ) {
+            if ( get_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run', true ) === '' ) {
+                update_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run', (string) time() );
+            }
+        } else {
+            delete_post_meta( $chat_id, 'bpbm-chat-auto-cleanup-last-run' );
+        }
 
         if ( ! isset( $settings['auto_exclude'] ) || $settings['auto_exclude'] !== '1' ) {
             Better_Messages()->functions->delete_thread_meta( $thread_id, 'auto_exclude_hash' );
@@ -1036,6 +1030,134 @@ class Better_Messages_Chats
             array_map( 'sanitize_key', $submitted ),
             $valid_roles
         ) ) );
+    }
+
+    private function sanitize_auto_cleanup_settings( array &$settings ) {
+        if ( ! isset( $settings['auto_cleanup'] ) || ! in_array( $settings['auto_cleanup'], self::AUTO_CLEANUP_MODES, true ) ) {
+            $settings['auto_cleanup'] = '0';
+        }
+
+        if ( ! isset( $settings['auto_cleanup_frequency'] ) || ! in_array( $settings['auto_cleanup_frequency'], self::AUTO_CLEANUP_FREQUENCIES, true ) ) {
+            $settings['auto_cleanup_frequency'] = 'daily';
+        }
+
+        $day = isset( $settings['auto_cleanup_day'] ) ? (int) $settings['auto_cleanup_day'] : 1;
+        if ( $day < 0 || $day > 6 ) {
+            $day = 1;
+        }
+        $settings['auto_cleanup_day'] = (string) $day;
+
+        $time = isset( $settings['auto_cleanup_time'] ) ? trim( (string) $settings['auto_cleanup_time'] ) : '03:00';
+        if ( ! preg_match( '/^([01]\d|2[0-3]):([0-5]\d)$/', $time ) ) {
+            $time = '03:00';
+        }
+        $settings['auto_cleanup_time'] = $time;
+
+        $limit = isset( $settings['auto_cleanup_limit'] ) ? (int) $settings['auto_cleanup_limit'] : 1000;
+        if ( $limit < 1 ) {
+            $limit = 1000;
+        }
+        $settings['auto_cleanup_limit'] = (string) $limit;
+    }
+
+    public function get_auto_cleanup_occurrences( $settings ) {
+        if ( ! isset( $settings['auto_cleanup'] ) || $settings['auto_cleanup'] !== 'schedule' ) {
+            return false;
+        }
+
+        $time = isset( $settings['auto_cleanup_time'] ) ? (string) $settings['auto_cleanup_time'] : '03:00';
+
+        if ( ! preg_match( '/^([01]\d|2[0-3]):([0-5]\d)$/', $time, $matches ) ) {
+            $matches = array( '03:00', '03', '00' );
+        }
+
+        $hour   = (int) $matches[1];
+        $minute = (int) $matches[2];
+
+        $timezone = wp_timezone();
+        $now      = new DateTime( 'now', $timezone );
+
+        $previous = new DateTime( 'now', $timezone );
+        $previous->setTime( $hour, $minute, 0 );
+
+        if ( isset( $settings['auto_cleanup_frequency'] ) && $settings['auto_cleanup_frequency'] === 'weekly' ) {
+            $target_day  = isset( $settings['auto_cleanup_day'] ) ? (int) $settings['auto_cleanup_day'] : 1;
+            $current_day = (int) $previous->format( 'w' );
+            $diff        = $target_day - $current_day;
+
+            if ( $diff !== 0 ) {
+                $previous->modify( ( $diff > 0 ? '+' : '' ) . $diff . ' days' );
+            }
+
+            if ( $previous > $now ) {
+                $previous->modify( '-7 days' );
+            }
+
+            $next = clone $previous;
+            $next->modify( '+7 days' );
+        } else {
+            if ( $previous > $now ) {
+                $previous->modify( '-1 day' );
+            }
+
+            $next = clone $previous;
+            $next->modify( '+1 day' );
+        }
+
+        return array(
+            'previous' => $previous->getTimestamp(),
+            'next'     => $next->getTimestamp(),
+        );
+    }
+
+    public function clear_thread_messages( $thread_id, $batch_size = 50 ) {
+        global $wpdb;
+
+        $thread_id  = (int) $thread_id;
+        $batch_size = max( 1, (int) $batch_size );
+        $table      = bm_get_table( 'messages' );
+
+        $message_ids = $wpdb->get_col( $wpdb->prepare(
+            "SELECT id FROM `{$table}` WHERE `thread_id` = %d LIMIT %d",
+            $thread_id, $batch_size
+        ) );
+
+        $deleted = count( $message_ids );
+
+        if ( $deleted > 0 ) {
+            foreach ( $message_ids as $message_id ) {
+                Better_Messages()->functions->delete_message( (int) $message_id, $thread_id, false, 'delete' );
+            }
+        }
+
+        $remaining = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM `{$table}` WHERE `thread_id` = %d",
+            $thread_id
+        ) );
+
+        $done = $remaining === 0;
+
+        if ( $done ) {
+            $time = bp_core_current_time();
+
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE " . bm_get_table('recipients') . "
+                SET unread_count = 0,
+                last_read = %s,
+                last_delivered = %s
+                WHERE thread_id = %d",
+                $time, $time, $thread_id
+            ) );
+
+            do_action( 'better_messages_thread_updated', $thread_id );
+            do_action( 'better_messages_thread_cleared', $thread_id );
+        }
+
+        return array(
+            'done'      => $done,
+            'deleted'   => $deleted,
+            'remaining' => $remaining,
+        );
     }
 
     public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
@@ -1362,6 +1484,11 @@ class Better_Messages_Chats
             'auto_remove_inactive_days'       => '30',
             'auto_remove_inactive_mode'       => 'site',
             'auto_remove_inactive_roles'      => array(),
+            'auto_cleanup'                    => '0',
+            'auto_cleanup_frequency'          => 'daily',
+            'auto_cleanup_day'                => '1',
+            'auto_cleanup_time'               => '03:00',
+            'auto_cleanup_limit'              => '1000',
             'enable_system_messages'          => '0',
             'system_messages_disabled_types'  => array(),
             'enable_notifications'            => '0',

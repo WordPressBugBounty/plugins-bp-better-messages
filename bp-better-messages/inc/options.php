@@ -104,6 +104,8 @@ class Better_Messages_Options
             'widgetIconUsers'             => '',
             'widgetIconCourses'           => '',
             'chatRoomsShowOnline'         => '0',
+            'participantsSortBy'          => 'join',
+            'participantsOnlineFirst'     => '1',
             'friendsMode'                 => '0',
             'singleThreadMode'            => '0',
             'newThreadMode'               => '0',

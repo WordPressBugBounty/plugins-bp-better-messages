@@ -747,6 +747,7 @@ __('was muted', 'bp-better-messages');
 __('were muted', 'bp-better-messages');
 __('was banned', 'bp-better-messages');
 __('were banned', 'bp-better-messages');
+__('Chat history was cleared automatically', 'bp-better-messages');
 __('Encrypted message', 'bp-better-messages');
 __('Restore encryption keys', 'bp-better-messages');
 __('Set up encryption', 'bp-better-messages');

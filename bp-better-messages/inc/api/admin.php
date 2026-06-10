@@ -328,7 +328,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
             // Get guest data from guests table
             $guest = $wpdb->get_row( $wpdb->prepare("
-                SELECT id, name, email, ip, created_at
+                SELECT id, name, email, ip, UNIX_TIMESTAMP(`created_at`) as created_at
                 FROM `" . bm_get_table('guests') . "`
                 WHERE `id` = %d
                 AND `deleted_at` IS NULL
@@ -355,7 +355,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             $user_item['id']             = abs( $user_item['id'] );
             $user_item['email']          = $guest['email'];
             $user_item['ip']             = $guest['ip'];
-            $user_item['createdAt']      = $guest['created_at'];
+            $user_item['createdAt']      = wp_date( 'Y-m-d H:i:s', (int) $guest['created_at'] );
             $user_item['messages']       = $messages_count;
             $user_item['conversations']  = $conversations_count;
             $user_item['isWhitelisted']  = Better_Messages_Moderation()->is_user_whitelisted( $guest_user_id );
@@ -451,7 +451,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             "));
 
             $user_ids = $wpdb->get_results( $wpdb->prepare("
-                SELECT id, email, ip, created_at,
+                SELECT id, email, ip, UNIX_TIMESTAMP(`created_at`) as created_at,
                 (SELECT COUNT(*) 
                   FROM `" . bm_get_table('messages') . "` 
                  WHERE `sender_id` = (-1 * `guests`.`id`) ) messages,
@@ -480,7 +480,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $user_item['id']            = abs( $user_item['id'] );
                 $user_item['email']         = $user['email'];
                 $user_item['ip']            = $user['ip'];
-                $user_item['createdAt']      = $user['created_at'];
+                $user_item['createdAt']      = wp_date( 'Y-m-d H:i:s', (int) $user['created_at'] );
                 $user_item['messages']      = $user['messages'];
                 $user_item['conversations'] = $user['participants'];
                 $user_item['isWhitelisted']  = Better_Messages_Moderation()->is_user_whitelisted( $guest_user_id );
@@ -1071,7 +1071,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                             : Better_Messages()->functions->rest_user_item( $message['sender_id'] ),
                         'thread_id'    => $message['thread_id'],
                         'message'      => $content,
-                        'time'         => $message['date_sent'],
+                        'time'         => get_date_from_gmt( $message['date_sent'] ),
                         'view_link'    => $view_link,
                         'participants' => $participants_count
                     ];

@@ -689,6 +689,40 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return apply_filters( 'bm_messages_thread_get_recipients', $recipients, $thread_id );
         }
 
+        public function maybe_sort_participants( $user_ids, $thread_type ){
+            if ( ( Better_Messages()->settings['participantsSortBy'] ?? 'join' ) !== 'display_name' ) {
+                return $user_ids;
+            }
+
+            if ( $thread_type === 'thread' && count( $user_ids ) <= 2 ) {
+                return $user_ids;
+            }
+
+            return $this->sort_user_ids_by_display_name( $user_ids );
+        }
+
+        public function sort_user_ids_by_display_name( $user_ids ){
+            $user_ids = array_values( array_map( 'intval', (array) $user_ids ) );
+
+            if ( count( $user_ids ) < 2 ) {
+                return $user_ids;
+            }
+
+            global $wpdb;
+
+            $ids_in = implode( ',', $user_ids );
+
+            $sorted = $wpdb->get_col( "SELECT `ID` FROM `" . bm_get_table('users') . "` WHERE `ID` IN ({$ids_in}) ORDER BY `display_name` ASC, `ID` ASC" );
+
+            if ( empty( $sorted ) ) {
+                return $user_ids;
+            }
+
+            $sorted  = array_map( 'intval', $sorted );
+            $missing = array_values( array_diff( $user_ids, $sorted ) );
+
+            return array_merge( $sorted, $missing );
+        }
 
         /**
          * Get all thread user ids including currently logged-in user
