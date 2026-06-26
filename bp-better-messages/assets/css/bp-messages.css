@@ -11557,11 +11557,16 @@ body.bm-mobile-device .bp-better-messages-list.bm-widget-bubble {
 }
 
 #bp-better-messages-mini-mobile-open .bp-better-messages-mini-mobile-open-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   font-size: 28px;
-  line-height: 52px;
+  line-height: 1;
 }
 #bp-better-messages-mini-mobile-open .bp-better-messages-mini-mobile-open-icon > svg {
-  vertical-align: initial;
+  display: block;
+  margin-bottom: 4px;
 }
 
 #bp-better-messages-mini-mobile-open .count {

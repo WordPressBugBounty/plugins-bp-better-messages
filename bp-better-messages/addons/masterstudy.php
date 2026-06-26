@@ -25,6 +25,8 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
 
             if ( Better_Messages()->settings['masterStudyIntegration'] !== '1' ) return;
 
+            add_action( 'wp_head', array( $this, 'mobile_styles' ), 99 );
+
             if ( Better_Messages()->settings['masterStudyMessageButton'] === '1' ) {
                 add_action( 'stm_lms_before_button_mixed', array( $this, 'course_message_button' ), 5, 1 );
             }
@@ -331,6 +333,29 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
             }
 
             return 0;
+        }
+
+        public function mobile_styles()
+        {
+            $bar_height    = 80;
+            $toast_bottom  = $bar_height + 12;
+            $button_bottom = Better_Messages()->hooks->get_mobile_popup_bottom() + $bar_height;
+            ?>
+            <style id="bm-masterstudy-mobile-styles">
+            body.bp-messages-mobile .masterstudy-account-mobile-menu { display: none !important; }
+            @media (max-width: 1279.98px) {
+                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-center,
+                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-left,
+                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-right {
+                    bottom: <?php echo $toast_bottom; ?>px;
+                }
+                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) #bp-better-messages-mini-mobile-open {
+                    bottom: <?php echo $button_bottom; ?>px !important;
+                    z-index: 1000000000;
+                }
+            }
+            </style>
+            <?php
         }
 
         public function disable_native_messages_styles()

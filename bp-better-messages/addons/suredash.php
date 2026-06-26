@@ -74,7 +74,7 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
                 return;
             }
 
-            $url   = Better_Messages()->functions->get_user_messages_url( get_current_user_id() ) . '&to=' . $user_id;
+            $url   = Better_Messages()->functions->private_message_link( $user_id );
             $label = esc_attr_x( 'Send Message', 'SureDash Integration', 'bp-better-messages' );
 
             if ( $is_user_view ) {

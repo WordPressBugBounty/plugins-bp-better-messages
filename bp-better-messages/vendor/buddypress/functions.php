@@ -86,7 +86,7 @@ if( ! function_exists('bp_core_fetch_avatar') ){
 
         if( $params['html'] === false ){
             if( function_exists('get_wp_user_avatar_src') ){
-                $return = get_wp_user_avatar_src( $params['item_id'], ['size' => $size] );
+                $return = get_wp_user_avatar_src( $params['item_id'], $size );
             } else {
                 $return = get_avatar_url($params['item_id'], ['size' => $size]);
             }

@@ -517,11 +517,17 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
         }
 
+        public function get_mobile_popup_bottom(){
+            $bottom = (int) Better_Messages()->settings['mobilePopupLocationBottom'];
+
+            return $bottom > 0 ? $bottom : 20;
+        }
+
         public function css_customizations(){
             $rules = [];
 
-            if( ! empty( BP_Better_Messages()->settings['mobilePopupLocationBottom'] ) && BP_Better_Messages()->settings['mobilePopupLocationBottom'] !== 20 ){
-                $bottom  = (int) BP_Better_Messages()->settings['mobilePopupLocationBottom'];
+            $bottom = $this->get_mobile_popup_bottom();
+            if( $bottom !== 20 ){
                 $rules[] = '#bp-better-messages-mini-mobile-open{bottom:' . $bottom . 'px!important}';
             }
 

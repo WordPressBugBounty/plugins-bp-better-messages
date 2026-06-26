@@ -1239,11 +1239,24 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $raw_message = $request->get_param('message');
             $content     = Better_Messages()->functions->filter_message_content( $raw_message );
 
+            $content = apply_filters( 'better_messages_send_message_content', $content, $raw_message, $thread_id );
+
             if( trim($content) == '') {
                 return new WP_Error(
                     'rest_forbidden',
                     __( 'Message content was empty.', 'bp-better-messages' ),
                     array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
+            if ( class_exists( 'Better_Messages_E2E_Encryption' )
+                && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
+                && ! Better_Messages_E2E_Encryption::is_valid_e2e_ciphertext( $content )
+            ) {
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Messages in encrypted conversations must be encrypted. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages' ),
+                    array( 'status' => 400 )
                 );
             }
 

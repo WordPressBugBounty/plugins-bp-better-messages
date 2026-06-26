@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.13
+Stable tag: 2.15.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,12 +379,16 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.13 =
+= 2.15.13 - 2.15.14 =
 * Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
 * Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings
 * Better Messages → Administration moderation area now showing message timestamps in the site timezone from Settings → General
 * Fixed user badge icons (e.g. PeepSo VIP icons) showing as HTML code instead of images in WP Admin user lists
 * Fixed encrypted conversations staying locked forever after a participant reset their encryption keys — the conversation key is now reliably re-shared as soon as any other participant visits the site or unlocks their encryption keys
+* Fixed MasterStudy mobile bottom menu bar showing through the full-screen messenger on the student dashboard
+* Fixed Better Messages mobile floating chat button and new-message notification being hidden behind the MasterStudy bottom menu bar on account pages
+* Fixed SureDash integration message button on member profiles opening the messages page without starting a conversation with the selected member
+* Update Freemius SDK to 2.13.2
 * Other minor bugfixes and improvements
 
 = 2.15.9 - 2.15.12 =

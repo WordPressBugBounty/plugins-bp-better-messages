@@ -729,6 +729,7 @@ function _bm_js_translation_strings() {
     _x('Restoring conversation', 'Thread restoring', 'bp-better-messages');
     _x('Conversation restored', 'Thread restoring', 'bp-better-messages');
     _x( 'The message you were trying to send was empty', 'User tried to send empty message error', 'bp-better-messages' );
+    _x( 'Unable to encrypt message — encryption key unavailable. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages' );
     _x('Failed to set up encryption for this conversation', 'E2E Encryption', 'bp-better-messages');
     _x('Unable to encrypt message — encryption key unavailable. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages');
     __( 'Are you sure you want to mute this conversation?', 'bp-better-messages' );
