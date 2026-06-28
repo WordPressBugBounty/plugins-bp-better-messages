@@ -1153,11 +1153,22 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $results = [];
             $errors  = [];
 
+            global $bp_better_messages_restrict_send_message;
+
             foreach( $thread_ids as $thread_id ) {
                 $can_reply = Better_Messages()->functions->check_access( $thread_id, $current_user_id, 'reply' );
 
                 if( ! $can_reply ) {
                     $errors[ $thread_id ] = _x('Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages');
+                    continue;
+                }
+
+                $bp_better_messages_restrict_send_message = [];
+
+                $policy_errors = $this->get_send_policy_errors( $thread_id, $current_user_id, $can_reply );
+
+                if( ! empty( $policy_errors ) ) {
+                    $errors[ $thread_id ] = implode( ' ', $policy_errors );
                     continue;
                 }
 
@@ -1182,10 +1193,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     'sender_id'    => $current_user_id,
                     'content'      => $content,
                     'thread_id'    => $thread_id,
+                    'is_pending'   => (int) Better_Messages()->moderation->is_moderation_enabled( $current_user_id, $thread_id, false ),
                     'return'       => 'message_id',
                     'error_type'   => 'wp_error',
                     'meta_data'    => $meta_data,
                 );
+
+                $send_errors = [];
+                Better_Messages()->functions->before_message_send_filter( $args, $send_errors );
+
+                if( ! empty( $send_errors ) ) {
+                    $errors[ $thread_id ] = implode( ' ', $send_errors );
+                    continue;
+                }
 
                 $new_message_id = Better_Messages()->functions->new_message( $args );
 
@@ -2458,34 +2478,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             ];
         }
 
-        public function can_reply(WP_REST_Request $request) {
-
-            $authorized = $this->is_user_authorized( $request );
-            if ( $authorized !== true ) {
-                return $authorized;
-            }
-
-            $user_id    = Better_Messages()->functions->get_current_user_id();
-            $thread_id  = intval($request->get_param('id'));
-
-            $has_access = Better_Messages()->functions->check_access( $thread_id, $user_id, 'reply' );
-
-            if( ! $has_access ){
-                $temp_id = sanitize_text_field( $request->get_param('temp_id') );
-                do_action('better_messages_on_message_not_sent', $thread_id, $temp_id, [] );
-
-                $thread = $this->get_threads([$thread_id]);
-
-                return new WP_Error(
-                    'rest_forbidden',
-                    _x( 'Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages' ),
-                    array(
-                        'status' => rest_authorization_required_code(),
-                        'update' => $thread
-                    )
-                );
-            }
-
+        public function get_send_policy_errors( $thread_id, $user_id, $has_access ) {
             $errors = [];
 
             $type = Better_Messages()->functions->get_thread_type( $thread_id );
@@ -2537,6 +2530,39 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 }
             }
+
+            return $errors;
+        }
+
+        public function can_reply(WP_REST_Request $request) {
+
+            $authorized = $this->is_user_authorized( $request );
+            if ( $authorized !== true ) {
+                return $authorized;
+            }
+
+            $user_id    = Better_Messages()->functions->get_current_user_id();
+            $thread_id  = intval($request->get_param('id'));
+
+            $has_access = Better_Messages()->functions->check_access( $thread_id, $user_id, 'reply' );
+
+            if( ! $has_access ){
+                $temp_id = sanitize_text_field( $request->get_param('temp_id') );
+                do_action('better_messages_on_message_not_sent', $thread_id, $temp_id, [] );
+
+                $thread = $this->get_threads([$thread_id]);
+
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Sorry, you are not allowed to reply into this conversation', 'Rest API Error', 'bp-better-messages' ),
+                    array(
+                        'status' => rest_authorization_required_code(),
+                        'update' => $thread
+                    )
+                );
+            }
+
+            $errors = $this->get_send_policy_errors( $thread_id, $user_id, $has_access );
 
             if( count( $errors ) === 0 ) {
                 return true;
