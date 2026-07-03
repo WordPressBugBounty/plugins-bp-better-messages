@@ -75,6 +75,9 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 add_filter( 'better_messages_rest_user_item', array( $this, 'blocked_user_item'), 10, 4 );
             }
 
+            add_filter( 'better_messages_can_send_message', array( $this, 'disable_banned_user_reply' ), 25, 3 );
+            add_action( 'better_messages_before_new_thread', array( $this, 'disable_start_thread_for_banned_user' ), 25, 2 );
+
             add_filter( 'better_messages_rest_user_item', array( $this, 'rest_user_item'), 10, 4 );
         }
 
@@ -164,6 +167,38 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             }
 
             return $allowed;
+        }
+
+        private function is_user_banned( $user_id ){
+            if( $user_id <= 0 || ! class_exists('PeepSoUser') ) return false;
+
+            $user = PeepSoUser::get_instance( $user_id );
+
+            if( ! $user || 'ban' !== $user->get_user_role() ) return false;
+
+            $ban_date = get_user_meta( $user_id, 'peepso_ban_user_date', true );
+
+            if( ! empty( $ban_date ) && intval( $ban_date ) <= time() ) return false;
+
+            return true;
+        }
+
+        public function disable_banned_user_reply( $allowed, $user_id, $thread_id ){
+            if( ! $allowed ) return $allowed;
+
+            if( $this->is_user_banned( Better_Messages()->functions->get_current_user_id() ) ){
+                global $bp_better_messages_restrict_send_message;
+                $bp_better_messages_restrict_send_message['peepso_banned'] = _x( 'Your account has been suspended', 'PeepSo Integration', 'bp-better-messages' );
+                return false;
+            }
+
+            return $allowed;
+        }
+
+        public function disable_start_thread_for_banned_user( &$args, &$errors ){
+            if( $this->is_user_banned( Better_Messages()->functions->get_current_user_id() ) ){
+                $errors[] = _x( 'Your account has been suspended', 'PeepSo Integration', 'bp-better-messages' );
+            }
         }
 
         function rest_user_item( $item, $user_id, $include_personal ){

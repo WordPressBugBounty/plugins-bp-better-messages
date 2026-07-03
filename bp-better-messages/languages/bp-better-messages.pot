@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.15\n"
+"Project-Id-Version: Better Messages 2.15.16\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-28T08:29:29+00:00\n"
+"POT-Creation-Date: 2026-07-02T17:34:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -823,59 +823,59 @@ msgctxt "E2E Encryption"
 msgid "Messages in encrypted conversations must be encrypted. Please reload the page and try again."
 msgstr ""
 
-#: addons/e2e-encryption.php:852
+#: addons/e2e-encryption.php:857
 msgctxt "E2E Encryption"
 msgid "End-to-end encryption has been disabled. Messages in this conversation cannot be decrypted. Please start a new conversation to continue messaging."
 msgstr ""
 
-#: addons/e2e-encryption.php:930
+#: addons/e2e-encryption.php:935
 msgctxt "E2E Encryption"
 msgid "Your encryption keys are ready. Waiting for another participant to come online and share the conversation key with you. This will happen automatically."
 msgstr ""
 
-#: addons/e2e-encryption.php:939
+#: addons/e2e-encryption.php:944
 msgctxt "E2E Encryption"
 msgid "Set up end-to-end encryption to start messaging in this conversation"
 msgstr ""
 
-#: addons/e2e-encryption.php:1159
-#: addons/e2e-encryption.php:1230
+#: addons/e2e-encryption.php:1164
+#: addons/e2e-encryption.php:1235
 #, php-format
 msgid "New encrypted conversation from %s"
 msgstr ""
 
-#: addons/e2e-encryption.php:1160
-#: addons/e2e-encryption.php:1231
+#: addons/e2e-encryption.php:1165
+#: addons/e2e-encryption.php:1236
 msgid "End-to-end encrypted conversation"
 msgstr ""
 
-#: addons/e2e-encryption.php:1273
+#: addons/e2e-encryption.php:1278
 msgctxt "Rest API Error"
 msgid "Messages from encrypted conversations cannot be forwarded"
 msgstr ""
 
-#: addons/e2e-encryption.php:1311
+#: addons/e2e-encryption.php:1316
 msgctxt "WP Admin"
 msgid "Encrypted conversation created"
 msgstr ""
 
-#: addons/e2e-encryption.php:1313
+#: addons/e2e-encryption.php:1318
 msgctxt "WP Admin"
 msgid "Encrypted conversation started"
 msgstr ""
 
-#: addons/e2e-encryption.php:1340
+#: addons/e2e-encryption.php:1345
 msgctxt "WP Admin"
 msgid "Encrypted message"
 msgstr ""
 
-#: addons/e2e-encryption.php:1355
+#: addons/e2e-encryption.php:1360
 #, php-format
 msgctxt "WP Admin"
 msgid "%s encrypted attachment(s) (%s)"
 msgstr ""
 
-#: addons/e2e-encryption.php:1411
+#: addons/e2e-encryption.php:1416
 msgctxt "Moderation"
 msgid "Encrypted message"
 msgstr ""
@@ -1411,87 +1411,93 @@ msgctxt "PeepSo Group Section Label"
 msgid "Messages"
 msgstr ""
 
-#: addons/peepso.php:104
+#: addons/peepso.php:107
 #: addons/users-block.php:96
 #, php-format
 msgctxt "Error when starting new thread but user blocked"
 msgid "%s blocked by you"
 msgstr ""
 
-#: addons/peepso.php:110
+#: addons/peepso.php:113
 #: addons/users-block.php:102
 #, php-format
 msgctxt "Error when starting new thread but user blocked"
 msgid "%s blocked you"
 msgstr ""
 
-#: addons/peepso.php:151
+#: addons/peepso.php:154
 #: addons/users-block.php:137
 msgctxt "Message when user cant send message to user blocked by him"
 msgid "You can't send message to user who was blocked by you"
 msgstr ""
 
-#: addons/peepso.php:162
+#: addons/peepso.php:165
 #: addons/users-block.php:148
 msgctxt "Message when user cant send message to user who blocked him"
 msgid "You can't send message to user who blocked you"
 msgstr ""
 
-#: addons/peepso.php:346
+#: addons/peepso.php:191
+#: addons/peepso.php:200
+msgctxt "PeepSo Integration"
+msgid "Your account has been suspended"
+msgstr ""
+
+#: addons/peepso.php:381
 #: addons/ultimate-member.php:406
 #, php-format
 msgid "%s not on your friends list"
 msgstr ""
 
-#: addons/peepso.php:378
+#: addons/peepso.php:413
 #: addons/ultimate-member.php:436
 #: inc/hooks.php:2008
 msgid "You must become friends to send messages"
 msgstr ""
 
-#: addons/peepso.php:407
-#: addons/peepso.php:748
+#: addons/peepso.php:442
+#: addons/peepso.php:783
 msgctxt "PeepSo Integration"
 msgid "Send Message"
 msgstr ""
 
-#: addons/peepso.php:462
-#: addons/peepso.php:471
+#: addons/peepso.php:497
+#: addons/peepso.php:506
 msgctxt "PeepSo Integration"
 msgid "Start a conversation"
 msgstr ""
 
-#: addons/peepso.php:490
-#: addons/peepso.php:750
+#: addons/peepso.php:525
+#: addons/peepso.php:785
 msgctxt "PeepSo Integration"
 msgid "Video Call"
 msgstr ""
 
-#: addons/peepso.php:507
-#: addons/peepso.php:749
+#: addons/peepso.php:542
+#: addons/peepso.php:784
 msgctxt "PeepSo Integration"
 msgid "Audio Call"
 msgstr ""
 
-#: addons/peepso.php:524
-#: addons/peepso.php:556
-#: addons/peepso.php:567
+#: addons/peepso.php:559
+#: addons/peepso.php:591
+#: addons/peepso.php:602
 msgctxt "PeepSo Integration"
 msgid "Messages"
 msgstr ""
 
-#: addons/peepso.php:525
+#: addons/peepso.php:560
 msgctxt "Peepso Integration"
 msgid "Messages"
 msgstr ""
 
-#: addons/peepso.php:562
-#: addons/peepso.php:576
+#: addons/peepso.php:597
+#: addons/peepso.php:611
 msgctxt "PeepSo Integration"
 msgid "View All"
 msgstr ""
 
-#: addons/peepso.php:569
+#: addons/peepso.php:604
 msgctxt "PeepSo Integration"
 msgid "New message"
 msgstr ""
@@ -3199,25 +3205,25 @@ msgstr ""
 msgid "<a href=\"%s\" target=\"_blank\">Download</a> and install Premium version of plugin to use this feature"
 msgstr ""
 
-#: inc/functions.php:2977
+#: inc/functions.php:2981
 msgctxt "Login form for unlogged users"
 msgid "Login required"
 msgstr ""
 
-#: inc/functions.php:3080
+#: inc/functions.php:3084
 msgid "Your message was not sent. Please use a valid sender."
 msgstr ""
 
-#: inc/functions.php:3083
+#: inc/functions.php:3087
 msgid "Your message was not sent. Please enter some content."
 msgstr ""
 
-#: inc/functions.php:3132
+#: inc/functions.php:3136
 #, php-format
 msgid "Re: %s"
 msgstr ""
 
-#: inc/functions.php:3139
+#: inc/functions.php:3143
 #: inc/translations/strings.php:400
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3227,7 +3233,7 @@ msgctxt "User tried to send message with no recipients"
 msgid "Please select recipient(s) before sending the message"
 msgstr ""
 
-#: inc/functions.php:3246
+#: inc/functions.php:3250
 msgid "Message was not sent. Please try again."
 msgstr ""
 

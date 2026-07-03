@@ -2805,6 +2805,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function render_login_form(){
+            if( ! defined( 'DONOTCACHEPAGE' ) ) define( 'DONOTCACHEPAGE', true );
+            if( ! defined( 'DONOTCACHEOBJECT' ) ) define( 'DONOTCACHEOBJECT', true );
+            if( ! headers_sent() ) nocache_headers();
+
             Better_Messages()->enqueue_css();
 
             ob_start();
