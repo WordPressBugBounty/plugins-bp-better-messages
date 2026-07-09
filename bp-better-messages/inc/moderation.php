@@ -22,6 +22,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             add_action('better_messages_cleaner_job', array( $this, 'clean_expired_bans') );
             add_filter('better_messages_can_send_message', array( $this, 'can_send_reply' ), 20, 3 );
             add_filter('better_messages_chat_user_can_join', array( $this, 'restrict_join' ), 10, 4 );
+            add_filter('better_messages_group_call_join_custom_error', array( $this, 'restrict_group_call_join' ), 10, 3 );
             add_action('rest_api_init',  array( $this, 'rest_api_init' ) );
             add_action('better_messages_clean_expired_ban', array( $this, 'clean_expired_ban'), 10, 2 );
             add_action('better_messages_message_sent', array( $this, 'mark_user_as_approved_sender' ), 10, 1 );
@@ -698,6 +699,18 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
 
             return $has_access;
+        }
+
+        public function restrict_group_call_join( $error, $thread_id, $user_id ){
+            if( ! empty( $error ) ) return $error;
+
+            $restrictions = $this->is_user_restricted( (int) $thread_id, (int) $user_id );
+
+            if( isset( $restrictions['ban'] ) ){
+                $error = _x( 'You are not allowed to join group calls', 'Rest API Error', 'bp-better-messages' );
+            }
+
+            return $error;
         }
 
         public function rest_api_init(){

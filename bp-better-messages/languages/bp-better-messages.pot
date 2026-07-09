@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.16\n"
+"Project-Id-Version: Better Messages 2.15.17\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-02T17:34:47+00:00\n"
+"POT-Creation-Date: 2026-07-09T08:32:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -21,7 +21,7 @@ msgstr ""
 #: addons/privacy.php:38
 #: addons/privacy.php:344
 #: inc/blocks/blocks.php:42
-#: inc/moderation.php:44
+#: inc/moderation.php:45
 #: inc/blocks/builds/chat-room/index.js:1
 #: inc/blocks/builds/user-inbox/index.js:1
 msgid "Better Messages"
@@ -1406,7 +1406,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: addons/peepso-groups.php:525
+#: addons/peepso-groups.php:532
 msgctxt "PeepSo Group Section Label"
 msgid "Messages"
 msgstr ""
@@ -1521,10 +1521,10 @@ msgstr ""
 #: inc/guests.php:421
 #: inc/mobile-app/inc/android.php:672
 #: inc/mobile-app/inc/options.php:253
-#: inc/moderation.php:770
-#: inc/moderation.php:798
-#: inc/moderation.php:824
-#: inc/moderation.php:849
+#: inc/moderation.php:783
+#: inc/moderation.php:811
+#: inc/moderation.php:837
+#: inc/moderation.php:862
 #: inc/rest-api.php:1095
 #: inc/rest-api.php:1119
 #: inc/rest-api.php:1249
@@ -3205,25 +3205,25 @@ msgstr ""
 msgid "<a href=\"%s\" target=\"_blank\">Download</a> and install Premium version of plugin to use this feature"
 msgstr ""
 
-#: inc/functions.php:2981
+#: inc/functions.php:2977
 msgctxt "Login form for unlogged users"
 msgid "Login required"
 msgstr ""
 
-#: inc/functions.php:3084
+#: inc/functions.php:3080
 msgid "Your message was not sent. Please use a valid sender."
 msgstr ""
 
-#: inc/functions.php:3087
+#: inc/functions.php:3083
 msgid "Your message was not sent. Please enter some content."
 msgstr ""
 
-#: inc/functions.php:3136
+#: inc/functions.php:3132
 #, php-format
 msgid "Re: %s"
 msgstr ""
 
-#: inc/functions.php:3143
+#: inc/functions.php:3139
 #: inc/translations/strings.php:400
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3233,7 +3233,7 @@ msgctxt "User tried to send message with no recipients"
 msgid "Please select recipient(s) before sending the message"
 msgstr ""
 
-#: inc/functions.php:3250
+#: inc/functions.php:3246
 msgid "Message was not sent. Please try again."
 msgstr ""
 
@@ -3625,92 +3625,97 @@ msgctxt "Push notification"
 msgid "Encrypted message"
 msgstr ""
 
-#: inc/moderation.php:880
+#: inc/moderation.php:710
+msgctxt "Rest API Error"
+msgid "You are not allowed to join group calls"
+msgstr ""
+
+#: inc/moderation.php:893
 #, php-format
 msgctxt "Message when user was muted in conversation"
 msgid "You were muted in this conversation until %s"
 msgstr ""
 
-#: inc/moderation.php:1262
+#: inc/moderation.php:1275
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] New message pending moderation"
 msgstr ""
 
-#: inc/moderation.php:1272
+#: inc/moderation.php:1285
 msgctxt "Moderation email"
 msgid "Pre-moderation rules"
 msgstr ""
 
-#: inc/moderation.php:1275
+#: inc/moderation.php:1288
 msgctxt "Moderation email"
 msgid "AI Content Moderation"
 msgstr ""
 
-#: inc/moderation.php:1277
+#: inc/moderation.php:1290
 msgctxt "Moderation email"
 msgid "First-time sender"
 msgstr ""
 
-#: inc/moderation.php:1281
+#: inc/moderation.php:1294
 msgctxt "Moderation email"
 msgid "User is blacklisted"
 msgstr ""
 
-#: inc/moderation.php:1286
+#: inc/moderation.php:1299
 #, php-format
 msgctxt "Moderation email"
 msgid "Sender: %s (ID: %d)"
 msgstr ""
 
-#: inc/moderation.php:1287
+#: inc/moderation.php:1300
 #, php-format
 msgctxt "Moderation email"
 msgid "Conversation: #%d"
 msgstr ""
 
-#: inc/moderation.php:1288
+#: inc/moderation.php:1301
 #, php-format
 msgctxt "Moderation email"
 msgid "Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1292
+#: inc/moderation.php:1305
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Flagged Categories: %s"
 msgstr ""
 
-#: inc/moderation.php:1294
+#: inc/moderation.php:1307
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1298
+#: inc/moderation.php:1311
 #, php-format
 msgctxt "Moderation email"
 msgid "Message: %s"
 msgstr ""
 
-#: inc/moderation.php:1302
+#: inc/moderation.php:1315
 msgctxt "Moderation email"
 msgid "Attachments:"
 msgstr ""
 
-#: inc/moderation.php:1311
+#: inc/moderation.php:1324
 #, php-format
 msgctxt "Moderation email"
 msgid "Review in moderation panel: %s"
 msgstr ""
 
-#: inc/moderation.php:1353
+#: inc/moderation.php:1366
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] Message reported"
 msgstr ""
 
-#: inc/moderation.php:1364
+#: inc/moderation.php:1377
 #, php-format
 msgctxt "Moderation email body"
 msgid ""

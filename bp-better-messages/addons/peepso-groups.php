@@ -256,7 +256,7 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
         public function has_access_to_group_chat( $has_access, $thread_id, $user_id ){
             $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
             if ( !! $group_id ) {
-                if( $this->is_group_messages_enabled( $group_id ) === 'enabled' && $this->user_can_see( $group_id, $user_id ) ){
+                if( $this->is_group_messages_enabled( $group_id ) === 'enabled' && $this->user_has_access( $group_id, $user_id ) ){
                     return true;
                 }
             }
@@ -291,6 +291,13 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
         public function group_segment_messages( $args ){
             $group = $args['group'];
             $group_segment = $args['group_segment'];
+
+            $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( $this->is_group_messages_enabled( $group->id ) !== 'enabled' || ! $this->user_has_access( $group->id, $user_id ) ){
+                PeepSo::redirect( $group->get_url() );
+                return;
+            }
             ?>
             <div class="peepso">
                 <div class="ps-page ps-page--group ps-page--group-bm-messages">
@@ -519,7 +526,7 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             $user_id  = Better_Messages()->functions->get_current_user_id();
             $group_id = PeepSoGroupsShortcode::get_instance()->group_id;
 
-            if( $this->is_group_messages_enabled( $group_id ) === 'enabled' && $this->user_can_see( $group_id, $user_id ) ){
+            if( $this->is_group_messages_enabled( $group_id ) === 'enabled' && $this->user_has_access( $group_id, $user_id ) ){
                 $sections[0]['bm_messages'] = [
                     'href'  => 'messages',
                     'title' => _x('Messages', 'PeepSo Group Section Label', 'bp-better-messages'),
