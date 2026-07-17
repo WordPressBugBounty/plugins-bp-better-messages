@@ -273,6 +273,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_wpForo::instance();
             }
 
+            if( defined('WEGLOT_VERSION') ){
+                require_once Better_Messages()->path . 'addons/weglot.php';
+                Better_Messages_Weglot::instance();
+            }
+
             if( class_exists( 'WooCommerce' ) ){
                 require_once Better_Messages()->path . 'addons/woocommerce.php';
                 Better_Messages_WooCommerce::instance();

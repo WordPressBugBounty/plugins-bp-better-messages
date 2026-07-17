@@ -37,6 +37,24 @@ class Better_Messages_Translations {
      * @return string|false URL of the cached JS file, or false if not needed
      */
     public function get_translation_file_url( $script_handle ) {
+        if ( ! has_filter( 'better_messages_i18n_locale' ) ) {
+            return $this->resolve_translation_file_url( $script_handle );
+        }
+
+        $current_locale = determine_locale();
+        $locale         = apply_filters( 'better_messages_i18n_locale', $current_locale, $script_handle );
+        $switched       = $locale !== $current_locale && switch_to_locale( $locale );
+
+        $result = $this->resolve_translation_file_url( $script_handle );
+
+        if ( $switched ) {
+            restore_previous_locale();
+        }
+
+        return $result;
+    }
+
+    private function resolve_translation_file_url( $script_handle ) {
         // No early skip for en_US — translation plugins like Loco Translate
         // may have customized strings even for English sites.
 

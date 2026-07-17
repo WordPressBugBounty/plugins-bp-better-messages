@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.17
+Stable tag: 2.15.18
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,7 +379,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.13 - 2.15.17 =
+= 2.15.13 - 2.15.18 =
 * Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
 * Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings
 * Better Messages → Administration moderation area now showing message timestamps in the site timezone from Settings → General
@@ -391,8 +391,11 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * PeepSo integration: members banned in PeepSo can no longer send messages or start new conversations in Better Messages
 * PeepSo integration: group chats are now accessible to group members only
 * Fixed messenger failing to load with error 500 — infinite loop when an encrypted conversation awaiting encryption key sharing was deleted or no longer accessible
-* Update Freemius SDK to 2.13.2
+* Update Freemius SDK to 2.13.4
 * Banned members in chat room cant join group video and audio calls anymore
+* Added [**Weglot**](https://www.better-messages.com/docs/integrations/weglot/) integration — the messenger interface now automatically follows the current Weglot language on multilingual sites
+* Added `better_messages_i18n_locale` filter to control which language the messenger interface loads
+* Fixed fatal PHP error (allowed memory size exhausted) when opening or starting a private conversation on sites with a very large accumulated history of no-reply bulk messages
 * Fixed OneSignal JavaScript error
 * Other minor bugfixes and improvements
 

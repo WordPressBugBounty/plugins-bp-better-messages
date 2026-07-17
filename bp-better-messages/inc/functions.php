@@ -1279,17 +1279,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $threads_excluded = '0';
             }
 
-            $bulk_excluded = $wpdb->get_col("
-                SELECT bjt.thread_id
-                FROM " . bm_get_table('bulk_job_threads') . " AS bjt
-                INNER JOIN " . bm_get_table('bulk_jobs') . " AS bj ON bj.id = bjt.job_id
-                WHERE bj.disable_reply = 1
-            ");
-
-            if ( ! empty( $bulk_excluded ) ) {
-                $threads_excluded .= ',' . implode( ',', array_map( 'intval', $bulk_excluded ) );
-            }
-
             if( $exclude_deleted === null ){
                 $exclude_deleted = Better_Messages()->settings['deletedBehaviour'] !== 'include';
             }
@@ -1318,6 +1307,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             AND `threadsmeta`.`meta_value` IS NULL
             {$exclude_e2e_where}
             AND threads.id NOT IN (" . $threads_excluded . ")
+            AND NOT EXISTS (
+                SELECT 1
+                FROM " . bm_get_table('bulk_job_threads') . " AS bjt
+                INNER JOIN " . bm_get_table('bulk_jobs') . " AS bj ON bj.id = bjt.job_id
+                WHERE bjt.thread_id = threads.id
+                AND bj.disable_reply = 1
+            )
             GROUP BY recipients.thread_id
             HAVING COUNT(recipients.thread_id) = 2", $from, $to);
 
