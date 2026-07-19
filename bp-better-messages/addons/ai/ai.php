@@ -4468,6 +4468,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
+            $site_context = isset( $settings['aiModerationSiteContext'] ) ? trim( $settings['aiModerationSiteContext'] ) : '';
+            if ( ! empty( $site_context ) ) {
+                $moderate['site_context'] = mb_substr( $site_context, 0, 1000 );
+            }
+
             $custom_rules_raw = isset( $settings['aiModerationCustomRules'] ) ? trim( $settings['aiModerationCustomRules'] ) : '';
             if ( ! empty( $custom_rules_raw ) ) {
                 $moderate['custom_rules'] = array_values( array_filter( array_map( 'trim', preg_split( '/\r?\n/', $custom_rules_raw ) ) ) );
@@ -4691,8 +4696,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $result = $message->ai_moderation_result;
             $sender_id = $message->sender_id;
-            $sender_item = Better_Messages()->functions->rest_user_item( $sender_id, false );
-            $sender_name = $sender_item['name'];
+            $sender_name = Better_Messages()->functions->get_plain_name( $sender_id );
             $thread_id = $message->thread_id;
 
             $input_types = isset( $result['category_applied_input_types'] ) ? $result['category_applied_input_types'] : [];

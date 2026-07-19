@@ -562,6 +562,7 @@ class Better_Messages_Options
             'aiModerationAction'            => 'flag',
             'aiModerationImages'            => '0',
             'aiModerationCategories'        => ['hate', 'harassment', 'sexual', 'violence', 'self-harm', 'illicit'],
+            'aiModerationSiteContext'       => '',
             'aiModerationCustomRules'       => '',
             'aiModerationContextMessages'   => '0',
             'aiModerationThreshold'         => '0.5',
@@ -2627,7 +2628,7 @@ class Better_Messages_Options
             'GamiPressCallPricingEndMessage'
         ];
 
-        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules' ];
+        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules', 'aiModerationSiteContext' ];
 
         // Fields that need special HTML handling (processed separately with wp_kses)
         $html_fields = [ 'emailCustomHtml' ];

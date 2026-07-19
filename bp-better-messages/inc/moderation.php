@@ -1263,10 +1263,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 return;
             }
 
-            // Get sender information using rest_user_item (handles both regular users and guests)
             $sender_id = $message->sender_id;
-            $sender_item = Better_Messages()->functions->rest_user_item( $sender_id, false );
-            $sender_name = $sender_item['name'];
+            $sender_name = Better_Messages()->functions->get_plain_name( $sender_id );
 
             $thread_id = $message->thread_id;
             $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
@@ -1351,14 +1349,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 return;
             }
 
-            // Get reporter information using rest_user_item (handles both regular users and guests)
-            $reporter_item = Better_Messages()->functions->rest_user_item( $reporter_user_id, false );
-            $reporter_name = $reporter_item['name'];
+            $reporter_name = Better_Messages()->functions->get_plain_name( $reporter_user_id );
 
-            // Get message sender information using rest_user_item (handles both regular users and guests)
             $sender_id = $message->sender_id;
-            $sender_item = Better_Messages()->functions->rest_user_item( $sender_id, false );
-            $sender_name = $sender_item['name'];
+            $sender_name = Better_Messages()->functions->get_plain_name( $sender_id );
 
             $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
 

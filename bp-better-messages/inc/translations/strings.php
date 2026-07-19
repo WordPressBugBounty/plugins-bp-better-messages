@@ -361,6 +361,7 @@ function _bm_js_translation_strings() {
     _x('Messages', 'Mobile view tabs', 'bp-better-messages');
     _x('Friends', 'Mobile view tabs', 'bp-better-messages');
     _x('Groups', 'Mobile view tabs', 'bp-better-messages');
+    _x('Courses', 'Mobile view tabs', 'bp-better-messages');
     _x('AI Bots', 'Mobile view tabs', 'bp-better-messages');
     _x('Chat Rooms', 'Mobile view tabs', 'bp-better-messages');
     _x('Users', 'Mobile view tabs', 'bp-better-messages');
@@ -1931,7 +1932,7 @@ function _bm_js_translation_strings() {
     _x('%s Integration', 'Settings page', 'bp-better-messages');
     _x('Advanced Mini Chats', 'Settings page', 'bp-better-messages');
     _x('Open a mini chat window instead of redirecting to the messages page when clicking a Private Message button in the members directory or user profile', 'Settings page', 'bp-better-messages');
-    _x('Mini Chats must be enabled. Ensure they are enabled <a href="%s">here</a>.', 'Settings page', 'bp-better-messages');
+    _x('Requires Mini Chats. Turn on Mini Chats <a href="%s">here</a> first.', 'Settings page', 'bp-better-messages');
     _x('Audio Call Button', 'Settings page', 'bp-better-messages');
     _x('Add an Audio Call button to %s user profiles', 'Settings page', 'bp-better-messages');
     _x('Video Call Button', 'Settings page', 'bp-better-messages');
@@ -2690,6 +2691,10 @@ function _bm_js_translation_strings() {
     _x('Moderate Images', 'Settings page', 'bp-better-messages');
     _x('Analyze attached images along with message text', 'Settings page', 'bp-better-messages');
     _x('Custom rules and content categories work independently. You can use either one alone or combine both for more comprehensive moderation.', 'Settings page', 'bp-better-messages');
+    _x('The predefined categories are intentionally general. If they don\'t match your moderation policy, uncheck all categories and define only custom rules — the AI will then flag only messages that violate your rules and ignore everything else.', 'Settings page', 'bp-better-messages');
+    _x('Website Context', 'Settings page', 'bp-better-messages');
+    _x('Optional. Describe what your website is used for so the AI judges messages by your community norms. Especially useful for dating, gaming, adult and other niche communities where generic moderation defaults are too aggressive', 'Settings page', 'bp-better-messages');
+    _x('This is a dating site for adults. Flirting, compliments and romantic conversation between members are normal and expected here.', 'Settings page', 'bp-better-messages');
     _x('Custom Rules', 'Settings page', 'bp-better-messages');
     _x('Define your own moderation rules. One rule per line', 'Settings page', 'bp-better-messages');
     _x('Block contact info (phones, emails, social handles) and off-platform moves\nBlock promotions, affiliate links, recruitment', 'Settings page', 'bp-better-messages');
@@ -2697,6 +2702,7 @@ function _bm_js_translation_strings() {
     _x('Number of previous messages to include for context. Helps detect patterns like phone numbers or emails split across multiple messages', 'Settings page', 'bp-better-messages');
     _x('Leave empty or 0 to moderate only the current message. Recommended: 5–10.', 'Settings page', 'bp-better-messages');
     _x('Content Categories', 'Settings page', 'bp-better-messages');
+    _x('Selecting a parent category automatically covers its subcategories. If the predefined categories are too general for your site, uncheck them all and rely on custom rules only', 'Settings page', 'bp-better-messages');
     _x('Selecting a parent category automatically covers its subcategories', 'Settings page', 'bp-better-messages');
     _x('Sensitivity Threshold', 'Settings page', 'bp-better-messages');
     _x('Confidence score for flagging (0–1). Lower = stricter', 'Settings page', 'bp-better-messages');
@@ -3213,6 +3219,7 @@ function _bm_js_translation_strings() {
     _x('Are you sure you want to delete this message?', 'User Reports', 'bp-better-messages');
     _x('Delete message', 'WP Admin', 'bp-better-messages');
     _x('AI Flagged', 'WP Admin', 'bp-better-messages');
+    _x('Rule Violation', 'WP Admin', 'bp-better-messages');
     _x('Are you sure you want to dismiss this AI flag?', 'WP Admin', 'bp-better-messages');
     _x('Are you sure you want to delete this message?', 'WP Admin', 'bp-better-messages');
     _x('Approve', 'WP Admin', 'bp-better-messages');

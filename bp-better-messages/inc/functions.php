@@ -1083,6 +1083,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
+        public function get_plain_name( $user_id ){
+            $user = $this->rest_user_item( $user_id, false );
+            $name = isset( $user['name'] ) ? (string) $user['name'] : '';
+            $name = wp_strip_all_tags( $name );
+            $name = preg_replace( '/\s+/u', ' ', $name );
+
+            return trim( $name );
+        }
+
 
         public function get_rest_avatar($user_id){
             $user = Better_Messages()->functions->rest_user_item( $user_id );

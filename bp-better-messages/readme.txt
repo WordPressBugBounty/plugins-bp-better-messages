@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.15.18
+Stable tag: 2.15.19
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,11 +379,13 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.13 - 2.15.18 =
+= 2.15.13 - 2.15.19 =
+* Added [**Website Context**](https://www.better-messages.com/docs/features/ai-content-moderation/#website-context) setting to AI Content Moderation — describe what your website is used for and Better Messages Moderation AI will judge messages by your community norms, fixing overly aggressive moderation on dating sites and similar communities
 * Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
 * Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings
 * Better Messages → Administration moderation area now showing message timestamps in the site timezone from Settings → General
 * Fixed user badge icons (e.g. PeepSo VIP icons) showing as HTML code instead of images in WP Admin user lists
+* Fixed user badge icons (e.g. PeepSo VIP icons) appearing as raw HTML code in moderation and report email notifications
 * Fixed encrypted conversations staying locked forever after a participant reset their encryption keys — the conversation key is now reliably re-shared as soon as any other participant visits the site or unlocks their encryption keys
 * Fixed MasterStudy mobile bottom menu bar showing through the full-screen messenger on the student dashboard
 * Fixed Better Messages mobile floating chat button and new-message notification being hidden behind the MasterStudy bottom menu bar on account pages
@@ -396,6 +398,8 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Added [**Weglot**](https://www.better-messages.com/docs/integrations/weglot/) integration — the messenger interface now automatically follows the current Weglot language on multilingual sites
 * Added `better_messages_i18n_locale` filter to control which language the messenger interface loads
 * Fixed fatal PHP error (allowed memory size exhausted) when opening or starting a private conversation on sites with a very large accumulated history of no-reply bulk messages
+* Fixed the LMS **Courses** tab (LearnPress, LearnDash, MasterStudy, TutorLMS, FluentCommunity) not showing in the mobile tab bar even when enabled — it now appears on mobile devices as it does on desktop
+* Fixed MOV videos not playing in Safari on iPhone, iPad and macOS when **File Protection Proxy** is enabled
 * Fixed OneSignal JavaScript error
 * Other minor bugfixes and improvements
 

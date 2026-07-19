@@ -366,6 +366,7 @@ _x('Guest Settings', 'Moderation actions', 'bp-better-messages');
 _x('Messages', 'Mobile view tabs', 'bp-better-messages');
 _x('Friends', 'Mobile view tabs', 'bp-better-messages');
 _x('Groups', 'Mobile view tabs', 'bp-better-messages');
+_x('Courses', 'Mobile view tabs', 'bp-better-messages');
 _x('AI Bots', 'Mobile view tabs', 'bp-better-messages');
 _x('Chat Rooms', 'Mobile view tabs', 'bp-better-messages');
 _x('Users', 'Mobile view tabs', 'bp-better-messages');

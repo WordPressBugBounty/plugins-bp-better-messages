@@ -1460,8 +1460,8 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $etag          = '"' . md5( $file_path . $last_modified . $file_size ) . '"';
 
             // Handle 304 Not Modified
-            $if_none_match     = isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ? trim( $_SERVER['HTTP_IF_NONE_MATCH'] ) : '';
-            $if_modified_since = isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ? strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) : 0;
+            $if_none_match     = isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ? trim( wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) : '';
+            $if_modified_since = isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ? strtotime( wp_unslash( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) : 0;
 
             if ( ( $if_none_match && $if_none_match === $etag ) ||
                  ( $if_modified_since && $if_modified_since >= $last_modified ) ) {
@@ -1487,7 +1487,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $last_modified ) . ' GMT' );
             header( 'ETag: ' . $etag );
             header( 'Cache-Control: private, max-age=86400' );
-            header( 'Accept-Ranges: none' );
+            header( 'Accept-Ranges: bytes' );
             header( 'X-Content-Type-Options: nosniff' );
             header( 'Referrer-Policy: no-referrer' );
 
@@ -1531,9 +1531,103 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 case 'php':
                 default:
-                    readfile( $file_path );
+                    $range = $this->get_requested_range( $file_size, $etag, $last_modified );
+
+                    if ( $range === false ) {
+                        status_header( 416 );
+                        header( 'Content-Range: bytes */' . $file_size );
+                        header( 'Content-Length: 0' );
+                        exit;
+                    }
+
+                    if ( $range === null ) {
+                        readfile( $file_path );
+                        exit;
+                    }
+
+                    list( $start, $end ) = $range;
+                    $length = $end - $start + 1;
+
+                    status_header( 206 );
+                    header( 'Content-Range: bytes ' . $start . '-' . $end . '/' . $file_size );
+                    header( 'Content-Length: ' . $length );
+
+                    $handle = fopen( $file_path, 'rb' );
+
+                    if ( ! $handle ) {
+                        status_header( 500 );
+                        header( 'Content-Length: 0' );
+                        exit;
+                    }
+
+                    fseek( $handle, $start );
+
+                    $remaining = $length;
+
+                    while ( $remaining > 0 && ! feof( $handle ) && ! connection_aborted() ) {
+                        $chunk = fread( $handle, min( 1048576, $remaining ) );
+
+                        if ( $chunk === false ) {
+                            break;
+                        }
+
+                        echo $chunk;
+                        flush();
+
+                        $remaining -= strlen( $chunk );
+                    }
+
+                    fclose( $handle );
                     exit;
             }
+        }
+
+        private function get_requested_range( int $file_size, string $etag, int $last_modified ) {
+            if ( empty( $_SERVER['HTTP_RANGE'] ) ) {
+                return null;
+            }
+
+            $range_header = trim( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
+
+            if ( ! preg_match( '/^bytes=(\d*)-(\d*)$/', $range_header, $matches ) ) {
+                return null;
+            }
+
+            if ( $matches[1] === '' && $matches[2] === '' ) {
+                return null;
+            }
+
+            if ( isset( $_SERVER['HTTP_IF_RANGE'] ) ) {
+                $if_range = trim( wp_unslash( $_SERVER['HTTP_IF_RANGE'] ) );
+
+                if ( $if_range !== $etag ) {
+                    $if_range_time = strtotime( $if_range );
+
+                    if ( ! $if_range_time || $if_range_time < $last_modified ) {
+                        return null;
+                    }
+                }
+            }
+
+            if ( $matches[1] === '' ) {
+                $suffix = (int) $matches[2];
+
+                if ( $suffix === 0 ) {
+                    return false;
+                }
+
+                $start = max( 0, $file_size - $suffix );
+                $end   = $file_size - 1;
+            } else {
+                $start = (int) $matches[1];
+                $end   = ( $matches[2] === '' ) ? $file_size - 1 : min( (int) $matches[2], $file_size - 1 );
+            }
+
+            if ( $start >= $file_size || $start > $end ) {
+                return false;
+            }
+
+            return array( $start, $end );
         }
 
         /**

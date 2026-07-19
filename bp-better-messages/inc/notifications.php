@@ -544,7 +544,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                                     $time    = apply_filters( 'better_messages_email_notification_time', wp_strip_all_tags( stripslashes(date_i18n($time_format, $timestamp)) ), $message, $user_id );
 
-                                    $author  = wp_strip_all_tags(stripslashes(sprintf( __('%s wrote:', 'bp-better-messages'), $bm_user['name'] )));
+                                    $author  = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags(stripslashes(sprintf( __('%s wrote:', 'bp-better-messages'), $bm_user['name'] ))) ) );
 
                                     $_message = nl2br(stripslashes($message->message));
                                     $_message = str_replace(['<p>', '</p>'], ['<br>', ''], $_message );
@@ -606,7 +606,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                             apply_filters('bp_better_messages_notification_tokens', array(
                                                 'messages.html' => $messageHtml,
                                                 'messages.raw' => $messageRaw,
-                                                'sender.name' => $bm_user['name'],
+                                                'sender.name' => trim( wp_strip_all_tags( $bm_user['name'] ) ),
                                                 'thread.id' => $thread_id,
                                                 'thread.url' => sanitize_url( Better_Messages()->functions->add_hash_arg( 'conversation/' . $thread_id, [], Better_Messages()->functions->get_link($user_id) ) ),
                                                 'subject' => $subject,
