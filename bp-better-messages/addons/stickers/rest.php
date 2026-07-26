@@ -277,15 +277,9 @@ if ( ! class_exists( 'Better_Messages_Stickers_REST' ) ) {
 
             // Best-effort delete of the underlying file if it's inside our uploads folder.
             if ( $file_to_delete ) {
-                $file_to_delete = Better_Messages_Sticker_Pack_Manager::rewrite_url( $file_to_delete );
-                $upload = wp_upload_dir();
-                $prefix = $upload['baseurl'] . '/better-messages/stickers/packs/';
-                if ( strpos( $file_to_delete, $prefix ) === 0 ) {
-                    $rel  = substr( $file_to_delete, strlen( $upload['baseurl'] ) + 1 );
-                    $path = trailingslashit( $upload['basedir'] ) . urldecode( $rel );
-                    if ( file_exists( $path ) ) {
-                        @unlink( $path );
-                    }
+                $path = $this->translation_file_to_local_path( $file_to_delete );
+                if ( $path && file_exists( $path ) ) {
+                    @unlink( $path );
                 }
             }
 
@@ -718,16 +712,26 @@ if ( ! class_exists( 'Better_Messages_Stickers_REST' ) ) {
             $url = Better_Messages_Sticker_Pack_Manager::rewrite_url( $url );
             $upload = wp_upload_dir();
             $base_url = trailingslashit( $upload['baseurl'] ) . 'better-messages/stickers/packs/';
+            $base_dir = trailingslashit( $upload['basedir'] ) . 'better-messages/stickers/packs/';
             if ( strpos( $url, $base_url ) !== 0 ) {
                 return null;
             }
             $rel = substr( $url, strlen( $base_url ) );
             $rel = urldecode( $rel );
             // Block path-traversal attempts.
-            if ( strpos( $rel, '..' ) !== false ) {
+            if ( $rel === '' || strpos( $rel, '..' ) !== false || strpos( $rel, "\0" ) !== false ) {
                 return null;
             }
-            return $upload['basedir'] . '/better-messages/stickers/packs/' . $rel;
+            $path      = $base_dir . $rel;
+            $real_base = realpath( $base_dir );
+            $real_path = realpath( $path );
+            if ( $real_base === false || $real_path === false ) {
+                return null;
+            }
+            if ( $real_path !== $real_base && strpos( $real_path, $real_base . DIRECTORY_SEPARATOR ) !== 0 ) {
+                return null;
+            }
+            return $path;
         }
 
         public function install_catalog_pack( WP_REST_Request $request )

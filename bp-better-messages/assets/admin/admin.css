@@ -2406,6 +2406,44 @@ body[class*=_page_better-messages-viewer] .update-nag {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.bm-radio-group .bm-radio-label .bm-radio-text {
+  flex: 1;
+  min-width: 0;
+}
+.bm-radio-group .bm-radio-label:has(.bm-radio-text) {
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+.bm-radio-group .bm-radio-label:has(.bm-radio-text) input[type=radio] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.bm-radio-group .bm-radio-label .bm-radio-description {
+  display: block;
+  font-size: 12px;
+  color: #757575;
+  margin-top: 2px;
+  max-width: 480px;
+  font-weight: 400;
+}
+
+.bm-settings-locked-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0 0;
+}
+.bm-settings-locked-note .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.bm-settings-row .bm-settings-row-control .bm-radio-group + .bm-settings-locked-note {
+  margin-left: 22px;
+}
 
 .bm-settings-row-control .bm-select {
   min-width: 200px;

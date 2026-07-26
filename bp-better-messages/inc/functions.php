@@ -3171,6 +3171,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $chat_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'chat_id');
 
                     if ( ! empty($chat_id) ) {
+                        if ( Better_Messages_Chats()->is_ephemeral_chat( $chat_id ) ) {
+                            $message->count_unread = false;
+                            $message->send_global  = false;
+                            $message->send_push    = false;
+                            $message->mobile_push  = false;
+                        }
+
                         $excluded_from_thread_list = Better_Messages()->functions->get_thread_meta($message->thread_id, 'exclude_from_threads_list');
                         if (!empty($excluded_from_thread_list)) {
                             $message->count_unread = false;
@@ -3567,6 +3574,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function check_chat_room_access( $thread_id, $user_id, $type ){
             if( $type === 'reply' ){
+                if( Better_Messages_Chats()->is_ephemeral_thread( $thread_id ) ){
+                    $chat_id = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
+                    return Better_Messages_Chats()->user_can_reply( $user_id, $chat_id );
+                }
+
                 $recipients = $this->get_recipients( $thread_id );
 
                 if ( isset( $recipients[ $user_id ] ) ) {
@@ -3588,6 +3600,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             if( ! $chat_id ){
                 return true;
+            }
+
+            if( Better_Messages_Chats()->is_ephemeral_chat( $chat_id ) ){
+                return Better_Messages_Chats()->user_can_read( $user_id, $chat_id );
             }
 
             $settings = Better_Messages_Chats()->get_chat_settings( $chat_id );

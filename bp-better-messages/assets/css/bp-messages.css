@@ -8146,6 +8146,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
   flex: 1;
   width: 0;
 }
+.bp-messages-wrap .chat-header .thread-info .thread-info-data:first-child {
+  padding-left: 10px;
+}
 .bp-messages-wrap .chat-header .thread-info .thread-info-data .name {
   margin-bottom: 2px;
   white-space: nowrap;
@@ -8414,7 +8417,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   line-height: 24px;
 }
 .bp-messages-wrap .bm-reply .bm-editor .bm-editor-content {
-  outline: 0;
+  outline: 0 !important;
   border: 0;
   margin: 0;
   padding: 0;
@@ -8596,6 +8599,9 @@ body.bp-messages-mobile #better-messages-modals-container input {
   overflow: hidden;
   flex: 1;
   width: 0;
+}
+.bp-messages-wrap.bp-better-messages-mini .chat .head .thread-info .thread-info-data:first-child, .bp-messages-wrap.bp-better-messages-list .chat .head .thread-info .thread-info-data:first-child {
+  padding-left: 8px;
 }
 .bp-messages-wrap.bp-better-messages-mini .chat .head .thread-info .thread-info-data .name, .bp-messages-wrap.bp-better-messages-list .chat .head .thread-info .thread-info-data .name {
   margin-bottom: 2px;

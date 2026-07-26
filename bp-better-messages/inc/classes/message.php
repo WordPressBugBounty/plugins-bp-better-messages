@@ -150,7 +150,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             do_action_ref_array( 'better_messages_message_before_save', array( &$this ) );
 
             // Make sure we have at least one recipient before sending.
-            if ( empty( $this->recipients ) ) {
+            // Ephemeral chat rooms have no stored recipients by design.
+            if ( empty( $this->recipients ) && ! Better_Messages_Chats()->is_ephemeral_thread( $this->thread_id ) ) {
                 return false;
             }
 

@@ -1213,11 +1213,14 @@ class Better_Messages_Options
         $default_settings = Better_Messages()->chats->get_chat_settings( 0 );
 
         $data = array(
-            'pluginUrl'       => Better_Messages()->url,
-            'pluginVersion'   => Better_Messages()->version,
-            'roles'           => $roles,
-            'isWebSocket'     => Better_Messages()->settings['mechanism'] === 'websocket',
-            'defaultSettings' => $default_settings,
+            'pluginUrl'            => Better_Messages()->url,
+            'pluginVersion'        => Better_Messages()->version,
+            'roles'                => $roles,
+            'isWebSocket'          => Better_Messages()->settings['mechanism'] === 'websocket',
+            'defaultSettings'      => $default_settings,
+            'groupVideoCallsChats' => ( Better_Messages()->settings['groupCallsChats'] ?? '0' ) === '1',
+            'groupAudioCallsChats' => ( Better_Messages()->settings['groupAudioCallsChats'] ?? '0' ) === '1',
+            'callsSettingsUrl'     => admin_url( 'admin.php?page=bp-better-messages#/group-calls' ),
         );
 
         ?>

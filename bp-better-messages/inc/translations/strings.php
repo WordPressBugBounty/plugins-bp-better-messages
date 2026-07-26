@@ -103,6 +103,7 @@ function _bm_js_translation_strings() {
     __('Statistics', 'bp-better-messages');
     __('Downloaded', 'bp-better-messages');
     __('Uploaded', 'bp-better-messages');
+    _x('Open', 'Chat Rooms list', 'bp-better-messages');
     _x('Joined', 'Chat Rooms list', 'bp-better-messages');
     _x('Join', 'Chat Rooms list', 'bp-better-messages');
     _x('members', 'Chat Rooms list', 'bp-better-messages');
@@ -628,6 +629,7 @@ function _bm_js_translation_strings() {
     _x('Search...', 'Friends list', 'bp-better-messages');
     _x('No friends added yet', 'Empty friends list', 'bp-better-messages');
     _x('No friends found', 'Empty friends list', 'bp-better-messages');
+    _nx('%s person here', '%s people here', roster.length, 'Chat Room Screen', 'bp-better-messages');
     _nx('%s participant', '%s participants', props.thread.participantsCount, 'Group Thread Participants Count', 'bp-better-messages');
     _x('%s online', 'Group Thread Online Participants Count', 'bp-better-messages');
     _x('Profile picture of %s',
@@ -1185,6 +1187,13 @@ function _bm_js_translation_strings() {
     _x('Create a copy of this chat room with the same settings. Messages will not be copied', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Duplicate', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Chat Room Settings', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Chat room type', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Switching to presence-based removes all current participants of this chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Regular chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Users join the chat room and stay participants until they leave, with unread counters and notifications', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Presence-based chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Participants are only the users who currently have the chat room open. Closing the page removes them from the room. No membership is stored, no unread counters or notifications', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Presence-based chat rooms require WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
     _x('Chat room is open', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('When closed, users will not be able to join or send messages in this chat room. Admins can still access the chat room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Closed Message', 'Chat Rooms (WP Admin)', 'bp-better-messages');
@@ -1215,6 +1224,15 @@ function _bm_js_translation_strings() {
     _x('Show online users list', 'Chat rooms settings page', 'bp-better-messages');
     _x('Display a sidebar with currently online users in the chat room', 'Chat rooms settings page', 'bp-better-messages');
     _x('Requires WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group video calls', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Allow starting and joining group video calls in this chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group video calls require WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group video calls for chat rooms are disabled globally', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Enable in Group Calls settings', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group audio calls', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Allow starting and joining group audio calls in this chat room', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group audio calls require WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Group audio calls for chat rooms are disabled globally', 'Chat rooms settings page', 'bp-better-messages');
     _x('Enable file uploads', 'Chat rooms settings page', 'bp-better-messages');
     _x('Users will be able to upload files to chat room. File uploads must be enabled in WP Admin -> Better Messages -> Settings -> Attachments to make this option work', 'Chat rooms settings page', 'bp-better-messages');
     _x('Hide chat from user inbox', 'Chat rooms settings page', 'bp-better-messages');
@@ -1288,6 +1306,7 @@ function _bm_js_translation_strings() {
     _x('Muted',                       'Chat rooms settings page', 'bp-better-messages');
     _x('Banned',                      'Chat rooms settings page', 'bp-better-messages');
     _x('Group call started',          'Chat rooms settings page', 'bp-better-messages');
+    _x('Can Read', 'Chat rooms settings page', 'bp-better-messages');
     _x('Select Image', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Use as Chat Room Image', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     __('Role', 'bp-better-messages');

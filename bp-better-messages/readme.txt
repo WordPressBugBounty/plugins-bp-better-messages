@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.19
+Stable tag: 2.15.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,7 +379,9 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.13 - 2.15.19 =
+= 2.15.13 - 2.15.20 =
+* Added [**Presence-based chat rooms**](https://www.better-messages.com/docs/features/chat-rooms/#chat-room-types) (WebSocket version) — a new chat room type where participants are only the users currently in the room: closing the page or navigating away removes them immediately, no membership is stored, and the participants list always shows who is really present
+* Added per-room **Group video calls** and **Group audio calls** toggles to chat room settings — disable group calls in specific chat rooms while keeping them enabled globally
 * Added [**Website Context**](https://www.better-messages.com/docs/features/ai-content-moderation/#website-context) setting to AI Content Moderation — describe what your website is used for and Better Messages Moderation AI will judge messages by your community norms, fixing overly aggressive moderation on dating sites and similar communities
 * Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
 * Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings

@@ -62,7 +62,12 @@ class Better_Messages_Chats
             $chat_id  = intval($registerData['chatId']);
             if( $this->is_chat_room( $chat_id ) ) {
                 $settings = $this->get_chat_settings($chat_id);
-                if( in_array( 'bm-guest', $settings['can_join'] ) ){
+
+                if( $this->is_ephemeral_chat( $chat_id ) ){
+                    if( in_array( 'bm-guest', $settings['can_reply'] ) ){
+                        $allowed = true;
+                    }
+                } else if( in_array( 'bm-guest', $settings['can_join'] ) ){
                     $allowed = true;
                 }
             }
@@ -80,6 +85,27 @@ class Better_Messages_Chats
         }
 
         return false;
+    }
+
+    public function is_ephemeral_chat( $chat_id )
+    {
+        if( ! Better_Messages()->realtime ) return false;
+        if( ! $this->is_chat_room( $chat_id ) ) return false;
+
+        $settings = $this->get_chat_settings( $chat_id );
+
+        return $settings['ephemeral_participants'] === '1';
+    }
+
+    public function is_ephemeral_thread( $thread_id )
+    {
+        if( ! Better_Messages()->realtime ) return false;
+        if( Better_Messages()->functions->get_thread_type( $thread_id ) !== 'chat-room' ) return false;
+
+        $chat_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'chat_id' );
+        if( ! $chat_id ) return false;
+
+        return $this->is_ephemeral_chat( $chat_id );
     }
 
     function before_message_send( &$args, &$errors ){
@@ -305,17 +331,23 @@ class Better_Messages_Chats
             $thread_id = (int) $this->get_chat_thread_id( $chat_id );
             if ( ! $thread_id ) continue;
 
+            $is_ephemeral = $this->is_ephemeral_chat( $chat_id );
+
             $is_joined = false;
-            if ( $user_id !== 0 ) {
+            if ( ! $is_ephemeral && $user_id !== 0 ) {
                 $is_joined = (bool) $wpdb->get_var( $wpdb->prepare(
                     "SELECT 1 FROM `{$recipients_table}` WHERE `thread_id` = %d AND `user_id` = %d LIMIT 1",
                     $thread_id, $user_id
                 ) );
             }
 
-            $can_join = $this->user_can_join( $user_id, $chat_id );
+            $can_join = $is_ephemeral ? false : $this->user_can_join( $user_id, $chat_id );
 
-            if ( ! $is_joined && ! $can_join ) {
+            if ( $is_ephemeral ) {
+                if ( ! $this->user_can_read( $user_id, $chat_id ) ) {
+                    continue;
+                }
+            } else if ( ! $is_joined && ! $can_join ) {
                 continue;
             }
 
@@ -330,10 +362,14 @@ class Better_Messages_Chats
                 }
             }
 
-            $member_count = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$recipients_table}` WHERE `thread_id` = %d",
-                $thread_id
-            ) );
+            $member_count = 0;
+
+            if ( ! $is_ephemeral ) {
+                $member_count = (int) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT COUNT(*) FROM `{$recipients_table}` WHERE `thread_id` = %d",
+                    $thread_id
+                ) );
+            }
 
             $rooms[] = array(
                 'chat_id'      => $chat_id,
@@ -345,8 +381,12 @@ class Better_Messages_Chats
                 'memberCount'  => $member_count,
                 'participants' => array(),
                 'showOnline'   => 0,
+                'ephemeral'    => $is_ephemeral ? 1 : 0,
             );
-            $thread_ids[] = $thread_id;
+
+            if ( ! $is_ephemeral ) {
+                $thread_ids[] = $thread_id;
+            }
         }
 
         if ( ! empty( $thread_ids ) ) {
@@ -355,6 +395,7 @@ class Better_Messages_Chats
             $by_thread = $this->fetch_packed_recipients( $thread_ids, $thread_placeholders );
 
             foreach ( $rooms as &$room ) {
+                if ( $room['ephemeral'] === 1 ) continue;
                 $room['participants'] = isset( $by_thread[ $room['thread_id'] ] )
                     ? $by_thread[ $room['thread_id'] ]
                     : array();
@@ -901,12 +942,31 @@ class Better_Messages_Chats
             'only_joined_can_read', 'auto_join', 'auto_exclude', 'auto_remove_inactive',
             'hide_participants', 'hide_participants_count', 'enable_chat_email_notifications',
             'enable_files', 'hide_from_thread_list', 'enable_notifications', 'allow_guests',
-            'show_online_users', 'enable_system_messages'
+            'show_online_users', 'enable_system_messages', 'ephemeral_participants'
         );
 
         foreach ( $checkbox_fields as $field ) {
             if ( ! isset( $settings[ $field ] ) ) {
                 $settings[ $field ] = '0';
+            }
+        }
+
+        if ( $settings['ephemeral_participants'] === '1' ) {
+            $settings['auto_join']                       = '0';
+            $settings['auto_exclude']                    = '0';
+            $settings['auto_remove_inactive']            = '0';
+            $settings['auto_add']                        = array();
+            $settings['enable_notifications']            = '0';
+            $settings['enable_chat_email_notifications'] = '0';
+            $settings['hide_from_thread_list']           = '1';
+        }
+
+        $was_ephemeral = $this->get_chat_settings( $chat_id );
+        $was_ephemeral = $was_ephemeral['ephemeral_participants'] === '1';
+
+        foreach ( array( 'group_video_calls', 'group_audio_calls' ) as $call_field ) {
+            if ( isset( $settings[ $call_field ] ) ) {
+                $settings[ $call_field ] = $settings[ $call_field ] === '1' ? '1' : '0';
             }
         }
 
@@ -951,6 +1011,12 @@ class Better_Messages_Chats
             : array();
 
         update_post_meta( $chat_id, 'bpbm-chat-settings', $settings );
+
+        if ( Better_Messages()->realtime && $settings['ephemeral_participants'] === '1' && ! $was_ephemeral && $thread_id ) {
+            global $wpdb;
+            $wpdb->delete( bm_get_table( 'recipients' ), array( 'thread_id' => $thread_id ), array( '%d' ) );
+            Better_Messages()->hooks->clean_thread_cache( $thread_id );
+        }
 
         $notifications_enabled = true;
 
@@ -1208,8 +1274,57 @@ class Better_Messages_Chats
         $thread_item['chatRoom']['showOnlineUsers']        = ( $settings['show_online_users'] === '1' );
         $thread_item['chatRoom']['closedMessage']            = $settings['closed_message'];
 
+        $is_ephemeral = $this->is_ephemeral_chat( $chat_id );
+        $thread_item['chatRoom']['ephemeral'] = $is_ephemeral;
 
-        if( $include_personal ) {
+        if( $is_ephemeral ){
+            $thread_item['chatRoom']['guestAllowed'] = in_array( 'bm-guest', $settings['can_reply'] );
+        }
+
+        if( $include_personal && $is_ephemeral ) {
+            $is_moderator = user_can( $user_id, 'manage_options') || Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ;
+
+            $can_read = $this->user_can_read( $user_id, $chat_id );
+
+            if( Better_Messages()->websocket ){
+                $thread_item['chatRoom']['broadcastToken'] = $can_read
+                    ? Better_Messages()->websocket->get_thread_broadcast_token( $thread_id )
+                    : '';
+            }
+
+            $thread_item['isHidden'] = 1;
+            $thread_item['permissions']['canMinimize'] = false;
+            $thread_item['permissions']['canMuteThread'] = false;
+
+            $thread_item['chatRoom']['autoJoin'] = false;
+            $thread_item['chatRoom']['isJoined'] = false;
+            $thread_item['chatRoom']['canJoin']  = false;
+            $thread_item['chatRoom']['canRead']  = $can_read;
+            $thread_item['chatRoom']['hideParticipants'] = ! $can_read || ( ! $is_moderator && $settings['hide_participants'] === '1' );
+            $thread_item['chatRoom']['hideParticipantsCount'] = ! $can_read || ( ! $is_moderator && $settings['hide_participants_count'] === '1' );
+
+            if( $is_moderator ){
+                $thread_item['restricted'] = Better_Messages()->moderation->get_restricted_users( $thread_id );
+            }
+
+            if ( ! $can_read ) {
+                $thread_item['permissions']['canReply'] = false;
+
+                if( count($thread_item['permissions']['canReplyMsg']) === 0 ){
+                    $thread_item['permissions']['canReplyMsg']['cant_reply_to_chat'] = $settings['not_allowed_reply_text'];
+                }
+            } else if ( $is_closed && ! $is_moderator ) {
+                $thread_item['permissions']['canReply'] = false;
+                $thread_item['permissions']['canReplyMsg']['chat_room_closed'] = $settings['closed_message'];
+            } else {
+                $can_reply = $this->user_can_reply( $user_id, $chat_id );
+                $thread_item['permissions']['canReply'] = $can_reply;
+
+                if( ! $can_reply && count($thread_item['permissions']['canReplyMsg']) === 0 ){
+                    $thread_item['permissions']['canReplyMsg']['cant_reply_to_chat'] = $settings['not_allowed_reply_text'];
+                }
+            }
+        } else if( $include_personal ) {
             $is_moderator = user_can( $user_id, 'manage_options') || Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ;
 
             $auto_join = $this->auto_join_enabled( $chat_id, $user_id );
@@ -1379,7 +1494,7 @@ class Better_Messages_Chats
 
         $auto_join = $this->auto_join_enabled( $chat_id, $user_id );
 
-        if( $auto_join ){
+        if( $auto_join || $this->is_ephemeral_chat( $chat_id ) ){
             return new WP_Error(
                 'rest_forbidden',
                 _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
@@ -1405,6 +1520,14 @@ class Better_Messages_Chats
         $user_id = Better_Messages()->functions->get_current_user_id();
         $chat_id = intval($request->get_param('id'));
 
+        if( $this->is_ephemeral_chat( $chat_id ) ){
+            return new WP_Error(
+                'rest_forbidden',
+                _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
+                array( 'status' => rest_authorization_required_code() )
+            );
+        }
+
         $is_joined = $this->add_to_chat( $user_id, $chat_id );
 
         $thread_id = $this->get_chat_thread_id( $chat_id );
@@ -1417,6 +1540,10 @@ class Better_Messages_Chats
     }
 
     public function add_to_chat( $user_id, $chat_id, $context = '' ){
+        if( $this->is_ephemeral_chat( $chat_id ) ){
+            return false;
+        }
+
         if( ! $this->user_can_join( $user_id, $chat_id ) ){
             return false;
         }
@@ -1496,6 +1623,9 @@ class Better_Messages_Chats
             'hide_participants'               => '0',
             'hide_participants_count'         => '0',
             'show_online_users'              => '0',
+            'ephemeral_participants'          => '0',
+            'group_video_calls'               => '1',
+            'group_audio_calls'               => '1',
             'enable_files'                    => '0',
             'hide_from_thread_list'           => '1',
             'must_join_message'               => _x('You need to join this chat room to send messages', 'Chat rooms settings page', 'bp-better-messages'),
@@ -1543,6 +1673,11 @@ class Better_Messages_Chats
 
         if( isset( $_POST['bpbm'] ) && is_array($_POST['bpbm']) ){
             $settings = (array) $_POST['bpbm'];
+
+            if ( ! isset( $settings['ephemeral_participants'] ) ) {
+                $stored = $this->get_chat_settings( $post->ID );
+                $settings['ephemeral_participants'] = $stored['ephemeral_participants'];
+            }
 
             if ( ! isset( $settings['only_joined_can_read'] ) ) {
                 $settings['only_joined_can_read'] = '0';
@@ -1794,6 +1929,24 @@ class Better_Messages_Chats
         return apply_filters( 'better_messages_chat_user_can_join', $has_access, $user_id, $chat_id, $thread_id );
     }
 
+    public function user_can_read( $user_id, $chat_id ){
+        if( $user_id > 0 && user_can( $user_id, 'manage_options' ) ) return true;
+        if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
+
+        $settings = $this->get_chat_settings( $chat_id );
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if( Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ) return true;
+
+        $user_roles = Better_Messages()->functions->get_user_roles( $user_id );
+
+        foreach ( $user_roles as $role ) {
+            if ( in_array( $role, $settings['can_join'] ) ) return true;
+        }
+
+        return $this->user_can_reply( $user_id, $chat_id );
+    }
+
     public function user_can_reply( $user_id, $chat_id ){
         if( user_can( $user_id, 'manage_options') ) return true;
         if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
@@ -1902,6 +2055,8 @@ class Better_Messages_Chats
         $thread_id  = $this->get_chat_thread_id( $chat_id );
 
         if( ! $thread_id ) return false;
+
+        if( $this->is_ephemeral_chat( $chat_id ) ) return false;
 
         $settings = Better_Messages()->chats->get_chat_settings( $chat_id );
 
