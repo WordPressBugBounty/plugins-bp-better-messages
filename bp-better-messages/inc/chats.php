@@ -7,6 +7,8 @@ class Better_Messages_Chats
     public const AUTO_CLEANUP_MODES = array( 'schedule', 'limit' );
     public const AUTO_CLEANUP_FREQUENCIES = array( 'daily', 'weekly' );
 
+    private $chat_thread_id_cache = array();
+
     public static function instance()
     {
 
@@ -290,8 +292,6 @@ class Better_Messages_Chats
     }
 
     public function rest_get_user_facing_chat_rooms( WP_REST_Request $request ) {
-        global $wpdb;
-
         $user_id = Better_Messages()->functions->get_current_user_id();
 
         $display_mode  = isset( Better_Messages()->settings['widgetChatRoomsDisplayMode'] )
@@ -302,54 +302,216 @@ class Better_Messages_Chats
             : array();
         $filter_active = ( $display_mode === 'specific' );
 
+        $page     = max( 1, (int) $request->get_param( 'page' ) );
+        $per_page = (int) $request->get_param( 'per_page' );
+        if ( $per_page <= 0 || $per_page > 100 ) $per_page = 20;
+
+        $search = trim( (string) $request->get_param( 'search' ) );
+
         if ( $filter_active && empty( $allowed_ids ) ) {
-            return array();
+            return $this->chat_rooms_response( array(), $user_id, $page, $per_page, false );
         }
 
-        $query_args = array(
-            'post_type'      => 'bpbm-chat',
-            'post_status'    => 'publish',
-            'posts_per_page' => 100,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'no_found_rows'  => true,
-        );
+        $needed     = $page * $per_page;
+        $accessible = array();
+        $offset     = 0;
+        $chunk      = (int) apply_filters( 'better_messages_chat_rooms_scan_chunk', 200 );
+        if ( $chunk < 1 ) $chunk = 200;
 
-        if ( $filter_active ) {
-            $query_args['post__in'] = $allowed_ids;
-            $query_args['orderby']  = 'post__in';
+        while ( true ) {
+            $candidates = $this->query_chat_room_candidates(
+                $search,
+                $filter_active ? $allowed_ids : array(),
+                $offset,
+                $chunk
+            );
+
+            if ( empty( $candidates ) ) break;
+
+            $offset += count( $candidates );
+
+            foreach ( $this->scan_accessible_chat_rooms( $candidates, $user_id ) as $entry ) {
+                $accessible[] = $entry;
+            }
+
+            if ( count( $accessible ) > $needed ) break;
+            if ( count( $candidates ) < $chunk ) break;
         }
 
-        $query = new WP_Query( $query_args );
+        $has_more = count( $accessible ) > $needed;
+        $slice    = array_slice( $accessible, ( $page - 1 ) * $per_page, $per_page );
+
+        return $this->chat_rooms_response( $slice, $user_id, $page, $per_page, $has_more );
+    }
+
+    private function query_chat_room_candidates( $search, array $allowed_ids, $offset, $limit ) {
+        global $wpdb;
+
+        $where  = array( "`post_type` = 'bpbm-chat'", "`post_status` = 'publish'" );
+        $params = array();
+
+        if ( $search !== '' ) {
+            $where[]  = '`post_title` LIKE %s';
+            $params[] = '%' . $wpdb->esc_like( $search ) . '%';
+        }
+
+        $order = '`post_title` ASC, `ID` ASC';
+
+        if ( ! empty( $allowed_ids ) ) {
+            $ids_list = implode( ',', array_map( 'intval', $allowed_ids ) );
+            $where[]  = "`ID` IN ({$ids_list})";
+            $order    = "FIELD( `ID`, {$ids_list} )";
+        }
+
+        $sql = "SELECT `ID`, `post_title`
+                FROM `{$wpdb->posts}`
+                WHERE " . implode( ' AND ', $where ) . "
+                ORDER BY {$order}
+                LIMIT %d OFFSET %d";
+
+        $params[] = (int) $limit;
+        $params[] = (int) $offset;
+
+        return $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
+    }
+
+    private function scan_accessible_chat_rooms( array $candidates, $user_id ) {
+        global $wpdb;
+
+        $chat_ids = array();
+        foreach ( $candidates as $candidate ) {
+            $chat_ids[] = (int) $candidate->ID;
+        }
+
+        _prime_post_caches( $chat_ids, false, true );
+
+        $thread_map = $this->map_chat_thread_ids( $chat_ids );
+
+        foreach ( $chat_ids as $chat_id ) {
+            if ( ! array_key_exists( $chat_id, $this->chat_thread_id_cache ) && isset( $thread_map[ $chat_id ] ) ) {
+                $this->chat_thread_id_cache[ $chat_id ] = $thread_map[ $chat_id ];
+            }
+        }
+
+        if ( $user_id !== 0 && ! empty( $thread_map ) && isset( Better_Messages()->moderation ) ) {
+            Better_Messages()->moderation->prime_user_restrictions( array_values( $thread_map ), $user_id );
+        }
+
+        $joined = array();
+        if ( $user_id !== 0 && ! empty( $thread_map ) ) {
+            $thread_ids  = array_values( $thread_map );
+            $placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
+
+            $params = $thread_ids;
+            $params[] = $user_id;
+
+            $rows = $wpdb->get_col( $wpdb->prepare(
+                "SELECT `thread_id` FROM `" . bm_get_table( 'recipients' ) . "`
+                 WHERE `thread_id` IN ({$placeholders}) AND `user_id` = %d",
+                $params
+            ) );
+
+            foreach ( $rows as $tid ) {
+                $joined[ (int) $tid ] = true;
+            }
+        }
+
+        $entries = array();
+
+        foreach ( $candidates as $candidate ) {
+            $chat_id = (int) $candidate->ID;
+
+            $thread_id = isset( $thread_map[ $chat_id ] )
+                ? $thread_map[ $chat_id ]
+                : (int) $this->get_chat_thread_id( $chat_id );
+
+            if ( ! $thread_id ) continue;
+
+            $is_ephemeral = $this->is_ephemeral_chat( $chat_id );
+
+            if ( $is_ephemeral ) {
+                if ( ! $this->user_can_read( $user_id, $chat_id ) ) continue;
+
+                $is_joined = false;
+                $can_join  = false;
+            } else {
+                $is_joined = isset( $joined[ $thread_id ] );
+                $can_join  = $this->user_can_join( $user_id, $chat_id );
+
+                if ( ! $is_joined && ! $can_join ) continue;
+            }
+
+            $entries[] = array(
+                'chat_id'   => $chat_id,
+                'thread_id' => $thread_id,
+                'title'     => $candidate->post_title,
+                'isJoined'  => $is_joined ? 1 : 0,
+                'canJoin'   => $can_join ? 1 : 0,
+                'ephemeral' => $is_ephemeral ? 1 : 0,
+            );
+        }
+
+        return $entries;
+    }
+
+    private function map_chat_thread_ids( array $chat_ids ) {
+        global $wpdb;
+
+        if ( empty( $chat_ids ) ) return array();
+
+        $placeholders = implode( ',', array_fill( 0, count( $chat_ids ), '%s' ) );
+
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT `meta`.`meta_value` AS `chat_id`, `meta`.`bm_thread_id` AS `thread_id`
+             FROM `" . bm_get_table( 'threadsmeta' ) . "` `meta`
+             INNER JOIN `" . bm_get_table( 'threads' ) . "` `threads`
+                 ON `threads`.`id` = `meta`.`bm_thread_id`
+             WHERE `meta`.`meta_key` = 'chat_id'
+             AND `meta`.`meta_value` IN ({$placeholders})",
+            array_map( 'strval', $chat_ids )
+        ) );
+
+        $map = array();
+        foreach ( $rows as $row ) {
+            $map[ (int) $row->chat_id ] = (int) $row->thread_id;
+        }
+
+        return $map;
+    }
+
+    private function chat_rooms_response( array $entries, $user_id, $page, $per_page, $has_more ) {
+        global $wpdb;
 
         $recipients_table = bm_get_table( 'recipients' );
         $rooms            = array();
         $thread_ids       = array();
 
-        foreach ( $query->posts as $post ) {
-            $chat_id   = (int) $post->ID;
-            $thread_id = (int) $this->get_chat_thread_id( $chat_id );
-            if ( ! $thread_id ) continue;
-
-            $is_ephemeral = $this->is_ephemeral_chat( $chat_id );
-
-            $is_joined = false;
-            if ( ! $is_ephemeral && $user_id !== 0 ) {
-                $is_joined = (bool) $wpdb->get_var( $wpdb->prepare(
-                    "SELECT 1 FROM `{$recipients_table}` WHERE `thread_id` = %d AND `user_id` = %d LIMIT 1",
-                    $thread_id, $user_id
-                ) );
+        foreach ( $entries as $entry ) {
+            if ( $entry['ephemeral'] !== 1 ) {
+                $thread_ids[] = $entry['thread_id'];
             }
+        }
 
-            $can_join = $is_ephemeral ? false : $this->user_can_join( $user_id, $chat_id );
+        $member_counts = array();
 
-            if ( $is_ephemeral ) {
-                if ( ! $this->user_can_read( $user_id, $chat_id ) ) {
-                    continue;
-                }
-            } else if ( ! $is_joined && ! $can_join ) {
-                continue;
+        if ( ! empty( $thread_ids ) ) {
+            $count_placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
+
+            $count_rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT `thread_id`, COUNT(*) AS `total`
+                 FROM `{$recipients_table}`
+                 WHERE `thread_id` IN ({$count_placeholders})
+                 GROUP BY `thread_id`",
+                $thread_ids
+            ) );
+
+            foreach ( $count_rows as $count_row ) {
+                $member_counts[ (int) $count_row->thread_id ] = (int) $count_row->total;
             }
+        }
+
+        foreach ( $entries as $entry ) {
+            $chat_id = $entry['chat_id'];
 
             $image_url = '';
             if ( has_post_thumbnail( $chat_id ) ) {
@@ -364,29 +526,22 @@ class Better_Messages_Chats
 
             $member_count = 0;
 
-            if ( ! $is_ephemeral ) {
-                $member_count = (int) $wpdb->get_var( $wpdb->prepare(
-                    "SELECT COUNT(*) FROM `{$recipients_table}` WHERE `thread_id` = %d",
-                    $thread_id
-                ) );
+            if ( $entry['ephemeral'] !== 1 && isset( $member_counts[ $entry['thread_id'] ] ) ) {
+                $member_count = $member_counts[ $entry['thread_id'] ];
             }
 
             $rooms[] = array(
                 'chat_id'      => $chat_id,
-                'thread_id'    => $thread_id,
-                'title'        => $post->post_title,
+                'thread_id'    => $entry['thread_id'],
+                'title'        => $entry['title'],
                 'image'        => $image_url,
-                'isJoined'     => $is_joined ? 1 : 0,
-                'canJoin'      => $can_join ? 1 : 0,
+                'isJoined'     => $entry['isJoined'],
+                'canJoin'      => $entry['canJoin'],
                 'memberCount'  => $member_count,
                 'participants' => array(),
                 'showOnline'   => 0,
-                'ephemeral'    => $is_ephemeral ? 1 : 0,
+                'ephemeral'    => $entry['ephemeral'],
             );
-
-            if ( ! $is_ephemeral ) {
-                $thread_ids[] = $thread_id;
-            }
         }
 
         if ( ! empty( $thread_ids ) ) {
@@ -414,7 +569,14 @@ class Better_Messages_Chats
             unset( $room );
         }
 
-        return apply_filters( 'better_messages_get_chat_rooms', $rooms, $user_id );
+        $rooms = apply_filters( 'better_messages_get_chat_rooms', $rooms, $user_id );
+
+        return array(
+            'items'   => array_values( $rooms ),
+            'page'    => (int) $page,
+            'perPage' => (int) $per_page,
+            'hasMore' => (bool) $has_more,
+        );
     }
 
     private function fetch_packed_recipients( array $thread_ids, $thread_placeholders ) {
@@ -1452,6 +1614,7 @@ class Better_Messages_Chats
         if( $post->post_type === 'bpbm-chat' ){
             $thread_id = $this->get_chat_thread_id( $post_ID );
             Better_Messages()->functions->erase_thread( $thread_id );
+            $this->flush_chat_thread_id_cache( $post_ID );
         }
     }
 
@@ -1973,10 +2136,16 @@ class Better_Messages_Chats
     public function get_chat_thread_id( $chat_id ){
         global $wpdb;
 
+        $cache_key = (int) $chat_id;
+
+        if ( array_key_exists( $cache_key, $this->chat_thread_id_cache ) ) {
+            return $this->chat_thread_id_cache[ $cache_key ];
+        }
+
         $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "
-        SELECT bm_thread_id 
-        FROM `" . bm_get_table('threadsmeta') . "` 
-        WHERE `meta_key` = 'chat_id' 
+        SELECT bm_thread_id
+        FROM `" . bm_get_table('threadsmeta') . "`
+        WHERE `meta_key` = 'chat_id'
         AND   `meta_value` = %s
         ", $chat_id ) );
 
@@ -1992,12 +2161,15 @@ class Better_Messages_Chats
 
         if( ! $thread_id ) {
             $chat = get_post($chat_id);
-            if( ! $chat ) return false;
+            if( ! $chat ) {
+                $this->chat_thread_id_cache[ $cache_key ] = false;
+                return false;
+            }
 
             $wpdb->query( $wpdb->prepare( "
-            DELETE 
-            FROM `" . bm_get_table('threadsmeta') . "` 
-            WHERE `meta_key` = 'chat_id' 
+            DELETE
+            FROM `" . bm_get_table('threadsmeta') . "`
+            WHERE `meta_key` = 'chat_id'
             AND   `meta_value` = %s
             ", $chat_id ) );
 
@@ -2020,7 +2192,18 @@ class Better_Messages_Chats
             wp_cache_delete( 'thread_' . $thread_id, 'bm_messages' );
         }
 
+        $this->chat_thread_id_cache[ $cache_key ] = $thread_id;
+
         return $thread_id;
+    }
+
+    public function flush_chat_thread_id_cache( $chat_id = null ){
+        if ( $chat_id === null ) {
+            $this->chat_thread_id_cache = array();
+            return;
+        }
+
+        unset( $this->chat_thread_id_cache[ (int) $chat_id ] );
     }
 
     public function sync_roles_update( $roles = [] ){

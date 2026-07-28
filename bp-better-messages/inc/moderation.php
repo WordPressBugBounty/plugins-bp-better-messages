@@ -1013,7 +1013,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $restrictions = wp_cache_get( $key, 'bm_messages' );
 
-            if( $restrictions ){
+            if( is_array( $restrictions ) ){
                 return $restrictions;
             }
 
@@ -1034,6 +1034,50 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_set($key, $array, 'bm_messages');
 
             return $array;
+        }
+
+        public function prime_user_restrictions( array $thread_ids, int $user_id ){
+            $pending = array();
+
+            foreach ( array_unique( array_map( 'intval', $thread_ids ) ) as $thread_id ) {
+                if ( $thread_id < 1 ) continue;
+
+                $cached = wp_cache_get( $this->user_thread_cache_key( $thread_id, $user_id ), 'bm_messages' );
+                if ( ! is_array( $cached ) ) {
+                    $pending[] = $thread_id;
+                }
+            }
+
+            if ( empty( $pending ) ) return;
+
+            global $wpdb;
+
+            $placeholders = implode( ',', array_fill( 0, count( $pending ), '%d' ) );
+
+            $params   = $pending;
+            $params[] = $user_id;
+
+            $results = $wpdb->get_results( $wpdb->prepare(
+                "SELECT `thread_id`, `type`, `expiration`
+                 FROM `" . bm_get_table( 'moderation' ) . "`
+                 WHERE `thread_id` IN ({$placeholders})
+                 AND `user_id` = %d
+                 AND `expiration` > NOW()",
+                $params
+            ) );
+
+            $grouped = array();
+            foreach ( $results as $result ) {
+                $grouped[ (int) $result->thread_id ][ $result->type ] = $result->expiration;
+            }
+
+            foreach ( $pending as $thread_id ) {
+                wp_cache_set(
+                    $this->user_thread_cache_key( $thread_id, $user_id ),
+                    isset( $grouped[ $thread_id ] ) ? $grouped[ $thread_id ] : array(),
+                    'bm_messages'
+                );
+            }
         }
 
         public function restrict_user( string $type, int $user_id, int $thread_id, int $time = 1 ){

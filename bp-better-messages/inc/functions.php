@@ -2095,44 +2095,71 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 ? array_map( 'intval', Better_Messages()->settings['widgetChatRoomsIds'] )
                 : array();
 
+            if ( $display_mode === 'specific' && empty( $allowed_ids ) ) return false;
+
+            if ( ! isset( Better_Messages()->chats ) ) return false;
+            $chats = Better_Messages()->chats;
+
+            global $wpdb;
+
+            $joined_sql = "SELECT 1
+                FROM `" . bm_get_table( 'recipients' ) . "` `recipients`
+                INNER JOIN `" . bm_get_table( 'threadsmeta' ) . "` `meta`
+                    ON `meta`.`bm_thread_id` = `recipients`.`thread_id`
+                    AND `meta`.`meta_key` = 'chat_id'
+                INNER JOIN `{$wpdb->posts}` `posts`
+                    ON `posts`.`ID` = `meta`.`meta_value`
+                    AND `posts`.`post_type` = 'bpbm-chat'
+                    AND `posts`.`post_status` = 'publish'
+                WHERE `recipients`.`user_id` = %d";
+
+            $joined_params = array( $user_id );
+
+            if ( $display_mode === 'specific' ) {
+                $joined_sql .= ' AND `posts`.`ID` IN (' . implode( ',', array_map( 'intval', $allowed_ids ) ) . ')';
+            }
+
+            $joined_sql .= ' LIMIT 1';
+
+            if ( (bool) $wpdb->get_var( $wpdb->prepare( $joined_sql, $joined_params ) ) ) {
+                return true;
+            }
+
             $args = array(
                 'post_type'        => 'bpbm-chat',
                 'post_status'      => 'publish',
-                'posts_per_page'   => 100,
+                'posts_per_page'   => 200,
                 'fields'           => 'ids',
                 'no_found_rows'    => true,
                 'suppress_filters' => true,
             );
 
             if ( $display_mode === 'specific' ) {
-                if ( empty( $allowed_ids ) ) return false;
                 $args['post__in'] = $allowed_ids;
                 $args['orderby']  = 'post__in';
             }
 
-            if ( ! isset( Better_Messages()->chats ) ) return false;
-            $chats = Better_Messages()->chats;
+            $paged = 1;
 
-            global $wpdb;
-            $recipients_table = bm_get_table( 'recipients' );
+            while ( true ) {
+                $args['paged'] = $paged;
 
-            $post_ids = get_posts( $args );
-            foreach ( $post_ids as $chat_id ) {
-                $thread_id = (int) $chats->get_chat_thread_id( $chat_id );
-                if ( ! $thread_id ) continue;
+                $post_ids = get_posts( $args );
+                if ( empty( $post_ids ) ) return false;
 
-                if ( $user_id !== 0 ) {
-                    $is_joined = (bool) $wpdb->get_var( $wpdb->prepare(
-                        "SELECT 1 FROM `{$recipients_table}` WHERE `thread_id` = %d AND `user_id` = %d LIMIT 1",
-                        $thread_id, $user_id
-                    ) );
-                    if ( $is_joined ) return true;
+                update_meta_cache( 'post', $post_ids );
+
+                foreach ( $post_ids as $chat_id ) {
+                    if ( $chats->user_can_join( $user_id, $chat_id ) ) {
+                        return true;
+                    }
                 }
 
-                if ( $chats->user_can_join( $user_id, $chat_id ) ) {
-                    return true;
-                }
+                if ( count( $post_ids ) < $args['posts_per_page'] ) return false;
+
+                $paged++;
             }
+
             return false;
         }
 

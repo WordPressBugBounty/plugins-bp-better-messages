@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.20\n"
+"Project-Id-Version: Better Messages 2.15.21\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-26T16:07:29+00:00\n"
+"POT-Creation-Date: 2026-07-28T07:26:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -155,7 +155,7 @@ msgstr ""
 
 #: addons/ai/ai.php:3637
 #: inc/api/admin.php:1614
-#: inc/chats.php:1837
+#: inc/chats.php:2000
 #: inc/options.php:766
 #: inc/options.php:776
 #: inc/options.php:1210
@@ -183,7 +183,7 @@ msgid "Website must have at least one valid API Key configured. Setup keys at <a
 msgstr ""
 
 #: addons/ai/ai.php:3678
-#: inc/chats.php:1847
+#: inc/chats.php:2010
 #: inc/translations/strings.php:811
 #: inc/translations/strings.php:1032
 #: inc/translations/strings.php:3208
@@ -1519,8 +1519,8 @@ msgstr ""
 #: inc/api/conversations.php:261
 #: inc/api/conversations.php:490
 #: inc/api/conversations.php:510
-#: inc/chats.php:1500
-#: inc/chats.php:1526
+#: inc/chats.php:1663
+#: inc/chats.php:1689
 #: inc/guests.php:334
 #: inc/guests.php:344
 #: inc/guests.php:421
@@ -2629,129 +2629,129 @@ msgctxt "Live Chat Builder"
 msgid "No numeric user id stored in the \"%s\" field of this post"
 msgstr ""
 
-#: inc/chats.php:593
+#: inc/chats.php:755
 msgid "Chat room title is required"
 msgstr ""
 
-#: inc/chats.php:617
-#: inc/chats.php:657
-#: inc/chats.php:672
-#: inc/chats.php:731
-#: inc/chats.php:762
-#: inc/chats.php:784
-#: inc/chats.php:838
-#: inc/chats.php:857
+#: inc/chats.php:779
+#: inc/chats.php:819
+#: inc/chats.php:834
+#: inc/chats.php:893
+#: inc/chats.php:924
+#: inc/chats.php:946
+#: inc/chats.php:1000
+#: inc/chats.php:1019
 msgid "Chat room not found"
 msgstr ""
 
-#: inc/chats.php:768
+#: inc/chats.php:930
 msgid "User is not a participant"
 msgstr ""
 
-#: inc/chats.php:791
+#: inc/chats.php:953
 msgid "Copy"
 msgstr ""
 
-#: inc/chats.php:844
-#: inc/chats.php:863
+#: inc/chats.php:1006
+#: inc/chats.php:1025
 msgid "Chat room has no thread"
 msgstr ""
 
-#: inc/chats.php:1566
+#: inc/chats.php:1729
 msgctxt "Chat Rooms"
 msgid "Chat Rooms"
 msgstr ""
 
-#: inc/chats.php:1567
+#: inc/chats.php:1730
 msgctxt "Chat Rooms"
 msgid "Chat Room"
 msgstr ""
 
-#: inc/chats.php:1568
-#: inc/chats.php:1569
+#: inc/chats.php:1731
+#: inc/chats.php:1732
 msgctxt "Chat Rooms"
 msgid "Create new Chat Room"
 msgstr ""
 
-#: inc/chats.php:1570
+#: inc/chats.php:1733
 msgctxt "Chat Rooms"
 msgid "Edit Chat Room"
 msgstr ""
 
-#: inc/chats.php:1571
+#: inc/chats.php:1734
 msgctxt "Chat Rooms"
 msgid "New Chat Room"
 msgstr ""
 
-#: inc/chats.php:1572
+#: inc/chats.php:1735
 msgctxt "Chat Rooms"
 msgid "Chat Thumbnail"
 msgstr ""
 
-#: inc/chats.php:1573
+#: inc/chats.php:1736
 msgctxt "Chat Rooms"
 msgid "Set chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:1574
+#: inc/chats.php:1737
 msgctxt "Chat Rooms"
 msgid "Remove chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:1575
+#: inc/chats.php:1738
 msgctxt "Chat Rooms"
 msgid "Use as chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:1596
+#: inc/chats.php:1759
 #: inc/translations/strings.php:1468
 #: inc/translations/strings.php:1555
 msgid "Loading"
 msgstr ""
 
-#: inc/chats.php:1631
-#: inc/chats.php:1734
+#: inc/chats.php:1794
+#: inc/chats.php:1897
 msgctxt "Chat rooms settings page"
 msgid "You need to join this chat room to send messages"
 msgstr ""
 
-#: inc/chats.php:1632
-#: inc/chats.php:1740
+#: inc/chats.php:1795
+#: inc/chats.php:1903
 msgctxt "Chat rooms settings page"
 msgid "Join chat room"
 msgstr ""
 
-#: inc/chats.php:1633
-#: inc/chats.php:1764
+#: inc/chats.php:1796
+#: inc/chats.php:1927
 msgctxt "Chat rooms settings page"
 msgid "You are not allowed to join this chat room"
 msgstr ""
 
-#: inc/chats.php:1634
-#: inc/chats.php:1770
+#: inc/chats.php:1797
+#: inc/chats.php:1933
 msgctxt "Chat rooms settings page"
 msgid "You are not allowed to reply in this chat room"
 msgstr ""
 
-#: inc/chats.php:1635
-#: inc/chats.php:1758
+#: inc/chats.php:1798
+#: inc/chats.php:1921
 msgctxt "Chat rooms settings page"
 msgid "You need to login to website to send messages"
 msgstr ""
 
-#: inc/chats.php:1636
-#: inc/chats.php:1746
+#: inc/chats.php:1799
+#: inc/chats.php:1909
 msgctxt "Chat rooms settings page"
 msgid "Login"
 msgstr ""
 
-#: inc/chats.php:1637
-#: inc/chats.php:1752
+#: inc/chats.php:1800
+#: inc/chats.php:1915
 msgctxt "Chat rooms settings page"
 msgid "Chat as Guest"
 msgstr ""
 
-#: inc/chats.php:1638
+#: inc/chats.php:1801
 msgctxt "Chat rooms settings page"
 msgid "This chat room is currently closed"
 msgstr ""
@@ -3201,34 +3201,34 @@ msgctxt "Thread Title (when subjects are disabled)"
 msgid "%s Participants"
 msgstr ""
 
-#: inc/functions.php:2551
+#: inc/functions.php:2578
 msgid "Get WebSocket License"
 msgstr ""
 
-#: inc/functions.php:2555
+#: inc/functions.php:2582
 #, php-format
 msgid "<a href=\"%s\" target=\"_blank\">Download</a> and install Premium version of plugin to use this feature"
 msgstr ""
 
-#: inc/functions.php:2982
+#: inc/functions.php:3009
 msgctxt "Login form for unlogged users"
 msgid "Login required"
 msgstr ""
 
-#: inc/functions.php:3085
+#: inc/functions.php:3112
 msgid "Your message was not sent. Please use a valid sender."
 msgstr ""
 
-#: inc/functions.php:3088
+#: inc/functions.php:3115
 msgid "Your message was not sent. Please enter some content."
 msgstr ""
 
-#: inc/functions.php:3137
+#: inc/functions.php:3164
 #, php-format
 msgid "Re: %s"
 msgstr ""
 
-#: inc/functions.php:3144
+#: inc/functions.php:3171
 #: inc/translations/strings.php:402
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3238,7 +3238,7 @@ msgctxt "User tried to send message with no recipients"
 msgid "Please select recipient(s) before sending the message"
 msgstr ""
 
-#: inc/functions.php:3258
+#: inc/functions.php:3285
 msgid "Message was not sent. Please try again."
 msgstr ""
 
@@ -3641,86 +3641,86 @@ msgctxt "Message when user was muted in conversation"
 msgid "You were muted in this conversation until %s"
 msgstr ""
 
-#: inc/moderation.php:1273
+#: inc/moderation.php:1317
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] New message pending moderation"
 msgstr ""
 
-#: inc/moderation.php:1283
+#: inc/moderation.php:1327
 msgctxt "Moderation email"
 msgid "Pre-moderation rules"
 msgstr ""
 
-#: inc/moderation.php:1286
+#: inc/moderation.php:1330
 msgctxt "Moderation email"
 msgid "AI Content Moderation"
 msgstr ""
 
-#: inc/moderation.php:1288
+#: inc/moderation.php:1332
 msgctxt "Moderation email"
 msgid "First-time sender"
 msgstr ""
 
-#: inc/moderation.php:1292
+#: inc/moderation.php:1336
 msgctxt "Moderation email"
 msgid "User is blacklisted"
 msgstr ""
 
-#: inc/moderation.php:1297
+#: inc/moderation.php:1341
 #, php-format
 msgctxt "Moderation email"
 msgid "Sender: %s (ID: %d)"
 msgstr ""
 
-#: inc/moderation.php:1298
+#: inc/moderation.php:1342
 #, php-format
 msgctxt "Moderation email"
 msgid "Conversation: #%d"
 msgstr ""
 
-#: inc/moderation.php:1299
+#: inc/moderation.php:1343
 #, php-format
 msgctxt "Moderation email"
 msgid "Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1303
+#: inc/moderation.php:1347
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Flagged Categories: %s"
 msgstr ""
 
-#: inc/moderation.php:1305
+#: inc/moderation.php:1349
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1309
+#: inc/moderation.php:1353
 #, php-format
 msgctxt "Moderation email"
 msgid "Message: %s"
 msgstr ""
 
-#: inc/moderation.php:1313
+#: inc/moderation.php:1357
 msgctxt "Moderation email"
 msgid "Attachments:"
 msgstr ""
 
-#: inc/moderation.php:1322
+#: inc/moderation.php:1366
 #, php-format
 msgctxt "Moderation email"
 msgid "Review in moderation panel: %s"
 msgstr ""
 
-#: inc/moderation.php:1360
+#: inc/moderation.php:1404
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] Message reported"
 msgstr ""
 
-#: inc/moderation.php:1371
+#: inc/moderation.php:1415
 #, php-format
 msgctxt "Moderation email body"
 msgid ""
