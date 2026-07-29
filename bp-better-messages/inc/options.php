@@ -2636,6 +2636,17 @@ class Better_Messages_Options
         // Fields that need special HTML handling (processed separately with wp_kses)
         $html_fields = [ 'emailCustomHtml' ];
 
+        $svg_icon_fields = [
+            'bubbleIcon',
+            'widgetIconMessages',
+            'widgetIconFriends',
+            'widgetIconGroups',
+            'widgetIconAIBots',
+            'widgetIconChatRooms',
+            'widgetIconUsers',
+            'widgetIconCourses'
+        ];
+
         $int_only = [
             'thread_interval'           => 1,
             'site_interval'             => 1,
@@ -2703,7 +2714,7 @@ class Better_Messages_Options
             } else if ( in_array( $key, $html_fields ) ) {
                 // HTML fields are processed separately with wp_kses later
                 $this->settings[$key] = $value;
-            } else if ( $key === 'bubbleIcon' && is_string( $value ) && stripos( ltrim( $value ), '<svg' ) === 0 ) {
+            } else if ( in_array( $key, $svg_icon_fields, true ) && is_string( $value ) && stripos( ltrim( $value ), '<svg' ) === 0 ) {
                 // Custom SVG icon — sanitize with SVG-safe tag/attribute whitelist
                 $this->settings[$key] = $this->sanitize_svg( wp_unslash( $value ) );
             } else {

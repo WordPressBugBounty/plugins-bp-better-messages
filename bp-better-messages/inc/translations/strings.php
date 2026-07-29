@@ -1182,6 +1182,10 @@ function _bm_js_translation_strings() {
     _x('Shortcode', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('View in inbox', 'Chat rooms settings page', 'bp-better-messages');
     _x('Participants', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Moderators', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Moderators can remove, mute and ban participants of this chat room and can reply while the chat room is closed. Assigned moderators are automatically joined to the chat room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Moderators can add participants', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Allow moderators of this chat room to add new participants from the chat interface', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Actions', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Duplicate Chat Room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Create a copy of this chat room with the same settings. Messages will not be copied', 'Chat Rooms (WP Admin)', 'bp-better-messages');
@@ -1296,6 +1300,13 @@ function _bm_js_translation_strings() {
     _x('Remove all participants', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Delete Chat Room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Delete this chat room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('moderator', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('moderators', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Add moderator', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Search users...', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Add', 'WP Admin', 'bp-better-messages');
+    _x('No moderators assigned yet', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Remove', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Participant joined',          'Chat rooms settings page', 'bp-better-messages');
     _x('Participant left',            'Chat rooms settings page', 'bp-better-messages');
     _x('Subject changed',             'Chat rooms settings page', 'bp-better-messages');
@@ -1330,13 +1341,10 @@ function _bm_js_translation_strings() {
     _x('participant', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('participants', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Add participant', 'Chat Rooms (WP Admin)', 'bp-better-messages');
-    _x('Search users...', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Adding...', 'Chat Rooms (WP Admin)', 'bp-better-messages');
-    _x('Add', 'WP Admin', 'bp-better-messages');
     _x('Search participants...', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('No participants found', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('No participants yet', 'Chat Rooms (WP Admin)', 'bp-better-messages');
-    _x('Remove', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Chat rooms saved', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('You have unsaved changes', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Saving...', 'Chat Rooms (WP Admin)', 'bp-better-messages');

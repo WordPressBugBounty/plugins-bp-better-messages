@@ -197,7 +197,31 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function can_invite( $user_id, $thread_id ){
             $type = $this->get_thread_type( $thread_id );
-            if( $type === 'chat-room' ) return false;
+
+            if( $type === 'chat-room' ){
+                if( $user_id <= 0 ) return false;
+
+                $chat_id = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
+
+                if( ! $chat_id || Better_Messages_Chats()->is_ephemeral_chat( $chat_id ) ){
+                    return false;
+                }
+
+                if( user_can( $user_id, 'bm_can_administrate' ) ){
+                    return apply_filters( 'better_messages_can_invite', true, $user_id, $thread_id );
+                }
+
+                if( $this->is_thread_moderator( $thread_id, $user_id ) ){
+                    $settings = Better_Messages_Chats()->get_chat_settings( $chat_id );
+
+                    if( $settings['moderators_can_invite'] === '1' ){
+                        return apply_filters( 'better_messages_can_invite', true, $user_id, $thread_id );
+                    }
+                }
+
+                return apply_filters( 'better_messages_can_invite', false, $user_id, $thread_id );
+            }
+
             if( $type === 'group' || $type === 'course' ) return false;
             if( $user_id <= 0 ) return false;
 

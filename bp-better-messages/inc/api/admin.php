@@ -616,6 +616,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $where_args = array( $search, $search_like, $search_like, $search_like, $search_like, $search_like, $search_like );
             }
 
+            if ( ! empty( $request->get_param( 'exclude_guests' ) ) ) {
+                $where_sql = $where_sql === ''
+                    ? "WHERE `bm_users`.`ID` > 0"
+                    : $where_sql . " AND `bm_users`.`ID` > 0";
+            }
+
             $offset = ( $page - 1 ) * $per_page;
             $sql = $wpdb->prepare(
                 "SELECT `bm_users`.`ID` FROM `" . bm_get_table('users') . "` `bm_users`

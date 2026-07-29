@@ -323,8 +323,14 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
 
                 $user_ids = array_map( 'intval', $wpdb->get_col( $sql ) );
 
+                $moderators = Better_Messages()->functions->get_moderators( $thread_id );
+
                 foreach ( $user_ids as $user_id ) {
                     if ( in_array( $user_id, $exclude_ids, true ) ) {
+                        continue;
+                    }
+
+                    if ( in_array( $user_id, $moderators, true ) ) {
                         continue;
                     }
 

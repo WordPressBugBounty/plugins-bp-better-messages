@@ -808,7 +808,55 @@ class Better_Messages_Chats
             $this->save_chat_settings( $chat_id, $settings );
         }
 
+        $moderators = $request->get_param( 'moderators' );
+        if ( is_array( $moderators ) ) {
+            $this->save_chat_moderators( $chat_id, $moderators );
+        }
+
         return $this->format_chat_room_for_rest( $chat_id );
+    }
+
+    private function save_chat_moderators( $chat_id, $moderators ) {
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if ( ! $thread_id ) {
+            return;
+        }
+
+        $user_ids = array();
+
+        foreach ( $moderators as $user_id ) {
+            $user_id = intval( $user_id );
+
+            if ( $user_id <= 0 ) continue;
+            if ( in_array( $user_id, $user_ids, true ) ) continue;
+            if ( ! Better_Messages()->functions->is_user_exists( $user_id ) ) continue;
+
+            $user_ids[] = $user_id;
+        }
+
+        $previous = Better_Messages()->functions->get_moderators( $thread_id );
+
+        if ( count( $user_ids ) > 0 ) {
+            Better_Messages()->functions->update_thread_meta( $thread_id, 'moderators', $user_ids );
+        } else {
+            Better_Messages()->functions->delete_thread_meta( $thread_id, 'moderators' );
+        }
+
+        if ( ! $this->is_ephemeral_chat( $chat_id ) ) {
+            foreach ( $user_ids as $user_id ) {
+                if ( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ) {
+                    Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id, 'admin' );
+                }
+            }
+        }
+
+        $changed = count( array_diff( $user_ids, $previous ) ) > 0 || count( array_diff( $previous, $user_ids ) ) > 0;
+
+        if ( $changed ) {
+            do_action( 'better_messages_thread_updated', $thread_id );
+            do_action( 'better_messages_info_changed', $thread_id );
+        }
     }
 
     public function rest_admin_delete_chat_room( WP_REST_Request $request ) {
@@ -985,6 +1033,11 @@ class Better_Messages_Chats
                     foreach ( $recipient_ids as $user_id ) {
                         Better_Messages()->functions->add_participant_to_thread( $new_thread_id, $user_id, 'admin' );
                     }
+
+                    $moderators = Better_Messages()->functions->get_moderators( $source_thread_id );
+                    if ( count( $moderators ) > 0 ) {
+                        Better_Messages()->functions->update_thread_meta( $new_thread_id, 'moderators', $moderators );
+                    }
                 }
             }
         }
@@ -1082,6 +1135,17 @@ class Better_Messages_Chats
             }
         }
 
+        $moderators = array();
+
+        if ( $thread_id ) {
+            foreach ( Better_Messages()->functions->get_moderators( $thread_id ) as $moderator_id ) {
+                if ( $moderator_id <= 0 ) continue;
+                if ( ! Better_Messages()->functions->is_user_exists( $moderator_id ) ) continue;
+
+                $moderators[] = Better_Messages()->functions->rest_user_item( $moderator_id );
+            }
+        }
+
         return array(
             'id'              => (int) $post->ID,
             'title'           => $post->post_title,
@@ -1091,6 +1155,7 @@ class Better_Messages_Chats
             'imageId'         => $image_id,
             'imageUrl'        => $image_url,
             'settings'        => $settings,
+            'moderators'      => $moderators,
             'messageCount'    => $message_count,
             'autoCleanupNext' => $auto_cleanup_next,
             'autoCleanupLast' => $auto_cleanup_last,
@@ -1104,7 +1169,8 @@ class Better_Messages_Chats
             'only_joined_can_read', 'auto_join', 'auto_exclude', 'auto_remove_inactive',
             'hide_participants', 'hide_participants_count', 'enable_chat_email_notifications',
             'enable_files', 'hide_from_thread_list', 'enable_notifications', 'allow_guests',
-            'show_online_users', 'enable_system_messages', 'ephemeral_participants'
+            'show_online_users', 'enable_system_messages', 'ephemeral_participants',
+            'moderators_can_invite'
         );
 
         foreach ( $checkbox_fields as $field ) {
@@ -1786,6 +1852,7 @@ class Better_Messages_Chats
             'hide_participants'               => '0',
             'hide_participants_count'         => '0',
             'show_online_users'              => '0',
+            'moderators_can_invite'           => '0',
             'ephemeral_participants'          => '0',
             'group_video_calls'               => '1',
             'group_audio_calls'               => '1',
@@ -2114,11 +2181,14 @@ class Better_Messages_Chats
         if( user_can( $user_id, 'manage_options') ) return true;
         if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
 
+        $thread_id = $this->get_chat_thread_id( $chat_id );
+
+        if( Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ) return true;
+
         $post = get_post( $chat_id );
         if ( $post && $post->post_status === 'draft' ) return false;
 
         $settings = $this->get_chat_settings( $chat_id );
-        $thread_id = $this->get_chat_thread_id( $chat_id );
 
         $has_access = false;
 
@@ -2354,6 +2424,14 @@ class Better_Messages_Chats
                 )", array_merge([$thread_id, $thread_id], $not_exclude_roles));
 
                 $to_exclude_users = array_map('intval', $wpdb->get_col($to_exclude_users_sql));
+
+                if( count($to_exclude_users) > 0 ){
+                    $moderators = Better_Messages()->functions->get_moderators( $thread_id );
+
+                    if( count( $moderators ) > 0 ){
+                        $to_exclude_users = array_diff( $to_exclude_users, $moderators );
+                    }
+                }
 
                 if( count($to_exclude_users) > 0 ){
                     // Ensure AI bot users (negative IDs) are never auto-excluded

@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.21
+    Version: 2.15.22
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.21';
+        public  $version = '2.15.22';
 
         public  $db_version = '1.0.4';
 
@@ -684,6 +684,21 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             return $this->version;
         }
 
+        private function get_worker_built() {
+            $this->get_worker_version();
+
+            if ( isset( $this->worker_versions['_built'] ) ) {
+                return intval( $this->worker_versions['_built'] );
+            }
+
+            $worker_file = $this->path . 'assets/js/workers/bmdb-shared.worker.js';
+            if ( file_exists( $worker_file ) ) {
+                return intval( filemtime( $worker_file ) );
+            }
+
+            return 0;
+        }
+
         public function get_script_variables(){
             $vars = $this->_compute_script_variables_inner();
             $vars = $this->_filter_default_equal_entries( $vars );
@@ -694,7 +709,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
         }
 
         private static $_always_send_keys = array(
-            'hash', 'user_id', 'version', 'workerVersion', 'blogId',
+            'hash', 'user_id', 'version', 'workerVersion', 'workerBuilt', 'blogId',
             'ajaxUrl', 'restUrl', 'nonce', 'authToken',
             'url', 'threadUrl', 'baseUrl',
             'assets', 'sounds', 'soundLevels',
@@ -781,6 +796,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'user_id'                => get_current_user_id(),
                 'version'                => $this->version,
                 'workerVersion'          => $this->get_worker_version(),
+                'workerBuilt'            => $this->get_worker_built(),
                 'blogId'                 => ( is_multisite() ? get_current_blog_id() : '' ),
                 'ajaxUrl'                => admin_url('admin-ajax.php'),
                 'restUrl'                => esc_url_raw(get_rest_url(null, '/better-messages/v1/')),
@@ -1316,6 +1332,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     require_once trailingslashit(dirname(__FILE__))     . 'addons/automatorwp/automatorwp.php';
 
     add_action( 'plugins_loaded', 'Better_Messages_Init', 20 );
+    require_once trailingslashit( dirname(__FILE__) ) . 'inc/admin-error-display.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'inc/install.php';
     register_activation_hook( __FILE__, 'better_messages_activation' );
     register_deactivation_hook( __FILE__, 'better_messages_deactivation' );
