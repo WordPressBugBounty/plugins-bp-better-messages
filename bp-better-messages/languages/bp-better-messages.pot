@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.22\n"
+"Project-Id-Version: Better Messages 2.15.23\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-29T12:48:44+00:00\n"
+"POT-Creation-Date: 2026-08-04T22:20:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -425,7 +425,7 @@ msgstr ""
 #: addons/calls.php:828
 #: addons/calls.php:924
 #: addons/calls.php:1009
-#: inc/shortcodes.php:461
+#: inc/shortcodes.php:601
 msgid "Audio Call"
 msgstr ""
 
@@ -435,7 +435,7 @@ msgstr ""
 #: addons/calls.php:839
 #: addons/calls.php:946
 #: addons/calls.php:1033
-#: inc/shortcodes.php:411
+#: inc/shortcodes.php:551
 msgid "Video Call"
 msgstr ""
 
@@ -492,8 +492,8 @@ msgstr ""
 #: inc/hooks.php:1345
 #: inc/hooks.php:1360
 #: inc/hooks.php:1407
-#: inc/shortcodes.php:320
-#: inc/shortcodes.php:510
+#: inc/shortcodes.php:460
+#: inc/shortcodes.php:650
 msgid "Private Message"
 msgstr ""
 
@@ -3958,18 +3958,18 @@ msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to access this conversation"
 msgstr ""
 
-#: inc/shortcodes.php:217
-#: inc/shortcodes.php:223
-#: inc/shortcodes.php:230
+#: inc/shortcodes.php:357
+#: inc/shortcodes.php:363
+#: inc/shortcodes.php:370
 msgid "Live Chat"
 msgstr ""
 
-#: inc/shortcodes.php:222
+#: inc/shortcodes.php:362
 msgctxt "Live Chat Button auto label"
 msgid "Chat with {author_name}"
 msgstr ""
 
-#: inc/shortcodes.php:285
+#: inc/shortcodes.php:425
 msgid "Conversation not exists"
 msgstr ""
 

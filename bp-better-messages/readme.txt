@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.22
+Stable tag: 2.15.23
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,7 +379,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15-20 - 2.15.22 =
+= 2.15.20 - 2.15.23 =
 * Added [**Chat Room Moderators**](https://www.better-messages.com/docs/features/chat-rooms/#moderators) — assign per-room moderators in the chat room editor: moderators can remove, mute and ban participants of their room, can reply while the room is closed, and see the participants list even when it is hidden from regular members
 * Added **Moderators can add participants** per-room setting — moderators get an "Add new participants" action right in the chat interface, so room membership can be managed without contacting site administrators
 * Added [**Presence-based chat rooms**](https://www.better-messages.com/docs/features/chat-rooms/#chat-room-types) (WebSocket version) — a new chat room type where participants are only the users currently in the room: closing the page or navigating away removes them immediately, no membership is stored, and the participants list always shows who is really present
@@ -389,6 +389,8 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed chat room moderators being unable to send messages in closed chat rooms
 * Chat room moderators are never removed by **Auto exclude users** or **Auto-remove inactive participants**
 * Fixed the [**Chat Rooms**](https://www.better-messages.com/docs/features/chat-rooms/) list showing only the first 100 rooms — rooms now load page by page as you scroll, search covers every room you have access to, and rooms you were added to are no longer missing from the list on sites with many chat rooms
+* Added [`better_messages_onesignal_integration`](https://www.better-messages.com/hooks/php-filters#better_messages_onesignal_integration) PHP filter — return `false` to fully disable the [OneSignal integration](https://www.better-messages.com/docs/integrations/onesignal/), including the script which associates WordPress user IDs with OneSignal subscriptions
+* Improved settings page mobile menu layout
 * Other minor bugfixes and improvements
 
 = 2.15.13 - 2.15.21 =

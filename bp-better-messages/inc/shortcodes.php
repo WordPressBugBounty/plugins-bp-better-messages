@@ -161,21 +161,161 @@ class Better_Messages_Shortcodes
     public function sanitize_icon_svg( $svg ){
         $svg = trim( (string) $svg );
         if( $svg === '' ) return '';
-        if( stripos( ltrim( $svg ), '<svg' ) !== 0 ) return '';
+        if( strlen( $svg ) > 100000 ) return '';
+        if( stripos( $svg, '<svg' ) !== 0 ) return '';
+        if( preg_match( '/<!DOCTYPE|<!ENTITY|<\?/i', $svg ) ) return '';
+        if( ! class_exists( 'DOMDocument' ) ) return '';
 
-        $svg = preg_replace( '/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/is', '', $svg );
-        $svg = preg_replace( '/<foreignObject\b[^<]*(?:(?!<\/foreignObject>)<[^<]*)*<\/foreignObject>/is', '', $svg );
-        $svg = preg_replace( '/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/is', '', $svg );
-        $svg = preg_replace( '/<(object|embed)\b[^>]*>/i', '', $svg );
-        $svg = preg_replace( '/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/is', '', $svg );
-        $svg = preg_replace( '/\son\w+\s*=\s*["\'][^"\']*["\']/i', '', $svg );
-        $svg = preg_replace( '/\son\w+\s*=\s*[^\s>]*/i', '', $svg );
-        $svg = preg_replace( '/(href|xlink:href|src)\s*=\s*["\']\s*(javascript|data|vbscript):[^"\']*["\']/i', '$1=""', $svg );
-        $svg = preg_replace( '/(href|xlink:href|src)\s*=\s*(javascript|data|vbscript):[^\s>]*/i', '$1=""', $svg );
+        if( strpos( $svg, 'xlink:' ) !== false && stripos( $svg, 'xmlns:xlink' ) === false ){
+            $svg = preg_replace( '/<svg\b/i', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"', $svg, 1 );
+        }
 
-        if( $svg === null || stripos( ltrim( $svg ), '<svg' ) !== 0 ) return '';
+        $svg = preg_replace( '/&(?!(?:#[0-9]+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);)/', '&amp;', $svg );
 
-        return $svg;
+        $previous_errors = libxml_use_internal_errors( true );
+        $entity_loader   = null;
+        if( PHP_VERSION_ID < 80000 && function_exists( 'libxml_disable_entity_loader' ) ){
+            $entity_loader = libxml_disable_entity_loader( true );
+        }
+
+        $dom    = new DOMDocument();
+        $flags  = LIBXML_NONET | LIBXML_NOBLANKS;
+        $loaded = $dom->loadXML( $svg, $flags );
+
+        if( ! $loaded ){
+            libxml_clear_errors();
+            $dom    = new DOMDocument();
+            $loaded = $dom->loadXML( $svg, $flags | LIBXML_RECOVER );
+        }
+
+        if( PHP_VERSION_ID < 80000 && function_exists( 'libxml_disable_entity_loader' ) ){
+            libxml_disable_entity_loader( $entity_loader );
+        }
+        libxml_clear_errors();
+        libxml_use_internal_errors( $previous_errors );
+
+        if( ! $loaded || ! ( $dom->documentElement instanceof DOMElement ) ) return '';
+        if( $this->svg_local_name( $dom->documentElement ) !== 'svg' ) return '';
+
+        $this->sanitize_svg_node( $dom->documentElement );
+
+        $clean = $dom->saveXML( $dom->documentElement );
+        if( ! is_string( $clean ) || stripos( ltrim( $clean ), '<svg' ) !== 0 ) return '';
+
+        return $clean;
+    }
+
+    protected function svg_local_name( $node ){
+        $name = $node->localName ? $node->localName : $node->nodeName;
+        $name = preg_replace( '/^.*:/', '', (string) $name );
+        return strtolower( $name );
+    }
+
+    protected function sanitize_svg_node( DOMElement $element ){
+        static $allowed = null;
+        static $uri_attrs = null;
+
+        if( $allowed === null ){
+            $allowed = array_flip( array(
+                'svg', 'g', 'a', 'defs', 'symbol', 'use', 'title', 'desc', 'switch',
+                'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
+                'text', 'tspan', 'textpath',
+                'lineargradient', 'radialgradient', 'stop',
+                'clippath', 'mask', 'pattern', 'marker', 'image',
+                'filter', 'fegaussianblur', 'feoffset', 'feblend', 'fecolormatrix',
+                'fecomponenttransfer', 'fecomposite', 'feconvolvematrix',
+                'fediffuselighting', 'fedisplacementmap', 'fedropshadow', 'feflood',
+                'fefunca', 'fefuncb', 'fefuncg', 'fefuncr', 'feimage', 'femerge',
+                'femergenode', 'femorphology', 'fepointlight', 'fespecularlighting',
+                'fespotlight', 'fetile', 'feturbulence', 'fedistantlight',
+            ) );
+        }
+
+        if( $uri_attrs === null ){
+            $uri_attrs = array_flip( array( 'href', 'xlink:href', 'src' ) );
+        }
+
+        static $text_holders = null;
+        if( $text_holders === null ){
+            $text_holders = array_flip( array( 'text', 'tspan', 'textpath', 'title', 'desc' ) );
+        }
+
+        $this->sanitize_svg_attributes( $element, $uri_attrs );
+
+        $keeps_text = isset( $text_holders[ $this->svg_local_name( $element ) ] );
+
+        $children = array();
+        foreach( $element->childNodes as $child ){
+            $children[] = $child;
+        }
+
+        foreach( $children as $child ){
+            if( $child->nodeType === XML_ELEMENT_NODE ){
+                if( ! isset( $allowed[ $this->svg_local_name( $child ) ] ) ){
+                    $element->removeChild( $child );
+                    continue;
+                }
+                $this->sanitize_svg_node( $child );
+            } elseif( $child->nodeType === XML_TEXT_NODE || $child->nodeType === XML_CDATA_SECTION_NODE ){
+                if( ! $keeps_text && trim( (string) $child->nodeValue ) !== '' ){
+                    $element->removeChild( $child );
+                }
+            } else {
+                $element->removeChild( $child );
+            }
+        }
+    }
+
+    protected function sanitize_svg_attributes( DOMElement $element, array $uri_attrs ){
+        $attributes = array();
+        if( $element->attributes !== null ){
+            foreach( $element->attributes as $attribute ){
+                $attributes[] = $attribute;
+            }
+        }
+
+        foreach( $attributes as $attribute ){
+            $full  = strtolower( $attribute->nodeName );
+            $local = strtolower( $attribute->localName ? $attribute->localName : $attribute->nodeName );
+
+            if( strpos( $local, 'on' ) === 0 ){
+                $element->removeAttributeNode( $attribute );
+                continue;
+            }
+
+            if( isset( $uri_attrs[ $full ] ) || isset( $uri_attrs[ $local ] ) ){
+                if( $this->is_unsafe_svg_uri( $attribute->value ) ){
+                    $element->removeAttributeNode( $attribute );
+                }
+                continue;
+            }
+
+            if( $local === 'style' ){
+                $safe = safecss_filter_attr( (string) $attribute->value );
+                if( $safe === '' ){
+                    $element->removeAttributeNode( $attribute );
+                } else {
+                    $attribute->value = $safe;
+                }
+            }
+        }
+    }
+
+    protected function is_unsafe_svg_uri( $value ){
+        $value = html_entity_decode( (string) $value, ENT_QUOTES );
+        $value = preg_replace( '/[\x00-\x20]+/', '', $value );
+        $value = strtolower( $value );
+
+        if( strpos( $value, 'javascript:' ) === 0 ) return true;
+        if( strpos( $value, 'vbscript:' ) === 0 ) return true;
+        if( strpos( $value, 'data:' ) === 0 ){
+            if( strpos( $value, 'data:image/' ) === 0 && strpos( $value, 'data:image/svg' ) !== 0 ){
+                return false;
+            }
+            return true;
+        }
+
+        return false;
     }
 
     public function get_context_post(){

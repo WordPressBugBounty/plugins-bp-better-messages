@@ -368,7 +368,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_BuddyBoss::instance();
             }
 
-            if( defined('ONESIGNAL_PLUGIN_URL') ) {
+            if( defined('ONESIGNAL_PLUGIN_URL') && apply_filters( 'better_messages_onesignal_integration', true ) ) {
                 require_once Better_Messages()->path . 'addons/onesignal.php';
                 Better_Messages_OneSignal::instance();
             }
