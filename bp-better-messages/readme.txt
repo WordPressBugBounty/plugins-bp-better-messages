@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.23
+Stable tag: 2.15.24
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,21 +379,28 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.20 - 2.15.23 =
+= 2.15.20 - 2.15.24 =
 * Added [**Chat Room Moderators**](https://www.better-messages.com/docs/features/chat-rooms/#moderators) — assign per-room moderators in the chat room editor: moderators can remove, mute and ban participants of their room, can reply while the room is closed, and see the participants list even when it is hidden from regular members
 * Added **Moderators can add participants** per-room setting — moderators get an "Add new participants" action right in the chat interface, so room membership can be managed without contacting site administrators
 * Added [**Presence-based chat rooms**](https://www.better-messages.com/docs/features/chat-rooms/#chat-room-types) (WebSocket version) — a new chat room type where participants are only the users currently in the room: closing the page or navigating away removes them immediately, no membership is stored, and the participants list always shows who is really present
 * Added per-room **Group video calls** and **Group audio calls** toggles to chat room settings — disable group calls in specific chat rooms while keeping them enabled globally
 * Added [**Website Context**](https://www.better-messages.com/docs/features/ai-content-moderation/#website-context) setting to AI Content Moderation — describe what your website is used for and Better Messages Moderation AI will judge messages by your community norms, fixing overly aggressive moderation on dating sites and similar communities
+* Added [**Roles that can send Bulk Messages**](https://www.better-messages.com/docs/features/mass-messaging/#permissions) setting — allow selected roles (for example HR or communications staff) to send bulk messages from the Administration page without full administrator access: they see and manage only their own bulk messages and cannot send on behalf of another user
+* Added [**Roles that can access Administration**](https://www.better-messages.com/docs/features/site-moderators/) setting — grant selected roles the Administration page and site-wide moderation powers without full administrator access, replacing the need for a role editor plugin to assign the moderation capability
+* Added [**Markdown support**](https://www.better-messages.com/docs/features/markdown-support/) to **Bulk Messages** — the bulk message editor now understands the same Markdown syntax as regular chat messages, so headings, bullet and numbered lists and links typed in the editor are delivered formatted
 * Site administrators can now add participants to any regular chat room directly from the chat interface
 * Fixed chat room moderators being unable to send messages in closed chat rooms
 * Chat room moderators are never removed by **Auto exclude users** or **Auto-remove inactive participants**
 * Fixed the [**Chat Rooms**](https://www.better-messages.com/docs/features/chat-rooms/) list showing only the first 100 rooms — rooms now load page by page as you scroll, search covers every room you have access to, and rooms you were added to are no longer missing from the list on sites with many chat rooms
+* Fixed the [**Browser push notifications**](https://www.better-messages.com/docs/websocket/web-push/) opt-in missing from the messenger user settings on sites where the email notification interval was set to 0 and **Sound Notification Control** was disabled, leaving users with no way to subscribe to web push
 * Added [`better_messages_onesignal_integration`](https://www.better-messages.com/hooks/php-filters#better_messages_onesignal_integration) PHP filter — return `false` to fully disable the [OneSignal integration](https://www.better-messages.com/docs/integrations/onesignal/), including the script which associates WordPress user IDs with OneSignal subscriptions
+* Added **Open online users list by default** per-room setting (WebSocket version) — when the online users sidebar is enabled, it can open automatically when users enter the chat room on desktop
+* Added [**GTranslate**](https://www.better-messages.com/docs/integrations/gtranslate/) integration — on GTranslate paid plans the messenger interface now follows the language of the page the visitor is on, instead of staying in the site default language on every translated sub-domain or sub-directory
+* WebSocket version now stops AJAX fallback polling by default — when a visitor's WebSocket connection cannot be established, their browser makes a single sync request per page load instead of polling the server every few seconds. The new [**Continuous Fallback Mode**](https://www.better-messages.com/docs/websocket/continuous-fallback-mode/) setting restores continuous fallback polling for the rare setups that need it, such as audiences behind country-level firewalls that block WebSocket traffic
 * Improved settings page mobile menu layout
 * Other minor bugfixes and improvements
 
-= 2.15.13 - 2.15.21 =
+= 2.15.13 - 2.15.19 =
 * Added [**Automatic Message Cleanup**](https://www.better-messages.com/docs/features/chat-rooms/#automatic-message-cleanup) for chat rooms
 * Added [**Participants List Order**](https://www.better-messages.com/docs/features/chat-rooms/#participants-list-order) setting at Settings → Messaging → Group Conversation Settings
 * Better Messages → Administration moderation area now showing message timestamps in the site timezone from Settings → General

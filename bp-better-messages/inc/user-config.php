@@ -165,27 +165,21 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            $notifications = false;
-
-            if( count($notifications_options) > 0 ) {
-                $notifications = [
-                    'id' => 'notifications',
-                    'title' => _x('Notifications', 'User settings', 'bp-better-messages'),
-                    'type' => 'checkboxes',
-                    'options' => $notifications_options
-                ];
-            }
-
-            if( $user_id > 0 && $notifications && Better_Messages()->settings['enablePushNotifications'] === '1' && ! apply_filters( 'better_messages_3rd_party_push_active', false ) ){
-                $notifications['options'][] = [
+            if( $user_id > 0 && Better_Messages()->settings['enablePushNotifications'] === '1' && ! apply_filters( 'better_messages_3rd_party_push_active', false ) ){
+                $notifications_options[] = [
                     'id'    => 'push_notifications',
                     'label' => _x('Browser push notifications', 'User settings', 'bp-better-messages'),
                     'desc'  => _x('When enabled, you will receive messages notifications even if browser is closed.', 'User settings', 'bp-better-messages')
                 ];
             }
 
-            if( is_array($notifications) ){
-                $settings[] = $notifications;
+            if( count($notifications_options) > 0 ) {
+                $settings[] = [
+                    'id' => 'notifications',
+                    'title' => _x('Notifications', 'User settings', 'bp-better-messages'),
+                    'type' => 'checkboxes',
+                    'options' => $notifications_options
+                ];
             }
 
             return apply_filters('better_messages_user_config', $settings, $user_id);

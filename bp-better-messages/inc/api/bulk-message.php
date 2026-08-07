@@ -171,7 +171,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             // Resolve sender first so we can exclude them from the user query
             $sender_id = get_current_user_id();
             $custom_sender = $request->get_param( 'sender_id' );
-            if ( ! empty( $custom_sender ) ) {
+            if ( ! empty( $custom_sender ) && $this->is_admin() ) {
                 $custom_sender = (int) $custom_sender;
                 if ( get_userdata( $custom_sender ) ) {
                     $sender_id = $custom_sender;
@@ -297,6 +297,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
             }
 
+            if ( ! $this->can_manage_job( $parent_job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
+            }
+
             $content = Better_Messages()->functions->filter_message_content( $message );
             if ( empty( trim( $content ) ) ) {
                 return new WP_Error( 'rest_forbidden', _x('Message is empty', 'WP Admin', 'bp-better-messages'), [ 'status' => 400 ] );
@@ -385,6 +389,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
             }
 
+            if ( ! $this->can_manage_job( $parent_job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
+            }
+
             $existing_threads = (int) $wpdb->get_var( $wpdb->prepare(
                 "SELECT COUNT(DISTINCT `thread_id`) FROM `{$threads_table}` WHERE `job_id` = %d",
                 $parent_job_id
@@ -412,9 +420,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $job_id = intval( $request->get_param( 'id' ) );
             $table = bm_get_table( 'bulk_jobs' );
 
-            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `{$table}` WHERE `id` = %d", $job_id ) );
+            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status`, `sender_id` FROM `{$table}` WHERE `id` = %d", $job_id ) );
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
+            }
+
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
             }
 
             if ( $job->status !== 'processing' ) {
@@ -434,9 +446,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $job_id = intval( $request->get_param( 'id' ) );
             $table = bm_get_table( 'bulk_jobs' );
 
-            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `{$table}` WHERE `id` = %d", $job_id ) );
+            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status`, `sender_id` FROM `{$table}` WHERE `id` = %d", $job_id ) );
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
+            }
+
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
             }
 
             if ( $job->status !== 'paused' ) {
@@ -456,9 +472,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $job_id = intval( $request->get_param( 'id' ) );
             $table = bm_get_table( 'bulk_jobs' );
 
-            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `{$table}` WHERE `id` = %d", $job_id ) );
+            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `status`, `sender_id` FROM `{$table}` WHERE `id` = %d", $job_id ) );
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
+            }
+
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
             }
 
             if ( ! in_array( $job->status, [ 'processing', 'paused', 'pending' ], true ) ) {
@@ -482,12 +502,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $table = bm_get_table( 'bulk_jobs' );
 
             $job = $wpdb->get_row( $wpdb->prepare(
-                "SELECT `status`, `total_users`, `processed_count`, `error_count`, `started_at`, `completed_at` FROM `{$table}` WHERE `id` = %d",
+                "SELECT `status`, `sender_id`, `total_users`, `processed_count`, `error_count`, `started_at`, `completed_at` FROM `{$table}` WHERE `id` = %d",
                 $job_id
             ) );
 
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
+            }
+
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
             }
 
             return [
@@ -562,6 +586,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
             }
 
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
+            }
+
             if ( (int) $job->parent_job_id > 0 ) {
                 // Follow-up: only delete this job's messages, not the shared threads
                 $message_ids = $wpdb->get_col( $wpdb->prepare(
@@ -614,9 +642,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $job_id = intval( $request->get_param( 'report_id' ) );
             $table = bm_get_table( 'bulk_jobs' );
 
-            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `id` FROM `{$table}` WHERE `id` = %d", $job_id ) );
+            $job = $wpdb->get_row( $wpdb->prepare( "SELECT `id`, `sender_id` FROM `{$table}` WHERE `id` = %d", $job_id ) );
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
+            }
+
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
             }
 
             $key   = sanitize_text_field( $request->get_param( 'property' ) );
@@ -775,11 +807,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
         }
 
         public function has_access(){
-            if( current_user_can('manage_options') ){
+            return current_user_can('bm_can_bulk_message');
+        }
+
+        public function is_admin(){
+            return current_user_can('manage_options');
+        }
+
+        private function can_manage_job( $job ){
+            if( $this->is_admin() ){
                 return true;
             }
 
-            return false;
+            return (int) $job->sender_id === get_current_user_id();
         }
 
         public function preview( WP_REST_Request $request ) {
@@ -787,7 +827,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             $exclude_id = null;
             $custom_sender = $request->get_param( 'sender_id' );
-            if ( ! empty( $custom_sender ) ) {
+            if ( ! empty( $custom_sender ) && $this->is_admin() ) {
                 $exclude_id = (int) $custom_sender;
             }
 
@@ -1015,6 +1055,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 return new WP_Error( 'not_found', 'Job not found', [ 'status' => 404 ] );
             }
 
+            if ( ! $this->can_manage_job( $job ) ) {
+                return new WP_Error( 'rest_forbidden', __('You are not allowed to manage this job', 'bp-better-messages'), [ 'status' => 403 ] );
+            }
+
             $sender_id      = (int) $job->sender_id;
             $parent_job_id  = (int) $job->parent_job_id;
 
@@ -1086,17 +1130,28 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
         public function get_reports( WP_REST_Request $request ){
             global $wpdb;
+
+            $is_admin = $this->is_admin();
+
             $return = [
-                'reports' => [],
-                'roles'   => [],
-                'groups'  => []
+                'reports'  => [],
+                'roles'    => [],
+                'groups'   => [],
+                'is_admin' => $is_admin
             ];
 
             $table = bm_get_table( 'bulk_jobs' );
             $threads_table = bm_get_table( 'bulk_job_threads' );
             $recipients_table = bm_get_table( 'recipients' );
 
-            $jobs = $wpdb->get_results( "SELECT * FROM `{$table}` ORDER BY `id` DESC" );
+            if ( $is_admin ) {
+                $jobs = $wpdb->get_results( "SELECT * FROM `{$table}` ORDER BY `id` DESC" );
+            } else {
+                $jobs = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT * FROM `{$table}` WHERE `sender_id` = %d ORDER BY `id` DESC",
+                    get_current_user_id()
+                ) );
+            }
 
             if ( $jobs ) {
                 foreach ( $jobs as $job ) {
@@ -1239,6 +1294,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             if ( ! $message ) {
                 return new WP_Error( 'not_found', _x( 'Preview message not found', 'WP Admin', 'bp-better-messages' ), array( 'status' => 404 ) );
+            }
+
+            if ( ! $this->is_admin() && (int) $message->sender_id !== $current_user_id ) {
+                return new WP_Error( 'rest_forbidden', _x( 'Preview message not found', 'WP Admin', 'bp-better-messages' ), array( 'status' => 403 ) );
             }
 
             $formatted              = new stdClass();

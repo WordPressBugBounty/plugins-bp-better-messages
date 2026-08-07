@@ -26,6 +26,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             return current_user_can('bm_can_administrate');
         }
 
+        public function user_can_search_users(){
+            return current_user_can('bm_can_administrate') || current_user_can('bm_can_bulk_message');
+        }
+
         public function user_is_admin(){
             return current_user_can('manage_options');
         }
@@ -69,13 +73,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             register_rest_route('better-messages/v1/admin', '/searchUsers', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'search_users'),
-                'permission_callback' => array($this, 'user_can_admin'),
+                'permission_callback' => array($this, 'user_can_search_users'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/getUsersByIds', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'get_users_by_ids'),
-                'permission_callback' => array($this, 'user_can_admin'),
+                'permission_callback' => array($this, 'user_can_search_users'),
             ));
 
             register_rest_route('better-messages/v1/admin', '/searchBots', array(

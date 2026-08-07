@@ -1169,7 +1169,7 @@ class Better_Messages_Chats
             'only_joined_can_read', 'auto_join', 'auto_exclude', 'auto_remove_inactive',
             'hide_participants', 'hide_participants_count', 'enable_chat_email_notifications',
             'enable_files', 'hide_from_thread_list', 'enable_notifications', 'allow_guests',
-            'show_online_users', 'enable_system_messages', 'ephemeral_participants',
+            'show_online_users', 'open_online_users', 'enable_system_messages', 'ephemeral_participants',
             'moderators_can_invite'
         );
 
@@ -1500,6 +1500,7 @@ class Better_Messages_Chats
         $thread_item['chatRoom']['loginButtonText']      = $settings['login_button_text'];
         $thread_item['chatRoom']['guestButtonText']        = $settings['guest_button_text'];
         $thread_item['chatRoom']['showOnlineUsers']        = ( $settings['show_online_users'] === '1' );
+        $thread_item['chatRoom']['openOnlineUsers']        = ( $settings['show_online_users'] === '1' && $settings['open_online_users'] === '1' );
         $thread_item['chatRoom']['closedMessage']            = $settings['closed_message'];
 
         $is_ephemeral = $this->is_ephemeral_chat( $chat_id );
@@ -1852,6 +1853,7 @@ class Better_Messages_Chats
             'hide_participants'               => '0',
             'hide_participants_count'         => '0',
             'show_online_users'              => '0',
+            'open_online_users'              => '0',
             'moderators_can_invite'           => '0',
             'ephemeral_participants'          => '0',
             'group_video_calls'               => '1',
@@ -1958,6 +1960,10 @@ class Better_Messages_Chats
 
             if ( ! isset( $settings['show_online_users'] ) ) {
                 $settings['show_online_users'] = '0';
+            }
+
+            if ( ! isset( $settings['open_online_users'] ) ) {
+                $settings['open_online_users'] = '0';
             }
 
             if ( ! isset( $settings['must_join_message'] ) || empty( $settings['must_join_message'] )  ) {

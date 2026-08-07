@@ -27,6 +27,7 @@ class Better_Messages_Options
             'template'                    => 'modern',
             'thread_interval'             => 3,
             'site_interval'               => 10,
+            'continuousFallback'          => '0',
             'attachmentsFormats'          => array('jpg','jpeg','jpe','png','gif','webp','avif','heic','mp3','m4a','ogg','wav','flac','mp4','mov','webm','pdf','doc','docx','xls','xlsx','ppt','pptx','odt','txt','rtf','csv','zip'),
             'attachmentsRetention'        => 365,
             'attachmentsEnable'           => '0',
@@ -353,6 +354,8 @@ class Better_Messages_Options
             'restrictBlockUsers'            => [],
             'restrictBlockUsersImmun'       => [],
             'messagesViewer'                => '1',
+            'bulkMessagingRoles'            => [],
+            'administrationRoles'           => [],
             'enableReactions'               => '1',
             'enableReactionsPopup'          => '1',
 
@@ -695,11 +698,17 @@ class Better_Messages_Options
             0
         );
 
+        $administration_cap = 'bm_can_administrate';
+
+        if( ! current_user_can('bm_can_administrate') && current_user_can('bm_can_bulk_message') ){
+            $administration_cap = 'bm_can_bulk_message';
+        }
+
         add_submenu_page(
             'bp-better-messages',
             _x( 'Administration', 'WP Admin', 'bp-better-messages' ),
             $administration_menu_title,
-            'bm_can_administrate',
+            $administration_cap,
             'better-messages-viewer',
             array($this, 'viewer_page_new_html'),
             2
@@ -1086,6 +1095,8 @@ class Better_Messages_Options
             'hasBuddyBossApp'    => $has_buddyboss_app,
             'hasOneSignal'       => defined('ONESIGNAL_PLUGIN_URL') || defined('ONESIGNAL_VERSION_V3') || class_exists('OneSignal'),
             'hasProgressify'     => class_exists('DaftPlug\Progressify\Plugin') || defined('PROGRESSIFY_VERSION'),
+            'hasBuddyBossPush'   => function_exists('bb_onesignal_app_is_connected') && bb_onesignal_app_is_connected(),
+            'hasThirdPartyPush'  => apply_filters('better_messages_3rd_party_push_active', false),
             'myMessagesUrl'      => do_shortcode('[better_messages_my_messages_url]'),
             'docsUrl'            => 'https://www.wordplus.org',
             'openaiError'        => get_option( 'better_messages_openai_error', false ),
@@ -1233,13 +1244,15 @@ class Better_Messages_Options
     }
 
     public function viewer_page_new_html(){
-        $messages_enabled = ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0';
-        $reports_enabled = class_exists('Better_Messages_User_Reports');
-        $bulk_messaging_enabled = current_user_can('manage_options');
+        $can_administrate = current_user_can('bm_can_administrate');
+        $messages_enabled = $can_administrate && ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0';
+        $reports_enabled = $can_administrate && class_exists('Better_Messages_User_Reports');
+        $bulk_messaging_enabled = current_user_can('bm_can_bulk_message');
 
         $data = array(
             'messagesEnabled'      => $messages_enabled,
             'reportsEnabled'       => $reports_enabled,
+            'guestsEnabled'        => $can_administrate,
             'bulkMessagingEnabled'  => $bulk_messaging_enabled,
             'pluginUrl'            => Better_Messages()->url,
             'pluginVersion'        => Better_Messages()->version,
@@ -1835,6 +1848,12 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['restrictBlockUsersImmun'] ) ) {
             $settings['restrictBlockUsersImmun'] = [];
+        }
+        if ( !isset( $settings['bulkMessagingRoles'] ) ) {
+            $settings['bulkMessagingRoles'] = [];
+        }
+        if ( !isset( $settings['administrationRoles'] ) ) {
+            $settings['administrationRoles'] = [];
         }
         if ( !isset( $settings['restrictNewReplies'] ) ) {
             $settings['restrictNewReplies'] = [];

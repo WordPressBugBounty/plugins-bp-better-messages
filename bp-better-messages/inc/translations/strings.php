@@ -1110,6 +1110,12 @@ function _bm_js_translation_strings() {
     _x('Preview', 'WP Admin', 'bp-better-messages');
     _x('Creating...', 'WP Admin', 'bp-better-messages');
     _x('Start Bulk Messaging', 'WP Admin', 'bp-better-messages');
+    _x('Markdown is supported', 'WP Admin', 'bp-better-messages');
+    _x('Heading', 'WP Admin', 'bp-better-messages');
+    _x('list', 'WP Admin', 'bp-better-messages');
+    _x('bold', 'WP Admin', 'bp-better-messages');
+    _x('link', 'WP Admin', 'bp-better-messages');
+    _x('Learn more', 'WP Admin', 'bp-better-messages');
     _x('Upload failed', 'WP Admin', 'bp-better-messages');
     _x('Drop files here or click to browse', 'WP Admin', 'bp-better-messages');
     _x('Are you sure you want to send this follow-up message?', 'WP Admin', 'bp-better-messages');
@@ -1228,6 +1234,8 @@ function _bm_js_translation_strings() {
     _x('Show online users list', 'Chat rooms settings page', 'bp-better-messages');
     _x('Display a sidebar with currently online users in the chat room', 'Chat rooms settings page', 'bp-better-messages');
     _x('Requires WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Open online users list by default', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Online users list will be automatically opened when user enters the chat room on desktop', 'Chat rooms settings page', 'bp-better-messages');
     _x('Group video calls', 'Chat rooms settings page', 'bp-better-messages');
     _x('Allow starting and joining group video calls in this chat room', 'Chat rooms settings page', 'bp-better-messages');
     _x('Group video calls require WebSocket version', 'Chat rooms settings page', 'bp-better-messages');
@@ -1923,6 +1931,10 @@ function _bm_js_translation_strings() {
     _x('AJAX polls the server at intervals for new messages. WebSocket delivers messages instantly via a persistent connection and puts significantly less load on your server', 'Settings page', 'bp-better-messages');
     _x('AJAX', 'Settings page', 'bp-better-messages');
     _x('WebSocket', 'Settings page', 'bp-better-messages');
+    _x('Continuous Fallback Mode', 'Settings page', 'bp-better-messages');
+    _x('Not recommended to enable', 'Settings page', 'bp-better-messages');
+    _x('causes extra unneeded AJAX requests to your server', 'Settings page', 'bp-better-messages');
+    _x('Learn more', 'Settings page', 'bp-better-messages');
     _x('Conversation Refresh Interval', 'Settings page', 'bp-better-messages');
     _x('How often to check for new messages when a conversation is open (in seconds)', 'Settings page', 'bp-better-messages');
     _x('Site-Wide Refresh Interval', 'Settings page', 'bp-better-messages');
@@ -2692,6 +2704,12 @@ function _bm_js_translation_strings() {
     _x('Show a messages viewer in the WordPress admin area', 'Settings page', 'bp-better-messages');
     _x('Message Reports', 'Settings page', 'bp-better-messages');
     _x('Allow users to report messages for admin review', 'Settings page', 'bp-better-messages');
+    _x('Roles That Can Access Administration', 'Settings page', 'bp-better-messages');
+    _x('Allow these roles to moderate messages and access the Administration page without full administrator access', 'Settings page', 'bp-better-messages');
+    _x('Bulk Messaging', 'Settings page', 'bp-better-messages');
+    _x('Bulk messages are sent from the Administration page in the WordPress admin area', 'Settings page', 'bp-better-messages');
+    _x('Roles That Can Send Bulk Messages', 'Settings page', 'bp-better-messages');
+    _x('Allow these roles to send bulk messages without full administrator access', 'Settings page', 'bp-better-messages');
     _x('Pre-Moderation', 'Settings page', 'bp-better-messages');
     _x('Require admin approval before messages appear in the chat', 'Settings page', 'bp-better-messages');
     _x('Enable Pre-Moderation', 'Settings page', 'bp-better-messages');
@@ -2755,6 +2773,8 @@ function _bm_js_translation_strings() {
     _x('Only send email notifications after the user has been offline for this many minutes. Set to 0 to always send', 'Settings page', 'bp-better-messages');
     _x('OneSignal plugin detected. Push notifications will be delivered through OneSignal instead of the built-in system.', 'Settings page', 'bp-better-messages');
     _x('Progressify plugin detected. Push notifications will be delivered through Progressify instead of the built-in system.', 'Settings page', 'bp-better-messages');
+    _x('BuddyBoss OneSignal integration is active. Push notifications will be delivered through BuddyBoss instead of the built-in system, and users subscribe through the OneSignal prompt rather than their Better Messages settings.', 'Settings page', 'bp-better-messages');
+    _x('Another plugin is handling push notifications. They will be delivered through it instead of the built-in system.', 'Settings page', 'bp-better-messages');
     _x('WebSocket version is required.', 'Settings page', 'bp-better-messages');
     _x('Browser Push Notifications', 'Settings page', 'bp-better-messages');
     _x('Allow users to receive web push notifications for new messages, even when the website is closed or in another tab', 'Settings page', 'bp-better-messages');

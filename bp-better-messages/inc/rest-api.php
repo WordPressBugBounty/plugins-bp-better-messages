@@ -639,11 +639,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $return['currentTime'] = $time;
 
-            // Opt-in kill-switch. Hook this filter and return 'websocket' to tell
-            // fallback-polling clients to stop hitting REST (e.g. under high WP load).
-            $transport = apply_filters( 'better_messages_checknew_transport', null, $current_user_id );
-            if ( $transport === 'websocket' ) {
-                $return['transport'] = 'websocket';
+            if ( Better_Messages()->realtime ) {
+                if ( Better_Messages()->settings['continuousFallback'] === '1' ) {
+                    $return['fallback'] = 'enabled';
+                } else {
+                    $return['transport'] = 'websocket';
+                }
             }
 
             return apply_filters( 'better_messages_rest_api_update_data', $return, $current_user_id, $lastClient );
