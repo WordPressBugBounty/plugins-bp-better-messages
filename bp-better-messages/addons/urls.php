@@ -207,7 +207,8 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                                 if ( $privacy_embeds ) {
                                     $html = $this->render_privacy_embed( $url, $embed );
                                 } else {
-                                    $html = '<span class="bp-messages-iframe-container">' . $embed->html . '</span>';
+                                    $embed_html = $this->apply_embed_playback_params( $embed->html, strtolower( $embed->provider_name ) );
+                                    $html = '<span class="bp-messages-iframe-container">' . $embed_html . '</span>';
                                 }
                             } else if( isset($embed->html) ) {
                                 // Non-video embeds (SoundCloud, Flickr, etc.) can contain
@@ -325,31 +326,73 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
         public function getMetaTags( $str )
         {
-            $pattern = '
-            ~<\s*meta\s
-        
-            # using lookahead to capture type to $1
-            (?=[^>]*?
-            \b(?:name|property|http-equiv)\s*=\s*
-            (?|"\s*([^"]*?)\s*"|\'\s*([^\']*?)\s*\'|
-            ([^"\'>]*?)(?=\s*/?\s*>|\s\w+\s*=))
-            )
-        
-            # capture content to $2
-            [^>]*?\bcontent\s*=\s*
-              (?|"\s*([^"]*?)\s*"|\'\s*([^\']*?)\s*\'|
-              ([^"\'>]*?)(?=\s*/?\s*>|\s\w+\s*=))
-            [^>]*>
-        
-            ~ix';
-            preg_match_all( $pattern, $str, $out );
+            $out  = array();
+            $keys = array( 'name', 'property', 'http-equiv' );
+            $tags = new WP_HTML_Tag_Processor( $str );
 
-            preg_match( '/<title>(.*?)<\/title>/', $str, $titles );
+            while ( $tags->next_tag( 'meta' ) ) {
+                $content = $tags->get_attribute( 'content' );
 
-            $out = array_combine( $out[ 1 ], $out[ 2 ] );
-            if ( isset( $titles[ 1 ] ) ) $out[ 'title' ] = $titles[ 1 ];
+                if ( ! is_string( $content ) ) {
+                    continue;
+                }
+
+                $names = $tags->get_attribute_names_with_prefix( '' );
+
+                if ( empty( $names ) ) {
+                    continue;
+                }
+
+                foreach ( $names as $name ) {
+                    if ( ! in_array( $name, $keys, true ) ) {
+                        continue;
+                    }
+
+                    $key = $tags->get_attribute( $name );
+
+                    if ( is_string( $key ) && trim( $key ) !== '' ) {
+                        $out[ trim( $key ) ] = trim( $content );
+                    }
+
+                    break;
+                }
+            }
+
+            if ( preg_match( '~<title[^>]*>(.*?)</title>~is', $str, $titles ) ) {
+                $out['title'] = trim( html_entity_decode( $titles[1], ENT_QUOTES, 'UTF-8' ) );
+            }
 
             return $out;
+        }
+
+        public function apply_embed_playback_params( $html, $provider ) {
+            if ( empty( $html ) || $provider !== 'youtube' ) {
+                return $html;
+            }
+
+            $tags = new WP_HTML_Tag_Processor( $html );
+
+            while ( $tags->next_tag( 'iframe' ) ) {
+                $src = $tags->get_attribute( 'src' );
+
+                if ( $src ) {
+                    $tags->set_attribute( 'src', $this->add_youtube_playsinline( $src ) );
+                }
+            }
+
+            return $tags->get_updated_html();
+        }
+
+        public function add_youtube_playsinline( $src ) {
+            if ( ! apply_filters( 'better_messages_youtube_playsinline_fullscreen', true, $src ) ) {
+                return $src;
+            }
+
+            if ( strpos( $src, 'playsinline=' ) !== false ) {
+                return $src;
+            }
+
+            return add_query_arg( 'playsinline', '0', $src );
         }
 
         /**
@@ -362,12 +405,17 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
             // Extract the iframe src from the embed HTML
             $iframe_src = '';
-            if ( isset( $embed->html ) && preg_match( '/src=["\']([^"\']+)["\']/', $embed->html, $matches ) ) {
-                $iframe_src = $matches[1];
+            if ( isset( $embed->html ) ) {
+                $tags = new WP_HTML_Tag_Processor( $embed->html );
+
+                if ( $tags->next_tag( 'iframe' ) ) {
+                    $iframe_src = (string) $tags->get_attribute( 'src' );
+                }
 
                 // YouTube: switch to privacy-enhanced mode
-                if ( $provider === 'youtube' ) {
+                if ( $iframe_src !== '' && $provider === 'youtube' ) {
                     $iframe_src = str_replace( 'youtube.com', 'youtube-nocookie.com', $iframe_src );
+                    $iframe_src = $this->add_youtube_playsinline( $iframe_src );
                 }
             }
 

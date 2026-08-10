@@ -443,6 +443,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_group_id' );
 
             $members = $this->get_group_members( $group_id );
+            $members = apply_filters( 'better_messages_fluent_community_group_chat_members', $members, (int) $group_id, (int) $thread_id );
 
             if( count($members) === 0 ) {
                 return false;

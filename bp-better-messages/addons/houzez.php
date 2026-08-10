@@ -270,7 +270,7 @@ if ( ! class_exists( 'Better_Messages_Houzez' ) ) {
 			if ( $viewer_id <= 0 || ! in_array( $viewer_id, $participants, true ) ) return $thread_item;
 			if ( $primary_agent_user_id > 0 && $viewer_id === $primary_agent_user_id ) return $thread_item;
 
-			if ( $this->viewer_is_on_agent_side( $viewer_id, $persona_user_id ) ) {
+			if ( $include_personal && $this->viewer_is_on_agent_side( $viewer_id, $persona_user_id ) ) {
 				$thread_item['threadInfo'] .= $this->persona_banner_html( $display_post_id, $display_type );
 			}
 

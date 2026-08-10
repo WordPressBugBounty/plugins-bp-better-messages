@@ -1,10 +1,10 @@
 === Better Messages - Chat Rooms, Group Chat, Private Messages & AI Chat Bots ===
 Contributors: wordplus
 Tags: BuddyPress, chat room, video chat, group chat, private message
-Requires at least: 5.9.0
+Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.24
+Stable tag: 2.15.25
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -378,6 +378,17 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.25 =
+* Added [`better_messages_thread_header_actions`](https://www.better-messages.com/hooks/js-filters#better_messages_thread_header_actions) JavaScript filter — the conversation header buttons (calls, minimize, maximize, the More menu) are now built as a single filterable list, so custom buttons can be added at any position and the built-in ones can be reordered, removed or replaced. Until now the header had no supported extension point: a button inserted into it by hand was moved or removed again whenever the header re-rendered. Custom buttons pick up the styling of the built-in ones, and the same filter also runs for mini chat headers
+* Added [`better_messages_fluent_community_group_chat_members`](https://www.better-messages.com/hooks/php-filters#better_messages_fluent_community_group_chat_members) and [`better_messages_fluent_community_course_chat_members`](https://www.better-messages.com/hooks/php-filters#better_messages_fluent_community_course_chat_members) PHP filters — exclude specific users from the automatic membership sync of [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) Space and Course group chats: user IDs removed by the filter are taken out of the chat by the sync itself and are no longer re-added by later enrollment events
+* Fixed YouTube videos shared in messages staying locked inside the message bubble on iPhone and iPad — tapping one now opens the full screen player again, as it did before YouTube changed the default playback behaviour of its embeds
+* Fixed link previews showing raw HTML codes such as `&amp;` in titles, and dropping the thumbnail when the image address contained one
+* Link previews now also find the page title when it is spread over several lines or carries attributes, and can no longer be spoofed by markup hidden inside a page's scripts
+* The minimum required WordPress version is now 6.3, matching what the Better Messages blocks have needed since they were introduced
+* Added **Button Icon** setting at Settings → Mobile → Floating Chat Button — choose a preset icon or paste your own SVG for the floating chat button on mobile, which previously always used the built-in messages icon with no way to change it
+* Fixed the "Chatting as" persona banner in the Houzez and RealHomes integrations briefly appearing to the other side of the conversation and vanishing from the persona side's own view while messages were delivered in the WebSocket version — viewer-specific conversation details are no longer part of the shared realtime payloads
+* Other minor bugfixes and improvements
 
 = 2.15.20 - 2.15.24 =
 * Added [**Chat Room Moderators**](https://www.better-messages.com/docs/features/chat-rooms/#moderators) — assign per-room moderators in the chat room editor: moderators can remove, mute and ban participants of their room, can reply while the room is closed, and see the participants list even when it is hidden from regular members

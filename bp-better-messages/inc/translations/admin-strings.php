@@ -1837,6 +1837,8 @@ function _bm_admin_translations_map() {
         array( '_x', 'Button Position', 'Settings page' ),
         array( '_x', 'Left', 'Settings page' ),
         array( '_x', 'Right', 'Settings page' ),
+        array( '_x', 'Button Icon', 'Settings page' ),
+        array( '_x', 'Icon displayed on the floating chat button. Leave unset to use the built-in messages icon', 'Settings page' ),
         array( '_x', 'Onsite Notifications', 'Settings page' ),
         array( '_x', 'Notification Position', 'Settings page' ),
         array( '_x', 'Automatic', 'Settings page' ),

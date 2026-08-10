@@ -267,6 +267,7 @@ class Better_Messages_Options
             'bpProfileSlug'               => 'bp-messages',
             'bpGroupSlug'                 => 'bp-messages',
             'mobilePopupLocation'         => 'right',
+            'mobileButtonIcon'            => '',
             'mobileOnsiteLocation'        => 'auto',
             'badWordsList'                => '',
             'badWordsSkipAdmins'          => '0',
@@ -2663,7 +2664,8 @@ class Better_Messages_Options
             'widgetIconAIBots',
             'widgetIconChatRooms',
             'widgetIconUsers',
-            'widgetIconCourses'
+            'widgetIconCourses',
+            'mobileButtonIcon'
         ];
 
         $int_only = [

@@ -11570,7 +11570,8 @@ body.bm-mobile-device .bp-better-messages-list.bm-widget-bubble {
   font-size: 28px;
   line-height: 1;
 }
-#bp-better-messages-mini-mobile-open .bp-better-messages-mini-mobile-open-icon > svg {
+#bp-better-messages-mini-mobile-open .bp-better-messages-mini-mobile-open-icon > svg,
+#bp-better-messages-mini-mobile-open .bp-better-messages-mini-mobile-open-icon > span > svg {
   display: block;
   margin-bottom: 4px;
 }

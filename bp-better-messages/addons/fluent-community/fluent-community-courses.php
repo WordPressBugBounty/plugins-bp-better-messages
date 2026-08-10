@@ -518,6 +518,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
             if ( ! $course_id ) return false;
 
             $members = $this->get_course_members( $course_id );
+            $members = apply_filters( 'better_messages_fluent_community_course_chat_members', $members, $course_id, $thread_id );
 
             global $wpdb;
             $array       = array();

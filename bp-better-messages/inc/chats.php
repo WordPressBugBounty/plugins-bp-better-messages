@@ -2135,8 +2135,6 @@ class Better_Messages_Chats
         $content = ob_get_clean();
         $content = str_replace( 'loading="lazy"', '', $content );
 
-        $content = Better_Messages()->functions->minify_html( $content );
-
         do_action('bp_better_messages_after_chat', $chat_id, $thread_id);
 
         return $content;

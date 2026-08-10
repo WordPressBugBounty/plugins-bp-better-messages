@@ -4,11 +4,11 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.24
+    Version: 2.15.25
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
-    Requires at least: 5.9.0
+    Requires at least: 6.3
     License: GPLv3
     Text Domain: bp-better-messages
     Domain Path: /languages/
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.24';
+        public  $version = '2.15.25';
 
         public  $db_version = '1.0.4';
 
@@ -227,7 +227,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once Better_Messages()->path . 'vendor/random-name-generator/random-name-generator.php';
 
             bpbm_fs()->add_filter('plugin_icon', function () {
-                return $this->path . 'assets/images/icon.png';
+                return WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/assets/images/icon.png';
             });
         }
 
@@ -884,6 +884,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'miniWidgetsIconsOnly'   => ( $this->settings['miniWidgetsIconsOnly'] == '1' ? '1' : '0' ),
                 'sidePanelIconsOnly'     => ( $this->settings['sidePanelIconsOnly'] == '1' ? '1' : '0' ),
                 'mobileTabsIconsOnly'    => ( $this->settings['mobileTabsIconsOnly'] == '1' ? '1' : '0' ),
+                'mobileButtonIcon'       => (string) ( $this->settings['mobileButtonIcon'] ?? '' ),
                 'widgetIconMessages'     => (string) ( $this->settings['widgetIconMessages'] ?? '' ),
                 'widgetIconFriends'      => (string) ( $this->settings['widgetIconFriends'] ?? '' ),
                 'widgetIconGroups'       => (string) ( $this->settings['widgetIconGroups'] ?? '' ),

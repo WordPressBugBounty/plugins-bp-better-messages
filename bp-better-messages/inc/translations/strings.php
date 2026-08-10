@@ -158,6 +158,7 @@ function _bm_js_translation_strings() {
     _x('Are you sure you want to delete this conversation? (This action is irreversible)', 'Delete Conversation Action', 'bp-better-messages');
     _x('Leave chat room', '"Leave Chat Room" Button Tooltip', 'bp-better-messages');
     _x('Leave chat room', '"Leave Chat Room" Button', 'bp-better-messages');
+    _x('Online users', 'Chat Room Screen', 'bp-better-messages');
     _x('Audio Call', '"Audio Call" Button Tooltip', 'bp-better-messages');
     _x('Video Call', '"Video Call" Button Tooltip', 'bp-better-messages');
     _x('Audio Chat', '"Audio Chat" Button Tooltip', 'bp-better-messages');
@@ -323,7 +324,6 @@ function _bm_js_translation_strings() {
     _x('Bulk Message', 'New threads screen', 'bp-better-messages');
     _x('Settings', 'User settings screen', 'bp-better-messages');
     _nx('%s participant', '%s participants', thread.participantsCount, 'Group Thread Participants Count', 'bp-better-messages');
-    _x('Online users', 'Chat Room Screen', 'bp-better-messages');
     _x('Close', '"Close" Button Tooltip', 'bp-better-messages');
     __('Conversation information', 'bp-better-messages');
     __('Deleted user', 'bp-better-messages');
@@ -671,9 +671,6 @@ function _bm_js_translation_strings() {
     _x('AI Bots', 'Mini Widgets - Head', 'bp-better-messages');
     _x('Chat Rooms', 'Mini Widgets - Head', 'bp-better-messages');
     _x( 'Start a new conversation' , 'Mini Widgets', 'bp-better-messages' );
-    _x('Back', 'Mini Chats', 'bp-better-messages');
-    _x('Open Full Screen', 'Mini Chat', 'bp-better-messages');
-    _x('Open in Messages', 'Mini Chat', 'bp-better-messages');
     _x('Start a video call', 'Mini Chats', 'bp-better-messages');
     _x('Start a voice call', 'Mini Chats', 'bp-better-messages');
     _x('Audio Chat', 'Mini Chats', 'bp-better-messages');
@@ -681,6 +678,9 @@ function _bm_js_translation_strings() {
     _x('Minimize', 'Mini Chats', 'bp-better-messages');
     _x('Close', 'Mini Chats', 'bp-better-messages');
     _x('Open', 'Mini Chats', 'bp-better-messages');
+    _x('Back', 'Mini Chats', 'bp-better-messages');
+    _x('Open Full Screen', 'Mini Chat', 'bp-better-messages');
+    _x('Open in Messages', 'Mini Chat', 'bp-better-messages');
     _x( 'Are you sure you want to block user from sending you messages?', 'Block user action', 'bp-better-messages' );
     _x('Error while blocking user', 'Block user action', 'bp-better-messages');
     _x('Blocking user', 'Block user action', 'bp-better-messages');
@@ -2640,6 +2640,8 @@ function _bm_js_translation_strings() {
     _x('Button Position', 'Settings page', 'bp-better-messages');
     _x('Left', 'Settings page', 'bp-better-messages');
     _x('Right', 'Settings page', 'bp-better-messages');
+    _x('Button Icon', 'Settings page', 'bp-better-messages');
+    _x('Icon displayed on the floating chat button. Leave unset to use the built-in messages icon', 'Settings page', 'bp-better-messages');
     _x('Onsite Notifications', 'Settings page', 'bp-better-messages');
     _x('Notification Position', 'Settings page', 'bp-better-messages');
     _x('Automatic', 'Settings page', 'bp-better-messages');
