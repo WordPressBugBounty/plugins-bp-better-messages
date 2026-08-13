@@ -472,13 +472,20 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 $subject = sprintf( __('New message from %s', 'bp-better-messages'), Better_Messages()->functions->get_name( $message->sender_id ) );
                 $content = sprintf( __('You have new message from %s', 'bp-better-messages'), Better_Messages()->functions->get_name( $message->sender_id ) );
 
+                $notification = apply_filters( 'better_messages_push_notification', [
+                    'title' => $subject,
+                    'body'  => $content,
+                    'tag'   => 'bp-better-messages-thread-' . $thread_id,
+                    'data'  => [ 'url' => $url ]
+                ], $user_id, 'new_message', $thread_id, $message->id, $message->sender_id );
+
                 $args = [
-                    'primary_text' => $subject,
-                    'secondary_text' => $content,
+                    'primary_text' => $notification['title'],
+                    'secondary_text' => $notification['body'],
                     'sent_as' => $message->sender_id,
                     'user_ids'  => [$user_id],
                     'data' => [
-                        'link' => $url
+                        'link' => $notification['data']['url']
                     ],
                     'type' => 'better_messages_better_messages_new_message',
                     'filter_users_by_subscription' => false

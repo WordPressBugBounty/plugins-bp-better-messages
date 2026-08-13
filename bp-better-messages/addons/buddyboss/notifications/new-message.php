@@ -97,7 +97,7 @@ class BetterMessagesNewMessageNotification extends BP_Core_Notification_Abstract
         $this->register_notification_type(
             'better_messages_new_message',
             esc_html__( 'You receive a new private message', 'bp-better-messages' ),
-            esc_html__( 'A member receives a new private message ', 'bp-better-messages' ),
+            esc_html__( 'A member receives a new private message', 'bp-better-messages' ),
             'better_messages'
         );
 

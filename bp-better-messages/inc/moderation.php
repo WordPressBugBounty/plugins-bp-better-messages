@@ -701,6 +701,36 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $has_access;
         }
 
+        public function is_ephemeral_thread( $thread_id ){
+            if( ! isset( Better_Messages()->chats ) ){
+                return false;
+            }
+
+            if( Better_Messages()->functions->get_thread_type( $thread_id ) !== 'chat-room' ){
+                return false;
+            }
+
+            $chat_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'chat_id' );
+
+            if( ! $chat_id ){
+                return false;
+            }
+
+            return Better_Messages()->chats->is_ephemeral_chat( $chat_id );
+        }
+
+        public function can_moderate_user( $thread_id, $user_id ){
+            if( Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ){
+                return true;
+            }
+
+            if( ! $this->is_ephemeral_thread( $thread_id ) ){
+                return false;
+            }
+
+            return Better_Messages()->functions->is_user_exists( $user_id );
+        }
+
         public function restrict_group_call_join( $error, $thread_id, $user_id ){
             if( ! empty( $error ) ) return $error;
 
@@ -775,7 +805,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 
             $can_mute = Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id );
-            $is_participant = Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true );
+            $is_participant = $this->can_moderate_user( $thread_id, $user_id );
 
             if( ! $can_mute || ! $is_participant ){
                 return new WP_Error(
@@ -829,7 +859,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 
             $can_mute = Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id );
-            $is_participant = Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true );
+            $is_participant = $this->can_moderate_user( $thread_id, $user_id );
 
             if( ! $can_mute || ! $is_participant ){
                 return new WP_Error(
@@ -854,7 +884,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $user_id    = intval( $request->get_param('user_id') );
 
             $can_mute = Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id );
-            $is_participant = Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true );
+            $is_participant = $this->can_moderate_user( $thread_id, $user_id );
 
             if( ! $can_mute || ! $is_participant ){
                 return new WP_Error(
@@ -879,7 +909,14 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             if( $thread_type === 'chat-room' ){
                 $restrictions = $this->is_user_restricted( $thread_id, $user_id );
 
-                if( isset( $restrictions['mute'] ) ){
+                if( isset( $restrictions['ban'] ) && $this->is_ephemeral_thread( $thread_id ) ){
+                    $allowed = false;
+
+                    $time = $this->format_time( $restrictions['ban'] );
+
+                    global $bp_better_messages_restrict_send_message;
+                    $bp_better_messages_restrict_send_message['bm_user_banned'] = sprintf(_x('You were banned in this conversation until %s', 'Message when user was banned in conversation', 'bp-better-messages'), $time);
+                } elseif( isset( $restrictions['mute'] ) ){
                     $allowed = false;
 
                     $expiration = $restrictions['mute'];
@@ -974,12 +1011,17 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $table = bm_get_table('moderation');
 
+            $ephemeral = $this->is_ephemeral_thread( $thread_id ) ? 1 : 0;
+
             $query = $wpdb->prepare("
-            SELECT user_id, type, CONVERT_TZ(expiration, @@session.time_zone, '+0:00') as expiration 
-            FROM  {$table} 
+            SELECT user_id, type, CONVERT_TZ(expiration, @@session.time_zone, '+0:00') as expiration
+            FROM  {$table}
             WHERE `thread_id` = %d
-            AND `type` = 'ban' OR ( `type` = 'mute' AND `user_id` IN ( SELECT user_id FROM " . bm_get_table('recipients') . " WHERE thread_id = %d AND is_deleted = 0 ) )
-            AND `expiration` > NOW()", $thread_id, $thread_id);
+            AND `expiration` > NOW()
+            AND (
+                `type` = 'ban'
+                OR ( `type` = 'mute' AND ( %d = 1 OR `user_id` IN ( SELECT user_id FROM " . bm_get_table('recipients') . " WHERE thread_id = %d AND is_deleted = 0 ) ) )
+            )", $thread_id, $ephemeral, $thread_id);
 
             $results = $wpdb->get_results( $query );
 

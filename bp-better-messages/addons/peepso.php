@@ -367,12 +367,16 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             $notFriends = array();
 
+            $current_user_id = get_current_user_id();
+
             foreach($recipients as $recipient){
                 if( $recipient < 0 ) continue;
+                if( intval( $recipient ) === $current_user_id ) continue;
 
                 $user = get_userdata( $recipient );
+                if( ! $user ) continue;
 
-                if( ! PeepSoFriendsModel::get_instance()->are_friends( get_current_user_id(), $user->ID ) ) {
+                if( ! PeepSoFriendsModel::get_instance()->are_friends( $current_user_id, $user->ID ) ) {
                     $notFriends[] = Better_Messages()->functions->get_name($user->ID);
                 }
             }

@@ -112,8 +112,8 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 usort( $urls[0], function( $a, $b ) { return strlen( $b ) - strlen( $a ); } );
             }
 
-            foreach ( $urls[ 0 ] as $_url ) {
-                $url = strip_tags(html_entity_decode(esc_url( $_url )));
+            foreach ( $urls[ 0 ] as $matched_url ) {
+                $url = strip_tags(html_entity_decode(esc_url( $matched_url )));
                 $_url = esc_url_raw($url);
 
                 if( ! $this->is_url_allowed( $_url ) ){
@@ -228,15 +228,15 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                             }
 
                             if( $html ) {
-                                $message = str_replace( $_url, '', $message );
+                                $message = str_replace( $matched_url, '', $message );
                             } else {
-                                $message = str_replace( $_url, $wrap_token( $_url ), $message );
+                                $message = str_replace( $matched_url, $wrap_token( $_url ), $message );
                             }
                         } else {
-                            $message = str_replace( $_url, $wrap_token( $_url ), $message );
+                            $message = str_replace( $matched_url, $wrap_token( $_url ), $message );
                         }
                     } else {
-                        $message = str_replace( $_url, $wrap_token( $_url ), $message );
+                        $message = str_replace( $matched_url, $wrap_token( $_url ), $message );
                     }
 
                     if( isset( $link ) ) {
@@ -366,21 +366,38 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
         }
 
         public function apply_embed_playback_params( $html, $provider ) {
-            if ( empty( $html ) || $provider !== 'youtube' ) {
+            if ( empty( $html ) ) {
                 return $html;
             }
 
-            $tags = new WP_HTML_Tag_Processor( $html );
+            $sandbox = $this->get_embed_sandbox( $provider );
+            $tags    = new WP_HTML_Tag_Processor( $html );
 
             while ( $tags->next_tag( 'iframe' ) ) {
-                $src = $tags->get_attribute( 'src' );
+                if ( $provider === 'youtube' ) {
+                    $src = $tags->get_attribute( 'src' );
 
-                if ( $src ) {
-                    $tags->set_attribute( 'src', $this->add_youtube_playsinline( $src ) );
+                    if ( $src ) {
+                        $tags->set_attribute( 'src', $this->add_youtube_playsinline( $src ) );
+                    }
+                }
+
+                if ( $sandbox !== '' ) {
+                    $tags->set_attribute( 'sandbox', $sandbox );
                 }
             }
 
             return $tags->get_updated_html();
+        }
+
+        public function get_embed_sandbox( $provider ) {
+            $sandbox = apply_filters(
+                'better_messages_embed_sandbox',
+                'allow-scripts allow-same-origin allow-presentation',
+                $provider
+            );
+
+            return is_string( $sandbox ) ? trim( $sandbox ) : '';
         }
 
         public function add_youtube_playsinline( $src ) {
@@ -424,7 +441,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             }
 
             return '<span class="bp-messages-iframe-container">'
-                . '<span class="bm-embed-consent" data-src="' . esc_attr( $iframe_src ) . '">'
+                . '<span class="bm-embed-consent" data-sandbox="' . esc_attr( $this->get_embed_sandbox( $provider ) ) . '" data-src="' . esc_attr( $iframe_src ) . '">'
                 . '<span class="bm-embed-consent-play"></span>'
                 . ( $title ? '<span class="bm-embed-consent-title">' . esc_html( $title ) . '</span>' : '' )
                 . '</span>'

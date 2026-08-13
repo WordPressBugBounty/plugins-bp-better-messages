@@ -2172,6 +2172,8 @@ class Better_Messages_Chats
 
         if( Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ) return true;
 
+        if( $this->is_ephemeral_chat( $chat_id ) && $this->is_user_banned_in_thread( $thread_id, $user_id ) ) return false;
+
         $user_roles = Better_Messages()->functions->get_user_roles( $user_id );
 
         foreach ( $user_roles as $role ) {
@@ -2179,6 +2181,14 @@ class Better_Messages_Chats
         }
 
         return $this->user_can_reply( $user_id, $chat_id );
+    }
+
+    public function is_user_banned_in_thread( $thread_id, $user_id ){
+        if( ! $thread_id || ! isset( Better_Messages()->moderation ) ) return false;
+
+        $restrictions = Better_Messages()->moderation->is_user_restricted( (int) $thread_id, (int) $user_id );
+
+        return isset( $restrictions['ban'] );
     }
 
     public function user_can_reply( $user_id, $chat_id ){

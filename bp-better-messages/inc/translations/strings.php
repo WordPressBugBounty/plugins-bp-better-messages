@@ -8,14 +8,7 @@ function _bm_js_translation_strings() {
     _x('Search...', 'AI Bots list', 'bp-better-messages');
     _x('No AI bots available', 'Empty AI Bots list', 'bp-better-messages');
     _x('No AI bots found', 'Empty AI Bots list', 'bp-better-messages');
-    _x('Friends', 'Combined view tabs', 'bp-better-messages');
-    _x('Groups', 'Combined view tabs', 'bp-better-messages');
-    _x('Courses', 'Combined view tabs', 'bp-better-messages');
-    _x('AI Bots', 'Combined view tabs', 'bp-better-messages');
-    _x('Chat Rooms', 'Combined view tabs', 'bp-better-messages');
-    _x('Users', 'Combined view tabs', 'bp-better-messages');
     _x( 'New Conversation' , '"New Conversation" Button Tooltip', 'bp-better-messages' );
-    _x('Messages', 'Combined view tabs', 'bp-better-messages');
     _x('Expand sidebar', 'Sidebar toggle tooltip', 'bp-better-messages');
     _x('Collapse sidebar', 'Sidebar toggle tooltip', 'bp-better-messages');
     _x('Connecting...', 'Call Screen', 'bp-better-messages');
@@ -103,11 +96,13 @@ function _bm_js_translation_strings() {
     __('Statistics', 'bp-better-messages');
     __('Downloaded', 'bp-better-messages');
     __('Uploaded', 'bp-better-messages');
+    _nx('%s unread message', '%s unread messages', unread, 'Chat Rooms list', 'bp-better-messages');
     _x('Open', 'Chat Rooms list', 'bp-better-messages');
     _x('Joined', 'Chat Rooms list', 'bp-better-messages');
     _x('Join', 'Chat Rooms list', 'bp-better-messages');
     _x('members', 'Chat Rooms list', 'bp-better-messages');
     _x('online', 'Chat Rooms list', 'bp-better-messages');
+    _x('You were mentioned in this conversation', 'Conversations list item', 'bp-better-messages');
     _x('Search...', 'Chat Rooms list', 'bp-better-messages');
     _x('No chat rooms available', 'Empty chat rooms list', 'bp-better-messages');
     _x('No chat rooms found', 'Empty chat rooms list', 'bp-better-messages');
@@ -234,6 +229,7 @@ function _bm_js_translation_strings() {
     _x('Loading...', 'Label at the start of messages list in conversation while loading', 'bp-better-messages' );
     _x('Start of conversation', 'Label at the start of messages list in conversation', 'bp-better-messages' );
     __('Write a message to start the conversation', 'bp-better-messages');
+    __('This message could not be displayed', 'bp-better-messages');
     _x('I agree to %s', 'Mobile App', 'bp-better-messages');
     _x('terms and conditions', 'Mobile App', 'bp-better-messages');
     __('Error', 'bp-better-messages');
@@ -418,6 +414,13 @@ function _bm_js_translation_strings() {
     _x('Friends', 'Search Results', 'bp-better-messages');
     _x('Members', 'Search Results', 'bp-better-messages');
     _x('Conversations', 'Search Results', 'bp-better-messages');
+    _x('Messages', 'Combined view tabs', 'bp-better-messages');
+    _x('Friends', 'Combined view tabs', 'bp-better-messages');
+    _x('Groups', 'Combined view tabs', 'bp-better-messages');
+    _x('Courses', 'Combined view tabs', 'bp-better-messages');
+    _x('AI Bots', 'Combined view tabs', 'bp-better-messages');
+    _x('Chat Rooms', 'Combined view tabs', 'bp-better-messages');
+    _x('Users', 'Combined view tabs', 'bp-better-messages');
     _x('End-to-end encrypted', 'Thread header', 'bp-better-messages');
     _x('No attachments in this conversation', 'Conversation information', 'bp-better-messages');
     _x('Photos', 'Conversation information', 'bp-better-messages');
@@ -592,6 +595,8 @@ function _bm_js_translation_strings() {
     _x('Crop portrait (9:16)', 'File Uploader', 'bp-better-messages');
     _x('Failed to convert file. Uploading original format.', 'File Uploader', 'bp-better-messages');
     _x('Add attachment', '"Add attachment" button tooltip', 'bp-better-messages');
+    _x('Optimizing files...', '"Optimizing files" tooltip', 'bp-better-messages');
+    _x('Uploading attachments', '"Uploading attachments" tooltip', 'bp-better-messages');
     _x( 'Transcribe', 'Voice Messages', 'bp-better-messages' );
     _x( 'Transcribing...', 'Voice Messages', 'bp-better-messages' );
     _x( 'Transcription', 'Voice Messages', 'bp-better-messages' );
@@ -613,7 +618,6 @@ function _bm_js_translation_strings() {
     _x('Removing...', 'E2E Encryption', 'bp-better-messages');
     _x('Remove from this browser', 'E2E Encryption', 'bp-better-messages');
     _x('%s Participants', 'Thread Title (when subjects are disabled)', 'bp-better-messages');
-    _x('You were mentioned in this conversation', 'Conversations list item', 'bp-better-messages');
     _x( 'Video', 'Frontend Scripts', 'bp-better-messages' );
     _x( 'Audio', 'Frontend Scripts', 'bp-better-messages' );
     _x( 'Chat Online', 'Frontend Scripts', 'bp-better-messages' );
@@ -1564,7 +1568,7 @@ function _bm_js_translation_strings() {
     _x('Refresh list', 'WP Admin', 'bp-better-messages');
     _x('Create New Identifier', 'WP Admin', 'bp-better-messages');
     _x('Application Profile', 'WP Admin (Mobile App)', 'bp-better-messages');
-    _x('Selection of Signing Certificate & Application Identifier required ', 'WP Admin (Mobile App)', 'bp-better-messages');
+    _x('Selection of Signing Certificate & Application Identifier required', 'WP Admin (Mobile App)', 'bp-better-messages');
     _x('No profiles compatible with selected bundle and certificate', 'WP Admin (Mobile App)', 'bp-better-messages');
     _x('Create New Provisioning Profile', 'WP Admin (Mobile App)', 'bp-better-messages');
     _x('Notification Service Profile', 'WP Admin (Mobile App)', 'bp-better-messages');
@@ -3098,6 +3102,8 @@ function _bm_js_translation_strings() {
     _x('Display how many users are currently online next to each chat room. Live presence data is delivered over the realtime connection', 'Settings page', 'bp-better-messages');
     _x('The threads/inbox list widget. Shows the user\'s recent conversations', 'Settings page', 'bp-better-messages');
     _x('Icon shown for the Conversations tab in Mini Widgets, Side Panel and Mobile tab bars', 'Settings page', 'bp-better-messages');
+    _x('Show Unread Counter', 'Settings page', 'bp-better-messages');
+    _x('Show the number of unread messages on the Conversations tab of the side panel and the mobile tab bar', 'Settings page', 'bp-better-messages');
     _x('Hide the Conversations Mini Widget tab from selected roles. Side Panel and Mobile Conversations views cannot be hidden because they are the primary messaging UI', 'Settings page', 'bp-better-messages');
     _x('List of courses the user is enrolled in or instructs. Sourced from Tutor LMS, LearnPress, LearnDash, or MasterStudy LMS', 'Settings page', 'bp-better-messages');
     _x('The Courses widget requires one of:', 'Settings page', 'bp-better-messages');
@@ -3125,7 +3131,7 @@ function _bm_js_translation_strings() {
     _x('Icon shown for the Groups tab in Mini Widgets, Side Panel and Mobile bars', 'Settings page', 'bp-better-messages');
     _x('Hide the Groups tab entirely when the current user has no groups to show', 'Settings page', 'bp-better-messages');
     _x('Mini Widgets Bar', 'Settings page', 'bp-better-messages');
-    _x('Tab strip or floating bubble fixed to the bottom of the screen. Drag tabs to reorder. Click the gear icon on a tab to configure it', 'Settings page', 'bp-better-messages');
+    _x('Tab strip or floating bubble fixed to the bottom of the screen. Drag tabs to reorder — the first tab is the one the bubble opens on. Click the gear icon on a tab to configure it', 'Settings page', 'bp-better-messages');
     _x('Display Style', 'Settings page', 'bp-better-messages');
     _x('How the mini widget appears on the page', 'Settings page', 'bp-better-messages');
     _x('Classic Bar', 'Settings page', 'bp-better-messages');
@@ -3142,10 +3148,10 @@ function _bm_js_translation_strings() {
     _x('Hide tab labels in the mini widgets. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
     _x('Keep mini widgets and mini chats in sync across browser tabs', 'Settings page', 'bp-better-messages');
     _x('Side Panel', 'Settings page', 'bp-better-messages');
-    _x('Vertical tab strip on the full inbox page. Conversations is always the first tab', 'Settings page', 'bp-better-messages');
+    _x('Vertical tab strip on the full inbox page. Drag tabs to reorder — the first tab is the one the messenger opens on', 'Settings page', 'bp-better-messages');
     _x('Hide tab labels in the side panel. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
     _x('Mobile Tab Bar', 'Settings page', 'bp-better-messages');
-    _x('Bottom tab bar shown when mobile full-screen mode is active. Conversations is always the first tab', 'Settings page', 'bp-better-messages');
+    _x('Bottom tab bar shown when mobile full-screen mode is active. Drag tabs to reorder — the first tab is the one the messenger opens on', 'Settings page', 'bp-better-messages');
     _x('Hide tab labels in the mobile bottom bar. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
     _x('Small chat windows that appear fixed to the bottom of the browser window when a user opens a conversation', 'Settings page', 'bp-better-messages');
     _x('Bubble Chat Heads', 'Settings page', 'bp-better-messages');
@@ -3317,4 +3323,124 @@ function _bm_js_translation_strings() {
     _x('Administration', 'WP Admin', 'bp-better-messages');
     _x('Use default (%s)', 'WP Admin', 'bp-better-messages');
     _x('Use default', 'WP Admin', 'bp-better-messages');
+    _x('Mobile App', 'Admin Menu', 'bp-better-messages');
+    _x( 'ZipArchive class is not available', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Error creating ZIP file', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Keystore information is not available', 'Rest API Error', 'bp-better-messages' );
+    _x( 'No file was uploaded', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Key store password is required', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Key alias is required', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Key password is required', 'Rest API Error', 'bp-better-messages' );
+    _x( 'cURL is not available', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Invalid key store file', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Key store password must be at least 8 characters', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Key password must be at least 8 characters', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Certificate First and Last Name is required', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Certificate Country Code is required', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Certificate Country Code must be 2 characters', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to connect to the key store generation service', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to generate key store', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to decode key store', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Incorrect JSON file', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Invalid JSON file', 'Rest API Error', 'bp-better-messages' );
+    _x( "Incorrect JSON file", 'Rest API Error', 'bp-better-messages' );
+    _x( 'Invalid key', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Invalid package name', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to response from oauth server ', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to get access token', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Failed to get response from Google Developer API', 'Rest API Error', 'bp-better-messages' );
+    _x( 'No connection data found', 'Rest API Error', 'bp-better-messages' );
+    _x('The device public key is required', 'Mobile App Authorization', 'bp-better-messages');
+    _x('The username and password are required', 'Mobile App Authorization', 'bp-better-messages');
+    _x('The username or password you entered is incorrect', 'App Authorization', 'better-messages-mobile-app');
+    _x('Logout', 'Mobile App - User settings', 'bp-better-messages');
+    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'better-pwa-and-mobile-app' );
+    _x( 'Connection to Apple Developer Account was not successful', 'WP Admin', 'better-pwa-and-mobile-app' );
+    _x( 'Credentials not found', 'Rest API Error', 'better-pwa-and-mobile-app' );
+    _x( 'Not possible to determine image size', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Image must be equal height and at least %s', 'Rest API Error', 'bp-better-messages' );
+    _x('Image must be exactly %s', 'Rest API Error', 'bp-better-messages');
+    _x( 'Image must be PNG', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Image must have only white and transparent pixels', 'Rest API Error', 'bp-better-messages' );
+    _x('Incoming video call', 'Private Call - Mobile App Push', 'bp-better-messages');
+    _x('You have incoming video call', 'Private Call - Mobile App Push', 'bp-better-messages');
+    _x('Incoming voice call', 'Private Call - Mobile App Push', 'bp-better-messages');
+    _x('You have incoming voice call', 'Private Call - Mobile App Push', 'bp-better-messages');
+    __('New message', 'bp-better-messages');
+    __('You have new message', 'bp-better-messages');
+    _x('Online', 'User status', 'bp-better-messages');
+    _x('Away', 'User status', 'bp-better-messages');
+    _x('Do not disturb', 'User status', 'bp-better-messages');
+    _x('You will not receive sound notifications', 'User status description', 'bp-better-messages');
+    __('New friendship request', 'bp-better-messages');
+    __('Friendship request accepted', 'bp-better-messages');
+    __('New message from %s', 'bp-better-messages');
+    __('You have new message from %s', 'bp-better-messages');
+    _x('Conversation not found', 'Private Call - Rest API Error', 'bp-better-messages');
+    _x('You are not a participant of this conversation', 'Private Call - Rest API Error', 'bp-better-messages');
+    _x('This is not a call', 'Private Call - Rest API Error', 'bp-better-messages');
+    _x('You can make private call only in private conversation', 'Private Call - Rest API Error', 'bp-better-messages');
+    _x('Video call', 'Private Call - Message Entry', 'bp-better-messages');
+    _x('Incoming video call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('You have incoming video call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('Audio call', 'Private Call - Message Entry', 'bp-better-messages');
+    _x('Incoming audio call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('You have incoming audio call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('Something went wrong. Member you tried to call not found in this conversation.', 'Private Call - Rest API Error', 'bp-better-messages');
+    _x( 'Video call', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'Audio call', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'Audio call accepted <span class="bpbm-call-duration">(%s)</span>', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'Video call accepted <span class="bpbm-call-duration">(%s)</span>', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'I tried to make an audio call, but you were offline', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'I tried to make a video call, but you were offline', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x( 'Missed audio call <span class="bpbm-call-duration">(%s)</span>', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x('Missed audio call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('You have missed audio call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x( 'Missed video call <span class="bpbm-call-duration">(%s)</span>', 'Private Call - Message Entry', 'bp-better-messages' );
+    _x('Missed video call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    _x('You have missed video call from %s', 'Private Call - Web Push', 'bp-better-messages');
+    __( 'Audio Call', 'bp-better-messages' );
+    __( 'Video Call', 'bp-better-messages' );
+    __('Audio Call', 'bp-better-messages');
+    __('Video Call', 'bp-better-messages');
+    __( 'Group calls are disabled in this chat room', 'bp-better-messages' );
+    __( 'You are not allowed to join group calls', 'bp-better-messages' );
+    __( 'This call is currently locked by the moderator', 'bp-better-messages' );
+    __( 'Invalid call type', 'bp-better-messages' );
+    __( 'You do not have permission to perform this action', 'bp-better-messages' );
+    _x( 'Set up end-to-end encryption before you can send messages in this conversation', 'E2E Encryption', 'bp-better-messages' );
+    _x( 'Messages in encrypted conversations must be encrypted. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages' );
+    _x(
+                        'End-to-end encryption has been disabled. Messages in this conversation cannot be decrypted. Please start a new conversation to continue messaging.',
+                        'E2E Encryption',
+                        'bp-better-messages'
+                    );
+    _x(
+                            'Your encryption keys are ready. Waiting for another participant to come online and share the conversation key with you. This will happen automatically.',
+                            'E2E Encryption',
+                            'bp-better-messages'
+                        );
+    _x(
+                            'Set up end-to-end encryption to start messaging in this conversation',
+                            'E2E Encryption',
+                            'bp-better-messages'
+                        );
+    _x( 'Messages from encrypted conversations cannot be forwarded', 'Rest API Error', 'bp-better-messages' );
+    _x( 'Encrypted conversation created', 'WP Admin', 'bp-better-messages' );
+    _x( 'Encrypted conversation started', 'WP Admin', 'bp-better-messages' );
+    _x( 'Encrypted message', 'WP Admin', 'bp-better-messages' );
+    _x( '%s encrypted attachment(s) (%s)', 'WP Admin', 'bp-better-messages' );
+    _x( 'Encrypted message', 'Moderation', 'bp-better-messages' );
+    __( 'Invalid public key format', 'bp-better-messages' );
+    __( 'Public key is required', 'bp-better-messages' );
+    __( 'User has not set up end-to-end encryption', 'bp-better-messages' );
+    __( 'user_ids must be an array', 'bp-better-messages' );
+    __( 'Encrypted private key is required', 'bp-better-messages' );
+    __( 'Keys must be a non-empty object', 'bp-better-messages' );
+    __( 'Thread keys were rejected — another key already exists', 'bp-better-messages' );
+    __( 'Threads must be a non-empty array', 'bp-better-messages' );
+    __( 'No encryption key found for this thread', 'bp-better-messages' );
+    __( 'New encrypted conversation from %s', 'bp-better-messages' );
+    __( 'End-to-end encrypted conversation', 'bp-better-messages' );
 }

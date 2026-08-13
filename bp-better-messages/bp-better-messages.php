@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.25
+    Version: 2.15.26
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.25';
+        public  $version = '2.15.26';
 
         public  $db_version = '1.0.4';
 
@@ -886,6 +886,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'mobileTabsIconsOnly'    => ( $this->settings['mobileTabsIconsOnly'] == '1' ? '1' : '0' ),
                 'mobileButtonIcon'       => (string) ( $this->settings['mobileButtonIcon'] ?? '' ),
                 'widgetIconMessages'     => (string) ( $this->settings['widgetIconMessages'] ?? '' ),
+                'widgetMessagesShowUnreadCount' => ( ( $this->settings['widgetMessagesShowUnreadCount'] ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetIconFriends'      => (string) ( $this->settings['widgetIconFriends'] ?? '' ),
                 'widgetIconGroups'       => (string) ( $this->settings['widgetIconGroups'] ?? '' ),
                 'widgetIconAIBots'       => (string) ( $this->settings['widgetIconAIBots'] ?? '' ),
@@ -907,6 +908,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'widgetUsersRoleHashes'  => Better_Messages()->functions->hash_role_slugs(
                     is_array( $this->settings['widgetUsersRoles'] ?? null ) ? $this->settings['widgetUsersRoles'] : array()
                 ),
+                'participantsSortBy'      => ( ( $this->settings['participantsSortBy'] ?? 'join' ) === 'display_name' ? 'display_name' : 'join' ),
                 'participantsOnlineFirst' => ( ( $this->settings['participantsOnlineFirst'] ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetFriendsShowSearch'   => ( ( $this->settings['widgetFriendsShowSearch']   ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetGroupsShowSearch'    => ( ( $this->settings['widgetGroupsShowSearch']    ?? '1' ) === '1' ? '1' : '0' ),

@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.25
+Stable tag: 2.15.26
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,9 +379,32 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
+= 2.15.26 =
+* Added [`better_messages_push_notification`](https://www.better-messages.com/hooks/php-filters/#better_messages_push_notification) PHP filter — change the link, title and text of push notifications on every delivery path
+* Added [`better_messages_mobile_push_content`](https://www.better-messages.com/hooks/php-filters/#better_messages_mobile_push_content) PHP filter — change the wording of push notifications sent to the [native mobile app](https://www.better-messages.com/docs/category/mobile-app/)
+* The messenger now opens on whichever tab is placed first at Settings → Mini Widgets → Layout, and the Conversations tab is now sortable like every other tab
+* The collapsed side panel now keeps every tab usable as a vertical icon column, and on windows too narrow for the panel the tabs move to a strip at the top of the messenger
+* Chat rooms now show unread and mention counters in the [chat rooms list](https://www.better-messages.com/docs/features/chat-rooms/)
+* The Messages tab of the side panel and the mobile tab bar now shows an unread counter, configurable at Settings → Mini Widgets → Conversations
+* The open conversation is now highlighted in every side panel list
+* Fixed moderation in [presence-based chat rooms](https://www.better-messages.com/docs/features/chat-rooms/#chat-room-types) — muting, banning and appointing moderators no longer fail with a permissions error, and bans and mutes are now enforced
+* Fixed the muted and banned lists of a conversation returning expired bans and restrictions of other conversations
+* Fixed the page scrolling to the chat on every conversation switch made from inside the messenger
+* Fixed the **Participants List Order** setting being ignored by the online users sidebar and the participants list of presence-based rooms
+* Fixed online counters not including the viewer right after logging in
+* Fixed the browser tab title being emptied when an SEO plugin or theme outputs the title tag after the plugin scripts
+* Fixed starting an [end-to-end encrypted](https://www.better-messages.com/docs/websocket/e2e-encryption/) conversation failing with a "not on your friends list" error when messaging was restricted to friends or followers
+* Fixed a new end-to-end encrypted conversation losing its encryption when the first message was held by [pre-moderation](https://www.better-messages.com/docs/features/pre-moderation/) — encrypted conversations now always skip the moderation queue
+* Fixed [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) replies occasionally left as unformatted, cut-off or garbled text after streaming finished, most often in the [native mobile app](https://www.better-messages.com/docs/category/mobile-app/)
+* Fixed tapping a shared YouTube or Vimeo video navigating the page to the video site instead of playing it — video players are now sandboxed, adjustable with the [`better_messages_embed_sandbox`](https://www.better-messages.com/hooks/php-filters/#better_messages_embed_sandbox) PHP filter
+* Fixed links typed with a capitalised address, such as the `Https://` phone keyboards produce, not being replaced by their preview
+* Fixed a conversation opening as an empty messenger when one of its messages quoted HTML or JSX source code, most often an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) reply — code in messages is now always shown as text
+* User statuses, call messages and end-to-end encryption notices of the WebSocket version are now translatable on WordPress.org
+* Other minor bugfixes and improvements
+
 = 2.15.25 =
-* Added [`better_messages_thread_header_actions`](https://www.better-messages.com/hooks/js-filters#better_messages_thread_header_actions) JavaScript filter — the conversation header buttons (calls, minimize, maximize, the More menu) are now built as a single filterable list, so custom buttons can be added at any position and the built-in ones can be reordered, removed or replaced. Until now the header had no supported extension point: a button inserted into it by hand was moved or removed again whenever the header re-rendered. Custom buttons pick up the styling of the built-in ones, and the same filter also runs for mini chat headers
-* Added [`better_messages_fluent_community_group_chat_members`](https://www.better-messages.com/hooks/php-filters#better_messages_fluent_community_group_chat_members) and [`better_messages_fluent_community_course_chat_members`](https://www.better-messages.com/hooks/php-filters#better_messages_fluent_community_course_chat_members) PHP filters — exclude specific users from the automatic membership sync of [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) Space and Course group chats: user IDs removed by the filter are taken out of the chat by the sync itself and are no longer re-added by later enrollment events
+* Added [`better_messages_thread_header_actions`](https://www.better-messages.com/hooks/js-filters/#better_messages_thread_header_actions) JavaScript filter — the conversation header buttons (calls, minimize, maximize, the More menu) are now built as a single filterable list, so custom buttons can be added at any position and the built-in ones can be reordered, removed or replaced. Until now the header had no supported extension point: a button inserted into it by hand was moved or removed again whenever the header re-rendered. Custom buttons pick up the styling of the built-in ones, and the same filter also runs for mini chat headers
+* Added [`better_messages_fluent_community_group_chat_members`](https://www.better-messages.com/hooks/php-filters/#better_messages_fluent_community_group_chat_members) and [`better_messages_fluent_community_course_chat_members`](https://www.better-messages.com/hooks/php-filters/#better_messages_fluent_community_course_chat_members) PHP filters — exclude specific users from the automatic membership sync of [FluentCommunity](https://www.better-messages.com/docs/integrations/fluentcommunity/) Space and Course group chats: user IDs removed by the filter are taken out of the chat by the sync itself and are no longer re-added by later enrollment events
 * Fixed YouTube videos shared in messages staying locked inside the message bubble on iPhone and iPad — tapping one now opens the full screen player again, as it did before YouTube changed the default playback behaviour of its embeds
 * Fixed link previews showing raw HTML codes such as `&amp;` in titles, and dropping the thumbnail when the image address contained one
 * Link previews now also find the page title when it is spread over several lines or carries attributes, and can no longer be spoofed by markup hidden inside a page's scripts
@@ -404,7 +427,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Chat room moderators are never removed by **Auto exclude users** or **Auto-remove inactive participants**
 * Fixed the [**Chat Rooms**](https://www.better-messages.com/docs/features/chat-rooms/) list showing only the first 100 rooms — rooms now load page by page as you scroll, search covers every room you have access to, and rooms you were added to are no longer missing from the list on sites with many chat rooms
 * Fixed the [**Browser push notifications**](https://www.better-messages.com/docs/websocket/web-push/) opt-in missing from the messenger user settings on sites where the email notification interval was set to 0 and **Sound Notification Control** was disabled, leaving users with no way to subscribe to web push
-* Added [`better_messages_onesignal_integration`](https://www.better-messages.com/hooks/php-filters#better_messages_onesignal_integration) PHP filter — return `false` to fully disable the [OneSignal integration](https://www.better-messages.com/docs/integrations/onesignal/), including the script which associates WordPress user IDs with OneSignal subscriptions
+* Added [`better_messages_onesignal_integration`](https://www.better-messages.com/hooks/php-filters/#better_messages_onesignal_integration) PHP filter — return `false` to fully disable the [OneSignal integration](https://www.better-messages.com/docs/integrations/onesignal/), including the script which associates WordPress user IDs with OneSignal subscriptions
 * Added **Open online users list by default** per-room setting (WebSocket version) — when the online users sidebar is enabled, it can open automatically when users enter the chat room on desktop
 * Added [**GTranslate**](https://www.better-messages.com/docs/integrations/gtranslate/) integration — on GTranslate paid plans the messenger interface now follows the language of the page the visitor is on, instead of staying in the site default language on every translated sub-domain or sub-directory
 * WebSocket version now stops AJAX fallback polling by default — when a visitor's WebSocket connection cannot be established, their browser makes a single sync request per page load instead of polling the server every few seconds. The new [**Continuous Fallback Mode**](https://www.better-messages.com/docs/websocket/continuous-fallback-mode/) setting restores continuous fallback polling for the rare setups that need it, such as audiences behind country-level firewalls that block WebSocket traffic
@@ -470,10 +493,10 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Other minor bugfixes and improvements
 
 = 2.15.6 =
-* Added JavaScript filter slots in the guest authentication screen — [`better_messages_auth_required_top`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_top), [`better_messages_auth_required_between`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_between), and [`better_messages_auth_required_bottom`](https://www.better-messages.com/hooks/js-filters#better_messages_auth_required_bottom) — for injecting custom HTML into the pre-chat popup, mini-widget banner, and full messages page wall
+* Added JavaScript filter slots in the guest authentication screen — [`better_messages_auth_required_top`](https://www.better-messages.com/hooks/js-filters/#better_messages_auth_required_top), [`better_messages_auth_required_between`](https://www.better-messages.com/hooks/js-filters/#better_messages_auth_required_between), and [`better_messages_auth_required_bottom`](https://www.better-messages.com/hooks/js-filters/#better_messages_auth_required_bottom) — for injecting custom HTML into the pre-chat popup, mini-widget banner, and full messages page wall
 * Added live unread counter badge to the BuddyBoss Theme profile dropdown Messages item
 * Added Audio Call and Video Call buttons to the members directory and group member rows for both BuddyPress (Nouveau theme) and BuddyBoss Platform
-* Added [`better_messages_group_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters#better_messages_group_call_join_custom_error) PHP filter for blocking group audio/video call join with a custom error message, mirroring the existing [`better_messages_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters#better_messages_call_join_custom_error) filter for 1-to-1 calls
+* Added [`better_messages_group_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters/#better_messages_group_call_join_custom_error) PHP filter for blocking group audio/video call join with a custom error message, mirroring the existing [`better_messages_call_join_custom_error`](https://www.better-messages.com/hooks/php-filters/#better_messages_call_join_custom_error) filter for 1-to-1 calls
 * Settings → Integrations tab label and section titles now read "BuddyBoss" instead of "BuddyPress" when the BuddyBoss Platform is active
 * Improved the bbPress reply Private Message link layout in BuddyBoss Theme
 * Added initial [Motors – Car Dealer, Classifieds & Listing](https://www.better-messages.com/docs/integrations/motors/) integration
@@ -525,9 +548,9 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Added three new [widgets](https://www.better-messages.com/docs/features/mini-widgets/): **Users** (browse and message any site member, with optional online-only filtering, online-first ordering, sort by last activity or registration date, and three display modes — all / by role / hand-picked), **AI Bots** (start or continue conversations with configured AI chat bots), and **Chat Rooms** (browse public chat rooms with optional online-count badge)
 * Redesigned the Settings → Mini Widgets page into per-widget sub-tabs, with each widget exposing its own icon picker, search-box toggle, role restrictions matrix (mini bar / side panel / mobile bar), and widget-specific options
 * Added "Hide Tab When Empty" toggle per widget — hides the Friends / Groups / AI Bots / Chat Rooms / Users tab entirely when the current user has nothing to show, instead of rendering an empty list
-* Added AI Chat Bot [welcome message](https://www.better-messages.com/docs/features/ai-chat-bots#welcome-message) — bots can greet users with a configurable opening message and placeholder
-* Added dynamic [placeholders](https://www.better-messages.com/docs/features/ai-chat-bots#placeholders) which allows to dynamically change ai chat bots system prompts and welcome messages
-* Renamed [`better_messages_open_ai_bot_instruction`](https://www.better-messages.com/hooks/php-filters#better_messages_ai_bot_instruction) filter to `better_messages_ai_bot_instruction` since it applies to all AI providers, and added new `$thread_id` and `$message_id` arguments so callbacks can read the conversation context and the triggering user message — the old name remains available as a deprecated alias
+* Added AI Chat Bot [welcome message](https://www.better-messages.com/docs/features/ai-chat-bots/#welcome-message) — bots can greet users with a configurable opening message and placeholder
+* Added dynamic [placeholders](https://www.better-messages.com/docs/features/ai-chat-bots/#placeholders) which allows to dynamically change ai chat bots system prompts and welcome messages
+* Renamed [`better_messages_open_ai_bot_instruction`](https://www.better-messages.com/hooks/php-filters/#better_messages_ai_bot_instruction) filter to `better_messages_ai_bot_instruction` since it applies to all AI providers, and added new `$thread_id` and `$message_id` arguments so callbacks can read the conversation context and the triggering user message — the old name remains available as a deprecated alias
 * Added per-message edit time limit — restrict how long users can edit their own messages after sending
 * Fixed fatal error when uploading attachments at the bulk messages screen
 * Fixed `hideParticipants` chat room setting being ignored when the attachments browser was enabled

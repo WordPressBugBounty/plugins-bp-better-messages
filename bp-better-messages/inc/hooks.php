@@ -2101,8 +2101,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $notFriends = array();
 
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
             foreach( $recipients as $recipient ){
-                if( $recipient > 0 && ! friends_check_friendship( Better_Messages()->functions->get_current_user_id(), $recipient ) ) {
+                if( $recipient > 0 && intval( $recipient ) !== $current_user_id && ! friends_check_friendship( $current_user_id, $recipient ) ) {
                     $notFriends[] = Better_Messages()->functions->get_name($recipient);
                 }
             }

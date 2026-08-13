@@ -98,6 +98,7 @@ class Better_Messages_Options
             'sidePanelIconsOnly'          => '0',
             'mobileTabsIconsOnly'         => '0',
             'widgetIconMessages'          => '',
+            'widgetMessagesShowUnreadCount' => '1',
             'widgetIconFriends'           => '',
             'widgetIconGroups'            => '',
             'widgetIconAIBots'            => '',
@@ -1906,6 +1907,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['sidePanelTabsOrder'] ) ) {
             $settings['sidePanelTabsOrder'] = [];
+        }
+        if ( !isset( $settings['widgetMessagesShowUnreadCount'] ) ) {
+            $settings['widgetMessagesShowUnreadCount'] = '1';
         }
         if ( !isset( $settings['mobileTabsOrder'] ) ) {
             $settings['mobileTabsOrder'] = [];

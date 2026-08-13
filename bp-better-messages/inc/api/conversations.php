@@ -218,7 +218,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
-            if( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ){
+            if( ! Better_Messages()->moderation->can_moderate_user( $thread_id, $user_id ) ){
                 return new WP_Error(
                     'rest_forbidden',
                     _x( 'You can not unmake user moderator if he is not participant of the conversation', 'Rest API Error', 'bp-better-messages' ),
@@ -263,7 +263,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
-            if( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ){
+            if( ! Better_Messages()->moderation->can_moderate_user( $thread_id, $user_id ) ){
                 return new WP_Error(
                     'rest_forbidden',
                     _x( 'You can not make user moderator if he is not participant of the conversation', 'Rest API Error', 'bp-better-messages' ),

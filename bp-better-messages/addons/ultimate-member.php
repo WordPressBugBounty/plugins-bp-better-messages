@@ -332,10 +332,16 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
             $notFollowed = array();
 
-            foreach($recipients as $recipient){
-                $user = get_userdata($recipient);
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
 
-                $allowed = Better_Messages()->functions->is_followers( Better_Messages()->functions->get_current_user_id(), $user->ID );
+            foreach($recipients as $recipient){
+                if( $recipient < 0 ) continue;
+                if( intval( $recipient ) === $current_user_id ) continue;
+
+                $user = get_userdata($recipient);
+                if( ! $user ) continue;
+
+                $allowed = Better_Messages()->functions->is_followers( $current_user_id, $user->ID );
 
                 if( ! $allowed ) {
                     $notFollowed[] = Better_Messages()->functions->get_name($user->ID);
@@ -392,12 +398,16 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
             $notFriends = array();
 
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
             foreach($recipients as $recipient){
                 if( $recipient < 0 ) continue;
+                if( intval( $recipient ) === $current_user_id ) continue;
 
                 $user = get_userdata($recipient);
+                if( ! $user ) continue;
 
-                if( ! UM()->Friends_API()->api()->is_friend( Better_Messages()->functions->get_current_user_id(), $user->ID ) ) {
+                if( ! UM()->Friends_API()->api()->is_friend( $current_user_id, $user->ID ) ) {
                     $notFriends[] = Better_Messages()->functions->get_name($user->ID);
                 }
             }
