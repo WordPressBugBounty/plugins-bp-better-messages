@@ -207,8 +207,10 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 $friendly = __( 'The AI service took too long to respond. Please try again.', 'bp-better-messages' );
             } elseif ( strpos( $lower, '503' ) !== false || strpos( $lower, '502' ) !== false || strpos( $lower, '500' ) !== false || strpos( $lower, 'server error' ) !== false || strpos( $lower, 'internal error' ) !== false || strpos( $lower, 'service unavailable' ) !== false || strpos( $lower, 'temporarily unavailable' ) !== false ) {
                 $friendly = __( 'The AI service is temporarily unavailable. Please try again later.', 'bp-better-messages' );
-            } elseif ( strpos( $lower, 'invalid' ) !== false && strpos( $lower, 'key' ) !== false ) {
+            } elseif ( ( strpos( $lower, 'invalid' ) !== false || strpos( $lower, 'incorrect' ) !== false ) && strpos( $lower, 'key' ) !== false ) {
                 $friendly = __( 'There is an issue with the AI configuration. Please contact the site administrator.', 'bp-better-messages' );
+            } elseif ( strpos( $lower, 'model' ) !== false && ( strpos( $lower, 'not found' ) !== false || strpos( $lower, 'not supported' ) !== false || strpos( $lower, 'does not exist' ) !== false || strpos( $lower, 'deprecated' ) !== false || strpos( $lower, 'do not have access' ) !== false ) ) {
+                $friendly = __( 'The AI model configured for this bot is not available. Please contact the site administrator.', 'bp-better-messages' );
             } elseif ( strpos( $lower, 'quota' ) !== false || strpos( $lower, 'billing' ) !== false || strpos( $lower, 'insufficient' ) !== false || strpos( $lower, 'credit' ) !== false || strpos( $lower, 'balance' ) !== false ) {
                 $friendly = __( 'The AI service quota has been exceeded. Please contact the site administrator.', 'bp-better-messages' );
             } elseif ( strpos( $lower, 'safety' ) !== false || strpos( $lower, 'blocked' ) !== false || strpos( $lower, 'content_filter' ) !== false ) {

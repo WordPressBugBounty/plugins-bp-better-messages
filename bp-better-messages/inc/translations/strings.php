@@ -1035,6 +1035,7 @@ function _bm_js_translation_strings() {
     _x('Error loading models', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Loading', 'WP Admin', 'bp-better-messages');
     _x('Same as bot model', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
+    _x('%s (no longer available)', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Bot deleted', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Are you sure you want to permanently delete this bot?', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Delete all messages sent by this bot', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
@@ -1797,8 +1798,8 @@ function _bm_js_translation_strings() {
     _x('Hide Breakpoint', 'Settings page', 'bp-better-messages');
     _x('Container width below which sidebar hides entirely (0 for auto-detection)', 'Settings page', 'bp-better-messages');
     _x('Dimensions', 'Settings page', 'bp-better-messages');
-    _x('Fixed Header Height', 'Settings page', 'bp-better-messages');
-    _x('If your theme has a fixed or sticky header, enter its height so the messages container and scrolling account for it', 'Settings page', 'bp-better-messages');
+    _x('Window Height Offset', 'Settings page', 'bp-better-messages');
+    _x('Space taken by other fixed elements on the page, such as a sticky header, a bottom bar or anything else the messenger should not overlap. The messenger subtracts this from the window height when calculating its size, so increasing it also leaves a bigger gap from the window edges', 'Settings page', 'bp-better-messages');
     _x('Min Height', 'Settings page', 'bp-better-messages');
     _x('The messages container will never be shorter than this value', 'Settings page', 'bp-better-messages');
     _x('Max Height', 'Settings page', 'bp-better-messages');

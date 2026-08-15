@@ -2127,10 +2127,10 @@ class Better_Messages_Chats
             echo '<p class="bpbm-notice">' . implode('</p><p class="bpbm-notice">', $bpbm_errors) . '</p>';
         }
 
-        $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+        $initialHeight = Better_Messages()->functions->initial_container_height();
         $class = 'bp-messages-chat-wrap';
         if( $disable_init ) $class .= ' bm-disable-auto-init';
-        echo '<div class="' . $class . '" style="height: ' . $initialHeight . 'px" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '" data-full-screen="' . esc_attr($full_screen) . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+        echo '<div class="' . $class . '" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '" data-full-screen="' . esc_attr($full_screen) . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
 
         $content = ob_get_clean();
         $content = str_replace( 'loading="lazy"', '', $content );

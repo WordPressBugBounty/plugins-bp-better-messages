@@ -622,6 +622,10 @@ class Better_Messages_Options
 
         $this->settings = wp_parse_args( $args, $this->defaults );
 
+        foreach ( array( 'miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder' ) as $tabs_order_key ) {
+            $this->settings[ $tabs_order_key ] = $this->with_conversations_tab( $this->settings[ $tabs_order_key ] );
+        }
+
         // Migrate emailCustomHtml from main settings to separate option if needed
         if( ! empty( $this->settings['emailCustomHtml'] ) ){
             $existing = get_option( 'better-messages-email-custom-html', '' );
@@ -630,6 +634,27 @@ class Better_Messages_Options
             }
             $this->settings['emailCustomHtml'] = ''; // Clear from main settings
         }
+    }
+
+    public function with_conversations_tab( $order )
+    {
+        if ( ! is_array( $order ) || empty( $order ) ) {
+            return $order;
+        }
+
+        foreach ( $order as $tab_id ) {
+            if ( ! is_string( $tab_id ) ) {
+                continue;
+            }
+
+            if ( $tab_id === 'conversations' || str_ends_with( $tab_id, '-conversations' ) ) {
+                return $order;
+            }
+        }
+
+        array_unshift( $order, 'conversations' );
+
+        return $order;
     }
 
     /**

@@ -1738,8 +1738,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
          * @since 2.0.55
          */
         public function get_conversation_layout(int $thread_id ){
-            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
-            return '<div class="bp-messages-single-thread-wrap" style="height: ' . $initialHeight . 'px" data-thread-id="' . $thread_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+            $initialHeight = $this->initial_container_height();
+            return '<div class="bp-messages-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' . $thread_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
         }
 
         public function get_page( $args = [] ){
@@ -1755,13 +1755,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                'full_screen' => false
             ] );
 
-            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+            $initialHeight = $this->initial_container_height();
 
             $full_screen = $args['full_screen'] ? '1' : '0';
 
             ob_start();
             do_action('bp_better_messages_before_main_template_rendered');
-            echo '<div class="bp-messages-wrap-main" style="height: ' . $initialHeight . 'px" data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder( true ) . '</div>';
+            echo '<div class="bp-messages-wrap-main" style="height: ' . esc_attr( $initialHeight ) . '" data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder( true ) . '</div>';
             do_action('bp_better_messages_after_main_template_rendered');
             return ob_get_clean();
         }
@@ -1776,9 +1776,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $thread_id = Better_Messages()->groups->get_group_thread_id( $group_id );
             ob_start();
             $is_in_groups_now = bm_bp_is_current_component('groups');
-            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+            $initialHeight = $this->initial_container_height();
             ?>
-            <div style="height:<?php echo $initialHeight; ?>px" class="bp-messages-wrap-group <?php if( $is_in_groups_now ) { echo 'bp-messages-group-thread'; }; ?> <?php Better_Messages()->functions->messages_classes($thread_id, 'group'); ?>" data-thread-id="<?php esc_attr_e($thread_id); ?>"><?php echo Better_Messages()->functions->container_placeholder(); ?></div>
+            <div style="height:<?php echo esc_attr( $initialHeight ); ?>" class="bp-messages-wrap-group <?php if( $is_in_groups_now ) { echo 'bp-messages-group-thread'; }; ?> <?php Better_Messages()->functions->messages_classes($thread_id, 'group'); ?>" data-thread-id="<?php esc_attr_e($thread_id); ?>"><?php echo Better_Messages()->functions->container_placeholder(); ?></div>
             <?php
             return ob_get_clean();
         }
@@ -3963,8 +3963,26 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return ob_get_clean();
         }
 
+        public function initial_container_height(){
+            $maxHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+            $minHeight = (int) Better_Messages()->settings['messagesMinHeight'];
+            $offset    = (int) Better_Messages()->settings['fixedHeaderHeight'];
+
+            $viewport = '100vh';
+
+            if( is_admin_bar_showing() ){
+                $viewport .= ' - var(--wp-admin--admin-bar--height, 32px)';
+            }
+
+            if( $offset > 0 ){
+                $viewport .= ' - ' . $offset . 'px';
+            }
+
+            return 'calc(clamp(' . $minHeight . 'px, ' . $viewport . ', ' . $maxHeight . 'px) - 20px)';
+        }
+
         public function container_placeholder( $with_sidebar = false ){
-            $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
+            $initialHeight = $this->initial_container_height();
             $combinedView = $with_sidebar && Better_Messages()->settings['combinedView'] === '1';
 
             ob_start();
@@ -3982,8 +4000,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $sideWidthValue = $sideWidth . 'px';
                 }
                 ?>
-                <div class="<?php echo esc_attr( $wrapClass ); ?>" style="height:<?php echo $initialHeight; ?>px; --bm-side-width:<?php echo esc_attr( $sideWidthValue ); ?>">
-                    <div class="bp-messages-threads-wrapper" style="height:<?php echo $initialHeight; ?>px">
+                <div class="<?php echo esc_attr( $wrapClass ); ?>" style="height:<?php echo esc_attr( $initialHeight ); ?>; --bm-side-width:<?php echo esc_attr( $sideWidthValue ); ?>">
+                    <div class="bp-messages-threads-wrapper" style="height:<?php echo esc_attr( $initialHeight ); ?>">
                         <div class="bp-messages-side-threads">
                             <div class="chat-header side-header">
                                 <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
@@ -4002,7 +4020,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 <?php
             } else {
                 ?>
-                <div class="bp-messages-wrap" style="height:<?php echo $initialHeight; ?>px">
+                <div class="bp-messages-wrap" style="height:<?php echo esc_attr( $initialHeight ); ?>">
                     <?php echo $this->header_placeholder(); ?>
                     <?php echo $this->threads_placeholder(); ?>
                 </div>

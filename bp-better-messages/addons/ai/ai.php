@@ -2345,7 +2345,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                         array( '/claude-3-haiku/',      array( 'input' => 0.25,  'output' => 1.25, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
                     ),
                     'openai' => array(
+                        array( '/gpt-5\\.6-luna/',         array( 'input' => 0.20,  'output' => 1.20, 'cacheRead' => 0.02,  'cacheWrite' => 0.20 ) ),
+                        array( '/gpt-5\\.6-sol/',          array( 'input' => 5,     'output' => 30,   'cacheRead' => 0.50,  'cacheWrite' => 5 ) ),
+                        array( '/gpt-5\\.6-terra/',        array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
+                        array( '/gpt-5\\.5-pro/',          array( 'input' => 30,    'output' => 180,  'cacheRead' => 30,    'cacheWrite' => 30 ) ),
+                        array( '/gpt-5\\.5/',              array( 'input' => 5,     'output' => 30,   'cacheRead' => 0.50,  'cacheWrite' => 5 ) ),
                         array( '/gpt-5\\.4-pro/',          array( 'input' => 30,    'output' => 180,  'cacheRead' => 30,    'cacheWrite' => 30 ) ),
+                        array( '/gpt-5\\.4-mini/',         array( 'input' => 0.75,  'output' => 4.50, 'cacheRead' => 0.075, 'cacheWrite' => 0.75 ) ),
+                        array( '/gpt-5\\.4-nano/',         array( 'input' => 0.20,  'output' => 1.25, 'cacheRead' => 0.02,  'cacheWrite' => 0.20 ) ),
                         array( '/gpt-5\\.4/',              array( 'input' => 2.50,  'output' => 15,   'cacheRead' => 0.25,  'cacheWrite' => 2.50 ) ),
                         array( '/gpt-5\\.3/',              array( 'input' => 1.75,  'output' => 14,   'cacheRead' => 0.175, 'cacheWrite' => 1.75 ) ),
                         array( '/gpt-5\\.2-pro/',          array( 'input' => 21,    'output' => 168,  'cacheRead' => 21,    'cacheWrite' => 21 ) ),
@@ -2447,6 +2454,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             'low'    => array( '1024x1024' => 0.009, '1024x1536' => 0.013, '1536x1024' => 0.013 ),
                             'medium' => array( '1024x1024' => 0.034, '1024x1536' => 0.05,  '1536x1024' => 0.05 ),
                             'high'   => array( '1024x1024' => 0.133, '1024x1536' => 0.20,  '1536x1024' => 0.20 ),
+                    ),
+                    'gpt-image-2' => array(
+                            'low'    => array( '1024x1024' => 0.006, '1024x1536' => 0.005, '1536x1024' => 0.005 ),
+                            'medium' => array( '1024x1024' => 0.053, '1024x1536' => 0.041, '1536x1024' => 0.041 ),
+                            'high'   => array( '1024x1024' => 0.211, '1024x1536' => 0.165, '1536x1024' => 0.165 ),
                     ),
                     // Gemini models (native image generation — single quality level)
                     'gemini-2.0-flash' => array(

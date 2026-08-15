@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.26
+Stable tag: 2.15.27
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,6 +379,24 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
+= 2.15.27 =
+* Added support for the **gpt-image-2** image generation model in [AI chat bots](https://www.better-messages.com/docs/features/ai-chat-bots/)
+* Added built-in pricing for the GPT-5.5 and GPT-5.6 models, and fixed gpt-5.4-mini / gpt-5.4-nano replies being charged at the full gpt-5.4 price
+* The **Context Messages Limit** of an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) now also applies to OpenAI bots in one-to-one conversations, keeping long chats from getting more expensive with every message
+* Fixed sending in a chat room getting slower with every member — in a room with tens of thousands of members a sticker took a minute to appear for the sender
+* Fixed the [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) model list offering models that cannot answer messages
+* Fixed a bot whose model is no longer available answering with a generic error instead of saying the model needs to be changed
+* Fixed the title and the YouTube logo on a shared video doing nothing when clicked
+* Fixed shared videos not responding to clicks inside [mini chats](https://www.better-messages.com/docs/websocket/mini-chats/) — they now open from a poster with a play button
+* Fixed **Privacy-friendly oEmbeds** rendering a broken placeholder with the video title spilled into the message as text
+* Video placeholders now start playback on the first tap, without a second click on the play button
+* Fixed conversation list previews of video messages sometimes showing raw placeholder text
+* Fixed the Conversations tab being listed last at Settings → Mini Widgets → Layout
+* Fixed the unread counter on tabs covering the icon when tab labels are shown, and being unreadable in dark mode
+* Stopped themes from reshaping the messenger's own input fields — the side panel search box stays readable in dark mode
+* Fixed the page appearing extremely tall while the messenger loads and then jumping once it is ready — the loading placeholder now fits the window exactly like the loaded messenger, including with **Max Height** set to a large value like 9999
+* Renamed the **Fixed Header Height** setting to **Window Height Offset**, as it reserves window space for any fixed element on the page, not only a sticky header
+
 = 2.15.26 =
 * Added [`better_messages_push_notification`](https://www.better-messages.com/hooks/php-filters/#better_messages_push_notification) PHP filter — change the link, title and text of push notifications on every delivery path
 * Added [`better_messages_mobile_push_content`](https://www.better-messages.com/hooks/php-filters/#better_messages_mobile_push_content) PHP filter — change the wording of push notifications sent to the [native mobile app](https://www.better-messages.com/docs/category/mobile-app/)
@@ -398,6 +416,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) replies occasionally left as unformatted, cut-off or garbled text after streaming finished, most often in the [native mobile app](https://www.better-messages.com/docs/category/mobile-app/)
 * Fixed tapping a shared YouTube or Vimeo video navigating the page to the video site instead of playing it — video players are now sandboxed, adjustable with the [`better_messages_embed_sandbox`](https://www.better-messages.com/hooks/php-filters/#better_messages_embed_sandbox) PHP filter
 * Fixed links typed with a capitalised address, such as the `Https://` phone keyboards produce, not being replaced by their preview
+* Fixed shared videos refusing to play in the [mobile app](https://www.better-messages.com/docs/category/mobile-app/) on iPhone and iPad — video services now require the address of the embedding page, which an app cannot provide, so players are loaded through a small page served from your own site
 * Fixed a conversation opening as an empty messenger when one of its messages quoted HTML or JSX source code, most often an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) reply — code in messages is now always shown as text
 * User statuses, call messages and end-to-end encryption notices of the WebSocket version are now translatable on WordPress.org
 * Other minor bugfixes and improvements

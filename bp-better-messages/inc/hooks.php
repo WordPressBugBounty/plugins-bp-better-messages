@@ -1483,15 +1483,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function max_height_css(){
             if( ! is_user_logged_in() ) return false;
-            $max_height = (int) apply_filters('bp_better_messages_max_height', Better_Messages()->settings['messagesHeight']);
-            $fixed_header_height = (int) Better_Messages()->settings['fixedHeaderHeight'];
-
-            if( $fixed_header_height > 0 ){
-                $max_height = $max_height - $fixed_header_height;
-            }
+            $max_height = Better_Messages()->functions->initial_container_height();
 
             #echo '<style type="text/css">body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .bp-messages-side-threads-wrapper > .bp-messages-column > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .bp-messages-side-threads-wrapper > .bp-messages-column > .scroller > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .scroller > .scroller{max-height:'. $max_height .'px;}body:not(.bp-messages-mobile) .bp-messages-threads-wrapper{max-height:' . ($max_height) .'px!important;}</style>';
-            echo '<style type="text/css">.bp-messages-threads-wrapper{height:' . $max_height . 'px}</style>';
+            echo '<style type="text/css">.bp-messages-threads-wrapper{height:' . $max_height . '}</style>';
         }
 
         public function beehive_theme_integration(){

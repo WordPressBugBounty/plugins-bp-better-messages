@@ -7441,15 +7441,18 @@ body.bp-messages-mobile #better-messages-modals-container input {
   background-size: cover;
   background-position: center;
   cursor: pointer;
+  touch-action: manipulation;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 8px;
 }
-.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent:hover .bm-embed-consent-play {
-  transform: scale(1.1);
-  background-color: rgba(255, 0, 0, 0.9);
+@media (hover: hover) {
+  .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent:hover .bm-embed-consent-play {
+    transform: scale(1.1);
+    background-color: rgba(255, 0, 0, 0.9);
+  }
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent .bm-embed-consent-play {
   width: 68px;
@@ -7457,6 +7460,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   background-color: rgba(255, 0, 0, 0.8);
   border-radius: 12px;
   position: relative;
+  flex-shrink: 0;
   transition: transform 0.15s ease, background-color 0.15s ease;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent .bm-embed-consent-play::after {
@@ -7478,6 +7482,21 @@ body.bp-messages-mobile #better-messages-modals-container input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent.bm-embed-consent-small {
+  gap: 4px;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent.bm-embed-consent-small .bm-embed-consent-play {
+  width: 44px;
+  height: 31px;
+  border-radius: 8px;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent.bm-embed-consent-small .bm-embed-consent-play::after {
+  border-width: 7px 0 7px 12px;
+}
+.bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bp-messages-iframe-container .bm-embed-consent.bm-embed-consent-small .bm-embed-consent-title {
+  font-size: 11px;
+  max-width: 90%;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-info {
   display: block;
@@ -8792,7 +8811,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   padding: 0 4px;
   border-radius: 7px;
   background: rgba(var(--main-bm-color), 1);
-  color: #fff;
+  color: rgba(var(--bm-bg-color), 1);
   font-size: 9px;
   font-weight: 600;
   text-align: center;
@@ -8805,6 +8824,13 @@ body.bp-messages-mobile #better-messages-modals-container input {
 }
 .bp-messages-wrap .bm-tab-badge:empty {
   display: none;
+}
+.bp-messages-wrap .bm-tab-labeled .bm-tab-badge {
+  position: static;
+  order: -1;
+  margin-right: 4px;
+  top: auto;
+  right: auto;
 }
 .bp-messages-wrap .bm-placeholder {
   margin: 0 auto;
@@ -8880,7 +8906,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   font-size: 16px;
   color: rgba(var(--bm-text-color), 1) !important;
   background: none !important;
-  border-radius: 0;
+  border-radius: 0 !important;
 }
 .bp-messages-wrap .bm_thread_subject_input input.thread_subject__input[type=text]::placeholder {
   color: rgba(var(--bm-placeholder), 0.33);
@@ -15309,6 +15335,36 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   max-width: calc(100% - 30px);
 }
 
+.bp-messages-wrap input[type=text],
+.bp-messages-wrap input[type=search],
+.bp-messages-wrap input[type=email],
+.bp-messages-wrap input[type=url],
+.bp-messages-wrap input[type=tel],
+.bp-messages-wrap input[type=number],
+.bp-messages-wrap input[type=password],
+.bp-messages-wrap textarea,
+.bp-messages-wrap select,
+.bp-better-messages-list input[type=text],
+.bp-better-messages-list input[type=search],
+.bp-better-messages-list input[type=email],
+.bp-better-messages-list input[type=url],
+.bp-better-messages-list input[type=tel],
+.bp-better-messages-list input[type=number],
+.bp-better-messages-list input[type=password],
+.bp-better-messages-list textarea,
+.bp-better-messages-list select,
+.bm-modal-window input[type=text],
+.bm-modal-window input[type=search],
+.bm-modal-window input[type=email],
+.bm-modal-window input[type=url],
+.bm-modal-window input[type=tel],
+.bm-modal-window input[type=number],
+.bm-modal-window input[type=password],
+.bm-modal-window textarea,
+.bm-modal-window select {
+  border-radius: 3px !important;
+}
+
 .bp-messages-wrap .bpbm-search-in-list {
   width: 100%;
   padding: 0;
@@ -15323,9 +15379,13 @@ a.bpbm-join-to-chat-button:hover.bm-button-disabled {
   min-height: 10px;
   display: block;
   outline: none !important;
-  background: rgba(var(--bm-bg-color), 1);
-  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(var(--bm-bg-color), 1) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   border-bottom: 1px solid rgba(var(--bm-border-secondary-color), 1) !important;
+  box-shadow: none !important;
   box-sizing: border-box;
   padding: 5px 10px 5px 10px;
   height: 45px;
@@ -18172,7 +18232,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   width: 100%;
   padding: 8px 12px;
   border: 1px solid rgba(var(--bm-border-secondary-color), 1);
-  border-radius: 6px;
+  border-radius: 6px !important;
   font-size: 14px;
   box-sizing: border-box;
   background: rgba(var(--bm-bg-color), 1);
@@ -18543,7 +18603,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   width: 100%;
   padding: 8px 10px;
   border: 1px solid rgba(var(--bm-border-secondary-color), 0.5);
-  border-radius: 4px;
+  border-radius: 4px !important;
   font-size: 14px;
   box-sizing: border-box;
   background: rgba(var(--bm-bg-color), 1);

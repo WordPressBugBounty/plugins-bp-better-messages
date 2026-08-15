@@ -164,19 +164,6 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
             $is_sticker = strpos( $message, '<span class="bpbm-sticker">', 0 ) === 0;
 
             if( $is_sticker ){
-                global $processedUrls;
-
-                $regex = '/\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-                preg_match_all( $regex, $message, $urls );
-
-                if( ! empty( $urls[0] ) ){
-                    $urls[0] = array_unique($urls[0]);
-                }
-
-                foreach ( $urls[ 0 ] as $_url ) {
-                    $processedUrls[$message_id][] = $_url;
-                }
-
                 $desc = '<i class="fas fa-sticky-note"></i> ' . __('Sticker', 'bp-better-messages');
                 if( $context !== 'stack' ) {
                     if( $context === 'mobile_app' ){

@@ -453,12 +453,42 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 return $all;
             }
 
+            $excluded = [
+                'chat-latest',
+                'chatgpt',
+                'deep-research',
+                'search-preview',
+                'search-api',
+                'instruct',
+                'realtime',
+                'transcribe',
+                'whisper',
+                'image',
+                'tts',
+                'moderation',
+                'embedding',
+            ];
+
+            $supports_audio = class_exists( 'BP_Better_Messages_Voice_Messages' );
+
             $models = [];
 
             foreach ( $all as $model_id ) {
-                if ( ( str_contains( $model_id, 'gpt' ) || preg_match( '/^o[0-9]/', $model_id ) ) && ! str_contains( $model_id, '-realtime-' ) ) {
-                    $models[] = $model_id;
+                if ( ! str_contains( $model_id, 'gpt' ) && ! preg_match( '/^o[0-9]/', $model_id ) ) {
+                    continue;
                 }
+
+                if ( str_contains( $model_id, 'audio' ) && ( ! $supports_audio || ! str_contains( $model_id, '-audio-' ) ) ) {
+                    continue;
+                }
+
+                foreach ( $excluded as $excluded_part ) {
+                    if ( str_contains( $model_id, $excluded_part ) ) {
+                        continue 2;
+                    }
+                }
+
+                $models[] = $model_id;
             }
 
             sort( $models );
@@ -491,8 +521,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
         }
 
         public function audioProvider( $bot_id, $bot_user, $message ) {
-            global $wpdb;
-
             $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
 
             $bot_user_id = absint( $bot_user->id ) * -1;
@@ -511,12 +539,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
             $voice = $bot_settings['voice'];
 
-            $messages = $wpdb->get_results( $wpdb->prepare(
-            "SELECT id, sender_id, message 
-            FROM `" . bm_get_table('messages') . "` 
-            WHERE thread_id = %d 
-            AND created_at <= %d
-            ORDER BY `created_at` ASC", $message->thread_id, $message->created_at ) );
+            $context_limit = 0;
+            if ( ! empty( $bot_settings['contextMessages'] ) && ! $this->is_group_thread( $message->thread_id ) ) {
+                $context_limit = intval( $bot_settings['contextMessages'] );
+            }
+
+            $messages = $this->get_thread_messages( $message->thread_id, $message->created_at, $context_limit );
 
             $request_messages = [];
 
@@ -937,8 +965,16 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
             $is_group = $this->is_group_thread( $thread_id );
 
+            if ( $is_group ) {
+                $context_limit = ! empty( $bot_settings['groupContextMessages'] ) ? intval( $bot_settings['groupContextMessages'] ) : 20;
+            } else {
+                $context_limit = ! empty( $bot_settings['contextMessages'] ) ? intval( $bot_settings['contextMessages'] ) : 0;
+            }
+
+            $use_history_input = $is_group || $context_limit > 0;
+
             $open_ai_conversation = null;
-            if ( ! $is_group ) {
+            if ( ! $use_history_input ) {
                 $open_ai_conversation = $this->get_open_ai_conversation( $thread_id );
 
                 if( is_wp_error( $open_ai_conversation ) ){
@@ -954,20 +990,23 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             $sender_names = array();
             $group_instruction = '';
 
-            if ( $is_group ) {
-                $context_limit = ! empty( $bot_settings['groupContextMessages'] ) ? intval( $bot_settings['groupContextMessages'] ) : 20;
+            if ( $use_history_input ) {
                 $summary_result  = $this->get_thread_messages_with_summary( $thread_id, $message->created_at, $context_limit, $bot_user_id, $bot_settings );
                 $thread_messages = $summary_result['messages'];
                 $summary_context = $summary_result['summary'];
-                $sender_names = $this->resolve_sender_names( $thread_messages, $bot_user_id );
+                if ( $is_group ) {
+                    $sender_names = $this->resolve_sender_names( $thread_messages, $bot_user_id );
+                }
                 $this->enrich_with_reply_context( $thread_messages, $message, $sender_names );
-                $bot_name = get_the_title( $bot_id );
-                $group_instruction = $this->get_group_context_instruction( $sender_names, $bot_user_id, $bot_name );
+                if ( $is_group ) {
+                    $bot_name = get_the_title( $bot_id );
+                    $group_instruction = $this->get_group_context_instruction( $sender_names, $bot_user_id, $bot_name );
+                }
                 if ( $summary_context ) {
                     $group_instruction .= "\n\nPrevious conversation summary:\n" . $summary_context;
                 }
 
-                // Build full conversation history as input (no server-side conversation for groups)
+                // Build conversation history as input (no server-side conversation)
                 foreach ( $thread_messages as $_message ) {
                     $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                     if ( $is_error ) continue;
@@ -987,10 +1026,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     $content = [];
 
                     if ( $role === 'user' ) {
-                        $msg_text = $this->strip_mention_html( $msg_text, $sender_names );
-                        $sid = (int) $_message->sender_id;
-                        $sender_label = isset( $sender_names[ $sid ] ) ? $sender_names[ $sid ] : 'User #' . abs( $sid );
-                        $msg_text = '[' . $sender_label . ']: ' . $msg_text;
+                        if ( $is_group ) {
+                            $msg_text = $this->strip_mention_html( $msg_text, $sender_names );
+                            $sid = (int) $_message->sender_id;
+                            $sender_label = isset( $sender_names[ $sid ] ) ? $sender_names[ $sid ] : 'User #' . abs( $sid );
+                            $msg_text = '[' . $sender_label . ']: ' . $msg_text;
+                        }
 
                         $attachments = Better_Messages()->functions->get_message_meta( $_message->id, 'attachments', true );
 

@@ -91,6 +91,14 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             if ( $context !== 'stack' ) return $message;
             global $processedUrls;
 
+            static $formatted_cache = array();
+
+            $cache_key = $message_id . ':' . md5( $message );
+
+            if ( isset( $formatted_cache[ $cache_key ] ) ) {
+                return $formatted_cache[ $cache_key ];
+            }
+
             $links = array();
             $wrap_token = function( $url ) use ( &$links ) {
                 return '<' . array_push( $links, '<a target="_blank" href="' . $url . '">' . $url . '</a>' ) . '>';
@@ -191,11 +199,13 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                             $embed = false;
                         } else {
                             $cache = Better_Messages()->functions->get_message_meta( $message_id, 'media_info_' . $url_md5, true );
-                            if ( ! empty( $cache ) ) {
+                            if ( $cache === 'none' ) {
+                                $embed  = false;
+                            } else if ( ! empty( $cache ) ) {
                                 $embed  = $cache;
                             } else {
                                 $embed  = $oembed->get_data( $url, ['height' => '200', 'discover' => false] );
-                                Better_Messages()->functions->update_message_meta( $message_id, 'media_info_' . $url_md5, $embed );
+                                Better_Messages()->functions->update_message_meta( $message_id, 'media_info_' . $url_md5, ( $embed === false ) ? 'none' : $embed );
                             }
                         }
 
@@ -207,7 +217,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                                 if ( $privacy_embeds ) {
                                     $html = $this->render_privacy_embed( $url, $embed );
                                 } else {
-                                    $embed_html = $this->apply_embed_playback_params( $embed->html, strtolower( $embed->provider_name ) );
+                                    $embed_html = $this->apply_embed_playback_params( $embed->html, strtolower( $embed->provider_name ), $embed );
                                     $html = '<span class="bp-messages-iframe-container">' . $embed_html . '</span>';
                                 }
                             } else if( isset($embed->html) ) {
@@ -248,7 +258,15 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 }
             }
 
-            return preg_replace_callback('/<(\d+)>/', function ($match) use (&$links) { return $links[$match[1] - 1]; }, $message);
+            $message = preg_replace_callback('/<(\d+)>/', function ($match) use (&$links) { return $links[$match[1] - 1]; }, $message);
+
+            if ( count( $formatted_cache ) > 200 ) {
+                $formatted_cache = array();
+            }
+
+            $formatted_cache[ $cache_key ] = $message;
+
+            return $message;
         }
 
 
@@ -365,12 +383,14 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             return $out;
         }
 
-        public function apply_embed_playback_params( $html, $provider ) {
+        public function apply_embed_playback_params( $html, $provider, $embed = null ) {
             if ( empty( $html ) ) {
                 return $html;
             }
 
             $sandbox = $this->get_embed_sandbox( $provider );
+            $poster  = is_object( $embed ) ? $this->get_embed_poster( $embed ) : '';
+            $title   = is_object( $embed ) && isset( $embed->title ) ? trim( (string) $embed->title ) : '';
             $tags    = new WP_HTML_Tag_Processor( $html );
 
             while ( $tags->next_tag( 'iframe' ) ) {
@@ -385,6 +405,14 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 if ( $sandbox !== '' ) {
                     $tags->set_attribute( 'sandbox', $sandbox );
                 }
+
+                if ( $poster !== '' ) {
+                    $tags->set_attribute( 'data-poster', $poster );
+                }
+
+                if ( $title !== '' ) {
+                    $tags->set_attribute( 'data-title', $title );
+                }
             }
 
             return $tags->get_updated_html();
@@ -393,7 +421,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
         public function get_embed_sandbox( $provider ) {
             $sandbox = apply_filters(
                 'better_messages_embed_sandbox',
-                'allow-scripts allow-same-origin allow-presentation',
+                'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox',
                 $provider
             );
 
@@ -410,6 +438,12 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             }
 
             return add_query_arg( 'playsinline', '0', $src );
+        }
+
+        public function get_embed_poster( $embed ) {
+            $poster = isset( $embed->thumbnail_url ) ? esc_url_raw( (string) $embed->thumbnail_url ) : '';
+
+            return strpos( $poster, 'https://' ) === 0 ? $poster : '';
         }
 
         /**
@@ -441,7 +475,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             }
 
             return '<span class="bp-messages-iframe-container">'
-                . '<span class="bm-embed-consent" data-sandbox="' . esc_attr( $this->get_embed_sandbox( $provider ) ) . '" data-src="' . esc_attr( $iframe_src ) . '">'
+                . '<span class="bm-embed-consent" data-title="' . $title . '" data-sandbox="' . esc_attr( $this->get_embed_sandbox( $provider ) ) . '" data-src="' . esc_attr( $iframe_src ) . '">'
                 . '<span class="bm-embed-consent-play"></span>'
                 . ( $title ? '<span class="bm-embed-consent-title">' . esc_html( $title ) . '</span>' : '' )
                 . '</span>'

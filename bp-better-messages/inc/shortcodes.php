@@ -438,8 +438,8 @@ class Better_Messages_Shortcodes
             $user_id = (int) Better_Messages()->functions->get_member_id();
         }
 
-        $initialHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
-        return '<div class="bp-messages-single-thread-wrap" style="height: ' . $initialHeight . 'px" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+        $initialHeight = Better_Messages()->functions->initial_container_height();
+        return '<div class="bp-messages-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
     }
 
     public function bp_better_messages( $args ){
