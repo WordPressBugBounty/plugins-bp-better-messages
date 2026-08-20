@@ -4181,6 +4181,38 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
+        public function is_onsite_notification_enabled( $user_id ){
+            $enabled = ( Better_Messages()->settings['disableOnSiteNotification'] !== '1' );
+
+            if( Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' && $user_id > 0 ){
+                $choice = $this->get_user_meta( $user_id, 'bm_onsite_notification', true );
+
+                if( $choice === 'yes' ){
+                    $enabled = true;
+                } elseif( $choice === 'no' ){
+                    $enabled = false;
+                }
+            }
+
+            return (bool) apply_filters( 'better_messages_onsite_notification_enabled', $enabled, $user_id );
+        }
+
+        public function is_enter_to_send_enabled( $user_id ){
+            $enabled = ( Better_Messages()->settings['disableEnterForDesktop'] !== '1' );
+
+            if( Better_Messages()->settings['allowEnterToSendControl'] === '1' && $user_id > 0 ){
+                $choice = $this->get_user_meta( $user_id, 'bm_enter_to_send', true );
+
+                if( $choice === 'yes' ){
+                    $enabled = true;
+                } elseif( $choice === 'no' ){
+                    $enabled = false;
+                }
+            }
+
+            return (bool) apply_filters( 'better_messages_enter_to_send_enabled', $enabled, $user_id );
+        }
+
         public function get_restrict_to_roles( $user_id ): array
         {
             $restricted_roles = (array) Better_Messages()->settings['restrictRoleBlock'];

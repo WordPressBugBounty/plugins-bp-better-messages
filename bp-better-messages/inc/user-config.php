@@ -142,6 +142,32 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
+            if( $user_id > 0 && Better_Messages()->settings['allowEnterToSendControl'] === '1' ) {
+                $enter_to_send = Better_Messages()->functions->is_enter_to_send_enabled( $user_id );
+
+                $settings[] = [
+                    'id' => 'enter_to_send',
+                    'title' => _x('How do you want to send messages on desktop?', 'User settings', 'bp-better-messages'),
+                    'type' => 'radio',
+                    'options' => [
+                        [
+                            'id' => 'enter',
+                            'label' => _x('Send with Enter', 'User settings', 'bp-better-messages'),
+                            'value' => 'enter',
+                            'checked' => $enter_to_send,
+                            'desc' => _x('Shift+Enter starts a new line. Best for quick back and forth chatting.', 'User settings', 'bp-better-messages')
+                        ],
+                        [
+                            'id' => 'shift_enter',
+                            'label' => _x('Send with Shift+Enter', 'User settings', 'bp-better-messages'),
+                            'value' => 'shift_enter',
+                            'checked' => ! $enter_to_send,
+                            'desc' => _x('Enter starts a new line. Best if you often write longer messages over several lines.', 'User settings', 'bp-better-messages')
+                        ]
+                    ]
+                ];
+            }
+
             $notifications_options = [];
 
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
@@ -155,13 +181,33 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' ) {
+            if( $user_id > 0 && Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' ) {
+                $notifications_options[] = [
+                    'id' => 'onsite_notifications',
+                    'label' => _x('Show a popup when a new message arrives', 'User settings', 'bp-better-messages'),
+                    'value' => 'yes',
+                    'checked' => Better_Messages()->functions->is_onsite_notification_enabled( $user_id ),
+                    'desc' => _x('When enabled, a notification popup appears on the page when you receive a new message and the conversation is not open.', 'User settings', 'bp-better-messages')
+                ];
+            }
+
+            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['notificationSound'] > 0 ) {
                 $notifications_options[] = [
                     'id' => 'sound_notifications',
                     'label' => _x('Disable new message sound notification', 'User settings', 'bp-better-messages'),
                     'value' => 'yes',
                     'checked' => (Better_Messages()->functions->get_user_meta($user_id, 'bpbm_disable_sound_notification', true) === 'yes'),
                     'desc' => _x('When enabled, you will not hear a sound when a new message is received.', 'User settings', 'bp-better-messages')
+                ];
+            }
+
+            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['sentSound'] > 0 ) {
+                $notifications_options[] = [
+                    'id' => 'sent_sound_notifications',
+                    'label' => _x('Disable sound when sending a message', 'User settings', 'bp-better-messages'),
+                    'value' => 'yes',
+                    'checked' => (Better_Messages()->functions->get_user_meta($user_id, 'bm_disable_sent_sound', true) === 'yes'),
+                    'desc' => _x('When enabled, you will not hear a sound when you send a message.', 'User settings', 'bp-better-messages')
                 ];
             }
 
@@ -200,6 +246,19 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                     break;
                 case 'who_can_start_conversations':
                     Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_who_can_start_conversations', $value );
+                    break;
+                case 'onsite_notifications':
+                    $new_value = ( $value === 'false' ) ? 'no' : 'yes';
+                    Better_Messages()->functions->update_user_meta( $user_id, 'bm_onsite_notification', $new_value );
+                    break;
+                case 'enter_to_send':
+                    if( $value === 'enter' || $value === 'shift_enter' ){
+                        Better_Messages()->functions->update_user_meta( $user_id, 'bm_enter_to_send', ( $value === 'enter' ) ? 'yes' : 'no' );
+                    }
+                    break;
+                case 'sent_sound_notifications':
+                    $new_value = ( $value === 'false' ) ? 'no' : 'yes';
+                    Better_Messages()->functions->update_user_meta( $user_id, 'bm_disable_sent_sound', $new_value );
                     break;
                 case 'sound_notifications':
                     $new_value = ( $value === 'false' ) ? 'no' : 'yes';

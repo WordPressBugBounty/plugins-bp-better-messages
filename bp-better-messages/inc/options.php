@@ -114,6 +114,7 @@ class Better_Messages_Options
             'disableGroupThreads'         => '0',
             'oEmbedEnable'                => '1',
             'disableEnterForDesktop'      => '0',
+            'allowEnterToSendControl'     => '0',
             'rateLimitReply'              => [],
             'rateLimitReplyMessage'       => 'Your limit for replies is exceeded',
             'restrictNewThreads'          => [],
@@ -218,6 +219,7 @@ class Better_Messages_Options
             'rateLimitNewThread'          => 0,
             'notificationsInterval'       => 15,
             'disableOnSiteNotification'   => '0',
+            'allowOnSiteNotificationControl' => '0',
             'allowSoundDisable'           => '1',
             'enableGroups'                => '0',
             'enableMiniGroups'            => '0',
@@ -577,6 +579,7 @@ class Better_Messages_Options
             'aiTranslationLanguages'        => [],
 
             'miniWidgetsOrder'              => [],
+            'rememberLastTab'               => '0',
             'sidePanelTabsOrder'            => [],
             'mobileTabsOrder'               => []
         );
@@ -1794,6 +1797,9 @@ class Better_Messages_Options
         if ( !isset( $settings['disableEnterForDesktop'] ) ) {
             $settings['disableEnterForDesktop'] = '0';
         }
+        if ( !isset( $settings['allowEnterToSendControl'] ) ) {
+            $settings['allowEnterToSendControl'] = '0';
+        }
         if ( !isset( $settings['restrictNewThreads'] ) ) {
             $settings['restrictNewThreads'] = [];
         }
@@ -1930,6 +1936,9 @@ class Better_Messages_Options
         if ( !isset( $settings['bubbleCloseOnOutside'] ) ) {
             $settings['bubbleCloseOnOutside'] = '0';
         }
+        if ( !isset( $settings['rememberLastTab'] ) ) {
+            $settings['rememberLastTab'] = '0';
+        }
         if ( !isset( $settings['sidePanelTabsOrder'] ) ) {
             $settings['sidePanelTabsOrder'] = [];
         }
@@ -2025,6 +2034,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['disableOnSiteNotification'] ) ) {
             $settings['disableOnSiteNotification'] = '0';
+        }
+        if ( !isset( $settings['allowOnSiteNotificationControl'] ) ) {
+            $settings['allowOnSiteNotificationControl'] = '0';
         }
         if ( !isset( $settings['allowSoundDisable'] ) ) {
             $settings['allowSoundDisable'] = '0';

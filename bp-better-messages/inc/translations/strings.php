@@ -2596,7 +2596,9 @@ function _bm_js_translation_strings() {
     _x('If a deleted conversation with the same recipient exists, the user will be offered to restore and continue it', 'Settings page', 'bp-better-messages');
     _x('Miscellaneous', 'Settings page', 'bp-better-messages');
     _x('Send on Enter', 'Settings page', 'bp-better-messages');
-    _x('On desktop, pressing Enter sends the message. When disabled, Enter adds a new line and users must click the send button or use Ctrl+Enter', 'Settings page', 'bp-better-messages');
+    _x('On desktop, pressing Enter sends the message. When disabled, Enter adds a new line and Shift+Enter sends the message', 'Settings page', 'bp-better-messages');
+    _x('Send on Enter Control', 'Settings page', 'bp-better-messages');
+    _x('Allow users to choose between Enter and Shift+Enter from their user settings, using the toggle above as the default', 'Settings page', 'bp-better-messages');
     _x('Delete Messages on Account Deletion', 'Settings page', 'bp-better-messages');
     _x('Permanently delete all messages sent by a user when their WordPress account is deleted', 'Settings page', 'bp-better-messages');
     _x('Sound Notification Control', 'Settings page', 'bp-better-messages');
@@ -2790,6 +2792,8 @@ function _bm_js_translation_strings() {
     _x('When offline or message is unread for 5 seconds', 'Settings page', 'bp-better-messages');
     _x('New Message Notifications', 'Settings page', 'bp-better-messages');
     _x('Show popup notifications on the page when a new message is received', 'Settings page', 'bp-better-messages');
+    _x('Popup Notification Control', 'Settings page', 'bp-better-messages');
+    _x('Allow users to turn new message popups on or off from their user settings, using the toggle above as the default', 'Settings page', 'bp-better-messages');
     _x('Email Template', 'Settings page', 'bp-better-messages');
     _x('Customize the appearance of message email notifications sent to users', 'Settings page', 'bp-better-messages');
     _x('Template Source', 'Settings page', 'bp-better-messages');
@@ -3151,6 +3155,8 @@ function _bm_js_translation_strings() {
     _x('Side Panel', 'Settings page', 'bp-better-messages');
     _x('Vertical tab strip on the full inbox page. Drag tabs to reorder — the first tab is the one the messenger opens on', 'Settings page', 'bp-better-messages');
     _x('Hide tab labels in the side panel. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
+    _x('Remember Last Tab', 'Settings page', 'bp-better-messages');
+    _x('Open the messenger on the tab each member used last instead of the first tab. Applies to the mobile tab bar as well. A link to a conversation always opens the tab that conversation belongs to', 'Settings page', 'bp-better-messages');
     _x('Mobile Tab Bar', 'Settings page', 'bp-better-messages');
     _x('Bottom tab bar shown when mobile full-screen mode is active. Drag tabs to reorder — the first tab is the one the messenger opens on', 'Settings page', 'bp-better-messages');
     _x('Hide tab labels in the mobile bottom bar. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');

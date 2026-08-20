@@ -1442,6 +1442,16 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
 
+            $category_label = $category;
+
+            if ( class_exists( 'Better_Messages_User_Reports' ) ) {
+                $categories = Better_Messages_User_Reports::instance()->get_categories( $message_id, $thread_id );
+
+                if ( isset( $categories[ $category ] ) ) {
+                    $category_label = $categories[ $category ];
+                }
+            }
+
             $subject = sprintf(
                 _x( '[%s] Message reported', 'Moderation email subject', 'bp-better-messages' ),
                 get_bloginfo( 'name' )
@@ -1457,7 +1467,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 _x( "A message has been reported on %s\n\nReported by: %s\nReason: %s\nDescription: %s\n\nOriginal message from: %s\nMessage: %s\n\nTotal reports for this message: %d\n\nModeration panel: %s", 'Moderation email body', 'bp-better-messages' ),
                 get_bloginfo( 'name' ),
                 $reporter_name,
-                $category,
+                $category_label,
                 $description,
                 $sender_name,
                 $message_content,

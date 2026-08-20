@@ -6347,7 +6347,7 @@ body.bm-messages-dark .bpbm-checkbox:checked + label::before {
   background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3e%3cpath fill=%27%23000%27 d=%27M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z%27/%3e%3c/svg%3e");
 }
 body.bm-messages-dark .bpbm-radio:checked + label::before {
-  background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3e%3cpath fill=%27%23000%27 d=%27M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z%27/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3e%3ccircle cx=%274%27 cy=%274%27 r=%273%27 fill=%27%23000%27/%3e%3c/svg%3e");
 }
 body.bm-messages-dark .contexify_item:not(.contexify_item-disabled):hover > .contexify_itemContent, body.bm-messages-dark .contexify_item:not(.contexify_item-disabled):focus > .contexify_itemContent {
   color: rgba(var(--bm-text-color), 1);
@@ -17315,7 +17315,7 @@ span.bm-user > *, a.bm-user > * {
   flex-shrink: 0;
   flex-grow: 0;
   border: 1px solid #adb5bd;
-  border-radius: 0.25em;
+  border-radius: 50%;
   margin-right: 0.5em;
   background-repeat: no-repeat;
   background-position: center center;
@@ -17324,7 +17324,7 @@ span.bm-user > *, a.bm-user > * {
 .bpbm-radio:checked + label::before {
   border-color: rgba(var(--main-bm-color), 1);
   background-color: rgba(var(--main-bm-color), 1);
-  background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3e%3cpath fill=%27%23fff%27 d=%27M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z%27/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3e%3ccircle cx=%274%27 cy=%274%27 r=%273%27 fill=%27%23fff%27/%3e%3c/svg%3e");
 }
 .bpbm-radio:not(:disabled):not(:checked) + label:hover::before {
   border-color: rgba(var(--main-bm-color), 1);
@@ -18498,7 +18498,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
 .bp-messages-wrap .bm-e2e-create-banner button {
   padding: 8px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--bm-border-radius) !important;
   background: rgb(var(--bm-button-bg));
   color: rgb(var(--bm-button-color));
   font-size: 14px;
@@ -18653,6 +18653,9 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+.bm-e2e-settings .bm-e2e-settings-actions .bm-button {
+  border-radius: var(--bm-border-radius) !important;
 }
 .bm-e2e-settings .bm-e2e-settings-actions .bm-e2e-btn-secondary {
   background: transparent !important;

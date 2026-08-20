@@ -59,17 +59,29 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                 $table = bm_get_table('messages');
 
                 $sql = $wpdb->prepare("
-                SELECT `id`
+                SELECT `id`, `thread_id`
                 FROM `{$table}`
                 WHERE LEFT(`created_at`, 10) <= %d
                 ORDER BY `{$table}`.`created_at` ASC
                 LIMIT 0, %d", $old_time, $batch_size);
 
-                $old_messages = array_map('intval', $wpdb->get_col( $sql ));
+                $old_messages = $wpdb->get_results( $sql );
 
                 if( !empty( $old_messages ) ) {
-                    foreach( $old_messages as $message_id ) {
-                        Better_Messages()->functions->delete_message( $message_id, false, true, 'delete');
+                    $thread_ids = [];
+
+                    foreach( $old_messages as $message ) {
+                        $thread_id = (int) $message->thread_id;
+
+                        Better_Messages()->functions->delete_message( (int) $message->id, $thread_id, false, 'delete');
+
+                        $thread_ids[] = $thread_id;
+                    }
+
+                    $thread_ids = array_unique( $thread_ids );
+
+                    foreach( $thread_ids as $thread_id ) {
+                        do_action( 'better_messages_thread_updated', $thread_id );
                     }
                 }
             }

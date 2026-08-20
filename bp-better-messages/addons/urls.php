@@ -346,7 +346,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
         {
             $out  = array();
             $keys = array( 'name', 'property', 'http-equiv' );
-            $tags = new WP_HTML_Tag_Processor( $str );
+            $tags = better_messages_html_tag_processor( $str );
 
             while ( $tags->next_tag( 'meta' ) ) {
                 $content = $tags->get_attribute( 'content' );
@@ -391,7 +391,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             $sandbox = $this->get_embed_sandbox( $provider );
             $poster  = is_object( $embed ) ? $this->get_embed_poster( $embed ) : '';
             $title   = is_object( $embed ) && isset( $embed->title ) ? trim( (string) $embed->title ) : '';
-            $tags    = new WP_HTML_Tag_Processor( $html );
+            $tags    = better_messages_html_tag_processor( $html );
 
             while ( $tags->next_tag( 'iframe' ) ) {
                 if ( $provider === 'youtube' ) {
@@ -457,7 +457,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             // Extract the iframe src from the embed HTML
             $iframe_src = '';
             if ( isset( $embed->html ) ) {
-                $tags = new WP_HTML_Tag_Processor( $embed->html );
+                $tags = better_messages_html_tag_processor( $embed->html );
 
                 if ( $tags->next_tag( 'iframe' ) ) {
                     $iframe_src = (string) $tags->get_attribute( 'src' );

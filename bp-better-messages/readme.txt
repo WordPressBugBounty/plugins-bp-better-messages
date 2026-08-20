@@ -1,10 +1,10 @@
 === Better Messages - Chat Rooms, Group Chat, Private Messages & AI Chat Bots ===
 Contributors: wordplus
 Tags: BuddyPress, chat room, video chat, group chat, private message
-Requires at least: 6.3
+Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.27
+Stable tag: 2.15.28
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,6 +379,20 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
+= 2.15.28 =
+* Added **Remember Last Tab** at Settings → Mini Widgets → Layout — the messenger reopens on the tab each member used last, the way the mini widgets already do
+* Users can now be given control over more of their own messenger — how Enter sends a message (**Send on Enter Control**, Settings → Messaging), whether the new message popup appears (**Popup Notification Control**, Settings → Notifications), and the sound played when they send one
+* Sound switches are no longer offered to users for a sound that is silenced site-wide
+* Fixed a "Send message" link from a forum or profile opening the side panel on the chat rooms list instead of the conversations list
+* Fixed the call restriction at Settings → Calls having no effect on guests — calls are now refused for every restricted role, not only hidden
+* Fixed **Auto-Delete Old Messages** leaving an unread badge that could never be cleared, and conversations now refresh once the cleanup has run instead of keeping removed messages on screen
+* Fixed guests losing their [end-to-end encryption](https://www.better-messages.com/docs/websocket/e2e-encryption/) keys on every page load — a guest was asked for the password again on each visit
+* Fixed the report reason arriving untranslated in the moderation email
+* Fixed the sidebar collapse button doing nothing when **Compact Mode** was set to Always Expanded or Always Compact
+* Fixed a name decorated by the site, such as a role badge, repeating itself in the avatar description and the profile tooltip
+* Fixed a prefilled message on the new conversation screen being inserted as HTML instead of plain text
+* Other minor bugfixes and improvements
+
 = 2.15.27 =
 * Added support for the **gpt-image-2** image generation model in [AI chat bots](https://www.better-messages.com/docs/features/ai-chat-bots/)
 * Added built-in pricing for the GPT-5.5 and GPT-5.6 models, and fixed gpt-5.4-mini / gpt-5.4-nano replies being charged at the full gpt-5.4 price
@@ -396,6 +410,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Stopped themes from reshaping the messenger's own input fields — the side panel search box stays readable in dark mode
 * Fixed the page appearing extremely tall while the messenger loads and then jumping once it is ready — the loading placeholder now fits the window exactly like the loaded messenger, including with **Max Height** set to a large value like 9999
 * Renamed the **Fixed Header Height** setting to **Window Height Offset**, as it reserves window space for any fixed element on the page, not only a sticky header
+* Other minor bugfixes and improvements
 
 = 2.15.26 =
 * Added [`better_messages_push_notification`](https://www.better-messages.com/hooks/php-filters/#better_messages_push_notification) PHP filter — change the link, title and text of push notifications on every delivery path

@@ -4,11 +4,11 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 2.15.27
+    Version: 2.15.28
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
-    Requires at least: 6.3
+    Requires at least: 5.9.0
     License: GPLv3
     Text Domain: bp-better-messages
     Domain Path: /languages/
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '2.15.27';
+        public  $version = '2.15.28';
 
         public  $db_version = '1.0.4';
 
@@ -180,6 +180,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once 'inc/classes/message.php';
             require_once 'inc/classes/thread.php';
             require_once 'inc/functions-global.php';
+            require_once 'inc/html-tag-processor.php';
             require_once 'inc/functions.php';
             /**
              * Require component only if BuddyPress is active
@@ -716,7 +717,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'notificationSoundUrl', 'sentSoundUrl', 'callSoundUrl', 'dialingSoundUrl',
             'sprite', 'emojiDataUrl', 'emojiHash',
             'loginUrl', 'registerUrl', 'adminUrl',
-            'total_unread', 'enableSound',
+            'total_unread', 'enableSound', 'enableSentSound', 'onSiteNotification', 'disableEnter',
             'realtime', 'friends', 'groups', 'courses', 'guests',
             'me', 'ukey',
             'translationLanguage',
@@ -762,11 +763,17 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
         private function _compute_script_variables_inner(){
             $enableSound = '1';
+            $enableSentSound = '1';
 
             if( Better_Messages()->settings['allowSoundDisable'] === '1' ){
                 $disabled = ( Better_Messages()->functions->get_user_meta( get_current_user_id(), 'bpbm_disable_sound_notification', true ) === 'yes');
                 if( $disabled ){
                     $enableSound = '0';
+                }
+
+                $sentDisabled = ( Better_Messages()->functions->get_user_meta( get_current_user_id(), 'bm_disable_sent_sound', true ) === 'yes');
+                if( $sentDisabled ){
+                    $enableSentSound = '0';
                 }
             }
 
@@ -829,6 +836,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'sideWidth'             => (int) $this->settings['sideThreadsWidth'],
                 'sidebarCompactMode'    => $this->settings['sidebarCompactMode'],
                 'sidebarUserToggle'     => $this->settings['sidebarUserToggle'],
+                'rememberLastTab'       => ( $this->settings['rememberLastTab'] == '1' ? '1' : '0' ),
                 'sidebarCompactBreakpoint' => (int) $this->settings['sidebarCompactBreakpoint'],
                 'sidebarHideBreakpoint' => (int) $this->settings['sidebarHideBreakpoint'],
                 'favorite'              => ( $this->settings['disableFavoriteMessages'] == '1' ? '0' : '1' ),
@@ -868,7 +876,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'touchEnter'            => ( $this->settings['disableEnterForTouch'] == '1' ? '0' : '1' ),
                 'loginUrl'              => apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg([]) ) ),
                 'total_unread'           => (int) $unread_count,
-                'disableEnter'           => ( $this->settings['disableEnterForDesktop'] == '1' ? '1' : '0' ),
+                'disableEnter'           => ( $this->functions->is_enter_to_send_enabled( get_current_user_id() ) ? '0' : '1' ),
                 'miniClose'              => ( $this->settings['enableMiniCloseButton'] ? '1' : '0' ),
                 'miniChats'              => ( $this->realtime && $this->settings['miniChatsEnable'] ? '1' : '0' ),
                 'miniMessages'           => ( $this->realtime && $this->settings['miniThreadsEnable'] ? '1' : '0' ),
@@ -931,7 +939,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'listStatus'             => ( $this->realtime && $this->settings['messagesStatusList'] ? '1' : '0' ),
                 'statusDetails'          => ( $this->realtime && $this->settings['messagesStatusDetailed'] ? '1' : '0' ),
                 'combinedView'           => ( $this->settings['combinedView'] == '1' ? '1' : '0' ),
-                'onSiteNotification'     => ( $this->settings['disableOnSiteNotification'] == '1' ? '0' : '1' ),
+                'onSiteNotification'     => ( $this->functions->is_onsite_notification_enabled( get_current_user_id() ) ? '1' : '0' ),
                 'onsitePosition'         => ( $this->settings['onsitePosition'] === 'right' ? 'right': 'left' ),
                 'titleNotifications'     => ( $this->settings['titleNotifications'] == '1' ? '1' : '0' ),
                 'hPBE'                   => ( $this->settings['hidePossibleBreakingElements'] == '1' ? '1' : '0' ),
@@ -941,6 +949,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'drafts'                 => ( $this->settings['enableDrafts'] == '1' ? '1' : '0' ),
                 'mobileOnsite'           => ( in_array($this->settings['mobileOnsiteLocation'], ['top', 'bottom'] ) ? $this->settings['mobileOnsiteLocation'] : 'auto' ),
                 'enableSound'            => $enableSound,
+                'enableSentSound'        => $enableSentSound,
                 'forceMentions'          => ( $this->settings['mentionsForceNotifications'] == '1' ? '1' : '0' ),
                 'guests'                 => ( Better_Messages()->guests->guest_access_enabled() ? '1' : '0' ),
                 'reports'                => ( $this->settings['allowReports'] == '1' ? '1' : '0' ),
