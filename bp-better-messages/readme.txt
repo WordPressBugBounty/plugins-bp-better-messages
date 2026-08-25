@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.28
+Stable tag: 2.15.29
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -378,6 +378,20 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+= 2.15.29 =
+* Fixed the messenger not loading at all on a site whose Ultimate Member Groups extension is too old for the installed Ultimate Member — the extension never starts up in that pairing, and the conversations list stayed permanently empty
+* An Ultimate Member group with no picture of its own now shows a group marker, in place of an image that had been failing to load since the service hosting it shut down
+* Fixed a chat room with no picture showing the generic person avatar in the chat rooms list, which made it look like a member — presence-based rooms, which keep no stored members, hit this every time
+* A link to a chat room now opens the Chat Rooms tab only when that room is not in the conversations list — a room left in the inbox opens there, next to everything else the member is talking in
+* Fixed the settings button missing from the messenger on phones — a site whose mobile tab bar comes from Chat Rooms, Users or AI Bots rather than Friends or Groups had no way to reach user settings there
+* Fixed line breaks vanishing from messages typed over several lines when Enter starts a new line instead of sending — browser extensions that tag page elements, such as Bitdefender, were collapsing them into one run-on line
+* Names decorated by the site keep that decoration in profile tooltips, as they did before 2.15.28 — only the avatar description, which is read aloud by screen readers, takes the name on its own
+* Fixed a name decorated by the site through the username filters losing that decoration in the conversations and users lists — on a phone those lists are most of the messenger
+* Fixed the confirmation for removing a participant, or for changing who moderates a conversation, spelling out the raw image markup of a badge the site attaches to member names — a PeepSo VIP icon printed as markup in the dialog, and in the notice that followed, in place of the plain name
+* Fixed a desktop notification title breaking into placeholder text when the sender carries such a badge
+* The **Messages Window Roundness** setting now also shapes the buttons inside the messenger and the name badges carried by the system messages and mentions, which stayed square whatever the setting was
+* Other minor bugfixes and improvements
 
 = 2.15.28 =
 * Added **Remember Last Tab** at Settings → Mini Widgets → Layout — the messenger reopens on the tab each member used last, the way the mini widgets already do

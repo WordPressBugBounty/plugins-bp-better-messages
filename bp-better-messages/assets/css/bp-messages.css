@@ -6543,7 +6543,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   font-size: 15px !important;
   line-height: 14px !important;
   padding: 7px 14px !important;
-  border-radius: 2px !important;
+  border-radius: var(--bm-border-radius) !important;
   border: none !important;
   outline: none !important;
   cursor: pointer !important;
@@ -7780,6 +7780,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   flex-direction: row;
   background: rgba(0, 0, 0, 0.1);
   padding: 2px 5px;
+  border-radius: var(--bm-border-radius);
   vertical-align: middle;
 }
 .bp-messages-wrap .bm-messages-list .bm-list .bm-messages-stack .bm-content .bm-messages-listing .bm-message .bm-message-content .bm-mention.bm-mention-current {
@@ -8464,7 +8465,7 @@ body.bp-messages-mobile #better-messages-modals-container input {
   margin: 0 1px;
   vertical-align: middle;
   display: inline-flex;
-  border-radius: 3px;
+  border-radius: var(--bm-border-radius);
   background-color: rgba(var(--bm-mention-bg), 1);
   color: rgba(var(--bm-mention-color), 1);
   align-items: center;
@@ -12549,6 +12550,22 @@ body.bm-mobile-device #bp-better-messages-mini-mobile-open.bpbm-mobile-open-left
 .bp-messages-chat-rooms-list .chat-room .pic.chat-room-avatars > * .avatar {
   width: 13px !important;
   height: 13px !important;
+}
+
+.bp-messages-chat-rooms-list .chat-room .pic.bm-chat-room-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--bm-avatar-radius);
+  background: rgba(var(--bm-hover-bg), 1);
+  color: rgba(var(--bm-text-color), 0.55);
+}
+
+.bp-messages-chat-rooms-list .chat-room .pic.bm-chat-room-placeholder svg {
+  width: 17px;
+  height: 17px;
 }
 
 .bp-messages-chat-rooms-list .chat-room .pic > img {

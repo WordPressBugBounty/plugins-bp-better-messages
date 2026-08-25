@@ -111,11 +111,33 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
             $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'um_group_id');
             $group    = get_post( (int) $group_id );
 
+            if( ! $group ) return $title;
+
             return get_permalink( $group->ID );
         }
 
+        public function get_um_groups(){
+            if ( ! class_exists( 'UM_Groups' ) || ! function_exists( 'UM' ) ) {
+                return false;
+            }
+
+            $um = UM();
+
+            if ( ! is_object( $um ) ) {
+                return false;
+            }
+
+            $groups = $um->Groups();
+
+            return is_object( $groups ) ? $groups : false;
+        }
+
+        public function get_default_group_image_html(){
+            return 'html:<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(var(--bm-text-color,0,0,0),0.05);color:rgba(var(--bm-text-color,0,0,0),0.45);border-radius:var(--bm-avatar-radius,2px);aspect-ratio:1/1;box-sizing:border-box"><svg style="width:60%;height:60%;max-width:36px;max-height:36px" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>';
+        }
+
         public function get_group_avatar( $group_id ){
-            $avatar = "https://via.placeholder.com/50x50";
+            $avatar = $this->get_default_group_image_html();
 
             $group = get_post($group_id);
 
@@ -123,9 +145,13 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
                 return $avatar;
             }
 
-            $avatar = "https://via.placeholder.com/50x50?text=" . ucfirst( $group->post_title[0] );
+            $um_groups = $this->get_um_groups();
 
-            $um_avatar = UM()->Groups()->api()->get_group_image( $group_id, 'default', 50, 50, true );
+            if ( ! $um_groups ) {
+                return $avatar;
+            }
+
+            $um_avatar = $um_groups->api()->get_group_image( $group_id, 'default', 50, 50, true );
 
             if( is_array( $um_avatar ) ){
                 $avatar = $um_avatar[0];
@@ -138,8 +164,10 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
             if ( $has ) return true;
             if ( $user_id <= 0 ) return false;
 
-            if ( class_exists( 'UM_Groups' ) ) {
-                $user_groups = UM()->Groups()->member()->get_groups_joined( $user_id );
+            $um_groups = $this->get_um_groups();
+
+            if ( $um_groups ) {
+                $user_groups = $um_groups->member()->get_groups_joined( $user_id );
                 return is_array( $user_groups ) && count( $user_groups ) > 0;
             }
 
@@ -164,8 +192,14 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
         }
 
         public function get_groups( $groups, $user_id ){
+            $um_groups = $this->get_um_groups();
+
+            if ( ! $um_groups ) {
+                return $groups;
+            }
+
             $groups = [];
-            $user_groups = UM()->Groups()->member()->get_groups_joined();
+            $user_groups = $um_groups->member()->get_groups_joined();
 
             if( count( $user_groups ) > 0 ) {
                 foreach ($user_groups as $user_group) {
@@ -208,7 +242,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
             }
 
             if( ! $thread_item['image'] ){
-                $thread_item['image'] = "https://via.placeholder.com/50x50?text=" . ucfirst( $thread_item['title'][0] );
+                $thread_item['image'] = $this->get_default_group_image_html();
             }
 
             return $thread_item;
@@ -294,11 +328,23 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
         }
 
         public function user_can_moderate( $group_id, $user_id ){
-            return UM()->Groups()->api()->can_moderate_posts( $group_id, $user_id );
+            $um_groups = $this->get_um_groups();
+
+            if ( ! $um_groups ) {
+                return false;
+            }
+
+            return $um_groups->api()->can_moderate_posts( $group_id, $user_id );
         }
 
         public function is_joined( $group_id, $user_id ){
-            return UM()->Groups()->api()->has_joined_group( $user_id, $group_id );
+            $um_groups = $this->get_um_groups();
+
+            if ( ! $um_groups ) {
+                return false;
+            }
+
+            return $um_groups->api()->has_joined_group( $user_id, $group_id );
         }
 
         public function get_group_thread_id( $group_id ){
