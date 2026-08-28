@@ -1598,7 +1598,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             if( function_exists('bp_get_member_user_id') ) {
-                if( ! function_exists('bp_is_user_profile') || ! bp_is_user_profile() ) {
+                global $members_template;
+
+                if( ! empty( $members_template->in_the_loop ) ) {
                     $loop_user_id = bp_get_member_user_id();
                     if ( !! $loop_user_id ) return $loop_user_id;
                 }

@@ -97,11 +97,10 @@ function _bm_js_translation_strings() {
     __('Downloaded', 'bp-better-messages');
     __('Uploaded', 'bp-better-messages');
     _nx('%s unread message', '%s unread messages', unread, 'Chat Rooms list', 'bp-better-messages');
-    _x('Open', 'Chat Rooms list', 'bp-better-messages');
+    _nx('%s member', '%s members', room.memberCount, 'Chat Rooms list', 'bp-better-messages');
+    _nx('%s online', '%s online', onlineCount, 'Chat Rooms list', 'bp-better-messages');
     _x('Joined', 'Chat Rooms list', 'bp-better-messages');
     _x('Join', 'Chat Rooms list', 'bp-better-messages');
-    _x('members', 'Chat Rooms list', 'bp-better-messages');
-    _x('online', 'Chat Rooms list', 'bp-better-messages');
     _x('You were mentioned in this conversation', 'Conversations list item', 'bp-better-messages');
     _x('Search...', 'Chat Rooms list', 'bp-better-messages');
     _x('No chat rooms available', 'Empty chat rooms list', 'bp-better-messages');

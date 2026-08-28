@@ -156,10 +156,12 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             if( BP_Better_Messages()->settings['bpForceMiniChat'] === '1' && function_exists('bp_displayed_user_id') ) {
                 $args['link_class'] .= ' bpbm-pm-button open-mini-chat bm-no-loader bm-no-style';
 
-                $user_id = bp_displayed_user_id();
+                $user_id = isset( $args['id'] ) ? (int) preg_replace( "/[^0-9]/", "", $args['id'] ) : 0;
+
                 if( ! $user_id ){
-                    $user_id = preg_replace("/[^0-9]/", "", $args['id'] );
+                    $user_id = Better_Messages()->functions->get_member_id();
                 }
+
                 $args['button_attr']['data-user-id'] = $user_id;
             }
 
@@ -219,7 +221,9 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                 && function_exists('bp_displayed_user_id')
                 && isset( $buttons['private_message'] )
             ) {
-                $buttons['private_message']['button_attr']['data-user-id'] = bp_displayed_user_id();
+                $target_id = ! empty( $user_id ) ? (int) $user_id : Better_Messages()->functions->get_member_id();
+
+                $buttons['private_message']['button_attr']['data-user-id'] = $target_id;
             }
 
             return $buttons;
@@ -234,7 +238,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
 
             if( BP_Better_Messages()->settings['bpForceMiniChat'] === '1' && function_exists('bp_displayed_user_id') ) {
                 $args['link_class'] .= ' bpbm-pm-button open-mini-chat bm-no-loader';
-                $args['button_attr']['data-user-id'] = bp_displayed_user_id();
+                $args['button_attr']['data-user-id'] = Better_Messages()->functions->get_member_id();
             }
 
             return $args;

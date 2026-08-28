@@ -8531,6 +8531,19 @@ body.bp-messages-mobile #better-messages-modals-container input {
 .bp-messages-wrap.bp-better-messages-mini .chat.mini-chat-new .bm-alert p, .bp-messages-wrap.bp-better-messages-list .chat.mini-chat-new .bm-alert p {
   font-size: 13px;
 }
+.bp-messages-wrap.bp-better-messages-mini .chat.mini-chat-new .bm-e2e-toggle-row .bm-e2e-toggle-row__info, .bp-messages-wrap.bp-better-messages-list .chat.mini-chat-new .bm-e2e-toggle-row .bm-e2e-toggle-row__info {
+  display: none;
+}
+.bp-messages-wrap.bp-better-messages-mini .chat.mini-chat-new .bm-e2e-create-banner, .bp-messages-wrap.bp-better-messages-list .chat.mini-chat-new .bm-e2e-create-banner {
+  gap: 6px;
+  padding: 12px;
+}
+.bp-messages-wrap.bp-better-messages-mini .chat.mini-chat-new .bm-e2e-create-banner > svg, .bp-messages-wrap.bp-better-messages-list .chat.mini-chat-new .bm-e2e-create-banner > svg {
+  font-size: 20px;
+}
+.bp-messages-wrap.bp-better-messages-mini .chat.mini-chat-new .bm-e2e-create-banner p, .bp-messages-wrap.bp-better-messages-list .chat.mini-chat-new .bm-e2e-create-banner p {
+  font-size: 12px;
+}
 .bp-messages-wrap.bp-better-messages-mini .chat.blink .head, .bp-messages-wrap.bp-better-messages-list .chat.blink .head {
   background: rgba(var(--bm-bg-color), 1);
 }
@@ -18501,6 +18514,12 @@ body.bm-mobile-device-pwa.bp-messages-mobile #bp-better-messages-mini-mobile-con
   padding: 20px 15px;
   text-align: center;
   border-top: 1px solid rgba(var(--bm-border-secondary-color), 0.5);
+  flex-shrink: 0;
+  max-height: 100%;
+  overflow-y: auto;
+}
+.bp-messages-wrap .bm-e2e-create-banner > * {
+  flex-shrink: 0;
 }
 .bp-messages-wrap .bm-e2e-create-banner > svg {
   font-size: 24px;

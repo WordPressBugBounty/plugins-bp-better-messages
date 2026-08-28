@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.2;
+        private $db_version = 2.3;
 
         public static function instance()
         {
@@ -785,6 +785,34 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         if ( empty( $col ) ) {
                             $wpdb->query( "ALTER TABLE `{$recipients_table}` ADD COLUMN `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" );
                             $wpdb->query( "ALTER TABLE `{$recipients_table}` ADD KEY `created_at_index` (`created_at`)" );
+                        }
+                    }
+                ],
+                '2.3' => [
+                    function () {
+                        global $wpdb;
+
+                        if ( ! function_exists( 'buddypress' ) ) return;
+
+                        $bp = buddypress();
+
+                        if ( empty( $bp->members ) || empty( $bp->members->table_name_last_activity ) ) return;
+
+                        $table = $bp->members->table_name_last_activity;
+
+                        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) return;
+
+                        $deleted = $wpdb->query( $wpdb->prepare(
+                            "DELETE FROM `{$table}` WHERE `component` = %s AND `type` = 'last_activity' AND `user_id` < 0",
+                            $bp->members->id
+                        ) );
+
+                        if ( $deleted ) {
+                            delete_transient( 'bp_active_member_count' );
+
+                            if ( function_exists( 'wp_cache_flush_group' ) ) {
+                                wp_cache_flush_group( 'bp_last_activity' );
+                            }
                         }
                     }
                 ]
