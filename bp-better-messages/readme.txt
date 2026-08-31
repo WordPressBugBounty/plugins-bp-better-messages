@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.30
+Stable tag: 2.15.31
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -379,12 +379,14 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Changelog ==
 
-= 2.15.30 =
+= 2.15.30 - 2.15.31 =
+* Chat attachments are no longer listed by the WordPress media API
 * Fixed guests being counted as BuddyPress members, which could report hundreds of members on a site with only a handful registered — updating clears the records already left behind
 * Fixed a **Send Message** button in a members or friends list on a BuddyPress or Youzify profile page opening a conversation with the profile owner instead of the member it belongs to
 * Fixed the **Create encrypted conversation** button being cut off at the bottom of a mini chat, with no way to scroll down to reach it
 * Member and online counts in the chat rooms list no longer read "1 members" for a single member
 * Presence-based chat rooms no longer carry an **Open** label in the chat rooms list
+* The **User Inbox** block is now called **Messages**, and the settings that spoke of an "inbox" name the messages page or the conversation list instead
 * Other minor bugfixes and improvements
 
 = 2.15.29 =

@@ -2,9 +2,9 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "better-messages/user-inbox",
-  "description": "Personal user inbox, where user can access all conversations which he is participating in",
+  "description": "The user's messages, where they can open any conversation they are part of",
   "version": "1.0",
-  "title": "User Inbox",
+  "title": "Messages",
   "category": "better-messages",
   "attributes": {
     "fullScreen": {

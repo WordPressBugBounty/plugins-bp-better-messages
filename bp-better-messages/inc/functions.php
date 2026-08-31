@@ -345,7 +345,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         AND ( mt1.meta_key = 'bp-better-messages-message-id'
                             AND mt1.meta_value = %d ) )
                     AND {$wpdb->posts}.post_type = 'attachment'
-                    AND (({$wpdb->posts}.post_status = 'inherit'))
+                    AND (({$wpdb->posts}.post_status IN ('inherit','private')))
                     GROUP BY {$wpdb->posts}.ID
                     ORDER BY {$wpdb->posts}.post_date DESC", $message_id);
 

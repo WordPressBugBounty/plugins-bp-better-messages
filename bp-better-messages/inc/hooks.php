@@ -26,6 +26,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_action('pre_get_posts', array($this, 'exclude_attachments_global'));
 
+            add_filter('rest_attachment_query', array($this, 'exclude_attachments_rest'));
+
             if( Better_Messages()->settings['attachmentsHide'] === '1' ) {
                 add_action('ajax_query_attachments_args', array($this, 'exclude_attachments'));
             }
@@ -2280,6 +2282,24 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $query->set('meta_query', $meta_query);
             }
 
+        }
+
+        public function exclude_attachments_rest( $args ){
+            if( current_user_can( 'manage_options' ) ) return $args;
+
+            $meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+
+            if( ! is_array( $meta_query ) ) $meta_query = array();
+
+            $meta_query[] = array(
+                'key'     => 'bp-better-messages-attachment',
+                'value'   => '1',
+                'compare' => 'NOT EXISTS'
+            );
+
+            $args['meta_query'] = $meta_query;
+
+            return $args;
         }
 
         function exclude_attachments($query){

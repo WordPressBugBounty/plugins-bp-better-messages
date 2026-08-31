@@ -548,7 +548,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $_FILES['file']['name'] = Better_Messages_Files()->limit_filename_bytes( sanitize_file_name( $_FILES['file']['name'] ) );
             }
 
-            $attachment_id = media_handle_upload( 'file', 0 );
+            $attachment_id = media_handle_upload( 'file', 0, array( 'post_status' => 'private' ) );
 
             if ( is_wp_error( $attachment_id ) ) {
                 return $attachment_id;

@@ -350,7 +350,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                      ON p.ID = pm_msg.post_id
                      AND pm_msg.meta_key = 'bp-better-messages-message-id'
                  WHERE p.post_type = 'attachment'
-                 AND p.post_status = 'inherit'
+                 AND p.post_status IN ('inherit','private')
                  {$type_clause}
                  AND NOT EXISTS (
                      SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
@@ -444,7 +444,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                      ON p.ID = pm_msg.post_id
                      AND pm_msg.meta_key = 'bp-better-messages-message-id'
                  WHERE p.post_type = 'attachment'
-                 AND p.post_status = 'inherit'
+                 AND p.post_status IN ('inherit','private')
                  AND NOT EXISTS (
                      SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
                      WHERE bm_meta.bm_message_id = pm_msg.meta_value
@@ -509,7 +509,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             AND mt1.meta_value < %d ) )
             AND ( mt_fwd.meta_value IS NULL OR mt_fwd.meta_value < %d )
             AND {$wpdb->posts}.post_type = 'attachment'
-            AND (({$wpdb->posts}.post_status = 'inherit'))
+            AND (({$wpdb->posts}.post_status IN ('inherit','private')))
             GROUP BY {$wpdb->posts}.ID
             ORDER BY {$wpdb->posts}.post_date DESC
             LIMIT 0, 50", $delete_after_time, $delete_after_time);
@@ -983,7 +983,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter('intermediate_image_sizes', '__return_empty_array');
                 add_filter('big_image_size_threshold', '__return_false');
-                $attachment_id = media_handle_sideload($file, 0);
+                $attachment_id = media_handle_sideload( $file, 0, null, array( 'post_status' => 'private' ) );
                 remove_filter('big_image_size_threshold', '__return_false');
                 remove_filter('intermediate_image_sizes', '__return_empty_array');
 
@@ -1110,7 +1110,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter( 'intermediate_image_sizes', '__return_empty_array' );
                 add_filter( 'big_image_size_threshold', '__return_false' );
-                $attachment_id = media_handle_upload( 'file', 0, array(), $upload_overrides );
+                $attachment_id = media_handle_upload( 'file', 0, array( 'post_status' => 'private' ), $upload_overrides );
                 remove_filter( 'big_image_size_threshold', '__return_false' );
                 remove_filter( 'intermediate_image_sizes', '__return_empty_array' );
 
@@ -2196,7 +2196,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter( 'intermediate_image_sizes', '__return_empty_array' );
                 add_filter( 'big_image_size_threshold', '__return_false' );
-                $attachment_id = media_handle_sideload( $file_array, 0 );
+                $attachment_id = media_handle_sideload( $file_array, 0, null, array( 'post_status' => 'private' ) );
                 remove_filter( 'big_image_size_threshold', '__return_false' );
                 remove_filter( 'intermediate_image_sizes', '__return_empty_array' );
 

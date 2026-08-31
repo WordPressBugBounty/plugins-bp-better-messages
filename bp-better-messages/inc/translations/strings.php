@@ -1190,7 +1190,7 @@ function _bm_js_translation_strings() {
     _x('Thread', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Messages', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Shortcode', 'Chat Rooms (WP Admin)', 'bp-better-messages');
-    _x('View in inbox', 'Chat rooms settings page', 'bp-better-messages');
+    _x('View in conversation list', 'Chat rooms settings page', 'bp-better-messages');
     _x('Participants', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Moderators', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Moderators can remove, mute and ban participants of this chat room and can reply while the chat room is closed. Assigned moderators are automatically joined to the chat room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
@@ -1251,10 +1251,10 @@ function _bm_js_translation_strings() {
     _x('Group audio calls for chat rooms are disabled globally', 'Chat rooms settings page', 'bp-better-messages');
     _x('Enable file uploads', 'Chat rooms settings page', 'bp-better-messages');
     _x('Users will be able to upload files to chat room. File uploads must be enabled in WP Admin -> Better Messages -> Settings -> Attachments to make this option work', 'Chat rooms settings page', 'bp-better-messages');
-    _x('Hide chat from user inbox', 'Chat rooms settings page', 'bp-better-messages');
-    _x('Chat room will be hidden from dedicated user inbox, but the chat will be still accessible at the page where the chat shortcode is placed', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Hide chat from conversation list', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Chat room will be hidden from the conversation list, but the chat will be still accessible at the page where the chat shortcode is placed', 'Chat rooms settings page', 'bp-better-messages');
     _x('Enable notifications', 'Chat rooms settings page', 'bp-better-messages');
-    _x('Users will receive email notifications about new messages in chat room. Email and push notifications must be enabled in Better Messages settings. This option will not work if the chat room is hidden from user inbox', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Users will receive email notifications about new messages in chat room. Email and push notifications must be enabled in Better Messages settings. This option will not work if the chat room is hidden from the conversation list', 'Chat rooms settings page', 'bp-better-messages');
     _x('Automatic Message Cleanup', 'Chat rooms settings page', 'bp-better-messages');
     _x('Cleanup mode', 'Chat rooms settings page', 'bp-better-messages');
     _x('Automatically delete messages in this chat room', 'Chat rooms settings page', 'bp-better-messages');
@@ -1913,12 +1913,12 @@ function _bm_js_translation_strings() {
     _x('Show in RealHomes Dashboard', 'Settings page', 'bp-better-messages');
     _x('Messages page created', 'Settings page', 'bp-better-messages');
     _x('Messages Location', 'Settings page', 'bp-better-messages');
-    _x('Select the page that will serve as the messages inbox. All notifications — email, push, and on-site — will direct users to this page.', 'Settings page', 'bp-better-messages');
+    _x('Select the page where users will read and reply to their messages. All notifications — email, push, and on-site — will direct users to this page.', 'Settings page', 'bp-better-messages');
     _x('Edit Page', 'Settings page', 'bp-better-messages');
     _x('Creating...', 'Settings page', 'bp-better-messages');
     _x('Create Page', 'Settings page', 'bp-better-messages');
     _x('View', 'Settings page', 'bp-better-messages');
-    _x('If no shortcode is added, the entire page content will be replaced with the messages inbox. To control placement, add the "User Inbox" block in the block editor, or use %1$s as plain text. If your page builder does not allow content replacement, use the %2$s shortcode instead.', 'Settings page', 'bp-better-messages');
+    _x('If no shortcode is added, messages take over the entire page. To control placement, add the "Messages" block in the block editor, or use %1$s as plain text. If your page builder does not allow content replacement, use the %2$s shortcode instead.', 'Settings page', 'bp-better-messages');
     _x('Better Messages requires a messages location to be set. Please select or create a page above.', 'Settings page', 'bp-better-messages');
     _x('Messages will be displayed inside %s.', 'Settings page', 'bp-better-messages');
     _x('My Account Endpoint Slug', 'Settings page', 'bp-better-messages');
@@ -1928,7 +1928,7 @@ function _bm_js_translation_strings() {
     _x('Guest Messages Page', 'Settings page', 'bp-better-messages');
     _x('The Messages Location above requires login. Pick a separate WordPress page where guests (and logged-in users) can access the messenger.', 'Settings page', 'bp-better-messages');
     _x('— Select page —', 'Settings page', 'bp-better-messages');
-    _x('Without a Guest Messages Page, links and notifications that point to the messages inbox will redirect guests to login. Pick a page above.', 'Settings page', 'bp-better-messages');
+    _x('Without a Guest Messages Page, links and notifications that point to the messages page will redirect guests to login. Pick a page above.', 'Settings page', 'bp-better-messages');
     _x('Redirect Guests to Login', 'Settings page', 'bp-better-messages');
     _x('Redirect non-logged-in users to the login page instead of showing the login form on the messages page', 'Settings page', 'bp-better-messages');
     _x('Realtime Update Mechanism', 'Settings page', 'bp-better-messages');
@@ -2423,7 +2423,7 @@ function _bm_js_translation_strings() {
     _x('Who should receive the chat when a visitor clicks the button.', 'Live Chat Builder', 'bp-better-messages');
     _x('Author of the current post', 'Live Chat Builder', 'bp-better-messages');
     _x('User stored in a custom field on the post', 'Live Chat Builder', 'bp-better-messages');
-    _x('Fixed user (a single inbox for the whole site)', 'Live Chat Builder', 'bp-better-messages');
+    _x('Fixed user (a single conversation list for the whole site)', 'Live Chat Builder', 'bp-better-messages');
     _x('Unique tag', 'Live Chat Builder', 'bp-better-messages');
     _x('Lets repeat visitors land in the same conversation instead of opening a new thread each time.', 'Live Chat Builder', 'bp-better-messages');
     _x('Auto — one thread per post', 'Live Chat Builder', 'bp-better-messages');
@@ -2488,7 +2488,7 @@ function _bm_js_translation_strings() {
     _x('Search All Users', 'Settings page', 'bp-better-messages');
     _x('Allow searching among all site users, not just friends. Admins can always search all users regardless of this setting', 'Settings page', 'bp-better-messages');
     _x('Suggested Conversations', 'Settings page', 'bp-better-messages');
-    _x('When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty inbox', 'Settings page', 'bp-better-messages');
+    _x('When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty conversation list', 'Settings page', 'bp-better-messages');
     _x('Conversation Features', 'Settings page', 'bp-better-messages');
     _x('Pinned Conversations', 'Settings page', 'bp-better-messages');
     _x('Allow users to pin conversations to the top of their conversation list for quick access', 'Settings page', 'bp-better-messages');
@@ -2937,7 +2937,7 @@ function _bm_js_translation_strings() {
     _x('Display an unread messages counter anywhere on your site.', 'Settings page', 'bp-better-messages');
     _x('To add this shortcode to your menu item you can use <a href="https://www.wordplus.org/shortcode-in-menus" target="_blank">Shortcode in Menus</a> plugin.', 'Settings page', 'bp-better-messages');
     _x('My Messages URL', 'Settings page', 'bp-better-messages');
-    _x('Returns the URL to the current user\'s inbox.', 'Settings page', 'bp-better-messages');
+    _x('Returns the URL to the current user\'s messages page.', 'Settings page', 'bp-better-messages');
     _x('Example:', 'Settings page', 'bp-better-messages');
     _x('Live Chat Button (reference)', 'Settings page', 'bp-better-messages');
     _x('Raw shortcode reference for the Live Chat Button. Use the Shortcode Builder above for a visual configurator. Magic values such as user_id="post_author", unique_tag="auto", object_id="auto" and placeholders like {author_name} are resolved against the current post automatically.', 'Settings page', 'bp-better-messages');
@@ -3104,7 +3104,7 @@ function _bm_js_translation_strings() {
     _x('Options specific to the Chat Rooms widget', 'Settings page', 'bp-better-messages');
     _x('Show Online Users Count', 'Settings page', 'bp-better-messages');
     _x('Display how many users are currently online next to each chat room. Live presence data is delivered over the realtime connection', 'Settings page', 'bp-better-messages');
-    _x('The threads/inbox list widget. Shows the user\'s recent conversations', 'Settings page', 'bp-better-messages');
+    _x('The conversation list widget. Shows the user\'s recent conversations', 'Settings page', 'bp-better-messages');
     _x('Icon shown for the Conversations tab in Mini Widgets, Side Panel and Mobile tab bars', 'Settings page', 'bp-better-messages');
     _x('Show Unread Counter', 'Settings page', 'bp-better-messages');
     _x('Show the number of unread messages on the Conversations tab of the side panel and the mobile tab bar', 'Settings page', 'bp-better-messages');
@@ -3152,7 +3152,7 @@ function _bm_js_translation_strings() {
     _x('Hide tab labels in the mini widgets. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
     _x('Keep mini widgets and mini chats in sync across browser tabs', 'Settings page', 'bp-better-messages');
     _x('Side Panel', 'Settings page', 'bp-better-messages');
-    _x('Vertical tab strip on the full inbox page. Drag tabs to reorder — the first tab is the one the messenger opens on', 'Settings page', 'bp-better-messages');
+    _x('Vertical tab strip on the full messages page. Drag tabs to reorder — the first tab is the one that opens first', 'Settings page', 'bp-better-messages');
     _x('Hide tab labels in the side panel. Labels appear as tooltips on hover', 'Settings page', 'bp-better-messages');
     _x('Remember Last Tab', 'Settings page', 'bp-better-messages');
     _x('Open the messenger on the tab each member used last instead of the first tab. Applies to the mobile tab bar as well. A link to a conversation always opens the tab that conversation belongs to', 'Settings page', 'bp-better-messages');

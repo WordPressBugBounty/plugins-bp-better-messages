@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.3;
+        private $db_version = 2.4;
 
         public static function instance()
         {
@@ -814,6 +814,44 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                                 wp_cache_flush_group( 'bp_last_activity' );
                             }
                         }
+                    }
+                ],
+                '2.4' => [
+                    function (){
+                        global $wpdb;
+
+                        $dir_name = apply_filters( 'bp_better_messages_upload_dir_name', 'bp-better-messages' );
+                        $path_like = $wpdb->esc_like( trailingslashit( $dir_name ) ) . '%';
+
+                        do {
+                            $ids = $wpdb->get_col( $wpdb->prepare(
+                                "SELECT `posts`.`ID`
+                                 FROM `{$wpdb->posts}` `posts`
+                                 LEFT JOIN `{$wpdb->postmeta}` `marker`
+                                     ON `posts`.`ID` = `marker`.`post_id`
+                                     AND `marker`.`meta_key` = 'bp-better-messages-attachment'
+                                 LEFT JOIN `{$wpdb->postmeta}` `file`
+                                     ON `posts`.`ID` = `file`.`post_id`
+                                     AND `file`.`meta_key` = '_wp_attached_file'
+                                 WHERE `posts`.`post_type` = 'attachment'
+                                 AND `posts`.`post_status` = 'inherit'
+                                 AND ( `marker`.`meta_value` = '1' OR `file`.`meta_value` LIKE %s )
+                                 GROUP BY `posts`.`ID`
+                                 LIMIT 1000",
+                                $path_like
+                            ) );
+
+                            if( empty( $ids ) ) break;
+
+                            $wpdb->query(
+                                "UPDATE `{$wpdb->posts}` SET `post_status` = 'private'
+                                 WHERE `ID` IN (" . implode( ',', array_map( 'intval', $ids ) ) . ")"
+                            );
+
+                            foreach( $ids as $id ){
+                                clean_post_cache( (int) $id );
+                            }
+                        } while( count( $ids ) === 1000 );
                     }
                 ]
             ];

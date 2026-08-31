@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 2.15.30\n"
+"Project-Id-Version: Better Messages 2.15.31\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-28T11:55:53+00:00\n"
+"POT-Creation-Date: 2026-08-31T04:38:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -478,7 +478,8 @@ msgstr ""
 #: addons/privacy.php:104
 #: addons/ultimate-member.php:463
 #: inc/component-group.php:64
-#: inc/hooks.php:1081
+#: inc/hooks.php:1083
+#: inc/blocks/builds/user-inbox/index.js:1
 msgid "Messages"
 msgstr ""
 
@@ -499,9 +500,9 @@ msgstr ""
 #: addons/ultimate-member.php:508
 #: addons/ultimate-member.php:539
 #: addons/ultimate-member.php:541
-#: inc/hooks.php:1350
-#: inc/hooks.php:1365
-#: inc/hooks.php:1412
+#: inc/hooks.php:1352
+#: inc/hooks.php:1367
+#: inc/hooks.php:1414
 #: inc/shortcodes.php:460
 #: inc/shortcodes.php:650
 msgid "Private Message"
@@ -1515,7 +1516,7 @@ msgstr ""
 
 #: addons/peepso.php:417
 #: addons/ultimate-member.php:446
-#: inc/hooks.php:2013
+#: inc/hooks.php:2015
 msgid "You must become friends to send messages"
 msgstr ""
 
@@ -2337,9 +2338,9 @@ msgid "Chat Room #%d"
 msgstr ""
 
 #: inc/api/admin.php:1010
-#: inc/hooks.php:460
-#: inc/hooks.php:464
-#: inc/hooks.php:468
+#: inc/hooks.php:462
+#: inc/hooks.php:466
+#: inc/hooks.php:470
 #: inc/translations/strings.php:765
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -2349,13 +2350,13 @@ msgid "A user"
 msgstr ""
 
 #: inc/api/admin.php:1013
-#: inc/hooks.php:461
+#: inc/hooks.php:463
 #, php-format
 msgid "%s joined the conversation"
 msgstr ""
 
 #: inc/api/admin.php:1014
-#: inc/hooks.php:465
+#: inc/hooks.php:467
 #, php-format
 msgid "%s left the conversation"
 msgstr ""
@@ -2386,7 +2387,7 @@ msgid "%s was banned"
 msgstr ""
 
 #: inc/api/admin.php:1026
-#: inc/hooks.php:470
+#: inc/hooks.php:472
 #: inc/translations/strings.php:777
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -2397,7 +2398,7 @@ msgid "%1$s changed the subject to \"%2$s\""
 msgstr ""
 
 #: inc/api/admin.php:1028
-#: inc/hooks.php:472
+#: inc/hooks.php:474
 #: inc/translations/strings.php:778
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -2846,7 +2847,7 @@ msgstr ""
 
 #: inc/component.php:128
 #: inc/component.php:181
-#: inc/hooks.php:1418
+#: inc/hooks.php:1420
 #, php-format
 msgctxt "Messages list sub nav"
 msgid "Messages <span class=\"%s\">%s</span>"
@@ -3233,7 +3234,7 @@ msgstr ""
 
 #: inc/functions.php:1100
 #: inc/functions.php:1142
-#: inc/hooks.php:1118
+#: inc/hooks.php:1120
 msgid "Deleted User"
 msgstr ""
 
@@ -3360,7 +3361,7 @@ msgctxt "Rest API Error"
 msgid "Sorry, such this name already used by someone else. Please try to use other name."
 msgstr ""
 
-#: inc/hooks.php:457
+#: inc/hooks.php:459
 #: inc/translations/strings.php:771
 #: assets/js/bp-messages-app.js:1
 #: assets/js/bp-messages-app.min.js:1
@@ -3369,57 +3370,57 @@ msgstr ""
 msgid "Encrypted conversation created"
 msgstr ""
 
-#: inc/hooks.php:1298
+#: inc/hooks.php:1300
 #, php-format
 msgid "You cant start new conversation now. Please wait %s seconds."
 msgstr ""
 
-#: inc/hooks.php:1462
-#: inc/hooks.php:1470
+#: inc/hooks.php:1464
+#: inc/hooks.php:1472
 msgid "Your membership does not allow to use messages"
 msgstr ""
 
-#: inc/hooks.php:1823
+#: inc/hooks.php:1825
 msgctxt "Error message when group threads are disabled"
 msgid "You can start conversation only with 1 user per time"
 msgstr ""
 
-#: inc/hooks.php:1853
+#: inc/hooks.php:1855
 msgid "You were blocked by recipient"
 msgstr ""
 
-#: inc/hooks.php:1981
+#: inc/hooks.php:1983
 msgid "This conversation is deleted."
 msgstr ""
 
-#: inc/hooks.php:1982
+#: inc/hooks.php:1984
 msgid "You need to recover this conversation to continue."
 msgstr ""
 
-#: inc/hooks.php:2037
+#: inc/hooks.php:2039
 #, php-format
 msgid "You already have conversations with %s"
 msgstr ""
 
-#: inc/hooks.php:2064
+#: inc/hooks.php:2066
 #, php-format
 msgid "%s not allow to message him"
 msgstr ""
 
-#: inc/hooks.php:2073
-#: inc/hooks.php:2079
-#: inc/hooks.php:2083
+#: inc/hooks.php:2075
+#: inc/hooks.php:2081
+#: inc/hooks.php:2085
 #, php-format
 msgid "<strong>%s</strong> allows only friends to message him"
 msgstr ""
 
-#: inc/hooks.php:2075
+#: inc/hooks.php:2077
 #, php-format
 msgctxt "Ultimate Member User Restriction"
 msgid "<strong>%s</strong> allows only followers to message him"
 msgstr ""
 
-#: inc/hooks.php:2108
+#: inc/hooks.php:2110
 #, php-format
 msgid "You must become friends with <strong>%s</strong> to start conversation"
 msgstr ""
@@ -12925,7 +12926,7 @@ msgstr ""
 
 #: inc/translations/strings.php:1193
 msgctxt "Chat rooms settings page"
-msgid "View in inbox"
+msgid "View in conversation list"
 msgstr ""
 
 #: inc/translations/strings.php:1194
@@ -13230,12 +13231,12 @@ msgstr ""
 
 #: inc/translations/strings.php:1254
 msgctxt "Chat rooms settings page"
-msgid "Hide chat from user inbox"
+msgid "Hide chat from conversation list"
 msgstr ""
 
 #: inc/translations/strings.php:1255
 msgctxt "Chat rooms settings page"
-msgid "Chat room will be hidden from dedicated user inbox, but the chat will be still accessible at the page where the chat shortcode is placed"
+msgid "Chat room will be hidden from the conversation list, but the chat will be still accessible at the page where the chat shortcode is placed"
 msgstr ""
 
 #: inc/translations/strings.php:1256
@@ -13245,7 +13246,7 @@ msgstr ""
 
 #: inc/translations/strings.php:1257
 msgctxt "Chat rooms settings page"
-msgid "Users will receive email notifications about new messages in chat room. Email and push notifications must be enabled in Better Messages settings. This option will not work if the chat room is hidden from user inbox"
+msgid "Users will receive email notifications about new messages in chat room. Email and push notifications must be enabled in Better Messages settings. This option will not work if the chat room is hidden from the conversation list"
 msgstr ""
 
 #: inc/translations/strings.php:1258
@@ -16484,7 +16485,7 @@ msgstr ""
 
 #: inc/translations/strings.php:1916
 msgctxt "Settings page"
-msgid "Select the page that will serve as the messages inbox. All notifications — email, push, and on-site — will direct users to this page."
+msgid "Select the page where users will read and reply to their messages. All notifications — email, push, and on-site — will direct users to this page."
 msgstr ""
 
 #: inc/translations/strings.php:1917
@@ -16510,7 +16511,7 @@ msgstr ""
 #: inc/translations/strings.php:1921
 #, php-format,js-format
 msgctxt "Settings page"
-msgid "If no shortcode is added, the entire page content will be replaced with the messages inbox. To control placement, add the \"User Inbox\" block in the block editor, or use %1$s as plain text. If your page builder does not allow content replacement, use the %2$s shortcode instead."
+msgid "If no shortcode is added, messages take over the entire page. To control placement, add the \"Messages\" block in the block editor, or use %1$s as plain text. If your page builder does not allow content replacement, use the %2$s shortcode instead."
 msgstr ""
 
 #: inc/translations/strings.php:1922
@@ -16561,7 +16562,7 @@ msgstr ""
 
 #: inc/translations/strings.php:1931
 msgctxt "Settings page"
-msgid "Without a Guest Messages Page, links and notifications that point to the messages inbox will redirect guests to login. Pick a page above."
+msgid "Without a Guest Messages Page, links and notifications that point to the messages page will redirect guests to login. Pick a page above."
 msgstr ""
 
 #: inc/translations/strings.php:1932
@@ -19065,7 +19066,7 @@ msgstr ""
 
 #: inc/translations/strings.php:2426
 msgctxt "Live Chat Builder"
-msgid "Fixed user (a single inbox for the whole site)"
+msgid "Fixed user (a single conversation list for the whole site)"
 msgstr ""
 
 #: inc/translations/strings.php:2427
@@ -19390,7 +19391,7 @@ msgstr ""
 
 #: inc/translations/strings.php:2491
 msgctxt "Settings page"
-msgid "When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty inbox"
+msgid "When a user or guest has no conversations yet, show a list of selected users they can start a conversation with instead of an empty conversation list"
 msgstr ""
 
 #: inc/translations/strings.php:2492
@@ -21638,7 +21639,7 @@ msgstr ""
 
 #: inc/translations/strings.php:2940
 msgctxt "Settings page"
-msgid "Returns the URL to the current user's inbox."
+msgid "Returns the URL to the current user's messages page."
 msgstr ""
 
 #: inc/translations/strings.php:2941
@@ -22480,7 +22481,7 @@ msgstr ""
 
 #: inc/translations/strings.php:3107
 msgctxt "Settings page"
-msgid "The threads/inbox list widget. Shows the user's recent conversations"
+msgid "The conversation list widget. Shows the user's recent conversations"
 msgstr ""
 
 #: inc/translations/strings.php:3108
@@ -22720,7 +22721,7 @@ msgstr ""
 
 #: inc/translations/strings.php:3155
 msgctxt "Settings page"
-msgid "Vertical tab strip on the full inbox page. Drag tabs to reorder — the first tab is the one the messenger opens on"
+msgid "Vertical tab strip on the full messages page. Drag tabs to reorder — the first tab is the one that opens first"
 msgstr ""
 
 #: inc/translations/strings.php:3156
@@ -23763,12 +23764,8 @@ msgid "The chat room will be opened in full screen mode when accessed from deskt
 msgstr ""
 
 #: inc/blocks/builds/user-inbox/index.js:1
-msgid "User Inbox"
-msgstr ""
-
-#: inc/blocks/builds/user-inbox/index.js:1
 msgctxt "WP Admin"
-msgid "The inbox will be opened in full screen mode when accessed from desktop devices or mobile full screen mode is disabled"
+msgid "The messages page will be opened in full screen mode when accessed from desktop devices or mobile full screen mode is disabled"
 msgstr ""
 
 #: inc/blocks/builds/chat-room/block.json
@@ -23805,12 +23802,12 @@ msgstr ""
 
 #: inc/blocks/builds/user-inbox/block.json
 msgctxt "block description"
-msgid "Personal user inbox, where user can access all conversations which he is participating in"
+msgid "The user's messages, where they can open any conversation they are part of"
 msgstr ""
 
 #: inc/blocks/builds/user-inbox/block.json
 msgctxt "block title"
-msgid "User Inbox"
+msgid "Messages"
 msgstr ""
 
 #: inc/blocks/builds/user-inbox/block.json
