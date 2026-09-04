@@ -578,6 +578,43 @@ table.build-info-table button {
   margin: 50px 10px 10px 10px;
 }
 
+.bm-export-intro {
+  margin: 0 0 16px;
+}
+
+.bm-export-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 6px;
+  margin-bottom: 12px;
+}
+.bm-export-option input {
+  margin: 0;
+}
+.bm-export-option span {
+  grid-column: 2;
+  color: #646970;
+}
+
+.bm-export-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding-top: 12px;
+  border-top: 1px solid #dcdcde;
+}
+
+.bm-export-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bm-export-toggle input {
+  margin: 0;
+}
+
 @media (min-width: 576px) {
   .bm-admin-modal-dialog {
     max-width: 500px;
@@ -1267,6 +1304,10 @@ table.build-info-table button {
   font-size: 13px;
   color: #666;
   margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .bm-select__input input {
@@ -5412,6 +5453,10 @@ body[class*=_page_better-messages-viewer] .update-nag {
   font-size: 13px;
   color: #50575e;
   margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 .bm-viewer-new-wrap .bm-viewer-new-content .bm-list-wrapper {
   margin: 0 0 4px;

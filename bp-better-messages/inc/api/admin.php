@@ -34,6 +34,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             return current_user_can('manage_options');
         }
 
+
         public function rest_api_init(){
             register_rest_route('better-messages/v1/admin', '/settings/save', array(
                 'methods'             => 'POST',
@@ -56,6 +57,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'methods' => 'GET',
                 'callback' => array($this, 'get_messages'),
                 'permission_callback' => array($this, 'user_can_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/exportTranscript', array(
+                'methods' => 'GET',
+                'callback' => array($this, 'export_transcript'),
+                'permission_callback' => array($this, 'user_is_admin'),
             ));
 
             /* register_rest_route('better-messages/v1/admin', '/getThreads', array(
@@ -1728,6 +1735,421 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'collation_fixed' => $result['collation_fixed'],
                 'inspect'         => $migrate->get_full_inspect(),
             ) );
+        }
+
+        public function export_transcript( WP_REST_Request $request ){
+            $thread_id = (int) $request->get_param('thread_id');
+            $chat_id   = (int) $request->get_param('chat_id');
+            $format    = $request->get_param('format');
+
+            if( ! in_array( $format, array( 'html', 'csv' ), true ) ){
+                $format = 'txt';
+            }
+
+            $options = array(
+                'avatars'  => $request->get_param('avatars') !== '0',
+                'user_ids' => $request->get_param('user_ids') === '1',
+            );
+
+            if( ! $thread_id && $chat_id ){
+                $thread_id = (int) Better_Messages()->chats->get_chat_thread_id( $chat_id );
+            }
+
+            if( ! $thread_id || ! Better_Messages()->functions->get_thread( $thread_id ) ){
+                return new WP_Error(
+                    'rest_error',
+                    _x( 'Conversation not found', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 404 )
+                );
+            }
+
+            if( class_exists('Better_Messages_E2E_Encryption') && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ){
+                return new WP_Error(
+                    'rest_error',
+                    _x( 'This conversation is end-to-end encrypted and can only be read by its participants', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 403 )
+                );
+            }
+
+            $title = Better_Messages()->functions->get_thread_title( $thread_id );
+
+            if( empty( $title ) ){
+                $title = sprintf( _x( 'Conversation #%s', 'Transcript export', 'bp-better-messages' ), $thread_id );
+            }
+
+            $total    = $this->export_transcript_count( $thread_id );
+            $filename = sanitize_file_name( sprintf( 'transcript-%d-%s.%s', $thread_id, gmdate('Y-m-d'), $format ) );
+
+            $mime_types = array(
+                'html' => 'text/html',
+                'csv'  => 'text/csv',
+                'txt'  => 'text/plain',
+            );
+
+            nocache_headers();
+            header( 'Content-Type: ' . $mime_types[ $format ] . '; charset=utf-8' );
+            header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+
+            while( ob_get_level() > 0 ) ob_end_flush();
+
+            if( $format === 'html' ){
+                $this->export_transcript_stream_html( $thread_id, $title, $total, $options );
+            } else if( $format === 'csv' ){
+                $this->export_transcript_stream_csv( $thread_id, $total, $options );
+            } else {
+                $this->export_transcript_stream_text( $thread_id, $title, $total, $options );
+            }
+
+            exit;
+        }
+
+        private function export_transcript_where( $thread_id ){
+            global $wpdb;
+
+            return $wpdb->prepare(
+                "`thread_id` = %d AND `is_pending` = 0 AND `message` NOT LIKE %s",
+                $thread_id,
+                '%' . $wpdb->esc_like( '<!-- BM-SYSTEM-MESSAGE:' ) . '%'
+            );
+        }
+
+        private function export_transcript_count( $thread_id ){
+            global $wpdb;
+
+            return (int) $wpdb->get_var(
+                "SELECT COUNT(*) FROM `" . bm_get_table('messages') . "` WHERE " . $this->export_transcript_where( $thread_id )
+            );
+        }
+
+        private function export_transcript_rows( $thread_id, $offset, $limit, &$names ){
+            global $wpdb;
+
+            $messages = $wpdb->get_results( $wpdb->prepare( "
+                SELECT `id`, `sender_id`, `message`, `date_sent`
+                FROM `" . bm_get_table('messages') . "`
+                WHERE " . $this->export_transcript_where( $thread_id ) . "
+                ORDER BY `id` ASC
+                LIMIT %d OFFSET %d
+            ", $limit, $offset ) );
+
+            $rows = array();
+
+            foreach( $messages as $message ){
+                $user_id = (int) $message->sender_id;
+
+                if( ! isset( $names[ $user_id ] ) ){
+                    $names[ $user_id ] = Better_Messages()->functions->get_name( $user_id );
+                }
+
+                $rows[] = array(
+                    'date_sent'   => $message->date_sent,
+                    'user_id'     => $user_id,
+                    'name'        => $names[ $user_id ],
+                    'content'     => $this->export_transcript_content( $message->message ),
+                    'attachments' => $this->export_transcript_attachments( $message->id, $thread_id ),
+                );
+            }
+
+            return $rows;
+        }
+
+        private function export_transcript_content( $content ){
+            if( strpos( $content, '<!-- BM-DELETED-MESSAGE -->' ) !== false ){
+                return __( 'This message was deleted', 'bp-better-messages' );
+            }
+
+            if( strpos( $content, '<!-- BM-VOICE-MESSAGE-EXPIRED -->' ) !== false ){
+                return __( 'Voice message expired', 'bp-better-messages' );
+            }
+
+            return trim( preg_replace( '/<!--.*?-->/s', '', $content ) );
+        }
+
+        private function export_transcript_attachments( $message_id, $thread_id ){
+            $attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
+
+            if( ! is_array( $attachments ) || empty( $attachments ) ) return array();
+
+            $is_private = Better_Messages()->settings['attachmentsProxy'] === '1';
+            $files      = array();
+
+            foreach( $attachments as $attachment_id => $url ){
+                $name = get_post_meta( $attachment_id, 'bp-better-messages-original-name', true );
+
+                if( empty( $name ) ){
+                    $original_url = wp_get_attachment_url( $attachment_id );
+                    $name         = wp_basename( $original_url ? $original_url : $url );
+                }
+
+                $files[] = array(
+                    'url'  => $is_private ? '' : $url,
+                    'name' => $name,
+                );
+            }
+
+            return $files;
+        }
+
+        private function export_transcript_plain_text( $content ){
+            $content = str_replace( array( '<br>', '<br/>', '<br />', '</p>' ), "\n", $content );
+            $content = wp_strip_all_tags( $content );
+            $content = html_entity_decode( $content, ENT_QUOTES, 'UTF-8' );
+
+            return trim( $content );
+        }
+
+        private function export_transcript_stream_text( $thread_id, $title, $total, $options ){
+            $exported_at = get_date_from_gmt( gmdate( 'Y-m-d H:i:s' ), 'Y-m-d H:i' );
+
+            echo $title . "\n";
+            echo sprintf( _x( 'Exported %s', 'Transcript export', 'bp-better-messages' ), $exported_at ) . "\n";
+            echo sprintf( _nx( '%s message', '%s messages', $total, 'Transcript export', 'bp-better-messages' ), number_format_i18n( $total ) ) . "\n\n";
+
+            $names  = array();
+            $offset = 0;
+            $limit  = 500;
+
+            while( true ){
+                $rows = $this->export_transcript_rows( $thread_id, $offset, $limit, $names );
+
+                if( empty( $rows ) ) break;
+
+                foreach( $rows as $row ){
+                    $time  = get_date_from_gmt( $row['date_sent'], 'Y-m-d H:i' );
+                    $parts = explode( "\n", $this->export_transcript_plain_text( $row['content'] ) );
+                    $first = array_shift( $parts );
+
+                    $author = $options['user_ids']
+                        ? sprintf( '%s (#%d)', $row['name'], $row['user_id'] )
+                        : $row['name'];
+
+                    echo rtrim( sprintf( '[%s] %s: %s', $time, $author, $first ) ) . "\n";
+
+                    foreach( $parts as $part ){
+                        echo '    ' . $part . "\n";
+                    }
+
+                    foreach( $row['attachments'] as $attachment ){
+                        echo empty( $attachment['url'] )
+                            ? '    ' . $attachment['name'] . "\n"
+                            : '    ' . $attachment['name'] . ' — ' . $attachment['url'] . "\n";
+                    }
+                }
+
+                if( count( $rows ) < $limit ) break;
+
+                $offset += $limit;
+                flush();
+            }
+        }
+
+        private function export_transcript_stream_html( $thread_id, $title, $total, $options ){
+            $allowed_tags = array(
+                'a'          => array( 'href' => true, 'target' => true, 'rel' => true ),
+                'b'          => array(),
+                'strong'     => array(),
+                'i'          => array(),
+                'em'         => array(),
+                'u'          => array(),
+                'br'         => array(),
+                'p'          => array(),
+                'span'       => array(),
+                'strike'     => array(),
+                'del'        => array(),
+                'sub'        => array(),
+                'sup'        => array(),
+                'blockquote' => array(),
+                'code'       => array(),
+                'pre'        => array(),
+            );
+
+            $date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+            $exported_at = get_date_from_gmt( gmdate( 'Y-m-d H:i:s' ), $date_format );
+
+            echo '<!DOCTYPE html>' . "\n";
+            echo '<html lang="' . esc_attr( get_bloginfo( 'language' ) ) . '">' . "\n";
+            echo '<head>' . "\n";
+            echo '<meta charset="utf-8">' . "\n";
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
+            echo '<title>' . esc_html( $title ) . '</title>' . "\n";
+            echo '<style>' . $this->export_transcript_styles() . '</style>' . "\n";
+            echo '</head>' . "\n";
+            echo '<body>' . "\n";
+            echo '<div class="bm-transcript">' . "\n";
+
+            echo '<header class="bm-transcript-head">' . "\n";
+            echo '<h1>' . esc_html( $title ) . '</h1>' . "\n";
+            echo '<p>' . esc_html( sprintf( _x( 'Exported %s', 'Transcript export', 'bp-better-messages' ), $exported_at ) ) . ' &middot; ';
+            echo esc_html( sprintf( _nx( '%s message', '%s messages', $total, 'Transcript export', 'bp-better-messages' ), number_format_i18n( $total ) ) ) . '</p>' . "\n";
+            echo '</header>' . "\n";
+
+            if( $total === 0 ){
+                echo '<p class="bm-transcript-empty">' . esc_html( _x( 'This conversation has no messages', 'Transcript export', 'bp-better-messages' ) ) . '</p>' . "\n";
+            }
+
+            $names  = array();
+            $offset = 0;
+            $limit  = 500;
+
+            while( true ){
+                $rows = $this->export_transcript_rows( $thread_id, $offset, $limit, $names );
+
+                if( empty( $rows ) ) break;
+
+                foreach( $rows as $row ){
+                    $time = get_date_from_gmt( $row['date_sent'], $date_format );
+
+                    echo '<article class="bm-message">' . "\n";
+
+                    if( $options['avatars'] ){
+                        $avatar = Better_Messages()->functions->get_avatar( $row['user_id'], 100, array( 'html' => false ) );
+
+                        if( ! empty( $avatar ) ){
+                            echo '<img class="bm-message-avatar" src="' . esc_url( $avatar ) . '" alt="" width="40" height="40">' . "\n";
+                        } else {
+                            echo '<span class="bm-message-avatar bm-message-avatar-empty">' . esc_html( mb_substr( $row['name'], 0, 1 ) ) . '</span>' . "\n";
+                        }
+                    }
+
+                    echo '<div class="bm-message-body">' . "\n";
+                    echo '<div class="bm-message-head">';
+                    echo '<span class="bm-message-name">' . esc_html( $row['name'] ) . '</span>';
+
+                    if( $options['user_ids'] ){
+                        echo '<span class="bm-message-uid">#' . (int) $row['user_id'] . '</span>';
+                    }
+
+                    echo '<span class="bm-message-time">' . esc_html( $time ) . '</span>';
+                    echo '</div>' . "\n";
+                    echo '<div class="bm-message-text">' . nl2br( wp_kses( $row['content'], $allowed_tags ) ) . '</div>' . "\n";
+
+                    if( ! empty( $row['attachments'] ) ){
+                        echo '<div class="bm-message-files">' . "\n";
+
+                        foreach( $row['attachments'] as $attachment ){
+                            if( empty( $attachment['url'] ) ){
+                                echo '<span class="bm-message-file">' . esc_html( $attachment['name'] ) . '</span>' . "\n";
+                                continue;
+                            }
+
+                            $extension = strtolower( pathinfo( $attachment['name'], PATHINFO_EXTENSION ) );
+
+                            if( in_array( $extension, array( 'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif' ), true ) ){
+                                echo '<a href="' . esc_url( $attachment['url'] ) . '"><img src="' . esc_url( $attachment['url'] ) . '" alt="' . esc_attr( $attachment['name'] ) . '"></a>' . "\n";
+                            } else {
+                                echo '<a href="' . esc_url( $attachment['url'] ) . '">' . esc_html( $attachment['name'] ) . '</a>' . "\n";
+                            }
+                        }
+
+                        echo '</div>' . "\n";
+                    }
+
+                    echo '</div>' . "\n";
+                    echo '</article>' . "\n";
+                }
+
+                if( count( $rows ) < $limit ) break;
+
+                $offset += $limit;
+                flush();
+            }
+
+            echo '</div>' . "\n";
+            echo '</body>' . "\n";
+            echo '</html>';
+        }
+
+        private function export_transcript_csv_cell( $value ){
+            if( $value === '' ) return $value;
+
+            if( strpos( "=+-@\t\r", substr( $value, 0, 1 ) ) !== false ){
+                return "'" . $value;
+            }
+
+            return $value;
+        }
+
+        private function export_transcript_stream_csv( $thread_id, $total, $options ){
+            $out = fopen( 'php://output', 'w' );
+
+            fwrite( $out, "\xEF\xBB\xBF" );
+
+            $header = array( _x( 'Date', 'Transcript export', 'bp-better-messages' ) );
+
+            if( $options['user_ids'] ){
+                $header[] = _x( 'User ID', 'Transcript export', 'bp-better-messages' );
+            }
+
+            $header[] = _x( 'Name', 'Transcript export', 'bp-better-messages' );
+            $header[] = _x( 'Message', 'Transcript export', 'bp-better-messages' );
+            $header[] = _x( 'Attachments', 'Transcript export', 'bp-better-messages' );
+
+            fputcsv( $out, $header, ',', '"', '\\' );
+
+            $names  = array();
+            $offset = 0;
+            $limit  = 500;
+
+            while( true ){
+                $rows = $this->export_transcript_rows( $thread_id, $offset, $limit, $names );
+
+                if( empty( $rows ) ) break;
+
+                foreach( $rows as $row ){
+                    $files = array();
+
+                    foreach( $row['attachments'] as $attachment ){
+                        $files[] = empty( $attachment['url'] )
+                            ? $attachment['name']
+                            : $attachment['url'];
+                    }
+
+                    $line = array( get_date_from_gmt( $row['date_sent'], 'Y-m-d H:i:s' ) );
+
+                    if( $options['user_ids'] ){
+                        $line[] = $row['user_id'];
+                    }
+
+                    $line[] = $this->export_transcript_csv_cell( $row['name'] );
+                    $line[] = $this->export_transcript_csv_cell( $this->export_transcript_plain_text( $row['content'] ) );
+                    $line[] = $this->export_transcript_csv_cell( implode( ' ', $files ) );
+
+                    fputcsv( $out, $line, ',', '"', '\\' );
+                }
+
+                if( count( $rows ) < $limit ) break;
+
+                $offset += $limit;
+                flush();
+            }
+
+            fclose( $out );
+        }
+
+        private function export_transcript_styles(){
+            return '
+body { margin: 0; background: #f6f7f9; color: #1d2327; font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.bm-transcript { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+.bm-transcript-head { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #dcdfe4; }
+.bm-transcript-head h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.3; }
+.bm-transcript-head p { margin: 0; color: #646970; font-size: 13px; }
+.bm-transcript-empty { color: #646970; }
+.bm-message { display: flex; gap: 12px; padding: 12px 0; }
+.bm-message-avatar { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #dcdfe4; }
+.bm-message-avatar-empty { display: flex; align-items: center; justify-content: center; color: #646970; font-size: 16px; font-weight: 600; text-transform: uppercase; }
+.bm-message-body { min-width: 0; flex: 1 1 auto; }
+.bm-message-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bm-message-name { font-weight: 600; }
+.bm-message-time { color: #8c8f94; font-size: 12px; }
+.bm-message-uid { color: #8c8f94; font-size: 12px; font-variant-numeric: tabular-nums; }
+.bm-message-text { margin-top: 2px; overflow-wrap: break-word; }
+.bm-message-text p { margin: 0 0 8px; }
+.bm-message-text p:last-child { margin-bottom: 0; }
+.bm-message-files { margin-top: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.bm-message-files img { max-width: 320px; height: auto; border-radius: 8px; display: block; }
+.bm-message-file { color: #646970; font-size: 13px; }
+@media print { body { background: #fff; } .bm-transcript { max-width: none; padding: 0; } }
+';
         }
     }
 

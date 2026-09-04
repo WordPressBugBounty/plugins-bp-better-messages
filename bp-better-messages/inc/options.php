@@ -1125,6 +1125,7 @@ class Better_Messages_Options
             'hasBuddyBossApp'    => $has_buddyboss_app,
             'hasOneSignal'       => defined('ONESIGNAL_PLUGIN_URL') || defined('ONESIGNAL_VERSION_V3') || class_exists('OneSignal'),
             'hasProgressify'     => class_exists('DaftPlug\Progressify\Plugin') || defined('PROGRESSIFY_VERSION'),
+            'hasFluentNotify'    => class_exists( 'Better_Messages_Fluent_Notify' ) && Better_Messages_Fluent_Notify::is_configured(),
             'hasBuddyBossPush'   => function_exists('bb_onesignal_app_is_connected') && bb_onesignal_app_is_connected(),
             'hasThirdPartyPush'  => apply_filters('better_messages_3rd_party_push_active', false),
             'myMessagesUrl'      => do_shortcode('[better_messages_my_messages_url]'),
@@ -1284,6 +1285,7 @@ class Better_Messages_Options
             'reportsEnabled'       => $reports_enabled,
             'guestsEnabled'        => $can_administrate,
             'bulkMessagingEnabled'  => $bulk_messaging_enabled,
+            'exportEnabled'        => current_user_can('manage_options'),
             'pluginUrl'            => Better_Messages()->url,
             'pluginVersion'        => Better_Messages()->version,
         );

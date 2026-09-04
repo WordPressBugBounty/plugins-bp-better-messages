@@ -4384,6 +4384,63 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 flush();
             }
         }
+
+        public function get_group_call_participants( $thread_id, $type = 'video' ){
+            $thread_id = (int) $thread_id;
+
+            if( $thread_id <= 0 ){
+                return 0;
+            }
+
+            if( $type !== 'audio' ){
+                $type = 'video';
+            }
+
+            $site_id    = Better_Messages()->websocket->site_id;
+            $secret_key = Better_Messages()->websocket->secret_key;
+
+            if( empty( $secret_key ) ){
+                return 0;
+            }
+
+            $cache_key  = 'bm_group_call_count_' . $thread_id . '_' . $type;
+            $cache_time = (int) apply_filters( 'better_messages_group_call_participants_cache_time', 5, $thread_id, $type );
+
+            if( $cache_time > 0 ){
+                $cached = get_transient( $cache_key );
+
+                if( $cached !== false ){
+                    return (int) $cached;
+                }
+            }
+
+            $server = apply_filters( 'bp_better_messages_realtime_server', 'https://cloud.better-messages.com/' );
+
+            $response = wp_remote_post( $server . 'checkGroupRoom', array(
+                'blocking' => true,
+                'timeout'  => 10,
+                'body'     => array(
+                    'site_id'    => $site_id,
+                    'secret_key' => sha1( $site_id . $secret_key ),
+                    'thread_id'  => $thread_id,
+                    'type'       => $type
+                )
+            ) );
+
+            if( is_wp_error( $response ) ){
+                return 0;
+            }
+
+            $body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+            $count = isset( $body['count'] ) ? (int) $body['count'] : 0;
+
+            if( $cache_time > 0 ){
+                set_transient( $cache_key, $count, $cache_time );
+            }
+
+            return $count;
+        }
     }
 
 endif;

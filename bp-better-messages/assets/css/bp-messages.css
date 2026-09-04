@@ -14026,8 +14026,8 @@ body.bp-messages-full-screen .bm-uppy-dashboard .uppy-Dashboard--modal .uppy-Das
 body.bp-messages-mobile .bm-uppy-dashboard .uppy-Dashboard--modal .uppy-Dashboard-inner {
   z-index: 10000002;
 }
-body.bp-messages-full-screen .Toastify__toast-container,
-body.bp-messages-mobile .Toastify__toast-container {
+body.bp-messages-full-screen .bm-toasts-container,
+body.bp-messages-mobile .bm-toasts-container {
   z-index: 10000001;
 }
 body.bp-messages-full-screen #better-messages-modals-container,

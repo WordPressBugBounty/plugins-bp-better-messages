@@ -380,6 +380,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_OneSignal::instance();
             }
 
+            if( defined('FLUENT_NOTIFY_PLUGIN_VERSION') && apply_filters( 'better_messages_fluent_notify_integration', true ) ) {
+                require_once Better_Messages()->path . 'addons/fluent-notify.php';
+                Better_Messages_Fluent_Notify::instance();
+            }
+
             if( defined('FLUENT_COMMUNITY_PLUGIN_VERSION') ){
                 require_once Better_Messages()->path . 'addons/fluent-community/fluent-community.php';
                 Better_Messages_Fluent_Community::instance();

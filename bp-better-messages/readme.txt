@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.31
+Stable tag: 2.15.32
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -236,6 +236,7 @@ Better Messages works on **any** WordPress site out of the box. If your site alr
 
 **Push & PWA:**
 
+* [FluentNotify](https://www.better-messages.com/docs/integrations/fluent-notify/) — web push through your own Firebase project
 * [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/) — web push notifications
 * [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) — install-to-home-screen prompts on the messenger
 
@@ -378,6 +379,21 @@ The complete documentation, integration guides, REST API reference, hooks refere
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
 
 == Changelog ==
+
+Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus.org/demo.php) site and send your feedback to support.
+
+= 2.15.32 =
+* Chat rooms and conversations can now be exported as a transcript — plain text, a web page or a CSV spreadsheet
+* Push notifications can now be delivered through [FluentNotify](https://www.better-messages.com/docs/integrations/fluent-notify/), using a Firebase project you control
+* Fixed a mini chat not opening for a chat room after the full screen view had been opened and closed
+* Fixed incoming call notifications being hidden behind the full screen view, leaving no way to answer
+* Added [`get_group_call_participants`](https://www.better-messages.com/hooks/php-functions/#get_group_call_participants) PHP function — read how many people are in a conversation's group video or audio call
+* Added [`BetterMessages.getGroupCallParticipants()`](https://www.better-messages.com/hooks/js-functions/#getGroupCallParticipants) JavaScript function — the same counts on the page, over the WebSocket, with no request to your own server
+* Added [`better_messages_group_call_status`](https://www.better-messages.com/hooks/js-actions/#better_messages_group_call_status) JavaScript action — fires whenever a group call's participant count changes
+* Added [`BetterMessages.subscribeGroupCallStatus()`](https://www.better-messages.com/hooks/js-functions/#subscribeGroupCallStatus) and [`unsubscribeGroupCallStatus()`](https://www.better-messages.com/hooks/js-functions/#unsubscribeGroupCallStatus) — watch the live count of any chat room, including one the visitor has not joined
+* Added [`better_messages_group_call_participants_cache_time`](https://www.better-messages.com/hooks/php-filters/#better_messages_group_call_participants_cache_time) PHP filter — how long a group call participant count is cached
+* Added [`better_messages_fluent_notify_integration`](https://www.better-messages.com/hooks/php-filters/#better_messages_fluent_notify_integration) PHP filter — return `false` to disable the FluentNotify integration
+* Other minor bugfixes and improvements
 
 = 2.15.30 - 2.15.31 =
 * Chat attachments are no longer listed by the WordPress media API
