@@ -1127,6 +1127,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $user['avatar'];
         }
 
+        public function avatar_url( $url ){
+            if( ! is_string( $url ) || $url === '' ){
+                return $url;
+            }
+
+            $url = html_entity_decode( $url, ENT_QUOTES, 'UTF-8' );
+
+            if( strpos( $url, '//' ) === 0 ){
+                $url = 'https://' . substr( $url, 2 );
+            }
+
+            return $url;
+        }
+
         public function get_avatar($user_id, $size, $args = array()){
             if( $size === 0 ) return '';
 
@@ -1178,6 +1192,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         'extra_attr' => $extra_attr
                     )
             ), $r );
+
+            if( $r['html'] !== true ){
+                return $this->avatar_url( $avatar );
+            }
 
             if( strpos($avatar, '//', 0) === 0 ){
                 $avatar = 'https://' . substr( $avatar, 2 );

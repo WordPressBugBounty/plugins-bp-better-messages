@@ -295,7 +295,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                         }
                     }
                 } else if( ! empty( $guest_user->email ) ){
-                    $avatar = get_avatar_url( $guest_user->email );
+                    $avatar = Better_Messages()->functions->avatar_url( get_avatar_url( $guest_user->email ) );
                     if( $avatar ){
                         $item['avatar'] = $avatar;
                     }
@@ -353,7 +353,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             if( ! empty( $name ) ){
                 $data['name'] = $name;
 
-                if( $this->check_if_name_already_used( $name ) ){
+                if( $this->names_must_be_unique() && $this->check_if_name_already_used( $name ) ){
                     return new WP_Error(
                         'rest_forbidden',
                         _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),
@@ -399,8 +399,13 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         public function check_if_name_already_used($name)
         {
             global $wpdb;
-            $sql = $wpdb->prepare("SELECT COUNT(*) FROM `{$this->table}` WHERE `name` LIKE %s", $name );
+            $sql = $wpdb->prepare("SELECT COUNT(*) FROM `{$this->table}` WHERE `name` LIKE %s", $wpdb->esc_like( $name ) );
             return (bool) $wpdb->get_var( $sql );
+        }
+
+        public function names_must_be_unique()
+        {
+            return Better_Messages()->settings['guestUniqueNames'] === '1';
         }
 
         public function register( WP_REST_Request $request ){
@@ -429,7 +434,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 if( isset( $registerData['name'] ) ){
                     $name = trim( sanitize_text_field( $registerData['name'] ) );
 
-                    if( $name && $this->check_if_name_already_used( $name ) ){
+                    if( $name && $this->names_must_be_unique() && $this->check_if_name_already_used( $name ) ){
                         return new WP_Error(
                             'rest_forbidden',
                             _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),

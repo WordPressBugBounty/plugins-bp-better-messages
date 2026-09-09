@@ -75,6 +75,7 @@ document.addEventListener('fluentCommunityUtilReady', function () {
           '</div>',
         mounted() {
           updateDynamicCSS();
+          bmFcSuppressPullToRefresh();
           if (window.BetterMessages && typeof window.BetterMessages.initialize === 'function') {
             window.BetterMessages.initialize();
           }
@@ -198,6 +199,13 @@ function bmFluentCommunityCourseButtonsMixin(app) {
   return app;
 }
 
+function bmFcSuppressPullToRefresh(){
+  var nodes = document.querySelectorAll('.fcom_better_messages_wrap, .bp-messages-wrap');
+  for( var i = 0; i < nodes.length; i++ ){
+    nodes[i].setAttribute('data-fcom-no-ptr', '');
+  }
+}
+
 function updateDynamicCSS(){
   var body = document.body;
 
@@ -258,6 +266,10 @@ const callback = function(mutationsList, observer) {
 const observer = new MutationObserver(callback);
 
 observer.observe(html, config);
+
+bmFcSuppressPullToRefresh();
+
+new MutationObserver(bmFcSuppressPullToRefresh).observe(document.body, { childList: true });
 
 if( window.visualViewport ){
   var lastViewportHeight = window.visualViewport.height;

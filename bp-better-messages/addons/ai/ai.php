@@ -1732,7 +1732,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 if ( $thread_type === 'chat-room' && isset( $chat_labels[ $thread_id ] ) ) {
                     $label = $chat_labels[ $thread_id ];
                 } else if ( $thread_type === 'group' || $thread_type === 'course' ) {
-                    $label = apply_filters( 'better_messages_thread_title', '', $thread_id );
+                    $label = Better_Messages()->functions->get_thread_title( $thread_id );
                 }
 
                 if ( empty( $label ) ) {
@@ -3666,7 +3666,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $voice_messages_banner = '';
             if( ! class_exists('BP_Better_Messages_Voice_Messages') ){
                 $voice_messages_banner = '<div class="bp-better-messages-banner bm-error">';
-                $voice_messages_banner .= sprintf(_x('<a href="%s" target="_blank">Voice Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages'), admin_url('admin.php?page=bp-better-messages-addons') );
+                $voice_messages_banner .= sprintf(_x('<a href="%s" target="_blank">Voice and Video Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages'), admin_url('admin.php?page=bp-better-messages-addons') );
                 $voice_messages_banner .= '</div>';
             }
 

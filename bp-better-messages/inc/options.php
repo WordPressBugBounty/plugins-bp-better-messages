@@ -461,6 +461,7 @@ class Better_Messages_Options
             'bpAppPush'                     => '0',
             'guestChat'                     => '0',
             'guestChatPage'                 => '0',
+            'guestUniqueNames'              => '1',
             'deleteMessagesOnUserDelete'    => '0',
             'dokanIntegration'              => '0',
             'MultiVendorXIntegration'       => '0',
@@ -2282,6 +2283,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['guestChat'] ) ) {
             $settings['guestChat'] = '0';
+        }
+
+        if( ! isset( $settings['guestUniqueNames'] ) ) {
+            $settings['guestUniqueNames'] = '1';
         }
 
         if( ! isset( $settings['dokanIntegration'] ) ) {

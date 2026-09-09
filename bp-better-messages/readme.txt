@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.32
+Stable tag: 2.15.33
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -97,7 +97,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 * File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
 * Client-side image and video optimization for cross-browser compatibility and saving storage space (format conversion, quality control, metadata stripping)
-* Voice Messages (available as addon)
+* Voice and Video Messages (available as addon)
 * Embedded links with thumbnails and descriptions
 * oEmbed support for YouTube, Vimeo, Spotify, SoundCloud, Flickr and 20+ services
 * Emoji selector
@@ -381,6 +381,23 @@ The complete documentation, integration guides, REST API reference, hooks refere
 == Changelog ==
 
 Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus.org/demo.php) site and send your feedback to support.
+
+= 2.15.33 =
+* Added [**Unique Guest Names**](https://www.better-messages.com/docs/features/guest-access/#can-two-guests-use-the-same-display-name) setting at Settings → General — turn it off to let guests use a display name someone else already took
+* Added [`BetterMessages.openGroupCall()`](https://www.better-messages.com/hooks/js-functions/#openGroupCall) JavaScript function — take a member straight into a chat room's group call from any page
+* Fixed an AI chat bot's Conversations list failing with a critical error and reporting no conversations, when the bot was in a group or course
+* Fixed a new encrypted conversation being created without a key when encryption was not yet set up on that device, leaving it unusable
+* Fixed the other person's video staying black in a one-to-one call answered in Firefox, while their audio and the call itself worked
+* Fixed the default avatar at Settings → Discussion being ignored on BuddyPress and BuddyBoss — users without a Gravatar showed the Gravatar logo
+* Fixed a guest display name containing an underscore or percent sign being wrongly rejected as already taken
+* Fixed unread counters bound to `better_messages_update_thread_unread` never dropping back to zero once a conversation was read
+* Fixed text smiles containing `<`, `>` or `&`, such as `<3`, never turning into an emoji, and the conversion staying on when it was switched off
+* Fixed a voice message shorter than a second arriving with no length shown, and the recording timer lagging up to a second behind
+* Fixed a JavaScript error when an on-site notification was dismissed just as a new message reopened it
+* Fixed conversations rendering blank when every emoji was removed from the reaction list
+* Fixed the reaction picker still appearing on messages after reactions were switched off in the settings
+* Fixed FluentCommunity's pull to refresh reloading the page while scrolling a conversation in an installed iOS app
+* Other minor bugfixes and improvements
 
 = 2.15.32 =
 * Chat rooms and conversations can now be exported as a transcript — plain text, a web page or a CSV spreadsheet

@@ -960,7 +960,7 @@ function _bm_js_translation_strings() {
     _x('Amount of search result context provided to the model. Higher values use more input tokens', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Max Calls per Response', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Audio', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
-    _x('<a href="%s">Voice Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages');
+    _x('<a href="%s">Voice and Video Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages');
     _x('Summarization', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Enable Summarization', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
     _x('Allow this bot to generate conversation summaries. The bot must be added as a participant to a conversation and selected as the summarization bot by a conversation moderator', 'AI Chat Bots (WP Admin)', 'bp-better-messages');
@@ -1939,6 +1939,8 @@ function _bm_js_translation_strings() {
     _x('The URL path for the messages tab in WooCommerce My Account. Example: /my-account/messages/', 'Settings page', 'bp-better-messages');
     _x('Guest Chat', 'Settings page', 'bp-better-messages');
     _x('Allow non-logged-in visitors to use the messaging system as guests', 'Settings page', 'bp-better-messages');
+    _x('Unique Guest Names', 'Settings page', 'bp-better-messages');
+    _x('Require every guest to pick a display name nobody has used before. Turn this off to let visitors reuse a name that is already taken', 'Settings page', 'bp-better-messages');
     _x('Guest Messages Page', 'Settings page', 'bp-better-messages');
     _x('The Messages Location above requires login. Pick a separate WordPress page where guests (and logged-in users) can access the messenger.', 'Settings page', 'bp-better-messages');
     _x('— Select page —', 'Settings page', 'bp-better-messages');

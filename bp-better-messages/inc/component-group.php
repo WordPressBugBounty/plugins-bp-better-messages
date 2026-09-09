@@ -120,6 +120,8 @@ class Better_Messages_Group extends BP_Group_Extension
             'html'       => false
         ));
 
+        $avatar = Better_Messages()->functions->avatar_url( $avatar );
+
         if( $avatar ){
             return $avatar;
         }

@@ -473,6 +473,8 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                         'html'       => false
                     ));
 
+                    $avatar = Better_Messages()->functions->avatar_url( $avatar );
+
                     $group_item = [
                         'group_id'  => $group_id,
                         'name'      => html_entity_decode(esc_attr($group->name)),
