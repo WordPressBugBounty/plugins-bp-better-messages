@@ -102,12 +102,12 @@ if ( ! class_exists( 'Better_Messages_WC_Vendors' ) ) {
             if( ! $this->is_livechat_enabled( get_current_user_id() ) ) return;
 
             $js = 'wp.hooks.addAction("better_messages_update_unread", "better_messages", function( unread ){
-                var element = document.querySelector(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bp-better-messages-unread");
+                var element = document.querySelector(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bm-menu-unread");
                 if( ! element ){
                     var parent = document.querySelector(".wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a");
                     if( parent ){
                         element = document.createElement("span");
-                        element.className = "bp-better-messages-unread bpbmuc bpbmuc-hide-when-null";
+                        element.className = "bm-menu-unread bpbmuc bpbmuc-hide-when-null";
                         parent.appendChild(element);
                     }
                 }
@@ -119,7 +119,7 @@ if ( ! class_exists( 'Better_Messages_WC_Vendors' ) ) {
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js( $js ), 'before' );
 
-            $css = '.wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bp-better-messages-unread{ margin-left: 10px; }';
+            $css = '.wcvendors-pro-dashboard-wrapper .wcv-navigation #dashboard-menu-item-messages a .bm-menu-unread{ margin-left: 10px; }';
 
             wp_add_inline_style( 'better-messages', Better_Messages()->functions->minify_css( $css ) );
         }

@@ -103,21 +103,39 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
 
             $sticker_id  = $request->get_param('sticker_id');
             $sticker_img = esc_url( strip_tags( $request->get_param('sticker_img') ) );
+            $temp_id     = sanitize_text_field( (string) $request->get_param('temp_id') );
+            $temp_time   = sanitize_text_field( (string) $request->get_param('temp_time') );
+            $user_id     = Better_Messages()->functions->get_current_user_id();
+
+            if( ! empty( $temp_id ) ){
+                $existing_message_id = Better_Messages_Rest_Api()->get_temp_id_message( $thread_id, $temp_id, $user_id );
+
+                if( $existing_message_id > 0 ){
+                    wp_send_json( array(
+                        'result'   => $existing_message_id,
+                        'update'   => Better_Messages_Rest_Api()->get_message_update( $thread_id, $existing_message_id ),
+                        'redirect' => false
+                    ) );
+                }
+            }
 
             if( strpos( $sticker_img, 'https://img.stipop.io/', 0 ) !== 0 ){
                 return false;
             }
 
-            $message = '<span class="bpbm-sticker"><img src="' . $sticker_img . '" alt=""></span>';
+            $message = '<span class="bm-sticker"><img src="' . $sticker_img . '" alt=""></span>';
 
             $args = array(
                 'content'    => $message,
                 'thread_id'  => $thread_id,
                 'return'     => 'message_id',
-                'error_type' => 'wp_error'
+                'error_type' => 'wp_error',
+                'is_pending' => (int) Better_Messages()->moderation->is_moderation_enabled( $user_id, $thread_id, false )
             );
 
-            if( ! Better_Messages()->functions->can_send_message_filter( Better_Messages()->functions->check_access( $thread_id ), Better_Messages()->functions->get_current_user_id(), $thread_id ) ) {
+            Better_Messages_Rest_Api()->apply_temp_id( $args, $temp_id, $temp_time );
+
+            if( ! Better_Messages()->functions->can_send_message_filter( Better_Messages()->functions->check_access( $thread_id ), $user_id, $thread_id ) ) {
                 $errors[] = __( 'You are not allowed to reply to this conversation.', 'bp-better-messages' );
             }
 
@@ -130,12 +148,12 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
                 if ( is_wp_error( $message_id ) ) {
                     $errors[] = $message_id->get_error_message();
                 } else {
-                    $this->register_usage( Better_Messages()->functions->get_current_user_id(), $sticker_id );
+                    $this->register_usage( $user_id, $sticker_id );
                 }
             }
 
             if( ! empty($errors) ) {
-                do_action( 'better_messages_on_message_not_sent', $thread_id, '', $errors );
+                do_action( 'better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
 
                 $redirect = 'redirect';
 
@@ -149,11 +167,9 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
                     'redirect' => $redirect
                 ) );
             } else {
-                $messages = Better_Messages_Rest_Api()->get_messages( $thread_id, [ $message_id ] );
-
                 wp_send_json( array(
                     'result'   => $message_id,
-                    'update'   => $messages,
+                    'update'   => Better_Messages_Rest_Api()->get_message_update( $thread_id, (int) $message_id ),
                     'redirect' => false
                 ) );
             }
@@ -161,7 +177,7 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
 
 
         public function format_message( $message, $message_id, $context, $user_id ) {
-            $is_sticker = strpos( $message, '<span class="bpbm-sticker">', 0 ) === 0;
+            $is_sticker = ( strpos( $message, '<span class="bm-sticker">', 0 ) === 0 || strpos( $message, '<span class="bpbm-sticker">', 0 ) === 0 );
 
             if( $is_sticker ){
                 $desc = '<i class="fas fa-sticky-note"></i> ' . __('Sticker', 'bp-better-messages');
@@ -171,7 +187,7 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
                     }
                     return $desc;
                 } else {
-                    //return str_replace('<span class="bpbm-sticker">', '<span class="bpbm-sticker" data-desc="' . base64_encode($desc) . '">',$message);
+                    //return str_replace('<span class="bm-sticker">', '<span class="bm-sticker" data-desc="' . base64_encode($desc) . '">',$message);
                 }
             }
 

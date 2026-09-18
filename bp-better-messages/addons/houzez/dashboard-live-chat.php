@@ -16,7 +16,7 @@ get_header( 'dashboard' );
 	<?php get_template_part( 'template-parts/dashboard/topbar' ); ?>
 
 	<div class="dashboard-content bm-houzez-dashboard-live-chat">
-		<?php echo do_shortcode( '[better_messages]' ); ?>
+		<?php echo do_shortcode( '[better_messages host_sized="1"]' ); ?>
 	</div>
 
 </div>

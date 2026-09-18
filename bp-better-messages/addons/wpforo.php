@@ -98,7 +98,7 @@ if ( !class_exists( 'Better_Messages_wpForo' ) ){
             if( $displayed_user_id === $current_user_id ) return;
 
             $link = Better_Messages()->functions->create_conversation_link( $displayed_user_id );
-            echo '<a href="' . $link . '" class="bpbm-pm-button bm-wpforo-btn">' . _x('Private Message', 'wpForo Integration', 'bp-better-messages') . '</a>';
+            echo '<a href="' . $link . '" class="bm-pm-button bm-wpforo-btn">' . _x('Private Message', 'wpForo Integration', 'bp-better-messages') . '</a>';
         }
     }
 }

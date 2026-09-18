@@ -215,6 +215,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 $friendly = __( 'The AI service quota has been exceeded. Please contact the site administrator.', 'bp-better-messages' );
             } elseif ( strpos( $lower, 'safety' ) !== false || strpos( $lower, 'blocked' ) !== false || strpos( $lower, 'content_filter' ) !== false ) {
                 $friendly = __( 'The message could not be processed due to content restrictions.', 'bp-better-messages' );
+            } elseif ( strpos( $lower, 'voice transcription' ) !== false ) {
+                $friendly = __( 'The voice message could not be transcribed. Please try again or send a text message.', 'bp-better-messages' );
             } else {
                 $friendly = __( 'Something went wrong while generating a response. Please try again.', 'bp-better-messages' );
             }
@@ -231,8 +233,77 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
          * Retries up to 3 times with increasing delays (5s, 15s, 30s).
          * Only retries errors that occur before any content is streamed (connection-level failures).
          */
+        protected function get_voice_transcript( $_message )
+        {
+            if ( strpos( (string) $_message->message, '<!-- BPBM-VOICE-MESSAGE -->' ) === false ) {
+                return null;
+            }
+
+            if ( ! isset( Better_Messages()->ai ) ) {
+                return null;
+            }
+
+            return Better_Messages()->ai->get_voice_transcript( $_message->id );
+        }
+
+        protected function get_context_text( $_message )
+        {
+            $text       = $this->clean_stored_message( $_message->message );
+            $transcript = $this->get_voice_transcript( $_message );
+
+            if ( is_string( $transcript ) && trim( $transcript ) !== '' ) {
+                $text = trim( $text );
+                $text = $text === '' ? $transcript : $text . "\n" . $transcript;
+            }
+
+            return $this->append_location_context( $_message->id, $text );
+        }
+
+        protected function prepare_voice_input( $bot_id, $message )
+        {
+            if ( ! isset( Better_Messages()->ai ) ) {
+                return null;
+            }
+
+            $attachment_id = Better_Messages()->ai->get_voice_attachment_id( $message->id );
+
+            if ( ! $attachment_id ) {
+                return null;
+            }
+
+            $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
+
+            if ( str_contains( $bot_settings['model'], '-audio-' ) && $this->supports( 'audio' ) ) {
+                return null;
+            }
+
+            $transcript = Better_Messages()->ai->get_voice_transcript( $message->id );
+
+            if ( $transcript === null ) {
+                if ( ! Better_Messages()->ai->bot_accepts_voice_input( $bot_settings ) ) {
+                    return 'voice transcription is not enabled';
+                }
+
+                $transcript = Better_Messages()->ai->get_voice_transcript( $message->id, true );
+            }
+
+            if ( $transcript === null || trim( $transcript ) === '' ) {
+                return 'voice transcription failed';
+            }
+
+            return null;
+        }
+
         protected function getResponseGeneratorWithRetry( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
         {
+            $voice_error = $this->prepare_voice_input( $bot_id, $message );
+
+            if ( $voice_error !== null ) {
+                return ( function () use ( $voice_error ) {
+                    yield [ 'error', $voice_error ];
+                } )();
+            }
+
             $max_retries  = 3;
             $retry_delays = [ 5, 15, 30 ];
 
@@ -406,7 +477,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 if ( $last_summary ) {
                     $summary_text = $last_summary->message;
                     $summary_text = preg_replace( '/<!--(.|\s)*?-->/', '', $summary_text );
-                    $summary_text = wp_strip_all_tags( html_entity_decode( $summary_text ) );
+                    $summary_text = wp_strip_all_tags( $this->decode_entities_deep( $summary_text ) );
 
                     $exclude_join  = '';
                     $exclude_where = '';
@@ -477,7 +548,16 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
             // Annotate the triggering message with reply context
             $replied_text = preg_replace( '/<!--(.|\s)*?-->/', '', $replied_msg->message );
-            $replied_text = wp_strip_all_tags( html_entity_decode( $replied_text ) );
+            $replied_text = wp_strip_all_tags( $this->decode_entities_deep( $replied_text ) );
+
+            if ( trim( $replied_text ) === '' ) {
+                $replied_transcript = $this->get_voice_transcript( $replied_msg );
+
+                if ( is_string( $replied_transcript ) ) {
+                    $replied_text = $replied_transcript;
+                }
+            }
+
             $replied_text = mb_substr( $replied_text, 0, 200 );
 
             $replied_sender_id = (int) $replied_msg->sender_id;
@@ -486,6 +566,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             // Check if replied-to message has attachments
             $replied_attachments = Better_Messages()->functions->get_message_meta( $reply_to_id, 'attachments', true );
             $has_attachments = ! empty( $replied_attachments );
+
+            $replied_location = $this->get_location_context( $reply_to_id );
 
             $reply_prefix = '[Replying to';
             if ( $replied_sender_name ) {
@@ -498,6 +580,9 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             if ( $has_attachments ) {
                 $count = count( $replied_attachments );
                 $reply_prefix .= ' (' . $count . ' attachment' . ( $count > 1 ? 's' : '' ) . ')';
+            }
+            if ( $replied_location !== '' ) {
+                $reply_prefix .= ' (shared location: ' . $replied_location . ')';
             }
             $reply_prefix .= ']: ';
 
@@ -587,10 +672,48 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $instruction;
         }
 
+        protected function decode_entities_deep( $text )
+        {
+            $text = (string) $text;
+            for ( $i = 0; $i < 3; $i++ ) {
+                $decoded = html_entity_decode( $text, ENT_QUOTES | ENT_HTML401, 'UTF-8' );
+                if ( $decoded === $text ) break;
+                $text = $decoded;
+            }
+            return $text;
+        }
+
         protected function clean_stored_message( $stored_text )
         {
             $text = preg_replace( '/<!--(.|\s)*?-->/', '', (string) $stored_text );
-            return html_entity_decode( $text, ENT_QUOTES | ENT_HTML401, 'UTF-8' );
+            return $this->decode_entities_deep( $text );
+        }
+
+        protected function get_location_context( $message_id )
+        {
+            if ( ! isset( Better_Messages()->ai ) ) {
+                return '';
+            }
+
+            return Better_Messages()->ai->get_location_context( $message_id );
+        }
+
+        protected function append_location_context( $message_id, $message_text )
+        {
+            $location = $this->get_location_context( $message_id );
+
+            if ( $location === '' ) {
+                return $message_text;
+            }
+
+            $message_text = trim( (string) $message_text );
+            $annotation   = '[Shared location: ' . $location . ']';
+
+            if ( strpos( $message_text, $annotation ) !== false ) {
+                return $message_text;
+            }
+
+            return $message_text === '' ? $annotation : $message_text . "\n" . $annotation;
         }
 
         protected function strip_mention_html( $text, $sender_names = array() )
@@ -639,7 +762,16 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 if ( $colon !== false ) {
                     $user_id  = trim( substr( $inner, 0, $colon ) );
                     $username = trim( substr( $inner, $colon + 1 ) );
-                    $result .= '&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;' . $user_id . '&quot;&gt;' . htmlspecialchars( $username, ENT_QUOTES, 'UTF-8' ) . '&lt;/span&gt;';
+
+                    if ( preg_match( '/-?\d+$/', $user_id, $id_match ) ) {
+                        $user_id = $id_match[0];
+                    }
+
+                    if ( preg_match( '/^-?\d+$/', $user_id ) ) {
+                        $result .= '&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;' . $user_id . '&quot;&gt;' . htmlspecialchars( $username, ENT_QUOTES, 'UTF-8' ) . '&lt;/span&gt;';
+                    } else {
+                        $result .= htmlspecialchars( $username, ENT_QUOTES, 'UTF-8' );
+                    }
                 } else {
                     $result .= substr( $text, $start, $end + 2 - $start );
                 }
@@ -819,6 +951,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     'content'      => '<!-- BM-AI -->',
                     'count_unread' => false,
                     'send_push'    => false,
+                    'mobile_push'  => false,
                     'return'       => 'message_id',
                     'error_type'   => 'wp_error'
                 ] );

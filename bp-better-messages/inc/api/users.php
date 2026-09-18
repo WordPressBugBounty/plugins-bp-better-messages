@@ -70,9 +70,8 @@ if ( ! class_exists( 'Better_Messages_Rest_Users' ) ):
             $where_parts[] = '( '
                 . '( bm_u.`ID` > 0 AND wp_u.`ID` IS NOT NULL )'
                 . ' OR ( bm_u.`ID` < 0 AND bm_g.`id` IS NOT NULL AND bm_g.`deleted_at` IS NULL'
-                .       ' AND ( bm_g.`ip` IS NULL OR bm_g.`ip` NOT LIKE %s ) )'
+                .       ' AND bm_g.`bot_id` = 0 )'
                 . ' )';
-            $params[] = 'ai-chat-bot-%';
 
             if ( $current_user_id !== 0 ) {
                 $where_parts[] = 'bm_u.`ID` != %d';

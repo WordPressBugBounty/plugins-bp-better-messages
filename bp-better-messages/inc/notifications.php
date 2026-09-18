@@ -502,12 +502,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         $message->message = _x('Encrypted message', 'Email notification', 'bp-better-messages');
                                     }
 
-                                    $is_sticker = strpos( $message->message, '<span class="bpbm-sticker">' ) !== false;
+                                    $is_sticker = ( strpos( $message->message, '<span class="bm-sticker">' ) !== false || strpos( $message->message, '<span class="bpbm-sticker">' ) !== false );
                                     if( $is_sticker ){
                                         $message->message = __('Sticker', 'bp-better-messages');
                                     }
 
-                                    $is_gif = strpos( $message->message, '<span class="bpbm-gif">' ) !== false;
+                                    $is_gif = ( strpos( $message->message, '<span class="bm-gif">' ) !== false || strpos( $message->message, '<span class="bpbm-gif">' ) !== false );
                                     if( $is_gif ){
                                         $message->message = __('GIF', 'bp-better-messages');
                                     }

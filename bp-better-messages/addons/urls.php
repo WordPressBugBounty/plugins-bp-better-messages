@@ -218,7 +218,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                                     $html = $this->render_privacy_embed( $url, $embed );
                                 } else {
                                     $embed_html = $this->apply_embed_playback_params( $embed->html, strtolower( $embed->provider_name ), $embed );
-                                    $html = '<span class="bp-messages-iframe-container">' . $embed_html . '</span>';
+                                    $html = '<span class="bm-iframe-container">' . $embed_html . '</span>';
                                 }
                             } else if( isset($embed->html) ) {
                                 // Non-video embeds (SoundCloud, Flickr, etc.) can contain
@@ -474,7 +474,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 return false;
             }
 
-            return '<span class="bp-messages-iframe-container">'
+            return '<span class="bm-iframe-container">'
                 . '<span class="bm-embed-consent" data-title="' . $title . '" data-sandbox="' . esc_attr( $this->get_embed_sandbox( $provider ) ) . '" data-src="' . esc_attr( $iframe_src ) . '">'
                 . '<span class="bm-embed-consent-play"></span>'
                 . ( $title ? '<span class="bm-embed-consent-title">' . esc_html( $title ) . '</span>' : '' )

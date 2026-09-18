@@ -497,11 +497,16 @@ class Better_Messages_Chats
         if ( ! empty( $thread_ids ) ) {
             $count_placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
 
+            $users_table = $wpdb->users;
+
             $count_rows = $wpdb->get_results( $wpdb->prepare(
-                "SELECT `thread_id`, COUNT(*) AS `total`
-                 FROM `{$recipients_table}`
-                 WHERE `thread_id` IN ({$count_placeholders})
-                 GROUP BY `thread_id`",
+                "SELECT `recipients`.`thread_id`, COUNT(*) AS `total`
+                 FROM `{$recipients_table}` `recipients`
+                 LEFT JOIN `{$users_table}` `users`
+                     ON `users`.`ID` = `recipients`.`user_id`
+                 WHERE `recipients`.`thread_id` IN ({$count_placeholders})
+                 AND ( ( `recipients`.`user_id` >= 0 AND `users`.`ID` IS NOT NULL ) OR ( `recipients`.`user_id` < 0 ) )
+                 GROUP BY `recipients`.`thread_id`",
                 $thread_ids
             ) );
 
@@ -2109,8 +2114,6 @@ class Better_Messages_Chats
             } else {
                 Better_Messages()->enqueue_js();
                 Better_Messages()->enqueue_css();
-
-                add_action('wp_footer', array( Better_Messages_Customize(), 'header_output' ), 100);
             }
         }
 
@@ -2124,13 +2127,22 @@ class Better_Messages_Chats
         ob_start();
 
         if( ! Better_Messages()->functions->is_ajax() && count( $bpbm_errors ) > 0 ) {
-            echo '<p class="bpbm-notice">' . implode('</p><p class="bpbm-notice">', $bpbm_errors) . '</p>';
+            echo '<p class="bm-chat-notice">' . implode('</p><p class="bm-chat-notice">', $bpbm_errors) . '</p>';
         }
 
         $initialHeight = Better_Messages()->functions->initial_container_height();
-        $class = 'bp-messages-chat-wrap';
+        $class = 'bm-chat-wrap';
         if( $disable_init ) $class .= ' bm-disable-auto-init';
-        echo '<div class="' . $class . '" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '" data-full-screen="' . esc_attr($full_screen) . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+
+        $viewer_id = Better_Messages()->functions->get_current_user_id();
+
+        $placeholder_can_reply = $this->is_ephemeral_chat( $chat_id )
+            ? ( $viewer_id !== 0 && $this->user_can_read( $viewer_id, $chat_id ) && $this->user_can_reply( $viewer_id, $chat_id ) )
+            : Better_Messages()->functions->is_thread_participant( $viewer_id, $thread_id );
+
+        $placeholder_avatar = has_post_thumbnail( $chat_id ) || count( Better_Messages()->functions->get_recipients( $thread_id ) ) > 0;
+
+        echo '<div class="' . $class . '" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' .  esc_attr($thread_id) . '" data-chat-id="'  . esc_attr($chat_id) . '" data-full-screen="' . esc_attr($full_screen) . '">' . Better_Messages()->functions->container_placeholder( false, 'chat-room', $placeholder_can_reply, $placeholder_avatar ) . '</div>';
 
         $content = ob_get_clean();
         $content = str_replace( 'loading="lazy"', '', $content );

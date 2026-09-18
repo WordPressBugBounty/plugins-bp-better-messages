@@ -211,6 +211,20 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             }
         }
 
+        public function guest_bot_id( $guest_user ){
+            if( ! $guest_user || empty( $guest_user->bot_id ) ) return 0;
+
+            return (int) $guest_user->bot_id;
+        }
+
+        public function get_bot_id( $user_id ){
+            $user_id = (int) $user_id;
+
+            if( $user_id === 0 ) return 0;
+
+            return $this->guest_bot_id( $this->get_guest_user( $user_id ) );
+        }
+
         public function get_all_guest_ids(){
 
             global $wpdb;
@@ -280,9 +294,10 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             if( $guest_user ){
                 $item['name'] = sanitize_user( $guest_user->name );
 
-                if( ! empty( $guest_user->ip ) && str_starts_with($guest_user->ip, 'ai-chat-bot-') ){
+                $bot_id = $this->guest_bot_id( $guest_user );
+
+                if( $bot_id > 0 ){
                     $item['is_bot'] = 1;
-                    $bot_id = str_replace('ai-chat-bot-', '', $guest_user->ip);
 
                     if( has_post_thumbnail( $bot_id ) ) {
                         $image_id = get_post_thumbnail_id($bot_id);
@@ -571,19 +586,21 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         }
 
         public function get_client_ip(){
-            $ip = '';
+            $sources = [ 'HTTP_X_REAL_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ];
 
-            if ( isset($_SERVER['HTTP_X_REAL_IP']) && ! empty($_SERVER['HTTP_X_REAL_IP']) && ! str_contains($_SERVER['HTTP_X_REAL_IP'], ',') ) {
-                $ip = $_SERVER['HTTP_X_REAL_IP'];
-            } else if ( isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP']) && ! str_contains($_SERVER['HTTP_CLIENT_IP'], ',')) {
-                $ip = $_SERVER['HTTP_CLIENT_IP'];
-            } elseif ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'] ) && ! str_contains($_SERVER['HTTP_X_FORWARDED_FOR'], ',') ) {
-                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            } else if( isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'] ) && ! str_contains($_SERVER['REMOTE_ADDR'], ',') ){
-                $ip = $_SERVER['REMOTE_ADDR'];
+            foreach( $sources as $source ){
+                if( empty( $_SERVER[ $source ] ) ) continue;
+
+                $ip = trim( (string) $_SERVER[ $source ] );
+
+                if( str_contains( $ip, ',' ) ) continue;
+
+                if( filter_var( $ip, FILTER_VALIDATE_IP ) !== false ){
+                    return $ip;
+                }
             }
 
-            return $ip;
+            return '';
         }
     }
 

@@ -342,14 +342,14 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
             $button_bottom = Better_Messages()->hooks->get_mobile_popup_bottom() + $bar_height;
             ?>
             <style id="bm-masterstudy-mobile-styles">
-            body.bp-messages-mobile .masterstudy-account-mobile-menu { display: none !important; }
+            body.bm-mobile .masterstudy-account-mobile-menu { display: none !important; }
             @media (max-width: 1279.98px) {
-                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-center,
-                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-left,
-                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) .Toastify__toast-container--bottom-right {
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-center,
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-left,
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-right {
                     bottom: <?php echo $toast_bottom; ?>px;
                 }
-                body:has(.masterstudy-account-mobile-menu):not(.bp-messages-mobile) #bp-better-messages-mini-mobile-open {
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) #bm-mini-mobile-open {
                     bottom: <?php echo $button_bottom; ?>px !important;
                     z-index: 1000000000;
                 }
@@ -474,7 +474,7 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
                 $courses[] = array(
                     'course_id' => $course_id,
                     'name'      => get_the_title( $course_id ),
-                    'image'     => $image ? $image : '',
+                    'image'     => $image ? $image : $this->get_default_course_image_html(),
                     'url'       => get_permalink( $course_id ),
                     'thread_id' => $thread_id,
                     'messages'  => 1,

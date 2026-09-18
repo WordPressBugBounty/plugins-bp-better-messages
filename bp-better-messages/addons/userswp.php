@@ -27,8 +27,6 @@ if ( !class_exists( 'Better_Messages_UsersWP' ) ){
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
             }
 
-            add_action('better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
-
             add_filter('better_messages_rest_user_item', array( $this, 'custom_user_meta' ), 20, 3 );
 
             add_action('admin_init', array( $this, 'admin_init' ) );
@@ -44,7 +42,7 @@ if ( !class_exists( 'Better_Messages_UsersWP' ) ){
             <script type="text/javascript">
                 var profileTab = document.querySelector('#uwp-profile-bm-messages a');
                 if( profileTab ){
-                    profileTab.innerHTML += ' <span class="bp-better-messages-unread bpbmuc bpbmuc-hide-when-null" data-count="0">0</span>'
+                    profileTab.innerHTML += ' <span class="bm-menu-unread bpbmuc bpbmuc-hide-when-null" data-count="0">0</span>'
                 }
             </script>
             <?php
@@ -52,10 +50,6 @@ if ( !class_exists( 'Better_Messages_UsersWP' ) ){
 
         public function admin_init(){
             remove_action( 'admin_notices', array( Better_Messages()->hooks, 'admin_notice') );
-        }
-
-        public function bm_location_label(){
-            return _x('Show in UsersWP profile', 'UsersWP Integration', 'bp-better-messages');
         }
 
         public function message_page_url( $url, $user_id ){

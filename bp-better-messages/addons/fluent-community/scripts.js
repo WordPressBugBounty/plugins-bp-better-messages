@@ -4,6 +4,24 @@ var settings = window.BM_Fluent_Community;
 
 const path = '/messages';
 
+// The portal renders its own document (FluentCommunity's portal_page.php has
+// a bare <body>), so WordPress never runs body_class() there and none of the
+// Design body classes arrive — bubble style, message layout, dates, group
+// avatars, fill window, mini-widget position, the mobile button. Every one of
+// those options was silently inert inside the portal while working on the
+// rest of the site. Light/dark is not in this list: updateDynamicCSS() below
+// mirrors the portal's own mode instead.
+function bmFcApplyDesignClasses() {
+  var classes = ( settings && Array.isArray( settings.bodyClasses ) ) ? settings.bodyClasses : [];
+  if ( ! classes.length || ! document.body ) return false;
+  document.body.classList.add.apply( document.body.classList, classes );
+  return true;
+}
+
+if ( ! bmFcApplyDesignClasses() ) {
+  document.addEventListener( 'DOMContentLoaded', bmFcApplyDesignClasses );
+}
+
 function extractPathWithHash(url) {
   try {
     const u = new URL(url, window.location.origin);
@@ -47,7 +65,7 @@ wp.hooks.addFilter('better_messages_navigate_url', 'bm_fluent_com', function( re
 
 
 document.addEventListener('fluentCommunityUtilReady', function () {
-  const isMobile = document.body.classList.contains('bp-messages-mobile');
+  const isMobile = document.body.classList.contains('bm-mobile');
   const fullSize = ( typeof settings !== 'undefined' && typeof settings.fullScreen !== 'undefined' ) ? settings.fullScreen : false;
   const containerClass = fullSize ? 'fcom_full_size_container' : 'fcom_boxed_container';
   const containerStyle = fullSize ? 'padding: 0;' : 'padding: 20px;';
@@ -71,7 +89,7 @@ document.addEventListener('fluentCommunityUtilReady', function () {
       component: {
         template: header +
           '<div class="fcom_better_messages_wrap ' + containerClass + '" style="' + containerStyle + '">' +
-          '<div class="bp-messages-wrap-main" style="height: 900px"></div>' +
+          '<div class="bm-wrap-main bm-host-sized" style="height: 900px"></div>' +
           '</div>',
         mounted() {
           updateDynamicCSS();
@@ -88,9 +106,9 @@ document.addEventListener('fluentCommunityUtilReady', function () {
             return false;
           }
 
-          document.body.classList.remove('bp-messages-mobile');
+          document.body.classList.remove('bm-mobile');
 
-          var container = document.querySelector('.bp-messages-wrap-main');
+          var container = document.querySelector('.bm-wrap-main');
           if( container ){
             if( container.reactRoot ) container.reactRoot.unmount()
             container.remove();
@@ -200,7 +218,7 @@ function bmFluentCommunityCourseButtonsMixin(app) {
 }
 
 function bmFcSuppressPullToRefresh(){
-  var nodes = document.querySelectorAll('.fcom_better_messages_wrap, .bp-messages-wrap');
+  var nodes = document.querySelectorAll('.fcom_better_messages_wrap, .bp-messages-wrap, .bm-wrap-main');
   for( var i = 0; i < nodes.length; i++ ){
     nodes[i].setAttribute('data-fcom-no-ptr', '');
   }
@@ -230,18 +248,19 @@ function updateDynamicCSS(){
   var windowHeight = window.innerHeight;
   css += `--bm-fcom-window-height:${windowHeight}px;`;
 
+  // Always emit these two. The whole :root block is rewritten on every call,
+  // so a variable left out here is not "kept from last time", it is DROPPED —
+  // and the messenger then falls back to the literal in its own var(), which
+  // is 41px against a nav that is really 65px. The reply area ends up under
+  // the nav by the difference. Absent or hidden means zero, and zero is a
+  // value worth stating.
   var mobileMenu = document.querySelector('.fcom_mobile_menu');
-  if( mobileMenu ) {
-    var height = mobileMenu.offsetHeight;
-    css += `--bm-fcom-footer-height:${height}px;`;
-  }
+  var footerHeight = mobileMenu ? mobileMenu.offsetHeight : 0;
+  css += `--bm-fcom-footer-height:${footerHeight}px;`;
 
   var topMenu = document.querySelector('.fcom_top_menu');
-
-  if( topMenu ) {
-    var topMenuHeight = topMenu.offsetHeight ;
-    css += `--bm-fcom-menu-height:${topMenuHeight}px;`;
-  }
+  var topMenuHeight = topMenu ? topMenu.offsetHeight : 0;
+  css += `--bm-fcom-menu-height:${topMenuHeight}px;`;
 
   var headerTitle = document.querySelector('.fhr_content_layout_header');
 
@@ -273,6 +292,9 @@ new MutationObserver(bmFcSuppressPullToRefresh).observe(document.body, { childLi
 
 if( window.visualViewport ){
   var lastViewportHeight = window.visualViewport.height;
+
+  window.addEventListener('resize', updateDynamicCSS);
+  window.addEventListener('orientationchange', updateDynamicCSS);
 
   window.visualViewport.addEventListener('resize', function(){
     var currentHeight = window.visualViewport.height;

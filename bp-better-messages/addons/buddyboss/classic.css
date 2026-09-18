@@ -15,8 +15,46 @@ body.bm-bb-classic-fullpage-msg #buddypress.buddypress-wrap > .bp-wrap {
     letter-spacing: normal;
 }
 
-body.bm-bb-classic-hide-mini .bp-better-messages-list,
-body.bm-bb-classic-hide-mini .bp-messages-wrap.bm-widget-bubble,
-body.bm-bb-classic-hide-mini .bpbm-minimize {
+/* `.bm-threads-list` is NOT part of the mini widget — it is the shared
+ * conversations layout that BuddyBoss's own header Messages dropdown is
+ * filled with. Hiding it here emptied that dropdown on every messages
+ * screen: the popup opened with its title and its View Inbox footer and
+ * nothing in between. */
+body.bm-bb-classic-hide-mini .bm-wrap.bm-widget-bubble,
+body.bm-bb-classic-hide-mini .bm-mini-widgets-wrap,
+body.bm-bb-classic-hide-mini .bm-mini-chats-wrap,
+body.bm-bb-classic-hide-mini .bm-minimize {
     display: none !important;
+}
+
+/* The header Messages popup sizes itself to whatever is put inside it:
+ * `.notification-dropdown` is absolutely positioned with a `min-width` and no
+ * `max-width` (400px on desktop, 330px under 543px, 280px under 380px). The
+ * theme's own cap lives on `.notification-list`, and override_messages_list()
+ * renames that class to `.bm-notification-list` when it injects the
+ * conversations layout — so the cap stops applying and our list is left
+ * deciding the popup's width.
+ *
+ * The list's intrinsic width is the widest row in it, and a row is as wide as
+ * its longest unbroken line. `text-overflow: ellipsis` does not help: it clips
+ * at paint time and leaves max-content at the full string. So one conversation
+ * with a long title — twenty rows down, where nobody can even see it — pushed
+ * the whole popup out to 548px against BuddyBoss's own 400px.
+ *
+ * `width: 0` takes the list out of that calculation entirely and `min-width:
+ * 100%` puts it back at whatever the popup resolved to on its own. No number of
+ * ours, so every breakpoint keeps the theme's. `.bm-mini` needs its automatic
+ * minimum size released as well, or the row lays out at its own width inside
+ * the narrower box and the scroller clips the name instead of ellipsing it. */
+body.bm-bb-classic #header-messages-dropdown-elem .notification-dropdown .bm-notification-list {
+    min-width: 0;
+}
+
+body.bm-bb-classic #header-messages-dropdown-elem .notification-dropdown .bm-notification-list > .bm-wrap.bm-threads-list {
+    width: 0;
+    min-width: 100%;
+}
+
+body.bm-bb-classic #header-messages-dropdown-elem .notification-dropdown .bm-notification-list .bm-mini {
+    min-width: 0;
 }

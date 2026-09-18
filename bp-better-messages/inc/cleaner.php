@@ -24,6 +24,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_preview_messages' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_orphaned_bulk_attachments' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_old_voice_messages' ) );
+            add_action( 'better_messages_cleaner_job', array( $this, 'clean_old_video_messages' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_inactive_chat_users' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_chat_rooms_auto_cleanup' ) );
         }
@@ -117,13 +118,32 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
 
         public function clean_old_voice_messages()
         {
-            $days = (int) Better_Messages()->settings['voiceMessagesAutoDelete'];
+            $this->clean_old_media_messages(
+                'bpbm_voice_messages',
+                (int) Better_Messages()->settings['voiceMessagesAutoDelete'],
+                Better_Messages()->settings['voiceMessagesAutoDeleteMode'],
+                '<!-- BM-VOICE-MESSAGE-EXPIRED -->',
+                'better_messages_delete_old_voice_messages_batch_size'
+            );
+        }
 
+        public function clean_old_video_messages()
+        {
+            $this->clean_old_media_messages(
+                'bpbm_video_messages',
+                (int) Better_Messages()->settings['videoMessagesAutoDelete'],
+                Better_Messages()->settings['videoMessagesAutoDeleteMode'],
+                '<!-- BM-VIDEO-MESSAGE-EXPIRED -->',
+                'better_messages_delete_old_video_messages_batch_size'
+            );
+        }
+
+        private function clean_old_media_messages( $meta_key, $days, $mode, $expired_marker, $batch_filter )
+        {
             if ( $days <= 0 ) {
                 return;
             }
 
-            $mode = Better_Messages()->settings['voiceMessagesAutoDeleteMode'];
             $old_time = strtotime( "-$days days" );
 
             if ( $old_time === false ) {
@@ -132,7 +152,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
 
             global $wpdb;
 
-            $batch_size   = apply_filters( 'better_messages_delete_old_voice_messages_batch_size', 100 );
+            $batch_size   = apply_filters( $batch_filter, 100 );
             $table        = bm_get_table( 'messages' );
             $meta_table   = bm_get_table( 'meta' );
 
@@ -141,10 +161,11 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                  FROM `{$table}` m
                  INNER JOIN `{$meta_table}` mm
                     ON m.`id` = mm.`bm_message_id`
-                    AND mm.`meta_key` = 'bpbm_voice_messages'
+                    AND mm.`meta_key` = %s
                  WHERE LEFT(m.`created_at`, 10) <= %d
                  ORDER BY m.`created_at` ASC
                  LIMIT 0, %d",
+                $meta_key,
                 $old_time,
                 $batch_size
             );
@@ -160,7 +181,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                     Better_Messages()->functions->delete_message( $message_id, false, true, 'delete' );
                 }
             } else {
-                // Replace mode: remove audio file, keep message with expired marker
+                // Replace mode: remove media file, keep message with expired marker
                 foreach ( $message_ids as $message_id ) {
                     $message = Better_Messages()->functions->get_message( $message_id );
 
@@ -168,7 +189,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                         continue;
                     }
 
-                    $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+                    $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, $meta_key, true );
 
                     if ( $attachment_id ) {
                         $file_path = get_attached_file( (int) $attachment_id );
@@ -178,13 +199,13 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                         }
                     }
 
-                    Better_Messages()->functions->delete_message_meta( $message_id, 'bpbm_voice_messages' );
+                    Better_Messages()->functions->delete_message_meta( $message_id, $meta_key );
 
                     Better_Messages()->functions->update_message( array(
                         'sender_id'    => $message->sender_id,
                         'thread_id'    => $message->thread_id,
                         'message_id'   => $message_id,
-                        'content'      => '<!-- BM-VOICE-MESSAGE-EXPIRED -->',
+                        'content'      => $expired_marker,
                         'send_push'    => false,
                         'mobile_push'  => false,
                         'count_unread' => false,

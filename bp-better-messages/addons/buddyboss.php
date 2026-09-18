@@ -95,13 +95,13 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 if( ! parents.length ) return;
 
                 parents.forEach(function( parent ){
-                    var element = parent.querySelector('.bp-better-messages-unread');
+                    var element = parent.querySelector('.bm-menu-unread');
                     if( ! element ){
                         var staticCount = parent.querySelector('span.count');
                         if( staticCount ) staticCount.remove();
 
                         element = document.createElement('span');
-                        element.className = 'count bp-better-messages-unread';
+                        element.className = 'count bm-menu-unread';
                         parent.appendChild(element);
                     }
                     element.textContent = unread;
@@ -112,7 +112,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             (function(){
                 function relocateBBPressPMLink(){
                     document.querySelectorAll('.bs-reply-list-item').forEach(function(reply){
-                        var pm = reply.querySelector('.bpbm-private-message-link-buddypress');
+                        var pm = reply.querySelector('.bm-private-message-link-buddypress');
                         if( ! pm || pm.dataset.bmRelocated ) return;
                         var target = reply.querySelector('.bbp-meta .bs-dropdown-wrap-inner');
                         if( ! target ) return;
@@ -120,7 +120,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                         var label = pm.textContent.trim();
                         var link = document.createElement('a');
                         link.href = pm.href;
-                        link.className = 'bbp-reply-to-link bpbm-private-message-link-buddyboss';
+                        link.className = 'bbp-reply-to-link bm-private-message-link-buddyboss';
                         link.setAttribute('data-balloon', label);
                         link.setAttribute('data-balloon-pos', 'up');
                         var icon = document.createElement('i');
@@ -161,7 +161,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js($script), 'before' );
 
-            $css = '.bs-reply-list-item .bbp-after-author-hook .bpbm-private-message-link-buddypress{display:none}.bs-reply-list-item .bs-dropdown-wrap-inner .bpbm-private-message-link-buddyboss .bb-icon-l.bb-icon-envelope{margin-left:-4px;margin-right:5px;border-radius:0 !important}';
+            $css = '.bs-reply-list-item .bbp-after-author-hook .bm-private-message-link-buddypress{display:none}.bs-reply-list-item .bs-dropdown-wrap-inner .bm-private-message-link-buddyboss .bb-icon-l.bb-icon-envelope{margin-left:-4px;margin-right:5px;border-radius:0 !important}';
             wp_add_inline_style( 'better-messages', Better_Messages()->functions->minify_css($css) );
         }
 
@@ -296,7 +296,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                                     const userId = profileCard.getAttribute('data-bp-item-id');
 
                                     if( userId ) {
-                                        target.classList.add('bpbm-pm-button', 'bm-no-style', 'bm-no-loader', 'open-mini-chat', 'bm-user-' + userId);
+                                        target.classList.add('bm-pm-button', 'bm-no-style', 'bm-no-loader', 'open-mini-chat', 'bm-user-' + userId);
                                         target.style.minWidth = target.offsetWidth + 'px';
                                         target.style.minHeight = target.offsetHeight + 'px';
                                         target.style.display = 'block';
@@ -469,8 +469,8 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
                 // Conversation URL
                 $url = Better_Messages()->functions->get_user_thread_url( $thread_id, $user_id );
-                $subject = sprintf( __('New message from %s', 'bp-better-messages'), Better_Messages()->functions->get_name( $message->sender_id ) );
-                $content = sprintf( __('You have new message from %s', 'bp-better-messages'), Better_Messages()->functions->get_name( $message->sender_id ) );
+                $subject = sprintf( __('New message from %s', 'bp-better-messages'), Better_Messages()->functions->get_plain_name( $message->sender_id ) );
+                $content = sprintf( __('You have new message from %s', 'bp-better-messages'), Better_Messages()->functions->get_plain_name( $message->sender_id ) );
 
                 $notification = apply_filters( 'better_messages_push_notification', [
                     'title' => $subject,
@@ -548,7 +548,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             if( $audio_enabled ){
                 $link = add_query_arg( array( 'fast-call' => '', 'to' => $user_id, 'type' => 'audio' ), $base_link );
                 $buttons['secondary'] .= sprintf(
-                    '<div id="bpbm-audio-call-%1$d" class="generic-button"><a class="bpbm-audio-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-phone"></i></a></div>',
+                    '<div id="bm-audio-call-%1$d" class="generic-button"><a class="bm-audio-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-phone"></i></a></div>',
                     (int) $user_id,
                     esc_url( $link ),
                     esc_attr__( 'Audio Call', 'bp-better-messages' )
@@ -558,7 +558,7 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
             if( $video_enabled ){
                 $link = add_query_arg( array( 'fast-call' => '', 'to' => $user_id, 'type' => 'video' ), $base_link );
                 $buttons['secondary'] .= sprintf(
-                    '<div id="bpbm-video-call-%1$d" class="generic-button"><a class="bpbm-video-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-video"></i></a></div>',
+                    '<div id="bm-video-call-%1$d" class="generic-button"><a class="bm-video-call bm-no-loader" href="%2$s" data-user-id="%1$d" data-balloon-pos="up" data-balloon="%3$s"><i class="bb-icon-l bb-icon-video"></i></a></div>',
                     (int) $user_id,
                     esc_url( $link ),
                     esc_attr__( 'Video Call', 'bp-better-messages' )

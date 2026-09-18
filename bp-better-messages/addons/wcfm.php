@@ -103,7 +103,7 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
                     <div class="wcfm-clearfix"></div>
                     <div class="wcfm-container" style="padding: 0; margin: 0">
                         <div id="wcfm_bpbm_messages_expander" class="wcfm-content" style="margin: 0; padding: 0;">
-                            <?php echo do_shortcode( '[better_messages]' ); ?>
+                            <?php echo do_shortcode( '[better_messages host_sized="1"]' ); ?>
                             <div class="wcfm-clearfix"></div>
                         </div>
                         <div class="wcfm-clearfix"></div>
@@ -123,9 +123,9 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
                         var resultHeight = totalHeight - headerHeight;
 
                         if( typeof Better_Messages !== 'undefined' ) {
-                            var wrap = container.querySelector('.bp-messages-wrap');
+                            var wrap = container.querySelector('.bm-wrap-main');
                             if( wrap ) wrap.style.height = resultHeight + 'px';
-                            var threadsWrap = container.querySelector('.bp-messages-threads-wrapper');
+                            var threadsWrap = container.querySelector('.bm-threads-wrapper');
                             if( threadsWrap ) threadsWrap.style.height = resultHeight + 'px';
                             Better_Messages['maxHeight'] = resultHeight;
                         }
@@ -165,7 +165,7 @@ if ( ! class_exists( 'Better_Messages_WCFM' ) ) {
 
             wp_add_inline_script( 'better-messages', Better_Messages()->functions->minify_js( $js ) );
 
-            $css = '.wcfm_menu_bpbm-messages .wcfm_menu_item .text .bp-better-messages-unread{ margin-left: 10px; }
+            $css = '.wcfm_menu_bpbm-messages .wcfm_menu_item .text .bm-menu-unread{ margin-left: 10px; }
                 #wcfm_bpbm_messages{ padding-bottom: 0 !important; }';
 
             wp_add_inline_style( 'better-messages', Better_Messages()->functions->minify_css( $css ) );

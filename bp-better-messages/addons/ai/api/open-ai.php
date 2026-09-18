@@ -563,7 +563,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                 $content[] = [
                     'type' => 'text',
-                    'text' => $this->clean_stored_message( $_message->message )
+                    'text' => $this->append_location_context( $_message->id, $this->clean_stored_message( $_message->message ) )
                 ];
 
                 $role = (int) $_message->sender_id === (int) $bot_user_id ? 'assistant' : 'user';
@@ -605,7 +605,11 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     }
 
                     if( str_replace('<!-- BM-AI -->', '', $_message->message ) === '<!-- BPBM-VOICE-MESSAGE -->' && $attachment_id = Better_Messages()->functions->get_message_meta( $_message->id, 'bpbm_voice_messages', true ) ){
-                        $transcription = $this->transcribe_audio( $attachment_id );
+                        $transcription = $this->get_voice_transcript( $_message );
+
+                        if( ! is_string( $transcription ) || trim( $transcription ) === '' ){
+                            $transcription = $this->transcribe_audio( $attachment_id );
+                        }
 
                         if( is_wp_error( $transcription ) || empty( $transcription ) ){
                             continue;
@@ -1011,7 +1015,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                     if ( $is_error ) continue;
 
-                    $msg_text = $this->clean_stored_message( $_message->message );
+                    $msg_text = $this->get_context_text( $_message );
                     if ( empty( trim( $msg_text ) ) ) {
                         $has_processable_attachments = false;
                         if ( $bot_settings['images'] || $bot_settings['files'] ) {
@@ -1071,7 +1075,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     ];
                 }
             } else {
-                $message_content = $this->clean_stored_message( $message->message );
+                $message_content = $this->get_context_text( $message );
 
                 $content = [];
 
@@ -1679,7 +1683,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                 $content[] = [
                     'type' => 'text',
-                    'text' => $this->clean_stored_message( $_message->message )
+                    'text' => $this->append_location_context( $_message->id, $this->clean_stored_message( $_message->message ) )
                 ];
 
                 $attachments = Better_Messages()->functions->get_message_meta($_message->id, 'attachments', true);

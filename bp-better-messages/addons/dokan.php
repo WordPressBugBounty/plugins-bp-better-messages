@@ -61,24 +61,28 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
             if( $vendor_layout === 'legacy' ){
             ?>
             <style type="text/css">
-                .dokan-dashboard-content .bp-messages-wrap{
+                .dokan-dashboard-content .bm-wrap,
+                .dokan-dashboard-content .bm-card{
                     border-radius: 0 !important;
                 }
 
                 @media (min-width: 768px) {
-                    .dokan-dashboard-content .bp-messages-wrap{
+                    .dokan-dashboard-content .bm-wrap,
+                    .dokan-dashboard-content .bm-card{
                         border-left: 0;
                     }
                 }
                 @media (max-width: 767px) {
-                    .dokan-dashboard-content .bp-messages-wrap{
+                    .dokan-dashboard-content .bm-wrap,
+                    .dokan-dashboard-content .bm-card{
                         border-top: 0;
                     }
                 }
             </style>
             <?php } else { ?>
                    <style type="text/css">
-                       .dokan-dashboard-content .bp-messages-wrap{
+                       .dokan-dashboard-content .bm-wrap,
+                       .dokan-dashboard-content .bm-card{
                            border-radius: 0 !important;
                            border: none !important;
                        }
@@ -101,15 +105,12 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
                            height: 100%;
                        }
 
-                       .dokan-dashboard-content .bp-messages-wrap-main{
+                       .dokan-dashboard-content .bm-wrap-main{
                            height: 100%;
                        }
 
-                       .dokan-dashboard-content .bp-messages-wrap-main .bp-messages-wrap{
-                           height: 100% !important;
-                       }
-
-                       .dokan-dashboard-content .bp-messages-wrap-main .bp-messages-wrap .bp-messages-threads-wrapper{
+                       .dokan-dashboard-content .bm-wrap-main .bm-wrap,
+                       .dokan-dashboard-content .bm-wrap-main .bm-threads-wrapper{
                            height: 100% !important;
                        }
                    </style>
@@ -141,7 +142,7 @@ if ( ! class_exists( 'Better_Messages_Dokan' ) ) {
                     do_action( 'dokan_chat_content_inside_before' );
                     ?>
 
-                    <?php echo do_shortcode( '[better_messages]' ); ?>
+                    <?php echo do_shortcode( '[better_messages host_sized="1"]' ); ?>
 
                     <?php
 

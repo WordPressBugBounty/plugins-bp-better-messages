@@ -84,7 +84,7 @@ if ( ! class_exists( 'Better_Messages_RealHomes' ) ) {
 			$submodule = is_array( $dashboard_globals ) && isset( $dashboard_globals['submodule'] ) ? $dashboard_globals['submodule'] : '';
 			$active = ( $current_module === self::MESSAGES_MODULE_KEY ) || ( $submodule === self::MESSAGES_MODULE_KEY );
 			if ( ! $active ) return;
-			echo '<div class="bm-realhomes-dashboard-live-chat">' . do_shortcode( '[better_messages]' ) . '</div>';
+			echo '<div class="bm-realhomes-dashboard-live-chat">' . do_shortcode( '[better_messages host_sized="1"]' ) . '</div>';
 			$current_module = '';
 			if ( is_array( $dashboard_globals ) ) {
 				$dashboard_globals['submodule'] = '';
@@ -1270,18 +1270,19 @@ body.page-bm-realhomes-live-chat .dashboard-page-head {
 	background: #fff;
 }
 .bm-realhomes-dashboard-live-chat .bp-better-messages,
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap,
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap-main {
+.bm-realhomes-dashboard-live-chat .bm-wrap,
+.bm-realhomes-dashboard-live-chat .bm-wrap-main {
 	height: 100% !important;
 }
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap,
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap-main {
+.bm-realhomes-dashboard-live-chat .bm-wrap,
+.bm-realhomes-dashboard-live-chat .bm-wrap-main,
+.bm-realhomes-dashboard-live-chat .bm-card {
 	border: none !important;
 	border-radius: 0 !important;
 	box-shadow: none !important;
 }
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile),
-.bm-realhomes-dashboard-live-chat .bp-messages-wrap-main .bp-messages-threads-wrapper {
+.bm-realhomes-dashboard-live-chat .bm-wrap-main .bm-wrap:not(.bm-full-screen, .bm-mobile),
+.bm-realhomes-dashboard-live-chat .bm-wrap-main .bm-threads-wrapper {
 	height: 100% !important;
 }
 #dashboard-menu .menu-item-bm-messages a,
@@ -1327,6 +1328,7 @@ body.page-bm-realhomes-live-chat .dashboard-page-head {
 	padding: 10px 12px;
 	background: #f7f9fb;
 	border-bottom: 1px solid #e6ebf0;
+	color: #1f2937;
 }
 .bm-realhomes-property-info .bm-product-details {
 	flex: 1 1 auto;

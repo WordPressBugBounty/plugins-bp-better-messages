@@ -477,7 +477,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                     );
                 } else {
                     $options['bm_message'] = array(
-                            'class' => $action_class . ' bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
+                            'class' => $action_class . ' bm-pm-button open-mini-chat bm-no-style bm-no-loader',
                             'click' => 'event.preventDefault()',
                             'icon' => $icon_class,
                             'loading' => FALSE,
@@ -506,7 +506,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 } else {
                     $act['bm_message'] = array(
                             'icon' => 'gcir gci-envelope',
-                            'class' => 'ps-focus__cover-action bpbm-pm-button open-mini-chat bm-no-style bm-no-loader',
+                            'class' => 'ps-focus__cover-action bm-pm-button open-mini-chat bm-no-style bm-no-loader',
                             'title' => _x('Start a conversation', 'PeepSo Integration', 'bp-better-messages'),
                             'click' => 'event.preventDefault()',
                             'loading' => FALSE,
@@ -525,7 +525,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                     $act['bm_video_call'] = array(
                             'icon' => 'gci gci-video',
-                            'class' => 'ps-focus__cover-action bpbm-pm-button video-call bm-no-style bm-no-loader',
+                            'class' => 'ps-focus__cover-action bm-pm-button video-call bm-no-style bm-no-loader',
                             'title' => _x('Video Call', 'PeepSo Integration', 'bp-better-messages'),
                             'click' => 'event.preventDefault();',
                             'loading' => FALSE,
@@ -542,7 +542,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
                     $act['bm_audio_call'] = array(
                             'icon' => 'gci gci-phone',
-                            'class' => 'ps-focus__cover-action bpbm-pm-button audio-call bm-no-style bm-no-loader',
+                            'class' => 'ps-focus__cover-action bm-pm-button audio-call bm-no-style bm-no-loader',
                             'title' => _x('Audio Call', 'PeepSo Integration', 'bp-better-messages'),
                             'click' => 'event.preventDefault();',
                             'loading' => FALSE,
@@ -581,6 +581,11 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             if( ! is_user_logged_in() ) return false;
 
             $inbox_url = Better_Messages()->functions->get_user_messages_url( get_current_user_id() );
+
+            if( $inbox_url === '' ) {
+                $inbox_url = home_url( '/' );
+            }
+
             ob_start(); ?>
             <script type="text/javascript">
                 var headerButtons = document.querySelectorAll('.ps-notif--better-messages');
@@ -596,7 +601,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                         '<a href="#" onclick="event.preventDefault();BetterMessages.openNewConversationWidget();" class="pso-btn pso-btn--link pso-notifbox__settings"><i class="pso-i-comment-alt-medical"></i></a></div></div>';
 
                     html += '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
-                        '<div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>' +
+                        '<div class="bm-wrap bm-threads-list" style="height:400px"></div>' +
                         '</div>' +
                         '<div class="pso-notifbox__actions"><a class="pso-btn" href="<?php echo $inbox_url; ?>"><?php echo esc_attr_x('View All', 'PeepSo Integration', 'bp-better-messages'); ?></a></div>';
 
@@ -610,7 +615,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                         '</div>';
 
                     html += '<div class="ps-notifications ps-notifications--empty" style="max-height: 400px !important; overflow: hidden;">' +
-                        '<div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>' +
+                        '<div class="bm-wrap bm-threads-list" style="height:400px"></div>' +
                         '</div>' +
                         '<div class="ps-notif__box-footer"><a href="<?php echo $inbox_url; ?>"><?php echo esc_attr_x('View All', 'PeepSo Integration', 'bp-better-messages'); ?></a>' +
                         '</div>' +
@@ -800,7 +805,7 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             <script type="text/javascript">
             (function(){
                 var cfg = <?php echo $config; ?>;
-                var BASE = 'ps-hovercard__actions ps-hovercard__actions--bm bpbm-pm-button bm-no-style bm-no-loader';
+                var BASE = 'ps-hovercard__actions ps-hovercard__actions--bm bm-pm-button bm-no-style bm-no-loader';
 
                 function cell( kind, href, dataUrl, extraClass, bm ) {
                     var cls = BASE + ( extraClass ? ' ' + extraClass : '' );

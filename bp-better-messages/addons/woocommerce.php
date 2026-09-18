@@ -515,9 +515,11 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                 return $message;
             }
 
-            return preg_replace_callback(
+            $carded = array();
+
+            $message = preg_replace_callback(
                 '#<a\s+([^>]*?)href=["\'](https?://[^"\']+)["\']([^>]*)>(.*?)</a>#is',
-                function( $matches ) use ( $home_host ) {
+                function( $matches ) use ( $home_host, &$carded ) {
                     $attrs_before = $matches[1];
                     $url          = $matches[2];
                     $attrs_after  = $matches[3];
@@ -546,10 +548,53 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                         return $matches[0];
                     }
 
+                    $carded[] = $url;
+
                     return $this->render_product_link_card( $product );
                 },
                 $message
             );
+
+            if ( ! empty( $carded ) ) {
+                $message = $this->drop_link_previews( $message, $message_id, $carded );
+            }
+
+            return $message;
+        }
+
+        protected function drop_link_previews( $message, $message_id, $urls ){
+            global $processedUrls;
+
+            if ( empty( $processedUrls[ $message_id ] ) || ! is_array( $processedUrls[ $message_id ] ) ) {
+                return $message;
+            }
+
+            $carded = array();
+            foreach ( $urls as $url ) {
+                $carded[] = html_entity_decode( $url, ENT_QUOTES );
+            }
+
+            foreach ( $processedUrls[ $message_id ] as $index => $link ) {
+                if ( ! is_string( $link ) ) {
+                    continue;
+                }
+
+                if ( ! preg_match( '#^<a\s[^>]*class=["\']url-wrap["\']#i', ltrim( $link ) ) ) {
+                    continue;
+                }
+
+                if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $link, $found ) ) {
+                    continue;
+                }
+
+                if ( ! in_array( html_entity_decode( $found[1], ENT_QUOTES ), $carded, true ) ) {
+                    continue;
+                }
+
+                $message = str_replace( '%%link_' . ( $index + 1 ) . '%%', '', $message );
+            }
+
+            return $message;
         }
 
         protected function render_product_link_card( $product ){

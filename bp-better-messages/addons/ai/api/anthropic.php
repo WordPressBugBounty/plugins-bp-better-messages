@@ -332,7 +332,7 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                 $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                 if ( $is_error ) continue;
 
-                $message_text = $this->clean_stored_message( $_message->message );
+                $message_text = $this->get_context_text( $_message );
                 if ( empty( trim( $message_text ) ) && $_message->id !== $message->id ) {
                     // Don't skip if message has attachments that the bot can process
                     $has_processable_attachments = false;

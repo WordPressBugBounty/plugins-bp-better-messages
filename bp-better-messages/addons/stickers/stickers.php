@@ -70,6 +70,21 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
         {
             $thread_id   = intval( $request->get_param( 'id' ) );
             $sticker_url = esc_url_raw( (string) $request->get_param( 'sticker_url' ) );
+            $temp_id     = sanitize_text_field( (string) $request->get_param( 'temp_id' ) );
+            $temp_time   = sanitize_text_field( (string) $request->get_param( 'temp_time' ) );
+            $user_id     = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! empty( $temp_id ) ) {
+                $existing_message_id = Better_Messages_Rest_Api()->get_temp_id_message( $thread_id, $temp_id, $user_id );
+
+                if ( $existing_message_id > 0 ) {
+                    return array(
+                        'result'   => $existing_message_id,
+                        'redirect' => false,
+                        'update'   => Better_Messages_Rest_Api()->get_message_update( $thread_id, $existing_message_id ),
+                    );
+                }
+            }
 
             if ( empty( $sticker_url ) ) {
                 return new WP_Error( 'missing_sticker', __( 'Missing sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
@@ -83,17 +98,19 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                 return new WP_Error( 'invalid_sticker', __( 'Invalid sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
             }
 
-            $message = '<span class="bpbm-sticker"><img src="' . esc_url( $sticker_url ) . '" alt=""></span>';
+            $message = '<span class="bm-sticker"><img src="' . esc_url( $sticker_url ) . '" alt=""></span>';
 
             $args = array(
                 'content'    => $message,
                 'thread_id'  => $thread_id,
                 'error_type' => 'wp_error',
                 'return'     => 'message_id',
+                'is_pending' => (int) Better_Messages()->moderation->is_moderation_enabled( $user_id, $thread_id, false ),
             );
 
-            $user_id = Better_Messages()->functions->get_current_user_id();
-            $errors  = array();
+            Better_Messages_Rest_Api()->apply_temp_id( $args, $temp_id, $temp_time );
+
+            $errors = array();
 
             if ( ! Better_Messages()->functions->can_send_message_filter(
                 Better_Messages()->functions->check_access( $thread_id ),
@@ -120,7 +137,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
             }
 
             if ( ! empty( $errors ) ) {
-                do_action( 'better_messages_on_message_not_sent', $thread_id, '', $errors );
+                do_action( 'better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
                 return array(
                     'result'   => false,
                     'errors'   => $errors,
@@ -134,7 +151,7 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
             );
 
             if ( $sent && ! is_wp_error( $sent ) ) {
-                $result['update'] = Better_Messages_Rest_Api()->get_messages( $thread_id, array( $sent ) );
+                $result['update'] = Better_Messages_Rest_Api()->get_message_update( $thread_id, (int) $sent );
             }
 
             return $result;

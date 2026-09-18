@@ -350,10 +350,10 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
                     var links = document.querySelectorAll(' . $selector_js . ');
                     if( ! links.length ) return;
                     links.forEach(function( link ){
-                        var counter = link.querySelector(".bp-better-messages-unread");
+                        var counter = link.querySelector(".bm-menu-unread");
                         if( ! counter ){
                             counter = document.createElement("span");
-                            counter.className = "bp-better-messages-unread bpbmuc bpbmuc-hide-when-null bm-mvx-unread";
+                            counter.className = "bm-menu-unread bpbmuc bpbmuc-hide-when-null bm-mvx-unread";
                             link.appendChild( counter );
                         }
                         counter.dataset.count = current;
@@ -403,17 +403,18 @@ if ( ! class_exists( 'Better_Messages_MultiVendorX_V5' ) ) {
                     margin-top: var(--bm-mvx-navbar-h, 57px);
                 }
                 .bm-mvx-dashboard-root,
-                .bm-mvx-dashboard-root .bp-messages-wrap-main,
-                .bm-mvx-dashboard-root .bp-messages-wrap-main .bp-messages-wrap,
-                .bm-mvx-dashboard-root .bp-messages-wrap-main .bp-messages-threads-wrapper{
+                .bm-mvx-dashboard-root .bm-wrap-main,
+                .bm-mvx-dashboard-root .bm-wrap-main .bm-wrap,
+                .bm-mvx-dashboard-root .bm-wrap-main .bm-threads-wrapper{
                     height: var(--bm-mvx-dashboard-h, calc(100vh - 120px)) !important;
                     min-height: 0 !important;
                     max-height: none !important;
                 }
-                .bm-mvx-dashboard-root .bp-messages-wrap-main{
+                .bm-mvx-dashboard-root .bm-wrap-main{
                     display: block;
                 }
-                .bm-mvx-dashboard-root .bp-messages-wrap-main .bp-messages-wrap{
+                .bm-mvx-dashboard-root .bm-wrap-main .bm-wrap,
+                .bm-mvx-dashboard-root .bm-wrap-main > .bm-threads-wrapper{
                     border: 0 !important;
                     border-radius: 0 !important;
                     box-shadow: none !important;

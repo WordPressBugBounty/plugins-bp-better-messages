@@ -21,7 +21,6 @@ if ( !class_exists( 'Better_Messages_WP_User_Manager' ) ){
         public function __construct()
         {
             add_filter( 'wpum_get_registered_profile_tabs', array( $this, 'profile_tab'), 10, 1 );
-            add_action( 'better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
 
             if( Better_Messages()->settings['chatPage'] === '0' ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
@@ -73,7 +72,7 @@ if ( !class_exists( 'Better_Messages_WP_User_Manager' ) ){
                 <script type="text/javascript">
                     var profileTab = document.querySelector('#wpum-profile #profile-navigation .tab-messages');
                     if( profileTab ){
-                    profileTab.innerHTML += ' <span class="bp-better-messages-unread bpbmuc bpbmuc-hide-when-null" data-count="0">0</span>'
+                    profileTab.innerHTML += ' <span class="bm-menu-unread bpbmuc bpbmuc-hide-when-null" data-count="0">0</span>'
                     }
                 </script>
             <?php }
@@ -96,10 +95,6 @@ if ( !class_exists( 'Better_Messages_WP_User_Manager' ) ){
             }
 
             return $tabs;
-        }
-
-        public function bm_location_label(){
-            return _x('Show in WP User Manager profile', 'WP User Manager Integration', 'bp-better-messages');
         }
 
         public function admin_init(){

@@ -65,12 +65,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
-            /* register_rest_route('better-messages/v1/admin', '/getThreads', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'get_threads'),
-                'permission_callback' => array($this, 'user_is_admin'),
-            )); */
-
             register_rest_route('better-messages/v1/admin', '/searchSenders', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'search_senders'),
@@ -221,6 +215,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
+            register_rest_route('better-messages/v1/admin', '/tools/reset-local-database', array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'rest_reset_local_database'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
+            register_rest_route('better-messages/v1/admin', '/tools/export-settings', array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'rest_export_settings'),
+                'permission_callback' => array($this, 'user_is_admin'),
+            ));
+
             register_rest_route('better-messages/v1/admin', '/tools/import-settings', array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'rest_import_settings'),
@@ -337,7 +343,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
             global $wpdb;
 
-            // Get guest data from guests table
             $guest = $wpdb->get_row( $wpdb->prepare("
                 SELECT id, name, email, ip, UNIX_TIMESTAMP(`created_at`) as created_at
                 FROM `" . bm_get_table('guests') . "`
@@ -349,7 +354,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'guest_not_found', 'Guest not found', array( 'status' => 404 ) );
             }
 
-            // Guest user ID is negative
             $guest_user_id = -1 * abs($guest_id);
 
             $messages_count = (int) $wpdb->get_var($wpdb->prepare("
@@ -425,7 +429,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
         public function deleteAccountMessages( WP_REST_Request $request ){
             $user_ids = $request->get_param('userIds');
-            //var_dump( $user_ids );
         }
 
         public function get_guests( WP_REST_Request $request ){
@@ -457,7 +460,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 SELECT COUNT(*) 
                 FROM `" . bm_get_table('guests') . "` `guests`
                 WHERE `deleted_at` IS NULL
-                AND `ip` NOT LIKE 'ai-chat-bot-%'
+                AND `bot_id` = 0
                 $search_sql
             "));
 
@@ -471,7 +474,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                  WHERE `user_id` = (-1 * `guests`.`id` )) participants
                 FROM `" . bm_get_table('guests') . "` `guests`
                 WHERE `deleted_at` IS NULL
-                AND `ip` NOT LIKE 'ai-chat-bot-%'
+                AND `bot_id` = 0
                 $search_sql
                 ORDER BY id ASC
                 LIMIT {$offset}, {$per_page}
@@ -505,78 +508,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
         }
 
         public function get_users( WP_REST_Request $request ){
-            /*global $wpdb;
-
-            $page = ( $request->has_param('page') ) ? intval( $request->get_param('page') ) : 1;
-
-            $search = ( $request->has_param('search') ) ? sanitize_text_field( $request->get_param('search') ) : "";
-
-            $search_sql = "";
-
-            if( $search ){
-                $search_sql = $wpdb->prepare("
-                    AND (
-                        ID = %s
-                        OR `user_nicename` LIKE %s
-                        OR `display_name` LIKE %s
-                        OR `ID` IN (
-                            SELECT user_id
-                            FROM `{$wpdb->usermeta}`
-                            WHERE `meta_key` IN ( 'nickname', 'first_name', 'last_name' )
-                            AND `meta_value` LIKE %s
-                        )
-                    )
-                ", "%" . $search . "%", "%" . $search . "%", "%" . $search . "%", "%" . $search . "%" );
-            }
-
-            $per_page = 20;
-
-            $offset = 0;
-
-            if( $page > 1 ){
-                $offset = ( $page - 1 ) * $per_page;
-            }
-
-            $count = (int) $wpdb->get_var($wpdb->prepare("
-                SELECT COUNT(*)
-                FROM `{$wpdb->users}` `users`
-                WHERE 1 = 1
-                {$search_sql}
-            "));
-
-            $user_ids = $wpdb->get_results( $wpdb->prepare("
-                SELECT ID,
-                (SELECT COUNT(*)
-                  FROM `" . bm_get_table('messages') . "`
-                 WHERE `sender_id` = `users`.`ID`) messages,
-                (SELECT COUNT(*)
-                  FROM `" . bm_get_table('recipients') . "`
-                 WHERE `user_id` = `users`.`ID`) participants
-                FROM `{$wpdb->users}` `users`
-                WHERE 1 = 1
-                {$search_sql}
-                ORDER BY ID ASC
-                LIMIT {$offset}, {$per_page}
-            "), ARRAY_A );
-
-            $return = [
-                'total'    => $count,
-                'page'     => $page,
-                'perPage'  => $per_page,
-                'pages'    => ceil( $count / $per_page ),
-                'users' => []
-            ];
-
-            foreach( $user_ids as $user ){
-                $user_item = Better_Messages()->functions->rest_user_item( $user['ID'] );
-                $user_item['messages']      = $user['messages'];
-                $user_item['conversations'] = $user['participants'];
-
-                $return['users'][] = $user_item;
-            }
-
-            return $return;
-            */
 
             return [];
         }
@@ -925,8 +856,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $meta_table     = bm_get_table('meta');
                 $messages_table = bm_get_table('messages');
 
-                // Invert the join direction: narrow via the indexed meta table first, then filter
-                // messages by PRIMARY KEY. The prior LEFT JOIN + OR pattern went full-scan at 6M+ rows.
                 $candidates          = $this->get_reported_candidate_ids();
                 $candidate_sql       = empty( $candidates['all_ids'] ) ? '0' : implode( ',', $candidates['all_ids'] );
                 $user_reports_in_sql = empty( $candidates['user_report_ids'] ) ? '0' : implode( ',', $candidates['user_report_ids'] );
@@ -1046,10 +975,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         }
                     }
 
-                    if( $content === '<!-- BPBM-VOICE-MESSAGE -->' ){
-                        $content = __('Voice Message', 'bp-better-messages');
+                    if( $content === '<!-- BPBM-VOICE-MESSAGE -->' || $content === '<!-- BPBM-VIDEO-MESSAGE -->' ){
+                        $is_video = $content === '<!-- BPBM-VIDEO-MESSAGE -->';
+                        $content  = $is_video ? __('Video Message', 'bp-better-messages') : __('Voice Message', 'bp-better-messages');
 
-                        $attachment_id = Better_Messages()->functions->get_message_meta( $message['id'], 'bpbm_voice_messages', true );
+                        $attachment_id = Better_Messages()->functions->get_message_meta( $message['id'], $is_video ? 'bpbm_video_messages' : 'bpbm_voice_messages', true );
 
                         $attachment_url = wp_get_attachment_url( $attachment_id );
                         if( $attachment_url ) {
@@ -1093,7 +1023,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         'participants' => $participants_count
                     ];
 
-                    // Allow addons (E2E) to modify the moderation item (e.g. replace encrypted content)
                     $item = apply_filters( 'better_messages_admin_moderation_item', $item, $message );
 
                     if( $participants_count === 2 ){
@@ -1129,21 +1058,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         $item['is_pending'] = true;
                     }
 
-                    // Add whitelist/blacklist status for sender (global and thread-specific)
                     $sender_id = (int) $message['sender_id'];
                     $thread_id = (int) $message['thread_id'];
                     if( $sender_id !== 0 ){
-                        // Global status (works for both regular users and guests with negative IDs)
                         $item['sender_whitelisted'] = Better_Messages()->moderation->is_user_whitelisted( $sender_id );
                         $item['sender_blacklisted'] = Better_Messages()->moderation->is_user_blacklisted( $sender_id );
-                        // Thread-specific status
                         if( $thread_id > 0 ){
                             $item['sender_thread_whitelisted'] = Better_Messages()->moderation->is_user_whitelisted( $sender_id, $thread_id );
                             $item['sender_thread_blacklisted'] = Better_Messages()->moderation->is_user_blacklisted( $sender_id, $thread_id );
                         }
                     }
 
-                    // Add AI moderation data
                     $ai_flagged = Better_Messages()->functions->get_message_meta( $message['id'], 'ai_moderation_flagged', true );
                     if( $ai_flagged === '1' ){
                         $item['ai_moderation_flagged'] = true;
@@ -1162,7 +1087,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         }
                     }
 
-                    // Add AI cost data from dedicated usage table
                     $ai_usage_table = bm_get_table('ai_usage');
                     if ( $ai_usage_table ) {
                         $ai_usage_row = $wpdb->get_row( $wpdb->prepare(
@@ -1178,7 +1102,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         }
                     }
 
-                    // Add translations data
                     $raw_translations = Better_Messages()->functions->get_message_meta( $message['id'], 'bm_translations', true );
                     $translations = ! empty( $raw_translations ) ? ( is_array( $raw_translations ) ? $raw_translations : json_decode( $raw_translations, true ) ) : array();
                     $translations = is_array( $translations ) ? array_filter( $translations, function( $v ) { return ! empty( $v ); } ) : array();
@@ -1444,14 +1367,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
             }
 
-            // First whitelist the user
             $whitelist_result = Better_Messages()->moderation->whitelist_user( $user_id, $thread_id, $duration );
 
             if( ! $whitelist_result ){
                 return new WP_Error( 'whitelist_failed', 'Failed to whitelist user', array( 'status' => 500 ) );
             }
 
-            // Then approve all pending messages from this user
             $approved_count = Better_Messages()->moderation->approve_all_pending_messages_from_user( $user_id );
 
             return array(
@@ -1471,10 +1392,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'invalid_user', 'Invalid user ID', array( 'status' => 400 ) );
             }
 
-            // First delete all pending messages from this user
             $deleted_count = Better_Messages()->moderation->delete_all_pending_messages_from_user( $user_id );
 
-            // Then blacklist the user
             $blacklist_result = Better_Messages()->moderation->blacklist_user( $user_id, $thread_id, $duration );
 
             if( ! $blacklist_result ){
@@ -1494,8 +1413,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'invalid_data', 'No settings provided', array( 'status' => 400 ) );
             }
 
-            // Handle emojiSettings separately — it saves to its own option
-            // and should not go through update_settings().
             if ( isset( $data['emojiSettings'] ) ) {
                 $emoji_json = $data['emojiSettings'];
                 unset( $data['emojiSettings'] );
@@ -1510,7 +1427,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 }
             }
 
-            // If other settings were changed, merge and save them.
             if ( ! empty( $data ) ) {
                 $existing = Better_Messages_Options::instance()->settings;
                 $merged   = array_merge( $existing, $data );
@@ -1537,18 +1453,31 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 ? _x( 'Guest Messages', 'Default page title', 'bp-better-messages' )
                 : _x( 'Messages', 'Default page title', 'bp-better-messages' );
 
+            $requested_title = trim( (string) $request->get_param( 'title' ) );
+            if ( $requested_title !== '' ) {
+                $page_title = $requested_title;
+            }
+
+            $requested_slug = sanitize_title( (string) $request->get_param( 'slug' ) );
+
             if ( function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( 'page' ) ) {
                 $page_content = '<!-- wp:better-messages/user-inbox /-->';
             } else {
                 $page_content = '[bp-better-messages]';
             }
 
-            $page_id = wp_insert_post( array(
+            $page_args = array(
                 'post_title'   => $page_title,
                 'post_content' => $page_content,
                 'post_status'  => 'publish',
                 'post_type'    => 'page',
-            ) );
+            );
+
+            if ( $requested_slug !== '' ) {
+                $page_args['post_name'] = $requested_slug;
+            }
+
+            $page_id = wp_insert_post( $page_args );
 
             if ( is_wp_error( $page_id ) ) {
                 return new WP_Error( 'create_failed', $page_id->get_error_message(), array( 'status' => 500 ) );
@@ -1597,6 +1526,35 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             ) );
         }
 
+        public function rest_reset_local_database( WP_REST_Request $request ) {
+            $generation = (int) get_option( 'bm_local_db_generation', 1 ) + 1;
+
+            update_option( 'bm_local_db_generation', $generation, false );
+
+            do_action( 'better_messages_reset_local_database', $generation );
+
+            return rest_ensure_response( array(
+                'success'    => true,
+                'generation' => $generation,
+            ) );
+        }
+
+        const SETTINGS_FILE_FORMAT = 1;
+
+        public function rest_export_settings() {
+            $settings = Better_Messages_Options::instance()->settings;
+            $settings['emailCustomHtml'] = Better_Messages_Options::instance()->get_email_custom_html();
+
+            return rest_ensure_response( array(
+                'betterMessagesSettings' => self::SETTINGS_FILE_FORMAT,
+                'plugin'                 => Better_Messages()->version,
+                'site'                   => home_url(),
+                'exported'               => gmdate( 'c' ),
+                'settings'               => $settings,
+                'appearance'             => Better_Messages_Design::instance()->export_design(),
+            ) );
+        }
+
         public function rest_import_settings( WP_REST_Request $request ) {
             $data = $request->get_json_params();
 
@@ -1604,11 +1562,43 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'invalid_data', 'Invalid settings data', array( 'status' => 400 ) );
             }
 
+            if ( isset( $data['betterMessagesAppearance'] ) ) {
+                return new WP_Error(
+                    'appearance_file',
+                    __( 'That is an appearance export. Import it from Appearance, where the colours, sizes and layout it carries belong.', 'bp-better-messages' ),
+                    array( 'status' => 400 )
+                );
+            }
+
+            $design = null;
+
+            if ( isset( $data['betterMessagesSettings'] ) ) {
+                $format = (int) $data['betterMessagesSettings'];
+                if ( $format > self::SETTINGS_FILE_FORMAT ) {
+                    return new WP_Error(
+                        'newer_format',
+                        __( 'That file was written by a newer version of Better Messages. Update the plugin on this site first.', 'bp-better-messages' ),
+                        array( 'status' => 400 )
+                    );
+                }
+                if ( empty( $data['settings'] ) || ! is_array( $data['settings'] ) ) {
+                    return new WP_Error( 'invalid_data', 'Invalid settings data', array( 'status' => 400 ) );
+                }
+                $design = isset( $data['appearance'] ) && is_array( $data['appearance'] ) ? $data['appearance'] : null;
+                $data   = $data['settings'];
+            }
+
             Better_Messages_Options::instance()->update_settings( $data );
+
+            $applied = null;
+            if ( null !== $design ) {
+                $applied = Better_Messages_Design::instance()->import_design( $design );
+            }
 
             return rest_ensure_response( array(
                 'success'  => true,
                 'message'  => 'Settings imported successfully',
+                'design'   => $applied,
             ) );
         }
 

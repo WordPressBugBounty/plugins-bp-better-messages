@@ -24,8 +24,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
         public function __construct()
         {
-            add_action('better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
-
             add_action('fluent_community/portal_head', [$this, 'load_styles']);
             add_action('wp_head', [$this, 'load_styles']);
             add_action( 'fluent_community/before_js_loaded', [$this, 'load_javascript'] );
@@ -103,10 +101,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             remove_action( 'admin_notices', array( Better_Messages()->hooks, 'admin_notice') );
         }
 
-        public function bm_location_label(){
-            return _x('Show in FluentCommunity Portal', 'FluentCommunity Integration', 'bp-better-messages');
-        }
-
         public function rest_user_item( $item, $user_id, $include_personal )
         {
             $xprofile = XProfile::where( 'user_id', $user_id )->first();
@@ -159,12 +153,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 }
             }
 
-            Better_Messages_Customize()->header_output();
-
             if( ! doing_action('fluent_community/portal_head') ) return;
             ?>
             <style type="text/css">
-                body.bp-messages-mobile[data-route="better_messages"] .fluent_com{
+                body.bm-mobile[data-route="better_messages"] .fluent_com{
                     min-height: auto;
                 }
 
@@ -173,13 +165,13 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                 }
 
                 body[data-route="better_messages"] #fcom-chat-widget-container,
-                body[data-route="better_messages"] .bp-better-messages-list,
-                body[data-route="better_messages"] .bp-better-messages-mini,
-                body[data-route="better_messages"] .bp-messages-wrap-main .chat-header .bpbm-minimize{
+                body[data-route="better_messages"] .bm-mini-widgets-wrap,
+                body[data-route="better_messages"] .bm-mini-chats-wrap,
+                body[data-route="better_messages"] .bm-wrap-main [data-action-key="minimize"]{
                     display: none !important;
                 }
 
-                body[data-route="better_messages"] .bp-better-messages-list+.bp-better-messages-mini {
+                body[data-route="better_messages"] .bm-mini-widgets-wrap+.bm-mini-chats-wrap {
                     right: 0;
                 }
 
@@ -208,45 +200,54 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     width: 20px;
                 }
 
-                .bp-messages-wrap.bp-messages-mobile .chat-header .mobileClose{
+                .bm-wrap-main.bm-mobile [data-action-key="close"],
+                .bm-wrap-group.bm-mobile [data-action-key="close"],
+                .bm-chat-wrap.bm-mobile [data-action-key="close"],
+                .bm-single-thread-wrap.bm-mobile [data-action-key="close"]{
                     display: none;
                 }
 
-                .fcom_full_size_container .bp-messages-wrap{
+                .fcom_full_size_container .bm-card{
                     border-radius: 0 !important;
                     box-shadow: none;
                     border: none;
                 }
 
-                .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile), .bp-messages-wrap-main .bp-messages-threads-wrapper{
+                .bm-wrap-main:not(.bm-full-screen, .bm-mobile) .bm-threads-wrapper{
                     height: calc( var(--bm-fcom-window-height) - var(--bm-fcom-menu-height, 55px) - var(--bm-fcom-title-height, 0px) - 40px ) !important;
                 }
 
-                .fcom_full_size_container .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile), .fcom_full_size_container .bp-messages-wrap-main .bp-messages-threads-wrapper{
+                .fcom_full_size_container .bm-wrap-main:not(.bm-full-screen, .bm-mobile),
+                .fcom_full_size_container .bm-wrap-main:not(.bm-full-screen, .bm-mobile) .bm-threads-wrapper{
                     height: calc( var(--bm-fcom-window-height) - var(--bm-fcom-menu-height, 55px) - var(--bm-fcom-title-height, 0px) ) !important;
                 }
 
-                .bp-messages-wrap-main.bp-messages-mobile, .bp-messages-wrap-group.bp-messages-mobile, .bp-messages-chat-wrap.bp-messages-mobile, .bp-messages-single-thread-wrap.bp-messages-mobile{
-                    top: var(--fcom-header-height);
-                    height: calc( 100% - var(--bm-fcom-footer-height, 41px) - var(--fcom-header-height) );
-                    z-index: 10;
+                body.bm-mobile{
+                    --bm-takeover-top: var(--bm-fcom-menu-height, var(--fcom-header-height, 55px));
+                    --bm-takeover-bottom: var(--bm-fcom-footer-height, 41px);
+                    --bm-takeover-z: 10;
                 }
 
-                body.bm-reply-area-focused .bp-messages-wrap-main.bp-messages-mobile,
-                body.bm-reply-area-focused .bp-messages-wrap-group.bp-messages-mobile,
-                body.bm-reply-area-focused .bp-messages-chat-wrap.bp-messages-mobile,
-                body.bm-reply-area-focused .bp-messages-single-thread-wrap.bp-messages-mobile {
-                    height: calc(100% - var(--fcom-header-height)) !important;
+                body.bm-reply-area-focused.bm-mobile{
+                    --bm-takeover-bottom: 0px;
                 }
 
-                body.bm-reply-area-focused.bp-messages-mobile .fcom_mobile_menu{
+                body.bm-reply-area-focused.bm-mobile .fcom_mobile_menu{
+                    display: none;
+                }
+
+                body.bm-call-active.bm-mobile{
+                    --bm-takeover-bottom: 0px;
+                }
+
+                body.bm-call-active.bm-mobile .fcom_mobile_menu{
                     display: none;
                 }
 
                 @media screen and (max-width: 1024px) {
-                    .bp-messages-wrap .chat-header .bpbm-minimize,
-                    .bp-better-messages-mini,
-                    .bp-better-messages-list {
+                    .bm-wrap-main [data-action-key="minimize"],
+                    .bm-mini-chats-wrap,
+                    .bm-mini-widgets-wrap {
                         display: none !important;
                     }
                 }
@@ -317,9 +318,21 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             $script_ver  = ( defined( 'BM_DEV' ) && BM_DEV && file_exists( $script_path ) ) ? filemtime( $script_path ) : $version;
             $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?v=' . $script_ver;
 
+            $design_classes = array();
+
+            if ( class_exists( 'Better_Messages_Design' ) ) {
+                foreach ( (array) Better_Messages_Design::instance()->design_body_classes() as $class ) {
+                    if ( 'bm-messages-light' === $class || 'bm-messages-dark' === $class ) {
+                        continue;
+                    }
+                    $design_classes[] = $class;
+                }
+            }
+
             $vars = [
                     'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
                     'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
+                    'bodyClasses' => $design_classes,
                     'courseChatButton' => (
                         Better_Messages()->settings['FCenableCourses'] === '1'
                         && Better_Messages()->settings['FCcourseChatButton'] === '1'
@@ -387,7 +400,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     $link = add_query_arg($args, get_site_url());
 
                     $data['profile_nav_actions'][] = [
-                            'css_class' => 'fcom_bm_video_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style video-call bm-user-' . $user_id,
+                            'css_class' => 'fcom_bm_video_call_button fcom_route el-button fcom_primary_button bm-pm-button bm-no-loader bm-no-style video-call bm-user-' . $user_id,
                             'title' => _x('Video Call', 'FluentCommunity Integration', 'bp-better-messages'),
                             'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M374.79 308.78 457.5 367a16 16 0 0 0 22.5-14.62V159.62A16 16 0 0 0 457.5 145l-82.71 58.22A16 16 0 0 0 368 216.3v79.4a16 16 0 0 0 6.79 13.08z"></path><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M268 384H84a52.15 52.15 0 0 1-52-52V180a52.15 52.15 0 0 1 52-52h184.48A51.68 51.68 0 0 1 320 179.52V332a52.15 52.15 0 0 1-52 52z"></path></svg></span>',
                             'url' => $link
@@ -404,7 +417,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
                     $link = add_query_arg($args, get_site_url());
 
                     $data['profile_nav_actions'][] = [
-                            'css_class' => 'fcom_bm_audio_call_button fcom_route el-button fcom_primary_button bpbm-pm-button bm-no-loader bm-no-style audio-call bm-user-' . $user_id,
+                            'css_class' => 'fcom_bm_audio_call_button fcom_route el-button fcom_primary_button bm-pm-button bm-no-loader bm-no-style audio-call bm-user-' . $user_id,
                             'title' => _x('Audio Call', 'FluentCommunity Integration', 'bp-better-messages'),
                             'svg_icon' => '<span class="bm-loader-container"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-miterlimit="10" stroke-width="32" d="M451 374c-15.88-16-54.34-39.35-73-48.76-24.3-12.24-26.3-13.24-45.4.95-12.74 9.47-21.21 17.93-36.12 14.75s-47.31-21.11-75.68-49.39-47.34-61.62-50.53-76.48 5.41-23.23 14.79-36c13.22-18 12.22-21 .92-45.3-8.81-18.9-32.84-57-48.9-72.8C119.9 44 119.9 47 108.83 51.6A160.15 160.15 0 0 0 83 65.37C67 76 58.12 84.83 51.91 98.1s-9 44.38 23.07 102.64 54.57 88.05 101.14 134.49S258.5 406.64 310.85 436c64.76 36.27 89.6 29.2 102.91 23s22.18-15 32.83-31a159.09 159.09 0 0 0 13.8-25.8C465 391.17 468 391.17 451 374z"></path></svg></span>',
                             'url' => $link
@@ -420,6 +433,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             if( ! is_user_logged_in() ) return $menu;
 
             $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
+
+            if( $url === '' ) return $menu;
 
             $item = [
                     'permalink' => $url,
@@ -441,6 +456,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
         {
             if( ! is_user_logged_in() ) return;
             $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
+            if( $url === '' ) return;
             ?>
             <li class="top_menu_item fcom_better_messages_menu_li fcom_countable_notification_holder  fcom_desktop_only">
                 <a href="<?php echo $url; ?>"

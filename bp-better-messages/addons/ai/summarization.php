@@ -941,6 +941,13 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 $text = wp_strip_all_tags( html_entity_decode( $text ) );
                 $text = trim( $text );
 
+                $location = Better_Messages()->ai->get_location_context( $msg->id );
+
+                if ( $location !== '' ) {
+                    $annotation = '[Shared location: ' . $location . ']';
+                    $text = $text === '' ? $annotation : $text . ' ' . $annotation;
+                }
+
                 if ( ! empty( $text ) ) {
                     $lines[] = '[' . $name . ']: ' . $text;
                 }
@@ -1248,14 +1255,9 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         private function get_bot_id_from_user( $user_id )
         {
-            $guest_id = absint( $user_id );
-            $guest = Better_Messages()->guests->get_guest_user( $guest_id );
+            $bot_id = Better_Messages()->guests->get_bot_id( $user_id );
 
-            if ( $guest && $guest->ip && str_starts_with( $guest->ip, 'ai-chat-bot-' ) ) {
-                return (int) str_replace( 'ai-chat-bot-', '', $guest->ip );
-            }
-
-            return false;
+            return $bot_id > 0 ? $bot_id : false;
         }
 
         public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id )

@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.15.33
+Stable tag: 3.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,8 +59,6 @@ Better Messages is widely used to power messaging for:
 
 **[Translate Better Messages to your language](https://www.wordplus.org/bm-translate/)**
 
-https://www.youtube.com/watch?v=jMHx97QsXj8
-
 **Core Messaging Features:**
 
 * AJAX or WebSocket powered realtime conversations
@@ -97,7 +95,9 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 
 * File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
 * Client-side image and video optimization for cross-browser compatibility and saving storage space (format conversion, quality control, metadata stripping)
-* Voice and Video Messages (available as addon)
+* Photo cropping and editing before sending
+* Location messages with a map picker and nearby place suggestions
+* Voice messages and video messages (available as addon)
 * Embedded links with thumbnails and descriptions
 * oEmbed support for YouTube, Vimeo, Spotify, SoundCloud, Flickr and 20+ services
 * Emoji selector
@@ -148,7 +148,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 **Customization:**
 
 * Modern, fully customizable design
-* Easy color customization via WP Customizer
+* Appearance tab — repaint every part of the messenger, reshape its corners and spacing and tune dark mode, with a live preview
 * Custom notification sounds
 * RTL layout support
 * White label solution
@@ -371,16 +371,61 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 == Screenshots ==
 
-1. Real-time private messaging thread with group conversation, file sharing, reactions, and emoji
+1. Group conversation with photo sharing, emoji reactions, replies and @mentions — alongside a conversations list with unread badges, pinned chats, online presence and live typing indicators
 2. Embedded video and link previews — YouTube, Vimeo, Spotify, and 20+ oEmbed providers
-3. Conversations inbox with unread badges, pinned chats, and full-text search across messages
-4. Start a new conversation with recipient search and friends list
-5. Real-time typing indicator and online presence (WebSocket version)
+3. Full-text search across every message, with matches highlighted in the conversations list
+4. Start a new conversation — recipient search with live results and online status
+5. Mini chat window that follows members across your whole WordPress site
 6. On-site toast notifications for new messages — visible anywhere on your WordPress site
+7. Dark mode across every surface of the messenger
+8. Voice and video messages, with one-tap transcription
+9. Read a conversation in your own language — messages arrive translated, with the original one tap away
+10. Share a location with a map picker and nearby place suggestions
+11. AI chat bots powered by OpenAI, Anthropic (Claude) and Google Gemini
+12. Appearance tab — repaint any part of the messenger and watch every change in the live preview
+13. Settings — email, browser push and on-site notifications, and 18 more tabs of options
+14. Group video calls for up to 32 participants, right beside the conversation (WebSocket version)
+15. One-to-one HD video and audio calls from any conversation (WebSocket version)
 
 == Changelog ==
 
-Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus.org/demo.php) site and send your feedback to support.
+**Important — please read before updating to 3.0**
+
+3.0 is a full redesign. Your conversations, settings and integrations carry across untouched — including the colors and sizes you set in the Customizer — but three things need your attention:
+
+* Custom CSS needs rewriting: the messenger's classes are now prefixed `bm-` instead of `bpbm-` and `bp-messages-`
+* Update the exclusion lists of any caching or optimisation plugin: the script and style files were renamed (`bp-messages*` → `better-messages*`, `bpbm-worker.js` → `bm-worker.js`)
+* The WordPress Customizer integration is gone — colors and sizes now live in the Appearance tab, and snippets calling `Better_Messages()->customize` stop working
+
+**Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
+
+= 3.0.0 =
+* The messenger has been redesigned from the ground up — every surface, from the conversations list to mini chats and popups, is new, while keeping the layout and workflows you know
+* The **Appearance** tab has been rebuilt around the new design — repaint any part of the messenger, reshape its corners and spacing, tune dark mode, and watch every change land in a live preview before saving. The colors and sizes you set in the Customizer are carried over
+* The messenger's font is now yours to set at Appearance → Typography — pick a stack, type your own, or hand it to your theme's font
+* The Mobile App page has been rebuilt and is no longer in alpha — a readiness checklist says what a build still needs before you start one, and the installed app now tells you when an update needs a restart, or a newer version is waiting in the App Store or Google Play
+* Messages can now carry a location — a map picker with nearby place suggestions, off until you turn it on in the new **Location** tab, which also chooses the map and place providers and which roles may send one
+* Voice messages can be answered with a video message, through the **Voice and Video Messages** add-on 2.0 — the new **Video Messages** tab sets round or square, a maximum length, auto-deletion and which roles may send them
+* AI chat bots can now be spoken to — send a voice message and the bot answers what was said, whatever model it runs on. Each bot has its own Voice Input switch, and all it needs is a transcription provider picked on the **Voice Messages** tab
+* Voice messages can be transcribed the moment they are sent — the new Auto Transcription option on the **Voice Messages** tab does it for every voice message, and the bubble shows the transcription running instead of asking for a tap
+* A conversation can now be read in your own language — turn translation on for that conversation and every message arrives translated, with the original one tap away. The **Translation** tab now reaches group conversations, chat rooms and chat bot messages, and can have it on by default
+* Messages and files sent while offline are kept on the device and sent by themselves once you are back online, or cancelled before that
+* Conversations cached on a device are now kept across plugin updates and settings changes, and trimmed by themselves once the copy grows large — a new Storage section in the user settings shows what the device holds and can free it up, and Tools can reset every device's copy
+* A reply to a photo or file now carries a thumbnail of it, and the attachments list can jump straight to the message a file was sent in
+* Answering a call on one device now stops the others ringing at once, instead of leaving them to ring on until the caller gave up
+* The Classic design, the follow-the-device color scheme, the Settings → Mobile tab and Mini Widgets → Layout have been removed — the Appearance tab replaces them, and the WordPress Customizer integration is gone with them, so snippets calling `Better_Messages()->customize` no longer work
+* Custom CSS and caching exclusions need updating: the messenger's CSS classes are now prefixed `bm-` rather than `bpbm-` and `bp-messages-`, and the script and style files were renamed (`bp-messages*` → `better-messages*`, `bpbm-worker.js` → `bm-worker.js`)
+* Fixed a crafted guest registration passing as an AI chat bot, which let it into role-restricted chat rooms (CVE-2026-89093)
+* Fixed a chat room's messages and participants being readable over the REST API by visitors its guest setting turns away (CVE-2026-89334)
+* Fixed a crafted icon SVG smuggling markup past the sanitizer in a CDATA section, which let it run script on the icon preview screen
+* Fixed a phone notification from an AI chat bot showing `<!-- BM-AI -->` in front of the text, and an empty one being sent the moment a bot began answering in a one-to-one conversation
+* Fixed the user menu showing no name or avatar for a member or guest who does not have any conversations yet
+* Fixed the guest registration bar losing its right-hand edge on themes that do not set border-box sizing
+* Fixed the installed app staying on a broken update until it was retried by hand — it now replaces or rolls one back on its own
+* Fixed chat notifications still being sent to phones the app had been removed from, and those devices counting as reachable
+* Fixed a failed call to the app build server being reported as a success, hiding the real error
+* Everything released in the 2.15 line, up to 2.15.33, is included — those entries are listed separately below
+* Other minor bugfixes and improvements
 
 = 2.15.33 =
 * Added [**Unique Guest Names**](https://www.better-messages.com/docs/features/guest-access/#can-two-guests-use-the-same-display-name) setting at Settings → General — turn it off to let guests use a display name someone else already took
@@ -420,6 +465,7 @@ Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus
 * Member and online counts in the chat rooms list no longer read "1 members" for a single member
 * Presence-based chat rooms no longer carry an **Open** label in the chat rooms list
 * The **User Inbox** block is now called **Messages**, and the settings that spoke of an "inbox" name the messages page or the conversation list instead
+* Added [`better_messages_fluent_notify_integration`](https://www.better-messages.com/hooks/php-filters/#better_messages_fluent_notify_integration) PHP filter — return `false` to disable the FluentNotify integration
 * Other minor bugfixes and improvements
 
 = 2.15.29 =
@@ -431,43 +477,41 @@ Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus
 * Fixed line breaks vanishing from messages typed over several lines when Enter starts a new line instead of sending — browser extensions that tag page elements, such as Bitdefender, were collapsing them into one run-on line
 * Names decorated by the site keep that decoration in profile tooltips, as they did before 2.15.28 — only the avatar description, which is read aloud by screen readers, takes the name on its own
 * Fixed a name decorated by the site through the username filters losing that decoration in the conversations and users lists — on a phone those lists are most of the messenger
-* Fixed the confirmation for removing a participant, or for changing who moderates a conversation, spelling out the raw image markup of a badge the site attaches to member names — a PeepSo VIP icon printed as markup in the dialog, and in the notice that followed, in place of the plain name
-* Fixed a desktop notification title breaking into placeholder text when the sender carries such a badge
-* The **Messages Window Roundness** setting now also shapes the buttons inside the messenger and the name badges carried by the system messages and mentions, which stayed square whatever the setting was
-* Other minor bugfixes and improvements
 
 = 2.15.28 =
 * Added **Remember Last Tab** at Settings → Mini Widgets → Layout — the messenger reopens on the tab each member used last, the way the mini widgets already do
 * Users can now be given control over more of their own messenger — how Enter sends a message (**Send on Enter Control**, Settings → Messaging), whether the new message popup appears (**Popup Notification Control**, Settings → Notifications), and the sound played when they send one
 * Sound switches are no longer offered to users for a sound that is silenced site-wide
+* Buttons on the [end-to-end encryption](https://www.better-messages.com/docs/websocket/e2e-encryption/) screens now follow the **Messages Window Roundness** setting
+* Corrected the **Send on Enter** description, which named Ctrl+Enter as the alternative — it has always been Shift+Enter
 * Fixed a "Send message" link from a forum or profile opening the side panel on the chat rooms list instead of the conversations list
 * Fixed the call restriction at Settings → Calls having no effect on guests — calls are now refused for every restricted role, not only hidden
 * Fixed **Auto-Delete Old Messages** leaving an unread badge that could never be cleared, and conversations now refresh once the cleanup has run instead of keeping removed messages on screen
 * Fixed guests losing their [end-to-end encryption](https://www.better-messages.com/docs/websocket/e2e-encryption/) keys on every page load — a guest was asked for the password again on each visit
-* Fixed the report reason arriving untranslated in the moderation email
+* Fixed the report reason arriving untranslated in the moderation email — it showed "inappropriate" instead of "Inappropriate"
 * Fixed the sidebar collapse button doing nothing when **Compact Mode** was set to Always Expanded or Always Compact
 * Fixed a name decorated by the site, such as a role badge, repeating itself in the avatar description and the profile tooltip
 * Fixed a prefilled message on the new conversation screen being inserted as HTML instead of plain text
-* Other minor bugfixes and improvements
 
 = 2.15.27 =
 * Added support for the **gpt-image-2** image generation model in [AI chat bots](https://www.better-messages.com/docs/features/ai-chat-bots/)
-* Added built-in pricing for the GPT-5.5 and GPT-5.6 models, and fixed gpt-5.4-mini / gpt-5.4-nano replies being charged at the full gpt-5.4 price
-* The **Context Messages Limit** of an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) now also applies to OpenAI bots in one-to-one conversations, keeping long chats from getting more expensive with every message
-* Fixed sending in a chat room getting slower with every member — in a room with tens of thousands of members a sticker took a minute to appear for the sender
-* Fixed the [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) model list offering models that cannot answer messages
-* Fixed a bot whose model is no longer available answering with a generic error instead of saying the model needs to be changed
-* Fixed the title and the YouTube logo on a shared video doing nothing when clicked
-* Fixed shared videos not responding to clicks inside [mini chats](https://www.better-messages.com/docs/websocket/mini-chats/) — they now open from a poster with a play button
+* Added built-in pricing for the GPT-5.5 and GPT-5.6 models, so their token cost and point charges are calculated instead of reported as zero
+* Fixed [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) replies from gpt-5.4-mini and gpt-5.4-nano being charged at the full gpt-5.4 price
+* The **Context Messages Limit** of an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) now also applies to OpenAI bots in one-to-one conversations — a long-running chat no longer makes every new reply more expensive than the last
+* Fixed the [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) model list offering models that cannot answer messages — such as ChatGPT's `-chat-latest` aliases and the image, audio and transcription models — where choosing one left the bot failing on every message
+* Fixed an [AI chat bot](https://www.better-messages.com/docs/features/ai-chat-bots/) whose model is no longer offered by the provider answering with a generic error, instead of telling the site administrator that the model needs to be changed
+* Fixed the title and the YouTube logo on a shared video doing nothing when clicked — they open the video on YouTube in a new tab again, while the conversation itself still cannot be navigated away
+* Fixed shared videos not responding to a click inside [mini chats](https://www.better-messages.com/docs/features/mini-chats/) — a mini chat is smaller than any video service will play in, so videos there now open from a poster with a play button
 * Fixed **Privacy-friendly oEmbeds** rendering a broken placeholder with the video title spilled into the message as text
-* Video placeholders now start playback on the first tap, without a second click on the play button
-* Fixed conversation list previews of video messages sometimes showing raw placeholder text
-* Fixed the Conversations tab being listed last at Settings → Mini Widgets → Layout
-* Fixed the unread counter on tabs covering the icon when tab labels are shown, and being unreadable in dark mode
-* Stopped themes from reshaping the messenger's own input fields — the side panel search box stays readable in dark mode
+* Videos opened from a placeholder now start playing straight away instead of waiting for a second click on the play button
+* Fixed the video placeholder ignoring the first tap on phones and tablets
+* Fixed the Conversations tab being listed last at Settings → Mini Widgets → Layout on sites that arranged their tabs before it became sortable, while the messenger kept opening on it
+* Fixed the unread counter on a side panel or mobile tab covering the tab icon when tab labels are shown — the count now sits in front of the icon
+* Fixed the unread counter on a tab being unreadable in dark mode, where it was drawn in white on a white badge
+* Fixed the search box of the friends, groups, courses, chat rooms and users lists being drawn as a rounded white field by the theme, which left it unreadable in dark mode
+* Themes can no longer round the corners of the messenger's own input fields
 * Fixed the page appearing extremely tall while the messenger loads and then jumping once it is ready — the loading placeholder now fits the window exactly like the loaded messenger, including with **Max Height** set to a large value like 9999
 * Renamed the **Fixed Header Height** setting to **Window Height Offset**, as it reserves window space for any fixed element on the page, not only a sticky header
-* Other minor bugfixes and improvements
 
 = 2.15.26 =
 * Added [`better_messages_push_notification`](https://www.better-messages.com/hooks/php-filters/#better_messages_push_notification) PHP filter — change the link, title and text of push notifications on every delivery path
@@ -882,3 +926,8 @@ Better Messages 3.0 is coming soon — try it on the [demo](https://www.wordplus
 * Added initial support for new Dokan Vendor Dashboard UI
 * Removed Customizations tab from settings page, settings from that page moved to Messaging tab
 * Other minor bugfixes and improvements
+
+== Upgrade Notice ==
+
+= 3.0.0 =
+A full redesign: a rebuilt Appearance tab with live preview, location and video messages, per-conversation translation, and the Mobile App page out of alpha. CSS classes and script filenames changed — update custom CSS and caching exclusion lists. The Customizer is gone, but its colors carry over.

@@ -2,15 +2,15 @@
   'root' => 
   array (
     'name' => '__root__',
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
-    'reference' => 'e94d2122f95975b19b7a596f7b85b65ffd0dfb05',
+    'pretty_version' => 'dev-main',
+    'version' => 'dev-main',
+    'reference' => '8953c9acc6e0604cfe6724d6dc676319494d87ce',
     'type' => 'library',
     'install_path' => __DIR__ . '/../',
     'aliases' => 
     array (
     ),
-    'dev' => true,
+    'dev' => false,
   ),
   'versions' => 
   array (
@@ -64,9 +64,9 @@
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '2.8.0',
-      'version' => '2.8.0.0',
-      'reference' => '21dc724a0583619cd1652f673303492272778051',
+      'pretty_version' => '2.9.0',
+      'version' => '2.9.0.0',
+      'reference' => '7d0ed42f28e42d61352a7a79de682e5e67fec884',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/psr7',
       'aliases' => 
@@ -160,9 +160,9 @@
     ),
     'react/dns' => 
     array (
-      'pretty_version' => 'v1.13.0',
-      'version' => '1.13.0.0',
-      'reference' => 'eb8ae001b5a455665c89c1df97f6fb682f8fb0f5',
+      'pretty_version' => 'v1.14.0',
+      'version' => '1.14.0.0',
+      'reference' => '7562c05391f42701c1fccf189c8225fece1cd7c3',
       'type' => 'library',
       'install_path' => __DIR__ . '/../react/dns',
       'aliases' => 
@@ -208,9 +208,9 @@
     ),
     'react/socket' => 
     array (
-      'pretty_version' => 'v1.16.0',
-      'version' => '1.16.0.0',
-      'reference' => '23e4ff33ea3e160d2d1f59a0e6050e4b0fb0eac1',
+      'pretty_version' => 'v1.17.0',
+      'version' => '1.17.0.0',
+      'reference' => 'ef5b17b81f6f60504c539313f94f2d826c5faa08',
       'type' => 'library',
       'install_path' => __DIR__ . '/../react/socket',
       'aliases' => 
@@ -232,9 +232,9 @@
     ),
     'symfony/deprecation-contracts' => 
     array (
-      'pretty_version' => 'v3.6.0',
-      'version' => '3.6.0.0',
-      'reference' => '63afe740e99a13ba87ec199bb07bbdee937a5b62',
+      'pretty_version' => 'v3.7.0',
+      'version' => '3.7.0.0',
+      'reference' => '50f59d1f3ca46d41ac911f97a78626b6756af35b',
       'type' => 'library',
       'install_path' => __DIR__ . '/../symfony/deprecation-contracts',
       'aliases' => 

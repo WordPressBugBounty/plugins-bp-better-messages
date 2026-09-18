@@ -55,11 +55,7 @@ if ( !class_exists( 'Better_Messages_Pinned_Message' ) ) {
 
         public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id )
         {
-            $pinned_messages = $this->get_pinned_messages( $thread_id );
-
-            if( is_array($pinned_messages) && count( $pinned_messages ) > 0 ){
-                $thread_item['pinned'] = $pinned_messages;
-            }
+            $thread_item['pinned'] = $this->get_pinned_messages( $thread_id );
 
             return $thread_item;
         }
@@ -88,25 +84,13 @@ if ( !class_exists( 'Better_Messages_Pinned_Message' ) ) {
                 );
             }
 
-            $current_pinned = $this->get_pinned_messages( $thread_id );
-
-            // Only allow single pinned message for now
-            if( count( $current_pinned ) > 0 ){
-                foreach ( $current_pinned as $id ){
-                    Better_Messages()->functions->delete_message_meta( $id, 'is_pinned', '' );
-                    Better_Messages()->functions->delete_message_meta($id, 'pinned_by', '');
-                }
-            }
-
             Better_Messages()->functions->update_message_meta( $message_id, 'is_pinned', time() );
             Better_Messages()->functions->update_message_meta( $message_id, 'pinned_by', Better_Messages()->functions->get_current_user_id() );
-
-            $value = [ $message_id ];
 
             do_action( 'better_messages_thread_updated', $thread_id );
             do_action('better_messages_info_changed', $thread_id);
 
-            return $value;
+            return $this->get_pinned_messages( $thread_id );
         }
 
         public function unpin_message( WP_REST_Request $request ){
@@ -135,20 +119,15 @@ if ( !class_exists( 'Better_Messages_Pinned_Message' ) ) {
 
             $current_pinned = $this->get_pinned_messages( $thread_id );
 
-            // Only allow single pinned message for now
-            if( count( $current_pinned ) > 0 ){
-                foreach ( $current_pinned as $id ){
-                    if( $id === $message_id ) {
-                        Better_Messages()->functions->delete_message_meta($id, 'is_pinned', '');
-                        Better_Messages()->functions->delete_message_meta($id, 'pinned_by', '');
-                    }
-                }
+            if( in_array( $message_id, $current_pinned, true ) ){
+                Better_Messages()->functions->delete_message_meta( $message_id, 'is_pinned', '' );
+                Better_Messages()->functions->delete_message_meta( $message_id, 'pinned_by', '' );
             }
 
             do_action( 'better_messages_thread_updated', $thread_id );
             do_action('better_messages_info_changed', $thread_id);
 
-            return true;
+            return $this->get_pinned_messages( $thread_id );
         }
 
         public function get_pinned_messages( $thread_id ){
@@ -159,6 +138,7 @@ if ( !class_exists( 'Better_Messages_Pinned_Message' ) ) {
             FROM `" . bm_get_table('meta') . "`
             WHERE `meta_key` = 'is_pinned'
             AND `bm_message_id` IN (SELECT id FROM `" . bm_get_table('messages') . "` WHERE `thread_id` = %d)
+            ORDER BY `bm_message_id` DESC
             ", $thread_id);
 
             return array_map('intval', $wpdb->get_col( $sql ) );

@@ -21,6 +21,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         public function __construct()
         {
             add_action( 'admin_init',     array( $this, 'update_db_if_needed' ) );
+            add_action( 'upgrader_process_complete', array( $this, 'after_plugin_update' ), 10, 2 );
 
             add_filter( 'cron_schedules', array( $this, 'cron_intervals' ) );
 
@@ -131,6 +132,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             add_filter('messages_thread_get_inbox_count', array( $this, 'replace_unread_count' ), 10, 2 );
 
             add_action( 'wp_footer', array( $this, 'mobile_popup_button') );
+            add_action( 'fluent_community/portal_footer', array( $this, 'mobile_popup_button') );
 
             /*
              * BeeHive premium theme integration
@@ -534,19 +536,58 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
         }
 
+        public function after_plugin_update( $upgrader, $hook_extra ){
+            if( ! is_array( $hook_extra ) ) return;
+            if( ! isset( $hook_extra['type'] ) || $hook_extra['type'] !== 'plugin' ) return;
+
+            $plugins = array();
+
+            if( isset( $hook_extra['plugins'] ) && is_array( $hook_extra['plugins'] ) ){
+                $plugins = $hook_extra['plugins'];
+            }
+
+            if( isset( $hook_extra['plugin'] ) ){
+                $plugins[] = $hook_extra['plugin'];
+            }
+
+            if( ! in_array( plugin_basename( Better_Messages()->path . 'bp-better-messages.php' ), $plugins, true ) ) return;
+
+            if( is_object( Better_Messages()->websocket ) && method_exists( Better_Messages()->websocket, 'install_push_workers_script' ) ){
+                Better_Messages()->websocket->install_push_workers_script( Better_Messages()->settings );
+            }
+
+            $this->flush_third_party_caches();
+        }
+
+        public function flush_third_party_caches(){
+            if( function_exists( 'rocket_clean_domain' ) ) rocket_clean_domain();
+            if( function_exists( 'w3tc_flush_all' ) ) w3tc_flush_all();
+            if( function_exists( 'wp_cache_clear_cache' ) ) wp_cache_clear_cache();
+            if( function_exists( 'wpfc_clear_all_cache' ) ) wpfc_clear_all_cache( true );
+            if( function_exists( 'sg_cachepress_purge_cache' ) ) sg_cachepress_purge_cache();
+            if( function_exists( 'breeze_clear_all_cache' ) ) breeze_clear_all_cache();
+
+            if( class_exists( 'autoptimizeCache' ) && method_exists( 'autoptimizeCache', 'clearall' ) ){
+                autoptimizeCache::clearall();
+            }
+
+            if( class_exists( 'WP_Optimize_Minify_Cache_Functions' ) && method_exists( 'WP_Optimize_Minify_Cache_Functions', 'purge' ) ){
+                WP_Optimize_Minify_Cache_Functions::purge();
+            }
+
+            if( has_action( 'litespeed_purge_all' ) ) do_action( 'litespeed_purge_all' );
+
+            do_action( 'better_messages_flush_caches' );
+        }
+
         public function get_mobile_popup_bottom(){
-            $bottom = (int) Better_Messages()->settings['mobilePopupLocationBottom'];
+            $bottom = Better_Messages_Design::instance()->get_design_var_int( '--bm-mobile-button-bottom' );
 
             return $bottom > 0 ? $bottom : 20;
         }
 
         public function css_customizations(){
             $rules = [];
-
-            $bottom = $this->get_mobile_popup_bottom();
-            if( $bottom !== 20 ){
-                $rules[] = '#bp-better-messages-mini-mobile-open{bottom:' . $bottom . 'px!important}';
-            }
 
             $rules = apply_filters( 'better_messages_css_customizations', $rules );
 
@@ -791,6 +832,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
                 if ( isset( $_GET['thread-id'] ) ) {
                     $redirect_url = Better_Messages()->functions->get_user_messages_url(get_current_user_id(), intval($_GET['thread-id']));
+                }
+
+                if ( $redirect_url === '' ) {
+                    $redirect_url = home_url( '/' );
                 }
 
                 wp_redirect($redirect_url);
@@ -1127,11 +1172,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $display_name = esc_attr( $sender->display_name );
             }
 
-            $newMessage  = '<span class="bpbm-replied-message" data-reply-message-id="' . $reply_message_id . '">';
-            $newMessage .= '<span class="bpbm-replied-message-name">' . $display_name . '</span>';
-            $newMessage .= '<span class="bpbm-replied-message-text">' . $message_content . '</span>';
+            $newMessage  = '<span class="bm-replied-message" data-reply-message-id="' . $reply_message_id . '">';
+            $newMessage .= '<span class="bm-replied-message-name">' . $display_name . '</span>';
+            $newMessage .= '<span class="bm-replied-message-text">' . $message_content . '</span>';
             $newMessage .= '</span>';
-            $newMessage .= '<span class="bpbm-replied-message-reply">' . $message . '</span>';
+            $newMessage .= '<span class="bm-replied-message-reply">' . $message . '</span>';
 
             return $newMessage;
         }
@@ -1354,7 +1399,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $link = Better_Messages()->functions->create_conversation_link( $user->ID, '', '', Better_Messages()->settings['fastStart'] === '1' );
 
-            echo '<a href="' . $link . '" class="bpbm-private-message-link-buddypress">' . __('Private Message', 'bp-better-messages') . '</a>';
+            echo '<a href="' . $link . '" class="bm-private-message-link-buddypress">' . __('Private Message', 'bp-better-messages') . '</a>';
         }
 
         public function asragaros_thread_view($author_id, $author_posts){
@@ -1369,7 +1414,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 'to' => $view_user->ID
             ], Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() ));
 
-            echo '<a href="' . $link .'" class="bpbm-asragaros-messages-link">' . __('Private Message', 'bp-better-messages') . ' </a>';
+            echo '<a href="' . $link .'" class="bm-asragaros-messages-link">' . __('Private Message', 'bp-better-messages') . ' </a>';
         }
 
         public function asragaros_profile_messages(){
@@ -1419,7 +1464,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 echo '<a href="' . $link .'">' . __('Private Message', 'bp-better-messages') . ' </a>';
             } else {
                 $messages_total = Better_Messages()->functions->get_total_threads_for_user( $user_id,  'unread' );
-                $class = 'bp-better-messages-unread';
+                $class = 'bm-menu-unread';
                 $class .= ( 0 === $messages_total ) ? ' no-count' : ' count';
 
                 $title = sprintf( _x( 'Messages <span class="%s">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
@@ -1461,7 +1506,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function hide_admin_counter(){
-            echo '<style type="text/css">.no-count.bp-better-messages-unread{display:none!important}</style>';
+            echo '<style type="text/css">.no-count.bm-menu-unread{display:none!important}</style>';
         }
 
         public function disable_thread_for_pmpro_restricted_role( &$args, &$errors ){
@@ -1492,8 +1537,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! is_user_logged_in() ) return false;
             $max_height = Better_Messages()->functions->initial_container_height();
 
-            #echo '<style type="text/css">body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .bp-messages-side-threads-wrapper > .bp-messages-column > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .bp-messages-side-threads-wrapper > .bp-messages-column > .scroller > .scroller,body:not(.bp-messages-mobile) .bp-messages-wrap.bp-messages-wrap-main > .scroller > .scroller{max-height:'. $max_height .'px;}body:not(.bp-messages-mobile) .bp-messages-threads-wrapper{max-height:' . ($max_height) .'px!important;}</style>';
-            echo '<style type="text/css">.bp-messages-threads-wrapper{height:' . $max_height . '}</style>';
+            #echo '<style type="text/css">body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .bm-side-threads-wrapper > .bm-column > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .bm-side-threads-wrapper > .bm-column > .scroller > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .scroller > .scroller{max-height:'. $max_height .'px;}body:not(.bm-mobile) .bm-threads-wrapper{max-height:' . ($max_height) .'px!important;}</style>';
+            echo '<style type="text/css">.bm-threads-wrapper{height:' . $max_height . '}</style>';
         }
 
         public function beehive_theme_integration(){
@@ -1508,41 +1553,36 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $rgba_color_075 = Better_Messages()->functions->hex2rgba($main_color, 0.075);
                 $rgba_color_06  = Better_Messages()->functions->hex2rgba($main_color, 0.6);
                 ?><style type="text/css">
-                    body.bp-messages-mobile header{
+                    body.bm-mobile header{
                         display: none;
                     }
 
-                    .bp-messages-wrap.bp-messages-mobile .reply .send button[type=submit]{
+                    .bm-wrap.bm-mobile .reply .send button[type=submit]{
                         background: #f7f7f7 !important;
                     }
 
-                    .bp-better-messages-list .tabs>div[data-tab=messages] .unread-count, .bp-better-messages-mini .chats .chat .head .unread-count{
+                    .bm-mini-widgets-wrap .tabs>div[data-tab=messages] .unread-count, .bm-mini-chats-wrap .chats .chat .head .unread-count{
                         background: <?php echo $main_color; ?> !important;
                     }
 
-                    .bp-messages-wrap .chat-header .fas,
-                    .bp-messages-wrap .chat-header>a,
-                    .bp-messages-wrap .reply .send button[type=submit],
-                    .uppy-Dashboard-browse,
-                    .bp-messages-wrap.mobile-ready:not(.bp-messages-mobile) .bp-messages-mobile-tap{
+                    .bm-wrap .chat-header .fas,
+                    .bm-wrap .chat-header>a,
+                    .bm-wrap .reply .send button[type=submit],
+                    .bm-wrap.mobile-ready:not(.bm-mobile) .bm-mobile-tap{
                         color: <?php echo $main_color; ?> !important;
                     }
 
-                    .uppy-Dashboard-close{
-                        color: <?php echo $main_color; ?> !important;
-                    }
-
-                    .bp-messages-wrap .bp-emojionearea.focused,
-                    .bp-messages-wrap .new-message form>div input:focus,
-                    .bp-messages-wrap .active .taggle_list,
-                    .bp-messages-wrap .chat-header .bpbm-search form input:focus{
+                    .bm-wrap .bp-emojionearea.focused,
+                    .bm-wrap .new-message form>div input:focus,
+                    .bm-wrap .active .taggle_list,
+                    .bm-wrap .chat-header .bm-search form input:focus{
                         border-color: <?php echo $main_color; ?>!important;
                         -moz-box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
                         -webkit-box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
                         box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
                     }
 
-                    .bp-messages-wrap #send-to .ui-autocomplete{
+                    .bm-wrap #send-to .ui-autocomplete{
                         border-color: <?php echo $main_color; ?>;
                         -moz-box-shadow: inset 0 0 0 <?php echo $rgba_color_075; ?>, 0 3px 3px <?php echo $rgba_color_06; ?>;
                         -webkit-box-shadow: inset 0 0 0 <?php echo $rgba_color_075; ?>, 0 3px 3px <?php echo $rgba_color_06; ?>;
@@ -1586,14 +1626,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         public function mobile_popup_button(){
             if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ) return '';
 
-            echo '<div id="bp-better-messages-mini-mobile-container"></div>';
+            echo '<div id="bm-mini-chats-wrap-mobile-container"></div>';
 
-            if(  Better_Messages()->settings['mobilePopup'] == '0' ) return '';
+            $preview = class_exists( 'Better_Messages_Design' ) && Better_Messages_Design::instance()->is_preview_mode();
+
+            if( ! $preview && Better_Messages()->settings['mobilePopup'] == '0' ) return '';
 
             $user_id = Better_Messages()->functions->get_current_user_id();
             $restricted_roles = Better_Messages()->settings['restrictMobilePopup'];
 
-            if( count($restricted_roles) > 0 ) {
+            if( ! $preview && count($restricted_roles) > 0 ) {
                 $roles = Better_Messages()->functions->get_user_roles( $user_id );
 
                 $is_restricted = false;
@@ -1616,11 +1658,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $class = ($count === 0) ? 'no-count' : '';
 
-            $positionClass = ( Better_Messages()->settings['mobilePopupLocation'] === 'left' ) ? ' bpbm-mobile-open-left' : '';
+            $positionClass = ( Better_Messages()->settings['mobilePopupLocation'] === 'left' ) ? ' bm-mobile-open-left' : '';
 
-            echo '<div id="bp-better-messages-mini-mobile-open" class="' . $positionClass . '">';
-            echo '<span class="bp-better-messages-mini-mobile-open-icon"></span>';
-            echo '<span class="count ' . $class . ' bp-better-messages-unread">' . $count . '</span></div>';
+            echo '<div id="bm-mini-mobile-open" class="' . $positionClass . '">';
+            echo '<span class="bm-mini-mobile-open-icon"></span>';
+            echo '<span class="count ' . $class . ' bm-menu-unread">' . $count . '</span></div>';
         }
 
         public function heartbeat_unread_notifications( $response = array() ){
@@ -1665,11 +1707,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if(class_exists('WooCommerce')){ ?>
                 wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
-                    var element = document.querySelector('.woocommerce-MyAccount-navigation-link--bp-messages a .bp-better-messages-unread');
+                    var element = document.querySelector('.woocommerce-MyAccount-navigation-link--bp-messages a .bm-menu-unread');
 
                     if ( ! element ) {
                         var newElement = document.createElement('span');
-                        newElement.className = 'bp-better-messages-unread bpbmuc bpbmuc-preserve-space bpbmuc-hide-when-null';
+                        newElement.className = 'bm-menu-unread bpbmuc bpbmuc-preserve-space bpbmuc-hide-when-null';
                         newElement.dataset.count = unread;
                         newElement.textContent = unread;
 
@@ -1811,16 +1853,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             switch ($theme_name){
                 case 'boss':
                     echo '<style type="text/css">';
-                    echo 'body.bp-messages-mobile #mobile-header{display:none}';
-                    echo 'body.bp-messages-mobile #inner-wrap{margin-top:0}';
-                    echo 'body.bp-messages-mobile .site{min-height:auto}';
+                    echo 'body.bm-mobile #mobile-header{display:none}';
+                    echo 'body.bm-mobile #inner-wrap{margin-top:0}';
+                    echo 'body.bm-mobile .site{min-height:auto}';
                     echo '</style>';
                     break;
             }
         }
 
         public function disableStatuses(){
-            ?><style type="text/css">.bp-messages-wrap .list .messages-stack .content .messages-list li .status{display: none !important;}.bp-messages-wrap .list .messages-stack .content .messages-list li .favorite{right: 5px !important;}</style><?php
+            ?><style type="text/css">.bm-wrap .list .messages-stack .content .messages-list li .status{display: none !important;}.bm-wrap .list .messages-stack .content .messages-list li .favorite{right: 5px !important;}</style><?php
         }
 
         public function disable_group_threads(&$args, &$errors){
@@ -2185,6 +2227,12 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $screen = get_current_screen();
             if( $screen && strpos( $screen->id, 'better-messages' ) !== false ){
                 return;
+            }
+
+            if( Better_Messages()->functions->has_voice_messages_addon() && ! Better_Messages()->functions->voice_messages_addon_supported() ){
+                echo '<div class="notice notice-warning">';
+                echo '<p><b>Better Messages</b> ' . esc_html( Better_Messages()->version ) . ' ' . esc_html_x( 'needs Voice and Video Messages 2.0 or newer. Until the add-on is updated, voice and video messages cannot be recorded or played.', 'Admin notice', 'bp-better-messages' ) . '</p>';
+                echo '</div>';
             }
 
             if( ! class_exists('BuddyPress') && ! defined('ultimatemember_version') ){

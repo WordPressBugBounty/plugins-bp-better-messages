@@ -86,7 +86,21 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
 
             $thread_id = intval( $request->get_param( 'id' ) );
             $gif_id    = sanitize_text_field( (string) $request->get_param( 'gif_id' ) );
+            $temp_id   = sanitize_text_field( (string) $request->get_param( 'temp_id' ) );
+            $temp_time = sanitize_text_field( (string) $request->get_param( 'temp_time' ) );
             $user_id   = Better_Messages()->functions->get_current_user_id();
+
+            if ( ! empty( $temp_id ) ) {
+                $existing_message_id = Better_Messages_Rest_Api()->get_temp_id_message( $thread_id, $temp_id, $user_id );
+
+                if ( $existing_message_id > 0 ) {
+                    return array(
+                        'result'   => $existing_message_id,
+                        'redirect' => false,
+                        'update'   => Better_Messages_Rest_Api()->get_message_update( $thread_id, $existing_message_id ),
+                    );
+                }
+            }
 
             $gif = $provider->get_by_id( $gif_id, $user_id );
             if ( ! $gif || empty( $gif['mp4'] ) ) {
@@ -96,7 +110,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
             $poster = isset( $gif['poster'] ) ? esc_url( $gif['poster'] ) : '';
             $mp4    = esc_url( $gif['mp4'] );
 
-            $message  = '<span class="bpbm-gif">';
+            $message  = '<span class="bm-gif">';
             $message .= '<video preload="auto" muted playsinline="playsinline" loop="loop" poster="' . $poster . '">';
             $message .= '<source src="' . $mp4 . '" type="video/mp4">';
             $message .= '</video>';
@@ -107,7 +121,10 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
                 'thread_id'  => $thread_id,
                 'error_type' => 'wp_error',
                 'return'     => 'message_id',
+                'is_pending' => (int) Better_Messages()->moderation->is_moderation_enabled( $user_id, $thread_id, false ),
             );
+
+            Better_Messages_Rest_Api()->apply_temp_id( $args, $temp_id, $temp_time );
 
             $errors = array();
 
@@ -138,7 +155,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
             }
 
             if ( ! empty( $errors ) ) {
-                do_action( 'better_messages_on_message_not_sent', $thread_id, '', $errors );
+                do_action( 'better_messages_on_message_not_sent', $thread_id, $temp_id, $errors );
 
                 $redirect = 'redirect';
                 if ( count( $errors ) === 1 && isset( $errors['empty'] ) ) {
@@ -158,7 +175,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
             );
 
             if ( $sent && ! is_wp_error( $sent ) ) {
-                $result['update'] = Better_Messages_Rest_Api()->get_messages( $thread_id, array( $sent ) );
+                $result['update'] = Better_Messages_Rest_Api()->get_message_update( $thread_id, (int) $sent );
             }
 
             return $result;
@@ -215,7 +232,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
 
         public function format_message( $message, $message_id, $context, $user_id )
         {
-            if ( strpos( $message, '<span class="bpbm-gif">', 0 ) === 0 ) {
+            if ( strpos( $message, '<span class="bm-gif">', 0 ) === 0 ) {
                 if ( $context !== 'stack' ) {
                     return '%bpbmgif%';
                 }
@@ -225,7 +242,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
 
         public function after_format_message( $message, $message_id, $context, $user_id )
         {
-            $is_gif = strpos( $message, '<span class="bpbm-gif">', 0 ) === 0 || $message === '%bpbmgif%';
+            $is_gif = strpos( $message, '<span class="bm-gif">', 0 ) === 0 || $message === '%bpbmgif%';
 
             if ( ! $is_gif ) {
                 return $message;
@@ -239,7 +256,7 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
                 return __( 'GIF', 'bp-better-messages' );
             }
 
-            return '<i class="bpbm-gifs-icon" title="' . __( 'GIF', 'bp-better-messages' ) . '"></i>';
+            return '<i class="bm-gifs-icon" title="' . __( 'GIF', 'bp-better-messages' ) . '"></i>';
         }
     }
 }

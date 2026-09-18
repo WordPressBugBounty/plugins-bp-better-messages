@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.4;
+        private $db_version = 2.6;
 
         public static function instance()
         {
@@ -66,7 +66,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
         public function export_admin_options(){
 
             $nonce    = $_POST['nonce'];
-            if ( ! wp_verify_nonce($nonce, 'bpbm-import-options') ){
+            if ( ! wp_verify_nonce($nonce, 'bm-import-options') ){
                 exit;
             }
 
@@ -81,7 +81,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
         public function import_admin_options(){
 
             $nonce    = $_POST['nonce'];
-            if ( ! wp_verify_nonce($nonce, 'bpbm-import-options') ){
+            if ( ! wp_verify_nonce($nonce, 'bm-import-options') ){
                 exit;
             }
 
@@ -227,6 +227,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                       `last_email` datetime NOT NULL DEFAULT '1970-01-01',
                       `is_muted` tinyint(1) NOT NULL DEFAULT '0',
                       `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
+                      `is_translated` tinyint(1) NOT NULL DEFAULT '0',
                       `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
                       `last_update` bigint(20) NOT NULL DEFAULT '0',
                       `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -277,11 +278,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                  `name` varchar(255) NOT NULL,
                  `email` varchar(100) DEFAULT NULL,
                  `ip` varchar(40) NOT NULL,
+                 `bot_id` bigint(20) NOT NULL DEFAULT 0,
                  `meta` longtext NOT NULL,
                  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                  `deleted_at` datetime DEFAULT NULL,
-                 PRIMARY KEY (`id`)
+                 PRIMARY KEY (`id`),
+                 KEY `bot_id_index` (`bot_id`)
                 ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('roles') . "` (
@@ -853,6 +856,39 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             }
                         } while( count( $ids ) === 1000 );
                     }
+                ],
+                '2.5' => [
+                    [ $this, 'migrate_translation_columns' ]
+                ],
+                '2.6' => [
+                    [ $this, 'migrate_translation_columns' ],
+                    function (){
+                        global $wpdb;
+
+                        $guests_table = bm_get_table('guests');
+                        $has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$guests_table}` LIKE 'bot_id'" );
+
+                        if( empty( $has_column ) ){
+                            $wpdb->query( "ALTER TABLE `{$guests_table}` ADD `bot_id` bigint(20) NOT NULL DEFAULT 0 AFTER `ip`, ADD KEY `bot_id_index` (`bot_id`)" );
+                        }
+
+                        $bot_rows = $wpdb->get_results( "SELECT `id`, `ip` FROM `{$guests_table}` WHERE `ip` LIKE 'ai-chat-bot-%' AND `secret` = '' AND `bot_id` = 0" );
+
+                        foreach( $bot_rows as $row ){
+                            $bot_id = (int) substr( $row->ip, strlen( 'ai-chat-bot-' ) );
+                            if( $bot_id <= 0 ) continue;
+
+                            $wpdb->update( $guests_table, [ 'bot_id' => $bot_id ], [ 'id' => (int) $row->id ], [ '%d' ], [ '%d' ] );
+                            wp_cache_delete( 'guest_user_' . (int) $row->id, 'bm_messages' );
+                            wp_cache_delete( 'bot_user_' . $bot_id, 'bm_messages' );
+                        }
+
+                        $spoofed = $wpdb->get_col( "SELECT `id` FROM `{$guests_table}` WHERE `ip` LIKE 'ai-chat-bot-%' AND `secret` != '' AND `deleted_at` IS NULL" );
+
+                        foreach( $spoofed as $guest_id ){
+                            Better_Messages()->guests->delete_guest_user( (int) $guest_id );
+                        }
+                    }
                 ]
             ];
 
@@ -880,6 +916,27 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             }
 
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function migrate_translation_columns(){
+            global $wpdb;
+
+            $recipients = bm_get_table( 'recipients' );
+            $has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$recipients}` LIKE 'is_translated'" );
+
+            if( empty( $has_column ) ){
+                $wpdb->query( "ALTER TABLE `{$recipients}` ADD `is_translated` TINYINT(1) NOT NULL DEFAULT '0' AFTER `is_pinned`" );
+            }
+
+            $meta     = bm_get_table( 'meta' );
+            $messages = bm_get_table( 'messages' );
+
+            $wpdb->query(
+                "DELETE `meta` FROM `{$meta}` `meta`
+                 INNER JOIN `{$messages}` `messages` ON `messages`.`id` = `meta`.`bm_message_id`
+                 WHERE `meta`.`meta_key` IN ( 'bm_translations', 'bm_translations_pending' )
+                 AND `messages`.`message` LIKE '%<span class=\"bpbm-call %'"
+            );
         }
 
         public function get_target_db_version(){
@@ -1041,6 +1098,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'last_email'     => "datetime NOT NULL DEFAULT '1970-01-01'",
                         'is_muted'       => "tinyint(1) NOT NULL DEFAULT '0'",
                         'is_pinned'      => "tinyint(1) NOT NULL DEFAULT '0'",
+                        'is_translated'  => "tinyint(1) NOT NULL DEFAULT '0'",
                         'is_deleted'     => "tinyint(1) NOT NULL DEFAULT '0'",
                         'last_update'    => "bigint(20) NOT NULL DEFAULT '0'",
                         'created_at'     => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -1103,12 +1161,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'name'       => "varchar(255) NOT NULL",
                         'email'      => "varchar(100) DEFAULT NULL",
                         'ip'         => "varchar(40) NOT NULL",
+                        'bot_id'     => "bigint(20) NOT NULL DEFAULT 0",
                         'meta'       => "longtext NOT NULL",
                         'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
                         'updated_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
                         'deleted_at' => "datetime DEFAULT NULL",
                     ],
                     'primary_key' => 'id',
+                    'keys' => [
+                        'bot_id_index' => 'bot_id',
+                    ],
                 ],
                 'roles' => [
                     'columns' => [

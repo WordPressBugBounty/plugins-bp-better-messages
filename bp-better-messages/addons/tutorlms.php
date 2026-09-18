@@ -292,7 +292,7 @@ if ( ! class_exists( 'Better_Messages_TutorLMS' ) ) {
             $thread_id = (int) $thread_id;
             if ( ! $thread_id ) return false;
 
-            wp_cache_delete( 'thread_recipients_' . $thread_id, 'bm_messages' );
+            wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
             wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
 
             $course_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'tutorlms_course_id' );
@@ -382,7 +382,7 @@ if ( ! class_exists( 'Better_Messages_TutorLMS' ) ) {
                 $courses[] = array(
                     'course_id' => $course_id,
                     'name'      => get_the_title( $course_id ),
-                    'image'     => $image ? $image : '',
+                    'image'     => $image ? $image : $this->get_default_course_image_html(),
                     'url'       => get_permalink( $course_id ),
                     'thread_id' => $thread_id,
                     'messages'  => 1,

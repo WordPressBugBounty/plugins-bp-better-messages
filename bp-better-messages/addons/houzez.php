@@ -1184,15 +1184,16 @@ body.page-bm-houzez-live-chat .dashboard-right > .dashboard-topbar {
 	height: 100%;
 	min-height: 0;
 }
-.dashboard-content.bm-houzez-dashboard-live-chat .bp-messages-wrap,
-.dashboard-content.bm-houzez-dashboard-live-chat .bp-messages-wrap-main {
+.dashboard-content.bm-houzez-dashboard-live-chat .bm-wrap,
+.dashboard-content.bm-houzez-dashboard-live-chat .bm-wrap-main,
+.dashboard-content.bm-houzez-dashboard-live-chat .bm-card {
 	border: none !important;
 	border-radius: 0 !important;
 	box-shadow: none !important;
 	height: 100% !important;
 }
-.dashboard-content.bm-houzez-dashboard-live-chat .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile),
-.dashboard-content.bm-houzez-dashboard-live-chat .bp-messages-wrap-main .bp-messages-threads-wrapper {
+.dashboard-content.bm-houzez-dashboard-live-chat .bm-wrap-main .bm-wrap:not(.bm-full-screen, .bm-mobile),
+.dashboard-content.bm-houzez-dashboard-live-chat .bm-wrap-main .bm-threads-wrapper {
 	height: 100% !important;
 }
 .bm-houzez-property-button-wrap.bm-houzez-mobile-sticky {
@@ -1277,6 +1278,7 @@ body.page-bm-houzez-live-chat .dashboard-right > .dashboard-topbar {
 	padding: 10px 12px;
 	background: #f7f9fb;
 	border-bottom: 1px solid #e6ebf0;
+	color: #1f2937;
 }
 .bm-houzez-property-info .bm-product-details,
 .bm-houzez-realtor-info .bm-product-details {

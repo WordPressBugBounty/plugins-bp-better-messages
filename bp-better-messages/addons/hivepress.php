@@ -75,6 +75,12 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
         }
         public function add_messages_menu_item( $menu )
         {
+            $url = Better_Messages()->functions->get_user_messages_url( Better_Messages()->functions->get_current_user_id() );
+
+            if( $url === '' ) {
+                return $menu;
+            }
+
             $items = $menu['items'];
 
             $minOrder = PHP_INT_MAX;
@@ -89,7 +95,7 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
 
             $menu['items']['bm-messages'] = apply_filters( 'better_messages_hivepress_menu_item', [
                 'label' => __('Messages', 'bp-better-messages'),
-                'url' => Better_Messages()->functions->get_user_messages_url( Better_Messages()->functions->get_current_user_id() ),
+                'url' => $url,
                 '_order' => $order
             ] );
 

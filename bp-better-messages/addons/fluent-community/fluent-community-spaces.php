@@ -437,7 +437,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
 
 
         public function sync_thread_members( $thread_id ){
-            wp_cache_delete( 'thread_recipients_' . $thread_id, 'bm_messages' );
+            wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
             wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
 
             $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'fluentcommunity_group_id' );

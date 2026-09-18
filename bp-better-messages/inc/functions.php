@@ -88,14 +88,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
          * @since 2.0.63
          */
         public function get_user_messages_url( int $user_id, ?int $thread_id = null ): string {
+            $link = Better_Messages()->functions->get_link( $user_id );
+
+            if( ! is_string( $link ) || $link === '' ) {
+                return '';
+            }
+
             if( $thread_id ) {
                 return Better_Messages()->functions->add_hash_arg('conversation/' . $thread_id, [
                     'scrollToContainer' => ''
-                ], Better_Messages()->functions->get_link($user_id));
+                ], $link);
             } else {
                 return Better_Messages()->functions->add_hash_arg('', [
                     'scrollToContainer' => ''
-                ], Better_Messages()->functions->get_link($user_id) );
+                ], $link );
             }
         }
 
@@ -678,6 +684,18 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $recipients = false;
             if( $cache ){
                 $recipients = wp_cache_get( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
+
+                // Entries stored before the int cast moved ahead of wp_cache_set()
+                // hold raw DB strings, and callers compare user_id with ===. Only a
+                // persistent object cache can carry one of those across the update,
+                // so check the shape once and rebuild rather than serve it.
+                if ( is_array( $recipients ) && ! empty( $recipients ) ) {
+                    $first = current( $recipients );
+
+                    if ( ! is_object( $first ) || ! isset( $first->user_id ) || ! is_int( $first->user_id ) ) {
+                        $recipients = false;
+                    }
+                }
             }
 
             if ( false === $recipients ) {
@@ -692,16 +710,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
                 $results    = $wpdb->get_results( $sql );
 
+                // Cast all items from the messages DB table as integers. This runs
+                // on the way in rather than on the way out so that a cache hit does
+                // not rebuild every recipient object again — in a chat room with
+                // 100k participants that cost 68ms and 76MB on each of the five
+                // calls a single send makes.
                 foreach ( (array) $results as $recipient ) {
-                    $recipients[ $recipient->user_id ] = $recipient;
+                    $recipients[ $recipient->user_id ] = (object) array_map( 'intval', (array) $recipient );
                 }
 
                 wp_cache_set( 'bm_thread_recipients_' . $thread_id, $recipients, 'bm_messages' );
-            }
-
-            // Cast all items from the messages DB table as integers.
-            foreach ( (array) $recipients as $key => $data ) {
-                $recipients[ $key ] = (object) array_map( 'intval', (array) $data );
             }
 
             /**
@@ -929,8 +947,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            if( Better_Messages()->settings['chatPage'] !== '0' ){
-                return get_permalink( Better_Messages()->settings['chatPage'] );
+            if( is_numeric( Better_Messages()->settings['chatPage'] ) && Better_Messages()->settings['chatPage'] !== '0' ){
+                $chat_page_link = get_permalink( (int) Better_Messages()->settings['chatPage'] );
+                return $chat_page_link ? $chat_page_link : '';
             }
 
             if( is_user_logged_in() || wp_doing_cron() ) {
@@ -1048,7 +1067,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
 
         function truncate( $text, $length ) {
-            $is_sticker  = strpos( $text, '<span class="bpbm-sticker">', 0 ) === 0;
+            $is_sticker  = ( strpos( $text, '<span class="bm-sticker">', 0 ) === 0 || strpos( $text, '<span class="bpbm-sticker">', 0 ) === 0 );
             $file_icon   = strpos( $text, '<i class="fas fa-file">' );
             $is_file     = $file_icon !== false;
             $bottom_html = false;
@@ -1169,7 +1188,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             );
 
             $r = wp_parse_args( $args, $defaults );
-            $r['class'] .= ' bpbm-avatar-user-id-' . $_user_id;
+            $r['class'] .= ' bm-avatar-user-id-' . $_user_id;
 
             extract( $r, EXTR_SKIP );
 
@@ -1759,7 +1778,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
          */
         public function get_conversation_layout(int $thread_id ){
             $initialHeight = $this->initial_container_height();
-            return '<div class="bp-messages-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' . $thread_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+            return '<div class="bm-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' . $thread_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
         }
 
         public function get_page( $args = [] ){
@@ -1772,16 +1791,35 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             if( ! is_array( $args ) ) $args = [];
 
             $args = wp_parse_args( $args, [
-               'full_screen' => false
+               'full_screen' => false,
+               'host_sized'  => false
             ] );
-
-            $initialHeight = $this->initial_container_height();
 
             $full_screen = $args['full_screen'] ? '1' : '0';
 
+            $host_sized = ! empty( $args['host_sized'] ) && 'false' !== $args['host_sized'] && '0' !== $args['host_sized'];
+            $host_sized = (bool) apply_filters( 'better_messages_host_sized_messenger', $host_sized, $args );
+
+            $class = 'bm-wrap-main' . ( $host_sized ? ' bm-host-sized' : '' );
+            $style = $host_sized ? '' : ' style="height: ' . esc_attr( $this->initial_container_height() ) . '"';
+
+            /**
+             * `messengerFill` ("Fill the window"). Written here, on the
+             * container, rather than styled from the body class the design
+             * also emits: the class is the transport, the attribute is what
+             * the stylesheet matches. Written server-side and not left to the
+             * app so the placeholder already has its final height — the inline
+             * style above is the non-filling one, and adding the attribute a
+             * frame later would resize the messenger in front of the visitor.
+             * BetterMessages keeps it in sync afterwards for the Design
+             * preview, which flips the body class live.
+             */
+            $fill = Better_Messages_Design::instance()->get_design_option( 'messengerFill', false )
+                ? ' data-fill-window="1"' : '';
+
             ob_start();
             do_action('bp_better_messages_before_main_template_rendered');
-            echo '<div class="bp-messages-wrap-main" style="height: ' . esc_attr( $initialHeight ) . '" data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder( true ) . '</div>';
+            echo '<div class="' . $class . '"' . $style . $fill . ' data-full-screen="' . $full_screen . '">' . Better_Messages()->functions->container_placeholder( true ) . '</div>';
             do_action('bp_better_messages_after_main_template_rendered');
             return ob_get_clean();
         }
@@ -1798,7 +1836,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $is_in_groups_now = bm_bp_is_current_component('groups');
             $initialHeight = $this->initial_container_height();
             ?>
-            <div style="height:<?php echo esc_attr( $initialHeight ); ?>" class="bp-messages-wrap-group <?php if( $is_in_groups_now ) { echo 'bp-messages-group-thread'; }; ?> <?php Better_Messages()->functions->messages_classes($thread_id, 'group'); ?>" data-thread-id="<?php esc_attr_e($thread_id); ?>"><?php echo Better_Messages()->functions->container_placeholder(); ?></div>
+            <div style="height:<?php echo esc_attr( $initialHeight ); ?>" class="bm-wrap-group <?php if( $is_in_groups_now ) { echo 'bm-group-thread'; }; ?> <?php Better_Messages()->functions->messages_classes($thread_id, 'group'); ?>" data-thread-id="<?php esc_attr_e($thread_id); ?>"><?php echo Better_Messages()->functions->container_placeholder( false, 'group' ); ?></div>
             <?php
             return ob_get_clean();
         }
@@ -1809,7 +1847,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_conversations_layout( $height = 400 ){
             ob_start();
-            echo '<div class="bp-messages-wrap bm-threads-list" style="height:' . $height . 'px"></div>';
+            echo '<div class="bm-wrap bm-threads-list" style="height:' . $height . 'px"></div>';
             return ob_get_clean();
         }
 
@@ -2056,7 +2094,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $existence_sql = '( '
                 . '( bm_u.`ID` > 0 AND wp_u.`ID` IS NOT NULL )'
                 . ' OR ( bm_u.`ID` < 0 AND bm_g.`id` IS NOT NULL AND bm_g.`deleted_at` IS NULL'
-                .       ' AND ( bm_g.`ip` IS NULL OR bm_g.`ip` NOT LIKE %s ) )'
+                .       ' AND bm_g.`bot_id` = 0 )'
                 . ' )';
 
             if ( $mode === 'roles' ) {
@@ -2072,7 +2110,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         INNER JOIN `{$roles_table}` bm_r ON bm_r.`user_id` = bm_u.`ID`
                         WHERE {$existence_sql} AND bm_r.`role` IN ({$placeholders}){$exclude_self_sql}
                         LIMIT 1";
-                $found = $wpdb->get_var( $wpdb->prepare( $sql, array_merge( array( 'ai-chat-bot-%' ), $roles ) ) );
+                $found = $wpdb->get_var( $wpdb->prepare( $sql, $roles ) );
                 return ! empty( $found );
             }
 
@@ -2087,7 +2125,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     LEFT JOIN `{$guests_table}` bm_g ON bm_g.`id` = -bm_u.`ID`
                     WHERE {$existence_sql} AND bm_u.`ID` IN ({$placeholders}){$exclude_self_sql}
                     LIMIT 1";
-            $found = $wpdb->get_var( $wpdb->prepare( $sql, array_merge( array( 'ai-chat-bot-%' ), $ids ) ) );
+            $found = $wpdb->get_var( $wpdb->prepare( $sql, $ids ) );
             return ! empty( $found );
         }
 
@@ -2597,12 +2635,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $chat_settings = Better_Messages()->chats->get_chat_settings( $chat_id );
 
                 if( $chat_settings['template'] === 'default' ){
-                    $class = 'bpbm-template-' . Better_Messages()->settings['template'];
+                    $class = 'bm-template-' . Better_Messages()->settings['template'];
                 } else {
-                    $class = 'bpbm-template-' . $chat_settings['template'];
+                    $class = 'bm-template-' . $chat_settings['template'];
                 }
 
-                if( $class === 'bpbm-template-modern' ) {
+                if( $class === 'bm-template-modern' ) {
                     if( $chat_settings['modernLayout'] === 'default' ) {
                         $classes[] = $class . '-' . Better_Messages()->settings['modernLayout'];
                     } else {
@@ -2611,7 +2649,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
 
             } else {
-                $class = 'bpbm-template-' . Better_Messages()->settings['template'];
+                $class = 'bm-template-' . Better_Messages()->settings['template'];
 
                 if (Better_Messages()->settings['template'] === 'modern') {
                     $classes[] = $class . '-' . Better_Messages()->settings['modernLayout'];
@@ -2621,7 +2659,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $classes[] = $class;
 
             if( ! is_user_logged_in() ) {
-                $classes[] = 'bpbm-not-logged-in';
+                $classes[] = 'bm-not-logged-in';
             }
 
             $bpbmCurrentClass = implode(' ',  $classes);
@@ -2735,7 +2773,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
-            wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bp_messages' );
+            wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
             wp_cache_delete( $user_id, 'bp_messages_unread_count' );
 
             $this->clean_thread_notifications( $thread_id, $user_id );
@@ -2823,11 +2861,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             ?>
             <style type="text/css">
                 .bm-login-form{
-                    background: rgba(var(--bm-bg-color), 1);
-                    border: 1px solid rgba(var(--bm-border-color), 1);
-                    border-radius: var(--bm-border-radius);
-                    color: rgba(var(--bm-text-color), 1);
-                    font-family: var(--bm-font-family);
+                    background: rgba(var(--bm-color-bg), 1);
+                    border: 1px solid rgba(var(--bm-color-border), 1);
+                    border-radius: var(--bm-radius-button);
+                    color: rgba(var(--bm-color-text-primary), 1);
+                    font-family: var(--bm-messenger-font, inherit);
                     padding: 28px 32px;
                     margin: 20px auto;
                     width: 100%;
@@ -2844,7 +2882,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
 
                 .bm-login-form .bm-login-text{
-                    color: rgba(var(--bm-text-color), 1);
+                    color: rgba(var(--bm-color-text-primary), 1);
                     font-size: 18px;
                     line-height: 1.3;
                     margin: 0 0 22px;
@@ -2863,7 +2901,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     width: 100%;
                     margin: 0 0 6px;
                     padding: 0;
-                    color: rgba(var(--bm-text-color), 0.85);
+                    color: rgba(var(--bm-color-text-primary), 0.85);
                     font-size: 13px;
                     font-weight: 500;
                     line-height: 1.4;
@@ -2877,10 +2915,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     height: auto;
                     margin: 0;
                     padding: 9px 12px;
-                    background: rgba(var(--bm-bg-secondary), 1);
-                    border: 1px solid rgba(var(--bm-border-color), 1);
-                    border-radius: var(--bm-border-radius);
-                    color: rgba(var(--bm-text-color), 1);
+                    background: rgba(var(--bm-color-bg-secondary), 1);
+                    border: 1px solid rgba(var(--bm-color-border), 1);
+                    border-radius: var(--bm-radius-button);
+                    color: rgba(var(--bm-color-text-primary), 1);
                     font-family: inherit;
                     font-size: 14px;
                     line-height: 1.4;
@@ -2894,8 +2932,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 .bm-login-form form input[type="text"]:focus,
                 .bm-login-form form input[type="password"]:focus,
                 .bm-login-form form input[type="email"]:focus{
-                    border-color: rgba(var(--main-bm-color), 1);
-                    box-shadow: 0 0 0 3px rgba(var(--main-bm-color), 0.15);
+                    border-color: rgba(var(--bm-color-accent), 1);
+                    box-shadow: 0 0 0 3px rgba(var(--bm-color-accent), 0.15);
                 }
 
                 .bm-login-form form .login-remember{
@@ -2908,7 +2946,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     gap: 8px;
                     margin: 0;
                     font-size: 13px;
-                    color: rgba(var(--bm-text-color), 0.8);
+                    color: rgba(var(--bm-color-text-primary), 0.8);
                     cursor: pointer;
                 }
 
@@ -2917,7 +2955,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     width: 16px;
                     height: 16px;
                     flex-shrink: 0;
-                    accent-color: rgba(var(--main-bm-color), 1);
+                    accent-color: rgba(var(--bm-color-accent), 1);
                 }
 
                 .bm-login-form form .login-submit{
@@ -2930,9 +2968,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     width: 100%;
                     margin: 0;
                     padding: 10px 16px;
-                    background: rgba(var(--main-bm-color), 1);
-                    border: 1px solid rgba(var(--main-bm-color), 1);
-                    border-radius: var(--bm-border-radius);
+                    background: rgba(var(--bm-color-accent), 1);
+                    border: 1px solid rgba(var(--bm-color-accent), 1);
+                    border-radius: var(--bm-radius-button);
                     color: #ffffff;
                     font-family: inherit;
                     font-size: 14px;
@@ -2955,33 +2993,33 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
                 .bm-login-form form input[type="submit"]:focus,
                 .bm-login-form form button[type="submit"]:focus{
-                    box-shadow: 0 0 0 3px rgba(var(--main-bm-color), 0.3);
+                    box-shadow: 0 0 0 3px rgba(var(--bm-color-accent), 0.3);
                 }
 
                 body.bm-messages-dark .bm-login-form form input[type="text"],
                 body.bm-messages-dark .bm-login-form form input[type="password"],
                 body.bm-messages-dark .bm-login-form form input[type="email"]{
-                    background: rgba(var(--bm-bg-color), 1);
-                    border-color: rgba(var(--bm-border-color), 0.5);
+                    background: rgba(var(--bm-color-bg), 1);
+                    border-color: rgba(var(--bm-color-border), 0.5);
                 }
 
                 body.bm-messages-dark .bm-login-form form input[type="text"]:focus,
                 body.bm-messages-dark .bm-login-form form input[type="password"]:focus,
                 body.bm-messages-dark .bm-login-form form input[type="email"]:focus{
-                    border-color: rgba(var(--bm-border-color), 1);
-                    box-shadow: 0 0 0 3px rgba(var(--bm-border-color), 0.4);
+                    border-color: rgba(var(--bm-color-border), 1);
+                    box-shadow: 0 0 0 3px rgba(var(--bm-color-border), 0.4);
                 }
 
                 body.bm-messages-dark .bm-login-form form input[type="submit"],
                 body.bm-messages-dark .bm-login-form form button[type="submit"]{
-                    background: rgba(var(--bm-bg-secondary), 1);
-                    border: 1px solid rgba(var(--bm-border-color), 0.5);
-                    color: rgba(var(--bm-text-color), 1);
+                    background: rgba(var(--bm-color-bg-secondary), 1);
+                    border: 1px solid rgba(var(--bm-color-border), 0.5);
+                    color: rgba(var(--bm-color-text-primary), 1);
                 }
 
                 body.bm-messages-dark .bm-login-form form input[type="submit"]:focus,
                 body.bm-messages-dark .bm-login-form form button[type="submit"]:focus{
-                    box-shadow: 0 0 0 3px rgba(var(--bm-border-color), 0.5);
+                    box-shadow: 0 0 0 3px rgba(var(--bm-color-border), 0.5);
                 }
             </style>
             <div class="bm-login-form">
@@ -3042,6 +3080,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $wpdb->query( $wpdb->prepare( "UPDATE " . bm_get_table('recipients') . " SET is_deleted = 1, last_update = %d WHERE thread_id = %d AND user_id = %d", $time, $thread_id, $user_id ) );
 
             do_action( 'better_messages_thread_updated', $thread_id );
+            do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
         }
 
         public function new_message( $args = '' ) {
@@ -3580,6 +3619,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function check_chat_room_access( $thread_id, $user_id, $type ){
+            if( $user_id <= 0 && ! $this->is_ai_bot_user( $user_id ) ){
+                $chat_id  = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
+                $settings = $chat_id ? Better_Messages_Chats()->get_chat_settings( $chat_id ) : array();
+
+                if( ! isset( $settings['allow_guests'] ) || $settings['allow_guests'] !== '1' ){
+                    return false;
+                }
+            }
+
             if( $type === 'reply' ){
                 if( Better_Messages_Chats()->is_ephemeral_thread( $thread_id ) ){
                     $chat_id = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
@@ -3630,6 +3678,44 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $recipients = $this->get_recipients( $thread_id );
 
             return isset( $recipients[ $user_id ] );
+        }
+
+        public function can_list_participants( $thread_id, $user_id ){
+            if( $this->get_thread_type( $thread_id ) !== 'chat-room' ){
+                return true;
+            }
+
+            $chat_id = (int) $this->get_thread_meta( $thread_id, 'chat_id' );
+
+            if( ! $chat_id ){
+                return true;
+            }
+
+            if( $user_id > 0 && user_can( $user_id, 'manage_options' ) ){
+                return true;
+            }
+
+            if( $this->is_thread_moderator( $thread_id, $user_id ) ){
+                return true;
+            }
+
+            $settings = Better_Messages_Chats()->get_chat_settings( $chat_id );
+
+            if( Better_Messages_Chats()->is_ephemeral_chat( $chat_id ) ){
+                if( ! Better_Messages_Chats()->user_can_read( $user_id, $chat_id ) ){
+                    return false;
+                }
+
+                return $settings['hide_participants'] !== '1';
+            }
+
+            $recipients = $this->get_recipients( $thread_id );
+
+            if( ! isset( $recipients[ $user_id ] ) ){
+                return false;
+            }
+
+            return $settings['hide_participants'] !== '1';
         }
 
         public function user_has_role( $user_id, $roles = [] ){
@@ -3820,10 +3906,18 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $moderators = [];
             }
 
-            return (array) array_map( 'intval', array_values($moderators) );
+            $moderators = array_map( 'intval', array_values($moderators) );
+
+            return (array) array_values( array_filter( $moderators, function( $moderator_id ){
+                return $moderator_id > 0;
+            } ) );
         }
 
         public function add_moderator( $thread_id, $user_id ){
+            if( (int) $user_id <= 0 ){
+                return;
+            }
+
             $moderators = $this->get_moderators( $thread_id );
 
             if ( ! in_array( ( int ) $user_id, $moderators) ) {
@@ -3956,98 +4050,306 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $wpdb->get_col($query);
         }
 
-        public function threads_placeholder( $loop_times = 10 ){
-            ob_start();
+        public function threads_placeholder( $loop_times = 8 ){
+            $rows = '';
 
-            echo '<div class="threads-list" style="padding-top:0; margin-top:0;opacity: 0.6; overflow: hidden;">';
-            for ($k = 0 ; $k < $loop_times; $k++){
-                echo '<div class="thread"><div class="pic" style="top: 0;"><span class="avatar bbpm-avatar"><div class="bm-placeholder-wrapper" style="position: relative; width: 30px; height: 30px; border-radius: 4px; overflow: hidden;"><div class="bm-placeholder"><div class="bm-animated-background"></div></div></div></span></div><div class="bm-info"><h4 class="name"><div class="bm-placeholder-wrapper" style="position: relative; width: 100px; height: 15px; border-radius: 4px; overflow: hidden;"><div class="bm-placeholder"><div class="bm-animated-background"></div></div></div></h4><h4><div class="bm-placeholder-wrapper" style="position: relative; width: 80px; height: 10px; border-radius: 4px; overflow: hidden;"><div class="bm-placeholder"><div class="bm-animated-background"></div></div></div></h4><div class="last-message"><div class="bm-last-message-content"><div class="bm-placeholder-wrapper" style="position: relative; min-width: 150px; max-width: 350px; width: 100%; height: 15px; border-radius: 4px; overflow: hidden;"><div class="bm-placeholder"><div class="bm-animated-background"></div></div></div></div></div></div><div class="time"><span class="time-wrapper"><div class="bm-placeholder-wrapper" style="position: relative; width: 50px; height: 15px; border-radius: 4px; overflow: hidden;"><div class="bm-placeholder"><div class="bm-animated-background"></div></div></div></span></div><div class="actions"><span class="delete"></span></div></div>';
+            for ( $i = 0; $i < $loop_times; $i++ ) {
+                $name    = 46 + ( ( $i * 13 ) % 30 );
+                $preview = 52 + ( ( $i * 13 ) % 36 );
+
+                $rows .= '<div class="bm-thread-row">'
+                    . '<div class="bm-thread-row__avatar"><span class="bm-skel bm-skel--avatar" style="width:40px;height:40px"></span></div>'
+                    . '<div class="bm-thread-row__body">'
+                    . '<div class="bm-thread-row-title">'
+                    . '<span class="bm-thread-row-title__name bm-skel-text" style="--bm-skel-w:' . $name . '%"><span class="bm-thread-row-title__name-text">&nbsp;</span></span>'
+                    . '<span class="bm-thread-row-title__time bm-skel-text" style="width:52px">&nbsp;</span>'
+                    . '</div>'
+                    . '<div class="bm-thread-row-preview">'
+                    . '<span class="bm-thread-row-preview__text bm-skel-text bm-skel--dim" style="--bm-skel-w:' . $preview . '%">&nbsp;</span>'
+                    . '</div>'
+                    . '</div>'
+                    . '</div>';
             }
-            echo '</div>';
 
-            return ob_get_clean();
+            return '<div class="bm-skel-list" aria-hidden="true">' . $rows . '</div>';
         }
 
-        public function header_placeholder(){
-            ob_start();
-            ?>
-            <div class="chat-header">
-                <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
-                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
-                </div>
-                <div style="position: relative; width:100px; height: 20px; margin-left: auto;margin-right:10px;border-radius: 4px; overflow: hidden">
-                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
-                </div>
-            </div>
-            <?php
-            return ob_get_clean();
+        public function header_placeholder( $with_thread = false, $with_avatar = true ){
+            $icon    = '<span class="bm-skel" style="width:18px;height:18px"></span>';
+            $actions = '';
+
+            for ( $i = 0; $i < ( $with_thread ? 4 : 3 ); $i++ ) {
+                $actions .= '<span class="bm-btn bm-icon-btn">' . $icon . '</span>';
+            }
+
+            $avatar = ( $with_thread && $with_avatar )
+                ? '<span class="bm-btn bm-thread-header__avatar-btn"><span class="bm-skel bm-skel--avatar" style="width:44px;height:44px"></span></span>'
+                : '';
+
+            $body = $with_thread
+                ? '<div class="bm-thread-header__body">'
+                    . '<div class="bm-thread-header__title"><span class="bm-thread-header__name bm-skel-text" style="width:150px">&nbsp;</span></div>'
+                    . '<div class="bm-thread-header__subtitle"><span class="bm-skel-text" style="width:92px">&nbsp;</span></div>'
+                    . '</div>'
+                : '<div class="bm-thread-header__body"></div>';
+
+            return '<header class="bm-thread-header">'
+                . $avatar
+                . $body
+                . '<div class="bm-thread-header__actions expandingButtons">' . $actions . '</div>'
+                . '</header>';
+        }
+
+        private function messages_placeholder( $thread_type = 'thread', $bubbles = null ){
+            $design = Better_Messages_Design::instance();
+
+            // Enough bubbles to fill the tallest the container can be. Seven
+            // was fixed, which filled one window and left a band of empty
+            // column above them in every taller one. Nothing here can measure
+            // the box — this is printed before any script runs — but the
+            // container clips its overflow, so sizing for the maximum and
+            // letting a short one clip is exact where a guess is not. 64px is
+            // roughly one bubble with its share of the stack spacing.
+            if ( $bubbles === null ) {
+                $maxHeight = (int) apply_filters( 'bp_better_messages_max_height', $design->get_design_var_int( '--bm-max-height' ) );
+                $bubbles   = max( 7, min( 40, (int) ceil( $maxHeight / 64 ) + 1 ) );
+            }
+
+            $layout = $design->get_design_option( 'messagesLayout', 'default' );
+            $fill   = $design->get_design_option( 'bubbleFill', 'filled' );
+            $mode   = $design->get_design_option( 'avatarsList', 'show' );
+            $self   = (bool) $design->get_design_option( 'showAvatarSelf', true );
+
+            $private = $thread_type === 'thread';
+            $hide    = $private
+                ? ( $mode === 'hide_private' || $mode === 'hide' )
+                : ( $mode === 'hide_groups' || $mode === 'hide' );
+
+            $stacks = array();
+            $mine   = false;
+            $left   = $bubbles;
+            $i      = 0;
+
+            while ( $left > 0 ) {
+                $count = min( $left, ( $i % 2 === 0 ) ? 2 : 1 );
+                $stacks[] = array( $mine, $count );
+                $left -= $count;
+                $mine = ! $mine;
+                $i++;
+            }
+
+            $html = '';
+            $n    = 0;
+
+            foreach ( $stacks as $index => $stack ) {
+                list( $is_mine, $count ) = $stack;
+
+                if ( $layout === 'single' ) {
+                    $side = 'left';
+                } else {
+                    $side = ( $is_mine !== ( $layout === 'reversed' ) ) ? 'right' : 'left';
+                }
+
+                $avatar = '';
+
+                if ( ! $hide && ( $self || ! $is_mine ) ) {
+                    $avatar = '<div class="bm-msg-stack__avatar"><span class="bm-skel bm-skel--avatar" style="width:32px;height:32px"></span></div>';
+                }
+
+                $bodies = '';
+
+                for ( $b = 0; $b < $count; $b++ ) {
+                    $width = 38 + ( ( $n * 13 ) % 46 );
+                    $n++;
+
+                    $bodies .= '<div class="bm-msg-body" style="width:' . $width . '%">'
+                        . '<div class="bm-msg-main"><div class="bm-msg-bubble">'
+                        . '<div class="bm-msg-bubble__text bm-skel-text">&nbsp;</div>'
+                        . '</div></div>'
+                        . '</div>';
+                }
+
+                $html .= '<div class="bm-msg-stack"' . ( $is_mine ? ' data-is-me="1"' : '' ) . ' data-side="' . esc_attr( $side ) . '" data-bubble="' . esc_attr( $fill ) . '">'
+                    . $avatar
+                    . '<div class="bm-msg-stack__bubbles">'
+                    . '<div class="bm-msg-stack__info"><span class="bm-skel-text" style="width:' . ( 58 + ( $index % 3 ) * 14 ) . 'px">&nbsp;</span></div>'
+                    . $bodies
+                    . '</div>'
+                    . '</div>';
+            }
+
+            return '<div class="bm-skel-msgs" aria-hidden="true"><div class="bm-msg-day">' . $html . '</div></div>';
+        }
+
+        private function room_gate_placeholder(){
+            return '<div class="bm-room-gate">'
+                . '<div class="bm-room-gate__text"><span class="bm-skel-text bm-skel-text--sized" style="width:220px">&nbsp;</span></div>'
+                . '<div class="bm-room-gate__actions"><span class="bm-btn bm-room-gate__btn bm-room-gate__btn--primary"><span class="bm-skel-text" style="width:76px">&nbsp;</span></span></div>'
+                . '</div>';
+        }
+
+        private function composer_placeholder(){
+            $icon = '<span class="bm-skel" style="width:18px;height:18px"></span>';
+
+            return '<div class="bm-composer"><div class="bm-composer__row">'
+                . '<div class="bm-composer__attach-wrap"><span class="bm-btn bm-icon-btn">' . $icon . '</span></div>'
+                . '<div class="bm-editor bm-composer__editor"><span class="bm-skel-text bm-skel-text--sized" style="width:140px">&nbsp;</span></div>'
+                . '<span class="bm-btn bm-icon-btn">' . $icon . '</span>'
+                . '<span class="bm-btn bm-icon-btn">' . $icon . '</span>'
+                . '<span class="bm-btn bm-icon-btn">' . $icon . '</span>'
+                . '</div></div>';
+        }
+
+        private function side_tab_restricted( $setting_key ){
+            $restricted = isset( Better_Messages()->settings[ $setting_key ] ) ? Better_Messages()->settings[ $setting_key ] : array();
+
+            if ( ! is_array( $restricted ) || count( $restricted ) === 0 ) {
+                return false;
+            }
+
+            $roles = $this->get_user_roles( $this->get_current_user_id() );
+
+            foreach ( $restricted as $role ) {
+                if ( in_array( $role, $roles, true ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private function side_tabs_count(){
+            $settings = Better_Messages()->settings;
+            $logged   = is_user_logged_in();
+            $count    = 1;
+
+            $tabs = array(
+                array( $logged && $this->is_friends_active(), 'combinedFriendsEnable',   'restrictViewSideFriends' ),
+                array( $logged && $this->is_groups_active(),  'combinedGroupsEnable',    'restrictViewSideGroups' ),
+                array( $logged && $this->is_courses_active(), 'combinedCoursesEnable',   'restrictViewSideCourses' ),
+                array( true,                                  'combinedAIBotsEnable',    'restrictViewSideAIBots' ),
+                array( true,                                  'combinedChatRoomsEnable', 'restrictViewSideChatRooms' ),
+                array( true,                                  'combinedUsersEnable',     'restrictViewSideUsers' ),
+            );
+
+            foreach ( $tabs as $tab ) {
+                list( $available, $setting_key, $restrict_key ) = $tab;
+
+                if ( ! $available ) {
+                    continue;
+                }
+
+                if ( ! isset( $settings[ $setting_key ] ) || $settings[ $setting_key ] !== '1' ) {
+                    continue;
+                }
+
+                if ( $this->side_tab_restricted( $restrict_key ) ) {
+                    continue;
+                }
+
+                $count++;
+            }
+
+            return $count;
+        }
+
+        private function side_tabs_placeholder(){
+            $count = $this->side_tabs_count();
+
+            if ( $count < 2 ) {
+                return '';
+            }
+
+            $icons_only = isset( Better_Messages()->settings['sidePanelIconsOnly'] ) && Better_Messages()->settings['sidePanelIconsOnly'] === '1';
+            $tab_class  = 'bm-btn bm-ei-tab' . ( $icons_only ? '' : ' bm-tab-labeled' );
+            $tabs       = '';
+
+            for ( $i = 0; $i < $count; $i++ ) {
+                $tabs .= '<span class="' . $tab_class . '">'
+                    . '<span class="bm-ei-tab__icon-wrap"><span class="bm-skel" style="width:17px;height:17px"></span></span>'
+                    . ( $icons_only ? '' : '<span class="bm-ei-tab__label bm-skel-text" style="width:52px">&nbsp;</span>' )
+                    . '</span>';
+            }
+
+            return '<div class="bm-ei-tabs bm-side-tabs" data-surface="side"' . ( $icons_only ? ' data-icons-only="1"' : '' ) . '>' . $tabs . '</div>';
+        }
+
+        private function inbox_search_placeholder(){
+            $icon = '<span class="bm-skel" style="width:18px;height:18px"></span>';
+
+            return '<div class="bm-ei-search">'
+                . '<span class="bm-btn bm-icon-btn bm-ei-search__lead">' . $icon . '</span>'
+                . '<div class="bm-ei-search__pinned">'
+                . '<span class="bm-skel" style="width:14px;height:14px"></span>'
+                . '<span class="bm-skel-text" style="width:74px">&nbsp;</span>'
+                . '</div>'
+                . '<span class="bm-btn bm-icon-btn">' . $icon . '</span>'
+                . '</div>';
+        }
+
+        private function footer_me_placeholder(){
+            return '<div class="bm-footer-me"><div class="bm-footer-me__row">'
+                . '<span class="bm-btn bm-footer-me__me">'
+                . '<span class="bm-footer-me__avatar-wrap"><span class="bm-skel bm-skel--avatar" style="width:32px;height:32px"></span></span>'
+                . '<span class="bm-footer-me__lines">'
+                . '<span class="bm-footer-me__name bm-skel-text" style="--bm-skel-w:64%">&nbsp;</span>'
+                . '<span class="bm-footer-me__status-label bm-skel-text" style="width:44px">&nbsp;</span>'
+                . '</span>'
+                . '</span>'
+                . '<span class="bm-btn bm-icon-btn"><span class="bm-skel" style="width:18px;height:18px"></span></span>'
+                . '</div></div>';
         }
 
         public function initial_container_height(){
-            $maxHeight = (int) apply_filters( 'bp_better_messages_max_height', Better_Messages()->settings['messagesHeight'] );
-            $minHeight = (int) Better_Messages()->settings['messagesMinHeight'];
-            $offset    = (int) Better_Messages()->settings['fixedHeaderHeight'];
+            $design    = Better_Messages_Design::instance();
+            $minHeight = $design->get_design_var_int( '--bm-min-height' );
+            $maxToken  = $design->get_design_var_int( '--bm-max-height' );
+            $maxHeight = (int) apply_filters( 'bp_better_messages_max_height', $maxToken );
 
-            $viewport = '100vh';
+            $viewport = '100vh - var(--bm-viewport-offset, 0px)';
 
-            if( is_admin_bar_showing() ){
+            if( is_admin_bar_showing() && ! $design->is_preview_mode() ){
                 $viewport .= ' - var(--wp-admin--admin-bar--height, 32px)';
             }
 
-            if( $offset > 0 ){
-                $viewport .= ' - ' . $offset . 'px';
-            }
+            $min = 'var(--bm-min-height, ' . $minHeight . 'px)';
+            $max = $maxHeight === $maxToken ? 'var(--bm-max-height, ' . $maxToken . 'px)' : $maxHeight . 'px';
 
-            return 'calc(clamp(' . $minHeight . 'px, ' . $viewport . ', ' . $maxHeight . 'px) - 20px)';
+            return 'calc(clamp(' . $min . ', ' . $viewport . ', ' . $max . ') - 20px)';
         }
 
-        public function container_placeholder( $with_sidebar = false ){
-            $initialHeight = $this->initial_container_height();
-            $combinedView = $with_sidebar && Better_Messages()->settings['combinedView'] === '1';
+        public function container_placeholder( $with_sidebar = false, $thread_type = 'thread', $can_reply = true, $with_avatar = true ){
+            $card = $with_sidebar
+                ? 'bm-card bm-threads-wrapper bm-chat-content wp-exclude-emoji'
+                : 'bm-card bm-card--thread-embed bm-chat-content wp-exclude-emoji';
 
-            ob_start();
+            $inbox = '';
 
-            if( $combinedView ){
-                $compactMode = Better_Messages()->settings['sidebarCompactMode'];
-                $sideWidth   = (int) Better_Messages()->settings['sideThreadsWidth'];
-
-                $wrapClass = 'bp-messages-wrap bm-no-transition';
-
-                if( $compactMode === 'always_compact' ){
-                    $wrapClass .= ' bm-side-compact';
-                    $sideWidthValue = '60px';
-                } else {
-                    $sideWidthValue = $sideWidth . 'px';
-                }
-                ?>
-                <div class="<?php echo esc_attr( $wrapClass ); ?>" style="height:<?php echo esc_attr( $initialHeight ); ?>; --bm-side-width:<?php echo esc_attr( $sideWidthValue ); ?>">
-                    <div class="bp-messages-threads-wrapper" style="height:<?php echo esc_attr( $initialHeight ); ?>">
-                        <div class="bp-messages-side-threads">
-                            <div class="chat-header side-header">
-                                <div style="position: relative; width:200px; height: 20px; margin-left: 10px; border-radius: 4px; overflow: hidden">
-                                    <div class="bm-placeholder"><div class="bm-animated-background"></div></div>
-                                </div>
-                            </div>
-                            <div class="bm-side-content">
-                                <?php echo $this->threads_placeholder(); ?>
-                            </div>
-                        </div>
-                        <div class="bp-messages-column">
-                            <?php echo $this->header_placeholder(); ?>
-                        </div>
-                    </div>
-                </div>
-                <?php
-            } else {
-                ?>
-                <div class="bp-messages-wrap" style="height:<?php echo esc_attr( $initialHeight ); ?>">
-                    <?php echo $this->header_placeholder(); ?>
-                    <?php echo $this->threads_placeholder(); ?>
-                </div>
-                <?php
+            if ( $with_sidebar ) {
+                $inbox = '<aside class="bm-embedded-inbox">'
+                    . $this->inbox_search_placeholder()
+                    . $this->side_tabs_placeholder()
+                    . ( $this->side_tabs_count() >= 2
+                        ? '<div class="bm-inbox-panel" data-active="1">' . $this->threads_placeholder() . '</div>'
+                        : $this->threads_placeholder() )
+                    . $this->footer_me_placeholder()
+                    . '</aside>';
             }
 
-            return ob_get_clean();
+            $column = $with_sidebar
+                ? $this->header_placeholder() . '<div class="bm-msg-list-wrap"></div>'
+                : $this->header_placeholder( true, $with_avatar )
+                    . '<div class="bm-thread-col__split"><div class="bm-thread-col__main">'
+                    . '<div class="bm-msg-list-wrap"><div class="bm-msg-list">' . $this->messages_placeholder( $thread_type ) . '</div></div>'
+                    . ( $can_reply ? $this->composer_placeholder() : $this->room_gate_placeholder() )
+                    . '</div></div>';
+
+            return '<div class="' . esc_attr( $card ) . '">'
+                . $inbox
+                . '<section class="bm-thread-col">'
+                . $column
+                . '</section>'
+                . '</div>';
         }
 
         public function generateRandomString($length = 25) {
@@ -4149,10 +4451,17 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function is_ai_bot_user( $user_id ){
             if( $user_id >= 0 ) return false;
 
-            $guest = Better_Messages()->guests->get_guest_user( $user_id );
-            if( ! $guest || empty( $guest->ip ) ) return false;
+            return Better_Messages()->guests->get_bot_id( $user_id ) > 0;
+        }
 
-            return str_starts_with( $guest->ip, 'ai-chat-bot-' );
+        public function has_voice_messages_addon(){
+            return class_exists( 'BP_Better_Messages_Voice_Messages' );
+        }
+
+        public function voice_messages_addon_supported(){
+            if( ! $this->has_voice_messages_addon() ) return false;
+
+            return method_exists( 'BP_Better_Messages_Voice_Messages', 'video_messages_script_vars' );
         }
 
         public function is_valid_user_id( $user_id ){
@@ -4289,7 +4598,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             // Check if the request was successful
             if ( is_wp_error($response) ) {
                 // Handle the error appropriately
-                return new WP_Error('request_failed', 'The network request failed.');
+                return new WP_Error('request_failed', 'The network request failed: ' . $response->get_error_message());
             }
 
             // Check if the request was authorized
@@ -4314,17 +4623,19 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function get_client_ip(){
-            $ip = '';
+            $sources = [ 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ];
 
-            if ( isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP'])) {
-                $ip = $_SERVER['HTTP_CLIENT_IP'];
-            } elseif ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'] )) {
-                $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-            } else if( isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'] ) ){
-                $ip = $_SERVER['REMOTE_ADDR'];
+            foreach( $sources as $source ){
+                if( empty( $_SERVER[ $source ] ) ) continue;
+
+                $ip = trim( explode( ',', (string) $_SERVER[ $source ] )[0] );
+
+                if( filter_var( $ip, FILTER_VALIDATE_IP ) !== false ){
+                    return $ip;
+                }
             }
 
-            return $ip;
+            return '';
         }
 
         public function get_site_domain()

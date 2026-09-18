@@ -44,9 +44,9 @@ class Better_Messages_Mini_List
         $users      = isset( Better_Messages()->script_variables['miniUsers'] ) && Better_Messages()->script_variables['miniUsers'] === '1';
 
         if( $threads || $friends || $groups || $courses || $ai_bots || $chat_rooms || $users ) {
-            $class = "bp-messages-wrap bp-better-messages-list";
+            $class = "bm-wrap bm-mini-widgets-wrap";
 
-            $mod = get_theme_mod('bm-mini-widgets-bottom', 0 );
+            $mod = Better_Messages_Design::instance()->get_design_var_int( '--bm-mini-widget-offset-y' );
 
             if( $mod > 0 ) {
                 $class .= ' bm-widget-not-at-bottom';

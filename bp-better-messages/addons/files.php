@@ -131,9 +131,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
         public function attachments_script_vars( $vars ){
             $vars['attachmentsBrowserEnable'] = Better_Messages()->settings['attachmentsBrowserEnable'] === '1';
+            $vars['attachmentsReplyThumbnail'] = Better_Messages()->settings['attachmentsReplyThumbnail'] === '1' ? '1' : '0';
 
             $attachments_enabled = Better_Messages()->settings['attachmentsEnable'] === '1';
-            $has_voice_messages  = class_exists( 'BP_Better_Messages_Voice_Messages' );
+            $has_voice_messages  = Better_Messages()->functions->voice_messages_addon_supported();
 
             if ( $attachments_enabled || $has_voice_messages ) {
                 $vars['attachments'] = [
@@ -220,9 +221,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 },
             ) );
 
-            $has_voice_messages = class_exists( 'BP_Better_Messages_Voice_Messages' );
-
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! $has_voice_messages ) {
+            if ( ! $this->uploads_available() ) {
                 return;
             }
 
@@ -302,6 +301,21 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $active_type = '';
             $counts_data = null;
 
+            if ( ! Better_Messages()->functions->can_read_chat_messages( $thread_id, Better_Messages()->functions->get_current_user_id() ) ) {
+                $empty = array(
+                    'files'   => array(),
+                    'hasMore' => false,
+                    'page'    => $page,
+                );
+
+                if ( $page === 1 && empty( $type ) ) {
+                    $empty['counts']     = array( 'photos' => 0, 'videos' => 0, 'audio' => 0, 'files' => 0 );
+                    $empty['activeType'] = '';
+                }
+
+                return $empty;
+            }
+
             // On first page without type filter: get counts first, auto-detect first non-empty type
             if ( $page === 1 && empty( $type ) ) {
                 $counts_data = $this->get_thread_attachment_counts( $thread_id );
@@ -355,7 +369,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                  AND NOT EXISTS (
                      SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
                      WHERE bm_meta.bm_message_id = pm_msg.meta_value
-                     AND bm_meta.meta_key = 'bpbm_voice_messages'
+                     AND bm_meta.meta_key IN ('bpbm_voice_messages', 'bpbm_video_messages')
                  )
                  ORDER BY p.post_date DESC
                  LIMIT %d OFFSET %d",
@@ -448,7 +462,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                  AND NOT EXISTS (
                      SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
                      WHERE bm_meta.bm_message_id = pm_msg.meta_value
-                     AND bm_meta.meta_key = 'bpbm_voice_messages'
+                     AND bm_meta.meta_key IN ('bpbm_voice_messages', 'bpbm_video_messages')
                  )",
                 $thread_id
             ), ARRAY_A );
@@ -1029,8 +1043,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 $file = $files['file'];
 
-                $extensions = apply_filters( 'bp_better_messages_attachment_allowed_extensions', Better_Messages()->settings['attachmentsFormats'], $thread_id, $user_id );
-                $extensions = self::get_expanded_extensions( $extensions );
+                $extensions = $this->allowed_upload_extensions( $thread_id, $user_id );
 
                 $is_e2e_upload = class_exists( 'Better_Messages_E2E_Encryption' ) && (
                     Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
@@ -1185,8 +1198,22 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $result;
         }
 
+        public function uploads_available() {
+            return Better_Messages()->settings['attachmentsEnable'] === '1' || Better_Messages()->functions->voice_messages_addon_supported();
+        }
+
+        public function allowed_upload_extensions( $thread_id, $user_id ) {
+            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' ) {
+                return apply_filters( 'bp_better_messages_attachment_allowed_extensions', array(), $thread_id, $user_id );
+            }
+
+            $extensions = apply_filters( 'bp_better_messages_attachment_allowed_extensions', Better_Messages()->settings['attachmentsFormats'], $thread_id, $user_id );
+
+            return self::get_expanded_extensions( $extensions );
+        }
+
         public function user_can_upload( $user_id, $thread_id ) {
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! class_exists( 'BP_Better_Messages_Voice_Messages' ) ) return false;
+            if ( ! $this->uploads_available() ) return false;
 
             if( $thread_id === 0 ) return true;
 
@@ -1194,7 +1221,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         }
 
         public function user_can_upload_callback(WP_REST_Request $request) {
-            if ( Better_Messages()->settings['attachmentsEnable'] !== '1' && ! class_exists( 'BP_Better_Messages_Voice_Messages' ) ) return false;
+            if ( ! $this->uploads_available() ) return false;
 
             $authorized = Better_Messages_Rest_Api()->is_user_authorized( $request );
             if ( $authorized !== true ) {
@@ -1913,8 +1940,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     );
                 }
 
-                $extensions = apply_filters( 'bp_better_messages_attachment_allowed_extensions', Better_Messages()->settings['attachmentsFormats'], $thread_id, $user_id );
-                    $extensions = self::get_expanded_extensions( $extensions );
+                $extensions = $this->allowed_upload_extensions( $thread_id, $user_id );
                 if ( ! in_array( $extension, $extensions, true ) ) {
                     return new WP_Error(
                         'rest_forbidden',
@@ -2153,8 +2179,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             if ( ! $is_e2e ) {
                 $extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
-                $extensions = apply_filters( 'bp_better_messages_attachment_allowed_extensions', Better_Messages()->settings['attachmentsFormats'], $thread_id, $user_id );
-                    $extensions = self::get_expanded_extensions( $extensions );
+                $extensions = $this->allowed_upload_extensions( $thread_id, $user_id );
 
                 if ( ! in_array( $extension, $extensions, true ) ) {
                     return new WP_Error(

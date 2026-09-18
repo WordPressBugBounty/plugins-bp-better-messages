@@ -133,7 +133,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
         }
 
         public function get_default_group_image_html(){
-            return 'html:<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(var(--bm-text-color,0,0,0),0.05);color:rgba(var(--bm-text-color,0,0,0),0.45);border-radius:var(--bm-avatar-radius,2px);aspect-ratio:1/1;box-sizing:border-box"><svg style="width:60%;height:60%;max-width:36px;max-height:36px" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>';
+            return 'html:<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(var(--bm-color-text-primary,0,0,0),0.05);color:rgba(var(--bm-color-text-primary,0,0,0),0.45);border-radius:var(--bm-radius-avatar,2px);aspect-ratio:1/1;box-sizing:border-box"><svg style="width:60%;height:60%;max-width:36px;max-height:36px" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>';
         }
 
         public function get_group_avatar( $group_id ){
@@ -410,7 +410,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member_Groups' ) ){
 
         public function sync_thread_members( $thread_id ){
             wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
-            wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bp_messages' );
+            wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
             $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'um_group_id' );
 
             $members = $this->get_groups_members( $group_id );

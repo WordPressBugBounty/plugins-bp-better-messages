@@ -40,11 +40,33 @@ class Better_Messages_Options
             'attachmentsUploadMethod'     => 'post',
             'attachmentsRandomizeFilenames'     => '0',
             'attachmentsBrowserEnable'    => '0',
+            'attachmentsReplyThumbnail'   => '1',
             'transcodingImageFormat'      => 'original',
             'transcodingImageQuality'     => 85,
             'transcodingImageMaxResolution' => 0,
             'transcodingStripMetadata'    => '0',
             'transcodingVideoFormat'      => 'original',
+            'locationEnable'              => '0',
+            'locationRestrictRoles'       => [],
+            'locationAllowSearch'         => '0',
+            'locationAllowNearby'         => '0',
+            'locationAllowGeolocate'      => '1',
+            'locationHighAccuracy'        => '1',
+            'locationPrecision'           => '0',
+            'locationTileUrl'             => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'locationTileAttribution'     => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            'locationGeocoderUrl'         => 'https://nominatim.openstreetmap.org',
+            'locationNearbyUrl'           => 'https://overpass-api.de/api/interpreter',
+            'locationNearbyRadius'        => 400,
+            'locationMaxZoom'             => 19,
+            'locationSearchLimit'         => 8,
+            'locationDefaultZoom'         => 14,
+            'locationSelectedZoom'        => 16,
+            'locationDefaultLat'          => '48.85',
+            'locationDefaultLng'          => '2.35',
+            'locationBubbleMap'           => '1',
+            'locationBubbleZoom'          => 15,
+            'locationOpenIn'              => 'osm',
             'miniChatsEnable'             => '0',
             'miniWidgetsStyle'            => 'classic',
             'miniWidgetsAnimation'        => '1',
@@ -438,6 +460,7 @@ class Better_Messages_Options
             'SDenableAuthorButton'          => '1',
             'SDenableSidebarMessages'       => '1',
             'SDenableDropdownMessages'      => '1',
+            'SDenableMobileMessages'        => '1',
             'SDProfileVideoCall'            => '0',
             'SDProfileAudioCall'            => '0',
 
@@ -546,6 +569,7 @@ class Better_Messages_Options
             'anthropicApiKey'               => '',
             'geminiApiKey'                  => '',
             'voiceTranscription'            => '0',
+            'voiceTranscriptionAuto'        => '0',
             'voiceTranscriptionProvider'    => 'openai',
             'voiceTranscriptionLanguage'    => '',
             'voiceTranscriptionModel'       => 'gpt-4o-mini-transcribe',
@@ -555,6 +579,12 @@ class Better_Messages_Options
             'voiceMessagesAutoDelete'       => 0,
             'voiceMessagesAutoDeleteMode'   => 'complete',
             'restrictVoiceMessages'         => [],
+
+            'videoMessagesShape'            => 'round',
+            'videoMessagesMaxDuration'      => 60,
+            'videoMessagesAutoDelete'       => 0,
+            'videoMessagesAutoDeleteMode'   => 'complete',
+            'restrictVideoMessages'         => [],
 
             'deleteOldMessages'             => 0,
             'suggestedConversations'        => [],
@@ -578,6 +608,12 @@ class Better_Messages_Options
 
             'aiTranslationEnabled'          => '0',
             'aiTranslationLanguages'        => [],
+            'aiTranslationDefaultOn'        => '0',
+            'aiTranslationPrivate'          => '1',
+            'aiTranslationGroups'           => '1',
+            'aiTranslationChatRooms'        => '1',
+            'aiTranslationBots'             => '1',
+            'aiTranslationRoles'            => [],
 
             'miniWidgetsOrder'              => [],
             'rememberLastTab'               => '0',
@@ -874,7 +910,6 @@ class Better_Messages_Options
             }
         }
 
-        $customize_url = Better_Messages()->customize->customization_link(array( 'panel' => 'better_messages' ));
 
         $has_buddypress  = class_exists('BuddyPress');
         $has_buddyboss   = defined('BP_PLATFORM_VERSION');
@@ -1062,7 +1097,7 @@ class Better_Messages_Options
             'reconnectUrl'       => $reconnect_url,
             'siteId'             => $site_id,
             'licenseCheck'       => $license_check,
-            'customizeUrl'       => $customize_url,
+            'design'             => Better_Messages_Design::instance()->get_init_data(),
             'isSsl'              => is_ssl() || defined('BM_DEV'),
             'hasBuddyPress'      => $has_buddypress,
             'hasBuddyBoss'       => $has_buddyboss,
@@ -1097,7 +1132,7 @@ class Better_Messages_Options
             'hasLearnDashInstructorRole' => $has_learndash_instructor_role,
             'hasMasterStudy'     => $has_masterstudy,
             'hasFriends'         => $has_friends,
-            'hasVoiceMessages'   => class_exists('BP_Better_Messages_Voice_Messages'),
+            'hasVoiceMessages'   => Better_Messages()->functions->voice_messages_addon_supported(),
             'translationLanguages' => class_exists('Better_Messages_AI') ? Better_Messages_AI::instance()->get_all_translation_languages() : array(),
             'giphyError'         => get_option( 'better_messages_gifs_giphy_error', get_option( 'bp_better_messages_giphy_error', false ) ),
             'klipyError'         => get_option( 'better_messages_gifs_klipy_error', false ),
@@ -1137,6 +1172,7 @@ class Better_Messages_Options
             'utf8mb4Supported'   => $wpdb->has_cap( 'utf8mb4' ),
             'dbVersion'          => Better_Messages_Rest_Api_DB_Migrate()->get_target_db_version(),
             'installedDbVersion' => Better_Messages_Rest_Api_DB_Migrate()->get_installed_db_version(),
+            'localDbGeneration'  => (int) get_option( 'bm_local_db_generation', 1 ),
             'lastSync'           => $last_sync,
             'nextSync'           => $next_sync,
             'hasMyCred'          => class_exists( 'myCRED_Core' ),
@@ -1198,6 +1234,10 @@ class Better_Messages_Options
 
         $has_voice_messages = class_exists('BP_Better_Messages_Voice_Messages');
 
+        $voice_transcription_ready = version_compare( phpversion(), '8.1', '>=' )
+            && class_exists('Better_Messages_AI')
+            && Better_Messages()->ai->is_transcription_configured();
+
         $image_pricing = array();
         if ( version_compare( phpversion(), '8.1', '>=' ) && class_exists('Better_Messages_AI') ) {
             $image_pricing = Better_Messages()->ai->get_image_pricing();
@@ -1214,6 +1254,7 @@ class Better_Messages_Options
             'providers'        => $providers,
             'voices'           => $voices,
             'hasVoiceMessages' => $has_voice_messages,
+            'voiceTranscriptionReady' => $voice_transcription_ready,
             'imagePricing'     => $image_pricing,
             'modelPricing'     => $model_pricing,
             'toolPricing'      => $tool_pricing,
@@ -1234,7 +1275,7 @@ class Better_Messages_Options
         );
 
         ?>
-        <style>:root { --bm-avatar-radius: <?php echo intval( get_theme_mod( 'bm-avatar-radius', 2 ) ); ?>px; }</style>
+        <style>:root { --bm-radius-avatar: <?php echo esc_html( Better_Messages_Design::instance()->avatar_radius_css() ); ?>; }</style>
         <script type="text/javascript">
             window.BM_AI_Bots_Data = <?php echo wp_json_encode( $data ); ?>;
         </script>
@@ -1267,7 +1308,7 @@ class Better_Messages_Options
         );
 
         ?>
-        <style>:root { --bm-avatar-radius: <?php echo intval( get_theme_mod( 'bm-avatar-radius', 2 ) ); ?>px; }</style>
+        <style>:root { --bm-radius-avatar: <?php echo esc_html( Better_Messages_Design::instance()->avatar_radius_css() ); ?>; }</style>
         <script type="text/javascript">
             window.BM_Chat_Rooms_Data = <?php echo wp_json_encode( $data ); ?>;
         </script>
@@ -1592,6 +1633,9 @@ class Better_Messages_Options
             if ( ! isset( $settings['SDenableDropdownMessages'] ) ) {
                 $settings['SDenableDropdownMessages'] = '0';
             }
+            if ( ! isset( $settings['SDenableMobileMessages'] ) ) {
+                $settings['SDenableMobileMessages'] = '0';
+            }
             if ( ! isset( $settings['SDProfileVideoCall'] ) ) {
                 $settings['SDProfileVideoCall'] = '0';
             }
@@ -1623,6 +1667,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['attachmentsBrowserEnable'] ) ) {
             $settings['attachmentsBrowserEnable'] = '0';
+        }
+        if ( !isset( $settings['attachmentsReplyThumbnail'] ) ) {
+            $settings['attachmentsReplyThumbnail'] = '0';
         }
         if ( !isset( $settings['transcodingImageFormat'] ) || !in_array( $settings['transcodingImageFormat'], array( 'original', 'webp', 'avif', 'jpeg' ), true ) ) {
             $settings['transcodingImageFormat'] = 'original';
@@ -1879,6 +1926,17 @@ class Better_Messages_Options
             $settings['aiTranslationLanguages'] = isset( $existing['aiTranslationLanguages'] ) ? $existing['aiTranslationLanguages'] : [];
         }
 
+        foreach ( [ 'aiTranslationDefaultOn' => '0', 'aiTranslationPrivate' => '1', 'aiTranslationGroups' => '1', 'aiTranslationChatRooms' => '1', 'aiTranslationBots' => '1' ] as $translation_key => $translation_default ) {
+            if ( ! isset( $settings[ $translation_key ] ) ) {
+                $settings[ $translation_key ] = $translation_default;
+            }
+        }
+
+        if ( ! isset( $settings['aiTranslationRoles'] ) ) {
+            $existing = $this->settings;
+            $settings['aiTranslationRoles'] = isset( $existing['aiTranslationRoles'] ) ? $existing['aiTranslationRoles'] : [];
+        }
+
         if ( !isset( $settings['restrictBlockUsers'] ) ) {
             $settings['restrictBlockUsers'] = [];
         }
@@ -1917,6 +1975,9 @@ class Better_Messages_Options
         }
         if ( !isset( $settings['restrictVoiceMessages'] ) ) {
             $settings['restrictVoiceMessages'] = [];
+        }
+        if ( !isset( $settings['restrictVideoMessages'] ) ) {
+            $settings['restrictVideoMessages'] = [];
         }
         if ( !isset( $settings['miniWidgetsOrder'] ) ) {
             $settings['miniWidgetsOrder'] = [];
@@ -2573,6 +2634,10 @@ class Better_Messages_Options
             $settings['voiceTranscription'] = '0';
         }
 
+        if( ! isset( $settings['voiceTranscriptionAuto'] ) ) {
+            $settings['voiceTranscriptionAuto'] = '0';
+        }
+
         if( isset( $settings['voiceTranscriptionLanguage'] ) ) {
             $lang = strtolower( trim( $settings['voiceTranscriptionLanguage'] ) );
             if ( $lang !== '' && $lang !== 'auto' && ! preg_match( '/^[a-z]{2,3}$/', $lang ) ) {
@@ -2582,6 +2647,60 @@ class Better_Messages_Options
                 $lang = '';
             }
             $settings['voiceTranscriptionLanguage'] = $lang;
+        }
+
+        if( ! isset( $settings['locationRestrictRoles'] ) ) {
+            $settings['locationRestrictRoles'] = [];
+        }
+
+        if( ! isset( $settings['locationPrecision'] ) || ! in_array( (string) $settings['locationPrecision'], ['0', '4', '3', '2'], true ) ) {
+            $settings['locationPrecision'] = '0';
+        }
+
+        if( ! isset( $settings['locationOpenIn'] ) || ! in_array( $settings['locationOpenIn'], ['osm', 'google', 'apple'], true ) ) {
+            $settings['locationOpenIn'] = 'osm';
+        }
+
+        foreach( [ 'locationTileUrl', 'locationGeocoderUrl', 'locationNearbyUrl' ] as $location_key ) {
+            $location_url = isset( $settings[ $location_key ] ) ? trim( (string) $settings[ $location_key ] ) : '';
+
+            if( ! preg_match( '#^https?://#i', $location_url ) ) {
+                $location_url = $this->defaults[ $location_key ];
+            }
+
+            $settings[ $location_key ] = $location_url;
+        }
+
+        $settings['locationGeocoderUrl'] = untrailingslashit( $settings['locationGeocoderUrl'] );
+
+        $location_zooms = [
+            'locationMaxZoom'      => [ 1, 22, 19 ],
+            'locationDefaultZoom'  => [ 1, 22, 14 ],
+            'locationSelectedZoom' => [ 1, 22, 16 ],
+            'locationBubbleZoom'   => [ 1, 22, 15 ],
+            'locationSearchLimit'  => [ 1, 40, 8 ],
+            'locationNearbyRadius' => [ 50, 5000, 400 ],
+        ];
+
+        foreach( $location_zooms as $location_key => $location_range ) {
+            list( $location_min, $location_max, $location_default ) = $location_range;
+            $location_value = isset( $settings[ $location_key ] ) && $settings[ $location_key ] !== ''
+                ? (int) $settings[ $location_key ]
+                : $location_default;
+
+            $settings[ $location_key ] = max( $location_min, min( $location_max, $location_value ) );
+        }
+
+        $location_coords = [ 'locationDefaultLat' => 90, 'locationDefaultLng' => 180 ];
+
+        foreach( $location_coords as $location_key => $location_bound ) {
+            $location_value = isset( $settings[ $location_key ] ) ? (float) $settings[ $location_key ] : 0;
+
+            if( ! is_finite( $location_value ) || abs( $location_value ) > $location_bound ) {
+                $location_value = (float) $this->defaults[ $location_key ];
+            }
+
+            $settings[ $location_key ] = (string) round( $location_value, 6 );
         }
 
         // Enum validations for select/radio fields
@@ -2671,6 +2790,14 @@ class Better_Messages_Options
             $settings['voiceMessagesAutoDeleteMode'] = 'complete';
         }
 
+        if( ! isset( $settings['videoMessagesShape'] ) || ! in_array( $settings['videoMessagesShape'], ['round', 'square'], true ) ) {
+            $settings['videoMessagesShape'] = 'round';
+        }
+
+        if( ! isset( $settings['videoMessagesAutoDeleteMode'] ) || ! in_array( $settings['videoMessagesAutoDeleteMode'], ['complete', 'replace'], true ) ) {
+            $settings['videoMessagesAutoDeleteMode'] = 'complete';
+        }
+
         if( ! isset( $settings['suggestedConversations'] ) ) {
             $settings['suggestedConversations'] = [];
         } else {
@@ -2683,6 +2810,7 @@ class Better_Messages_Options
 
         $links_allowed = [
             'restrictBadWordsList',
+            'locationTileAttribution',
             'restrictCallsMessage',
             'restrictNewThreadsMessage',
             'restrictNewRepliesMessage',
@@ -2744,6 +2872,8 @@ class Better_Messages_Options
             'attachmentsMaxNumber'      => 0,
             'voiceMessagesMaxDuration'  => 0,
             'voiceMessagesAutoDelete'   => 0,
+            'videoMessagesMaxDuration'  => 0,
+            'videoMessagesAutoDelete'   => 0,
             'deleteOldMessages'         => 0,
             'emailLogoId'               => 0,
             'editMessageTimeLimit'      => 0,
@@ -2753,6 +2883,8 @@ class Better_Messages_Options
         $arrays = [
             'rateLimitReply',
             'restrictRoleBlock',
+            'locationRestrictRoles',
+            'aiTranslationRoles',
             'myCredNewMessageCharge',
             'myCredNewMessageChargeTypes',
             'myCredNewThreadCharge',

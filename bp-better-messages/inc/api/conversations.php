@@ -111,6 +111,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 ),
             ) );
 
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/searchMessages', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'search_messages' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function($param, $request, $key) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ) );
+
             register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/makeModerator', array(
                 'methods' => 'POST',
                 'callback' => array( $this, 'make_moderator' ),
@@ -495,6 +508,41 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             Better_Messages()->functions->change_thread_subject( $thread_id, $subject );
 
             return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
+        }
+
+        public function search_messages( WP_REST_Request $request ){
+            global $wpdb;
+
+            $thread_id = intval( $request->get_param('id') );
+            $search    = trim( sanitize_text_field( $request->get_param('search') ) );
+
+            if( ! Better_Messages()->functions->can_read_chat_messages( $thread_id, Better_Messages()->functions->get_current_user_id() ) ){
+                return array( 'results' => array() );
+            }
+
+            if( mb_strlen( $search ) < 2 ){
+                return array( 'results' => array() );
+            }
+
+            $message_ids = $wpdb->get_col( $wpdb->prepare("
+                SELECT `id`
+                FROM `" . bm_get_table('messages') . "`
+                WHERE `thread_id` = %d
+                AND   `sender_id` != 0
+                AND   `message` LIKE %s
+                ORDER BY `id` DESC
+                LIMIT 0, 20
+            ", $thread_id, '%' . $wpdb->esc_like( $search ) . '%' ) );
+
+            $message_ids = array_map( 'intval', $message_ids );
+
+            $return = array( 'results' => $message_ids );
+
+            if( count( $message_ids ) > 0 ){
+                $return['update'] = Better_Messages_Rest_Api()->get_messages( null, $message_ids );
+            }
+
+            return $return;
         }
 
         public function change_meta( WP_REST_Request $request ){

@@ -302,13 +302,13 @@ class Better_Messages_Group extends BP_Group_Extension
             <p tabindex="0"><?php _ex( 'Enable Group Messages feature for this group', 'BuddyPress Groups', 'bp-better-messages' ); ?></p>
             <p tabindex="0"><?php _ex( 'All members of the group will be automatically joined to the conversation of this group', 'BuddyPress Groups', 'bp-better-messages' ); ?></p>
 
-            <label for="group-bp-messages-enabled">
-                <input type="radio" name="bpbm_messages" id="group-bp-messages-enabled" value="enabled" <?php checked($messages, 'enabled'); ?>/>
+            <label for="group-bm-messages-enabled">
+                <input type="radio" name="bpbm_messages" id="group-bm-messages-enabled" value="enabled" <?php checked($messages, 'enabled'); ?>/>
                 <?php esc_html_e( 'Enabled', 'bp-better-messages' ); ?>
             </label>
 
-            <label for="group-bp-messages-disabled">
-                <input type="radio" name="bpbm_messages" id="group-bp-messages-disabled" value="disabled" <?php checked($messages, 'disabled'); ?> />
+            <label for="group-bm-messages-disabled">
+                <input type="radio" name="bpbm_messages" id="group-bm-messages-disabled" value="disabled" <?php checked($messages, 'disabled'); ?> />
                 <?php esc_html_e( 'Disabled', 'bp-better-messages' ); ?>
             </label>
 
@@ -394,7 +394,7 @@ class Better_Messages_Group extends BP_Group_Extension
             return false;
         }
 
-        wp_cache_delete( 'thread_recipients_' . $thread_id, 'bm_messages' );
+        wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
         wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
         $group_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'group_id' );
         $group    = new BP_Groups_Group( $group_id );

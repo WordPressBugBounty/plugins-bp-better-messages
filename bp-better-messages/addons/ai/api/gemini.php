@@ -371,7 +371,7 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                 if ( $is_error ) continue;
 
-                $message_text = $this->clean_stored_message( $_message->message );
+                $message_text = $this->get_context_text( $_message );
                 if ( empty( trim( $message_text ) ) && (int) $_message->id !== (int) $current_user_msg_id ) {
                     $has_processable_attachments = false;
                     if ( $bot_settings['images'] || $bot_settings['files'] ) {

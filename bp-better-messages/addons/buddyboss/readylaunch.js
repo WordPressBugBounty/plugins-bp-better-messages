@@ -135,7 +135,7 @@
         var replies = document.querySelectorAll('.bb-rl-forum-reply-list-item');
         for (var i = 0; i < replies.length; i++) {
             var reply = replies[i];
-            var pm = reply.querySelector('.bpbm-private-message-link-buddypress');
+            var pm = reply.querySelector('.bm-private-message-link-buddypress');
             if (!pm || pm.dataset.bmRelocatedRl === '1') {
                 continue;
             }
@@ -151,7 +151,7 @@
 
             var link = document.createElement('a');
             link.href = pm.href;
-            link.className = 'bbp-reply-pm-link bpbm-private-message-link-buddyboss';
+            link.className = 'bbp-reply-pm-link bm-private-message-link-buddyboss';
             link.textContent = label;
 
             li.appendChild(link);

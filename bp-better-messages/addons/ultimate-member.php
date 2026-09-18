@@ -101,7 +101,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
                     <span class="um-message-live-count" style="display:none">0</span>
                     <ul class="dropdown-menu msg-drop-menu" aria-labelledby="dropdownMenuButton">
-                        <div class="bp-messages-wrap bm-threads-list" style="height:400px"></div>
+                        <div class="bm-wrap bm-threads-list" style="height:400px"></div>
                     </ul>
                 </div>
             </div>
@@ -501,7 +501,7 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             $link_attr  = '';
 
             if ( Better_Messages()->settings['umForceMiniChat'] === '1' ) {
-                $link_class .= ' bpbm-pm-button open-mini-chat ';
+                $link_class .= ' bm-pm-button open-mini-chat ';
                 $link_attr .= ' data-user-id="' . esc_attr( $user_id ) . '"';
             }
 
@@ -511,10 +511,10 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
         }
 
         public function um_pm_link( $args ){
-            $class = 'um-members-bpbm-btn';
+            $class = 'um-members-bm-btn';
 
             if ( doing_action( 'um_members_list_just_after_actions_tmpl' ) ) {
-                $class .= ' um-members-list-footer-button-wrapper bpbm-pm-button';
+                $class .= ' um-members-list-footer-button-wrapper bm-pm-button';
             }
             ?>
             <# if ( user.bm_pm_button && user.bm_pm_button != '' ) { #>

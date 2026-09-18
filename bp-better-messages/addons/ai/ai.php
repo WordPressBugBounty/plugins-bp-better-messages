@@ -22,6 +22,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             add_action( 'init',      array( $this, 'register_post_type' ) );
             add_filter( 'better_messages_rest_thread_item', array( $this, 'rest_thread_item'), 20, 5 );
             add_filter('better_messages_get_user_roles', array($this, 'get_user_roles'), 10, 2 );
+            add_filter( 'bp_better_messages_pre_format_message', array( $this, 'strip_ai_marker' ), 1, 4 );
 
             if ( version_compare(phpversion(), '8.1', '>=') ) {
                 // Requires PHP 8.1+
@@ -79,11 +80,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 list( $transcriptionProvider, $transcriptionAvailable ) = $this->is_transcription_available();
 
-                if ( Better_Messages()->settings['voiceTranscription'] === '1'
-                    && $transcriptionAvailable
-                    && class_exists( 'BP_Better_Messages_Voice_Messages' )
-                ) {
+                if ( $transcriptionAvailable && class_exists( 'BP_Better_Messages_Voice_Messages' ) ) {
                     add_filter( 'better_messages_rest_message_meta', array( $this, 'voice_transcription_meta' ), 12, 4 );
+                    add_action( 'better_messages_message_sent', array( $this, 'mark_voice_transcription_pending' ), 5, 1 );
 
                     if ( $transcriptionProvider === 'bm' ) {
                         add_action( 'better_messages_ai_ensure_completion_job', array( $this, 'retry_pending_transcriptions' ) );
@@ -99,6 +98,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     add_action( 'better_messages_message_sent', array( $this, 'translate_on_send_mark' ), 5, 1 );
                     add_action( 'better_messages_message_sent', array( $this, 'translate_on_send_dispatch' ), 20, 1 );
                     add_action( 'better_messages_ai_ensure_completion_job', array( $this, 'retry_pending_translations' ) );
+                    add_filter( 'better_messages_can_translate_thread', array( $this, 'can_translate_thread' ), 10, 3 );
+                    add_filter( 'better_messages_thread_is_translated', array( $this, 'thread_is_translated' ), 10, 4 );
+                    add_filter( 'better_messages_translation_language', array( $this, 'filter_translation_language' ), 10, 2 );
+                    add_filter( 'bp_better_messages_script_variable', array( $this, 'translation_script_vars' ), 10, 1 );
                 }
             }
         }
@@ -113,19 +116,27 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function get_user_roles( $roles, $user_id )
         {
             if( $user_id < 0 ){
-                $guest_id = absint($user_id);
-                $guest = Better_Messages()->guests->get_guest_user( $guest_id );
+                $bot_id = Better_Messages()->guests->get_bot_id( $user_id );
 
-                if( $guest && $guest->ip && str_starts_with($guest->ip, 'ai-chat-bot-') ){
-                    $bot_id = str_replace('ai-chat-bot-', '', $guest->ip);
-
-                    if( $this->bot_exists( $bot_id ) ){
-                        $roles = ['bm-bot'];
-                    }
+                if( $bot_id > 0 && $this->bot_exists( $bot_id ) ){
+                    $roles = ['bm-bot'];
                 }
             }
 
             return $roles;
+        }
+
+        public function strip_ai_marker( $message, $message_id, $context, $user_id )
+        {
+            if ( $context === 'stack' || ! is_string( $message ) ) {
+                return $message;
+            }
+
+            if ( strpos( $message, '<!-- BM-AI -->' ) !== 0 ) {
+                return $message;
+            }
+
+            return substr( $message, strlen( '<!-- BM-AI -->' ) );
         }
 
         public function add_bots_to_search_results( $users, $search, $user_id )
@@ -161,12 +172,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $recipient_id = reset( $recipients );
 
                 if( $recipient_id < 0 ){
-                    $guest_id = absint($recipient_id);
-                    $guest = Better_Messages()->guests->get_guest_user( $guest_id );
+                    $bot_id = Better_Messages()->guests->get_bot_id( $recipient_id );
 
-                    if( $guest && $guest->ip && str_starts_with($guest->ip, 'ai-chat-bot-') ){
-                        $bot_id = str_replace('ai-chat-bot-', '', $guest->ip);
-
+                    if( $bot_id > 0 ){
                         if( $this->bot_exists( $bot_id ) ){
                             $bot_settings = $this->get_bot_settings( $bot_id );
 
@@ -413,12 +421,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 foreach ($recipients as $user) {
                     $recipient_user_id = $user->user_id;
                     if ($recipient_user_id < 0) {
-                        $guest_id = absint($recipient_user_id);
-                        $guest = Better_Messages()->guests->get_guest_user($guest_id);
+                        $bot_id = Better_Messages()->guests->get_bot_id( $recipient_user_id );
 
-                        if ($guest && $guest->ip && str_starts_with($guest->ip, 'ai-chat-bot-')) {
-                            $bot_id = str_replace('ai-chat-bot-', '', $guest->ip);
-
+                        if ( $bot_id > 0 ) {
                             if( $this->bot_exists( $bot_id ) && $this->is_bot_conversation( $bot_id, $thread_id ) ){
                                 $bot_settings = $this->get_bot_settings($bot_id);
 
@@ -718,6 +723,18 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             list( , $transcriptionAvailable ) = $this->is_transcription_available();
 
             if ( Better_Messages()->settings['voiceTranscription'] === '1' && $transcriptionAvailable ) {
+                register_rest_route('better-messages/v1/ai', '/transcribeVoiceBackground', array(
+                    'methods'             => 'GET',
+                    'callback'            => array( $this, 'handle_background_transcription' ),
+                    'permission_callback' => function( WP_REST_Request $request ) {
+                        $provided = $request->get_param('secret');
+                        if( ! empty( $provided ) && $provided === $this->get_ai_request_secret() ){
+                            return true;
+                        }
+                        return false;
+                    },
+                ));
+
                 register_rest_route('better-messages/v1/ai', '/transcribeVoice/(?P<id>\d+)/(?P<message_id>\d+)', array(
                     'methods'             => 'POST',
                     'callback'            => array( $this, 'transcribe_voice_message' ),
@@ -741,6 +758,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 register_rest_route('better-messages/v1/ai', '/translateMessages/(?P<id>\d+)', array(
                     'methods'             => 'POST',
                     'callback'            => array( $this, 'translate_messages' ),
+                    'permission_callback' => array( Better_Messages()->api, 'check_thread_access' ),
+                    'args' => array(
+                        'id' => array(
+                            'validate_callback' => function( $param ) {
+                                return is_numeric( $param );
+                            }
+                        ),
+                    ),
+                ));
+
+                register_rest_route('better-messages/v1', '/thread/(?P<id>\d+)/translation', array(
+                    'methods'             => 'POST',
+                    'callback'            => array( $this, 'set_thread_translation' ),
                     'permission_callback' => array( Better_Messages()->api, 'check_thread_access' ),
                     'args' => array(
                         'id' => array(
@@ -2852,8 +2882,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $url = Better_Messages()->functions->get_user_thread_url( $thread_id, $recipient_id );
                 $notification = array(
-                    'title' => sprintf( __( 'New message from %s', 'bp-better-messages' ), Better_Messages()->functions->get_name( $sender_id ) ),
-                    'body'  => sprintf( __( 'You have new message from %s', 'bp-better-messages' ), Better_Messages()->functions->get_name( $sender_id ) ),
+                    'title' => sprintf( __( 'New message from %s', 'bp-better-messages' ), Better_Messages()->functions->get_plain_name( $sender_id ) ),
+                    'body'  => sprintf( __( 'You have new message from %s', 'bp-better-messages' ), Better_Messages()->functions->get_plain_name( $sender_id ) ),
                     'icon'  => htmlspecialchars_decode( Better_Messages_Functions()->get_rest_avatar( $sender_id ) ),
                     'tag'   => 'bp-better-messages-thread-' . $thread_id,
                     'data'  => array( 'url' => $url ),
@@ -2997,6 +3027,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     continue;
                 }
 
+                if ( get_transient( 'bm_transcribing_' . $attachment_id ) ) {
+                    continue;
+                }
+
                 $result = Better_Messages_Cloud_AI::instance()->transcribe( $attachment_id, $message_id );
 
                 if ( is_wp_error( $result ) ) {
@@ -3008,11 +3042,233 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        private function is_transcription_available() {
+        public function is_transcription_available() {
             $provider = Better_Messages()->settings['voiceTranscriptionProvider'] ?? 'openai';
             $available = ( $provider === 'bm' && Better_Messages()->functions->can_use_premium_code() )
                 || ( $provider === 'openai' && ! empty( Better_Messages()->settings['openAiApiKey'] ) );
             return array( $provider, $available );
+        }
+
+        public function is_transcription_configured() {
+            if ( ! class_exists( 'BP_Better_Messages_Voice_Messages' ) || ! $this->api ) {
+                return false;
+            }
+
+            list( , $available ) = $this->is_transcription_available();
+
+            return $available;
+        }
+
+        public function is_transcription_enabled() {
+            return $this->is_transcription_configured() && Better_Messages()->settings['voiceTranscription'] === '1';
+        }
+
+        public function bot_accepts_voice_input( $bot_settings ) {
+            if ( ! $this->is_transcription_configured() ) {
+                return false;
+            }
+
+            $enabled = isset( $bot_settings['voiceInput'] ) ? $bot_settings['voiceInput'] : '1';
+
+            return $enabled === '1';
+        }
+
+        public function get_voice_attachment_id( $message_id ) {
+            $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+
+            return $attachment_id ? (int) $attachment_id : 0;
+        }
+
+        public function get_voice_transcript( $message_id, $transcribe = false ) {
+            $attachment_id = $this->get_voice_attachment_id( $message_id );
+
+            if ( ! $attachment_id ) {
+                return null;
+            }
+
+            if ( metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                $stored = get_post_meta( $attachment_id, 'bm_voice_transcription', true );
+
+                return is_string( $stored ) ? $stored : '';
+            }
+
+            if ( ! $transcribe || ! $this->is_transcription_configured() ) {
+                return null;
+            }
+
+            $text = $this->transcribe_voice_attachment( $message_id, $attachment_id );
+
+            if ( is_wp_error( $text ) ) {
+                if ( in_array( $text->get_error_code(), array( 'already_processing', 'cloud_ai_timeout' ), true ) ) {
+                    return $this->wait_for_voice_transcript( $attachment_id );
+                }
+
+                return null;
+            }
+
+            return $text;
+        }
+
+        private function wait_for_voice_transcript( $attachment_id, $timeout = 30 ) {
+            $waited = 0;
+
+            while ( $waited < $timeout ) {
+                sleep( 2 );
+                $waited += 2;
+
+                wp_cache_delete( $attachment_id, 'post_meta' );
+
+                if ( metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                    $stored = get_post_meta( $attachment_id, 'bm_voice_transcription', true );
+
+                    return is_string( $stored ) ? $stored : '';
+                }
+            }
+
+            return null;
+        }
+
+        public function mark_voice_transcription_pending( $message ) {
+            $message_id    = (int) $message->id;
+            $attachment_id = $this->get_voice_attachment_id( $message_id );
+
+            if ( ! $attachment_id || metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                return;
+            }
+
+            $bot_will_transcribe = $this->thread_bot_accepts_voice_input( (int) $message->thread_id, (int) $message->sender_id );
+            $auto_transcribe     = $this->is_transcription_enabled() && Better_Messages()->settings['voiceTranscriptionAuto'] === '1';
+
+            if ( ! $bot_will_transcribe && ! $auto_transcribe ) {
+                return;
+            }
+
+            Better_Messages()->functions->update_message_meta( $message_id, 'bm_transcription_pending', time() );
+
+            if ( $bot_will_transcribe ) {
+                return;
+            }
+
+            $url = add_query_arg( array(
+                'message_id' => $message_id,
+                'secret'     => $this->get_ai_request_secret(),
+            ), Better_Messages()->functions->get_rest_api_url() . 'ai/transcribeVoiceBackground' );
+
+            wp_remote_get( $url, array(
+                'blocking' => false,
+                'timeout'  => 0,
+            ) );
+        }
+
+        private function thread_bot_accepts_voice_input( $thread_id, $sender_id ) {
+            $recipients = Better_Messages()->functions->get_recipients( $thread_id );
+
+            if ( count( $recipients ) !== 2 ) {
+                return false;
+            }
+
+            foreach ( $recipients as $recipient ) {
+                $user_id = (int) $recipient->user_id;
+
+                if ( $user_id === $sender_id || $user_id >= 0 ) {
+                    continue;
+                }
+
+                $bot_id = $this->get_bot_id_from_user( $user_id );
+
+                if ( ! $bot_id || ! $this->bot_exists( $bot_id ) ) {
+                    continue;
+                }
+
+                $settings = $this->get_bot_settings( $bot_id );
+
+                if ( str_contains( $settings['model'], '-audio-' ) ) {
+                    continue;
+                }
+
+                if ( $this->bot_accepts_voice_input( $settings ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public function handle_background_transcription( WP_REST_Request $request ) {
+            Better_Messages()->functions->end_browser_output();
+
+            $message_id    = (int) $request->get_param( 'message_id' );
+            $attachment_id = $this->get_voice_attachment_id( $message_id );
+
+            if ( ! $attachment_id || metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
+                Better_Messages()->functions->delete_message_meta( $message_id, 'bm_transcription_pending' );
+
+                return new WP_REST_Response( array( 'status' => 'skipped' ), 200 );
+            }
+
+            $this->transcribe_voice_attachment( $message_id, $attachment_id );
+
+            return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
+        }
+
+        public function transcribe_voice_attachment( $message_id, $attachment_id ) {
+            $lock_key = 'bm_transcribing_' . $attachment_id;
+
+            if ( get_transient( $lock_key ) ) {
+                return new WP_Error(
+                    'already_processing',
+                    _x( 'Transcription is already in progress', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 409 )
+                );
+            }
+
+            set_transient( $lock_key, true, 2 * MINUTE_IN_SECONDS );
+
+            $provider = Better_Messages()->settings['voiceTranscriptionProvider'] ?? 'openai';
+
+            if ( $provider === 'bm' ) {
+                $result = Better_Messages_Cloud_AI::instance()->transcribe( $attachment_id, $message_id );
+
+                if ( is_wp_error( $result ) && in_array( $result->get_error_code(), array( 'cloud_ai_timeout', 'cloud_ai_unavailable' ), true ) ) {
+                    Better_Messages()->functions->update_message_meta( $message_id, 'bm_transcription_pending', time() );
+                    return $result;
+                }
+
+                if ( is_wp_error( $result ) ) {
+                    delete_transient( $lock_key );
+                    Better_Messages()->functions->delete_message_meta( $message_id, 'bm_transcription_pending' );
+                    return $result;
+                }
+
+                $text = isset( $result['text'] ) ? $result['text'] : '';
+            } else {
+                $result = $this->api->transcribe_audio( $attachment_id );
+
+                if ( is_wp_error( $result ) ) {
+                    delete_transient( $lock_key );
+                    Better_Messages()->functions->delete_message_meta( $message_id, 'bm_transcription_pending' );
+                    return $result;
+                }
+
+                $text = $result;
+            }
+
+            if ( ! is_string( $text ) ) {
+                $text = '';
+            }
+
+            update_post_meta( $attachment_id, 'bm_voice_transcription', $text );
+            delete_transient( $lock_key );
+            Better_Messages()->functions->delete_message_meta( $message_id, 'bm_transcription_pending' );
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if ( $message ) {
+                Better_Messages()->functions->update_message_update_time( $message_id );
+                do_action( 'better_messages_message_meta_updated', (int) $message->thread_id, $message_id, 'bm_voice_transcription', $text );
+            }
+
+            return $text;
         }
 
         private function get_language_names() {
@@ -3084,6 +3340,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $thread_id   = intval( $request->get_param( 'id' ) );
             $body        = $request->get_json_params();
             $message_ids = isset( $body['message_ids'] ) ? array_map( 'intval', (array) $body['message_ids'] ) : array();
+            $message_ids = array_slice( array_values( array_unique( $message_ids ) ), 0, 25 );
             $user_id     = Better_Messages()->functions->get_current_user_id();
             $target_lang = Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_translation_language', true );
 
@@ -3091,8 +3348,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return new WP_Error( 'no_language', 'No translation language set', array( 'status' => 400 ) );
             }
 
-            $recipients = Better_Messages()->functions->get_recipients( $thread_id );
-            if ( count( $recipients ) !== 2 ) {
+            if ( ! $this->user_translates_thread( $user_id, $thread_id ) ) {
                 return new WP_REST_Response( array( 'status' => 'skipped' ), 200 );
             }
 
@@ -3109,7 +3365,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $pending = $this->get_translations_pending( $msg_id );
                 if ( isset( $pending[ $target_lang ] ) && ( time() - (int) $pending[ $target_lang ] ) < 120 ) continue;
 
-                if ( ! $this->is_ai_processable_content( $message->message ) ) continue;
+                if ( ! $this->is_translatable_content( $message->message ) ) continue;
+                if ( $this->is_location_message( $msg_id ) ) continue;
 
                 $sender_id = (int) $message->sender_id;
                 $plain     = wp_strip_all_tags( $message->message );
@@ -3154,63 +3411,256 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
         }
 
-        /**
-         * Get recipient translation languages for a message.
-         * Returns array of [ 'recipient_id' => int, 'target_lang' => string ] or empty array if not translatable.
-         */
-        private function get_translation_targets( $message ) {
+        private function translation_default_on() {
+            return Better_Messages()->settings['aiTranslationDefaultOn'] === '1';
+        }
+
+        private function translation_flag_on( $flag ) {
+            $flag = (int) $flag;
+
+            return $flag === 1 || ( $flag === 0 && $this->translation_default_on() );
+        }
+
+        public function user_can_translate( $user_id ) {
+            $user_id = (int) $user_id;
+            if ( $user_id <= 0 ) return false;
+
+            $allowed = (array) ( Better_Messages()->settings['aiTranslationRoles'] ?? [] );
+            if ( empty( $allowed ) ) return true;
+            if ( user_can( $user_id, 'manage_options' ) ) return true;
+
+            foreach ( Better_Messages()->functions->get_user_roles( $user_id ) as $role ) {
+                if ( in_array( $role, $allowed, true ) ) return true;
+            }
+
+            return false;
+        }
+
+        public function thread_translation_allowed( $thread_id ) {
+            $thread_id = (int) $thread_id;
+            $settings  = Better_Messages()->settings;
+            $type      = Better_Messages()->functions->get_thread_type( $thread_id );
+
+            if ( $type === 'chat-room' ) return $settings['aiTranslationChatRooms'] === '1';
+            if ( $type === 'group' || $type === 'course' ) return $settings['aiTranslationGroups'] === '1';
+
+            $recipients = Better_Messages()->functions->get_recipients( $thread_id );
+
+            return count( $recipients ) > 2
+                ? $settings['aiTranslationGroups'] === '1'
+                : $settings['aiTranslationPrivate'] === '1';
+        }
+
+        public function can_translate_thread( $can, $user_id, $thread_id ) {
+            $user_id   = (int) $user_id;
+            $thread_id = (int) $thread_id;
+
+            if ( $user_id <= 0 || $thread_id <= 0 ) return false;
+            if ( ! $this->user_can_translate( $user_id ) ) return false;
+
+            if ( class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ) return false;
+
+            $recipients = Better_Messages()->functions->get_recipients( $thread_id );
+
+            if ( ! isset( $recipients[ $user_id ] ) ) return false;
+
+            if ( count( $recipients ) === 2 ) {
+                foreach ( $recipients as $recipient ) {
+                    if ( Better_Messages()->functions->is_ai_bot_user( (int) $recipient->user_id ) ) return false;
+                }
+            }
+
+            return $this->thread_translation_allowed( $thread_id );
+        }
+
+        public function thread_is_translated( $is_translated, $flag, $user_id, $thread_id ) {
+            return $this->translation_flag_on( $flag ) && $this->can_translate_thread( false, $user_id, $thread_id );
+        }
+
+        public function filter_translation_language( $language, $user_id ) {
+            return $this->user_can_translate( $user_id ) ? $language : '';
+        }
+
+        public function translation_script_vars( $vars ) {
+            $vars['translation'] = array(
+                'bots'      => Better_Messages()->settings['aiTranslationBots'] === '1',
+                'defaultOn' => $this->translation_default_on(),
+            );
+
+            return $vars;
+        }
+
+        private $user_translates_memo = array();
+
+        public function user_translates_thread( $user_id, $thread_id ) {
+            $user_id   = (int) $user_id;
+            $thread_id = (int) $thread_id;
+            if ( $user_id <= 0 ) return false;
+
+            $memo_key = $user_id . ':' . $thread_id;
+            if ( array_key_exists( $memo_key, $this->user_translates_memo ) ) {
+                return $this->user_translates_memo[ $memo_key ];
+            }
+
+            $recipients = Better_Messages()->functions->get_recipients( $thread_id );
+
+            $result = isset( $recipients[ $user_id ] )
+                && $this->translation_flag_on( $recipients[ $user_id ]->is_translated )
+                && $this->can_translate_thread( false, $user_id, $thread_id );
+
+            $this->user_translates_memo[ $memo_key ] = $result;
+
+            return $result;
+        }
+
+        private function is_location_message( $message_id ) {
+            $location = Better_Messages()->functions->get_message_meta( (int) $message_id, 'location', true );
+
+            return ! empty( $location );
+        }
+
+        public function get_location_context( $message_id ) {
+            $message_id = (int) $message_id;
+            $location   = Better_Messages()->functions->get_message_meta( $message_id, 'location', true );
+
+            if ( empty( $location ) || ! is_array( $location ) ) {
+                return '';
+            }
+
+            if ( ! isset( $location['lat'] ) || ! isset( $location['lng'] ) ) {
+                return '';
+            }
+
+            if ( ! is_numeric( $location['lat'] ) || ! is_numeric( $location['lng'] ) ) {
+                return '';
+            }
+
+            $name    = isset( $location['name'] ) ? trim( (string) $location['name'] ) : '';
+            $address = isset( $location['address'] ) ? trim( (string) $location['address'] ) : '';
+
+            $parts = array();
+
+            if ( $address === '' ) {
+                if ( $name !== '' ) {
+                    $parts[] = $name;
+                }
+            } elseif ( $name === '' || stripos( $address, $name ) === 0 ) {
+                $parts[] = $address;
+            } else {
+                $parts[] = $name;
+                $parts[] = $address;
+            }
+
+            $parts[] = 'lat ' . $this->format_location_coordinate( $location['lat'] );
+            $parts[] = 'lng ' . $this->format_location_coordinate( $location['lng'] );
+
+            $context = implode( ', ', $parts );
+
+            return (string) apply_filters( 'better_messages_ai_location_context', $context, $message_id, $location );
+        }
+
+        private function format_location_coordinate( $value ) {
+            return rtrim( rtrim( sprintf( '%.6F', (float) $value ), '0' ), '.' );
+        }
+
+        public function set_thread_translation( WP_REST_Request $request ) {
+            global $wpdb;
+
+            $thread_id = intval( $request->get_param( 'id' ) );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+            $enabled   = filter_var( $request->get_param( 'enabled' ), FILTER_VALIDATE_BOOLEAN ) ? 1 : 0;
+
+            if ( $enabled && ! apply_filters( 'better_messages_can_translate_thread', false, $user_id, $thread_id, Better_Messages()->functions->get_thread_type( $thread_id ) ) ) {
+                return new WP_Error( 'translation_unavailable', _x( 'Translation is not available in this conversation', 'Message translation', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
+
+            $current = $wpdb->get_var( $wpdb->prepare(
+                "SELECT `is_translated` FROM " . bm_get_table( 'recipients' ) . " WHERE `user_id` = %d AND `thread_id` = %d",
+                $user_id, $thread_id
+            ) );
+
+            if ( is_null( $current ) ) {
+                return new WP_Error( 'rest_thread_forbidden', _x( 'Sorry, you are not allowed to access this conversation', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
+
+            if ( $this->translation_flag_on( $current ) !== (bool) $enabled ) {
+                $wpdb->query( $wpdb->prepare(
+                    "UPDATE " . bm_get_table( 'recipients' ) . " SET `is_translated` = %d, `last_update` = %d WHERE `user_id` = %d AND `thread_id` = %d",
+                    $enabled ? 1 : 2, Better_Messages()->functions->get_microtime(), $user_id, $thread_id
+                ) );
+
+                Better_Messages()->hooks->clean_thread_cache( $thread_id );
+                $this->user_translates_memo = array();
+
+                do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
+            }
+
+            return new WP_REST_Response( array( 'isTranslated' => (bool) $enabled ), 200 );
+        }
+
+        private function get_translation_languages( $message ) {
+            global $wpdb;
+
             $sender_id = (int) $message->sender_id;
+            $thread_id = (int) $message->thread_id;
             if ( $sender_id === 0 ) return array();
-            if ( ! $this->is_ai_processable_content( $message->message ) ) return array();
+            if ( ! $this->is_translatable_content( $message->message ) ) return array();
+            if ( $this->is_location_message( (int) $message->id ) ) return array();
+            if ( ! $this->thread_translation_allowed( $thread_id ) ) return array();
 
             $plain = wp_strip_all_tags( $message->message );
             if ( ! preg_match( '/\pL/u', $plain ) ) return array();
 
-            $recipients = Better_Messages()->functions->get_recipients( (int) $message->thread_id );
-            if ( count( $recipients ) !== 2 ) return array();
+            $rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT `recipients`.`user_id`, `usermeta`.`meta_value` AS `lang`
+                 FROM " . bm_get_table( 'recipients' ) . " `recipients`
+                 INNER JOIN `{$wpdb->usermeta}` `usermeta`
+                     ON `usermeta`.`user_id` = `recipients`.`user_id`
+                     AND `usermeta`.`meta_key` = 'bpbm_translation_language'
+                 WHERE `recipients`.`thread_id` = %d
+                 AND `recipients`.`user_id` > 0
+                 AND `recipients`.`user_id` != %d
+                 AND `usermeta`.`meta_value` != ''
+                 AND ( `recipients`.`is_translated` = 1 OR ( `recipients`.`is_translated` = 0 AND %d = 1 ) )",
+                $thread_id, $sender_id, $this->translation_default_on() ? 1 : 0
+            ) );
 
-            $targets = array();
-            foreach ( $recipients as $recipient ) {
-                $recipient_id = (int) $recipient->user_id;
-                if ( $recipient_id === $sender_id || $recipient_id <= 0 ) continue;
-
-                $target_lang = Better_Messages()->functions->get_user_meta( $recipient_id, 'bpbm_translation_language', true );
-                if ( ! empty( $target_lang ) ) {
-                    $targets[] = array( 'recipient_id' => $recipient_id, 'target_lang' => $target_lang );
-                }
+            $languages = array();
+            foreach ( (array) $rows as $row ) {
+                if ( ! $this->user_can_translate( (int) $row->user_id ) ) continue;
+                $languages[ $row->lang ] = $row->lang;
             }
-            return $targets;
+
+            return array_values( $languages );
         }
 
         /**
          * Mark message as pending translation before WebSocket broadcast (priority 5).
          */
         public function translate_on_send_mark( $message ) {
-            $targets = $this->get_translation_targets( $message );
-            if ( empty( $targets ) ) return;
+            $languages = $this->get_translation_languages( $message );
+            if ( empty( $languages ) ) return;
 
-            $msg_id = (int) $message->id;
-            foreach ( $targets as $target ) {
-                $pending = $this->get_translations_pending( $msg_id );
-                $pending[ $target['target_lang'] ] = time();
-                $this->save_translations_pending( $msg_id, $pending );
+            $msg_id  = (int) $message->id;
+            $pending = $this->get_translations_pending( $msg_id );
+            foreach ( $languages as $target_lang ) {
+                $pending[ $target_lang ] = time();
             }
+            $this->save_translations_pending( $msg_id, $pending );
         }
 
         /**
          * Dispatch translation request after WebSocket broadcast (priority 20).
          */
         public function translate_on_send_dispatch( $message ) {
-            $targets = $this->get_translation_targets( $message );
-            if ( empty( $targets ) ) return;
+            $languages = $this->get_translation_languages( $message );
+            if ( empty( $languages ) ) return;
 
             $msg_id    = (int) $message->id;
             $thread_id = (int) $message->thread_id;
             $text      = $this->prepare_translation_text( $message->message );
 
-            foreach ( $targets as $target ) {
-                $target_lang = $target['target_lang'];
-
+            foreach ( $languages as $target_lang ) {
                 $all = $this->get_translations( $msg_id );
                 if ( array_key_exists( $target_lang, $all ) ) continue;
 
@@ -3336,7 +3786,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          * Add translation data to message meta in REST/WebSocket responses.
          */
         public function translation_message_meta( $meta, $message_id, $thread_id, $content ) {
-            if ( ! $this->is_ai_processable_content( $content ) ) return $meta;
+            if ( ! $this->is_translatable_content( $content ) ) return $meta;
 
             $all           = $this->get_translations( $message_id );
             $pending_langs = $this->get_translations_pending( $message_id );
@@ -3362,6 +3812,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $target_lang = Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_translation_language', true );
             if ( empty( $target_lang ) ) return $meta;
+            if ( ! $this->user_translates_thread( $user_id, $thread_id ) ) return $meta;
 
             if ( isset( $translations[ $target_lang ] ) ) {
                 $meta['translation'] = $translations[ $target_lang ];
@@ -3410,6 +3861,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          * Add translation language selector to user settings.
          */
         public function translation_user_config( $settings, $user_id ) {
+            if ( ! $this->user_can_translate( $user_id ) ) return $settings;
+
             $translation_lang = Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_translation_language', true );
             $all_languages = $this->get_all_translation_languages();
             $allowed = (array) ( Better_Messages()->settings['aiTranslationLanguages'] ?? [] );
@@ -3433,7 +3886,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                         'label'   => _x( 'Translate messages to', 'User settings', 'bp-better-messages' ),
                         'value'   => $translation_lang ?: '',
                         'options' => $lang_options,
-                        'desc'    => _x( 'Select a language to automatically translate incoming messages', 'User settings', 'bp-better-messages' ),
+                        'desc'    => _x( 'Turn translation on in a conversation to see its incoming messages in this language', 'User settings', 'bp-better-messages' ),
                     ],
                 ],
             ];
@@ -3710,6 +4163,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 "maxWebSearchCalls" => "",
                 "maxFileSearchCalls" => "",
                 "files" => "0",
+                "voiceInput" => "1",
                 "webSearch" => "0",
                 "webSearchContextSize" => "medium",
                 "fileSearch" => "0",
@@ -3875,7 +4329,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             global $wpdb;
 
-            $query = $wpdb->prepare( "SELECT * FROM `" . bm_get_table('guests') . "` WHERE `ip` = %s AND `deleted_at` IS NULL", "ai-chat-bot-" . $bot_id );
+            $query = $wpdb->prepare( "SELECT * FROM `" . bm_get_table('guests') . "` WHERE `bot_id` = %d AND `deleted_at` IS NULL ORDER BY `id` ASC LIMIT 1", (int) $bot_id );
 
             $guest_user = $wpdb->get_row( $query );
 
@@ -3905,6 +4359,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $result = $wpdb->insert( bm_get_table('guests'), [
                     'ip'     => "ai-chat-bot-" . $bot_id,
+                    'bot_id' => (int) $bot_id,
                     'name'   => $name,
                     'secret' => ''
                 ] );
@@ -3926,11 +4381,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if( count( $recipients ) === 2 ){
                 foreach( $recipients as $recipient_id ){
                     if( $recipient_id < 0 ) {
-                        $guest_id = absint($recipient_id);
-                        $guest = Better_Messages()->guests->get_guest_user($guest_id);
+                        $bot_id = Better_Messages()->guests->get_bot_id( $recipient_id );
 
-                        if ( $guest && $guest->ip && str_starts_with($guest->ip, 'ai-chat-bot-') ) {
-                            $bot_id = str_replace('ai-chat-bot-', '', $guest->ip);
+                        if ( $bot_id > 0 ) {
                             if ( $this->is_bot_conversation($bot_id, $thread_id) ) {
                                 $settings = $this->get_bot_settings($bot_id);
 
@@ -3943,7 +4396,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                                 $thread_item['permissions']['canInvite'] = false;
                                 $thread_item['permissions']['preventReplies'] = true;
 
-                                $thread_item['permissions']['preventVoiceMessages'] = ( ! str_contains($settings['model'], '-audio-') || ! class_exists('BP_Better_Messages_Voice_Messages') );
+                                $accepts_voice = str_contains($settings['model'], '-audio-') || $this->bot_accepts_voice_input( $settings );
+                                $voice_restricted = ! empty( $thread_item['permissions']['preventVoiceMessages'] );
+
+                                $thread_item['permissions']['preventVoiceMessages'] = ( $voice_restricted || ! $accepts_voice || ! class_exists('BP_Better_Messages_Voice_Messages') );
+                                $thread_item['permissions']['preventVideoMessages'] = true;
 
                                 if (isset($thread_item['permissions']['canUpload'])) {
                                     $support_images = $settings['images'];
@@ -4059,14 +4516,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          */
         public function get_bot_id_from_user( $user_id )
         {
-            $guest_id = absint( $user_id );
-            $guest = Better_Messages()->guests->get_guest_user( $guest_id );
+            $bot_id = Better_Messages()->guests->get_bot_id( $user_id );
 
-            if ( $guest && $guest->ip && str_starts_with( $guest->ip, 'ai-chat-bot-' ) ) {
-                return (int) str_replace( 'ai-chat-bot-', '', $guest->ip );
-            }
-
-            return false;
+            return $bot_id > 0 ? $bot_id : false;
         }
 
         /**
@@ -4232,11 +4684,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          */
         private function prepare_translation_text( $content ) {
             // Remove GIFs
-            $content = preg_replace( '/<span class="bpbm-gif">.*?<\/span>/s', '', $content );
+            $content = preg_replace( '/<span class="(?:bm|bpbm)-gif">.*?<\/span>/s', '', $content );
             // Remove stickers
-            $content = preg_replace( '/<span class="bpbm-sticker">.*?<\/span>/s', '', $content );
+            $content = preg_replace( '/<span class="(?:bm|bpbm)-sticker">.*?<\/span>/s', '', $content );
             // Remove reply quotes
-            $content = preg_replace( '/<span class="bpbm-replied-message"[^>]*>.*?<\/span>/s', '', $content );
+            $content = preg_replace( '/<span class="(?:bm|bpbm)-replied-message"[^>]*>.*?<\/span>/s', '', $content );
             // Remove HTML comments
             $content = preg_replace( '/<!--.*?-->/s', '', $content );
 
@@ -4248,18 +4700,28 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          * Returns false for voice messages, AI bot messages, call messages, deleted messages, E2E encrypted,
          * file-only messages, privacy-removed, system messages, stickers, GIFs.
          */
+        public function is_translatable_content( $content ) {
+            if ( strpos( $content, '<!-- BM-AI -->' ) === 0 ) {
+                if ( Better_Messages()->settings['aiTranslationBots'] !== '1' ) return false;
+
+                return $this->is_ai_processable_content( substr( $content, strlen( '<!-- BM-AI -->' ) ) );
+            }
+
+            return $this->is_ai_processable_content( $content );
+        }
+
         public function is_ai_processable_content( $content ) {
             if ( empty( $content ) ) return false;
-            if ( $content === '<!-- BM-DELETED-MESSAGE -->' || $content === '<!-- BM-VOICE-MESSAGE-EXPIRED -->' ) return false;
+            if ( $content === '<!-- BM-DELETED-MESSAGE -->' || $content === '<!-- BM-VOICE-MESSAGE-EXPIRED -->' || $content === '<!-- BM-VIDEO-MESSAGE-EXPIRED -->' ) return false;
             if ( $content === '<!-- BM-PRIVACY-REMOVED -->' ) return false;
             if ( strpos( $content, '<!-- BM-AI -->' ) === 0 ) return false;
             if ( strpos( $content, '<!-- BM-SYSTEM-MESSAGE:' ) === 0 ) return false;
             if ( strpos( $content, '<div class="bpbm-voice-message"' ) === 0 ) return false;
-            if ( strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->' ) !== false ) return false;
-            if ( strpos( $content, '<span class="bpbm-call ' ) !== false ) return false;
+            if ( strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->' ) !== false || strpos( $content, '<!-- BPBM-VIDEO-MESSAGE -->' ) !== false ) return false;
+            if ( strpos( $content, '<span class="bm-call ' ) !== false || strpos( $content, '<span class="bpbm-call ' ) !== false ) return false;
             if ( strpos( $content, '<!-- BM-ONLY-FILES -->' ) !== false ) return false;
-            if ( strpos( $content, '<span class="bpbm-sticker">' ) === 0 ) return false;
-            if ( strpos( $content, '<span class="bpbm-gif">' ) === 0 ) return false;
+            if ( strpos( $content, '<span class="bm-sticker">' ) === 0 || strpos( $content, '<span class="bpbm-sticker">' ) === 0 ) return false;
+            if ( strpos( $content, '<span class="bm-gif">' ) === 0 || strpos( $content, '<span class="bpbm-gif">' ) === 0 ) return false;
             if ( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $content, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) return false;
             $plain = wp_strip_all_tags( $content );
             $letters = preg_replace( '/[^\pL]/u', '', mb_strtolower( $plain ) );
@@ -4788,50 +5250,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
             }
 
-            $lock_key = 'bm_transcribing_' . $attachment_id;
-            if ( get_transient( $lock_key ) ) {
-                return new WP_Error(
-                    'already_processing',
-                    _x( 'Transcription is already in progress', 'Rest API Error', 'bp-better-messages' ),
-                    array( 'status' => 409 )
-                );
-            }
+            $result = $this->transcribe_voice_attachment( $message_id, $attachment_id );
 
-            set_transient( $lock_key, true, 2 * MINUTE_IN_SECONDS );
-
-            $provider = Better_Messages()->settings['voiceTranscriptionProvider'] ?? 'openai';
-
-            if ( $provider === 'bm' ) {
-                $result = Better_Messages_Cloud_AI::instance()->transcribe( $attachment_id, $message_id );
-
-                if ( is_wp_error( $result ) && in_array( $result->get_error_code(), array( 'cloud_ai_timeout', 'cloud_ai_unavailable' ), true ) ) {
-                    Better_Messages()->functions->update_message_meta( $message_id, 'bm_transcription_pending', time() );
-                    return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
-                }
-
-                if ( is_wp_error( $result ) ) {
-                    delete_transient( $lock_key );
-                    return $result;
-                }
-
-                $text = isset( $result['text'] ) ? $result['text'] : '';
-            } else {
-                $result = $this->api->transcribe_audio( $attachment_id );
-
-                if ( is_wp_error( $result ) ) {
-                    delete_transient( $lock_key );
-                    return $result;
-                }
-
-                $text = $result;
-            }
-
-            update_post_meta( $attachment_id, 'bm_voice_transcription', $text );
-            delete_transient( $lock_key );
-
-            if ( $message ) {
-                Better_Messages()->functions->update_message_update_time( $message_id );
-                do_action( 'better_messages_message_meta_updated', (int) $message->thread_id, $message_id, 'bm_voice_transcription', $text );
+            if ( is_wp_error( $result ) && ! in_array( $result->get_error_code(), array( 'cloud_ai_timeout', 'cloud_ai_unavailable' ), true ) ) {
+                return $result;
             }
 
             return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
@@ -4842,17 +5264,31 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
          */
         public function voice_transcription_meta( $meta, $message_id, $thread_id, $content )
         {
-            $is_voice_message = strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->', 0 ) === 0;
+            $is_voice_message = strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->' ) !== false;
 
             if ( ! $is_voice_message ) {
                 return $meta;
             }
 
-            $meta['canTranscribe'] = true;
+            $meta['canTranscribe'] = $this->is_transcription_enabled();
+            $meta['transcribing']  = false;
 
-            $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+            $attachment_id = $this->get_voice_attachment_id( $message_id );
             if ( $attachment_id && metadata_exists( 'post', $attachment_id, 'bm_voice_transcription' ) ) {
-                $meta['transcription'] = get_post_meta( $attachment_id, 'bm_voice_transcription', true );
+                $meta['canTranscribe'] = false;
+                $stored = get_post_meta( $attachment_id, 'bm_voice_transcription', true );
+                if ( is_string( $stored ) && trim( $stored ) !== '' ) {
+                    $meta['transcription'] = $stored;
+                }
+
+                return $meta;
+            }
+
+            $pending = (int) Better_Messages()->functions->get_message_meta( $message_id, 'bm_transcription_pending' );
+
+            if ( $pending > 0 && ( time() - $pending ) < 2 * MINUTE_IN_SECONDS ) {
+                $meta['canTranscribe'] = false;
+                $meta['transcribing']  = true;
             }
 
             return $meta;

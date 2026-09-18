@@ -31,11 +31,14 @@
         useEffect(function () {
             if (!ref.current) return;
 
-            // BM owns `.bp-messages-wrap-main`'s DOM lifecycle (it mounts its
+            // BM owns `.bm-wrap-main`'s DOM lifecycle (it mounts its
             // own React root into it via `BetterMessages.initialize()`).
             // Append imperatively so React doesn't try to reconcile children.
             var wrap = document.createElement('div');
-            wrap.className = 'bp-messages-wrap-main';
+            // `bm-host-sized`: the dashboard fits the messenger to its own
+            // panel below, so BM's "fill the window" rule — which is
+            // !important and outranks these selectors — has to stand down.
+            wrap.className = 'bm-wrap-main bm-host-sized';
             // Avoid `data-full-screen="1"`: BM reparents the wrap to <body>
             // for fixed-position layout in that mode, yanking it out of the
             // dashboard. Height is handled via the CSS variables instead.

@@ -4,7 +4,7 @@
 
 namespace BetterMessages\Composer\Autoload;
 
-class ComposerStaticInit8f48f8492184dac56277fdbaa7758434
+class ComposerStaticInit4b564d12745f73f50d2527c298538705
 {
     public static $files = array (
         'c52340349845674640f31d959b6f1873' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
@@ -351,9 +351,9 @@ class ComposerStaticInit8f48f8492184dac56277fdbaa7758434
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8f48f8492184dac56277fdbaa7758434::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8f48f8492184dac56277fdbaa7758434::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit8f48f8492184dac56277fdbaa7758434::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4b564d12745f73f50d2527c298538705::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4b564d12745f73f50d2527c298538705::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit4b564d12745f73f50d2527c298538705::$classMap;
 
         }, null, ClassLoader::class);
     }

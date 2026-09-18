@@ -25,8 +25,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
             add_action('profile_magic_profile_tab_link', array( $this, 'profile_tab_link' ), 10, 5 );
             add_action('profile_magic_profile_tab_content', array( $this, 'profile_tab_content'), 10, 2 );
 
-            add_action('better_messages_location_none', array( $this, 'bm_location_label' ), 10, 1 );
-
             if( Better_Messages()->settings['chatPage'] === '0' ) {
                 add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
             }
@@ -73,10 +71,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
             return $pmrequests->pm_get_user_profile_url( $user_id );
         }
 
-        public function bm_location_label(){
-            return _x('Show in ProfileGrid profile', 'ProfileGrid Integration', 'bp-better-messages');
-        }
-
         public function profile_tab_content( $uid, $primary_gid ){
             if(  (int) $uid === Better_Messages()->functions->get_current_user_id() ) {
                 echo '<div id="bm-pg-messages" class="pm-dbfl pg-profile-tab-content bm-pg-messages-tab" style="display: none">';
@@ -86,7 +80,7 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
                     var button = document.getElementById('bm-pg-messages-link');
 
                     button.addEventListener('click', function(){
-                        let clickToOpen = document.querySelector('#bm-pg-messages .bp-messages-mobile-tap')
+                        let clickToOpen = document.querySelector('#bm-pg-messages .bm-mobile-tap')
                         if( clickToOpen ) clickToOpen.click()
                     });
 

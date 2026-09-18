@@ -35,7 +35,7 @@ if ( !class_exists( 'Better_Messages_Reactions' ) ){
         }
 
         public function reactions_message_meta( $meta, $message_id, $thread_id, $content ){
-            $reactions = self::get_reactions();
+            $reactions = $this->get_reactions();
 
             $message_reactions = $this->get_message_reactions( $message_id );
 
@@ -81,7 +81,7 @@ if ( !class_exists( 'Better_Messages_Reactions' ) ){
             global $wpdb;
             $user_id             = Better_Messages()->functions->get_current_user_id();
             $emoji               = sanitize_text_field( $request->get_param('emoji') );
-            $available_reactions = self::get_reactions();
+            $available_reactions = $this->get_reactions();
 
 
             if( ! isset( $available_reactions[ $emoji ] ) ){
@@ -150,13 +150,17 @@ if ( !class_exists( 'Better_Messages_Reactions' ) ){
             ];
         }
 
-        public static function get_reactions(){
+        public function get_reactions(){
             $reactions = Better_Messages()->settings['reactionsEmojies'];
             return apply_filters( 'bp_better_messages_reactions_list', $reactions );
         }
 
         public function add_reactions_to_js( $variables ){
-            $variables['reactions'] = self::get_reactions();
+            if ( Better_Messages()->settings['enableReactions'] !== '1' ) {
+                return $variables;
+            }
+
+            $variables['reactions'] = $this->get_reactions();
             return $variables;
         }
 

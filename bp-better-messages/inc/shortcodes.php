@@ -259,6 +259,21 @@ class Better_Messages_Shortcodes
             } elseif( $child->nodeType === XML_TEXT_NODE || $child->nodeType === XML_CDATA_SECTION_NODE ){
                 if( ! $keeps_text && trim( (string) $child->nodeValue ) !== '' ){
                     $element->removeChild( $child );
+                    continue;
+                }
+
+                /**
+                 * saveXML() writes a CDATA section back out verbatim, and the icon markup is
+                 * then echoed into an HTML document. <title> and <desc> are HTML integration
+                 * points, so an HTML parser reads `<![CDATA[` inside them as a bogus comment
+                 * that ends at the very first `>` — everything after it becomes live markup.
+                 * Swapping the section for a text node makes saveXML() escape the content.
+                 */
+                if( $child->nodeType === XML_CDATA_SECTION_NODE ){
+                    $element->replaceChild(
+                        $element->ownerDocument->createTextNode( (string) $child->nodeValue ),
+                        $child
+                    );
                 }
             } else {
                 $element->removeChild( $child );
@@ -439,7 +454,7 @@ class Better_Messages_Shortcodes
         }
 
         $initialHeight = Better_Messages()->functions->initial_container_height();
-        return '<div class="bp-messages-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+        return '<div class="bm-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
     }
 
     public function bp_better_messages( $args ){
@@ -455,7 +470,7 @@ class Better_Messages_Shortcodes
     }
 
     public function bp_better_messages_pm_button( $args ){
-        $class   = 'bpbm-pm-button';
+        $class   = 'bm-pm-button';
         $target  = '';
         $text    = __('Private Message', 'bp-better-messages');
         $subject = '';
@@ -546,7 +561,7 @@ class Better_Messages_Shortcodes
     }
 
     public function bp_better_messages_video_call_button( $args ){
-        $class   = 'bpbm-pm-button video-call';
+        $class   = 'bm-pm-button video-call';
         $target  = '';
         $text    = __('Video Call', 'bp-better-messages');
         $return_url = false;
@@ -597,7 +612,7 @@ class Better_Messages_Shortcodes
     }
 
     public function bp_better_messages_audio_call_button( $args ){
-        $class   = 'bpbm-pm-button audio-call';
+        $class   = 'bm-pm-button audio-call';
         $text    = __('Audio Call', 'bp-better-messages');
         $return_url = false;
 
@@ -646,7 +661,7 @@ class Better_Messages_Shortcodes
             return '';
         }
 
-        $class   = 'bpbm-pm-button open-mini-chat';
+        $class   = 'bm-pm-button open-mini-chat';
         $text    = __('Private Message', 'bp-better-messages');
 
         if( isset( $args['class'] ) ) {
@@ -711,7 +726,7 @@ class Better_Messages_Shortcodes
             $preserve_space = true;
         }
 
-        $classes = ['bp-better-messages-unread', 'bpbmuc'];
+        $classes = ['bm-menu-unread', 'bp-better-messages-unread', 'bpbmuc'];
         if( $hide_when_no_messages ){
             $classes[] = 'bpbmuc-hide-when-null';
         }

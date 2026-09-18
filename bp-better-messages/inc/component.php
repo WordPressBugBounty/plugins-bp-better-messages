@@ -122,21 +122,21 @@ class Better_Messages_Component extends BP_Component
         if ( ! is_user_logged_in() ) return;
 
         $messages_total = Better_Messages()->functions->get_total_threads_for_user( Better_Messages()->functions->get_current_user_id(), 'unread' );
-        $class = 'bp-better-messages-unread count';
+        $class = 'bm-menu-unread count';
         $class .= ( 0 === $messages_total ) ? ' no-count' : '';
 
         $title = sprintf( _x( 'Messages <span class="%s">%s</span>', 'Messages list sub nav', 'bp-better-messages' ), esc_attr( $class ), bp_core_number_format( $messages_total ) );
 
         $wp_admin_nav[] = array(
             'parent' => buddypress()->my_account_menu_id,
-            'id'     => 'bp-messages-' . $this->id,
+            'id'     => 'bm-messages-' . $this->id,
             'title'  => $title,
             'href'   => Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() )
         );
 
         $wp_admin_nav[] = array(
-            'parent' => 'bp-messages-' . $this->id,
-            'id'     => 'bp-messages-' . $this->id . '-threads',
+            'parent' => 'bm-messages-' . $this->id,
+            'id'     => 'bm-messages-' . $this->id . '-threads',
             'title'  => __( 'Conversations', 'bp-better-messages' ),
             'href'   => Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() )
         );
@@ -145,8 +145,8 @@ class Better_Messages_Component extends BP_Component
             $href = Better_Messages()->functions->add_hash_arg('favorited', [], Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() ));
 
             $wp_admin_nav[] = array(
-                'parent' => 'bp-messages-' . $this->id,
-                'id' => 'bp-messages-' . $this->id . '-starred',
+                'parent' => 'bm-messages-' . $this->id,
+                'id' => 'bm-messages-' . $this->id . '-starred',
                 'title' => __('Starred', 'bp-better-messages'),
                 'href' => $href
             );
@@ -156,8 +156,8 @@ class Better_Messages_Component extends BP_Component
             $href = Better_Messages()->functions->add_hash_arg('new-conversation', [], Better_Messages()->functions->get_link( Better_Messages()->functions->get_current_user_id() ));
 
             $wp_admin_nav[] = array(
-                'parent' => 'bp-messages-' . $this->id,
-                'id' => 'bp-messages-' . $this->id . '-new-message',
+                'parent' => 'bm-messages-' . $this->id,
+                'id' => 'bm-messages-' . $this->id . '-new-message',
                 'title' => __('New Conversation', 'bp-better-messages'),
                 'href' => $href
             );

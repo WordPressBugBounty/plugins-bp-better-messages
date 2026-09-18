@@ -73,8 +73,12 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
             if( $include_personal ){
 
                 if( $thread_item['participantsCount'] === 2 ) {
-                    $user_id = $thread_item['participants'][0];
-                    $thread_item['permissions']['canBlockUser'] = $this->can_block_user( Better_Messages()->functions->get_current_user_id(), $user_id );
+                    $me      = Better_Messages()->functions->get_current_user_id();
+                    $user_id = (int) $thread_item['participants'][0];
+                    if( $user_id === $me && isset( $thread_item['participants'][1] ) ){
+                        $user_id = (int) $thread_item['participants'][1];
+                    }
+                    $thread_item['permissions']['canBlockUser'] = $this->can_block_user( $me, $user_id );
                 }
             }
 

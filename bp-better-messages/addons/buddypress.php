@@ -154,7 +154,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
         public function modify_youzify_button($args){
             $args['link_href'] = $this->pm_link();
             if( BP_Better_Messages()->settings['bpForceMiniChat'] === '1' && function_exists('bp_displayed_user_id') ) {
-                $args['link_class'] .= ' bpbm-pm-button open-mini-chat bm-no-loader bm-no-style';
+                $args['link_class'] .= ' bm-pm-button open-mini-chat bm-no-loader bm-no-style';
 
                 $user_id = isset( $args['id'] ) ? (int) preg_replace( "/[^0-9]/", "", $args['id'] ) : 0;
 
@@ -204,7 +204,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
 
             if( BP_Better_Messages()->settings['bpForceMiniChat'] === '1'
                 && function_exists('bp_displayed_user_id') ) {
-                echo '<a href="' . $this->pm_link() . '" class="bpbm-pm-button open-mini-chat" data-user-id="' .  $user_id . '"><span class="bm-button-text">' . __('Private Message', 'bp-better-messages') . '</span></a>';
+                echo '<a href="' . $this->pm_link() . '" class="bm-pm-button open-mini-chat" data-user-id="' .  $user_id . '"><span class="bm-button-text">' . __('Private Message', 'bp-better-messages') . '</span></a>';
             } else {
                 echo '<a href="' . $this->pm_link() . '">' . __('Private Message', 'bp-better-messages') . '</a>';
             }
@@ -237,7 +237,7 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             $args['link_href'] = $this->pm_link();
 
             if( BP_Better_Messages()->settings['bpForceMiniChat'] === '1' && function_exists('bp_displayed_user_id') ) {
-                $args['link_class'] .= ' bpbm-pm-button open-mini-chat bm-no-loader';
+                $args['link_class'] .= ' bm-pm-button open-mini-chat bm-no-loader';
                 $args['button_attr']['data-user-id'] = Better_Messages()->functions->get_member_id();
             }
 

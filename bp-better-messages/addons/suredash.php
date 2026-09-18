@@ -31,6 +31,10 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
                 add_action( 'wp_footer', array( $this, 'dropdown_js' ) );
             }
 
+            if ( Better_Messages()->settings['SDenableMobileMessages'] === '1' ) {
+                add_action( 'wp_footer', array( $this, 'mobile_menu_js' ) );
+            }
+
             add_action( 'wp_head', array( $this, 'counter_script' ) );
             add_action( 'wp_footer', array( $this, 'dark_mode_script' ) );
 
@@ -230,6 +234,130 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
         }
 
         /**
+         * Inject Messages into the mobile bottom bar
+         *
+         * SureDash builds that bar from block markup in the portal template, so
+         * there is no server-side menu filter to add an item to the way
+         * FluentCommunity offers `fluent_community/mobile_menu`. The bar's own
+         * items are the template for the new one: clone the House entry, swap
+         * its icon, label and href, and carry the notification badge markup
+         * over from the Bell entry so the counter looks native rather than
+         * bolted on. The badge also answers to `.bm-suredash-unread-count`, so
+         * counter_script keeps it live with no extra wiring.
+         */
+        public function mobile_menu_js()
+        {
+            if ( ! is_user_logged_in() ) {
+                return;
+            }
+
+            $messages_url = Better_Messages()->functions->get_link();
+            $label        = esc_js( _x( 'Messages', 'SureDash Integration', 'bp-better-messages' ) );
+            $unread       = Better_Messages()->functions->get_user_unread_count( get_current_user_id() );
+            $badge_style  = $unread > 0 ? '' : 'display:none;';
+            $badge_text   = $unread > 0 ? intval( $unread ) : '';
+
+            ob_start();
+            ?>
+            <script type="text/javascript">
+                (function(){
+                    var ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+
+                    function build( bar ){
+                        if( bar.querySelector('.bm-suredash-mobile-messages') ) return true;
+
+                        var icons = bar.querySelector('.wp-block-suredash-dynamic-icons');
+                        if( ! icons ) return false;
+
+                        var sample = icons.querySelector('.wp-block-suredash-dynamic-icon');
+                        if( ! sample ) return false;
+
+                        var item = sample.cloneNode(false);
+                        item.className = sample.className.replace(/wp-social-link-[A-Za-z0-9_-]+/, 'wp-social-link-Message') + ' bm-suredash-mobile-messages';
+
+                        var anchor = document.createElement('a');
+                        var sampleAnchor = sample.querySelector('a');
+                        anchor.className = sampleAnchor ? sampleAnchor.className : 'wp-block-suredash-dynamic-icon-anchor';
+                        anchor.href = '<?php echo esc_url( $messages_url ); ?>';
+                        anchor.style.position = 'relative';
+
+                        var glyph = document.createElement('span');
+                        var sampleGlyph = sample.querySelector('.portal-svg-icon');
+                        glyph.className = sampleGlyph ? sampleGlyph.className : 'portal-svg-icon portal-icon-inherit';
+                        glyph.setAttribute('aria-hidden', 'true');
+                        glyph.innerHTML = ICON;
+                        anchor.appendChild(glyph);
+
+                        var srLabel = document.createElement('span');
+                        srLabel.className = 'wp-block-suredash-dynamic-icon-label screen-reader-text';
+                        srLabel.textContent = '<?php echo $label; ?>';
+                        anchor.appendChild(srLabel);
+
+                        // `notification-unread-count` is the portal's own hook
+                        // for the bell count and is dropped deliberately —
+                        // keeping it would let SureDash overwrite this badge
+                        // with the notification number. Everything else is the
+                        // portal's badge styling, spelled out rather than only
+                        // cloned: the bell renders no badge at all when there
+                        // is nothing to show, so on those page loads there is
+                        // nothing to copy and the fallback is what ships.
+                        var BADGE = 'portal-footer-notif-badge sd-absolute sd-flex sd-items-center sd-justify-center sd-font-12 sd-px-8 sd-max-h-20 sd-font-medium sd-bg-danger sd-color-white sd-min-w-20 sd-nowrap sd-radius-9999';
+                        var BADGE_STYLE = 'top:-10px;right:-5px;padding:0 5px;min-width:18px;height:18px;text-align:center;';
+
+                        var badge = document.createElement('span');
+                        var sampleBadge = icons.querySelector('.portal-footer-notif-badge');
+                        badge.className = ( sampleBadge ? sampleBadge.className.replace('notification-unread-count', '').trim() : BADGE ) + ' bm-suredash-unread-count';
+                        badge.setAttribute('style', ( sampleBadge && sampleBadge.getAttribute('style') ? sampleBadge.getAttribute('style') : BADGE_STYLE ) + ';<?php echo $badge_style; ?>');
+                        badge.textContent = '<?php echo $badge_text; ?>';
+                        anchor.appendChild(badge);
+
+                        item.appendChild(anchor);
+
+                        // Messages belongs with the other things addressed to
+                        // you, so it goes ahead of notifications; failing that,
+                        // ahead of the profile icon, which is the other
+                        // personal end of the bar. A bar with neither is one we
+                        // know nothing about, so the item just goes last rather
+                        // than guessing at a position inside it.
+                        var anchorItem = icons.querySelector('.wp-social-link-Bell')
+                            || icons.querySelector('.wp-social-link-User');
+
+                        if( anchorItem ){
+                            icons.insertBefore(item, anchorItem);
+                        } else {
+                            icons.appendChild(item);
+                        }
+
+                        return true;
+                    }
+
+                    function inject(){
+                        var bars = document.querySelectorAll('.portal-application-footer');
+                        var done = bars.length > 0;
+                        bars.forEach(function( bar ){
+                            if( ! build( bar ) ) done = false;
+                        });
+                        return done;
+                    }
+
+                    if( inject() ) return;
+
+                    // The bar is block markup that the portal can hydrate after
+                    // this script runs, so watch for it instead of racing it.
+                    var observer = new MutationObserver(function(){
+                        if( inject() ) observer.disconnect();
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true });
+                    setTimeout(function(){ observer.disconnect(); }, 10000);
+                })();
+            </script>
+            <?php
+            $script = ob_get_clean();
+
+            echo Better_Messages()->functions->minify_js( $script );
+        }
+
+        /**
          * Real-time unread counter updates
          */
         public function counter_script()
@@ -362,19 +490,86 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
         {
             ?>
             <style type="text/css">
-                .wp-block-suredash-content:has(.bp-messages-wrap-main) {
+                .wp-block-suredash-content:has(.bm-wrap-main) {
                     padding-bottom: 0 !important;
                     padding-left: 0 !important;
                     padding-right: 0 !important;
                 }
-                #portal-main-content .bp-messages-wrap-main .bp-messages-wrap:not(.bp-messages-full-screen, .bp-messages-mobile),
-                #portal-main-content .bp-messages-wrap-main .bp-messages-threads-wrapper {
-                    height: calc(var(--bm-sd-window-height) - var(--bm-sd-top-offset, 0px)) !important;
+                /* Keyed on the messenger itself rather than on where it sits:
+                 * the mobile takeover moves .bm-wrap-main out to <body>, so a
+                 * selector anchored to #portal-main-content stopped matching
+                 * exactly where the badge is most in the way. */
+                body:has(.bm-wrap-main) .portal-branding {
+                    display: none !important;
                 }
-                #portal-main-content .bp-messages-wrap-main .bp-messages-wrap {
+                #portal-main-content .bm-wrap-main:not(.bm-full-screen, .bm-mobile),
+                #portal-main-content .bm-wrap-main .bm-wrap:not(.bm-full-screen, .bm-mobile),
+                #portal-main-content .bm-wrap-main .bm-threads-wrapper {
+                    height: calc(var(--bm-sd-window-height) - var(--bm-sd-top-offset, 0px)) !important;
+                    min-height: 0 !important;
+                    max-height: none !important;
+                }
+                #portal-main-content .bm-wrap-main .bm-wrap,
+                #portal-main-content .bm-wrap-main .bm-card {
                     border-radius: 0 !important;
                     box-shadow: none;
                     border: none;
+                }
+
+                /* The portal's own chrome is how a phone gets back out of the
+                 * messenger, so the takeover stops short of it instead of
+                 * covering it: the sticky header keeps the room above, the
+                 * bottom bar the room below. Both heights are measured, not
+                 * assumed — a portal page built from a different pattern has
+                 * neither, and the script leaves the variables at 0 there.
+                 * Below the header's own z-index (10) and the bar's (99). */
+                body.bm-mobile {
+                    --bm-takeover-top: var(--bm-sd-mobile-header, 0px);
+                    --bm-takeover-bottom: var(--bm-sd-mobile-footer, 0px);
+                    --bm-takeover-z: 9;
+                }
+
+                /* Core hides the admin bar on mobile because the messenger
+                 * normally covers the screen anyway. Here it does not, and
+                 * hiding it only leaves the 46px gap that html's margin-top
+                 * still reserves. Put it back where the portal chrome is. */
+                body.bm-mobile:has(.portal-application-footer) #wpadminbar {
+                    display: block !important;
+                }
+
+                /* SureDash gives the bar a 50px-blur shadow, which reads as
+                 * depth over scrolling page content but as a smudge over the
+                 * messenger's own footer sitting flush against it. */
+                body:has(.bm-wrap-main) .portal-application-footer {
+                    box-shadow: none !important;
+                }
+
+                /* Typing and calls want the whole screen: the keyboard already
+                 * takes the bottom, and a call has its own way out. */
+                body.bm-reply-area-focused.bm-mobile,
+                body.bm-call-active.bm-mobile {
+                    --bm-takeover-bottom: 0px;
+                }
+
+                body.bm-reply-area-focused.bm-mobile .portal-application-footer,
+                body.bm-call-active.bm-mobile .portal-application-footer {
+                    display: none !important;
+                }
+
+                /* With the bar on screen the portal is the way back out, so the
+                 * messenger's own close button stops being the only exit and
+                 * starts being a second one that leads somewhere less obvious.
+                 * Guarded on the bar actually being there: a portal page without
+                 * it needs that button kept. */
+                body.bm-mobile:has(.portal-application-footer) .bm-wrap-main.bm-mobile [data-action-key="close"],
+                body.bm-mobile:has(.portal-application-footer) .bm-wrap-group.bm-mobile [data-action-key="close"],
+                body.bm-mobile:has(.portal-application-footer) .bm-chat-wrap.bm-mobile [data-action-key="close"],
+                body.bm-mobile:has(.portal-application-footer) .bm-single-thread-wrap.bm-mobile [data-action-key="close"] {
+                    display: none !important;
+                }
+
+                .bm-suredash-mobile-messages .bm-suredash-unread-count:empty {
+                    display: none !important;
                 }
             </style>
             <?php
@@ -393,10 +588,42 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
                         }
                     }
 
-                    function bmSuredashUpdateHeight(){
-                        var wrap = document.querySelector('#portal-main-content .bp-messages-wrap-main');
-                        if( ! wrap ) return;
+                    // The portal's mobile header is sticky and its bottom bar is
+                    // fixed, so their room has to be measured rather than named:
+                    // the header's own bottom edge already carries the admin bar
+                    // above it, and either can be missing on a page built from a
+                    // different pattern.
+                    function bmSuredashMobileChrome(){
+                        var top = 0, bottom = 0;
 
+                        // offsetParent is null for a fixed element, so it can
+                        // not stand in for "is this on screen" here.
+                        var footer = document.querySelector('.portal-application-footer');
+                        if( footer ){
+                            var fr = footer.getBoundingClientRect();
+                            if( fr.height > 0 && getComputedStyle(footer).display !== 'none' ){
+                                bottom = Math.round(fr.height);
+                            }
+                        }
+
+                        // The portal header is a plain block group with nothing
+                        // naming it, so it is found by what it does: the sticky
+                        // full-width band at the top of the page. Its own bottom
+                        // edge already accounts for the admin bar above it.
+                        var best = 0;
+                        document.querySelectorAll('.wp-block-group').forEach(function( el ){
+                            if( getComputedStyle(el).position !== 'sticky' ) return;
+                            var r = el.getBoundingClientRect();
+                            if( r.top > 150 || r.height === 0 ) return;
+                            if( r.width < window.innerWidth * 0.9 ) return;
+                            if( r.bottom > best ) best = r.bottom;
+                        });
+                        top = Math.max(0, Math.round(best));
+
+                        return { top: top, bottom: bottom };
+                    }
+
+                    function bmSuredashUpdateHeight(){
                         var style = document.querySelector('#bm-suredash-height-style');
                         if( ! style ){
                             style = document.createElement('style');
@@ -404,18 +631,29 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
                             document.head.appendChild(style);
                         }
 
-                        var rect = wrap.getBoundingClientRect();
+                        var chrome = bmSuredashMobileChrome();
                         var css = ':root{';
                         css += '--bm-sd-window-height:' + window.innerHeight + 'px;';
-                        css += '--bm-sd-top-offset:' + Math.max(0, rect.top) + 'px;';
-                        css += '}';
+                        css += '--bm-sd-mobile-header:' + chrome.top + 'px;';
+                        css += '--bm-sd-mobile-footer:' + chrome.bottom + 'px;';
 
+                        var wrap = document.querySelector('#portal-main-content .bm-wrap-main');
+                        if( wrap ){
+                            css += '--bm-sd-top-offset:' + Math.max(0, wrap.getBoundingClientRect().top) + 'px;';
+                        }
+
+                        css += '}';
                         style.textContent = css;
-                        wrap.style.height = 'auto';
+
+                        if( wrap ) wrap.style.height = 'auto';
                     }
 
                     bmSuredashUpdateHeight();
+                    // The bar is block markup the portal can hydrate late, so
+                    // take a second reading once it has settled.
+                    setTimeout(bmSuredashUpdateHeight, 500);
                     window.addEventListener('resize', bmSuredashUpdateHeight);
+                    window.addEventListener('orientationchange', function(){ setTimeout(bmSuredashUpdateHeight, 100); });
                 })();
             </script>
             <?php

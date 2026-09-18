@@ -15,6 +15,7 @@ class Better_Messages_Translations {
     private $upload_dir;
     private $upload_url;
     private $inline_fallback = array();
+    private $file_versions = array();
 
     public function __construct() {
         $upload = wp_upload_dir();
@@ -25,27 +26,22 @@ class Better_Messages_Translations {
         add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'inject_translation_updates' ) );
     }
 
-    /**
-     * Get the URL of a cached translation JS file.
-     * Must be called AFTER wp_register_script() and wp_set_script_translations().
-     *
-     * Uses WordPress's own load_script_textdomain() to find translations
-     * the same way WordPress would for inline injection, then caches the
-     * result as an external JS file for browser caching.
-     *
-     * @param string $script_handle Registered WP script handle
-     * @return string|false URL of the cached JS file, or false if not needed
-     */
-    public function get_translation_file_url( $script_handle ) {
+    // The JS translation path is gone. It located a JED .json by md5 of a
+    // script path, which needed three generated stub files in assets/js
+    // that existed for no other reason. Every enqueue now calls
+    // get_php_translation_file_url() below, which builds the same map from
+    // inc/translations/frontend-strings.php and the PHP catalogue.
+
+    private function in_script_locale( $script_handle, $resolver ) {
         if ( ! has_filter( 'better_messages_i18n_locale' ) ) {
-            return $this->resolve_translation_file_url( $script_handle );
+            return call_user_func( $resolver, $script_handle );
         }
 
         $current_locale = determine_locale();
         $locale         = apply_filters( 'better_messages_i18n_locale', $current_locale, $script_handle );
         $switched       = $locale !== $current_locale && switch_to_locale( $locale );
 
-        $result = $this->resolve_translation_file_url( $script_handle );
+        $result = call_user_func( $resolver, $script_handle );
 
         if ( $switched ) {
             restore_previous_locale();
@@ -54,63 +50,15 @@ class Better_Messages_Translations {
         return $result;
     }
 
-    private function resolve_translation_file_url( $script_handle ) {
-        // No early skip for en_US — translation plugins like Loco Translate
-        // may have customized strings even for English sites.
-
-        $domain    = 'bp-better-messages';
-        $lang_path = plugin_dir_path( dirname( __FILE__, 2 ) ) . 'languages/';
-
-        // Register translations so WordPress knows where to look
-        wp_set_script_translations( $script_handle, $domain, $lang_path );
-
-        // WordPress uses md5(relative_path) to find .json files.
-        // In dev mode the script src differs from production, so we override the path.
-        $json_data = load_script_textdomain( $script_handle, $domain, $lang_path );
-
-        // If no result (e.g. dev mode), try production paths
-        if ( ! $json_data ) {
-            $fallback_paths = array(
-                'better-messages'       => array( 'assets/js/bp-messages-premium.js', 'assets/js/bp-messages-free.js' ),
-                'better-messages-app'   => array( 'assets/js/bp-messages-app.js' ),
-            );
-
-            if ( isset( $fallback_paths[ $script_handle ] ) ) {
-                foreach ( $fallback_paths[ $script_handle ] as $try_path ) {
-                    $filter = function() use ( $try_path ) { return $try_path; };
-                    add_filter( 'load_script_textdomain_relative_path', $filter, 999 );
-                    $json_data = load_script_textdomain( $script_handle, $domain, $lang_path );
-                    remove_filter( 'load_script_textdomain_relative_path', $filter, 999 );
-                    if ( $json_data ) break;
-                }
-            }
-        }
-
-        // Remove textdomain from script so WordPress doesn't also inline it
-        if ( isset( wp_scripts()->registered[ $script_handle ] ) ) {
-            unset( wp_scripts()->registered[ $script_handle ]->textdomain );
-            unset( wp_scripts()->registered[ $script_handle ]->translations_path );
-        }
-
-        if ( ! $json_data ) {
-            return false;
-        }
-
-        // Build the JS: parse WordPress's JED format into a simple key→value object
-        $translations = $this->parse_jed_translations( $json_data );
-
-        if ( empty( $translations ) ) {
-            return false;
-        }
-
-        return $this->cache_translations_js( $script_handle, $translations );
-    }
-
-    /**
+        /**
      * Get inline translation data when file caching failed.
      */
     public function get_inline_translations( $script_handle ) {
         return isset( $this->inline_fallback[ $script_handle ] ) ? $this->inline_fallback[ $script_handle ] : false;
+    }
+
+    public function get_translation_file_version( $script_handle ) {
+        return isset( $this->file_versions[ $script_handle ] ) ? $this->file_versions[ $script_handle ] : null;
     }
 
     /**
@@ -125,6 +73,8 @@ class Better_Messages_Translations {
         $js_content = '(function(){window.Better_Messages_i18n=' . wp_json_encode( $translations, JSON_UNESCAPED_UNICODE ) . '})();';
         $hash       = substr( md5( Better_Messages()->version . $js_content ), 0, 8 );
         $cache_key  = $script_handle . '-' . $locale;
+
+        $this->file_versions[ $script_handle ] = $hash;
         $file_name  = 'bm-i18n-' . $cache_key . '-' . $hash . '.js';
         $file_path  = $this->upload_dir . $file_name;
         $file_url   = $this->upload_url . $file_name;
@@ -147,47 +97,6 @@ class Better_Messages_Translations {
         // File write failed -- store for inline fallback
         $this->inline_fallback[ $script_handle ] = $translations;
         return false;
-    }
-
-    /**
-     * Parse WordPress JED-format JSON into a simple key→value map.
-     * Keys use context\x04msgid format for context-aware strings.
-     */
-    private function parse_jed_translations( $json_data ) {
-        $data = json_decode( $json_data, true );
-
-        // WordPress.org uses 'messages', Loco Translate uses the domain name
-        $messages = null;
-        if ( ! empty( $data['locale_data']['messages'] ) ) {
-            $messages = $data['locale_data']['messages'];
-        } elseif ( ! empty( $data['locale_data'] ) ) {
-            $messages = reset( $data['locale_data'] );
-        }
-
-        if ( empty( $messages ) ) {
-            return array();
-        }
-
-        $translations = array();
-
-        // Include plural-forms header for JS plural rule evaluation
-        if ( isset( $messages[''] ) && is_array( $messages[''] ) ) {
-            $plural_forms = $messages['']['plural-forms'] ?? $messages['']['Plural-Forms'] ?? null;
-            if ( $plural_forms ) {
-                $translations[''] = array( 'plural-forms' => $plural_forms );
-            }
-        }
-
-        foreach ( $messages as $key => $value ) {
-            if ( $key === '' || empty( $value ) ) {
-                continue;
-            }
-            $translations[ $key ] = ( is_array( $value ) && count( $value ) === 1 )
-                ? $value[0]
-                : $value;
-        }
-
-        return $translations;
     }
 
     /**
@@ -273,18 +182,12 @@ class Better_Messages_Translations {
         return $transient;
     }
 
-    /**
-     * Get the URL of a cached admin translation JS file built from PHP.
-     *
-     * Unlike get_translation_file_url() which relies on WordPress JSON files
-     * (that WordPress.org fails to generate for the admin bundle), this method
-     * builds translations by calling PHP __()/_x() against the loaded MO file.
-     *
-     * @param string $script_handle Registered WP script handle
-     * @return string|false URL of the cached JS file, or false if not needed
-     */
     public function get_php_translation_file_url( $script_handle ) {
-        $translations = $this->build_translations_from_php();
+        return $this->in_script_locale( $script_handle, array( $this, 'resolve_php_translation_file_url' ) );
+    }
+
+    private function resolve_php_translation_file_url( $script_handle ) {
+        $translations = $this->build_translations_from_php( $script_handle );
 
         if ( empty( $translations ) ) {
             return false;
@@ -293,27 +196,47 @@ class Better_Messages_Translations {
         return $this->cache_translations_js( $script_handle, $translations );
     }
 
-    /**
-     * Build admin translations from the loaded MO file using PHP translation functions.
-     *
-     * @return array Translation map in the same format as parse_jed_translations()
-     */
-    private function build_translations_from_php() {
-        $map_file = __DIR__ . '/admin-strings.php';
+    private function translations_map( $script_handle ) {
+        $maps = array(
+            'better-messages-admin' => array( 'admin-strings.php',    '_bm_admin_translations_map' ),
+            'better-messages'       => array( 'frontend-strings.php', '_bm_frontend_translations_map' ),
+            'better-messages-app'   => array( 'frontend-strings.php', '_bm_frontend_translations_map' ),
+        );
+
+        if ( ! isset( $maps[ $script_handle ] ) ) {
+            return array();
+        }
+
+        list( $file, $function ) = $maps[ $script_handle ];
+
+        $map_file = __DIR__ . '/' . $file;
+
         if ( ! file_exists( $map_file ) ) {
             return array();
         }
 
         require_once $map_file;
-        if ( ! function_exists( '_bm_admin_translations_map' ) ) {
+
+        if ( ! function_exists( $function ) ) {
             return array();
         }
 
-        $domain  = 'bp-better-messages';
-        $strings = _bm_admin_translations_map();
+        return call_user_func( $function );
+    }
 
-        // Ensure text domain is loaded
+    private function build_translations_from_php( $script_handle ) {
+        $strings = $this->translations_map( $script_handle );
+
+        if ( empty( $strings ) ) {
+            return array();
+        }
+
+        $domain = 'bp-better-messages';
+
         load_plugin_textdomain( $domain, false, basename( plugin_dir_path( dirname( __FILE__, 2 ) ) ) . '/languages/' );
+
+        $plural_forms   = $this->get_plural_forms_header( $domain );
+        $plural_samples = $this->plural_form_samples( $plural_forms );
 
         $translations = array();
 
@@ -341,7 +264,7 @@ class Better_Messages_Translations {
                 $context  = $def[3];
                 $key      = $context . "\x04" . $singular;
 
-                $forms = $this->get_all_plural_forms( $singular, $plural, $context, $domain );
+                $forms = $this->get_all_plural_forms( $singular, $plural, $context, $domain, $plural_samples );
                 if ( $forms !== false ) {
                     $translations[ $key ] = $forms;
                 }
@@ -352,8 +275,6 @@ class Better_Messages_Translations {
             return array();
         }
 
-        // Add plural-forms header for JS plural rule evaluation
-        $plural_forms = $this->get_plural_forms_header( $domain );
         if ( $plural_forms ) {
             $translations[''] = array( 'plural-forms' => $plural_forms );
         }
@@ -361,34 +282,61 @@ class Better_Messages_Translations {
         return $translations;
     }
 
-    /**
-     * Get all plural form translations for a _nx string.
-     *
-     * @return array|false Array of plural forms, or false if not translated
-     */
-    private function get_all_plural_forms( $singular, $plural, $context, $domain ) {
-        $mo = get_translations_for_domain( $domain );
+    private function plural_form_samples( $plural_forms ) {
+        $nplurals   = 2;
+        $expression = 'n != 1';
 
-        if ( method_exists( $mo, 'translate_entry' ) ) {
-            $entry = new Translation_Entry( array(
-                'singular' => $singular,
-                'plural'   => $plural,
-                'context'  => $context,
-            ) );
-            $translated = $mo->translate_entry( $entry );
-            if ( $translated && ! empty( $translated->translations ) ) {
-                return $translated->translations;
-            }
+        if ( $plural_forms && preg_match( '/^\s*nplurals\s*=\s*(\d+)\s*;\s*plural\s*=\s*(.+?)\s*;?\s*$/', $plural_forms, $matches ) ) {
+            $nplurals   = max( 1, (int) $matches[1] );
+            $expression = $matches[2];
         }
 
-        return false;
+        $samples = array();
+
+        try {
+            $forms = new Plural_Forms( $expression );
+
+            for ( $n = 0; $n <= 1000 && count( $samples ) < $nplurals; $n++ ) {
+                $index = (int) $forms->get( $n );
+
+                if ( ! isset( $samples[ $index ] ) ) {
+                    $samples[ $index ] = $n;
+                }
+            }
+        } catch ( Exception $e ) {
+            $samples = array();
+        }
+
+        if ( empty( $samples ) ) {
+            $samples = array( 0 => 1, 1 => 2 );
+        }
+
+        ksort( $samples );
+
+        return $samples;
     }
 
-    /**
-     * Get the Plural-Forms header from the loaded translation domain.
-     *
-     * @return string|false Plural-Forms header string, or false
-     */
+    private function get_all_plural_forms( $singular, $plural, $context, $domain, $samples ) {
+        $forms      = array();
+        $translated = false;
+
+        foreach ( $samples as $index => $n ) {
+            $text = _nx( $singular, $plural, $n, $context, $domain );
+
+            if ( $text !== ( $n === 1 ? $singular : $plural ) ) {
+                $translated = true;
+            }
+
+            $forms[ $index ] = $text;
+        }
+
+        if ( ! $translated ) {
+            return false;
+        }
+
+        return array_values( $forms );
+    }
+
     private function get_plural_forms_header( $domain ) {
         $mo = get_translations_for_domain( $domain );
 
@@ -399,9 +347,15 @@ class Better_Messages_Translations {
             }
         }
 
-        // WP 6.5+ compat: check headers property
-        if ( isset( $mo->headers ) && is_array( $mo->headers ) ) {
-            return $mo->headers['Plural-Forms'] ?? $mo->headers['plural-forms'] ?? false;
+        $headers = ( property_exists( $mo, 'headers' ) || method_exists( $mo, '__get' ) ) ? $mo->headers : null;
+
+        if ( is_array( $headers ) ) {
+            if ( ! empty( $headers['Plural-Forms'] ) ) {
+                return $headers['Plural-Forms'];
+            }
+            if ( ! empty( $headers['plural-forms'] ) ) {
+                return $headers['plural-forms'];
+            }
         }
 
         return false;
