@@ -65,6 +65,7 @@ function _bm_js_translation_strings() {
     _x( "They were offline", "Call card label", "bp-better-messages" );
     _x( "Ringing...", "Call card label", "bp-better-messages" );
     _x( "In progress", "Call card label", "bp-better-messages" );
+    _x( 'More', 'Call Controls', 'bp-better-messages' );
     _x( 'Same as system', 'Media Inputs', 'bp-better-messages');
     _x( 'Communications', 'Media Inputs', 'bp-better-messages');
     _x( 'Default', 'Media Inputs', 'bp-better-messages');

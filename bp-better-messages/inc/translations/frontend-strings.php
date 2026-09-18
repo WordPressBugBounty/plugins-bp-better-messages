@@ -65,6 +65,7 @@ function _bm_frontend_translations_map() {
         array( '_x', 'They were offline', 'Call card label' ),
         array( '_x', 'Ringing...', 'Call card label' ),
         array( '_x', 'In progress', 'Call card label' ),
+        array( '_x', 'More', 'Call Controls' ),
         array( '_x', 'Same as system', 'Media Inputs' ),
         array( '_x', 'Communications', 'Media Inputs' ),
         array( '_x', 'Default', 'Media Inputs' ),

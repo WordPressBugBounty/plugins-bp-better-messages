@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.0
+Stable tag: 3.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -399,7 +399,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
-= 3.0.0 =
+= 3.0.0 - 3.0.3 =
 * The messenger has been redesigned from the ground up — every surface, from the conversations list to mini chats and popups, is new, while keeping the layout and workflows you know
 * The **Appearance** tab has been rebuilt around the new design — repaint any part of the messenger, reshape its corners and spacing, tune dark mode, and watch every change land in a live preview before saving. The colors and sizes you set in the Customizer are carried over
 * The messenger's font is now yours to set at Appearance → Typography — pick a stack, type your own, or hand it to your theme's font
@@ -424,6 +424,8 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed the installed app staying on a broken update until it was retried by hand — it now replaces or rolls one back on its own
 * Fixed chat notifications still being sent to phones the app had been removed from, and those devices counting as reachable
 * Fixed a failed call to the app build server being reported as a success, hiding the real error
+* Fixed a link to a chat room landing on the conversations list instead of opening the Chat Rooms tab
+* Fixed a role that may not start conversations, guests included, still being offered a Start a new conversation button beside the conversations list
 * Everything released in the 2.15 line, up to 2.15.33, is included — those entries are listed separately below
 * Other minor bugfixes and improvements
 
