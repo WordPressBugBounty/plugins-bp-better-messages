@@ -117,6 +117,89 @@ function better_messages_design_zone_controls( $zone_name, $preview = array() ) 
     return $out;
 }
 
+function better_messages_design_toast_variants() {
+    static $variants = null;
+    if ( null !== $variants ) {
+        return $variants;
+    }
+    $variants = array(
+        '--bm-color-toast-bg' => array(
+            'inverse' => array( 'default' => '17, 24, 39',    'dark' => '241, 245, 249', 'formula' => array( 'same', '--bm-color-text-primary' ) ),
+            'match'   => array( 'default' => '255, 255, 255', 'dark' => '24, 33, 56',    'formula' => array( 'same', '--bm-color-bg-elevated' ) ),
+        ),
+        '--bm-color-toast-text' => array(
+            'inverse' => array( 'default' => '255, 255, 255', 'dark' => '24, 33, 56',    'formula' => array( 'same', '--bm-color-bg-elevated' ) ),
+            'match'   => array( 'default' => '17, 24, 39',    'dark' => '241, 245, 249', 'formula' => array( 'same', '--bm-color-text-primary' ) ),
+        ),
+        '--bm-color-toast-border' => array(
+            'inverse' => array( 'default' => '50, 56, 69',    'dark' => '211, 215, 222', 'formula' => array( 'mix', '--bm-color-toast-bg', '--bm-color-toast-text', 0.14 ) ),
+            'match'   => array( 'default' => '222, 223, 225', 'dark' => '54, 63, 83',    'formula' => array( 'mix', '--bm-color-toast-bg', '--bm-color-toast-text', 0.14 ) ),
+        ),
+    );
+    return $variants;
+}
+
+function better_messages_design_toast_mode() {
+    $stored = get_option( 'bm_design_options', array() );
+    $mode   = is_array( $stored ) && isset( $stored['toastColors'] ) ? (string) $stored['toastColors'] : 'inverse';
+    return 'match' === $mode ? 'match' : 'inverse';
+}
+
+function better_messages_design_toast_controls() {
+    $variants = better_messages_design_toast_variants();
+    $mode     = better_messages_design_toast_mode();
+    $preview  = array( 'previewView' => 'toasts' );
+
+    $labels = array(
+        '--bm-color-toast-bg'     => array(
+            'label' => _x( 'Background', 'Settings page', 'bp-better-messages' ),
+            'help'  => _x( 'The card itself. Follows the conversation text on Inverted, the elevated surface on Match, until you set it', 'Settings page', 'bp-better-messages' ),
+        ),
+        '--bm-color-toast-text'   => array(
+            'label' => _x( 'Text', 'Settings page', 'bp-better-messages' ),
+            'help'  => _x( 'The title, the preview line, the close button and the chip, all blended from this', 'Settings page', 'bp-better-messages' ),
+        ),
+        '--bm-color-toast-border' => array(
+            'label' => _x( 'Border', 'Settings page', 'bp-better-messages' ),
+            'help'  => _x( 'The hairline around the card. A light blend of the text into the background until you set it', 'Settings page', 'bp-better-messages' ),
+        ),
+    );
+
+    $out = array(
+        array_merge( array(
+            'id'        => 'toastColors',
+            'kind'      => 'radio',
+            'source'    => 'option',
+            'label'     => _x( 'Notification cards', 'Settings page', 'bp-better-messages' ),
+            'help'      => _x( 'New message, incoming call and notification cards float over the page rather than inside the messenger. Inverted sets them apart from it, matching draws them like the messenger. Success, error and warning cards keep their own colors either way', 'Settings page', 'bp-better-messages' ),
+            'default'   => 'inverse',
+            'choices'   => array(
+                array( 'value' => 'inverse', 'label' => _x( 'Inverted', 'Settings page', 'bp-better-messages' ) ),
+                array( 'value' => 'match',   'label' => _x( 'Match the messenger', 'Settings page', 'bp-better-messages' ) ),
+            ),
+        ), $preview ),
+    );
+
+    foreach ( $labels as $id => $text ) {
+        $out[] = array_merge( array(
+            'id'            => $id,
+            'kind'          => 'color',
+            'source'        => 'token',
+            'label'         => $text['label'],
+            'help'          => $text['help'],
+            'default'       => $variants[ $id ][ $mode ]['default'],
+            'dark'          => $variants[ $id ][ $mode ]['dark'],
+            'formula'       => $variants[ $id ][ $mode ]['formula'],
+            'sheet'         => $variants[ $id ]['inverse']['default'],
+            'sheetDark'     => $variants[ $id ]['inverse']['dark'],
+            'variantOption' => 'toastColors',
+            'variants'      => $variants[ $id ],
+        ), $preview );
+    }
+
+    return $out;
+}
+
 function better_messages_design_widget_icon_controls() {
     $has_fluent_community = defined( 'FLUENT_COMMUNITY_PLUGIN_VERSION' );
     $widgets = array(
@@ -183,6 +266,12 @@ function better_messages_design_schema() {
                             ),
                         ),
                     ),
+                ),
+
+                array(
+                    'label'       => _x( 'Notifications', 'Settings page', 'bp-better-messages' ),
+                    'description' => _x( 'The cards that float over the page when a message arrives, a call comes in or something needs saying. The same card on every screen, so these are not per surface', 'Settings page', 'bp-better-messages' ),
+                    'controls'    => better_messages_design_toast_controls(),
                 ),
             ),
             'tabs'        => array(
@@ -796,6 +885,15 @@ function better_messages_design_schema() {
                             'bodyClass' => 'bm-msg-layout-',
                         ),
                         array(
+                            'id'        => 'tapMessageActions',
+                            'kind'      => 'switch',
+                            'source'    => 'option',
+                            'label'     => _x( 'Tap a message to show its actions', 'Settings page', 'bp-better-messages' ),
+                            'help'      => _x( 'On a touch screen, where there is no pointer to hover with. Turn it off to leave a long press as the only way in, the way a right click is on a desktop', 'Settings page', 'bp-better-messages' ),
+                            'default'   => true,
+                            'bodyClass' => 'bm-msg-tap-actions-',
+                        ),
+                        array(
                             'id'      => '--bm-bubble-tail',
                             'kind'    => 'switch',
                             'source'  => 'token',
@@ -803,7 +901,7 @@ function better_messages_design_schema() {
                             'default' => '0',
                             'on'      => '1',
                             'off'     => '0',
-                            'appliesWhen' => array( 'bubbleFill' => array( 'filled' ) ),
+                            'appliesWhen' => array( 'bubbleFill' => array( 'filled', 'outline' ) ),
                             'appliesNote' => _x( 'Not used by the selected message design. Chat rooms that pick a bubble design in their own settings still follow it', 'Settings page', 'bp-better-messages' ),
                         ),
                         array(
@@ -1676,6 +1774,15 @@ function better_messages_design_schema() {
                             'label'     => _x( 'Avatars in mini chats', 'Settings page', 'bp-better-messages' ),
                             'help'      => _x( 'The compact sender avatars beside messages inside mini chat windows', 'Settings page', 'bp-better-messages' ),
                             'default'   => true,
+                        ),
+                        array(
+                            'id'        => 'miniChatsMessageActions',
+                            'kind'      => 'switch',
+                            'source'    => 'option',
+                            'label'     => _x( 'Message actions in mini chats', 'Settings page', 'bp-better-messages' ),
+                            'help'      => _x( 'The reply, favorite and more buttons beside a message. They take a lane next to the bubble, so messages are narrower in the small window. With this off the same actions are still reachable by right click', 'Settings page', 'bp-better-messages' ),
+                            'default'   => true,
+                            'bodyClass' => 'bm-mini-msg-actions-',
                         ),
                         array(
                             'id'        => 'miniChatAudioCall',

@@ -42,6 +42,8 @@ function _bm_js_translation_strings() {
     _x('Connecting...', 'Call Screen', 'bp-better-messages');
     _x( 'Sound playback is blocked by your browser. Please click this message to enable it.', 'Call Screen', 'bp-better-messages' );
     _x( 'Starting the call...', 'Call Screen', 'bp-better-messages' );
+    _x( 'The other side\'s camera stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
+    _x( 'The other side\'s microphone stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side did not reconnect', 'Call Screen', 'bp-better-messages' );
     _x( 'This call was answered on another device', 'Call Screen', 'bp-better-messages' );
     _x( 'Connecting...', 'Call Screen', 'bp-better-messages' );
@@ -416,6 +418,7 @@ function _bm_js_translation_strings() {
     _x( "Square crop", "Image editor", "bp-better-messages" );
     _x( "Landscape crop", "Image editor", "bp-better-messages" );
     _x( "Portrait crop", "Image editor", "bp-better-messages" );
+    _x( "More actions", "Message hover actions", "bp-better-messages" );
     _x( "Download", "Lightbox", "bp-better-messages" );
     _x( "Expand conversations list", "Inbox", "bp-better-messages" );
     _x( "Notifications disabled", "Conversations list item", "bp-better-messages" );
@@ -688,6 +691,7 @@ function _bm_js_translation_strings() {
     _x( 'Transcribe', 'Voice Messages', 'bp-better-messages' );
     _x( 'Transcribing...', 'Voice Messages', 'bp-better-messages' );
     _x( 'Transcription', 'Voice Messages', 'bp-better-messages' );
+    _x( 'Microphone', 'Media Inputs', 'bp-better-messages' );
     _x( 'Microphone', 'Voice recorder', 'bp-better-messages' );
     _x( 'Pause Recording', 'Voice recorder', 'bp-better-messages' );
     _x( 'Resume Recording', 'Voice recorder', 'bp-better-messages' );
@@ -734,7 +738,6 @@ function _bm_js_translation_strings() {
     _x( "Show translation", "Translation", "bp-better-messages" );
     _x( "Show original", "Translation", "bp-better-messages" );
     _x( "Translating...", "Translation", "bp-better-messages" );
-    _x( "More actions", "Message hover actions", "bp-better-messages" );
     _x( "Reply", "Message context menu", "bp-better-messages" );
     __( "Voice message expired", "bp-better-messages" );
     __( "Video message expired", "bp-better-messages" );
@@ -872,14 +875,14 @@ function _bm_js_translation_strings() {
     _x('Unable to encrypt message — encryption key unavailable. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages');
     __( 'Are you sure you want to mute this conversation?', 'bp-better-messages' );
     __( 'Are you sure you want to unmute this conversation?', 'bp-better-messages' );
+    _x( 'Camera', 'Media Inputs', 'bp-better-messages');
+    _x( 'Microphone', 'Media Inputs', 'bp-better-messages');
+    _x( 'Screen', 'Media Inputs', 'bp-better-messages');
     _x( 'Camera or Microphone', 'Calling Features - Device Name when error triggered', 'bp-better-messages');
     _x( '%s not found', 'Calling Features - Device not found error', 'bp-better-messages');
     _x( 'No permission to access %s. Please ensure access to %s is allowed in your browser settings.', 'Calling Features - Device no permission error', 'bp-better-messages');
     _x( '%s is already in use. Ensure that its not used by other application or select other %s if available.', 'Calling Features - Device already in use error', 'bp-better-messages');
     _x( 'Unknown error while trying to access %s', 'Calling Features - Device unknown error', 'bp-better-messages');
-    _x( 'Camera', 'Media Inputs', 'bp-better-messages');
-    _x( 'Microphone', 'Media Inputs', 'bp-better-messages');
-    _x( 'Screen', 'Media Inputs', 'bp-better-messages');
     _x('You can not make a call to yourself', 'Shortcode error', 'bp-better-messages');
     _x('You can not start a conversation with yourself', 'Shortcode error', 'bp-better-messages');
     __('Authorization required', 'bp-better-messages' );
@@ -947,6 +950,8 @@ function _bm_js_translation_strings() {
     _x('This call could not be connected', 'Call Screen', 'bp-better-messages');
     _x('Could not reach the call server', 'Call Screen', 'bp-better-messages');
     _x('No permission to access the microphone. Please allow it in the app settings.', 'Call Screen', 'bp-better-messages');
+    _x('The other side\'s microphone stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages');
+    _x('The other side\'s camera stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages');
     _x('Switch Videos', 'Call Screen', 'bp-better-messages');
     _x('Minimise', 'Call Screen', 'bp-better-messages');
     _x('Participants', 'Group Video Chat', 'bp-better-messages');
@@ -960,6 +965,8 @@ function _bm_js_translation_strings() {
     _x( "This GIF cannot be sent to an encrypted conversation", "Outbox", "bp-better-messages" );
     _x( 'User rejected your call', 'Private Call Screen', 'bp-better-messages' );
     _x( 'User you are trying to call is already in call. Please try later.', 'Private Call Screen', 'bp-better-messages' );
+    _x( 'New message', 'Design preview', 'bp-better-messages' );
+    _x( 'Sounds good — see you there', 'Design preview', 'bp-better-messages' );
     _x( 'Incoming Video Call', 'Private Call - On Site Message', 'bp-better-messages' );
     _x( 'Incoming Audio Call', 'Private Call - On Site Message', 'bp-better-messages' );
     _x( 'Answer', 'Private Call Screen', 'bp-better-messages' );
@@ -3356,6 +3363,7 @@ function _bm_js_translation_strings() {
     _x('Selected roles will not be allowed to start new conversations', 'Settings page', 'bp-better-messages');
     _x('New Conversation Rate Limit', 'Settings page', 'bp-better-messages');
     _x('Minimum time between new conversations, in seconds. Set to 0 to disable', 'Settings page', 'bp-better-messages');
+    _x('%s is replaced with the time left to wait', 'Settings page', 'bp-better-messages');
     _x('Hide New Conversation Button', 'Settings page', 'bp-better-messages');
     _x('Remove the new conversation button for restricted users', 'Settings page', 'bp-better-messages');
     _x('Restrict Replies', 'Settings page', 'bp-better-messages');

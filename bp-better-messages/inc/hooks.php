@@ -1347,7 +1347,15 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $last_thread_created_ago = time() - $last_thread_created;
 
                 if( $last_thread_created_ago < $rateLimit ){
-                    $errors['restrictNewThreadsRateLimit'] = sprintf(__('You cant start new conversation now. Please wait %s seconds.', 'bp-better-messages'), $rateLimit - $last_thread_created_ago);
+                    $remaining = human_time_diff( time(), $last_thread_created + $rateLimit );
+
+                    $message = Better_Messages()->settings['rateLimitNewThreadMessage'];
+
+                    if( trim( $message ) === '' ){
+                        $message = __('You cannot start a new conversation yet. Please try again in %s.', 'bp-better-messages');
+                    }
+
+                    $errors['restrictNewThreadsRateLimit'] = str_replace( '%s', $remaining, $message );
                 }
             }
         }

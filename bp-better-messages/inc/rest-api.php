@@ -1070,7 +1070,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 'error_type'   => 'wp_error'
             );
 
-            $meta = (array) $request->get_param('meta');
+            $meta = Better_Messages()->functions->filter_client_message_meta( $request->get_param('meta') );
 
             $this->apply_temp_id( $args, $temp_id, $temp_time );
 

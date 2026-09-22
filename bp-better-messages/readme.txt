@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.3
+Stable tag: 3.0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -399,6 +399,37 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
+= 3.0.4 =
+**Thank you to everyone who sent feedback on the 3.0 release.**
+
+* Fixed a chat room's online users list taking its width out of the conversation during a call, which left messages wrapping at about one character a line — the list now sits beside the conversation, or slides over it where there is genuinely no room for both
+* Fixed the Login button on a chat room's sign-in prompt taking its label colour from the theme, which left it dark on the accent fill and unreadable on some colour schemes
+* Fixed the Indigo palette's dark mode putting white on its accent, where the other palettes already use dark ink
+* Fixed the user settings buttons — "Restore encryption keys", "Free up space" and "Clear local data" — arriving in dark mode as outlines with nothing legible inside them, and "Clear local data" not reading as the destructive action it is. Every shipped palette was measured, in both schemes
+* A microphone or camera that will not open now says why — a device you have not allowed yet, one that is missing and one another application is already using each read the way they always have on the call screen, and each points at the fix it needs
+* Security improvement: a sent message now carries only the metadata the messenger is meant to send, with everything else written on the server and the BuddyBoss group name lookup behind one of those keys now a prepared statement. Developers sending custom metadata with a message can allow their keys through the new `better_messages_client_message_meta_keys` filter
+* Security improvement: a display name can no longer carry an element into the messenger. A tag typed into a member's own WordPress profile as HTML entities used to become a real element in the browser of everyone who saw the name, so names now pass an allowlist on both sides, the server and the browser, and anything outside it arrives as the text it reads as. Decoration is what the allowlist is for, so badges, icons and the links around them keep working exactly as the integration wrote them, attributes and all — inline `<svg>` is the one decoration that no longer renders. A tag the default list does not carry can be added through the new `better_messages_display_name_allowed_html` filter, which exists in [PHP](https://www.better-messages.com/hooks/php-filters/#better_messages_display_name_allowed_html) and [JavaScript](https://www.better-messages.com/hooks/js-filters/#better_messages_display_name_allowed_html) under the same name and shape — register it in both to have the tag render everywhere
+* The "Chatting as …" bar above the message field, with its login and register links, is back on every screen a guest can be on — mini chats included, which had never carried it in any version and left a guest on a bubble-only site with no way to sign in at all
+* A link to a chat room opens the Chat Rooms tab again, rather than leaving the list on Conversations — a menu or page link straight to a room had been landing on the wrong list since 3.0
+* A role that may not start conversations, guests included, no longer gets a "Start a new conversation" button on the screen beside the conversations list. The button in the list header already obeyed the setting, this one did not
+* Every link inside a message opens in a new tab again, so a reader never loses the conversation by following one — a plain URL always did, a markdown link lost it in 3.0, and a link written as HTML, by a bot or by a developer's own filter, had never had it in any version
+* Fixed "Pointing tail toward the avatar" pointing away from it, outlined messages being unable to carry the tail at all, and an outlined message losing its own edge for as long as it was clicked
+* Fixed the reason a conversation could not be started never reaching the member who tried — it was read only once the landing page had finished loading, by which time the messenger had tidied it out of the address bar, and when it was read in time it stayed in the address and came back as a stray error on whatever was opened next. The reason now clears whatever its wording, where before only English sentences carrying no apostrophe or bracket did, which is why translated sites saw this first. Most visible on the interval a member must wait between starting conversations, and it applies to every refusal that reaches them this way
+* The reply, favorite and more buttons are back beside messages in mini chat windows, now as a setting — **Appearance → Mini chat windows → Message actions in mini chats**, on by default as it was in 2.x. With it off the messages take that width back, and the same actions are still there on a right click
+* Opening an image no longer hides the ways to answer it — the viewer's toolbar now carries Reply, the favorite star and the whole message menu, gathered behind the menu button on a narrow screen
+* Whether a tap on a message reveals its buttons is now yours to choose — **Appearance → Conversation → Messages → Tap a message to show its actions**, on by default as it has been since 2.x. Turn it off and a long press is the only way in, the way a right click already is on a desktop
+* Fixed the buttons beside a message being clipped at the edge of the conversation, which on a phone cut the last one in half — the room set aside for them had been short by the width of the sender's avatar on every surface
+* Fixed "Copy message text" being offered on a message with no text to copy — a voice message, a sticker, a GIF or attachments sent without a caption, where using it left the clipboard empty. Attachments sent with a caption still offer it, because a caption is text
+* Notification cards are yours to colour. The cards that float over the page — a new message, an incoming call, a notification, a push proposal — deliberately take the messenger's colours the other way round, which is wrong on a site whose page is already dark. **Appearance → Colors → Notifications** now carries their background, text and border, each with a light and a dark value, plus a choice of Inverted as before or Match the messenger, with a real card standing in the preview while you edit. Success, error and warning cards keep their own colours either way
+* Fixed typing @ in a presence-based chat room offering no names — a room of that kind keeps no members on purpose, so the list is now built from whoever is in the room right now, and whoever has spoken in it
+* Fixed the settings page filling the debug log with WordPress deprecation notices, from the two back-compat shims that ran when the Appearance preview replayed the front-end `wp_head` hook inside wp-admin. The preview now drops them before it captures, as it already did for the third
+* Fixed an email notification from a chat room arriving with `&#038;` in its subject line in place of the `&` in the room's name — and the same for an apostrophe, a quotation mark, a dash and an ellipsis, each of which reached the subject as a code rather than the character it stands for. The name was stored the way WordPress writes a title for a page, which leaves those characters encoded, and a subject line is plain text that nothing decodes. A room created or renamed from now on stores its name as it reads, and a room named before this is corrected as the email goes out, so nothing has to be re-saved
+* Reliability improvements for one-to-one calls — a call whose connection fails now recovers, or moves to the room, in seconds rather than tens of seconds. The iOS and Android apps get the same improvements and need a new build for them
+* Erasing a conversation removes it from your own list straight away, instead of leaving a row behind that opens to "the conversation does not exist" and comes back on every reload. Leaving one, pinning, muting and editing a message all answer at once in the same way. Every one of them was being left to the realtime server to confirm, which is fine until that message does not arrive — then the change was saved and you could not see it
+* "Clear messages" now clears the whole conversation. It removes fifty messages per request and was only ever asked once, so a conversation longer than that kept everything past the first fifty and still reported success — and the unread counts, which are only reset once nothing is left, stayed where they were. Measured on a conversation of 120: fifty went and seventy stayed. It now asks until there is nothing left
+* A conversation that no longer exists, or that you can no longer open, is cleared from the messenger for guests too. Members already had this, but the check only recognised the refusal WordPress gives a signed-in visitor, so for a guest the conversation stayed in the list and every click on it repeated the same error. Conversations left behind by a missed realtime message are also noticed again after a reload, rather than only on the first page view after connecting
+* Other minor bugfixes and improvements
+
 = 3.0.0 - 3.0.3 =
 * The messenger has been redesigned from the ground up — every surface, from the conversations list to mini chats and popups, is new, while keeping the layout and workflows you know
 * The **Appearance** tab has been rebuilt around the new design — repaint any part of the messenger, reshape its corners and spacing, tune dark mode, and watch every change land in a live preview before saving. The colors and sizes you set in the Customizer are carried over
@@ -415,8 +446,8 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Answering a call on one device now stops the others ringing at once, instead of leaving them to ring on until the caller gave up
 * The Classic design, the follow-the-device color scheme, the Settings → Mobile tab and Mini Widgets → Layout have been removed — the Appearance tab replaces them, and the WordPress Customizer integration is gone with them, so snippets calling `Better_Messages()->customize` no longer work
 * Custom CSS and caching exclusions need updating: the messenger's CSS classes are now prefixed `bm-` rather than `bpbm-` and `bp-messages-`, and the script and style files were renamed (`bp-messages*` → `better-messages*`, `bpbm-worker.js` → `bm-worker.js`)
-* Fixed a crafted guest registration passing as an AI chat bot, which let it into role-restricted chat rooms (CVE-2026-89093)
-* Fixed a chat room's messages and participants being readable over the REST API by visitors its guest setting turns away (CVE-2026-89334)
+* Security improvement: a crafted guest registration could pass as an AI chat bot, which let it into role-restricted chat rooms
+* Security improvement: a chat room's messages and participants were readable over the REST API by visitors its guest setting turns away
 * Fixed a crafted icon SVG smuggling markup past the sanitizer in a CDATA section, which let it run script on the icon preview screen
 * Fixed a phone notification from an AI chat bot showing `<!-- BM-AI -->` in front of the text, and an empty one being sent the moment a bot began answering in a one-to-one conversation
 * Fixed the user menu showing no name or avatar for a member or guest who does not have any conversations yet
@@ -424,8 +455,6 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed the installed app staying on a broken update until it was retried by hand — it now replaces or rolls one back on its own
 * Fixed chat notifications still being sent to phones the app had been removed from, and those devices counting as reachable
 * Fixed a failed call to the app build server being reported as a success, hiding the real error
-* Fixed a link to a chat room landing on the conversations list instead of opening the Chat Rooms tab
-* Fixed a role that may not start conversations, guests included, still being offered a Start a new conversation button beside the conversations list
 * Everything released in the 2.15 line, up to 2.15.33, is included — those entries are listed separately below
 * Other minor bugfixes and improvements
 

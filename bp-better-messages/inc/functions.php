@@ -1120,9 +1120,197 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     $user_id = 0;
                 }
 
-                return apply_filters( 'bp_better_messages_display_name', $name, $user_id );
+                return $this->sanitize_display_name( apply_filters( 'bp_better_messages_display_name', $name, $user_id ) );
             } else {
-                return apply_filters( 'better_messages_guest_display_name', "", $user_id );
+                return $this->sanitize_display_name( apply_filters( 'better_messages_guest_display_name', "", $user_id ) );
+            }
+        }
+
+        public function display_name_allowed_html(){
+            $global = array(
+                'class'  => true,
+                'id'     => true,
+                'title'  => true,
+                'style'  => true,
+                'dir'    => true,
+                'lang'   => true,
+                'role'   => true,
+                'data-*' => true,
+                'aria-*' => true,
+            );
+
+            $allowed = array(
+                'img'    => array_merge( $global, array( 'src' => true, 'srcset' => true, 'sizes' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true, 'decoding' => true ) ),
+                'a'      => array_merge( $global, array( 'href' => true, 'target' => true, 'rel' => true ) ),
+                'abbr'   => $global,
+                'b'      => $global,
+                'bdi'    => $global,
+                'br'     => array(),
+                'em'     => $global,
+                'i'      => $global,
+                'mark'   => $global,
+                's'      => $global,
+                'small'  => $global,
+                'span'   => $global,
+                'strong' => $global,
+                'sub'    => $global,
+                'sup'    => $global,
+                'u'      => $global,
+            );
+
+            return apply_filters( 'better_messages_display_name_allowed_html', $allowed );
+        }
+
+        private function display_name_attribute_allowed( $allowed_for_tag, $attribute ){
+            $attribute = strtolower( $attribute );
+
+            if( strpos( $attribute, 'on' ) === 0 ) return false;
+            if( $attribute === 'srcdoc' || $attribute === 'formaction' ) return false;
+
+            if( ! empty( $allowed_for_tag[ $attribute ] ) ) return true;
+
+            foreach( $allowed_for_tag as $pattern => $enabled ){
+                if( empty( $enabled ) ) continue;
+                if( substr( $pattern, -1 ) !== '*' ) continue;
+                if( strpos( $attribute, substr( $pattern, 0, -1 ) ) === 0 ) return true;
+            }
+
+            return false;
+        }
+
+        private static $display_name_cache = array();
+
+        private static $display_name_dropped_tags = array(
+            'script', 'style', 'iframe', 'frame', 'frameset', 'object', 'embed', 'applet',
+            'template', 'noscript', 'svg', 'math', 'link', 'meta', 'base', 'title',
+            'form', 'input', 'textarea', 'select', 'button', 'option',
+            'audio', 'video', 'source', 'track', 'canvas', 'portal', 'dialog',
+        );
+
+        public function sanitize_display_name( $name ){
+            $name = (string) $name;
+
+            if( $name === '' ) return '';
+
+            $key = md5( $name );
+
+            if( isset( self::$display_name_cache[ $key ] ) ){
+                return self::$display_name_cache[ $key ];
+            }
+
+            $result = $this->build_sanitized_display_name( $name );
+
+            if( count( self::$display_name_cache ) > 500 ){
+                self::$display_name_cache = array();
+            }
+
+            self::$display_name_cache[ $key ] = $result;
+
+            return $result;
+        }
+
+        private function build_sanitized_display_name( $name ){
+            for( $pass = 0; $pass < 5; $pass ++ ){
+                $decoded = html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+                if( $decoded === $name ) break;
+                $name = $decoded;
+            }
+
+            if( strpos( $name, '<' ) === false ){
+                return esc_html( $name );
+            }
+
+            $name = preg_replace( '#<(?![a-zA-Z!?]|/[a-zA-Z])#', '&lt;', $name );
+
+            $allowed = $this->display_name_allowed_html();
+
+            if( ! class_exists( 'DOMDocument' ) ){
+                return wp_kses( $name, $allowed );
+            }
+
+            $document = new DOMDocument();
+            $internal = libxml_use_internal_errors( true );
+
+            $loaded = $document->loadHTML(
+                '<?xml encoding="UTF-8"?><html><body>' . $name . '</body></html>',
+                LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING
+            );
+
+            libxml_clear_errors();
+            libxml_use_internal_errors( $internal );
+
+            $body = $loaded ? $document->getElementsByTagName( 'body' )->item( 0 ) : null;
+
+            if( ! $body ){
+                return wp_kses( $name, $allowed );
+            }
+
+            $surviving = array();
+
+            $this->scrub_display_name_node( $body, $allowed, $surviving );
+
+            $html = '';
+
+            foreach( $body->childNodes as $child ){
+                $html .= $document->saveHTML( $child );
+            }
+
+            foreach( $surviving as $tag => $attributes ){
+                $allowed[ $tag ] = isset( $allowed[ $tag ] ) ? array_merge( $allowed[ $tag ], $attributes ) : $attributes;
+            }
+
+            return wp_kses( $html, $allowed );
+        }
+
+        private function scrub_display_name_node( $node, $allowed, &$surviving ){
+            $children = array();
+
+            foreach( $node->childNodes as $child ){
+                $children[] = $child;
+            }
+
+            foreach( $children as $child ){
+                if( $child->nodeType === XML_COMMENT_NODE || $child->nodeType === XML_PI_NODE ){
+                    $node->removeChild( $child );
+                    continue;
+                }
+
+                if( $child->nodeType !== XML_ELEMENT_NODE ) continue;
+
+                $tag = strtolower( $child->nodeName );
+
+                if( in_array( $tag, self::$display_name_dropped_tags, true ) ){
+                    $node->removeChild( $child );
+                    continue;
+                }
+
+                if( ! isset( $allowed[ $tag ] ) ){
+                    $this->scrub_display_name_node( $child, $allowed, $surviving );
+
+                    while( $child->firstChild ){
+                        $node->insertBefore( $child->firstChild, $child );
+                    }
+
+                    $node->removeChild( $child );
+                    continue;
+                }
+
+                $names = array();
+
+                foreach( $child->attributes as $attribute ){
+                    $names[] = $attribute->nodeName;
+                }
+
+                foreach( $names as $attribute_name ){
+                    if( ! $this->display_name_attribute_allowed( $allowed[ $tag ], $attribute_name ) ){
+                        $child->removeAttribute( $attribute_name );
+                        continue;
+                    }
+
+                    $surviving[ $tag ][ strtolower( $attribute_name ) ] = true;
+                }
+
+                $this->scrub_display_name_node( $child, $allowed, $surviving );
             }
         }
 
@@ -1130,6 +1318,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $user = $this->rest_user_item( $user_id, false );
             $name = isset( $user['name'] ) ? (string) $user['name'] : '';
             $name = wp_strip_all_tags( $name );
+            $name = wp_strip_all_tags( html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
             $name = preg_replace( '/\s+/u', ' ', $name );
 
             return trim( $name );
@@ -1886,6 +2075,28 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $retval;
         }
 
+        public function filter_client_message_meta( $meta ) {
+            if ( ! is_array( $meta ) ) {
+                return array();
+            }
+
+            $allowed = (array) apply_filters( 'better_messages_client_message_meta_keys', array(
+                'reply_to',
+                'location',
+                'e2eFileKeys'
+            ) );
+
+            $keys = array();
+
+            foreach ( $allowed as $key ) {
+                if ( is_string( $key ) || is_int( $key ) ) {
+                    $keys[ $key ] = true;
+                }
+            }
+
+            return array_intersect_key( $meta, $keys );
+        }
+
         public function get_user_muted_threads( $user_id ){
             if( Better_Messages()->settings['allowMuteThreads'] !== '1' ) {
                 return [];
@@ -2273,7 +2484,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $item = [
                 'id'         => (string) $user_id,
                 'user_id'    => (int) $user_id,
-                'name'       => html_entity_decode( Better_Messages()->functions->get_name( $user_id ) ),
+                'name'       => Better_Messages()->functions->get_name( $user_id ),
                 'avatar'     => Better_Messages()->functions->get_avatar( $user_id, 100, ['html' => false] ),
                 'url'        => $url,
                 'verified'   => (int) $this->is_verified( $user_id ),
@@ -2305,7 +2516,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            return apply_filters( 'better_messages_rest_user_item', $item, $user_id, $include_personal );
+            $item = apply_filters( 'better_messages_rest_user_item', $item, $user_id, $include_personal );
+
+            if( isset( $item['name'] ) ){
+                $item['name'] = $this->sanitize_display_name( $item['name'] );
+            }
+
+            return $item;
         }
 
         /**

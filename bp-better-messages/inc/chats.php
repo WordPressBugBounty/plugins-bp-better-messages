@@ -1663,7 +1663,7 @@ class Better_Messages_Chats
     public function on_chat_update( $post_ID, $post, $update ){
         $thread_id = $this->get_chat_thread_id( $post_ID );
 
-        $name = get_the_title( $post_ID );
+        $name = html_entity_decode( get_the_title( $post_ID ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
         global $wpdb;
 
         $wpdb->update(
@@ -2269,7 +2269,7 @@ class Better_Messages_Chats
             AND   `meta_value` = %s
             ", $chat_id ) );
 
-            $name = get_the_title( $chat_id );
+            $name = html_entity_decode( get_the_title( $chat_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
             $wpdb->insert(
                 bm_get_table('threads'),

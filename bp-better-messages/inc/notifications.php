@@ -573,7 +573,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 if( Better_Messages()->settings['disableSubject'] === '1' && $type === 'thread' ) {
                                     $subject = '';
                                 } else {
-                                    $subject = Better_Messages()->functions->remove_re(sanitize_text_field(stripslashes($messages[0]->subject)));
+                                    $subject = Better_Messages()->functions->remove_re(sanitize_text_field(html_entity_decode(stripslashes($messages[0]->subject), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
                                     $subject = Better_Messages()->functions->clean_no_subject($subject);
 
                                     if( class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $subject, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ){

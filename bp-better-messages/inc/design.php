@@ -762,6 +762,8 @@ class Better_Messages_Design {
         wp_dequeue_style( 'admin-bar' );
         wp_dequeue_style( 'bp-admin-bar' );
         remove_action( 'wp_head', '_admin_bar_bump_cb' );
+        remove_action( 'wp_head', 'wp_admin_bar_header' );
+        remove_action( 'wp_print_styles', 'print_emoji_styles' );
     }
 
     private function style_markup_only( $html ) {
@@ -2041,6 +2043,12 @@ class Better_Messages_Design {
             $vars = $this->default_design_vars();
             if ( 'dark' === $scope ) {
                 $vars = array_merge( $vars, $this->default_design_vars_dark() );
+            }
+            foreach ( better_messages_design_schema_controls() as $id => $control ) {
+                if ( empty( $control['sheet'] ) ) {
+                    continue;
+                }
+                $vars[ $id ] = ( 'dark' === $scope && ! empty( $control['sheetDark'] ) ) ? $control['sheetDark'] : $control['sheet'];
             }
             $cache[ $scope ] = $vars;
         }

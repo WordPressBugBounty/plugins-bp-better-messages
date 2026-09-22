@@ -2317,6 +2317,7 @@ function _bm_admin_translations_map() {
         array( '_x', 'Selected roles will not be allowed to start new conversations', 'Settings page' ),
         array( '_x', 'New Conversation Rate Limit', 'Settings page' ),
         array( '_x', 'Minimum time between new conversations, in seconds. Set to 0 to disable', 'Settings page' ),
+        array( '_x', '%s is replaced with the time left to wait', 'Settings page' ),
         array( '_x', 'Hide New Conversation Button', 'Settings page' ),
         array( '_x', 'Remove the new conversation button for restricted users', 'Settings page' ),
         array( '_x', 'Restrict Replies', 'Settings page' ),

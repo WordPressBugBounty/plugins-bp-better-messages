@@ -623,16 +623,16 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
         public function buddyboss_group_messages( $message, $message_id, $context, $user_id ){
             global $wpdb;
-            $group_id         = Better_Messages()->functions->get_message_meta( $message_id, 'group_id', true );
+            $group_id         = (int) Better_Messages()->functions->get_message_meta( $message_id, 'group_id', true );
             $message_deleted  = Better_Messages()->functions->get_message_meta( $message_id, 'bp_messages_deleted', true );
 
-            if( $group_id ) {
+            if( $group_id > 0 ) {
                 if ( function_exists('bp_get_group_name') ) {
                     $group_name = bp_get_group_name(groups_get_group($group_id));
                 } else {
                     $bp_prefix = bp_core_get_table_prefix();
                     $table = $bp_prefix . 'bp_groups';
-                    $group_name = $wpdb->get_var( "SELECT `name` FROM `{$table}` WHERE `id` = '{$group_id}';" );
+                    $group_name = $wpdb->get_var( $wpdb->prepare( "SELECT `name` FROM `{$table}` WHERE `id` = %d", $group_id ) );
                 }
 
                 $message_left     = Better_Messages()->functions->get_message_meta( $message_id, 'group_message_group_left', true );

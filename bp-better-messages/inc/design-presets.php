@@ -113,6 +113,7 @@ function better_messages_design_shipped_presets() {
                 ),
                 'dark'  => array(
                     '--bm-color-accent'             => '124, 116, 248',
+                    '--bm-color-text-on-accent'     => '17, 24, 39',
                     '--bm-color-bg'                 => '19, 19, 33',
                     '--bm-color-text-primary'       => '232, 232, 246',
                     '--bm-color-border'             => '44, 44, 70',
