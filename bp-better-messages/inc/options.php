@@ -287,6 +287,7 @@ class Better_Messages_Options
             'maximumMessageLength'        => 0,
             'enableNiceLinks'             => '1',
             'userStatuses'                => '0',
+            'accountRow'                  => '1',
             'myProfileButton'             => '1',
             'titleNotifications'          => '1',
             'enableMiniCloseButton'       => '0',
@@ -2145,6 +2146,10 @@ class Better_Messages_Options
 
         if ( !isset( $settings['userStatuses'] ) ) {
             $settings['userStatuses'] = '0';
+        }
+
+        if ( !isset( $settings['accountRow'] ) ) {
+            $settings['accountRow'] = '0';
         }
 
         if ( !isset( $settings['myProfileButton'] ) ) {

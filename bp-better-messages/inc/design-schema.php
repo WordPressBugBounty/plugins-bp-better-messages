@@ -1432,6 +1432,22 @@ function better_messages_design_schema() {
                             'previewSurface' => 'desktop',
                         ),
                         array(
+                            'id'        => 'accountRow',
+                            'kind'      => 'switch',
+                            'source'    => 'setting',
+                            'scriptVar' => 'accountRow',
+                            'label'     => _x( 'Account row', 'Settings page', 'bp-better-messages' ),
+                            'help'      => _x( 'The member\'s own avatar and name at the foot of the conversation list', 'Settings page', 'bp-better-messages' ),
+                            'default'   => '1',
+                            'previewSurface' => 'desktop',
+                            'appliesWhen' => array(
+                                'myProfileButton' => array( '0' ),
+                                'userStatuses'    => array( '0' ),
+                                'pointsSystem'    => array( 'none' ),
+                            ),
+                            'appliesNote' => _x( 'Shown anyway while its menu still has something in it', 'Settings page', 'bp-better-messages' ),
+                        ),
+                        array(
                             'id'        => 'myProfileButton',
                             'kind'      => 'switch',
                             'source'    => 'setting',

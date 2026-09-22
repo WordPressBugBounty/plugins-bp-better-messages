@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 3.0.4\n"
+"Project-Id-Version: Better Messages 3.0.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T22:16:56+00:00\n"
+"POT-Creation-Date: 2026-09-22T07:14:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -174,9 +174,9 @@ msgstr ""
 #: addons/ai/ai.php:4102
 #: inc/api/admin.php:1621
 #: inc/chats.php:2078
-#: inc/options.php:843
-#: inc/options.php:853
-#: inc/options.php:1295
+#: inc/options.php:844
+#: inc/options.php:854
+#: inc/options.php:1296
 msgctxt "Settings page"
 msgid "Guests"
 msgstr ""
@@ -3241,7 +3241,7 @@ msgstr ""
 
 #: inc/design-schema.php:47
 #: inc/design-schema.php:739
-#: inc/design-schema.php:1613
+#: inc/design-schema.php:1629
 msgctxt "Settings page"
 msgid "Widget bar"
 msgstr ""
@@ -3610,7 +3610,7 @@ msgid "White while white reads on the label background, dark otherwise, until yo
 msgstr ""
 
 #: inc/design-schema.php:716
-#: inc/design-schema.php:1712
+#: inc/design-schema.php:1728
 msgctxt "Settings page"
 msgid "Mini chats"
 msgstr ""
@@ -3630,19 +3630,19 @@ msgid "Messages"
 msgstr ""
 
 #: inc/design-schema.php:735
-#: inc/design-schema.php:1553
+#: inc/design-schema.php:1569
 msgctxt "Settings page"
 msgid "Mini widgets"
 msgstr ""
 
 #: inc/design-schema.php:747
-#: inc/design-schema.php:1833
+#: inc/design-schema.php:1849
 msgctxt "Settings page"
 msgid "Bubble launcher"
 msgstr ""
 
 #: inc/design-schema.php:749
-#: inc/design-schema.php:1840
+#: inc/design-schema.php:1856
 msgctxt "Settings page"
 msgid "Only with the Floating bubble style"
 msgstr ""
@@ -3653,8 +3653,8 @@ msgid "The round button itself. Follows the widget bar accent until you set it"
 msgstr ""
 
 #: inc/design-schema.php:776
-#: inc/design-schema.php:1847
-#: inc/design-schema.php:2043
+#: inc/design-schema.php:1863
+#: inc/design-schema.php:2059
 msgctxt "Settings page"
 msgid "Icon"
 msgstr ""
@@ -3690,7 +3690,7 @@ msgid "White while white reads on the badge, dark otherwise, until you set it"
 msgstr ""
 
 #: inc/design-schema.php:821
-#: inc/design-schema.php:1928
+#: inc/design-schema.php:1944
 #: inc/translations/strings.php:2257
 #: inc/translations/strings.php:3628
 msgctxt "Settings page"
@@ -3703,7 +3703,7 @@ msgid "List"
 msgstr ""
 
 #: inc/design-schema.php:841
-#: inc/design-schema.php:2053
+#: inc/design-schema.php:2069
 msgctxt "Settings page"
 msgid "Tab bar"
 msgstr ""
@@ -3967,7 +3967,7 @@ msgid "Scales padding and gaps everywhere at once"
 msgstr ""
 
 #: inc/design-schema.php:1096
-#: inc/design-schema.php:1759
+#: inc/design-schema.php:1775
 msgctxt "Settings page"
 msgid "Corners"
 msgstr ""
@@ -4078,8 +4078,8 @@ msgid "A persistent conversations list beside the open conversation, so members 
 msgstr ""
 
 #: inc/design-schema.php:1250
-#: inc/design-schema.php:1629
-#: inc/design-schema.php:1733
+#: inc/design-schema.php:1645
+#: inc/design-schema.php:1749
 msgctxt "Settings page"
 msgid "Width"
 msgstr ""
@@ -4176,14 +4176,14 @@ msgid "Widgets on the side panel"
 msgstr ""
 
 #: inc/design-schema.php:1344
-#: inc/design-schema.php:1667
-#: inc/design-schema.php:2071
+#: inc/design-schema.php:1683
+#: inc/design-schema.php:2087
 msgctxt "Settings page"
 msgid "Show only icons"
 msgstr ""
 
 #: inc/design-schema.php:1345
-#: inc/design-schema.php:1668
+#: inc/design-schema.php:1684
 msgctxt "Settings page"
 msgid "Hide the tab labels. They appear as tooltips instead"
 msgstr ""
@@ -4270,506 +4270,521 @@ msgstr ""
 
 #: inc/design-schema.php:1439
 msgctxt "Settings page"
-msgid "My profile in the user menu"
+msgid "Account row"
 msgstr ""
 
 #: inc/design-schema.php:1440
 msgctxt "Settings page"
+msgid "The member's own avatar and name at the foot of the conversation list"
+msgstr ""
+
+#: inc/design-schema.php:1448
+msgctxt "Settings page"
+msgid "Shown anyway while its menu still has something in it"
+msgstr ""
+
+#: inc/design-schema.php:1455
+msgctxt "Settings page"
+msgid "My profile in the user menu"
+msgstr ""
+
+#: inc/design-schema.php:1456
+msgctxt "Settings page"
 msgid "A link to the member's own profile in the user menu"
 msgstr ""
 
-#: inc/design-schema.php:1450
+#: inc/design-schema.php:1466
 msgctxt "Settings page"
 msgid "User statuses"
 msgstr ""
 
-#: inc/design-schema.php:1451
+#: inc/design-schema.php:1467
 msgctxt "Settings page"
 msgid "Members can set themselves Online, Away or Do not disturb"
 msgstr ""
 
-#: inc/design-schema.php:1462
+#: inc/design-schema.php:1478
 msgctxt "Settings page"
 msgid "Typography"
 msgstr ""
 
-#: inc/design-schema.php:1465
+#: inc/design-schema.php:1481
 msgctxt "Settings page"
 msgid "The messenger sets its own font so it reads the same on any theme, and follows the theme font when you ask it to"
 msgstr ""
 
-#: inc/design-schema.php:1473
+#: inc/design-schema.php:1489
 msgctxt "Settings page"
 msgid "Font family"
 msgstr ""
 
-#: inc/design-schema.php:1474
+#: inc/design-schema.php:1490
 msgctxt "Settings page"
 msgid "These render on every device. For a web font your theme loads, such as Roboto or Inter, choose Custom and type its name"
 msgstr ""
 
-#: inc/design-schema.php:1477
+#: inc/design-schema.php:1493
 msgctxt "Settings page"
 msgid "System"
 msgstr ""
 
-#: inc/design-schema.php:1478
+#: inc/design-schema.php:1494
 msgctxt "Settings page"
 msgid "Classic sans-serif"
 msgstr ""
 
-#: inc/design-schema.php:1479
+#: inc/design-schema.php:1495
 msgctxt "Settings page"
 msgid "Serif"
 msgstr ""
 
-#: inc/design-schema.php:1480
+#: inc/design-schema.php:1496
 msgctxt "Settings page"
 msgid "Monospace"
 msgstr ""
 
-#: inc/design-schema.php:1481
+#: inc/design-schema.php:1497
 msgctxt "Settings page"
 msgid "Inherit from the theme"
 msgstr ""
 
-#: inc/design-schema.php:1488
+#: inc/design-schema.php:1504
 msgctxt "Settings page"
 msgid "Monospace font"
 msgstr ""
 
-#: inc/design-schema.php:1489
+#: inc/design-schema.php:1505
 msgctxt "Settings page"
 msgid "Timestamps, timers, file sizes and counters, where every digit needs the same width"
 msgstr ""
 
-#: inc/design-schema.php:1492
+#: inc/design-schema.php:1508
 msgctxt "Settings page"
 msgid "System monospace"
 msgstr ""
 
-#: inc/design-schema.php:1493
+#: inc/design-schema.php:1509
 msgctxt "Settings page"
 msgid "Courier"
 msgstr ""
 
-#: inc/design-schema.php:1494
+#: inc/design-schema.php:1510
 msgctxt "Settings page"
 msgid "Same as the message text"
 msgstr ""
 
-#: inc/design-schema.php:1501
+#: inc/design-schema.php:1517
 msgctxt "Settings page"
 msgid "Message text size"
 msgstr ""
 
-#: inc/design-schema.php:1512
+#: inc/design-schema.php:1528
 msgctxt "Settings page"
 msgid "Sender name size"
 msgstr ""
 
-#: inc/design-schema.php:1513
+#: inc/design-schema.php:1529
 msgctxt "Settings page"
 msgid "The name above a message in group conversations"
 msgstr ""
 
-#: inc/design-schema.php:1525
+#: inc/design-schema.php:1541
 msgctxt "Settings page"
 msgid "Interface text size"
 msgstr ""
 
-#: inc/design-schema.php:1526
+#: inc/design-schema.php:1542
 msgctxt "Settings page"
 msgid "Scales every label, button and timestamp, leaving message text alone"
 msgstr ""
 
-#: inc/design-schema.php:1538
+#: inc/design-schema.php:1554
 msgctxt "Settings page"
 msgid "Line height"
 msgstr ""
 
-#: inc/design-schema.php:1539
+#: inc/design-schema.php:1555
 msgctxt "Settings page"
 msgid "As a multiple of the text size"
 msgstr ""
 
-#: inc/design-schema.php:1556
+#: inc/design-schema.php:1572
 msgctxt "Settings page"
 msgid "The floating panels shown on every page of the site"
 msgstr ""
 
-#: inc/design-schema.php:1560
+#: inc/design-schema.php:1576
 msgctxt "Settings page"
 msgid "Placement"
 msgstr ""
 
-#: inc/design-schema.php:1567
+#: inc/design-schema.php:1583
 msgctxt "Settings page"
 msgid "Style"
 msgstr ""
 
-#: inc/design-schema.php:1568
+#: inc/design-schema.php:1584
 msgctxt "Settings page"
 msgid "A tab bar fixed to the bottom of the screen, or a round button that expands into a panel"
 msgstr ""
 
-#: inc/design-schema.php:1571
+#: inc/design-schema.php:1587
 msgctxt "Settings page"
 msgid "Classic bar"
 msgstr ""
 
-#: inc/design-schema.php:1572
+#: inc/design-schema.php:1588
 msgctxt "Settings page"
 msgid "Floating bubble"
 msgstr ""
 
-#: inc/design-schema.php:1579
+#: inc/design-schema.php:1595
 msgctxt "Settings page"
 msgid "Screen corner"
 msgstr ""
 
-#: inc/design-schema.php:1582
-#: inc/design-schema.php:2017
+#: inc/design-schema.php:1598
+#: inc/design-schema.php:2033
 #: inc/translations/strings.php:3231
 msgctxt "Settings page"
 msgid "Left"
 msgstr ""
 
-#: inc/design-schema.php:1583
-#: inc/design-schema.php:2018
+#: inc/design-schema.php:1599
+#: inc/design-schema.php:2034
 #: inc/translations/strings.php:3230
 msgctxt "Settings page"
 msgid "Right"
 msgstr ""
 
-#: inc/design-schema.php:1591
+#: inc/design-schema.php:1607
 msgctxt "Settings page"
 msgid "Distance from the side"
 msgstr ""
 
-#: inc/design-schema.php:1602
-#: inc/design-schema.php:2028
+#: inc/design-schema.php:1618
+#: inc/design-schema.php:2044
 msgctxt "Settings page"
 msgid "Distance from the bottom"
 msgstr ""
 
-#: inc/design-schema.php:1614
+#: inc/design-schema.php:1630
 msgctxt "Settings page"
 msgid "Drag to reorder: the first tab is the one the bubble opens on. The gear opens the widget's own page. An icon picked here is used on the side panel and the mobile tab bar too"
 msgstr ""
 
-#: inc/design-schema.php:1621
+#: inc/design-schema.php:1637
 msgctxt "Settings page"
 msgid "Widgets on the bar"
 msgstr ""
 
-#: inc/design-schema.php:1640
-#: inc/design-schema.php:1746
+#: inc/design-schema.php:1656
+#: inc/design-schema.php:1762
 msgctxt "Settings page"
 msgid "Height"
 msgstr ""
 
-#: inc/design-schema.php:1641
+#: inc/design-schema.php:1657
 msgctxt "Settings page"
 msgid "When a tab is open"
 msgstr ""
 
-#: inc/design-schema.php:1652
+#: inc/design-schema.php:1668
 msgctxt "Settings page"
 msgid "Bar and tab corners"
 msgstr ""
 
-#: inc/design-schema.php:1676
+#: inc/design-schema.php:1692
 msgctxt "Settings page"
 msgid "Close button"
 msgstr ""
 
-#: inc/design-schema.php:1677
+#: inc/design-schema.php:1693
 msgctxt "Settings page"
 msgid "A close button on an expanded widget"
 msgstr ""
 
-#: inc/design-schema.php:1685
+#: inc/design-schema.php:1701
 msgctxt "Settings page"
 msgid "Animation"
 msgstr ""
 
-#: inc/design-schema.php:1686
+#: inc/design-schema.php:1702
 msgctxt "Settings page"
 msgid "Animate widgets as they open and close"
 msgstr ""
 
-#: inc/design-schema.php:1695
+#: inc/design-schema.php:1711
 msgctxt "Settings page"
 msgid "Sync between browser tabs"
 msgstr ""
 
-#: inc/design-schema.php:1696
+#: inc/design-schema.php:1712
 msgctxt "Settings page"
 msgid "Keep the widgets and mini chats in the same state in every tab of the browser"
 msgstr ""
 
-#: inc/design-schema.php:1703
+#: inc/design-schema.php:1719
 msgctxt "Settings page"
 msgid "Mini chat windows"
 msgstr ""
 
-#: inc/design-schema.php:1713
+#: inc/design-schema.php:1729
 msgctxt "Settings page"
 msgid "Small chat windows fixed to the bottom of the browser window when a member opens a conversation"
 msgstr ""
 
-#: inc/design-schema.php:1723
+#: inc/design-schema.php:1739
 msgctxt "Settings page"
 msgid "Combined mode"
 msgstr ""
 
-#: inc/design-schema.php:1724
+#: inc/design-schema.php:1740
 msgctxt "Settings page"
 msgid "Open conversations inside the Conversations widget instead of separate windows"
 msgstr ""
 
-#: inc/design-schema.php:1727
+#: inc/design-schema.php:1743
 msgctxt "Settings page"
 msgid "Needs Mini chats and the Conversations widget on"
 msgstr ""
 
-#: inc/design-schema.php:1740
-#: inc/design-schema.php:1753
+#: inc/design-schema.php:1756
+#: inc/design-schema.php:1769
 msgctxt "Settings page"
 msgid "In combined mode the window takes the mini widgets width and height"
 msgstr ""
 
-#: inc/design-schema.php:1760
+#: inc/design-schema.php:1776
 msgctxt "Settings page"
 msgid "The top corners while the window sits on the screen edge, all four once a distance from the bottom lifts it off"
 msgstr ""
 
-#: inc/design-schema.php:1767
+#: inc/design-schema.php:1783
 msgctxt "Settings page"
 msgid "In combined mode the window takes the mini widgets corners"
 msgstr ""
 
-#: inc/design-schema.php:1774
+#: inc/design-schema.php:1790
 msgctxt "Settings page"
 msgid "Avatars in mini chats"
 msgstr ""
 
-#: inc/design-schema.php:1775
+#: inc/design-schema.php:1791
 msgctxt "Settings page"
 msgid "The compact sender avatars beside messages inside mini chat windows"
 msgstr ""
 
-#: inc/design-schema.php:1782
+#: inc/design-schema.php:1798
 msgctxt "Settings page"
 msgid "Message actions in mini chats"
 msgstr ""
 
-#: inc/design-schema.php:1783
+#: inc/design-schema.php:1799
 msgctxt "Settings page"
 msgid "The reply, favorite and more buttons beside a message. They take a lane next to the bubble, so messages are narrower in the small window. With this off the same actions are still reachable by right click"
 msgstr ""
 
-#: inc/design-schema.php:1793
+#: inc/design-schema.php:1809
 msgctxt "Settings page"
 msgid "Audio call button"
 msgstr ""
 
-#: inc/design-schema.php:1794
-#: inc/design-schema.php:1804
+#: inc/design-schema.php:1810
+#: inc/design-schema.php:1820
 msgctxt "Settings page"
 msgid "In the header of a private mini chat"
 msgstr ""
 
-#: inc/design-schema.php:1803
+#: inc/design-schema.php:1819
 msgctxt "Settings page"
 msgid "Video call button"
 msgstr ""
 
-#: inc/design-schema.php:1814
+#: inc/design-schema.php:1830
 msgctxt "Settings page"
 msgid "Group audio call button"
 msgstr ""
 
-#: inc/design-schema.php:1815
-#: inc/design-schema.php:1826
+#: inc/design-schema.php:1831
+#: inc/design-schema.php:1842
 msgctxt "Settings page"
 msgid "In the header of a group mini chat"
 msgstr ""
 
-#: inc/design-schema.php:1825
+#: inc/design-schema.php:1841
 msgctxt "Settings page"
 msgid "Group video call button"
 msgstr ""
 
-#: inc/design-schema.php:1834
+#: inc/design-schema.php:1850
 msgctxt "Settings page"
 msgid "The round button used when the style is Floating bubble. Its background, icon, border and unread badge have colors of their own, apart from the widget bar's."
 msgstr ""
 
-#: inc/design-schema.php:1836
+#: inc/design-schema.php:1852
 msgctxt "Settings page"
 msgid "Set them in Colors → Mini widgets → Bubble launcher"
 msgstr ""
 
-#: inc/design-schema.php:1855
+#: inc/design-schema.php:1871
 msgctxt "Settings page"
 msgid "Size"
 msgstr ""
 
-#: inc/design-schema.php:1866
+#: inc/design-schema.php:1882
 msgctxt "Settings page"
 msgid "Roundness"
 msgstr ""
 
-#: inc/design-schema.php:1878
+#: inc/design-schema.php:1894
 msgctxt "Settings page"
 msgid "Close on outside click"
 msgstr ""
 
-#: inc/design-schema.php:1879
+#: inc/design-schema.php:1895
 msgctxt "Settings page"
 msgid "Close the panel when the page around it is clicked"
 msgstr ""
 
-#: inc/design-schema.php:1888
+#: inc/design-schema.php:1904
 msgctxt "Settings page"
 msgid "Chat heads"
 msgstr ""
 
-#: inc/design-schema.php:1889
+#: inc/design-schema.php:1905
 msgctxt "Settings page"
 msgid "Recently closed conversations as avatar bubbles above the button"
 msgstr ""
 
-#: inc/design-schema.php:1892
+#: inc/design-schema.php:1908
 msgctxt "Settings page"
 msgid "Needs Mini chats on"
 msgstr ""
 
-#: inc/design-schema.php:1899
+#: inc/design-schema.php:1915
 msgctxt "Settings page"
 msgid "Chat heads limit"
 msgstr ""
 
-#: inc/design-schema.php:1900
+#: inc/design-schema.php:1916
 msgctxt "Settings page"
 msgid "How many chat heads to show at most"
 msgstr ""
 
-#: inc/design-schema.php:1906
-#: inc/design-schema.php:1919
+#: inc/design-schema.php:1922
+#: inc/design-schema.php:1935
 msgctxt "Settings page"
 msgid "Only with chat heads on"
 msgstr ""
 
-#: inc/design-schema.php:1912
+#: inc/design-schema.php:1928
 msgctxt "Settings page"
 msgid "Chat heads size"
 msgstr ""
 
-#: inc/design-schema.php:1931
+#: inc/design-schema.php:1947
 msgctxt "Settings page"
 msgid "How the messenger opens and what surrounds it on phones"
 msgstr ""
 
-#: inc/design-schema.php:1935
+#: inc/design-schema.php:1951
 msgctxt "Settings page"
 msgid "Full screen"
 msgstr ""
 
-#: inc/design-schema.php:1943
+#: inc/design-schema.php:1959
 msgctxt "Settings page"
 msgid "Full screen mode"
 msgstr ""
 
-#: inc/design-schema.php:1944
+#: inc/design-schema.php:1960
 msgctxt "Settings page"
 msgid "Open the messages page in full screen on mobile devices"
 msgstr ""
 
-#: inc/design-schema.php:1952
+#: inc/design-schema.php:1968
 msgctxt "Settings page"
 msgid "Open full screen automatically"
 msgstr ""
 
-#: inc/design-schema.php:1953
+#: inc/design-schema.php:1969
 msgctxt "Settings page"
 msgid "Enter full screen as soon as the messages page opens"
 msgstr ""
 
-#: inc/design-schema.php:1956
-#: inc/design-schema.php:1968
-#: inc/design-schema.php:1979
-#: inc/design-schema.php:1990
+#: inc/design-schema.php:1972
+#: inc/design-schema.php:1984
+#: inc/design-schema.php:1995
+#: inc/design-schema.php:2006
 msgctxt "Settings page"
 msgid "Only with full screen mode on"
 msgstr ""
 
-#: inc/design-schema.php:1964
+#: inc/design-schema.php:1980
 msgctxt "Settings page"
 msgid "Tap to open prompt"
 msgstr ""
 
-#: inc/design-schema.php:1965
+#: inc/design-schema.php:1981
 msgctxt "Settings page"
 msgid "A \"Tap to open\" prompt over the messenger while it sits in the page"
 msgstr ""
 
-#: inc/design-schema.php:1975
+#: inc/design-schema.php:1991
 msgctxt "Settings page"
 msgid "Swipe to go back"
 msgstr ""
 
-#: inc/design-schema.php:1976
+#: inc/design-schema.php:1992
 msgctxt "Settings page"
 msgid "Swipe right to return to the conversations list"
 msgstr ""
 
-#: inc/design-schema.php:1986
+#: inc/design-schema.php:2002
 msgctxt "Settings page"
 msgid "Hide overlapping theme elements"
 msgstr ""
 
-#: inc/design-schema.php:1987
+#: inc/design-schema.php:2003
 msgctxt "Settings page"
 msgid "Hide theme elements that may overlap the messenger in full screen"
 msgstr ""
 
-#: inc/design-schema.php:1996
-#: inc/design-schema.php:2005
+#: inc/design-schema.php:2012
+#: inc/design-schema.php:2021
 msgctxt "Settings page"
 msgid "Floating chat button"
 msgstr ""
 
-#: inc/design-schema.php:1997
+#: inc/design-schema.php:2013
 msgctxt "Settings page"
 msgid "A button on every page of the site that opens the messenger full screen"
 msgstr ""
 
-#: inc/design-schema.php:2014
+#: inc/design-schema.php:2030
 msgctxt "Settings page"
 msgid "Side"
 msgstr ""
 
-#: inc/design-schema.php:2021
-#: inc/design-schema.php:2035
-#: inc/design-schema.php:2047
+#: inc/design-schema.php:2037
+#: inc/design-schema.php:2051
+#: inc/design-schema.php:2063
 msgctxt "Settings page"
 msgid "Only with the button on"
 msgstr ""
 
-#: inc/design-schema.php:2054
+#: inc/design-schema.php:2070
 msgctxt "Settings page"
 msgid "The bottom bar of the full screen messenger. Drag to reorder: the first tab is the one the messenger opens on. The gear opens the widget's own page"
 msgstr ""
 
-#: inc/design-schema.php:2062
+#: inc/design-schema.php:2078
 msgctxt "Settings page"
 msgid "Tabs on the bar"
 msgstr ""
 
-#: inc/design-schema.php:2072
+#: inc/design-schema.php:2088
 msgctxt "Settings page"
 msgid "Hide the tab labels of the bottom bar. They appear as tooltips instead"
 msgstr ""
@@ -5380,14 +5395,14 @@ msgstr ""
 #: inc/notifications.php:547
 #: inc/notifications.php:1003
 #: inc/notifications.php:1010
-#: inc/options.php:1209
+#: inc/options.php:1210
 #, php-format
 msgid "%s wrote:"
 msgstr ""
 
 #: inc/notifications.php:630
 #: inc/notifications.php:826
-#: inc/options.php:1207
+#: inc/options.php:1208
 #, php-format
 msgctxt "Email notification header for non BuddyPress websites"
 msgid "You have unread messages: \"%s\""
@@ -5403,8 +5418,8 @@ msgid "Please enter a valid email address."
 msgstr ""
 
 #: inc/notifications.php:825
-#: inc/options.php:1206
 #: inc/options.php:1207
+#: inc/options.php:1208
 msgid "Test Conversation"
 msgstr ""
 
@@ -5444,56 +5459,56 @@ msgstr ""
 
 #: inc/notifications.php:1056
 #: inc/notifications.php:1193
-#: inc/options.php:1210
+#: inc/options.php:1211
 msgid "View Conversation"
 msgstr ""
 
 #: inc/notifications.php:1060
 #: inc/notifications.php:1198
-#: inc/options.php:1208
+#: inc/options.php:1209
 #, php-format
 msgid "Hi %s,"
 msgstr ""
 
 #: inc/notifications.php:1161
 #: inc/notifications.php:1224
-#: inc/options.php:1211
+#: inc/options.php:1212
 msgctxt "Email footer"
 msgid "Unsubscribe from email notifications about unread messages"
 msgstr ""
 
-#: inc/options.php:721
-#: inc/options.php:777
+#: inc/options.php:722
+#: inc/options.php:778
 #: inc/translations/strings.php:3784
 #: views/layout-viewer.php:11
 msgctxt "WP Admin"
 msgid "Administration"
 msgstr ""
 
-#: inc/options.php:722
+#: inc/options.php:723
 msgctxt "WP Admin"
 msgid "Better Messages"
 msgstr ""
 
-#: inc/options.php:761
 #: inc/options.php:762
+#: inc/options.php:763
 msgctxt "WP Admin"
 msgid "Settings"
 msgstr ""
 
-#: inc/options.php:787
 #: inc/options.php:788
+#: inc/options.php:789
 msgctxt "WP Admin"
 msgid "Chat Rooms"
 msgstr ""
 
-#: inc/options.php:797
 #: inc/options.php:798
+#: inc/options.php:799
 msgctxt "WP Admin"
 msgid "AI Chat Bots"
 msgstr ""
 
-#: inc/options.php:854
+#: inc/options.php:855
 #: inc/translations/strings.php:2370
 msgctxt "Settings page"
 msgid "AI Chat Bots"
