@@ -283,9 +283,12 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $item['url']      = false;
             $item['canBlock'] = 0;
-            $item['canVideo'] = 0;
-            $item['canAudio'] = 0;
             $item['verified'] = 0;
+
+            if( $include_personal && Better_Messages()->functions->is_ai_bot_user( $user_id ) ) {
+                $item['canVideo'] = 0;
+                $item['canAudio'] = 0;
+            }
 
             $item['avatar'] = Better_Messages()->url . 'assets/images/avatar.png';
 

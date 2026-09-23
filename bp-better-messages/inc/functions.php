@@ -4544,10 +4544,14 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 ? 'bm-card bm-threads-wrapper bm-chat-content wp-exclude-emoji'
                 : 'bm-card bm-card--thread-embed bm-chat-content wp-exclude-emoji';
 
-            $inbox = '';
+            $inbox         = '';
+            $single_column = '';
 
             if ( $with_sidebar ) {
-                $inbox = '<aside class="bm-embedded-inbox">'
+                $below         = Better_Messages_Design::instance()->preview_side_list_min_width();
+                $single_column = ' data-single-column-below="' . ( $below > 0 ? (int) $below : 'always' ) . '"';
+
+                $inbox = '<aside class="bm-embedded-inbox"' . ( $this->side_tabs_count() >= 2 ? ' data-tabs-top="1"' : '' ) . '>'
                     . $this->inbox_search_placeholder()
                     . $this->side_tabs_placeholder()
                     . ( $this->side_tabs_count() >= 2
@@ -4565,7 +4569,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     . ( $can_reply ? $this->composer_placeholder() : $this->room_gate_placeholder() )
                     . '</div></div>';
 
-            return '<div class="' . esc_attr( $card ) . '">'
+            return '<div class="' . esc_attr( $card ) . '"' . $single_column . '>'
                 . $inbox
                 . '<section class="bm-thread-col">'
                 . $column

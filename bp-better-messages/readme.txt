@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.7
+Stable tag: 3.0.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -399,9 +399,25 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
-= 3.0.7 =
+= 3.0.7 - 3.0.8 =
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
+* Text pasted into the reply box keeps its bold, italics, underline and strikethrough, whether it was copied from a message or from another page — fonts, colours and everything else stay behind
+* Fixed quotes, ampersands and angle brackets showing as HTML codes in the mobile app's message notifications and the conversation title above them
+* Fixed the messenger's loading placeholder jumping on phones and in narrow page columns — it now shows the same single-column layout the messenger opens in
+* Fixed an iPhone placing or answering a video call in Chrome still showing its own picture at half its width in a black frame
+* Fixed the reply box losing its focus and cursor about a second after a new conversation was opened from a link, which closed the keyboard on a phone
+* Fixed an emoji from a phone's keyboard or a paste appearing in the reply box as WordPress's emoji image, with the cursor jumped in front of it and the emoji missing from the sent message
+* Fixed presence-based chat rooms offering **Pin to top**, which pinned nothing because those rooms never appear in the conversations list
+* Fixed the conversation going blank for a moment between the loading placeholder and a conversation opened from a link
+* Fixed a message sent just as the reply box saved its draft coming back into the reply box after sending, and staying there as the conversation's draft
+* Fixed text typed just before reloading the page or closing the tab missing from the conversation's draft
+* Fixed a long press on a conversation in the list selecting the list's text on a phone instead of opening the conversation's menu, and no list of conversations, people, groups or chat rooms selects its text on a long press or a mouse drag any more
+* Fixed a long message filling the search results and the favourites list with its whole text — a search result now shows the words around the match on two lines
+* Fixed the text of a message not being selectable with a mouse on a Windows 2-in-1 or tablet the browser treats as a touch screen — a long press with a finger still opens the message menu
+* Fixed **Copy message text** losing the message's line breaks and formatting — a copied message pastes back into a conversation as it was written, and into other editors with its bold, italics and links
+* Members keep their end-to-end encryption keys in the browser while encryption is switched off, so switching it back on no longer asks them for their backup password
+* Audio Call and Video Call are offered for guests too in the users list, search results, a chat room's online users and a conversation's participants, as they already were inside a conversation with a guest
 * Fixed the Minimize button still appearing on the BuddyBoss Messages page with **Hide Mini Widget on Messages Page** turned on, where pressing it sent the conversation into a mini chat that setting had already hidden
 * Phones and mini chats can show every button beside a message, the ⋯ menu alone or none, at **Appearance → Mobile → Buttons beside a message** and **Appearance → Mini widgets → Mini chat windows → Buttons beside a message**, which take the place of **Tap a message to show its actions** and **Message actions in mini chats**
 * Messages on a phone and in a mini chat take all the width their buttons leave, in every message design, instead of stopping at the Maximum bubble width
