@@ -28,6 +28,49 @@ if ( ! class_exists( 'Better_Messages_Fluent_Notify' ) ) {
 
             add_filter( 'better_messages_bulk_pushs', array( $this, 'send_bulk_pushs' ), 10, 4 );
             add_filter( 'better_messages_push_request_data', array( $this, 'send_push' ), 10, 7 );
+
+            add_action( 'wp_footer', array( $this, 'leave_message_pushes_to_messenger' ), 99999 );
+            add_action( 'fluent_community/portal_footer', array( $this, 'leave_message_pushes_to_messenger' ) );
+        }
+
+        private bool $message_pushes_left_to_messenger = false;
+
+        public function leave_message_pushes_to_messenger()
+        {
+            if ( $this->message_pushes_left_to_messenger ) return;
+
+            if ( ! is_user_logged_in() || ! wp_script_is( 'better-messages' ) ) return;
+
+            $this->message_pushes_left_to_messenger = true;
+
+            ob_start();
+            ?>
+            <script type="text/javascript">
+                (function(){
+                    var skipMessagePushes = function(){
+                        var client = window.fluentNotify;
+
+                        if( ! client || typeof client.showInAppNotification !== 'function' || client.showInAppNotification.bmSkipsMessagePushes ) return;
+
+                        var showInAppNotification = client.showInAppNotification;
+
+                        client.showInAppNotification = function( notification ){
+                            try {
+                                if( notification && notification.link && new URL( notification.link, window.location.href ).searchParams.has( 'bm-redirect-to-messages' ) ) return;
+                            } catch ( e ) {}
+
+                            return showInAppNotification.apply( this, arguments );
+                        };
+
+                        client.showInAppNotification.bmSkipsMessagePushes = true;
+                    };
+
+                    skipMessagePushes();
+                    document.addEventListener( 'fluent-notify-initialized', skipMessagePushes );
+                })();
+            </script>
+            <?php
+            echo Better_Messages()->functions->minify_js( ob_get_clean() );
         }
 
         public static function is_configured()

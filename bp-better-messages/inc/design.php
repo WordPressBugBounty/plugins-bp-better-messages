@@ -31,7 +31,7 @@ class Better_Messages_Design {
         'bm_design_version',
     );
 
-    const MIGRATION_TARGET_VERSION = 13;
+    const MIGRATION_TARGET_VERSION = 14;
 
     const DEFAULT_DARK_MODE      = 'never';
 
@@ -112,7 +112,35 @@ class Better_Messages_Design {
         if ( $current < 13 ) {
             $this->migrate_fill_window_off();
         }
+        if ( $current < 14 ) {
+            $this->migrate_message_buttons();
+        }
         update_option( self::OPTION_MIGRATION_VERSION, self::MIGRATION_TARGET_VERSION );
+    }
+
+    public function migrate_message_buttons() {
+        $options = get_option( self::OPTION_DESIGN_OPTIONS, array() );
+        if ( ! is_array( $options ) ) {
+            return;
+        }
+        $map = array(
+            'tapMessageActions'       => 'mobileMessageButtons',
+            'miniChatsMessageActions' => 'miniChatsMessageButtons',
+        );
+        $changed = false;
+        foreach ( $map as $old => $new ) {
+            if ( ! array_key_exists( $old, $options ) ) {
+                continue;
+            }
+            if ( in_array( $options[ $old ], array( false, 0, '0', 'false', 'off' ), true ) && ! array_key_exists( $new, $options ) ) {
+                $options[ $new ] = 'none';
+            }
+            unset( $options[ $old ] );
+            $changed = true;
+        }
+        if ( $changed ) {
+            update_option( self::OPTION_DESIGN_OPTIONS, $options );
+        }
     }
 
     public function migrate_list_background_key() {

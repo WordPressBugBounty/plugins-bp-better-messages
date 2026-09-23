@@ -286,6 +286,11 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
             if ( bp_is_messages_component() ) {
                 $link = Better_Messages()->functions->get_link();
 
+                if( ! $link ) {
+                    wp_redirect( home_url( '/' ) );
+                    exit;
+                }
+
                 if( bp_action_variable(0) !== false ){
                     $link = add_query_arg([
                         'thread_id' => bp_action_variable(0)

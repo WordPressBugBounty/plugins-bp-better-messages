@@ -488,7 +488,7 @@ function _bm_admin_translations_map() {
         array( '_x', 'Site default', 'Chat rooms settings page' ),
         array( '_x', 'Bubbles', 'Chat rooms settings page' ),
         array( '_x', 'Outlined', 'Settings page' ),
-        array( '_x', 'No bubbles', 'Chat rooms settings page' ),
+        array( '_x', 'Classic', 'Chat rooms settings page' ),
         array( '_x', 'Message side', 'Chat rooms settings page' ),
         array( '_x', 'Overrides the site-wide message side for this room only', 'Chat rooms settings page' ),
         array( '_x', 'Mine on the right', 'Settings page' ),

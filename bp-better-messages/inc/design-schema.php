@@ -1,6 +1,10 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+function better_messages_design_bubble_fill_note() {
+    return _x( 'Not used by the selected message design. Chat rooms that pick a bubble design in their own settings still follow it', 'Settings page', 'bp-better-messages' );
+}
+
 function better_messages_design_zone_parts() {
     static $parts = null;
     if ( null !== $parts ) {
@@ -20,7 +24,7 @@ function better_messages_design_zone_parts() {
         'selfText'   => array( 'slug' => 'self-text',  'shared' => '--bm-color-bubble-self-text',       'label' => _x( 'Own message text', 'Settings page', 'bp-better-messages' ),         'base' => _x( 'own messages text', 'Settings page', 'bp-better-messages' ),            'default' => '255, 255, 255', 'dark' => '255, 255, 255' ),
         'selfName'   => array( 'slug' => 'self-name',  'shared' => '--bm-color-bubble-self-nickname',   'label' => _x( 'Own message name', 'Settings page', 'bp-better-messages' ),         'base' => _x( 'own messages name', 'Settings page', 'bp-better-messages' ),            'default' => '55, 65, 81',    'dark' => '203, 213, 225' ),
         'otherBg'    => array( 'slug' => 'other-bg',   'shared' => '--bm-color-bubble-other-bg',        'label' => _x( 'Other message background', 'Settings page', 'bp-better-messages' ), 'base' => _x( 'other messages background', 'Settings page', 'bp-better-messages' ),    'default' => '243, 244, 246', 'dark' => '38, 50, 82' ),
-        'otherText'  => array( 'slug' => 'other-text', 'shared' => '--bm-color-bubble-other-text',      'label' => _x( 'Other message text', 'Settings page', 'bp-better-messages' ),       'base' => _x( 'other messages text', 'Settings page', 'bp-better-messages' ),          'default' => '17, 24, 39',    'dark' => '241, 245, 249' ),
+        'otherText'  => array( 'slug' => 'other-text', 'shared' => '--bm-color-bubble-other-text',      'label' => _x( 'Other message text', 'Settings page', 'bp-better-messages' ),       'base' => _x( 'other messages text', 'Settings page', 'bp-better-messages' ),          'default' => '17, 24, 39',    'dark' => '241, 245, 249', 'applies' => array( 'filled' ) ),
         'otherName'  => array( 'slug' => 'other-name', 'shared' => '--bm-color-bubble-other-nickname',  'label' => _x( 'Other message name', 'Settings page', 'bp-better-messages' ),       'base' => _x( 'other messages name', 'Settings page', 'bp-better-messages' ),          'default' => '55, 65, 81',    'dark' => '203, 213, 225' ),
     );
     return $parts;
@@ -103,6 +107,10 @@ function better_messages_design_zone_controls( $zone_name, $preview = array() ) 
             ), $preview );
             continue;
         }
+        $gate = empty( $spec['applies'] ) ? array() : array(
+            'appliesWhen' => array( 'bubbleFill' => $spec['applies'] ),
+            'appliesNote' => better_messages_design_bubble_fill_note(),
+        );
         $out[] = array_merge( array(
             'id'      => $id,
             'kind'    => 'color',
@@ -112,7 +120,7 @@ function better_messages_design_zone_controls( $zone_name, $preview = array() ) 
             'dark'    => $stock['dark'],
             'help'    => sprintf( _x( 'Follows the %s until you set it', 'Settings page', 'bp-better-messages' ), $what ),
             'formula' => array( 'same', $via ),
-        ), $preview );
+        ), $gate, $preview );
     }
     return $out;
 }
@@ -635,12 +643,14 @@ function better_messages_design_schema() {
                                 'dark'    => '38, 50, 82',
                             ),
                             array(
-                                'id'      => '--bm-color-bubble-other-text',
-                                'kind'    => 'color',
-                                'source'  => 'token',
-                                'label'   => _x( 'Text', 'Settings page', 'bp-better-messages' ),
-                                'default' => '17, 24, 39',
-                                'dark'    => '241, 245, 249',
+                                'id'          => '--bm-color-bubble-other-text',
+                                'kind'        => 'color',
+                                'source'      => 'token',
+                                'label'       => _x( 'Text', 'Settings page', 'bp-better-messages' ),
+                                'default'     => '17, 24, 39',
+                                'dark'        => '241, 245, 249',
+                                'appliesWhen' => array( 'bubbleFill' => array( 'filled' ) ),
+                                'appliesNote' => better_messages_design_bubble_fill_note(),
                             ),
                             array(
                                 'id'            => '--bm-color-bubble-other-nickname',
@@ -862,12 +872,12 @@ function better_messages_design_schema() {
                             'kind'    => 'cards',
                             'source'  => 'option',
                             'label'   => _x( 'Message design', 'Settings page', 'bp-better-messages' ),
-                            'help'    => _x( 'For the flat list 2.0 called Standard, pick No bubbles and put everyone on one side', 'Settings page', 'bp-better-messages' ),
+                            'help'    => _x( 'Classic is the flat list 2.0 called Standard, with every message on one side', 'Settings page', 'bp-better-messages' ),
                             'default' => 'filled',
                             'choices' => array(
                                 array( 'value' => 'filled',  'label' => _x( 'Bubbles', 'Settings page', 'bp-better-messages' ) ),
                                 array( 'value' => 'outline', 'label' => _x( 'Outlined', 'Settings page', 'bp-better-messages' ) ),
-                                array( 'value' => 'none',    'label' => _x( 'No bubbles', 'Settings page', 'bp-better-messages' ) ),
+                                array( 'value' => 'none',    'label' => _x( 'Classic', 'Settings page', 'bp-better-messages' ) ),
                             ),
                             'bodyClass' => 'bm-bubble-',
                         ),
@@ -883,15 +893,8 @@ function better_messages_design_schema() {
                                 array( 'value' => 'single',   'label' => _x( 'All on one side', 'Settings page', 'bp-better-messages' ) ),
                             ),
                             'bodyClass' => 'bm-msg-layout-',
-                        ),
-                        array(
-                            'id'        => 'tapMessageActions',
-                            'kind'      => 'switch',
-                            'source'    => 'option',
-                            'label'     => _x( 'Tap a message to show its actions', 'Settings page', 'bp-better-messages' ),
-                            'help'      => _x( 'On a touch screen, where there is no pointer to hover with. Turn it off to leave a long press as the only way in, the way a right click is on a desktop', 'Settings page', 'bp-better-messages' ),
-                            'default'   => true,
-                            'bodyClass' => 'bm-msg-tap-actions-',
+                            'appliesWhen' => array( 'bubbleFill' => array( 'filled', 'outline' ) ),
+                            'appliesNote' => _x( 'Not used by the selected message design. Chat rooms that pick a bubble design in their own settings still follow it', 'Settings page', 'bp-better-messages' ),
                         ),
                         array(
                             'id'      => '--bm-bubble-tail',
@@ -922,7 +925,7 @@ function better_messages_design_schema() {
                             'kind'    => 'slider',
                             'source'  => 'token',
                             'label'   => _x( 'Maximum bubble width', 'Settings page', 'bp-better-messages' ),
-                            'help'    => _x( 'Room is always kept beside the bubble for the message actions', 'Settings page', 'bp-better-messages' ),
+                            'help'    => _x( 'On the full-size messenger, with room kept beside the bubble for the message buttons. On a phone and in a mini chat a message takes the whole width those buttons leave', 'Settings page', 'bp-better-messages' ),
                             'default' => '70%',
                             'unit'    => '%',
                             'min'     => 40,
@@ -1322,6 +1325,27 @@ function better_messages_design_schema() {
                 ),
 
                 array(
+                    'label'       => _x( 'During a call', 'Settings page', 'bp-better-messages' ),
+                    'description' => _x( 'While a call is open the conversation moves aside and shares the messenger with the video. This is how much of it the conversation may take', 'Settings page', 'bp-better-messages' ),
+                    'controls'    => array(
+                        array(
+                            'id'      => '--bm-call-chat-width',
+                            'previewSurface' => 'desktop',
+                            'previewView'    => 'call',
+                            'kind'    => 'slider',
+                            'source'  => 'token',
+                            'label'   => _x( 'Conversation width', 'Settings page', 'bp-better-messages' ),
+                            'help'    => _x( 'A ceiling, not a fixed width: on a messenger too narrow to grant it the conversation and the video simply share what there is. Every pixel given here is one the video gives up', 'Settings page', 'bp-better-messages' ),
+                            'default' => '350px',
+                            'unit'    => 'px',
+                            'min'     => 300,
+                            'max'     => 600,
+                            'step'    => 10,
+                        ),
+                    ),
+                ),
+
+                array(
                     'label'       => _x( 'Side panel', 'Settings page', 'bp-better-messages' ),
                     'description' => _x( 'The vertical tab strip beside the side list, shown when more than one widget is on it. Drag to reorder: the first tab is the one the messenger opens on. The gear opens the widget\'s own page', 'Settings page', 'bp-better-messages' ),
                     'controls'    => array(
@@ -1441,9 +1465,9 @@ function better_messages_design_schema() {
                             'default'   => '1',
                             'previewSurface' => 'desktop',
                             'appliesWhen' => array(
-                                'myProfileButton' => array( '0' ),
-                                'userStatuses'    => array( '0' ),
-                                'pointsSystem'    => array( 'none' ),
+                                'myProfileButton'            => array( '0' ),
+                                'userStatuses'               => array( '0' ),
+                                'pointsBalanceUserMenuPopup' => array( '0' ),
                             ),
                             'appliesNote' => _x( 'Shown anyway while its menu still has something in it', 'Settings page', 'bp-better-messages' ),
                         ),
@@ -1792,13 +1816,18 @@ function better_messages_design_schema() {
                             'default'   => true,
                         ),
                         array(
-                            'id'        => 'miniChatsMessageActions',
-                            'kind'      => 'switch',
+                            'id'        => 'miniChatsMessageButtons',
+                            'kind'      => 'radio',
                             'source'    => 'option',
-                            'label'     => _x( 'Message actions in mini chats', 'Settings page', 'bp-better-messages' ),
-                            'help'      => _x( 'The reply, favorite and more buttons beside a message. They take a lane next to the bubble, so messages are narrower in the small window. With this off the same actions are still reachable by right click', 'Settings page', 'bp-better-messages' ),
-                            'default'   => true,
-                            'bodyClass' => 'bm-mini-msg-actions-',
+                            'label'     => _x( 'Buttons beside a message', 'Settings page', 'bp-better-messages' ),
+                            'help'      => _x( 'The reply, favorite and ⋯ buttons the pointer brings up in a mini chat. Room is kept for them beside every message, or on its first line in the Classic design, so fewer buttons leave the text more width in the small window. With Menu only, ⋯ opens every action, and with None a right click does', 'Settings page', 'bp-better-messages' ),
+                            'default'   => 'all',
+                            'choices'   => array(
+                                array( 'value' => 'all',  'label' => _x( 'All', 'Settings page', 'bp-better-messages' ) ),
+                                array( 'value' => 'menu', 'label' => _x( 'Menu only', 'Settings page', 'bp-better-messages' ) ),
+                                array( 'value' => 'none', 'label' => _x( 'None', 'Settings page', 'bp-better-messages' ) ),
+                            ),
+                            'bodyClass' => 'bm-msg-buttons-mini-',
                         ),
                         array(
                             'id'        => 'miniChatAudioCall',
@@ -2004,6 +2033,26 @@ function better_messages_design_schema() {
                             'default'   => '0',
                             'appliesWhen' => array( 'mobileFullScreen' => array( '1' ) ),
                             'appliesNote' => _x( 'Only with full screen mode on', 'Settings page', 'bp-better-messages' ),
+                        ),
+                    ),
+                ),
+
+                array(
+                    'label'    => _x( 'Messages', 'Settings page', 'bp-better-messages' ),
+                    'controls' => array(
+                        array(
+                            'id'        => 'mobileMessageButtons',
+                            'kind'      => 'radio',
+                            'source'    => 'option',
+                            'label'     => _x( 'Buttons beside a message', 'Settings page', 'bp-better-messages' ),
+                            'help'      => _x( 'The reply, favorite and ⋯ buttons a tap brings up. Room is kept for them beside every message, or on its first line in the Classic design, so fewer buttons leave the text more width. With Menu only, ⋯ opens every action, and with None a long press does. Reactions are reachable either way — a tap brings up the picker, and a long press opens the set at the top of the message menu', 'Settings page', 'bp-better-messages' ),
+                            'default'   => 'all',
+                            'choices'   => array(
+                                array( 'value' => 'all',  'label' => _x( 'All', 'Settings page', 'bp-better-messages' ) ),
+                                array( 'value' => 'menu', 'label' => _x( 'Menu only', 'Settings page', 'bp-better-messages' ) ),
+                                array( 'value' => 'none', 'label' => _x( 'None', 'Settings page', 'bp-better-messages' ) ),
+                            ),
+                            'bodyClass' => 'bm-msg-buttons-mobile-',
                         ),
                     ),
                 ),

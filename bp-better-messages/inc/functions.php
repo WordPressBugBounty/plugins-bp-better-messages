@@ -513,6 +513,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                             LIMIT 0, 1
                         ", $thread_id ));
 
+                        if( $admin_user === 0 ){
+                            return false;
+                        }
+
                         Better_Messages()->functions->add_moderator( $thread_id, $admin_user );
 
                         if( intval($user_id) === $admin_user){

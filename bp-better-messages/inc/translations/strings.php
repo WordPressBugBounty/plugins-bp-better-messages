@@ -41,11 +41,12 @@ function _bm_js_translation_strings() {
     _x( 'This call was answered on another device', 'Private Call Screen', 'bp-better-messages' );
     _x('Connecting...', 'Call Screen', 'bp-better-messages');
     _x( 'Sound playback is blocked by your browser. Please click this message to enable it.', 'Call Screen', 'bp-better-messages' );
+    _x( 'The other side did not reconnect', 'Call Screen', 'bp-better-messages' );
     _x( 'Starting the call...', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side\'s camera stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side\'s microphone stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
-    _x( 'The other side did not reconnect', 'Call Screen', 'bp-better-messages' );
     _x( 'This call was answered on another device', 'Call Screen', 'bp-better-messages' );
+    _x( 'The other side could not join the call', 'Call Screen', 'bp-better-messages' );
     _x( 'Connecting...', 'Call Screen', 'bp-better-messages' );
     _x('Toggle Chat Screen', 'Calling Features - Toggle Chat Screen', 'bp-better-messages');
     __( 'Realtime connection not established. Please wait until you will be connected to realtime server and try again', 'bp-better-messages' );
@@ -302,6 +303,7 @@ function _bm_js_translation_strings() {
     _x( "Members", "Search Results", "bp-better-messages" );
     _x( "Conversations", "Search Results", "bp-better-messages" );
     _x( "Conversation", "Untitled conversation fallback", "bp-better-messages" );
+    __( "Continue", "bp-better-messages" );
     _x( "Restore encryption keys", "E2E Encryption", "bp-better-messages" );
     _x( "Set up encryption", "E2E Encryption", "bp-better-messages" );
     _x( "Set up end-to-end encryption to send messages in this conversation.", "E2E Encryption", "bp-better-messages" );
@@ -524,7 +526,6 @@ function _bm_js_translation_strings() {
     _x( "Chat Rooms", "Mini Widgets - Head", "bp-better-messages" );
     _x( "Start a new conversation", "Mini Widgets", "bp-better-messages" );
     _x( "Remove", "Mini Widgets", "bp-better-messages" );
-    __( "Continue", "bp-better-messages" );
     _x('I agree to %s', 'Mobile App', 'bp-better-messages');
     _x('terms and conditions', 'Mobile App', 'bp-better-messages');
     __('Error', 'bp-better-messages');
@@ -875,6 +876,7 @@ function _bm_js_translation_strings() {
     _x('Unable to encrypt message — encryption key unavailable. Please reload the page and try again.', 'E2E Encryption', 'bp-better-messages');
     __( 'Are you sure you want to mute this conversation?', 'bp-better-messages' );
     __( 'Are you sure you want to unmute this conversation?', 'bp-better-messages' );
+    _x( 'Cannot reach the site. Reload the page to try again.', 'Rest API Error', 'bp-better-messages' );
     _x( 'Camera', 'Media Inputs', 'bp-better-messages');
     _x( 'Microphone', 'Media Inputs', 'bp-better-messages');
     _x( 'Screen', 'Media Inputs', 'bp-better-messages');
@@ -937,6 +939,7 @@ function _bm_js_translation_strings() {
     _x('Incoming Audio Call', 'Private Call - On Site Message', 'bp-better-messages');
     _x('Incoming Video Call', 'Private Call - On Site Message', 'bp-better-messages');
     _x('Decline', 'Call Screen', 'bp-better-messages');
+    _x('Reconnecting...', 'Call Screen', 'bp-better-messages');
     _x('This call was answered on another device', 'Private Call Screen', 'bp-better-messages');
     _x('User rejected your call', 'Private Call Screen', 'bp-better-messages');
     _x('User you are trying to call is already in call. Please try later.', 'Private Call Screen', 'bp-better-messages');
@@ -952,6 +955,7 @@ function _bm_js_translation_strings() {
     _x('No permission to access the microphone. Please allow it in the app settings.', 'Call Screen', 'bp-better-messages');
     _x('The other side\'s microphone stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages');
     _x('The other side\'s camera stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages');
+    _x('The other side did not reconnect', 'Call Screen', 'bp-better-messages');
     _x('Switch Videos', 'Call Screen', 'bp-better-messages');
     _x('Minimise', 'Call Screen', 'bp-better-messages');
     _x('Participants', 'Group Video Chat', 'bp-better-messages');
@@ -974,6 +978,7 @@ function _bm_js_translation_strings() {
     _x( 'Enable browser push notifications to receive private messages when you are offline?', 'Push Request Proposal', 'bp-better-messages' );
     _x( 'Enable', 'Push Request Proposal', 'bp-better-messages' );
     _x( 'Dismiss', 'Push Request Proposal', 'bp-better-messages' );
+    _x( 'Cannot reach the site. Check your connection and try again.', 'Rest API Error', 'bp-better-messages' );
     _x('Authorization failed. Please check if you are still authorized at this website.', 'Rest API Error', 'bp-better-messages');
     _nx( "%s typing", "%s typing", g.count, "Typing indicator", "bp-better-messages" );
     _x( "%s recording", "Activity indicator (Username recording)", "bp-better-messages" );
@@ -1029,6 +1034,7 @@ function _bm_js_translation_strings() {
     _x( "%s Participants", "Thread Title (when subjects are disabled)", "bp-better-messages" );
     __( "Deleted user", "bp-better-messages" );
     __( "Encrypted", "bp-better-messages" );
+    _nx( 'Close all notifications, %s more hidden', 'Close all notifications, %s more hidden', foldedCount, 'Onsite notifications', 'bp-better-messages' );
     _x('Close all notifications', 'Onsite notifications', 'bp-better-messages');
     _x( 'Error loading models', 'AI Chat Bots (WP Admin)', 'bp-better-messages' );
     _x( 'Loading', 'WP Admin', 'bp-better-messages' );
@@ -1517,7 +1523,7 @@ function _bm_js_translation_strings() {
     _x('Site default', 'Chat rooms settings page', 'bp-better-messages');
     _x('Bubbles', 'Chat rooms settings page', 'bp-better-messages');
     _x('Outlined', 'Settings page', 'bp-better-messages');
-    _x('No bubbles', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Classic', 'Chat rooms settings page', 'bp-better-messages');
     _x('Message side', 'Chat rooms settings page', 'bp-better-messages');
     _x('Overrides the site-wide message side for this room only', 'Chat rooms settings page', 'bp-better-messages');
     _x('Mine on the right', 'Settings page', 'bp-better-messages');

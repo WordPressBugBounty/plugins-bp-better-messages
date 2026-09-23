@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.6
+Stable tag: 3.0.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -399,9 +399,81 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
-= 3.0.4 - 3.0.6 =
-**Thank you to everyone who sent feedback on the 3.0 release.**
+= 3.0.7 =
+**Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
+* Fixed the Minimize button still appearing on the BuddyBoss Messages page with **Hide Mini Widget on Messages Page** turned on, where pressing it sent the conversation into a mini chat that setting had already hidden
+* Phones and mini chats can show every button beside a message, the ⋯ menu alone or none, at **Appearance → Mobile → Buttons beside a message** and **Appearance → Mini widgets → Mini chat windows → Buttons beside a message**, which take the place of **Tap a message to show its actions** and **Message actions in mini chats**
+* Messages on a phone and in a mini chat take all the width their buttons leave, in every message design, instead of stopping at the Maximum bubble width
+* A favorited message shows its star beside the time where the buttons beside it carry none
+* Fixed turning **Tap a message to show its actions** off in 3.0.6 also taking reactions away on a phone — a tap brings up the reactions picker whatever the buttons beside a message are set to
+* **No bubbles** is now **Classic**, laid out as 2.0's Standard template was: every message on one side, its buttons and time on its first line and no room kept beside it, with **Message side** applying to the bubble designs only
+* Fixed **Pointing tail toward the avatar** moving the sender name away from the avatar along with the bubble
+* Reactions are now at the top of the message menu as well, which is what makes them reachable on a picture at last — long press the image, or open the same menu from the image viewer's own button
+* Fixed the reactions picker sliding away the moment a reaction was picked, which put a different emoji under a cursor that had not moved
+* Fixed the message menu sliding in from the side of the screen on a phone instead of opening where the message was pressed
+* Fixed Escape closing the image viewer together with the message menu opened over it
+* A sticker, a GIF or a picture carrying reactions now shows its time on the same row as the pills, the way a message with text already did, instead of spending a line on each
+* Fixed a landscape GIF or sticker leaving its bubble wider than the picture, with the time and ticks beside it instead of on it
+* Fixed the messenger being pushed sideways and squeezed into a narrow strip by a theme's floated element, most visibly on a BuddyPress group's Messages tab on a phone
+* Fixed the messenger, and the page around it, being stretched to the width of the longest conversation preview on a theme that sizes its layout from its own content
+* Fixed a theme's text color taking over the messenger's search and picker fields, which could leave their text unreadable on a dark palette
+* Fixed opening the conversation menu during a call taking the conversation off screen and closing the menu again, with the call stretched across the whole messenger in its place
+* Fixed the call controls drawing, and taking clicks, over the conversation information panel opened beside a call
+* Fixed a GIF or sticker being cut off at the edge of the conversation a call squeezes, instead of shrinking to the room it has
+* The conversation beside a call can be made wider or narrower, at Appearance → Layout → During a call, where its width had always been fixed at 350px
+* The other messages' text color at Appearance → Colors now says when the selected message design does not paint it, instead of looking live while changing nothing
+* Fixed pinning or muting a conversation, changing your status, opening a sticker pack and following a refused Private Message link reporting "AxiosError: Request failed with status code 403" or "[object Object]" in place of the reason the site gave
+* Fixed a connection that drops raising "Network Error" notices over the messenger, most visible on a phone, where a suspended tab or a move from Wi-Fi to cellular could put several of them on screen at once
+* A firewall or CORS rule that keeps the messenger from reaching the site now says so in one readable notice, where it used to show "Network Error"
+* An action that could not reach the site, such as pinning, muting, a reaction or a setting, now says so in one readable notice instead of "Network Error"
+* Notification cards now step around open mini chats, the mini chats bar and the phone's chat button instead of covering them
+* A new message no longer raises a notification card while its conversation can already be seen, open or in view in a conversations list — one pushed below the pinned conversations, or behind another tab of the mini widget, still raises it
+* Fixed a setting that the site would not save saying nothing at all, on the messenger's own settings screen
+* Fixed Private Message taking you off the page instead of opening a mini chat, in the participants and online users lists of a conversation embedded on a page and in a mini chat's own message menu
+* Fixed typing @ in a presence-based chat room offering only the people who had already written there, which left somebody sitting in the room who has never spoken impossible to mention
+* Fixed the name search behind @ finding nobody in a conversation holding more participants than the messenger had loaded
+* Fixed the list of names that opens on @ landing far from the message field on a phone once the on-screen keyboard was up, and not appearing at all where the messenger had taken the whole screen
+* Typing @ searches a whole name again, spaces included, where the list had been closing at the first space and leaving a member findable only by the word their name starts with
+* Fixed the list of names that opens on @ appearing behind the mobile app's own screen, where Enter then picked a name nobody could see
+* Fixed a group conversation viewed before anyone had written in it never granting moderator rights to the first person who then sent a message
+* Fixed an error while preparing a conversation update for one participant leaving the rest of that request acting as that participant
+* Fixed the "New messages" line disappearing a moment after opening a conversation from another one, and landing above messages already read when a conversation is opened again
+* Fixed the message field sometimes opening partly under the on-screen keyboard on an iPhone, where only closing the keyboard and tapping again brought it into view
+* Fixed a conversation left showing loading placeholders instead of its empty state once its last message was deleted or it was cleared, which on a WebSocket site lasted until the page was reloaded
+* Fixed the bubble-style mini widget's conversation panel closing while its emoji picker, formatting bar or image viewer was in use
+* Fixed end-to-end encryption keys being lost when the messenger rebuilt its local data right after the page loaded, which left the member restoring them with their backup password
+* Fixed chat room moderators no longer being offered Delete on other members' messages
+* Fixed chat room moderators being shown the group call settings of a room, which only a site moderator can change
+* Fixed Private Message missing from the message menu in a course conversation between two people
+* Fixed Kick participant being offered in a group's chat, whose members come from the group itself
+* One-to-one calls now move to the room only when they cannot connect directly or through the relay server at all, so a brief network change, such as a phone switching from Wi-Fi to mobile data, keeps a call on its direct connection
+* One-to-one calls can now last as long as needed — a long call no longer ends when its connection has to move to the room, and a call carried by the relay server no longer drops after six hours
+* Fixed a one-to-one call that had moved to the room ending by itself a minute after a brief loss of the realtime connection
+* Fixed the caller waiting on "Connecting" for good when the other side answered but could not join, where the call now ends with "The other side could not join the call"
+* Fixed the caller of a call that starts in the room waiting on "Connecting" for good when the other side accepted and never arrived, where the call now ends after a minute
+* Fixed a one-to-one call sometimes not recovering after its connection dropped for more than a few seconds
+* Fixed a phone's camera no longer reaching the other side of a one-to-one video call after the browser had spent more than a few seconds in the background
+* Fixed the camera or microphone staying on after a call when it had been turned on while the call was still ringing
+* Fixed a phone's own camera preview being drawn at half its width in a black frame, at the start of a call and after coming back to the browser
+* Fixed a Firefox participant's camera never reaching the others in a room call, including a one-to-one call that had moved to the room
+* Fixed the iOS and Android apps hanging up a one-to-one call as it moved to the room, and turning a muted microphone or a switched-off camera back on there — the apps need a new build to get this
+* Fixed the iOS and Android apps saying the other side had lost connection for the rest of a call after a moment's drop of their own connection — the apps need a new build to get this
+* Fixed a call answered from the iOS app's own ringing screen sometimes having no sound in either direction — the app needs a new build to get this
+* Fixed a series of call problems in the iOS and Android apps, in group calls and in one-to-one calls that reconnect or move to the room — the apps need a new build to get this
+* Fixed avatars in the conversations list, the compact icons-only list included, showing an arrow instead of the hand pointer the rest of the row shows
+* Fixed the New Conversation button missing from the conversations list with **Messaging → Single Conversation Per Recipient** turned on
+* Fixed **Hide in private conversations** and **Hide in group conversations** at Appearance → Conversation → Avatars treating a conversation of three or more people as a private one
+* Fixed a visitor who is not logged in getting an error on opening a member, an AI bot or a chat room from a list, instead of being asked to log in or continue as a guest
+* Fixed **Calls → Call Restrictions → Restricted Roles** also taking group audio and video chats away from those roles, where it covers one-to-one calls only
+* Audio Call and Video Call are back beside people in the mini widget, in search results, in a chat room's online users list and among the participants of a conversation embedded on a page
+* Fixed a search typed with any tab other than Messages in front showing no results
+* The points balance on the account row follows **User Menu** and **User Menu Popup** at Integrations → Points Systems → Balance Display again, instead of appearing in its menu whenever the balance was shown anywhere else
+* Fixed FluentNotify showing its own notification for a new message a few seconds after the messenger had already shown one on the same page
+* Fixed Reply in the image viewer only closing the picture in a mini chat that had been closed and opened again since the picture was first viewed
+* Other minor bugfixes and improvements
+
+= 3.0.4 - 3.0.6 =
 * A conversation full of long, heavily formatted messages opens far faster and no longer locks up a phone while it loads
 * Fixed a PHP warning on every message push to a member whose only registered device is an Android phone, which filled the debug log of any site running the mobile app with WordPress debugging on
 * The member's own avatar and name at the foot of the conversation list can be hidden again — the new **Appearance → Layout → Interface elements → Account row** decides it, and the settings button stays behind as it did in 2.x
@@ -796,173 +868,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Updated Freemius SDK to latest version
 * Other minor bugfixes and improvements
 
-= 2.14.7 =
-* Added new Privacy & GDPR settings page with compliance overview and privacy controls
-* Added self-hosted emoji sprites option — download emoji images to your server instead of loading from external CDN
-* Added Privacy-friendly oEmbeds — YouTube, Vimeo and other video embeds load only after user clicks
-* Added WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
-* Added suggested privacy policy text that adapts based on enabled features (Settings → Privacy)
-* Added option to delete file attachments when user requests data erasure
-* Added option to enable or disable Emoji Picker button
-* Added option to enable or disable automatic text emoticon to emoji conversion
-* Improved caching — scripts and resources that don't change between updates are now cached independently by the browser
-* Scripts and resources are now loaded on demand only when the feature is actually used
-* Added filter hooks for custom AI provider registration
-* AI Chat Bots will not be auto-removed from Group Conversations when members list syncing
-* Show "Voice message" fallback text when voice messages addon is disabled
-* Fixed mentions popup not closing when no matches found
-* Fixed voice message uploads returning 404 when file attachments disabled
-* Fixed E2E encrypted file uploads in new conversations
-* Fixed group member sync running for groups with chat disabled
-* Improved email template customization — preview now reflects all settings accurately
-* Fixed custom HTML email template not saving properly
-* Other minor bugfixes and improvements
-
-= 2.14.2 - 2.14.6 =
-* Added option to randomize filenames on upload to prevent Web Application Firewalls from blocking file uploads in some web hosts
-* Added double confirmation for message auto deleting setting to prevent accidental data loss
-* Improved integrations subtabs sorting — active plugins now appear first
-* Improved AI Digests with better context awareness and error logging
-* Improved video and image transcoding to prevent GIF animation loss
-* Fixed chat room moderators not recognized in group video call permissions (join, start, admin controls)
-* Fixed async chunk loading issues caused by browser caching after plugin updates
-* Fixed reactions selector overflowing bottom of viewport
-* Fixed image/video optimization output formats not saved to settings and not validated on upload
-* Fixed stale E2E encryption status when sending messages after switching threads
-* Fixed Ultimate Member directory message button missing target user ID
-* Fixed Chat Room block "Create new" link pointing to old post editor
-* Fixed messages location warning showing incorrectly for integration plugins
-* Fixed mentions with HTML badges (e.g. PeepSo verified icons) rendering as raw HTML instead of images
-* Fixed CSS issue for SVG icons in FluentCommunity Groups
-* Fixed Fluent Community mobile bottom menu not returning after closing keyboard on Chrome iOS with native button
-* Improved Fluent Community mobile bottom menu icon now navigating back to messages list when not at it
-* Other minor bugfixes, improvements and optimizations
-
-= 2.14.0 - 2.14.1 =
-* Completely rebuilt Settings page in WP Admin to make it more compact and easier to navigate while adding new features
-* Reworked GamiPress and myCRED addons into unified Points System with per-role pricing and balance display directly in Better Messages interface
-* AI Chat Bots: Added support for adding chat bots to group conversations and ability to respond when they are mentioned
-* AI Chat Bots: Added support for Anthropic (Claude) and Google Gemini providers alongside OpenAI
-* AI Chat Bots: Added conversation summarization and scheduled digests features for Group Conversations
-* AI Chat Bots: Added token usage tracking with cost estimation and ability to charge with MyCRED or GamiPress points
-* AI Chat Bots: Bots now appear as online users and show typing indicators while generating responses in WebSocket Version
-* AI Chat Bots: Added dedicated admin page for bot management
-* Added activity indicators for voice recording and file uploading in addition to typing indicator in WebSocket Version
-* Added Voice Messages settings tab with max recording duration, auto-delete, voice transcription and role restrictions
-* Added new Chat Rooms administration page in WP Admin
-* Added ability to force notification for tagged users even if muted the conversation
-* Added online users sidebar panel in Chat Rooms with toggle button
-* Added ability mute and unmute participant microphones in group video calls
-* Added ability to send voice messages when creating a new conversation
-* Added ability to customize order of tabs in mini widgets, side panel and mobile view
-* Added compatibility with the new Progressify plugin (wordpress.org version) alongside the legacy CodeCanyon version
-* Tested with WordPress 7.0 Beta
-
-= 2.13.0 - 2.13.1 =
-* Added optional End-to-End Encryption (E2EE) for private and group conversations (WebSocket version only)
-    * Can be enabled at the website level and optionally per conversation
-    * Messages encrypted in user browsers — server never sees plaintext
-    * AES-256-GCM encryption for messages and file attachments
-    * Password-protected key backup for multi-device access
-    * Key recovery if the user forgets an encryption password
-    * Automatic key distribution for new conversation participants
-* Added client-side image and video optimization for cross-browser compatibility and saving storage space
-    * Automatic image conversion to WebP, AVIF, or JPEG before upload
-    * Configurable image quality and max resolution
-    * Metadata stripping for privacy
-    * HEIC/HEIF automatic conversion for cross-browser compatibility
-    * Video format conversion to MP4 for universal playback
-* Added Compact Mode for Side Conversations List with auto and always compact options
-* Renamed "Combined View" to "Side Conversations List"
-* Fixed "Enable PeepSo Header at Messages Page" was not working after some updates
-* Other minor bugfixes, improvements and optimizations
-
-= 2.12.9 =
-* Added optional feature to enable messages forwarding
-* Reworked bulk messaging
-    * Moved bulk messaging to a dedicated WP Admin screen
-    * Added ability to attach files to bulk messages
-    * Moved bulk messaging sending to a background process instead of frontend processing
-    * Added ability to schedule bulk messages for later
-    * Added ability to pause, resume and cancel bulk jobs
-    * Added follow-up messaging to send additional messages into existing bulk conversations
-    * Added activity filter to target users active within or inactive for a specified number of days
-    * Added ability to send bulk messages as another user
-    * Added ability to send bulk messages to specific users
-    * Added ability to send bulk messages to group members (BuddyPress, PeepSo, Ultimate Member)
-    * Added send rate (batch size) control
-    * Added test/preview for bulk messages before sending
-* Added initial integration with [SureDash](https://www.better-messages.com/docs/integrations/suredash/)
-* Removed jQuery dependency from inline scripts
-* Fixed empty chat rooms to be properly shown in user inbox when user auto added to it
-* Added Thread ID indication and View in inbox button to Chat Rooms settings page in WP Admin
-* Other minor bugfixes, improvements and optimizations
-
-= 2.12.5 - 2.12.6 =
-* Added option to filter conversations list to show only unread conversations
-* Migrated WC Vendors and WCFM Add-ons to the core plugin. WCFM and WC Vendors Add-ons are now deprecated and will be removed, please deactivate them in your website if you are using them.
-* Updated OneSignal Integration code to support the latest OneSignal API changes
-* Mentions search now supports searching usernames with whitespace
-* Other minor bugfixes, improvements and optimizations
-
-= 2.12.2 - 2.12.4 =
-* Completely reworked Voice Recorder Add-on UX
-* Added Attachments browser feature which allows browsing all uploaded files in the conversation information panel
-* Added message draft autosave feature — unsent messages are automatically saved and restored when returning to a conversation, with a draft indicator shown in the conversations list
-* Added voice message transcription powered by OpenAI (requires OpenAI API key)
-* Added protect files with proxy feature to protect uploaded files from direct access with support for X-Sendfile, X-Accel-Redirect and LiteSpeed optimized serving
-* Added resumable file uploads for improved reliability on slow or unstable connections
-* Added option to switch between file upload method (Standard POST Upload or TUS (Resumable Upload)) as some hosting blocks TUS uploads with WAF
-* Improved upload directory structure with per-thread unique subfolders to improve security and keep original filenames
-* Other minor bugfixes and improvements
-
-= 2.12.0 - 2.12.1 =
-* Added AI Content Moderation powered by OpenAI Moderation API
-* Group Video & Audio Calls improvements:
-    * Added moderator controls: lock room, mute all participants, broadcast mode
-    * Added Promote to Speaker / Demote to Viewer controls in broadcast mode
-    * Added Raise Hand / Lower Hand feature for viewers in broadcast mode
-    * Added Lower All Hands button for moderators
-    * Added option to restrict who can start group calls (anyone or moderators only)
-    * Added default call mode setting (Participatory or Broadcast) in conversation settings
-    * Added group call settings section in conversation information panel
-    * Added visual speaker highlighting during group calls
-    * Improved microphone and camera device switching reliability
-* Replaced browser database engine with new lightweight custom solution for better performance and stability
-* Browser database and WebSocket connection is now shared across browser tabs via SharedWorker, improving performance and real-time sync
-* AI Moderation supports two modes: Hold for Review (messages require admin approval) and Flag Only (messages are sent but marked for admin review)
-* AI Moderation includes configurable sensitivity threshold, content category selection, and role-based bypass
-* AI Moderation supports image moderation in addition to text content
-* AI Flagged messages appear in the moderation panel alongside user-reported messages
-* Improved moderation notification emails with detailed reason information (AI moderation, first-time sender, blacklisted user)
-* AI Chat Bots: Added support for OpenAI reasoning models (o-series, GPT-5)
-* AI Chat Bots: Added Temperature, Max Output Tokens, and Reasoning Effort settings
-* Added Chat Room block for WordPress Block Editor (Gutenberg) with full screen auto-open option
-* Added option to hide participants count in chat room header
-* Improved rendering performance of the messages list, reducing unnecessary updates when receiving new messages
-* Improved auto-recovery when browser database is unexpectedly deleted
-* Fixed calls not starting in some cases
-* Fixed group video call crash when container has zero dimensions during initialization
-* Fixed AI Chat Bot error "You cannot send messages to this user"
-* Fixed scrollbar thumb direction in some browsers
-* Compatibility update for WordPress 6.2+ by replacing deprecated `get_page_by_title()` usage during activation
-* Other minor bugfixes and improvements
-
-= 2.11.0 - 2.11.1 =
-* Added ability to customize the email template for unread messages notifications in WP Admin
-* Added ability to add unsubscribe link to email notifications
-* Added ability to send test email notifications message from plugin settings page
-* Added Pre-Moderated Messages feature, which allows moderating messages before they are delivered to recipients
-    * Added ability to pre-moderate messages when the user did not have messages at website yet
-    * Added ability to enable moderation of new conversation by user role in plugin settings
-    * Added ability to enable moderation of new replies by user role in plugin settings
-    * Added ability to whitelist users from moderation in the administration screen
-    * Added ability to blacklist users, which enables force moderation of messages from them
-    * Added ability to set email list which will receive notifications about new messages for moderated or new message reports
-* Added options for admins to bypass words blacklist
-* Added initial support for new Dokan Vendor Dashboard UI
-* Removed Customizations tab from settings page, settings from that page moved to Messaging tab
-* Other minor bugfixes and improvements
+[Full changelog history] (https://www.better-messages.com/changelog/)
 
 == Upgrade Notice ==
 

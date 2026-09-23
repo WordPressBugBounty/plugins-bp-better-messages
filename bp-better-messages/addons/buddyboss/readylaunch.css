@@ -162,11 +162,17 @@ body.bm-bb-rl-fullscreen .bm-bb-rl-msg-page-header {
  * conversations layout that BuddyBoss's own header Messages dropdown is
  * filled with. Hiding it here emptied that dropdown on every messages
  * screen: the popup opened with its title and its View Inbox footer and
- * nothing in between. */
+ * nothing in between.
+ *
+ * The minimize-to-mini-chat button goes with the dock it would dock into:
+ * left standing it drops the conversation back to the inbox and puts the
+ * mini chat somewhere nobody can see. `.bm-minimize` was v2's class and 3.0
+ * renders no such thing — the header stamps a stable `data-action-key`
+ * instead, and `unmaximize` carries its own key, so restore-down stays. */
 body.bm-bb-rl-hide-mini .bm-wrap.bm-widget-bubble,
 body.bm-bb-rl-hide-mini .bm-mini-widgets-wrap,
 body.bm-bb-rl-hide-mini .bm-mini-chats-wrap,
-body.bm-bb-rl-hide-mini .bm-minimize {
+body.bm-bb-rl-hide-mini [data-action-key="minimize"] {
     display: none !important;
 }
 
