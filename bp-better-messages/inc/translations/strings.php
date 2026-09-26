@@ -176,6 +176,9 @@ function _bm_js_translation_strings() {
     _x( "GIF", "Picker popover tab", "bp-better-messages" );
     _x( "Emoji", "Composer", "bp-better-messages" );
     _x( "Write your message", "Reply area placeholder", "bp-better-messages" );
+    _x( "Message is too long. Maximum allowed length is %d characters", "Edit message error", "bp-better-messages" );
+    _x( "Message is too long. Maximum allowed length is %d characters", "Send message error", "bp-better-messages" );
+    _x( "The message you were trying to send was empty", "User tried to send empty message error", "bp-better-messages" );
     _x( "Upload files", "Attach menu item", "bp-better-messages" );
     _x( "Share location", "Attach menu item", "bp-better-messages" );
     _x( "You can also drag and drop or paste files into the reply area", "Attach menu hint", "bp-better-messages" );
@@ -184,6 +187,8 @@ function _bm_js_translation_strings() {
     _x( "Reply to message", "Reply message panel", "bp-better-messages" );
     _x( "Sticker suggestions", "Composer sticker suggestions strip", "bp-better-messages" );
     _x( "Add attachment", "\"Add attachment\" button tooltip", "bp-better-messages" );
+    _x( "Message is too long. Maximum allowed length is %d characters", "Save button tooltip when over limit", "bp-better-messages" );
+    _x( "Message is too long. Maximum allowed length is %d characters", "Send button tooltip when over limit", "bp-better-messages" );
     _x( "Save Message", "\"Edit message\" button tooltip", "bp-better-messages" );
     _x( "Contains a banned term", "Banned term warning headline", "bp-better-messages" );
     _x( "Contains a banned term: %s", "Banned term warning detail", "bp-better-messages" );
@@ -813,8 +818,19 @@ function _bm_js_translation_strings() {
     _x( "Guest Settings", "Moderation actions", "bp-better-messages" );
     __( "Report Message", "bp-better-messages" );
     _x( "Unable to encrypt message — encryption key unavailable. Please reload the page and try again.", "E2E Encryption", "bp-better-messages" );
+    _x( "Deleting conversation", "Delete Conversation Action", "bp-better-messages" );
+    _x( "Conversation deleted", "Delete Conversation Action", "bp-better-messages" );
+    _x( "Leaving conversation", "Leave conversation action", "bp-better-messages" );
+    _x( "You left the conversation", "Leave conversation action", "bp-better-messages" );
+    _x( "Clearing messages", "Clear Messages Action", "bp-better-messages" );
+    _x( "Messages cleared", "Clear Messages Action", "bp-better-messages" );
+    _x( "Error while clearing messages", "Clear Messages Action", "bp-better-messages" );
     _x( "Error while deleting message", "Messages deleting", "bp-better-messages" );
     _x( "Message deleted", "Messages deleting", "bp-better-messages" );
+    _x( "Pinning message", "Messages pinning", "bp-better-messages" );
+    _x( "Message pinned", "Messages deleting", "bp-better-messages" );
+    _x( "Unpinning message", "Messages pinning", "bp-better-messages" );
+    _x( "Message unpinned", "Messages pinning", "bp-better-messages" );
     _x( "Are you sure you want to delete all messages in this conversation? (This action is irreversible)", "Clear Messages Action", "bp-better-messages" );
     _x( "Clear messages", "\"Clear messages\" Button", "bp-better-messages" );
     _x( "Leave chat room", "\"Leave Chat Room\" Button", "bp-better-messages" );

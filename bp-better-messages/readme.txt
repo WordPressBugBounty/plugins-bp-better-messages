@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.9
+Stable tag: 3.0.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -401,7 +401,18 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
-= 3.0.9 =
+= 3.0.9 - 3.0.10 =
+* Clear messages, Erase conversation, Leave conversation, Pin Message and Unpin Message show that they are under way and then that they are done, as in 2.0
+* Fixed Delete conversation, and the Restore link after it, spinning without end when the site could not be reached
+* Over the length limit, Send stays in place and says the message is too long when pressed, for a new message and an edit alike, as in 2.0
+* Saving an edit with all of its text removed says the message is empty, as in 2.0, instead of doing nothing
+* A call a site's own rules refuse between two members stays in the conversation header, greyed, and says why when pressed, as in 2.0
+* The Messages tab of the corner widget says why when older conversations cannot be loaded, as in 2.0
+* Enter in a guest's name field continues, as in 2.0
+* Fixed a status picked on a phone's settings screen being saved twice
+* Fixed the encryption error showing twice when an edit, or a message sent from New Conversation, could not be encrypted
+* Fixed the Message status dialog marking Delivered with a single check, which on a message means sent, instead of the double check
+* Fixed opening a conversation briefly showing an earlier day's date label at the top and fading other date labels in, with nothing being scrolled
 * The ⋯ button is back on every conversation in the list, as in 2.0, opening the same menu as a right click — it shows on hover on desktop and always on phones, with a switch for each in **Appearance → Layout** and **Appearance → Mobile**
 * Fixed search results, on-site message notifications and the reply box's quote showing a broken character (�) or part of an HTML code such as `&#` where a long message was cut short
 * Fixed the search highlight landing one letter off the matched word in a message with a Turkish İ before it
