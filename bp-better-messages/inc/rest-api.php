@@ -1002,7 +1002,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $args['temp_id'] = $temp_id;
 
-            if( empty( $temp_time ) ) {
+            if( empty( $temp_time ) || ! Better_Messages()->realtime ) {
                 return;
             }
 
@@ -2197,11 +2197,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $added_user_ids     = array_column($return['users'], 'user_id');
 
-            $get_messages = $this->get_messages($thread_id, [], $added_user_ids);
+            $tail_count   = 80;
+            $get_messages = $this->get_messages($thread_id, [], $added_user_ids, $tail_count);
 
             $return['messages'] = $get_messages['messages'];
             $page_ids = array_map( 'intval', array_column( $get_messages['messages'], 'message_id' ) );
             $return['threads'][0]['tailFirst'] = count( $page_ids ) > 0 ? min( $page_ids ) : 0;
+            $return['historyComplete'] = count( $page_ids ) < $tail_count;
             $return['users']    = array_merge($return['users'], $get_messages['users']);
 
             $pending_sql = user_can( $current_user_id, 'bm_can_administrate' ) ? "" : $wpdb->prepare(" AND ( `messages`.`is_pending` != 1 OR `messages`.`sender_id` = %d )", $current_user_id );

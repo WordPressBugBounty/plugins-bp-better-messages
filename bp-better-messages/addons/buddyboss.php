@@ -147,10 +147,10 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
                 document.addEventListener('click', function(e){
                     if( ! e.target || typeof e.target.closest !== 'function' ) return;
-                    var thread = e.target.closest('#header-messages-dropdown-elem .thread');
+                    var thread = e.target.closest('#header-messages-dropdown-elem .bm-thread-row');
                     if( ! thread ) return;
+                    var dd = thread.closest('#header-messages-dropdown-elem');
                     setTimeout(function(){
-                        var dd = document.getElementById('header-messages-dropdown-elem');
                         if( dd && dd.classList.contains('selected') ){
                             dd.classList.remove('selected');
                         }

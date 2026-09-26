@@ -587,6 +587,7 @@ class Better_Messages_Design {
         $vars['designPreviewThread']  = (string) self::PREVIEW_THREAD_ID;
         $vars['designPreviewGroup']   = (string) self::PREVIEW_GROUP_THREAD_ID;
         $vars['designPreviewAssets']  = Better_Messages()->url . 'assets/images/preview/';
+        $vars['designPreviewLinkPreviews'] = ( isset( Better_Messages()->settings['enableNiceLinks'] ) && '1' === Better_Messages()->settings['enableNiceLinks'] ) ? '1' : '0';
 
         if ( 'mobile' === $surface ) {
             $vars['forceMobileView'] = '1';

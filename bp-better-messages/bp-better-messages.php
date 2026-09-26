@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.0.8
+    Version: 3.0.9
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '3.0.8';
+        public  $version = '3.0.9';
 
         public  $db_version = '3.0.0';
 
@@ -709,15 +709,19 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
             $js = '(function(w){try{'
                 . 'if(new URLSearchParams(w.location.search).has("noSharedWorker"))return;'
-                . 'if(typeof w.SharedWorker!=="undefined"){'
-                . 'var s={url:%s,name:%s,worker:null,messages:[],error:null};'
+                . 'var sw=typeof w.SharedWorker!=="undefined";'
+                . 'var ua=w.navigator.userAgent||"";if(/Android|iP(hone|ad|od)/.test(ua)||(/Macintosh|Linux/.test(ua)&&w.navigator.maxTouchPoints>1))sw=false;'
+                . 'try{var h=JSON.parse(w.localStorage.getItem("bm-shared-worker-unavailable")||"null");if(h&&h.until>Date.now())sw=false;}catch(e){}'
+                . 'var r=function(u){try{var x=new URL(u,w.location.href);if(x.origin===w.location.origin||!/^https?:$/.test(w.location.protocol))return u;return w.location.origin+x.pathname+x.search+x.hash;}catch(e){return u;}};'
+                . 'if(sw){'
+                . 'var s={url:r(%s),name:%s,worker:null,messages:[],error:null};'
                 . 's.worker=new w.SharedWorker(s.url,{name:s.name});'
                 . 's.worker.onerror=function(e){s.error=e;};'
                 . 's.worker.port.onmessage=function(e){s.messages.push(e.data);};'
                 . 's.worker.port.start();'
                 . 'w.__bmSharedWorkerBoot=s;'
                 . '}else if(typeof w.Worker!=="undefined"){'
-                . 'var d={url:%s,worker:null,messages:[],error:null};'
+                . 'var d={url:r(%s),worker:null,messages:[],error:null};'
                 . 'd.worker=new w.Worker(d.url);'
                 . 'd.worker.onerror=function(e){d.error=e;};'
                 . 'd.worker.onmessage=function(e){d.messages.push(e.data);};'
@@ -833,6 +837,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'datePosition', 'timeFormat', 'avatars', 'avatarsSelf', 'subName',
             'typingPosition',
             'miniChatsAvatars',
+            'miniChatsPrivateMessages',
         );
 
         private function _filter_default_equal_entries( array $vars ) {
@@ -958,6 +963,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'privateReplies'        => ( $this->settings['privateReplies'] == '1' ? '1' : '0' ),
                 'forwardMessages'       => ( $this->settings['enableForwardMessages'] == '1' ? '1' : '0' ),
                 'editMessageTimeLimit'  => (int) $this->settings['editMessageTimeLimit'],
+                'deleteMethod'          => ( $this->settings['deleteMethod'] === 'replace' ? 'replace' : 'delete' ),
                 'maximumMessageLength'  => (int) $this->settings['maximumMessageLength'],
                 'template'              => $this->settings['template'],
                 'layout'                => $this->settings['modernLayout'],
@@ -984,6 +990,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'avatars'               =>  Better_Messages_Design::instance()->get_design_option( 'avatarsList', 'show' ),
                 'avatarsSelf'           => ( Better_Messages_Design::instance()->get_design_option( 'showAvatarSelf', true ) ? '1' : '0' ),
                 'miniChatsAvatars'      => ( Better_Messages_Design::instance()->get_design_option( 'miniChatsAvatars', true ) ? '1' : '0' ),
+                'miniChatsPrivateMessages' => ( Better_Messages_Design::instance()->get_design_option( 'miniChatsPrivateMessages', false ) ? '1' : '0' ),
                 'subName'               =>  Better_Messages_Design::instance()->get_design_option( 'privateSubName', 'online' ),
                 'typingPosition'        =>  Better_Messages_Design::instance()->get_design_option( 'typingPosition', 'header' ),
                 'touchEnter'            => ( $this->settings['disableEnterForTouch'] == '1' ? '0' : '1' ),
@@ -1253,6 +1260,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
                     $script_variables['callRequestTimeLimit'] = $this->settings['callRequestTimeLimit'];
                     $script_variables['callsRevertIcons']     = ( $this->settings['callsRevertIcons'] === '1' ? '0' : '1' );
+                    $script_variables['callsEnabled']         = ( $this->settings['audioCalls'] === '1' || $this->settings['videoCalls'] === '1' ? '1' : '0' );
                     $script_variables['fast']                 = apply_filters('bp_better_messages_fast', '1');
 
                     if ( $this->settings['enablePushNotifications'] === '1' ) {

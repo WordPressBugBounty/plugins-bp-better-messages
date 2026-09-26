@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.8
+Stable tag: 3.0.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -399,9 +399,76 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
-= 3.0.7 - 3.0.8 =
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
+= 3.0.9 =
+* The ⋯ button is back on every conversation in the list, as in 2.0, opening the same menu as a right click — it shows on hover on desktop and always on phones, with a switch for each in **Appearance → Layout** and **Appearance → Mobile**
+* Fixed search results, on-site message notifications and the reply box's quote showing a broken character (�) or part of an HTML code such as `&#` where a long message was cut short
+* Fixed the search highlight landing one letter off the matched word in a message with a Turkish İ before it
+* Fixed the conversation info panel listing no members in a course conversation, or in a private conversation an administrator opened without being in it
+* A conversation among the search results has its menu again, as in 2.0 — a right click, a long press or its ⋯ pins, mutes or deletes it where it was found
+* A conversation among the search results goes by its name in the conversations list again, as in 2.0, instead of by whoever wrote the matching message
+* A conversation among the search results shows who wrote the match again, as in 2.0 — the writer's picture in a group, and the delivery tick on your own message
+* Fixed a reply or edit being written getting cancelled when the unread filter was switched on with its conversation open
+* Mark all as read is offered whenever a conversation is unread, as in 2.0, not only while that conversation is among the ones the list has loaded
+* The Users and Friends tabs mark the person of the open conversation again when the conversations list has not loaded it or the unread filter is on
+* On a phone, a conversation the list has not loaded no longer empties before it slides away on Back
+* Fixed a guest in Do not disturb still hearing the message sound and the ringtone
+* Fixed a guest's drafts and unsent messages being cleared on the next page load after the messenger reset its local database
+* The forward dialog shows the badges a site adds to a member's name, as the conversations list does and as 2.0 did
+* An administrator reading someone else's conversation sees it named by its subject, as in 2.0, instead of after one of the two people in it
+* The favorites page shows 2.0's star on every message again, and a click on it takes the message off the list
+* A reaction shows a number only once two or more people have picked the same emoji, so reactions in a private conversation show just the emoji
+* The tick of a seen message is the accent color inside a conversation again, as in the conversations list and in 2.0 — on bubbles painted in the accent it keeps the message's text color
+* The Appearance preview shows delivery ticks as delivered and seen, and a click on one opens who saw it instead of breaking the preview
+* Choose the color of links in messages in **Appearance → Colors** — for your own and other people's messages on bubbles, and one for the Outlined and Classic designs
+* Choose the outline color of your own and other people's messages for the Outlined design in **Appearance → Colors**, and each message color says what it still paints under Outlined and Classic
+* **Appearance** opens on the Conversation tab, where the message design is chosen, ahead of Colors
+* Fixed a blocked member's messages offering no menu — they can be reported again, and deleted by a moderator
+* Fixed an encrypted message this device cannot decrypt offering no menu — its sender can delete it, and it can be answered, pinned, starred or reported
+* On a phone, a conversation picked from the header Messages dropdown of BuddyBoss, PeepSo or Ultimate Member opens over the page again, as in 2.0, instead of loading the messages page
+* Fixed the BuddyBoss header's Messages dropdown staying open after a conversation was picked from it
+* On a phone, Private Message on a member or a message of a chat room embedded in a page opens over that page again, as in 2.0, instead of loading the messages page
+* Fixed Private Message in the messenger taking a phone off the page when a chat room is embedded in it
+* Fixed a person or conversation picked in the corner widget without mini chats opening the profile owner's messages page on someone else's BuddyPress profile, instead of your own
+* On a phone, Back leaves the page at the first press again after the messenger was opened over it, as in 2.0
+* Links carrying `openFullScreen` open the messages page maximized again
+* A message notification clicked on the messages page opens the conversation in that messenger instead of a mini chat over it, unless another conversation is open there
+* Private Message on a participant or on a message can open the new conversation in a mini chat, so a chat room it was started from stays open — switch on **Private messages from a conversation** in **Appearance → Mini widgets**
+* Message buttons still carrying 2.0's `bpbm-pm-button` class — copied into a page or kept in a page cache — work again
+* A mention in a message opens the profile in the same tab again, as in 2.0, and passes the click to the `better_messages_before_avatar_click` filter first, as an avatar does
+* Fixed a long name in a mention spilling out of its pill in mini chats, or out of the message on a phone
+* Fixed notifications covering the bottom menu of MasterStudy account pages narrower than 1280px
+* FluentNotify shows its own card for a new message again where the messenger's on-site notifications are turned off
+* Fixed a swipe through a conversation on iPhone and iPad stopping dead and jumping back, in Safari and in apps that show the messenger in a web view
+* Fixed the conversation scrolling to the bottom a second time a moment after sending a message, pulling you back down if you had scrolled up again
+* Older messages load further ahead of the scroll, and on iPhone and iPad while a swipe is still moving, instead of stopping it at the top of what was loaded
+* Loading older messages no longer redraws every message already in the conversation, which made long conversations stutter more the further back they were scrolled
+* A conversation too short to scroll shows "Start of conversation" above its first message again, as in 2.0
+* Fixed a new message flashing once before it fades in, in a conversation too short to scroll
+* On a phone, the slide between the conversations list and a conversation no longer stutters while the conversation opens, and a swipe back no longer jumps as it starts to follow the finger
+* In a web app installed to a phone's home screen, the tab bar and the reply area stand clear of the bottom edge again, as in 2.0
+* Fixed a gap between the tab bar and FluentCommunity's bottom menu when the community is installed as an app on iPhone or iPad
+* Fixed the messenger on iPhone and iPad staying stuck until Safari was restarted — phones and tablets now keep the local database in each tab's own worker
+* Fixed a "Database not opened" error, and a messenger that never finished loading, after another tab closed or reset the local database
+* Fixed a new message, or another change made in one browser tab, sometimes not showing in the site's other open tabs
+* The messenger keeps working on a device that has run out of storage, and keeps its local copy on sites that serve plugin files from a CDN
+* The conversation list and arriving messages show sooner, and a large local history no longer freezes the page while it loads, in the browser and in the apps
+* Fixed conversations staying on the loading placeholder on a slow phone with a large local history
+* Fixed a one-to-one conversation's header showing your own name after the site's data was cleared in the browser with the messenger open
+* Fixed a message that arrived while another tab was loading its local copy, or while encrypted conversations were being read, not showing until the conversation changed again
+* Fixed a message on a site without WebSocket sometimes never reaching the other person when it took a few seconds to send, or went out once the connection was back
+* Fixed older end-to-end encrypted messages reading as undecryptable until a reload, after the encryption module once failed to load
+* With end-to-end encryption on, closing a tab in a chat room that shows who is present leaves the room while other tabs stay open
+* A call pressed before the messenger has connected opens at once, says it is connecting and goes out once connected, as in 2.0, instead of doing nothing or saying the connection is not established
+* The Android app says when full-screen notifications are off, which keeps incoming calls off a locked screen, and opens the setting that allows them — at start, after a call missed that way and in its Settings (rebuild the app to get it)
+* A deleted message disappears as soon as the delete is confirmed — or shows "This message was deleted" where the site replaces deleted messages — and comes back if the delete fails
+* Fixed the loading placeholder showing instead of an empty conversation when its only message was deleted while the conversation was still loading
+* Fixed pictures not filling their frame on some themes, which left an empty band below a wide picture — in messages, reply quotes, the reply box and the info panel's photos
+* Fixed the AI moderation, pre-moderation, voice transcription and translation switches getting stuck on after the OpenAI API key, license or Messages Viewer they need was gone
+* Fixed a link to a chat room landing on the Messages tab when the conversations list is collapsed, and collapsing the list switching it back to Messages
+
+= 3.0.7 - 3.0.8 =
 * Text pasted into the reply box keeps its bold, italics, underline and strikethrough, whether it was copied from a message or from another page — fonts, colours and everything else stay behind
 * Fixed quotes, ampersands and angle brackets showing as HTML codes in the mobile app's message notifications and the conversation title above them
 * Fixed the messenger's loading placeholder jumping on phones and in narrow page columns — it now shows the same single-column layout the messenger opens in

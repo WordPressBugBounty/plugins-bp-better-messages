@@ -41,6 +41,8 @@ if ( ! class_exists( 'Better_Messages_Fluent_Notify' ) ) {
 
             if ( ! is_user_logged_in() || ! wp_script_is( 'better-messages' ) ) return;
 
+            if ( ! Better_Messages()->functions->is_onsite_notification_enabled( Better_Messages()->functions->get_current_user_id() ) ) return;
+
             $this->message_pushes_left_to_messenger = true;
 
             ob_start();

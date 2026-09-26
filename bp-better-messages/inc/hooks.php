@@ -1557,44 +1557,9 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             ]);
 
             if( is_array($options) && isset($options['primary'] ) ) {
-                $main_color = $options['primary'];
-                $rgba_color_075 = Better_Messages()->functions->hex2rgba($main_color, 0.075);
-                $rgba_color_06  = Better_Messages()->functions->hex2rgba($main_color, 0.6);
                 ?><style type="text/css">
                     body.bm-mobile header{
                         display: none;
-                    }
-
-                    .bm-wrap.bm-mobile .reply .send button[type=submit]{
-                        background: #f7f7f7 !important;
-                    }
-
-                    .bm-mini-widgets-wrap .tabs>div[data-tab=messages] .unread-count, .bm-mini-chats-wrap .chats .chat .head .unread-count{
-                        background: <?php echo $main_color; ?> !important;
-                    }
-
-                    .bm-wrap .chat-header .fas,
-                    .bm-wrap .chat-header>a,
-                    .bm-wrap .reply .send button[type=submit],
-                    .bm-wrap.mobile-ready:not(.bm-mobile) .bm-mobile-tap{
-                        color: <?php echo $main_color; ?> !important;
-                    }
-
-                    .bm-wrap .bp-emojionearea.focused,
-                    .bm-wrap .new-message form>div input:focus,
-                    .bm-wrap .active .taggle_list,
-                    .bm-wrap .chat-header .bm-search form input:focus{
-                        border-color: <?php echo $main_color; ?>!important;
-                        -moz-box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
-                        -webkit-box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
-                        box-shadow: inset 0 1px 1px <?php echo $rgba_color_075; ?>, 0 0 8px <?php echo $rgba_color_06; ?>;
-                    }
-
-                    .bm-wrap #send-to .ui-autocomplete{
-                        border-color: <?php echo $main_color; ?>;
-                        -moz-box-shadow: inset 0 0 0 <?php echo $rgba_color_075; ?>, 0 3px 3px <?php echo $rgba_color_06; ?>;
-                        -webkit-box-shadow: inset 0 0 0 <?php echo $rgba_color_075; ?>, 0 3px 3px <?php echo $rgba_color_06; ?>;
-                        box-shadow: inset 0 0 0 <?php echo $rgba_color_075; ?>, 0 3px 3px <?php echo $rgba_color_06; ?>;
                     }
                 </style>
                 <script type="text/javascript">

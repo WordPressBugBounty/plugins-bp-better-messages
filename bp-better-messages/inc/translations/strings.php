@@ -42,12 +42,12 @@ function _bm_js_translation_strings() {
     _x('Connecting...', 'Call Screen', 'bp-better-messages');
     _x( 'Sound playback is blocked by your browser. Please click this message to enable it.', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side did not reconnect', 'Call Screen', 'bp-better-messages' );
+    _x( 'Connecting...', 'Call Screen', 'bp-better-messages' );
     _x( 'Starting the call...', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side\'s camera stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side\'s microphone stopped sending. They have been asked to turn it on again.', 'Call Screen', 'bp-better-messages' );
     _x( 'This call was answered on another device', 'Call Screen', 'bp-better-messages' );
     _x( 'The other side could not join the call', 'Call Screen', 'bp-better-messages' );
-    _x( 'Connecting...', 'Call Screen', 'bp-better-messages' );
     _x('Toggle Chat Screen', 'Calling Features - Toggle Chat Screen', 'bp-better-messages');
     __( 'Realtime connection not established. Please wait until you will be connected to realtime server and try again', 'bp-better-messages' );
     __( 'This browser not support video calls feature. Please use another browser.', 'bp-better-messages' );
@@ -297,6 +297,7 @@ function _bm_js_translation_strings() {
     _x( "No courses yet", "Empty courses list", "bp-better-messages" );
     _x( "Course Page", "Courses List", "bp-better-messages" );
     _x( "Attachment", "Favorites directory", "bp-better-messages" );
+    _x( "Remove from Favorited", "Remove message from favorited", "bp-better-messages" );
     _x( "No favorited messages yet!", "Favorited messages screen", "bp-better-messages" );
     _x( "Nothing found", "Search Results", "bp-better-messages" );
     _x( "Friends", "Search Results", "bp-better-messages" );
@@ -547,6 +548,8 @@ function _bm_js_translation_strings() {
     _x('Open Settings', 'Mobile App', 'bp-better-messages');
     _x('Push Notifications permissions are not enabled. Please enable them to receive push notifications.', 'Mobile App', 'bp-better-messages');
     _x('Enable', 'Mobile App', 'bp-better-messages');
+    _x('Calls', 'Mobile App', 'bp-better-messages');
+    _x('Full-screen notifications are off for this app, so incoming calls cannot show on the lock screen. Allow them in Settings to answer calls while your phone is locked.', 'Mobile App', 'bp-better-messages');
     _x('Are you sure you want to logout?', 'Mobile App', 'bp-better-messages');
     _x( 'Logout', 'Mobile App', 'bp-better-messages' );
     _x('Logout', 'Mobile App', 'bp-better-messages');
@@ -810,6 +813,7 @@ function _bm_js_translation_strings() {
     _x( "Guest Settings", "Moderation actions", "bp-better-messages" );
     __( "Report Message", "bp-better-messages" );
     _x( "Unable to encrypt message — encryption key unavailable. Please reload the page and try again.", "E2E Encryption", "bp-better-messages" );
+    _x( "Error while deleting message", "Messages deleting", "bp-better-messages" );
     _x( "Message deleted", "Messages deleting", "bp-better-messages" );
     _x( "Are you sure you want to delete all messages in this conversation? (This action is irreversible)", "Clear Messages Action", "bp-better-messages" );
     _x( "Clear messages", "\"Clear messages\" Button", "bp-better-messages" );
@@ -936,6 +940,11 @@ function _bm_js_translation_strings() {
     __('Rich Content', 'bp-better-messages');
     _x('This chat room is currently closed', 'Chat Room', 'bp-better-messages');
     _x( 'Speaker', 'Media Inputs', 'bp-better-messages');
+    _x("Settings could not be opened. Open your phone's Settings, find this app and allow full-screen notifications.", 'Mobile App', 'bp-better-messages');
+    _x('A call rang while your phone was locked, but it could not show on the screen because full-screen notifications are off for this app. Allow them in Settings to answer calls while your phone is locked.', 'Mobile App', 'bp-better-messages');
+    _x('You missed a call', 'Mobile App', 'bp-better-messages');
+    _x('Not now', 'Mobile App', 'bp-better-messages');
+    _x('Answer calls on the lock screen', 'Mobile App', 'bp-better-messages');
     _x('Incoming Audio Call', 'Private Call - On Site Message', 'bp-better-messages');
     _x('Incoming Video Call', 'Private Call - On Site Message', 'bp-better-messages');
     _x('Decline', 'Call Screen', 'bp-better-messages');
@@ -995,7 +1004,6 @@ function _bm_js_translation_strings() {
     _x( "Private Message", "Message context menu", "bp-better-messages" );
     _x( "Unpin Message", "Message context menu", "bp-better-messages" );
     _x( "Pin Message", "Message context menu", "bp-better-messages" );
-    _x( "Remove from Favorited", "Remove message from favorited", "bp-better-messages" );
     _x( "Mark as Favorited", "Mark message as favorite", "bp-better-messages" );
     _x( "Forward", "Message context menu", "bp-better-messages" );
     _x( "Report", "Message context menu", "bp-better-messages" );

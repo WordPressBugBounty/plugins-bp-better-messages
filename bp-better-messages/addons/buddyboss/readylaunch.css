@@ -54,6 +54,20 @@
     max-width: none;
 }
 
+/* `.bm-wrap` is only the widget, the mini chats and the threads list now. The
+ * messages page, the embedded conversations and the overlays have no such
+ * ancestor, so the reset shrank an icon wider than its box there: the
+ * conversation row's ⋯ drew at 12px of its 16. v2's rule reached them all
+ * through `.bp-messages-wrap`. Their icons are laid out as blocks by the
+ * messenger's own rules, so only the width cap is lifted. */
+.bm-bb-readylaunch .bm-scope svg,
+.bm-bb-readylaunch .bm-wrap-main svg,
+.bm-bb-readylaunch .bm-chat-wrap svg,
+.bm-bb-readylaunch .bm-wrap-group svg,
+.bm-bb-readylaunch .bm-single-thread-wrap svg {
+    max-width: none;
+}
+
 /* Mobile launcher centers its icon via text-align + line-height, needs inline. */
 .bm-bb-readylaunch #bm-mini-mobile-open svg {
     display: inline;

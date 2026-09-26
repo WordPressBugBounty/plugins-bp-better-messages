@@ -344,10 +344,10 @@ if ( ! class_exists( 'Better_Messages_MasterStudy' ) ) {
             <style id="bm-masterstudy-mobile-styles">
             body.bm-mobile .masterstudy-account-mobile-menu { display: none !important; }
             @media (max-width: 1279.98px) {
-                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-center,
-                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-left,
-                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .Toastify__toast-container--bottom-right {
-                    bottom: <?php echo $toast_bottom; ?>px;
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .bm-toast-container--bottom-center,
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .bm-toast-container--bottom-left,
+                body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) .bm-toast-container--bottom-right {
+                    bottom: <?php echo $toast_bottom; ?>px !important;
                 }
                 body:has(.masterstudy-account-mobile-menu):not(.bm-mobile) #bm-mini-mobile-open {
                     bottom: <?php echo $button_bottom; ?>px !important;
