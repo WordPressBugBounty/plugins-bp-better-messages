@@ -603,6 +603,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                  */
                 $missedThreads = $this->check_missing_threads( $current_user_id, $clientThreads );
 
+                if( count( $missedThreads ) > 0 && count( $visibleThreads ) > 0 ){
+                    $openThreads = array_map( 'intval', $visibleThreads );
+
+                    foreach( $missedThreads as $index => $thread_id ){
+                        if( in_array( $thread_id, $openThreads, true ) && Better_Messages()->functions->is_user_participant( $thread_id, $current_user_id ) ){
+                            unset( $missedThreads[ $index ] );
+                        }
+                    }
+
+                    $missedThreads = array_values( $missedThreads );
+                }
+
                 if( count( $missedThreads ) > 0 ){
                     $return['missedThreads'] = $missedThreads;
                 }

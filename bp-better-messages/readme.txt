@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.10
+Stable tag: 3.0.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -401,7 +401,12 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
-= 3.0.9 - 3.0.10 =
+= 3.0.9 - 3.0.11 =
+* Fixed New Conversation showing a reply box instead of the Recover button for a conversation you had deleted, when **Messaging → Deleted Conversations** is set to offer restoring it
+* Fixed a conversation you had deleted with a message still unread sending you back to the inbox a moment after you opened it, before you could press Recover
+* Fixed the floating chat button on phones opening an empty screen instead of the messenger on some themes
+* Fixed the To and Subject fields and the searches taking the theme's own font and size instead of the messenger's, on themes and plugins that restyle form fields
+* Fixed the messenger's text turning thin on themes that set a light body weight, such as Twenty Twenty-Five
 * Clear messages, Erase conversation, Leave conversation, Pin Message and Unpin Message show that they are under way and then that they are done, as in 2.0
 * Fixed Delete conversation, and the Restore link after it, spinning without end when the site could not be reached
 * Over the length limit, Send stays in place and says the message is too long when pressed, for a new message and an edit alike, as in 2.0
@@ -478,6 +483,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Fixed pictures not filling their frame on some themes, which left an empty band below a wide picture — in messages, reply quotes, the reply box and the info panel's photos
 * Fixed the AI moderation, pre-moderation, voice transcription and translation switches getting stuck on after the OpenAI API key, license or Messages Viewer they need was gone
 * Fixed a link to a chat room landing on the Messages tab when the conversations list is collapsed, and collapsing the list switching it back to Messages
+* Fixed an empty dot on the Users tab of the collapsed conversations list while nobody else is online — its online count is green again, as in 2.0
 
 = 3.0.7 - 3.0.8 =
 * Text pasted into the reply box keeps its bold, italics, underline and strikethrough, whether it was copied from a message or from another page — fonts, colours and everything else stay behind
