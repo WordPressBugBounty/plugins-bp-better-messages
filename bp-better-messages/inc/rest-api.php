@@ -1741,12 +1741,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                     $messages = $wpdb->get_results( $query );
                 } elseif ( ! $thread_id && count( $message_ids ) > 0 ) {
-                    $query = $wpdb->prepare( "
+                    $query = "
                         SELECT id, thread_id, sender_id, message, created_at, updated_at, temp_id, is_pending
                         FROM  " . bm_get_table('messages') . " messages
                         WHERE `id` IN (" . implode(',', $message_ids) . ")
+                        $pending_sql
                         ORDER BY `created_at` DESC
-                    ");
+                    ";
 
                     $messages = $wpdb->get_results( $query );
                 } else {
@@ -2191,8 +2192,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
 
             if( $thread_type === 'chat-room' ){
-                $chat_id = Better_Messages_Chats()->get_chat_thread_id( $thread_id );
-                Better_Messages_Chats()->sync_auto_add_users( $chat_id );
+                $chat_id = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'chat_id' );
+                if( $chat_id > 0 ) {
+                    Better_Messages_Chats()->sync_auto_add_users_on_open( $chat_id );
+                }
             }
 
             $return     = $this->get_threads( [ $thread_id ], false );

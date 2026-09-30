@@ -1428,7 +1428,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             }
 
             if ( ! empty( $data ) ) {
-                $existing = Better_Messages_Options::instance()->settings;
+                $existing = Better_Messages_Options::instance()->get_stored_settings();
                 $merged   = array_merge( $existing, $data );
 
                 Better_Messages_Options::instance()->update_settings( $merged );
@@ -1483,7 +1483,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'create_failed', $page_id->get_error_message(), array( 'status' => 500 ) );
             }
 
-            $existing = Better_Messages_Options::instance()->settings;
+            $existing = Better_Messages_Options::instance()->get_stored_settings();
             $existing[ $target ] = (string) $page_id;
             Better_Messages_Options::instance()->update_settings( $existing );
 
@@ -1542,7 +1542,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
         const SETTINGS_FILE_FORMAT = 1;
 
         public function rest_export_settings() {
-            $settings = Better_Messages_Options::instance()->settings;
+            $settings = Better_Messages_Options::instance()->get_stored_settings();
             $settings['emailCustomHtml'] = Better_Messages_Options::instance()->get_email_custom_html();
 
             return rest_ensure_response( array(
@@ -1603,7 +1603,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
         }
 
         public function rest_get_settings( WP_REST_Request $request ) {
-            $settings = Better_Messages_Options::instance()->settings;
+            $settings = Better_Messages_Options::instance()->get_effective_settings();
 
             if ( ! function_exists( 'get_editable_roles' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/user.php';

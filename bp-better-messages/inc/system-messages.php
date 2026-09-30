@@ -70,11 +70,11 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
             return true;
         }
 
-        private function passes_thread_rate_limit( $thread_id, $event_type )
+        private function passes_thread_rate_limit( $thread_id, $event_type, $default_max = 5 )
         {
             $max = (int) apply_filters(
                 'better_messages_system_message_thread_rate_max',
-                5,
+                $default_max,
                 $event_type,
                 $thread_id
             );
@@ -256,19 +256,32 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
             Better_Messages()->functions->delete_thread_meta( $thread_id, '_bm_sysmsg_user_' . $event_type . '_' . $user_id );
         }
 
-        private function gates_pass_for_emit( $thread_id, $event_type, $user_id = 0 )
+        private function gates_pass_for_emit( $thread_id, $event_type, $user_id = 0, $default_rate_max = 5 )
         {
             if ( $user_id !== 0 && ! $this->passes_user_cooldown( $thread_id, $event_type, $user_id ) ) {
                 return false;
             }
-            if ( ! $this->passes_thread_rate_limit( $thread_id, $event_type ) ) {
+            if ( ! $this->passes_thread_rate_limit( $thread_id, $event_type, $default_rate_max ) ) {
                 return false;
             }
             return true;
         }
 
+        private function tidies_join_leave()
+        {
+            return ( Better_Messages()->settings['systemMessagesTidyJoinLeave'] ?? '1' ) !== '0';
+        }
+
         private function emit_event( $thread_id, $event_type, $event_data, $user_id = 0 )
         {
+            if ( ( $event_type === 'user_joined' || $event_type === 'user_left' ) && ! $this->tidies_join_leave() ) {
+                if ( $this->gates_pass_for_emit( $thread_id, $event_type, $user_id, 0 ) ) {
+                    $event_data['users'] = array( $this->build_user_entry_from_event( $event_data ) );
+                    Better_Messages()->functions->send_system_message( $thread_id, $event_type, $event_data );
+                }
+                return;
+            }
+
             $zone = $this->get_transient_zone( $thread_id );
 
             switch ( $event_type ) {
@@ -354,7 +367,7 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
         {
             $new_user_id = (int) ( $event_data['user_id'] ?? 0 );
 
-            foreach ( $zone as $row ) {
+            foreach ( $this->tidies_join_leave() ? $zone : array() as $row ) {
                 if ( $this->row_event_type( $row ) !== 'user_joined' ) {
                     continue;
                 }

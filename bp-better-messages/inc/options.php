@@ -105,6 +105,7 @@ class Better_Messages_Options
             'enableSystemMessagesCallStarted'     => '1',
             'systemMessagesUserCooldownSeconds'   => 0,
             'systemMessagesIgnoreInSort'          => '0',
+            'systemMessagesTidyJoinLeave'         => '1',
             'miniThreadsEnable'           => '0',
             'miniFriendsEnable'           => '0',
             'miniAIBotsEnable'            => '0',
@@ -623,6 +624,25 @@ class Better_Messages_Options
             'mobileTabsOrder'               => []
         );
 
+        $this->settings = $this->get_effective_settings( ! is_admin() && current_user_can( 'manage_options') );
+
+        // Migrate emailCustomHtml from main settings to separate option if needed
+        if( ! empty( $this->settings['emailCustomHtml'] ) ){
+            $existing = get_option( 'better-messages-email-custom-html', '' );
+            if( empty( $existing ) ){
+                update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
+            }
+            $this->settings['emailCustomHtml'] = ''; // Clear from main settings
+        }
+    }
+
+    public function get_stored_settings()
+    {
+        return $this->parse_settings( get_option( 'bp-better-chat-settings', array() ) );
+    }
+
+    public function get_effective_settings( $admin_search = false )
+    {
         $args = get_option( 'bp-better-chat-settings', array() );
 
         if ( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) {
@@ -649,7 +669,7 @@ class Better_Messages_Options
             $args['encryptionEnabled'] = '1';
         }
 
-        if( ! is_admin() && current_user_can( 'manage_options') ){
+        if( $admin_search ){
             $args['disableUsersSearch'] = '0';
         }
 
@@ -662,20 +682,18 @@ class Better_Messages_Options
             $args['allowReports'] = '0';
         }
 
-        $this->settings = wp_parse_args( $args, $this->defaults );
+        return $this->parse_settings( $args );
+    }
+
+    private function parse_settings( $args )
+    {
+        $settings = wp_parse_args( $args, $this->defaults );
 
         foreach ( array( 'miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder' ) as $tabs_order_key ) {
-            $this->settings[ $tabs_order_key ] = $this->with_conversations_tab( $this->settings[ $tabs_order_key ] );
+            $settings[ $tabs_order_key ] = $this->with_conversations_tab( $settings[ $tabs_order_key ] );
         }
 
-        // Migrate emailCustomHtml from main settings to separate option if needed
-        if( ! empty( $this->settings['emailCustomHtml'] ) ){
-            $existing = get_option( 'better-messages-email-custom-html', '' );
-            if( empty( $existing ) ){
-                update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
-            }
-            $this->settings['emailCustomHtml'] = ''; // Clear from main settings
-        }
+        return $settings;
     }
 
     public function with_conversations_tab( $order )
@@ -1439,6 +1457,8 @@ class Better_Messages_Options
 
     public function update_settings( $settings )
     {
+        $this->settings = $this->get_stored_settings();
+
         if( isset( $settings['emojiSettings'] ) && ! empty( trim($settings['emojiSettings']) ) ){
             $emojies = json_decode( wp_unslash($settings['emojiSettings']), true );
             $emojies = $this->sanitize_emoji_data( $emojies );
@@ -3091,6 +3111,7 @@ class Better_Messages_Options
         $this->settings['emailCustomHtml'] = ''; // Don't store in main settings
 
         update_option( 'bp-better-chat-settings', $this->settings );
+        $this->settings = $this->get_effective_settings();
         Better_Messages()->settings = $this->settings;
         do_action( 'bp_better_chat_settings_updated', $this->settings );
 

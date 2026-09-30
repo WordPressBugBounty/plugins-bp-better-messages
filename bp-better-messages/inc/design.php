@@ -783,6 +783,8 @@ class Better_Messages_Design {
             . '.bm-preview-stage { display: flex; height: 100vh; height: 100dvh; padding: 0; box-sizing: border-box; }'
             . '.bm-preview-stage > .bm-wrap-main { flex: 1 1 auto; min-width: 0; min-height: 0; }'
             . '.bm-preview-stage .bm-composer, .bm-preview-stage .bm-composer * { pointer-events: none; user-select: none; }'
+            . '.bm-preview-stage .bm-composer .bm-editor-content, .bm-preview-stage .bm-composer .bm-editor-content *, .bm-preview-stage .bm-composer .bm-format-toolbar, .bm-preview-stage .bm-composer .bm-format-toolbar *, .bm-preview-stage .bm-composer .bm-composer__format, .bm-preview-stage .bm-composer .bm-composer__format * { pointer-events: auto; }'
+            . '.bm-preview-stage .bm-composer .bm-editor-content, .bm-preview-stage .bm-composer .bm-editor-content *, .bm-preview-stage .bm-composer .bm-format-toolbar input { user-select: text; -webkit-user-select: text; }'
             . 'body.bm-preview-surface-widgets .bm-preview-stage { display: block; }'
             . '</style>';
     }
@@ -1323,6 +1325,17 @@ class Better_Messages_Design {
             $raw = $values[ $id ];
             if ( is_bool( $default ) ) {
                 $value = ( '0' === $raw || 'false' === $raw ) ? false : (bool) $raw;
+            } elseif ( 'checkboxes' === $control['kind'] ) {
+                $picked = is_array( $raw )
+                    ? array_map( 'strval', array_filter( $raw, 'is_scalar' ) )
+                    : ( is_scalar( $raw ) ? array_map( 'trim', explode( ',', (string) $raw ) ) : array() );
+                $kept   = array();
+                foreach ( (array) $control['choices'] as $choice ) {
+                    if ( in_array( (string) $choice['value'], $picked, true ) ) {
+                        $kept[] = (string) $choice['value'];
+                    }
+                }
+                $value = implode( ',', $kept );
             } else {
                 $allowed = array();
                 if ( ! empty( $control['choices'] ) ) {

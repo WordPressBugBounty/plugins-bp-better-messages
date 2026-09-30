@@ -162,9 +162,9 @@ function _bm_js_translation_strings() {
     _x( "Mark all as read", "\"Mark all as read\" Button Tooltip", "bp-better-messages" );
     _x( "Show unread only", "\"Show unread only\" Button Tooltip", "bp-better-messages" );
     _x( "Favorited", "\"Favorited\" Button Tooltip", "bp-better-messages" );
+    _x( "Close", "\"Close\" Button Tooltip", "bp-better-messages" );
     _x( "Start a new conversation", "Starting Messages Screen (No threads selected)", "bp-better-messages" );
     _x( "Online", "Chat Room Screen", "bp-better-messages" );
-    _x( "Close", "\"Close\" Button Tooltip", "bp-better-messages" );
     _x( "No users online", "Chat Room Screen", "bp-better-messages" );
     _x( "This chat room is currently closed", "Chat Room", "bp-better-messages" );
     __( "Continue as guest", "bp-better-messages" );
@@ -179,6 +179,7 @@ function _bm_js_translation_strings() {
     _x( "Message is too long. Maximum allowed length is %d characters", "Edit message error", "bp-better-messages" );
     _x( "Message is too long. Maximum allowed length is %d characters", "Send message error", "bp-better-messages" );
     _x( "The message you were trying to send was empty", "User tried to send empty message error", "bp-better-messages" );
+    _x( "Bold, lists and links", "Appearance preview: sample message text", "bp-better-messages" );
     _x( "Upload files", "Attach menu item", "bp-better-messages" );
     _x( "Share location", "Attach menu item", "bp-better-messages" );
     _x( "You can also drag and drop or paste files into the reply area", "Attach menu hint", "bp-better-messages" );
@@ -187,6 +188,8 @@ function _bm_js_translation_strings() {
     _x( "Reply to message", "Reply message panel", "bp-better-messages" );
     _x( "Sticker suggestions", "Composer sticker suggestions strip", "bp-better-messages" );
     _x( "Add attachment", "\"Add attachment\" button tooltip", "bp-better-messages" );
+    _x( "Hide formatting", "Composer formatting button tooltip", "bp-better-messages" );
+    _x( "Formatting", "Composer formatting button tooltip", "bp-better-messages" );
     _x( "Message is too long. Maximum allowed length is %d characters", "Save button tooltip when over limit", "bp-better-messages" );
     _x( "Message is too long. Maximum allowed length is %d characters", "Send button tooltip when over limit", "bp-better-messages" );
     _x( "Save Message", "\"Edit message\" button tooltip", "bp-better-messages" );
@@ -277,8 +280,10 @@ function _bm_js_translation_strings() {
     _nx( "%s online", "%s online", onlineCount, "Chat Rooms list", "bp-better-messages" );
     _x( "User profile", "Users List", "bp-better-messages" );
     _x( "Start a new conversation", "AI Bots list", "bp-better-messages" );
+    _x( "Closed", "Chat Rooms list", "bp-better-messages" );
     _x( "Joined", "Chat Rooms list", "bp-better-messages" );
     _x( "Join", "Chat Rooms list", "bp-better-messages" );
+    _x( "Log in", "Chat Rooms list", "bp-better-messages" );
     _x( "You were mentioned in this conversation", "Conversations list item", "bp-better-messages" );
     _x( "Search friends…", "Friends directory", "bp-better-messages" );
     _x( "No friends found", "Empty friends list", "bp-better-messages" );
@@ -371,6 +376,24 @@ function _bm_js_translation_strings() {
     _x( "Balance", "Points balance tooltip", "bp-better-messages" );
     _x( "My profile", "My profile button", "bp-better-messages" );
     _x( "Status", "Footer me menu", "bp-better-messages" );
+    _x( "Bold", "Formatting button", "bp-better-messages" );
+    _x( "Italic", "Formatting button", "bp-better-messages" );
+    _x( "Underline", "Formatting button", "bp-better-messages" );
+    _x( "Strikethrough", "Formatting button", "bp-better-messages" );
+    _x( "Bulleted list", "Formatting button", "bp-better-messages" );
+    _x( "Numbered list", "Formatting button", "bp-better-messages" );
+    _x( "Large heading", "Formatting button", "bp-better-messages" );
+    _x( "Medium heading", "Formatting button", "bp-better-messages" );
+    _x( "Small heading", "Formatting button", "bp-better-messages" );
+    _x( "Link", "Formatting button", "bp-better-messages" );
+    _x( "Text", "Formatting link field", "bp-better-messages" );
+    _x( "Paste or type a link", "Formatting link field", "bp-better-messages" );
+    _x( "Link address", "Formatting link field", "bp-better-messages" );
+    _x( "Enter a valid link", "Formatting link field", "bp-better-messages" );
+    _x( "Apply", "Formatting button", "bp-better-messages" );
+    _x( "Remove link", "Formatting button", "bp-better-messages" );
+    _x( "Cancel", "Formatting button", "bp-better-messages" );
+    _x( "Formatting", "Formatting toolbar", "bp-better-messages" );
     _x('Open Member Profile', 'Mini Chat', 'bp-better-messages');
     _x('Unpin from top', '"Unpin thread" Button', 'bp-better-messages');
     _x('Pin to top', '"Pin thread" Button', 'bp-better-messages');
@@ -620,6 +643,8 @@ function _bm_js_translation_strings() {
     _x('Reason', 'User Reports', 'bp-better-messages');
     _x('Description', 'User Reports', 'bp-better-messages');
     _x('Report Message', 'User Reports', 'bp-better-messages');
+    __( "Login", "bp-better-messages" );
+    __( "Register", "bp-better-messages" );
     _x( "Awaiting moderator approval", "Moderation pending banner title", "bp-better-messages" );
     _x( "Edit", "Message context menu", "bp-better-messages" );
     _x( "Please select recipient(s) before sending the message", "User tried to send message with no recipients", "bp-better-messages" );
@@ -1469,6 +1494,8 @@ function _bm_js_translation_strings() {
     _x('When closed, users will not be able to join or send messages in this chat room. Admins can still access the chat room', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Closed Message', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Message shown to users when the chat room is closed. HTML allowed', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('Keep in the Chat Rooms list', 'Chat Rooms (WP Admin)', 'bp-better-messages');
+    _x('While closed, the room stays in the Chat Rooms list marked Closed for everyone who would see it when open, and opening it shows the closed message. Off, a closed room leaves the list', 'Chat Rooms (WP Admin)', 'bp-better-messages');
     _x('Only joined can read messages', 'Chat rooms settings page', 'bp-better-messages');
     _x('Only users who joined to chat room will be able to read messages', 'Chat rooms settings page', 'bp-better-messages');
     _x('Auto join users', 'Chat rooms settings page', 'bp-better-messages');
@@ -1539,6 +1566,8 @@ function _bm_js_translation_strings() {
     _x('Role Based Access', 'Chat rooms settings page', 'bp-better-messages');
     _x('Allow guests', 'Chat rooms settings page', 'bp-better-messages');
     _x('Allow unlogged-in users (guests) to see the chat room. You can also enable guest users to participate in chat rooms by enabling guests role access in the settings below', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Show to guests', 'Chat rooms settings page', 'bp-better-messages');
+    _x('Show this chat room in the Chat Rooms list to guests who cannot join it. Opening it asks them to log in', 'Chat rooms settings page', 'bp-better-messages');
     _x('Auto exclude users', 'Chat rooms settings page', 'bp-better-messages');
     _x('If, after joining the chat, a user changes their role to one that does not allow participation, they will be automatically removed from the chat room', 'Chat rooms settings page', 'bp-better-messages');
     _x('Appearance', 'Chat rooms settings page', 'bp-better-messages');
@@ -3088,6 +3117,8 @@ function _bm_js_translation_strings() {
     _x('Muted', 'Settings page', 'bp-better-messages');
     _x('Banned', 'Settings page', 'bp-better-messages');
     _x('Group call started', 'Settings page', 'bp-better-messages');
+    _x('Tidy up joins and leaves', 'Settings page', 'bp-better-messages');
+    _x('Joins and leaves in a row share one line, and someone who leaves and comes back before anyone writes leaves no line at all. Switch off to give every join and leave a line of its own', 'Settings page', 'bp-better-messages');
     _x('Repeat suppression window', 'Settings page', 'bp-better-messages');
     _x('Optional extra suppression on top of the rolling-message coalescer. Number of seconds during which a repeated event for the same user is hard-suppressed in the same conversation. Default 0 (disabled — coalescer handles dedup). Set to a positive number to enable', 'Settings page', 'bp-better-messages');
     _x('Unread Counter', 'Settings page', 'bp-better-messages');
@@ -3428,6 +3459,9 @@ function _bm_js_translation_strings() {
     _x('OK', 'Settings page', 'bp-better-messages');
     _x('Mismatch', 'Settings page', 'bp-better-messages');
     _x('Missing', 'Settings page', 'bp-better-messages');
+    _x('Connection character set:', 'Settings page', 'bp-better-messages');
+    _x('Emoji will turn into question marks. WordPress opens the connection as utf8mb4, so another plugin or the server switches it afterwards.', 'Settings page', 'bp-better-messages');
+    _x('Emoji will turn into question marks. The connection character set comes from DB_CHARSET in wp-config.php.', 'Settings page', 'bp-better-messages');
     _x('Recreate Table', 'Settings page', 'bp-better-messages');
     _x('Sync Schema', 'Settings page', 'bp-better-messages');
     _x('Working...', 'Settings page', 'bp-better-messages');
@@ -3462,6 +3496,7 @@ function _bm_js_translation_strings() {
     _x('missing', 'Settings page', 'bp-better-messages');
     _x('mismatch', 'Settings page', 'bp-better-messages');
     _x('collation', 'Settings page', 'bp-better-messages');
+    _x('connection character set', 'Settings page', 'bp-better-messages');
     _x('all OK', 'Settings page', 'bp-better-messages');
     _x('Refresh', 'Settings page', 'bp-better-messages');
     _x('Repairing...', 'Settings page', 'bp-better-messages');

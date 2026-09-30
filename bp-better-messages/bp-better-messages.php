@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.0.11
+    Version: 3.0.12
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '3.0.11';
+        public  $version = '3.0.12';
 
         public  $db_version = '3.0.0';
 
@@ -457,6 +457,8 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                         $include_css = true;
                     } else if( str_ends_with( $current_screen->id, 'bp-better-messages-chat-rooms' ) ){
                         $include_css = true;
+                    } else if( str_ends_with( $current_screen->id, 'bp-better-messages-pricing' ) ){
+                        $include_css = true;
                     }
             }
 
@@ -836,8 +838,10 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'color', 'darkColor', 'locale', 'widgetsPosition',
             'datePosition', 'timeFormat', 'avatars', 'avatarsSelf', 'subName',
             'typingPosition',
+            'formattingButtons', 'mobileFormattingButtons', 'miniFormattingButtons', 'formattingButtonsList',
             'miniChatsAvatars',
             'miniChatsPrivateMessages',
+            'favoritesButton',
         );
 
         private function _filter_default_equal_entries( array $vars ) {
@@ -993,6 +997,11 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'miniChatsPrivateMessages' => ( Better_Messages_Design::instance()->get_design_option( 'miniChatsPrivateMessages', false ) ? '1' : '0' ),
                 'subName'               =>  Better_Messages_Design::instance()->get_design_option( 'privateSubName', 'online' ),
                 'typingPosition'        =>  Better_Messages_Design::instance()->get_design_option( 'typingPosition', 'header' ),
+                'favoritesButton'       => (string) Better_Messages_Design::instance()->get_design_option( 'favoritesButton', 'list' ),
+                'formattingButtons'       => (string) Better_Messages_Design::instance()->get_design_option( 'formattingButtons', 'selection' ),
+                'mobileFormattingButtons' => (string) Better_Messages_Design::instance()->get_design_option( 'mobileFormattingButtons', 'hidden' ),
+                'miniFormattingButtons'   => (string) Better_Messages_Design::instance()->get_design_option( 'miniFormattingButtons', 'selection' ),
+                'formattingButtonsList'   => (string) Better_Messages_Design::instance()->get_design_option( 'formattingButtonsList', 'bold,italic,underline,strike,bulleted,numbered,heading1,heading2,heading3,link' ),
                 'touchEnter'            => ( $this->settings['disableEnterForTouch'] == '1' ? '0' : '1' ),
                 'loginUrl'              => apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg([]) ) ),
                 'total_unread'           => (int) $unread_count,
@@ -1470,58 +1479,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     register_activation_hook( __FILE__, 'better_messages_activation' );
     register_deactivation_hook( __FILE__, 'better_messages_deactivation' );
 
-    if ( ! function_exists( 'bpbm_fs' ) ) {
-        // Create a helper function for easy SDK access.
-        function bpbm_fs()
-        {
-            global  $bbm_fs;
-
-            if ( ! isset( $bbm_fs ) ) {
-                if ( !defined( 'WP_FS__PRODUCT_1557_MULTISITE' ) ) {
-                    define( 'WP_FS__PRODUCT_1557_MULTISITE', true );
-                }
-
-                // Include Freemius SDK.
-                require_once dirname(__FILE__) . '/vendor/freemius/start.php';
-
-                $bbm_fs = fs_dynamic_init( array(
-                    'id'                  => '1557',
-                    'slug'                => 'bp-better-messages',
-                    'premium_slug'        => 'bp-better-messages-websocket',
-                    'type'                => 'plugin',
-                    'public_key'          => 'pk_8af54172153e9907893f32a4706e2',
-                    'is_premium'          => false,
-                    'premium_suffix'      => '- WebSocket Version',
-                    'has_addons'          => true,
-                    'has_paid_plans'      => true,
-                    'trial'               => array(
-                        'days'               => 3,
-                        'is_require_payment' => true,
-                    ),
-                    'menu'                => array(
-                        'slug'           => 'bp-better-messages',
-                        'support'        => false,
-                    ),
-                    'is_live'             => true,
-                    'is_org_compliant'    => true,
-                ) );
-            }
-
-            return $bbm_fs;
-        }
-
-        // Init Freemius.
-        bpbm_fs();
-        // Signal that SDK was initiated.
-        do_action( 'bbm_fs_loaded' );
-
-        bpbm_fs()->add_filter( 'templates/checkout.php', function ( $template ) {
-            if ( false !== strpos( $template, '&billing_cycle=annual' ) ) {
-                $template = str_replace( '&billing_cycle=annual', '&billing_cycle=annual&show_monthly_switch=true', $template );
-            }
-
-            return $template;
-        } );
-    }
+    require_once trailingslashit( dirname(__FILE__) ) . 'inc/freemius.php';
 
 }

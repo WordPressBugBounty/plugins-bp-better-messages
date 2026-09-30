@@ -1051,6 +1051,88 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $content;
         }
 
+        public function markdown_to_plain_text( $text ) {
+            static $converted = array();
+
+            $text = (string) $text;
+
+            if ( $text === '' || strlen( $text ) > 20000 ) {
+                return $text;
+            }
+
+            if ( isset( $converted[ $text ] ) ) {
+                return $converted[ $text ];
+            }
+
+            $lines = preg_split( "/\r\n|\r|\n/", $text );
+            $out   = array();
+            $fence = false;
+
+            foreach ( $lines as $line ) {
+                if ( preg_match( '/^ {0,3}(`{3,}|~{3,})/', $line ) ) {
+                    $fence = ! $fence;
+                    continue;
+                }
+
+                if ( $fence || strlen( $line ) > 2000 ) {
+                    $out[] = $line;
+                    continue;
+                }
+
+                $line = preg_replace( '/^( {0,3})#{1,6} +(.*?)(?: +#+ *)?$/', '$1$2', $line );
+                $line = preg_replace( '/^ {0,3}> ?/', '', $line );
+
+                $line = preg_replace_callback( '/(!?)\[((?:\\\\.|[^\\\\\]])*)\]\(\s*<?([^\s)>]+)>?\s*\)/', function ( $match ) {
+                    $label = trim( preg_replace( '/\\\\([\\\\\[\]])/', '$1', $match[2] ) );
+                    $href  = $match[3];
+
+                    if ( $match[1] === '!' ) {
+                        return $label;
+                    }
+
+                    $shown = preg_match( '/^(mailto|tel):/i', $href ) ? preg_replace( '/^(mailto|tel):/i', '', $href ) : $href;
+
+                    if ( $label === '' || $label === $href || $label === $shown || 'https://' . $label === $href || 'http://' . $label === $href ) {
+                        return $shown;
+                    }
+
+                    return $label . ' (' . $shown . ')';
+                }, $line );
+
+                $urls = array();
+                $line = preg_replace_callback( '#(?:https?://|mailto:|tel:)[^\s()<>]+#i', function ( $match ) use ( &$urls ) {
+                    $urls[] = $match[0];
+                    return "\x1A" . ( count( $urls ) - 1 ) . "\x1A";
+                }, $line );
+
+                $line = preg_replace( '/`([^`]+)`/', '$1', $line );
+
+                $plain = preg_replace( '/(\*{1,3}|~~)(?=\S)(.*?\S)\1/u', '$2', $line );
+                if ( $plain !== null ) {
+                    $line = $plain;
+                }
+
+                $plain = preg_replace( '/(^|[^\p{L}\p{N}_])(_{1,3})(?=\S)(.*?\S)\2(?![\p{L}\p{N}_])/u', '$1$3', $line );
+                if ( $plain !== null ) {
+                    $line = $plain;
+                }
+
+                $line = preg_replace_callback( '/\x1A(\d+)\x1A/', function ( $match ) use ( $urls ) {
+                    return isset( $urls[ (int) $match[1] ] ) ? $urls[ (int) $match[1] ] : '';
+                }, $line );
+
+                $out[] = $line;
+            }
+
+            if ( count( $converted ) >= 20 ) {
+                $converted = array();
+            }
+
+            $converted[ $text ] = implode( "\n", $out );
+
+            return $converted[ $text ];
+        }
+
         public function message_text_length( $content ) {
             $text = html_entity_decode( (string) $content, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
             $text = trim( wp_strip_all_tags( $text ) );
@@ -2381,8 +2463,24 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function user_has_chat_rooms( $user_id ) {
-            if ( $user_id === 0 ) return false;
+            if ( $user_id !== 0 ) {
+                return $this->scan_user_chat_rooms( $user_id );
+            }
 
+            $cached = get_transient( 'bm_guest_has_chat_rooms' );
+
+            if ( $cached === '1' || $cached === '0' ) {
+                return $cached === '1';
+            }
+
+            $has_rooms = $this->scan_user_chat_rooms( 0 );
+
+            set_transient( 'bm_guest_has_chat_rooms', $has_rooms ? '1' : '0', 10 * MINUTE_IN_SECONDS );
+
+            return $has_rooms;
+        }
+
+        private function scan_user_chat_rooms( $user_id ) {
             $display_mode = isset( Better_Messages()->settings['widgetChatRoomsDisplayMode'] )
                 ? Better_Messages()->settings['widgetChatRoomsDisplayMode']
                 : 'all';
@@ -2434,25 +2532,39 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $args['orderby']  = 'post__in';
             }
 
-            $paged = 1;
+            foreach ( array( 'publish', 'draft' ) as $status ) {
+                $closed = $status === 'draft';
+                $args['post_status'] = $status;
+                $paged = 1;
 
-            while ( true ) {
-                $args['paged'] = $paged;
+                while ( true ) {
+                    $args['paged'] = $paged;
 
-                $post_ids = get_posts( $args );
-                if ( empty( $post_ids ) ) return false;
+                    $post_ids = get_posts( $args );
+                    if ( empty( $post_ids ) ) break;
 
-                update_meta_cache( 'post', $post_ids );
+                    update_meta_cache( 'post', $post_ids );
 
-                foreach ( $post_ids as $chat_id ) {
-                    if ( $chats->user_can_join( $user_id, $chat_id ) ) {
-                        return true;
+                    foreach ( $post_ids as $chat_id ) {
+                        if ( $closed && ! $chats->is_listed_while_closed( $chat_id ) ) continue;
+
+                        $listed = ! $chats->is_guest_kept_out( $user_id, $chat_id ) && ( $chats->is_ephemeral_chat( $chat_id )
+                            ? $chats->user_can_read( $user_id, $chat_id )
+                            : $chats->user_can_join( $user_id, $chat_id, $closed ) );
+
+                        if ( ! $listed && $closed && $user_id !== 0 ) {
+                            $listed = $this->is_user_participant( (int) $chats->get_chat_thread_id( $chat_id ), $user_id );
+                        }
+
+                        if ( $listed || $chats->is_shown_to_guest( $user_id, $chat_id ) ) {
+                            return true;
+                        }
                     }
+
+                    if ( count( $post_ids ) < $args['posts_per_page'] ) break;
+
+                    $paged++;
                 }
-
-                if ( count( $post_ids ) < $args['posts_per_page'] ) return false;
-
-                $paged++;
             }
 
             return false;
@@ -4498,12 +4610,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         private function inbox_search_placeholder(){
             $icon = '<span class="bm-skel" style="width:18px;height:18px"></span>';
 
+            $favorites_in_list = ( ! isset( Better_Messages()->settings['disableFavoriteMessages'] ) || Better_Messages()->settings['disableFavoriteMessages'] != '1' )
+                && Better_Messages_Design::instance()->get_design_option( 'favoritesButton', 'list' ) !== 'index';
+
             return '<div class="bm-ei-search">'
                 . '<span class="bm-btn bm-icon-btn bm-ei-search__lead">' . $icon . '</span>'
                 . '<div class="bm-ei-search__pinned">'
                 . '<span class="bm-skel" style="width:14px;height:14px"></span>'
                 . '<span class="bm-skel-text" style="width:74px">&nbsp;</span>'
                 . '</div>'
+                . ( $favorites_in_list ? '<span class="bm-btn bm-icon-btn bm-ei-search__boot-favorites">' . $icon . '</span>' : '' )
                 . '<span class="bm-btn bm-icon-btn">' . $icon . '</span>'
                 . '</div>';
         }

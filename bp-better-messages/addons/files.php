@@ -2556,7 +2556,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             @rmdir( $dir );
             @rmdir( dirname( $dir ) );
 
-            $settings = Better_Messages()->settings;
+            $settings = Better_Messages_Options::instance()->get_stored_settings();
             $settings['transcodingVideoFormat'] = 'original';
             Better_Messages_Options::instance()->update_settings( $settings );
 

@@ -519,7 +519,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     "DELETE FROM `" . bm_get_table('meta') ."` WHERE `meta_key` = 'bm_tmp_id';",
                     "UPDATE `" . bm_get_table('messages') ."`
                     SET `created_at` = (
-                        SELECT CONCAT(UNIX_TIMESTAMP(date_sent), '0000')
+                        SELECT CONCAT(TIMESTAMPDIFF(SECOND, '1970-01-01 00:00:00', date_sent), '0000')
                         FROM (SELECT * FROM `" . bm_get_table('messages') ."`) AS sub
                         WHERE sub.`id` = `" . bm_get_table('messages') ."`.`id` AND date_sent > '1970-01-01'
                     )
@@ -534,7 +534,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 '1.2' => [
                     "UPDATE `" . bm_get_table('messages') ."`
                     SET `created_at` = (
-                        SELECT CONCAT(UNIX_TIMESTAMP(date_sent), '0000')
+                        SELECT CONCAT(TIMESTAMPDIFF(SECOND, '1970-01-01 00:00:00', date_sent), '0000')
                         FROM (SELECT * FROM `" . bm_get_table('messages') ."`) AS sub
                         WHERE sub.`id` = `" . bm_get_table('messages') ."`.`id` AND date_sent > '1970-01-01'
                     )
@@ -1023,7 +1023,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
 
                         $wpdb->query("UPDATE `" . bm_get_table('messages') ."`
                         SET `created_at` = (
-                            SELECT CONCAT(UNIX_TIMESTAMP(date_sent), '0000')
+                            SELECT CONCAT(TIMESTAMPDIFF(SECOND, '1970-01-01 00:00:00', date_sent), '0000')
                             FROM (SELECT * FROM `" . bm_get_table('messages') ."`) AS sub
                             WHERE sub.`id` = `" . bm_get_table('messages') ."`.`id` AND date_sent > '1970-01-01'
                         )
@@ -1936,12 +1936,41 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 'installed_db_version' => (string) get_option( 'better_messages_2_db_version', '0' ),
                 'totals'               => $totals,
                 'utf8mb4_supported'    => $this->is_utf8mb4_supported(),
+                'connection'           => $this->get_connection_charset(),
             ];
         }
 
         private function is_utf8mb4_supported(){
             global $wpdb;
             return $wpdb->has_cap( 'utf8mb4' );
+        }
+
+        public function get_connection_charset(){
+            global $wpdb;
+
+            $row = $wpdb->get_row( 'SELECT @@character_set_client AS cs_client, @@character_set_connection AS cs_connection, @@character_set_results AS cs_results' );
+
+            if ( ! $row ) {
+                return [
+                    'client'     => '',
+                    'connection' => '',
+                    'results'    => '',
+                    'expected'   => (string) $wpdb->charset,
+                    'ok'         => null,
+                ];
+            }
+
+            $client     = (string) $row->cs_client;
+            $connection = (string) $row->cs_connection;
+            $results    = $row->cs_results === null ? '' : (string) $row->cs_results;
+
+            return [
+                'client'     => $client,
+                'connection' => $connection,
+                'results'    => $results,
+                'expected'   => (string) $wpdb->charset,
+                'ok'         => $client === 'utf8mb4' && $connection === 'utf8mb4' && in_array( $results, [ 'utf8mb4', 'binary', '' ], true ),
+            ];
         }
 
         public function get_thread_type( $thread_id ){

@@ -546,7 +546,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                                     $author  = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags(stripslashes(sprintf( __('%s wrote:', 'bp-better-messages'), $bm_user['name'] ))) ) );
 
-                                    $_message = nl2br(stripslashes($message->message));
+                                    $_message = nl2br( Better_Messages()->functions->markdown_to_plain_text( stripslashes( $message->message ) ) );
                                     $_message = str_replace(['<p>', '</p>'], ['<br>', ''], $_message );
                                     $_message = Better_Messages()->functions->format_message( $_message, $message->id, 'email', $user_id );
                                     $_message = htmlspecialchars_decode(Better_Messages()->functions->strip_all_tags($_message, '<br>'));

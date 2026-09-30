@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.11
+Stable tag: 3.0.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -256,8 +256,8 @@ We use our dedicated servers to implement WebSocket communications between your 
 
 **Performance & Reliability:**
 
-* **Significantly** reduces the load on your server (up to 200x fewer requests)
-* **Instant** message delivery in realtime
+* **Significantly** reduces the load on your server
+* **Instant** message delivery in realtime, up to 200x faster than AJAX
 * Works with any hosting including shared hosting
 * No limits on concurrent connections or monthly active users
 
@@ -269,14 +269,12 @@ We use our dedicated servers to implement WebSocket communications between your 
 * Group Audio Chats (up to 50 participants)
 * Screen Sharing in calls and group chats
 
-**Mobile Apps (Alpha):**
+**Mobile Apps:**
 
-* iOS Mobile App (build your own branded app) - Alpha
-* Android Mobile App (build your own branded app) - Alpha
+* iOS Mobile App (build your own branded app)
+* Android Mobile App (build your own branded app)
 * Push notifications for calls and messages
 * VoIP notifications for incoming calls
-
-Note: Mobile apps are currently in alpha stage. Core functionality works, but some features may be limited or under development.
 
 **Realtime Features:**
 
@@ -321,7 +319,7 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 = Is Better Messages free? =
 
-Yes — install the free version from WordPress.org. It supports private and group conversations, chat rooms, file sharing, oEmbed previews, smart-batched email notifications, role-based access, guest chat, and the standard messenger feature set. The WebSocket version is paid and unlocks instant delivery, one-on-one and group voice / video calls, AI Chat Bots, AI Content Moderation, AI Message Translation, Voice Message Transcription, web push, and end-to-end encryption.
+Yes — install the free version from WordPress.org. It supports private and group conversations, chat rooms, file sharing, oEmbed previews, smart-batched email notifications, role-based access, guest chat, and the standard messenger feature set. The WebSocket version is paid and unlocks instant delivery, one-on-one and group voice / video calls, Better Messages Cloud AI (content moderation, message translation and voice message transcription with no API key of your own), web push, and end-to-end encryption.
 
 = Which WordPress plugins does Better Messages integrate with? =
 
@@ -345,7 +343,7 @@ Yes. All message data is stored only in your WordPress database. The WebSocket c
 
 = Does it have AI features? =
 
-Yes (WebSocket version, AI add-on). AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) act as full participants in any thread, with custom system prompts and per-bot points charging via GamiPress / MyCRED. Better Messages Cloud AI provides AI Content Moderation (23+ categories including spam, scam, doxxing, contact sharing), AI Message Translation (53 languages with auto-detection), and Voice Message Transcription (99+ languages) — all included with the WebSocket license, no third-party API key required.
+Yes. AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) work in the free version with your own provider API key. They act as full participants in any thread, with custom system prompts and per-bot points charging via GamiPress / MyCRED. Better Messages Cloud AI (WebSocket version) provides AI Content Moderation (23+ categories including spam, scam, doxxing, contact sharing), AI Message Translation (53 languages with auto-detection), and Voice Message Transcription (99+ languages) — all included with the WebSocket license, no third-party API key required.
 
 = Does it have native iOS and Android apps? =
 
@@ -400,6 +398,50 @@ The complete documentation, integration guides, REST API reference, hooks refere
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
+
+= 3.0.12 =
+* The formatting buttons also make bulleted and numbered lists, headings and links, and the bar over selected text now looks like the messenger's other menus
+* **Appearance → Conversation → Message field** chooses which formatting buttons are offered and where they show — over selected text, behind a button, always or not at all — with rows of their own under **Mini widgets** and **Mobile**
+* The reply area in the Appearance preview takes typing, so the formatting buttons can be tried there
+* Email and app notifications show a message's headings, links and bold as plain words instead of Markdown symbols
+* A list in a message is no longer followed by an empty line it was not written with
+* Fixed a message with a list or a heading changing its layout a moment after it was sent
+* Fixed a heading in a message taking the theme's heading colour, which left it dark on your own messages and in dark mode
+* Fixed lists, headings, tables and code blocks in end-to-end encrypted conversations showing as plain lines instead of being drawn as in other conversations
+* Security improvement: a crafted message in an end-to-end encrypted conversation could run a script in the browsers of the other members
+* A chat room with **Allow guests** off can still be listed for guests with **Show to guests** in its **Role Based Access** settings — clicking it asks them to log in, in the room's own words
+* Fixed guests being offered Join on, joining or being added automatically to a chat room with **Allow guests** off, when Guests was left ticked under **Can join** or **Auto Add**
+* A chat room with **Allow guests** off and **Auto exclude users** on takes out the guests who are still its members
+* A closed chat room can stay in the Chat Rooms list marked Closed, with **Keep in the Chat Rooms list** in its settings — opening it shows the room's closed message
+* **Tidy up joins and leaves** under **Settings → Messaging → System Messages** can be switched off to give every join and leave a line of its own
+* Fixed a chat room joined from the Chat Rooms list not counting you online there until the page was reloaded
+* Fixed the Chat Rooms list still offering Join for a room joined with the Join button inside it or automatically, and still counting you online in a room you had left
+* Fixed the Chat Rooms list showing anyone but a room's moderators its members with **Hide participants list** on, and its member and online counts with **Hide participants count** on
+* Fixed opening a chat room not adding everyone whose role is ticked under **Auto Add**, and leaving empty conversations behind in the database
+* Fixed **Auto Add** missing new members of a role with many users, and people whose ban in the room had run out
+* Fixed **Hide Tab When Empty** hiding the Chat Rooms tab from guests even when rooms are open to them
+* The favorites star sits in the conversations list, so it can be reached with a conversation open — **Appearance → Layout → Interface elements → Favorites button** puts it back on the screen with no conversation open
+* Fixed a message starred in a chat room you read without joining, presence-based ones included, missing from the favorites page and losing its star there
+* Fixed your star not being saved on a message someone else had already starred
+* Fixed a message waiting for moderation reaching other members through the favorites page or a search
+* Security improvement: opening the favorites page with no starred messages downloaded the messages an administrator had previewed in **Bulk Messages**
+* Fixed a minimized mini chat only blinking when its conversation was picked in the mini widget or its notification was clicked, instead of opening
+* Fixed picking a conversation in the mini widget doing nothing while the messages page was writing a new message with that conversation open behind it
+* Fixed a notification clicked on the messages page replacing the open conversation after the full screen view had been opened and closed there
+* Fixed the BuddyPress import placing every message several hours off, on sites whose database server is not set to UTC
+* Fixed Reply on a message leaving the cursor outside the reply box on desktop, so the answer could not be typed until the box was clicked
+* Fixed clicking Send, or closing the emoji picker without picking one, taking the cursor out of the reply box on desktop, so what was typed next was lost
+* Escape in the reply box cancels a reply or an edit again, as it did in 2.0
+* Fixed picking a person in New Conversation taking the cursor out of the To field on desktop, so a second name could not be typed straight away
+* Fixed typing after a click at the end of a reply box that ends in a mention going nowhere in Firefox, as in a restored draft or a message being edited
+* Fixed a call showing The other side lost connection while both sides could still see and hear each other, when the other person's connection to the site dropped for a moment
+* **Tools → Database** shows the character set of the database connection and warns when it would turn emoji into question marks
+* Fixed saving any setting turning **Messaging → User Search** back on, and WebSocket features staying off after an upgrade or renewal when settings were saved without an active license
+* Fixed the settings button in the mini widget sitting beside the new conversation button instead of at the right, for visitors who are not logged in and with **Account row** off
+* Fixed the full screen messenger having no close button until a conversation was opened while its conversations list was collapsed, as in a desktop window narrower than 800px
+* Fixed Enter sending the message, or picking a name from the mention list, when it only confirmed a character in a Chinese, Japanese or Korean input method
+* Fixed the same Enter, and the Escape that drops a character, submitting or closing other fields too — the guest name, subject, file name, link and chat room fields, the searches, the emoji picker and dialogs
+* Fixed "Start of conversation" fading in a moment after the messages when a conversation too short to scroll is opened
 
 = 3.0.9 - 3.0.11 =
 * Fixed New Conversation showing a reply box instead of the Recover button for a conversation you had deleted, when **Messaging → Deleted Conversations** is set to offer restoring it
@@ -968,7 +1010,7 @@ The complete documentation, integration guides, REST API reference, hooks refere
 * Updated Freemius SDK to latest version
 * Other minor bugfixes and improvements
 
-[Full changelog history] (https://www.better-messages.com/changelog/)
+[Full changelog history](https://www.better-messages.com/changelog/)
 
 == Upgrade Notice ==
 

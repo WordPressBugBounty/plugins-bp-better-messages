@@ -67,19 +67,73 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Favorited' ) ):
 
             $messages_ids = $wpdb->get_col( $query );
 
+            if ( isset( Better_Messages()->chats ) ) {
+                $rooms_query = $wpdb->prepare( "
+                    SELECT `messages`.`id`, `messages`.`thread_id`
+                    FROM " . bm_get_table('meta') . " `meta`
+                      INNER JOIN " . bm_get_table('messages') . " `messages`
+                        ON `meta`.`bm_message_id` = `messages`.`id`
+                      INNER JOIN " . bm_get_table('threads') . " `threads`
+                        ON `threads`.`id` = `messages`.`thread_id`
+                        AND `threads`.`type` = 'chat-room'
+                      LEFT JOIN " . bm_get_table('recipients') . " `recipients`
+                        ON `recipients`.`thread_id` = `messages`.`thread_id`
+                        AND `recipients`.`user_id` = %d
+                    WHERE `meta`.`meta_key` = 'starred_by_user'
+                    AND `meta`.`meta_value` = %d
+                    AND `recipients`.`thread_id` IS NULL
+                ", $current_user_id, $current_user_id );
+
+                $readable = array();
+
+                foreach ( $wpdb->get_results( $rooms_query ) as $row ) {
+                    $thread_id = (int) $row->thread_id;
+
+                    if ( ! isset( $readable[ $thread_id ] ) ) {
+                        $readable[ $thread_id ] = ( user_can( $current_user_id, 'bm_can_administrate' ) || Better_Messages()->functions->check_access( $thread_id, $current_user_id ) )
+                            && Better_Messages()->functions->can_read_chat_messages( $thread_id, $current_user_id );
+                    }
+
+                    if ( $readable[ $thread_id ] ) {
+                        $messages_ids[] = $row->id;
+                    }
+                }
+            }
+
+            if ( empty( $messages_ids ) ) {
+                return array( 'users' => array(), 'messages' => array() );
+            }
+
             $return = Better_Messages_Rest_Api()->get_messages( null, $messages_ids );
 
             return $return;
         }
 
         public function favorite( WP_REST_Request $request ){
+            $thread_id  = intval( $request->get_param( 'id' ) );
             $message_id = absint( $request->get_param( 'messageId') );
             $type       = sanitize_text_field( $request->get_param('type') );
+            $user_id    = Better_Messages()->functions->get_current_user_id();
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            $hidden_pending = $message
+                && (int) $message->is_pending === 1
+                && (int) $message->sender_id !== $user_id
+                && ! user_can( $user_id, 'bm_can_administrate' );
+
+            if ( ! $message || (int) $message->thread_id !== $thread_id || $hidden_pending ) {
+                return new WP_Error(
+                    'rest_not_found',
+                    _x('Message not found', 'Rest API Error', 'bp-better-messages'),
+                    array('status' => 404)
+                );
+            }
 
             $args = array(
                 'action'     => $type,
                 'message_id' => $message_id,
-                'user_id'    => Better_Messages()->functions->get_current_user_id(),
+                'user_id'    => $user_id,
             );
 
             $is_starred = Better_Messages()->functions->is_message_starred( $args['message_id'], $args['user_id'] );
@@ -89,7 +143,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Favorited' ) ):
                 if ( true === $is_starred ) {
                     return true;
                 } else {
-                    Better_Messages()->functions->add_message_meta( $args['message_id'], 'starred_by_user', $args['user_id'] );
+                    Better_Messages()->functions->add_message_meta( $args['message_id'], 'starred_by_user', $args['user_id'], false );
                     return true;
                 }
                 // Unstar.
