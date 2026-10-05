@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.12
+Stable tag: 3.0.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -398,6 +398,25 @@ The complete documentation, integration guides, REST API reference, hooks refere
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
+
+= 3.0.13 =
+* Fixed a block made with Block, Suspend, Report for BuddyPress stopping only the blocked member: the member who blocked can no longer write to them either, and neither of them can start a new conversation with the other
+* Fixed "Block user" staying in a conversation's menu after user blocking was switched off, in a browser that had opened the conversation before
+* Fixed the guest name field stretching across the whole messenger on themes that restyle every form field on the page, such as ProRadio
+* Fixed a chat room or the messenger staying empty when its page is opened on a theme that loads pages without a full reload, such as ProRadio
+* Fixed the Chat Rooms list leaving out a guest or member who joined a room after the list was opened from that room's member and online counts until the page was reloaded
+* Fixed a message coming back into the reply box as a draft after it was sent, when the page was left straight after sending, so it looked unsent and was easy to send twice
+* Fixed a notification popping up for every unread conversation, however old, the first time the site was opened in a browser, after the browser's site data was cleared, or on coming back after more than a week: only messages that arrived since the browser last checked raise one
+* Fixed a message showing twice in the conversation until the page was reloaded, for the other members and sometimes for the sender, when the sender's connection to the WebSocket server dropped or slowed just as it was sent
+* Hardened script and style versioning for caches, so old cached files cannot break anything during updates
+* Improved group calls connecting on networks that block most ports: they now get the same relay servers and ports as one-to-one calls
+* Added the attribution GIPHY and KLIPY require: the GIF search reads "Search GIPHY…" or "Search KLIPY…", the picker shows the provider's "Powered by" mark and sent GIFs carry its watermark
+* Added revoking a member's real-time access: the new `better_messages_revoke_user` and `better_messages_restore_user` [actions](https://www.better-messages.com/hooks/php-actions/#better_messages_revoke_user) close every open session of a user on the WebSocket server and refuse new ones until the user is restored, and the new [`better_messages_user_can_connect`](https://www.better-messages.com/hooks/php-filters/#better_messages_user_can_connect) filter decides who may connect — see [Revoke a user's access](https://www.better-messages.com/docs/development/guides/revoke-user-access/)
+* Security improvement: an Ultimate Member member whose account status changes from approved to inactive, rejected or back to review is cut off the WebSocket server at once, and let back when approved again
+* Security improvement: a ban in a chat room whose participants are only who is present now takes the member's open browser or app out of the room at once, instead of only on their next page load
+* Security improvement: profile updates, fast messages, call rings and call screens, conversation names and images, and message details (attachments, link previews, translations, transcriptions, locations, replies) now cross the WebSocket server encrypted with your site's key
+* Security improvement: a group call no longer sends the visitor's IP address to the call server
+* Other minor bugfixes and improvements
 
 = 3.0.12 =
 * The formatting buttons also make bulleted and numbered lists, headings and links, and the bar over selected text now looks like the messenger's other menus

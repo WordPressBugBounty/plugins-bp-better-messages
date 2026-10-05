@@ -507,7 +507,8 @@ function _bm_js_translation_strings() {
                                           "Location picker: empty nearby without search", "bp-better-messages" );
     _x( "Sending:", "Location picker: footer label", "bp-better-messages" );
     _x( "Send location", "Location picker: send", "bp-better-messages" );
-    _x('Search GIFs…', 'Media picker', 'bp-better-messages');
+    _x( 'Powered by %s', 'Media picker', 'bp-better-messages' );
+    _x('Search %s…', 'Media picker', 'bp-better-messages');
     _x('Close', '"Close" Button Tooltip', 'bp-better-messages');
     _x('No GIFs found for that search.', 'Media picker', 'bp-better-messages');
     _x('No trending GIFs right now.', 'Media picker', 'bp-better-messages');
@@ -2644,6 +2645,7 @@ function _bm_js_translation_strings() {
     _x('GIF Provider', 'Settings page', 'bp-better-messages');
     _x('Provider', 'Settings page', 'bp-better-messages');
     _x('Choose which service supplies trending and searchable GIFs in the chat', 'Settings page', 'bp-better-messages');
+    _x('The GIF picker and sent GIFs carry the attribution %s requires, with nothing to set up.', 'Settings page', 'bp-better-messages');
     _x('GIPHY', 'Settings page', 'bp-better-messages');
     _x('API Key', 'Settings page', 'bp-better-messages');
     _x('Leave empty to disable the GIPHY integration', 'Settings page', 'bp-better-messages');

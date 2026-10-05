@@ -6,6 +6,50 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
     class Better_Messages_Ultimate_Member
     {
 
+        /**
+         * An approved member who stops being approved (deactivated, rejected, sent back for
+         * review) is cut off the realtime server at once, and let back in when approved again.
+         * A member never approved cannot log in, so their first approval changes nothing there.
+         * Ultimate Member before 2.8.7 does not say what the status was, so there any status but
+         * approved cuts the member off.
+         */
+        public function on_account_status_changed( $status, $user_id, $old_status = null ){
+            if( ! isset( Better_Messages()->websocket ) || ! Better_Messages()->websocket ) return;
+
+            $user_id = (int) $user_id;
+
+            if( $status === 'approved' ){
+                Better_Messages()->websocket->restore_user( $user_id, 'ultimate-member' );
+                // A member the eligibility filter below cut off on a role change goes back too.
+                Better_Messages()->websocket->check_user_access( $user_id );
+            } else if( $old_status === 'approved' || ( ( $old_status === null || $old_status === '' ) && $this->has_sessions( $user_id ) ) ){
+                Better_Messages()->websocket->revoke_user( $user_id, 'ultimate-member' );
+            }
+        }
+
+        private function has_sessions( $user_id ){
+            if( ! class_exists( 'WP_Session_Tokens' ) ) return true;
+
+            $sessions = WP_Session_Tokens::get_instance( (int) $user_id )->get_all();
+
+            return ! empty( $sessions );
+        }
+
+        /**
+         * A member whose account status is set to anything but approved gets no realtime
+         * connection, whatever wrote the status: the page hands them no key to connect with. A user
+         * without a status, as every user from before Ultimate Member has, is not held back.
+         */
+        public function can_connect( $can_connect, $user_id ){
+            if( ! $can_connect || (int) $user_id <= 0 ) return $can_connect;
+
+            $status = get_user_meta( (int) $user_id, 'account_status', true );
+
+            if( is_string( $status ) && $status !== '' && $status !== 'approved' ) return false;
+
+            return $can_connect;
+        }
+
         public static function instance()
         {
 
@@ -20,6 +64,9 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
         public function __construct(){
             add_filter( 'um_user_profile_tabs', array( $this, 'um_add_profile_tab' ), 200 );
+
+            add_action( 'um_after_user_status_is_changed', array( $this, 'on_account_status_changed' ), 10, 3 );
+            add_filter( 'better_messages_user_can_connect', array( $this, 'can_connect' ), 10, 2 );
 
             add_action( 'um_profile_content_messages_default', array( $this, 'um_content_messages' ), 1 );
 

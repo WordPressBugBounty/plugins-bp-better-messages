@@ -1,2 +1,2 @@
 <?php
-return array('bmdb-shared'=>'328dd4b1','bmdb'=>'a1aa5cdb','transcode-ffmpeg-worker'=>'16990eca','transcode-ffmpeg'=>'8db067fd','transcode-heif'=>'9497a992','transcoder'=>'40b125a6');
+return array('bmdb-shared'=>'06485337','bmdb'=>'710832a7','transcode-ffmpeg-worker'=>'16990eca','transcode-ffmpeg'=>'8db067fd','transcode-heif'=>'9497a992','transcoder'=>'3a24d72b');

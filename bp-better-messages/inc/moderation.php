@@ -956,19 +956,21 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $table = bm_get_table('moderation');
 
             $results = $wpdb->get_results("
-            SELECT id, thread_id, user_id
-            FROM  {$table} 
+            SELECT id, thread_id, user_id, type
+            FROM  {$table}
             WHERE `expiration` <= NOW()");
 
             if( ! empty( $results ) ) {
                 foreach ($results as $result) {
                     $wpdb->query($wpdb->prepare("
                 DELETE
-                FROM  {$table} 
+                FROM  {$table}
                 WHERE `id` = %d", $result->id));
 
                     $this->cache_delete($result->thread_id, $result->user_id);
                     Better_Messages()->functions->thread_updated_for_user($result->thread_id, $result->user_id);
+
+                    do_action( 'better_messages_user_unrestricted', (int) $result->thread_id, (int) $result->user_id, $result->type );
                 }
             }
         }
@@ -979,8 +981,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $table = bm_get_table('moderation');
 
             $results = $wpdb->get_results( $wpdb->prepare("
-            SELECT id, thread_id, user_id
-            FROM  {$table} 
+            SELECT id, thread_id, user_id, type
+            FROM  {$table}
             WHERE `thread_id` = %d
             AND `user_id` = %d
             AND `expiration` <= NOW()", $thread_id, $user_id) );
@@ -989,11 +991,13 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 foreach ($results as $result) {
                     $wpdb->query($wpdb->prepare("
                     DELETE
-                    FROM  {$table} 
+                    FROM  {$table}
                     WHERE `id` = %d", $result->id));
 
                     $this->cache_delete($result->thread_id, $result->user_id);
                     Better_Messages()->functions->thread_updated_for_user($result->thread_id, $result->user_id);
+
+                    do_action( 'better_messages_user_unrestricted', (int) $result->thread_id, (int) $result->user_id, $result->type );
                 }
             }
         }
@@ -1173,6 +1177,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 if( wp_get_scheduled_event( 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] ) ){
                     wp_clear_scheduled_hook( 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] );
                 }
+
+                do_action( 'better_messages_user_unrestricted', $thread_id, $user_id, $type );
             }
 
             return $result;

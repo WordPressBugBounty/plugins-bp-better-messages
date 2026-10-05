@@ -36,7 +36,12 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
         }
 
         public function script_variables( $vars ){
-            $vars['gifs'] = ( $this->is_enabled() ? '1' : '0' );
+            $provider = Better_Messages_Gif_Provider_Factory::get_active();
+
+            $vars['gifs']             = ( $provider ? '1' : '0' );
+            $vars['gifsProvider']     = ( $provider ? $provider->get_provider_id() : '' );
+            $vars['gifsProviderName'] = ( $provider ? $provider->get_provider_name() : '' );
+
             return $vars;
         }
 

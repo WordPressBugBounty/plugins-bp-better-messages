@@ -57,11 +57,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter( 'better_messages_can_send_message', array( $this, 'disable_archived_reply' ), 10, 3);
 
-            /*
-             * Block, Suspend, Report for BuddyPress integration
-             */
-            add_filter('better_messages_can_send_message',         array($this, 'disable_message_for_blocked_user'), 10, 3);
-
             if( isset(Better_Messages()->settings['restrictNewReplies'])
                 && is_array(Better_Messages()->settings['restrictNewReplies'])
                 && count(Better_Messages()->settings['restrictNewReplies']) > 0
@@ -250,6 +245,15 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( class_exists( 'PeepSo' ) ) {
                 require_once Better_Messages()->path . 'addons/peepso.php';
                 Better_Messages_Peepso::instance();
+            }
+
+            /*
+             * Block, Suspend, Report for BuddyPress. BPTK_Block only appears on `init`,
+             * after this runs, so the plugin is recognised by its main class.
+             */
+            if( class_exists( 'BP_Toolkit' ) || class_exists( 'BPTK_Block' ) ) {
+                require_once Better_Messages()->path . 'addons/bp-toolkit.php';
+                Better_Messages_BP_Toolkit::instance();
             }
 
             if( class_exists('WP_User_Manager') ){
@@ -1845,40 +1849,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 $message = _x('You can start conversation only with 1 user per time', 'Error message when group threads are disabled', 'bp-better-messages');
                 $errors[] = $message;
             }
-        }
-
-        public function disable_message_for_blocked_user( $allowed, $user_id, $thread_id ){
-            if( ! class_exists('BPTK_Block') ) return $allowed;
-
-            $participants = Better_Messages()->functions->get_participants($thread_id);
-
-            if( ! isset( $participants['recipients'] ) ) {
-                return $allowed;
-            }
-            /**
-             * Not block in group thread
-             */
-            if( count($participants['recipients']) > 1 ){
-                return $allowed;
-            }
-
-            foreach( $participants['recipients'] as $recipient_user_id ){
-                $list = Better_Messages()->functions->get_user_meta( $recipient_user_id, 'bptk_block', true );
-                if ( empty($list) ) {
-                    $list = array();
-                }
-                $_list = apply_filters( 'get_blocked_users', $list, $recipient_user_id );
-                $recipient_blocked = array_filter( $_list );
-
-                if( in_array( $user_id, $recipient_blocked ) ){
-                    global $bp_better_messages_restrict_send_message;
-                    $bp_better_messages_restrict_send_message['blocked_by_user'] = __('You were blocked by recipient', 'bp-better-messages');
-                    $allowed = false;
-                }
-            }
-
-
-            return $allowed;
         }
 
         public function disable_message_for_blocked_restricted_role( $allowed, $user_id, $thread_id ){

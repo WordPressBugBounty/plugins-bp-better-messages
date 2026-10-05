@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.0.12
+    Version: 3.0.13
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '3.0.12';
+        public  $version = '3.0.13';
 
         public  $db_version = '3.0.0';
 
@@ -193,6 +193,8 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
             add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
             add_action( 'init', array( $this, 'load_text_domain' ) );
+
+            Better_Messages_Asset_Versions();
         }
 
         /**
@@ -204,6 +206,7 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             require_once __DIR__ . '/inc/classes/thread.php';
             require_once __DIR__ . '/inc/functions-global.php';
             require_once __DIR__ . '/inc/html-tag-processor.php';
+            require_once __DIR__ . '/inc/asset-versions.php';
             require_once __DIR__ . '/inc/functions.php';
             /**
              * Require component only if BuddyPress is active
@@ -388,38 +391,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             return true;
         }
 
-        public function ensure_version_included( $src, $handle ){
-            $handles_to_ensure = [
-                'better-messages',
-                'better-messages-media',
-                'better-messages-files-webcam',
-                'better-messages-files-image-editor',
-                'better-messages-files-react',
-                'better-messages-files-core',
-                'better-messages-app'
-            ];
-
-            if( ! in_array( $handle, $handles_to_ensure ) ) return $src;
-
-            $parsed_vars = parse_url( $src, PHP_URL_QUERY );
-            $version_included = false;
-
-            if( $parsed_vars ){
-                parse_str($parsed_vars, $url_vars);
-
-                if( isset( $url_vars['ver'] ) ){
-                    $version_included = true;
-                }
-            }
-
-            if( ! $version_included ){
-                $src = add_query_arg('ver', $this->version, $src);
-            }
-
-
-            return $src;
-        }
-
         public function enqueue_admin_css(){
             $current_screen = get_current_screen();
 
@@ -563,10 +534,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
         public function enqueue_css( $force = false ){
             if( ! $force && $this->css_loaded ) return;
 
-            if( ! has_action('style_loader_src', array( $this, 'ensure_version_included')  ) ) {
-                add_action('style_loader_src', array($this, 'ensure_version_included'), 999, 2);
-            }
-
             $css_base = 'better-messages';
 
             $css_file = 'assets/css/' . $css_base . '.min.css';
@@ -599,10 +566,6 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
 
         public function enqueue_js(){
             if( $this->js_loaded ) return;
-
-            if( ! has_action('script_loader_src', array( $this, 'ensure_version_included')  ) ) {
-                add_action('script_loader_src', array($this, 'ensure_version_included'), 999, 2);
-            }
 
             do_action('better_messages_register_script_dependencies');
 
@@ -1262,6 +1225,11 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                     $script_variables['video_server']  = $video_server;
                     $script_variables['site_id']       = Better_Messages_WebSocket()->site_id;
                     $script_variables['secret_key']    = sha1($script_variables['site_id'] . Better_Messages_WebSocket()->secret_key . get_current_user_id() );
+
+                    // A user cut off from the realtime server gets no key to connect with (inc/websocket.php user_can_connect).
+                    if ( ! Better_Messages_WebSocket()->user_can_connect( get_current_user_id() ) ) {
+                        $script_variables['secret_key'] = '';
+                    }
 
                     if ( apply_filters( 'better_messages_3rd_party_push_active', false ) ) {
                         $this->settings['enablePushNotifications'] = '0';

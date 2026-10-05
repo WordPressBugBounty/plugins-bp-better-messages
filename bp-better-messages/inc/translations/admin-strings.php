@@ -1544,6 +1544,7 @@ function _bm_admin_translations_map() {
         array( '_x', 'GIF Provider', 'Settings page' ),
         array( '_x', 'Provider', 'Settings page' ),
         array( '_x', 'Choose which service supplies trending and searchable GIFs in the chat', 'Settings page' ),
+        array( '_x', 'The GIF picker and sent GIFs carry the attribution %s requires, with nothing to set up.', 'Settings page' ),
         array( '_x', 'GIPHY', 'Settings page' ),
         array( '_x', 'API Key', 'Settings page' ),
         array( '_x', 'Leave empty to disable the GIPHY integration', 'Settings page' ),

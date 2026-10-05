@@ -2626,10 +2626,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $filename = 'libheif' . $suffix . '.wasm';
 
             if ( defined( 'BETTER_MESSAGES_WASM_FALLBACK' ) && BETTER_MESSAGES_WASM_FALLBACK === true ) {
-                return admin_url( 'admin-ajax.php' ) . '?action=bm_libheif_wasm&file=' . $filename;
+                return admin_url( 'admin-ajax.php' ) . '?action=bm_libheif_wasm&file=' . $filename . '&ver=' . rawurlencode( Better_Messages()->version );
             }
 
-            return Better_Messages()->url . 'assets/js/modules/transcode/' . $filename;
+            return Better_Messages()->url . 'assets/js/modules/transcode/' . $filename . '?ver=' . rawurlencode( Better_Messages()->version );
         }
 
         /**
