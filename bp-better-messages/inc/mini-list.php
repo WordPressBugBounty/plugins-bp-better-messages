@@ -55,6 +55,9 @@ class Better_Messages_Mini_List
             if ( Better_Messages()->settings['miniWidgetsStyle'] === 'bubble' ) {
                 $class .= ' bm-widget-bubble';
             }
+
+            $class .= Better_Messages_Design::instance()->dock_classes();
+
             echo '<div class="' . $class . '"></div>';
         }
     }

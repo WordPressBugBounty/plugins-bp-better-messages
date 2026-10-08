@@ -707,6 +707,18 @@ class Better_Messages_Design {
                         var wrap = document.querySelector('.bm-mini-widgets-wrap');
                         if (wrap) { wrap.classList.toggle('bm-widget-bubble', data.settings.miniWidgetsStyle === 'bubble'); }
                     }
+                    if (data.type === 'bm_design_settings_update' && data.settings) {
+                        var docks = document.querySelectorAll('.bm-mini-widgets-wrap, .bm-mini-chats-wrap');
+                        for (var d = 0; d < docks.length; d++) {
+                            if (data.settings.widgetsPosition !== undefined) { docks[d].classList.toggle('bm-widgets-left', data.settings.widgetsPosition === 'left'); }
+                            if (data.settings.miniWidgetsIconsOnly !== undefined) { docks[d].classList.toggle('bm-widget-icons-on', data.settings.miniWidgetsIconsOnly === '1'); }
+                        }
+                        var mobileButton = document.getElementById('bm-mini-mobile-open');
+                        if (mobileButton) {
+                            if (data.settings.mobilePopup !== undefined) { mobileButton.classList.toggle('bm-mobile-button-off', data.settings.mobilePopup !== '1'); }
+                            if (data.settings.mobilePopupLocation !== undefined) { mobileButton.classList.toggle('bm-mobile-open-left', data.settings.mobilePopupLocation === 'left'); }
+                        }
+                    }
                     if (data.type === 'bm_design_token_update') {
                         applyTokens(data.tokens);
                         // PHP prints this class from the saved bottom offset
@@ -1803,7 +1815,6 @@ class Better_Messages_Design {
             'schema'            => better_messages_design_schema(),
             'zones'             => array_values( $this->zones() ),
             'previewThreads'    => $this->preview_threads(),
-            'bodyClassPrefixes' => $this->body_class_prefixes(),
         );
     }
 
@@ -1979,34 +1990,7 @@ class Better_Messages_Design {
             $classes[] = 'bm-messages-light';
         }
 
-        $options = $this->get_design_options();
-        foreach ( $this->option_controls() as $id => $control ) {
-            if ( empty( $control['bodyClass'] ) || ! array_key_exists( $id, $options ) ) {
-                continue;
-            }
-            $classes[] = $control['bodyClass'] . $this->body_class_value( $control, $options[ $id ] );
-        }
-
-        foreach ( $this->setting_controls() as $control ) {
-            if ( empty( $control['bodyClass'] ) ) {
-                continue;
-            }
-            $value = $this->setting_control_value( $control );
-            if ( 'switch' === $control['kind'] ) {
-                $on    = ( '1' === $value ) !== ! empty( $control['invert'] );
-                $value = $on ? 'on' : 'off';
-            }
-            $classes[] = $control['bodyClass'] . sanitize_html_class( $value );
-        }
-
         return $classes;
-    }
-
-    public function body_class_value( $control, $value ) {
-        if ( is_bool( $control['default'] ) ) {
-            return $value ? 'on' : 'off';
-        }
-        return (string) $value;
     }
 
     public function print_body_classes_script( $exclude = array() ) {
@@ -2021,44 +2005,25 @@ class Better_Messages_Design {
             . 'if(!a()){document.addEventListener("DOMContentLoaded",a);}})();</script>';
     }
 
-    public function body_class_prefixes() {
-        $prefixes = array();
-        foreach ( array_merge( $this->option_controls(), $this->setting_controls() ) as $control ) {
-            if ( ! empty( $control['bodyClass'] ) ) {
-                $prefixes[] = $control['bodyClass'];
-            }
+    public function dock_classes() {
+        $classes = '';
+
+        if ( 'left' === $this->get_design_option( 'widgetsPosition', 'right' ) ) {
+            $classes .= ' bm-widgets-left';
         }
-        return array_values( array_unique( $prefixes ) );
+
+        if ( ( Better_Messages()->settings['miniWidgetsIconsOnly'] ?? '0' ) === '1' ) {
+            $classes .= ' bm-widget-icons-on';
+        }
+
+        return $classes;
     }
 
     public function body_class( $classes ) {
         if ( is_admin() ) {
             return $classes;
         }
-        $classes = array_merge( $classes, $this->design_body_classes() );
-        if ( ( Better_Messages()->settings['miniWidgetsStyle'] ?? 'classic' ) === 'bubble' ) {
-            $has_mini_widget = false;
-
-            if ( is_user_logged_in() || Better_Messages()->guests->guest_access_enabled() ) {
-                $script_variables = Better_Messages()->script_variables;
-
-                $threads    = isset( $script_variables['miniMessages'] ) && $script_variables['miniMessages'] === '1';
-                $friends    = is_user_logged_in() && isset( $script_variables['miniFriends'] ) && $script_variables['miniFriends'] === '1';
-                $groups     = is_user_logged_in() && isset( $script_variables['miniGroups'] ) && $script_variables['miniGroups'] === '1';
-                $courses    = is_user_logged_in() && isset( $script_variables['miniCourses'] ) && $script_variables['miniCourses'] === '1';
-                $ai_bots    = isset( $script_variables['miniAIBots'] ) && $script_variables['miniAIBots'] === '1';
-                $chat_rooms = isset( $script_variables['miniChatRooms'] ) && $script_variables['miniChatRooms'] === '1';
-                $users      = isset( $script_variables['miniUsers'] ) && $script_variables['miniUsers'] === '1';
-
-                $has_mini_widget = ( $threads || $friends || $groups || $courses || $ai_bots || $chat_rooms || $users );
-            }
-
-            if ( $has_mini_widget ) {
-                $classes[] = 'bm-bubble-mode';
-                $classes[] = 'bm-bubble-position-' . ( 'left' === $this->get_design_option( 'widgetsPosition', 'right' ) ? 'left' : 'right' );
-            }
-        }
-        return $classes;
+        return array_merge( $classes, $this->design_body_classes() );
     }
 
     public function admin_body_class( $classes ) {

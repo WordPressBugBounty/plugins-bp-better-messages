@@ -66,16 +66,24 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             }
 
             $finished = in_array( $response['status'], array( 'built', 'failed' ), true );
+            $failed   = $response['status'] === 'failed';
+            $revision = $finished && isset( $response['core_revision'] ) && (int) $response['core_revision'] > 0;
 
-            if( $finished && isset( $response['core_revision'] ) && (int) $response['core_revision'] > 0 ){
+            if( $revision || $failed ){
                 $row = $wpdb->get_row( $wpdb->prepare( "SELECT build_info FROM $table WHERE `id` = %d", $build['id'] ), ARRAY_A );
                 $build_info = $row ? json_decode( $row['build_info'], true ) : null;
 
                 if( is_array( $build_info ) ){
-                    $build_info['core_revision'] = (int) $response['core_revision'];
+                    if( $revision ){
+                        $build_info['core_revision'] = (int) $response['core_revision'];
 
-                    if( isset( $response['channel'] ) && $response['channel'] !== null && $response['channel'] !== '' ){
-                        $build_info['core_channel'] = (string) $response['channel'];
+                        if( isset( $response['channel'] ) && $response['channel'] !== null && $response['channel'] !== '' ){
+                            $build_info['core_channel'] = (string) $response['channel'];
+                        }
+                    }
+
+                    if( $failed ){
+                        $build_info['build_error'] = $this->sanitize_build_error( $response['error'] ?? null );
                     }
 
                     $update['build_info'] = wp_json_encode( $build_info );
@@ -89,6 +97,79 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             if( $finished && $response['status'] === 'built' ){
                 $this->refresh_outdated_builds();
             }
+        }
+
+        public function sanitize_build_error( $error ): ?array
+        {
+            if( ! is_array( $error ) || empty( $error['code'] ) || ! is_string( $error['code'] ) ){
+                return null;
+            }
+
+            $lines = array();
+
+            if( isset( $error['lines'] ) && is_array( $error['lines'] ) ){
+                foreach( array_slice( $error['lines'], 0, 10 ) as $line ){
+                    if( ! is_string( $line ) ){
+                        continue;
+                    }
+
+                    $line = trim( wp_strip_all_tags( $line ) );
+
+                    if( $line !== '' ){
+                        $lines[] = mb_substr( $line, 0, 500 );
+                    }
+                }
+            }
+
+            $sanitized = array(
+                'code'  => sanitize_key( $error['code'] ),
+                'lines' => $lines,
+            );
+
+            if( ! empty( $error['url'] ) && is_string( $error['url'] ) ){
+                $sanitized['url'] = esc_url_raw( $error['url'], array( 'http', 'https' ) );
+            }
+
+            if( ! empty( $error['http_status'] ) ){
+                $sanitized['http_status'] = (int) $error['http_status'];
+            }
+
+            if( ! empty( $error['handle'] ) && is_string( $error['handle'] ) ){
+                $sanitized['handle'] = sanitize_text_field( $error['handle'] );
+            }
+
+            return $sanitized;
+        }
+
+        public function request_build_status( array $build, int $timeout = 30 )
+        {
+            $builder_server = apply_filters('better_messages_mobile_app_builder_server', 'https://builder.better-messages.com');
+
+            $request = wp_remote_get(add_query_arg( [
+                'id' => $build['id'],
+                'site_id' => $build['site_id'],
+                'secret' => $build['secret'],
+            ], $builder_server . '/api/getBuildStatus'), array(
+                'timeout' => $timeout
+            ));
+
+            $good = Better_Messages()->functions->is_response_good( $request );
+
+            if( $good !== true ){
+                return $good;
+            }
+
+            if ( wp_remote_retrieve_response_code($request) != 200 ) {
+                return new WP_Error('request_failed', 'The network request failed.');
+            }
+
+            $response = json_decode( wp_remote_retrieve_body( $request ), true );
+
+            if( ! is_array( $response ) || ! isset( $response['status'] ) ){
+                return new WP_Error('request_failed', 'The network request failed.');
+            }
+
+            return $response;
         }
 
         public function build_currency( array $build_info, array $core ): string
@@ -181,24 +262,10 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             $builds = $wpdb->get_results( "SELECT id, status, site_id, secret FROM $table WHERE status = 'in-queue' OR status = 'building'", ARRAY_A );
 
             if( count( $builds ) > 0 ) {
-                $builder_server = apply_filters('better_messages_mobile_app_builder_server', 'https://builder.better-messages.com');
-
                 foreach ($builds as $build) {
-                    $request = wp_remote_get(add_query_arg( [
-                        'id' => $build['id'],
-                        'site_id' => $build['site_id'],
-                        'secret' => $build['secret'],
-                    ], $builder_server . '/api/getBuildStatus'), array(
-                        'timeout' => 30
-                    ));
+                    $response = $this->request_build_status( $build );
 
-                    if( Better_Messages()->functions->is_response_good( $request ) !== true ){
-                        continue;
-                    }
-
-                    $response = json_decode($request['body'], true );
-
-                    if ( wp_remote_retrieve_response_code($request) != 200 ) {
+                    if( is_wp_error( $response ) ){
                         continue;
                     }
 
@@ -299,24 +366,10 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return $build['status'];
             }
 
-            $builder_server = apply_filters('better_messages_mobile_app_builder_server', 'https://builder.better-messages.com');
+            $response = $this->request_build_status( $build );
 
-            $request = wp_remote_get(add_query_arg( [
-                'id' => $build['id'],
-                'site_id' => $build['site_id'],
-                'secret' => $build['secret'],
-            ], $builder_server . '/api/getBuildStatus'), array(
-                'timeout' => 30
-            ));
-
-            if( Better_Messages()->functions->is_response_good( $request ) !== true ){
-                return Better_Messages()->functions->is_response_good( $request );
-            }
-
-            $response = json_decode($request['body'], true );
-
-            if ( wp_remote_retrieve_response_code($request) != 200 ) {
-                return new WP_Error('request_failed', 'The network request failed.');
+            if( is_wp_error( $response ) ){
+                return $response;
             }
 
             $this->apply_build_status( $build, $response );
@@ -448,6 +501,16 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
             $build_info = json_decode($build['build_info'], true);
 
+            if( $build['status'] === 'failed' && is_array( $build_info ) && ! array_key_exists( 'build_error', $build_info ) ){
+                $response = $this->request_build_status( $build, 10 );
+
+                if( ! is_wp_error( $response ) ){
+                    $this->apply_build_status( $build, $response );
+
+                    $build_info['build_error'] = $response['status'] === 'failed' ? $this->sanitize_build_error( $response['error'] ?? null ) : null;
+                }
+            }
+
             $app_name = $build_info['app_name'];
             $app_icon = $build_info['app_icon'];
 
@@ -457,6 +520,10 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             $build['app_icon'] = $app_icon;
             $build['built_at'] = isset( $build_info['created_at'] ) ? (int) $build_info['created_at'] : 0;
             $build['core_revision'] = isset( $build_info['core_revision'] ) ? (int) $build_info['core_revision'] : 0;
+
+            if( $build['status'] === 'failed' ){
+                $build['error'] = isset( $build_info['build_error'] ) ? $build_info['build_error'] : null;
+            }
 
             if( $build['type'] === 'production' ){
                 $build['version'] = $build_info['version'];

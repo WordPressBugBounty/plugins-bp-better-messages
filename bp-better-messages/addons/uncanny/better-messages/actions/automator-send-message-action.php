@@ -120,6 +120,8 @@ class Automator_Send_Message_Action {
             );
         }
 
+        $data['skip_moderation'] = true;
+
         $send = Better_Messages()->functions->new_message( $data );
 
 		// If there was an error, it'll be logged in action log with an error message.

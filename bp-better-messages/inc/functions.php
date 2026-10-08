@@ -3440,7 +3440,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'notification'     => false,
                 'send_global'      => true,
                 'bulk_hide'        => false,
-                'is_pending'       => 0,
+                'is_pending'       => null,
+                'skip_moderation'  => false,
                 'date_sent'        => bp_core_current_time(),
                 'created_at'       => $microtime,
                 'updated_at'       => $microtime,
@@ -3474,6 +3475,18 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
+            if ( $r['is_pending'] === null ) {
+                $r['is_pending'] = 0;
+
+                if ( ! $r['skip_moderation'] && (int) $r['sender_id'] !== 0 ) {
+                    $r['is_pending'] = (int) Better_Messages()->moderation->is_moderation_enabled(
+                        (int) $r['sender_id'],
+                        empty( $r['thread_id'] ) ? null : (int) $r['thread_id'],
+                        empty( $r['thread_id'] )
+                    );
+                }
+            }
+
             // Create a new message object.
             $message                = new BM_Messages_Message;
             $message->thread_id     = $r['thread_id'];
@@ -3485,6 +3498,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $message->updated_at    = $r['updated_at'];
             $message->temp_id       = $r['temp_id'];
             $message->is_pending    = $r['is_pending'];
+            $message->skip_moderation = (bool) $r['skip_moderation'];
             $message->bulk_hide     = $r['bulk_hide'];
             $message->send_global   = $r['send_global'];
             $message->count_unread  = (bool) $r['count_unread'];

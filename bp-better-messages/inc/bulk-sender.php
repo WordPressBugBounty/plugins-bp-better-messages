@@ -251,6 +251,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 'recipients'    => $user_ids,
                 'attachments'   => $attachment_ids,
                 'suppress_new_thread_created' => true,
+                'skip_moderation' => true,
             );
 
             $thread_id = Better_Messages()->functions->new_message( $args );
@@ -349,6 +350,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                             'error_type'    => 'wp_error',
                             'bulk_hide'     => (bool) $job->hide_thread,
                             'attachments'   => $attachment_ids,
+                            'skip_moderation' => true,
                         );
 
                         $message_id = Better_Messages()->functions->new_message( $args );
@@ -485,6 +487,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 'recipients'    => array( $user_id ),
                 'attachments'   => $attachment_ids,
                 'suppress_new_thread_created' => true,
+                'skip_moderation' => true,
             );
 
             $result = Better_Messages()->functions->new_message( $args );

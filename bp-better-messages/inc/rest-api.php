@@ -708,11 +708,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 
-            $is_pending = (int) Better_Messages()->moderation->is_moderation_enabled( $current_user_id, null, true );
-
-            if( $is_pending ){
-                $args['is_pending'] = $is_pending;
-            }
+            $args['is_pending'] = (int) Better_Messages()->moderation->is_moderation_enabled( $current_user_id, null, true );
 
             if( ! $e2e_init ) {
                 if( trim($args['content']) == '') {

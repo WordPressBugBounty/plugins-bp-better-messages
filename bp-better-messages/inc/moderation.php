@@ -127,9 +127,18 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             // This handles users who sent messages before moderation was enabled
             global $wpdb;
             $table = bm_get_table('messages');
+
+            $checked_since = (int) get_option( 'better_messages_first_time_senders_since', 0 );
+
+            if( $checked_since === 0 ){
+                $checked_since = Better_Messages()->functions->get_microtime();
+                add_option( 'better_messages_first_time_senders_since', $checked_since, '', false );
+            }
+
             $has_messages = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT 1 FROM {$table} WHERE sender_id = %d AND is_pending = 0 LIMIT 1",
-                $user_id
+                "SELECT 1 FROM {$table} WHERE sender_id = %d AND is_pending = 0 AND created_at < %d LIMIT 1",
+                $user_id,
+                $checked_since
             ));
 
             if( $has_messages ){
@@ -150,7 +159,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
          */
         public function mark_user_as_approved_sender( $message )
         {
-            if( ! isset( $message->sender_id ) ){
+            if( ! isset( $message->sender_id ) || ! empty( $message->skip_moderation ) ){
                 return;
             }
 

@@ -270,6 +270,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     'ai_welcome_message' => '1',
                     'ai_response_status' => 'completed',
                 ),
+                'skip_moderation' => true,
             ) );
         }
 

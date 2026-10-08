@@ -321,21 +321,9 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             $script_ver  = ( defined( 'BM_DEV' ) && BM_DEV && file_exists( $script_path ) ) ? filemtime( $script_path ) : $version;
             $src = Better_Messages()->url . 'addons/fluent-community/scripts.js?v=' . $script_ver;
 
-            $design_classes = array();
-
-            if ( class_exists( 'Better_Messages_Design' ) ) {
-                foreach ( (array) Better_Messages_Design::instance()->design_body_classes() as $class ) {
-                    if ( 'bm-messages-light' === $class || 'bm-messages-dark' === $class ) {
-                        continue;
-                    }
-                    $design_classes[] = $class;
-                }
-            }
-
             $vars = [
                     'title' => Better_Messages()->settings['FcPageTitle'] === '1' ? _x('Messages', 'FluentCommunity Integration (Page Header)', 'bp-better-messages') : '',
                     'fullScreen' => Better_Messages()->settings['FcFullScreen'] === '1',
-                    'bodyClasses' => $design_classes,
                     'courseChatButton' => (
                         Better_Messages()->settings['FCenableCourses'] === '1'
                         && Better_Messages()->settings['FCcourseChatButton'] === '1'

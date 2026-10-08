@@ -30,9 +30,7 @@ class Better_Messages_Users
         $this->roles_table = bm_get_table('roles');
 
 
-        add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
-
-        add_action( 'add_user_role',    array($this, 'role_changed'), 10, 2 );
+        add_action( 'add_user_role',   array($this, 'role_changed'), 10, 2 );
         add_action( 'remove_user_role', array($this, 'role_changed'), 10, 2 );
         add_action( 'set_user_role',    array($this, 'role_changed'), 10, 3 );
         add_action( 'profile_update',   array($this, 'user_changed'), 10, 3 );
@@ -50,51 +48,6 @@ class Better_Messages_Users
         add_action( 'better_messages_sync_user_index_weekly', array( $this, 'sync_all_users'), 10, 0 );
 
         add_action( 'admin_init', array( $this, 'register_weekly_worker' ) );
-    }
-
-    public function rest_api_init(){
-        register_rest_route( 'better-messages/v1', '/getUsers', array(
-            'methods' => 'POST',
-            'callback' => array( $this, 'get_users' ),
-            'permission_callback' => array( Better_Messages_Rest_Api(), 'is_user_authorized' )
-        ) );
-    }
-
-    public function get_users( WP_REST_Request $request ){
-        $current_user_id = Better_Messages()->functions->get_current_user_id();
-
-        global $wpdb;
-
-        $total = (int) $wpdb->get_var($wpdb->prepare( "
-        SELECT COUNT(*)
-        FROM `" . bm_get_table('users') . "`
-        WHERE `ID` != %d
-        ", $current_user_id ));
-
-        $result = [
-            'users' => [],
-            'total' => $total
-        ];
-
-        $sql = $wpdb->prepare( "
-        SELECT ID
-        FROM `" . bm_get_table('users') . "`
-        WHERE `ID` != %d
-        ORDER BY `last_activity` DESC
-        LIMIT 0, 40
-        ", $current_user_id );
-
-        $users = $wpdb->get_col( $sql );
-
-        if( count( $users ) > 0 ){
-            foreach ( $users as $user_id ) {
-                $user = Better_Messages()->functions->rest_user_item( $user_id );
-                $user['isContact'] = 1;
-                $result['users'][] = $user;
-            }
-        }
-
-        return $result;
     }
 
     function register_weekly_worker(){

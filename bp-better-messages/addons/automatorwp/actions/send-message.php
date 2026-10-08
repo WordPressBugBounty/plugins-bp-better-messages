@@ -107,6 +107,8 @@ class AutomatorWP_Better_Messages_Send_Message extends AutomatorWP_Integration_A
             );
         }
 
+        $data['skip_moderation'] = true;
+
         $result = Better_Messages()->functions->new_message( $data );
 
         // If there was an error, it'll be logged in action log with an error message.

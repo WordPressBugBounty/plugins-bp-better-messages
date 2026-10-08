@@ -320,6 +320,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Conversations' ) ):
                 'content'    => $content,
                 'return'     => 'both',
                 'error_type' => 'wp_error',
+                'skip_moderation' => true,
             );
 
             $result = Better_Messages()->functions->new_message( $args );

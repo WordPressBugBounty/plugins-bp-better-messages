@@ -4,24 +4,6 @@ var settings = window.BM_Fluent_Community;
 
 const path = '/messages';
 
-// The portal renders its own document (FluentCommunity's portal_page.php has
-// a bare <body>), so WordPress never runs body_class() there and none of the
-// Design body classes arrive — bubble style, message layout, dates, group
-// avatars, fill window, mini-widget position, the mobile button. Every one of
-// those options was silently inert inside the portal while working on the
-// rest of the site. Light/dark is not in this list: updateDynamicCSS() below
-// mirrors the portal's own mode instead.
-function bmFcApplyDesignClasses() {
-  var classes = ( settings && Array.isArray( settings.bodyClasses ) ) ? settings.bodyClasses : [];
-  if ( ! classes.length || ! document.body ) return false;
-  document.body.classList.add.apply( document.body.classList, classes );
-  return true;
-}
-
-if ( ! bmFcApplyDesignClasses() ) {
-  document.addEventListener( 'DOMContentLoaded', bmFcApplyDesignClasses );
-}
-
 function extractPathWithHash(url) {
   try {
     const u = new URL(url, window.location.origin);

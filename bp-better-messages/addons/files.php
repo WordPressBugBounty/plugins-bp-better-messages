@@ -316,12 +316,16 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 return $empty;
             }
 
-            // On first page without type filter: get counts first, auto-detect first non-empty type
-            if ( $page === 1 && empty( $type ) ) {
-                $counts_data = $this->get_thread_attachment_counts( $thread_id );
+            $thread_files = $this->get_thread_files( $thread_id );
 
-                $type_order = array( 'photos', 'videos', 'audio', 'files' );
-                foreach ( $type_order as $t ) {
+            if ( $page === 1 && empty( $type ) ) {
+                $counts_data = array( 'photos' => 0, 'videos' => 0, 'audio' => 0, 'files' => 0 );
+
+                foreach ( $thread_files as $thread_file ) {
+                    $counts_data[ $thread_file['type'] ]++;
+                }
+
+                foreach ( array( 'photos', 'videos', 'audio', 'files' ) as $t ) {
                     if ( $counts_data[ $t ] > 0 ) {
                         $active_type = $t;
                         $type = $t;
@@ -330,65 +334,27 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 }
             }
 
-            $type_clause = '';
-            switch ( $type ) {
-                case 'photos':
-                    $type_clause = "AND p.post_mime_type LIKE 'image/%'";
-                    break;
-                case 'videos':
-                    $type_clause = "AND p.post_mime_type LIKE 'video/%'";
-                    break;
-                case 'audio':
-                    $type_clause = "AND p.post_mime_type LIKE 'audio/%'";
-                    break;
-                case 'files':
-                    $type_clause = "AND p.post_mime_type NOT LIKE 'image/%' AND p.post_mime_type NOT LIKE 'video/%' AND p.post_mime_type NOT LIKE 'audio/%'";
-                    break;
+            if ( in_array( $type, array( 'photos', 'videos', 'audio', 'files' ), true ) ) {
+                $thread_files = array_values( array_filter( $thread_files, function ( $thread_file ) use ( $type ) {
+                    return $thread_file['type'] === $type;
+                } ) );
             }
 
             $files    = array();
-            $has_more = false;
+            $selected = array_slice( $thread_files, $offset, $per_page + 1 );
+            $has_more = count( $selected ) > $per_page;
 
-            $attachment_ids = $wpdb->get_col( $wpdb->prepare(
-                "SELECT p.ID
-                 FROM {$wpdb->posts} p
-                 INNER JOIN {$wpdb->postmeta} pm_thread
-                     ON p.ID = pm_thread.post_id
-                     AND pm_thread.meta_key = 'bp-better-messages-thread-id'
-                     AND pm_thread.meta_value = %d
-                 INNER JOIN {$wpdb->postmeta} pm_attach
-                     ON p.ID = pm_attach.post_id
-                     AND pm_attach.meta_key = 'bp-better-messages-attachment'
-                     AND pm_attach.meta_value = '1'
-                 LEFT JOIN {$wpdb->postmeta} pm_msg
-                     ON p.ID = pm_msg.post_id
-                     AND pm_msg.meta_key = 'bp-better-messages-message-id'
-                 WHERE p.post_type = 'attachment'
-                 AND p.post_status IN ('inherit','private')
-                 {$type_clause}
-                 AND NOT EXISTS (
-                     SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
-                     WHERE bm_meta.bm_message_id = pm_msg.meta_value
-                     AND bm_meta.meta_key IN ('bpbm_voice_messages', 'bpbm_video_messages')
-                 )
-                 ORDER BY p.post_date DESC
-                 LIMIT %d OFFSET %d",
-                $thread_id,
-                $per_page + 1,
-                $offset
-            ) );
-
-            $has_more = count( $attachment_ids ) > $per_page;
             if ( $has_more ) {
-                array_pop( $attachment_ids );
+                array_pop( $selected );
             }
 
-            foreach ( $attachment_ids as $attachment_id ) {
-                $attachment = get_post( $attachment_id );
+            foreach ( $selected as $thread_file ) {
+                $attachment_id = $thread_file['id'];
+                $attachment    = get_post( $attachment_id );
                 if ( ! $attachment ) continue;
 
                 $url = wp_get_attachment_url( $attachment_id );
-                $url = apply_filters( 'better_messages_attachment_url', $url, $attachment_id, 0, $thread_id );
+                $url = apply_filters( 'better_messages_attachment_url', $url, $attachment_id, $thread_file['message_id'], $thread_id );
 
                 $thumb_url   = wp_get_attachment_image_url( (int) $attachment_id, array( 200, 200 ) );
                 $local_path  = get_attached_file( $attachment_id );
@@ -405,7 +371,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 $name         = get_post_meta( $attachment_id, 'bp-better-messages-original-name', true );
                 if ( empty( $name ) ) $name = wp_basename( $original_url );
 
-                $message_id   = (int) get_post_meta( $attachment_id, 'bp-better-messages-message-id', true );
+                $message_id   = $thread_file['message_id'];
 
                 $files[] = array(
                     'id'        => (int) $attachment_id,
@@ -434,45 +400,90 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $result;
         }
 
-        private function get_thread_attachment_counts( int $thread_id ): array {
+        public function get_thread_files( int $thread_id ): array {
             global $wpdb;
 
-            $counts = $wpdb->get_results( $wpdb->prepare(
-                "SELECT
-                     SUM( CASE WHEN p.post_mime_type LIKE 'image/%%' THEN 1 ELSE 0 END ) AS photos,
-                     SUM( CASE WHEN p.post_mime_type LIKE 'video/%%' THEN 1 ELSE 0 END ) AS videos,
-                     SUM( CASE WHEN p.post_mime_type LIKE 'audio/%%' THEN 1 ELSE 0 END ) AS audio,
-                     SUM( CASE WHEN p.post_mime_type NOT LIKE 'image/%%'
-                                AND p.post_mime_type NOT LIKE 'video/%%'
-                                AND p.post_mime_type NOT LIKE 'audio/%%' THEN 1 ELSE 0 END ) AS files
+            $messages_table = bm_get_table( 'messages' );
+            $meta_table     = bm_get_table( 'meta' );
+
+            $rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT m.id, mm.meta_value
+                 FROM `{$messages_table}` m
+                 INNER JOIN `{$meta_table}` mm
+                     ON mm.bm_message_id = m.id
+                     AND mm.meta_key = 'attachments'
+                 WHERE m.thread_id = %d
+                 AND m.is_pending = 0
+                 AND NOT EXISTS (
+                     SELECT 1 FROM `{$meta_table}` vm
+                     WHERE vm.bm_message_id = m.id
+                     AND vm.meta_key IN ('bpbm_voice_messages', 'bpbm_video_messages')
+                 )
+                 ORDER BY m.created_at DESC, m.id DESC",
+                $thread_id
+            ) );
+
+            $messages = array();
+
+            foreach ( $rows as $row ) {
+                $attachments = maybe_unserialize( $row->meta_value );
+
+                if ( ! is_array( $attachments ) ) continue;
+
+                foreach ( array_keys( $attachments ) as $attachment_id ) {
+                    $attachment_id = (int) $attachment_id;
+
+                    if ( $attachment_id > 0 && ! isset( $messages[ $attachment_id ] ) ) {
+                        $messages[ $attachment_id ] = (int) $row->id;
+                    }
+                }
+            }
+
+            if ( empty( $messages ) ) {
+                return array();
+            }
+
+            $ids          = array_keys( $messages );
+            $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+            $mimes = $wpdb->get_results( $wpdb->prepare(
+                "SELECT p.ID, p.post_mime_type
                  FROM {$wpdb->posts} p
-                 INNER JOIN {$wpdb->postmeta} pm_thread
-                     ON p.ID = pm_thread.post_id
-                     AND pm_thread.meta_key = 'bp-better-messages-thread-id'
-                     AND pm_thread.meta_value = %d
                  INNER JOIN {$wpdb->postmeta} pm_attach
                      ON p.ID = pm_attach.post_id
                      AND pm_attach.meta_key = 'bp-better-messages-attachment'
                      AND pm_attach.meta_value = '1'
-                 LEFT JOIN {$wpdb->postmeta} pm_msg
-                     ON p.ID = pm_msg.post_id
-                     AND pm_msg.meta_key = 'bp-better-messages-message-id'
-                 WHERE p.post_type = 'attachment'
-                 AND p.post_status IN ('inherit','private')
-                 AND NOT EXISTS (
-                     SELECT 1 FROM {$wpdb->bm_messagemeta} bm_meta
-                     WHERE bm_meta.bm_message_id = pm_msg.meta_value
-                     AND bm_meta.meta_key IN ('bpbm_voice_messages', 'bpbm_video_messages')
-                 )",
-                $thread_id
-            ), ARRAY_A );
+                 WHERE p.ID IN ({$placeholders})
+                 AND p.post_type = 'attachment'
+                 AND p.post_status IN ('inherit','private')",
+                $ids
+            ), OBJECT_K );
 
-            return array(
-                'photos' => (int) ( $counts[0]['photos'] ?? 0 ),
-                'videos' => (int) ( $counts[0]['videos'] ?? 0 ),
-                'audio'  => (int) ( $counts[0]['audio'] ?? 0 ),
-                'files'  => (int) ( $counts[0]['files'] ?? 0 ),
-            );
+            $files = array();
+
+            foreach ( $messages as $attachment_id => $message_id ) {
+                if ( ! isset( $mimes[ $attachment_id ] ) ) continue;
+
+                $mime = (string) $mimes[ $attachment_id ]->post_mime_type;
+
+                if ( strpos( $mime, 'image/' ) === 0 ) {
+                    $type = 'photos';
+                } else if ( strpos( $mime, 'video/' ) === 0 ) {
+                    $type = 'videos';
+                } else if ( strpos( $mime, 'audio/' ) === 0 ) {
+                    $type = 'audio';
+                } else {
+                    $type = 'files';
+                }
+
+                $files[] = array(
+                    'id'         => (int) $attachment_id,
+                    'message_id' => (int) $message_id,
+                    'type'       => $type,
+                );
+            }
+
+            return $files;
         }
 
         public function remove_old_attachments(){
@@ -567,8 +578,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 }
 
                 $content = str_replace( $message_attachments[$attachment_id], '', $message->message );
+                $other_files = count( $message_attachments ) > 1;
 
-                if( empty( trim( $content ) ) ){
+                if( empty( trim( $content ) ) || ( ! $other_files && trim( str_replace( '<!-- BM-ONLY-FILES -->', '', $content ) ) === '' ) ){
                     Better_Messages()->functions->delete_all_message_meta($message_id);
                     $wpdb->delete($table, array('id' => $message_id));
                 } else {
@@ -1381,6 +1393,34 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return $this->get_proxy_url( (int) $attachment_id );
         }
 
+        public function can_open_through_messages( int $attachment_id, int $user_id, int $checked_thread_id = 0 ): bool {
+            global $wpdb;
+
+            $message_ids = array_filter( array_map( 'intval', (array) get_post_meta( $attachment_id, 'bp-better-messages-message-id' ) ) );
+
+            if ( empty( $message_ids ) ) {
+                return false;
+            }
+
+            $thread_ids = $wpdb->get_col(
+                "SELECT DISTINCT `thread_id` FROM `" . bm_get_table('messages') . "` WHERE `id` IN (" . implode( ',', $message_ids ) . ") AND `is_pending` = 0"
+            );
+
+            foreach ( $thread_ids as $thread_id ) {
+                $thread_id = (int) $thread_id;
+
+                if ( $thread_id === $checked_thread_id ) {
+                    continue;
+                }
+
+                if ( Better_Messages()->functions->check_access( $thread_id, $user_id ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /**
          * File Proxy: Serve the file through the proxy with auth and access checks.
          */
@@ -1438,6 +1478,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     }
 
                     if ( ! $has_access ) {
+                        $has_access = $this->can_open_through_messages( $attachment_id, $user_id, $thread_id );
+                    }
+
+                    if ( ! $has_access ) {
                         return new WP_Error(
                             'rest_forbidden',
                             _x( 'File access denied.', 'File Proxy Error', 'bp-better-messages' ),
@@ -1446,6 +1490,9 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     }
                 } else {
                     $has_access = Better_Messages()->functions->check_access( $thread_id, $user_id );
+                    if ( ! $has_access ) {
+                        $has_access = $this->can_open_through_messages( $attachment_id, $user_id, $thread_id );
+                    }
                     if ( ! $has_access ) {
                         return new WP_Error(
                             'rest_forbidden',

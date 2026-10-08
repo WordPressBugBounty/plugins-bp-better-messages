@@ -1637,6 +1637,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $positionClass = ( Better_Messages()->settings['mobilePopupLocation'] === 'left' ) ? ' bm-mobile-open-left' : '';
 
+            if ( Better_Messages()->settings['mobilePopup'] == '0' ) {
+                $positionClass .= ' bm-mobile-button-off';
+            }
+
             echo '<div id="bm-mini-mobile-open" class="' . $positionClass . '">';
             echo '<span class="bm-mini-mobile-open-icon"></span>';
             echo '<span class="count ' . $class . ' bm-menu-unread">' . $count . '</span></div>';

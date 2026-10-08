@@ -934,7 +934,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                         'scrollToContainer' => ''
                     ], Better_Messages()->functions->get_link() );
 
-                    $content = $message['message'];
+                    $content = $this->readable_mentions( $message['message'] );
 
                     if ( strpos( $content, '<!-- BM-SYSTEM-MESSAGE:' ) === 0 ) {
                         preg_match( '/<!-- BM-SYSTEM-MESSAGE:(\w+)/', $content, $type_match );
@@ -1852,7 +1852,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return __( 'Voice message expired', 'bp-better-messages' );
             }
 
-            return trim( preg_replace( '/<!--.*?-->/s', '', $content ) );
+            return trim( preg_replace( '/<!--.*?-->/s', '', $this->readable_mentions( $content ) ) );
+        }
+
+        private function readable_mentions( $content ){
+            $readable = preg_replace(
+                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+)&quot;&gt;((?:(?!&lt;).)*?)&lt;\/span&gt;/s',
+                '<span class="bm-mention" data-user-id="$1">$2</span>',
+                (string) $content
+            );
+
+            return $readable === null ? $content : $readable;
         }
 
         private function export_transcript_attachments( $message_id, $thread_id ){

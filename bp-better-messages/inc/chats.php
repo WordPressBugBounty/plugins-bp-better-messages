@@ -1616,6 +1616,11 @@ class Better_Messages_Chats
 
             if( $auto_join && ! $is_participant ){
                 $is_participant = $this->add_to_chat( $user_id, $chat_id );
+
+                if( $is_participant && isset( $thread_item['participants'] ) && is_array( $thread_item['participants'] ) && ! in_array( (int) $user_id, $thread_item['participants'], true ) ){
+                    $thread_item['participants'][] = (int) $user_id;
+                    $thread_item['participantsCount'] = count( $thread_item['participants'] );
+                }
             }
 
             $thread_item['chatRoom']['autoJoin'] = $auto_join;

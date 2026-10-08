@@ -627,7 +627,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 'content'      => $content,
                 'count_unread' => true,
                 'return'       => 'message_id',
-                'error_type'   => 'wp_error'
+                'error_type'   => 'wp_error',
+                'skip_moderation' => true
             ) );
 
             if ( is_wp_error( $message_id ) ) {
@@ -757,7 +758,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 'content'      => $content,
                 'count_unread' => true,
                 'return'       => 'message_id',
-                'error_type'   => 'wp_error'
+                'error_type'   => 'wp_error',
+                'skip_moderation' => true
             ) );
 
             if ( is_wp_error( $message_id ) ) {

@@ -98,6 +98,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Messaging' ) ):
                 'content'    => $content,
                 'return'     => 'message_id',
                 'error_type' => 'wp_error',
+                'skip_moderation' => true,
             ) );
 
             if ( is_wp_error( $result ) ) {

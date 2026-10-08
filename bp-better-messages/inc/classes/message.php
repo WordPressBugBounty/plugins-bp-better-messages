@@ -54,6 +54,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $is_pending;
 
+        public $skip_moderation = false;
+
         /**
          * Message recipients.
          *

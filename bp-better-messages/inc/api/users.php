@@ -21,10 +21,44 @@ if ( ! class_exists( 'Better_Messages_Rest_Users' ) ):
 
         public function rest_api_init(){
             register_rest_route( 'better-messages/v1', '/getUsers', array(
-                'methods'             => 'GET',
+                'methods'             => 'GET, POST',
                 'callback'            => array( $this, 'get_users' ),
-                'permission_callback' => '__return_true',
+                'permission_callback' => array( $this, 'can_view_users_widget' ),
             ) );
+        }
+
+        public function can_view_users_widget( WP_REST_Request $request ){
+            Better_Messages_Rest_Api()->is_user_authorized( $request );
+
+            $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if ( $user_id <= 0 && ! Better_Messages()->guests->guest_access_enabled() ) {
+                return false;
+            }
+
+            $roles = Better_Messages()->functions->get_user_roles( $user_id );
+
+            $surfaces = array(
+                'miniUsersEnable'     => 'restrictViewMiniUsers',
+                'combinedUsersEnable' => 'restrictViewSideUsers',
+                'mobileUsersEnable'   => 'restrictViewMobileUsers',
+            );
+
+            foreach ( $surfaces as $enable_key => $restrict_key ) {
+                if ( ! isset( Better_Messages()->settings[ $enable_key ] ) || Better_Messages()->settings[ $enable_key ] !== '1' ) {
+                    continue;
+                }
+
+                $restricted = isset( Better_Messages()->settings[ $restrict_key ] ) && is_array( Better_Messages()->settings[ $restrict_key ] )
+                    ? Better_Messages()->settings[ $restrict_key ]
+                    : array();
+
+                if ( count( array_intersect( $restricted, $roles ) ) === 0 ) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public function get_users( WP_REST_Request $request ){

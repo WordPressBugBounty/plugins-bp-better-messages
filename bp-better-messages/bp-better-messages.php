@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.0.13
+    Version: 3.0.14
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
     class Better_Messages
     {
-        public  $version = '3.0.13';
+        public  $version = '3.0.14';
 
         public  $db_version = '3.0.0';
 
@@ -802,6 +802,8 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
             'datePosition', 'timeFormat', 'avatars', 'avatarsSelf', 'subName',
             'typingPosition',
             'formattingButtons', 'mobileFormattingButtons', 'miniFormattingButtons', 'formattingButtonsList',
+            'bubbleFill', 'messagesLayout', 'dateEnabled', 'dateSticky', 'showAvatarGroup', 'messengerFill',
+            'threadMenuButton', 'mobileThreadMenuButton', 'miniChatsMessageButtons', 'mobileMessageButtons',
             'miniChatsAvatars',
             'miniChatsPrivateMessages',
             'favoritesButton',
@@ -965,6 +967,16 @@ if ( ! class_exists( 'Better_Messages' ) && ! function_exists( 'bpbm_fs' ) ) {
                 'mobileFormattingButtons' => (string) Better_Messages_Design::instance()->get_design_option( 'mobileFormattingButtons', 'hidden' ),
                 'miniFormattingButtons'   => (string) Better_Messages_Design::instance()->get_design_option( 'miniFormattingButtons', 'selection' ),
                 'formattingButtonsList'   => (string) Better_Messages_Design::instance()->get_design_option( 'formattingButtonsList', 'bold,italic,underline,strike,bulleted,numbered,heading1,heading2,heading3,link' ),
+                'bubbleFill'              => (string) Better_Messages_Design::instance()->get_design_option( 'bubbleFill', 'filled' ),
+                'messagesLayout'          => (string) Better_Messages_Design::instance()->get_design_option( 'messagesLayout', 'default' ),
+                'dateEnabled'             => ( Better_Messages_Design::instance()->get_design_option( 'dateEnabled', true ) ? '1' : '0' ),
+                'dateSticky'              => ( Better_Messages_Design::instance()->get_design_option( 'dateSticky', true ) ? '1' : '0' ),
+                'showAvatarGroup'         => ( Better_Messages_Design::instance()->get_design_option( 'showAvatarGroup', true ) ? '1' : '0' ),
+                'messengerFill'           => ( Better_Messages_Design::instance()->get_design_option( 'messengerFill', false ) ? '1' : '0' ),
+                'threadMenuButton'        => ( Better_Messages_Design::instance()->get_design_option( 'threadMenuButton', true ) ? '1' : '0' ),
+                'mobileThreadMenuButton'  => ( Better_Messages_Design::instance()->get_design_option( 'mobileThreadMenuButton', true ) ? '1' : '0' ),
+                'miniChatsMessageButtons' => (string) Better_Messages_Design::instance()->get_design_option( 'miniChatsMessageButtons', 'all' ),
+                'mobileMessageButtons'    => (string) Better_Messages_Design::instance()->get_design_option( 'mobileMessageButtons', 'all' ),
                 'touchEnter'            => ( $this->settings['disableEnterForTouch'] == '1' ? '0' : '1' ),
                 'loginUrl'              => apply_filters( 'better_messages_login_url', wp_login_url( add_query_arg([]) ) ),
                 'total_unread'           => (int) $unread_count,

@@ -900,7 +900,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 'content'      => $content,
                 'count_unread' => true,
                 'return'       => 'message_id',
-                'error_type'   => 'wp_error'
+                'error_type'   => 'wp_error',
+                'skip_moderation' => true
             ] );
 
             if ( is_wp_error( $ai_message_id ) ) {
@@ -953,7 +954,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     'send_push'    => false,
                     'mobile_push'  => false,
                     'return'       => 'message_id',
-                    'error_type'   => 'wp_error'
+                    'error_type'   => 'wp_error',
+                    'skip_moderation' => true
                 ] );
 
                 Better_Messages()->functions->add_message_meta( $ai_message_id, 'ai_response_for', $message_id );

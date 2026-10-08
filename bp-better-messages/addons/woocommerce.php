@@ -1021,9 +1021,10 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
             }
 
             $result = Better_Messages()->functions->new_message( array(
-                'sender_id' => $current_user_id,
-                'thread_id' => $thread_id,
-                'content'   => $message_html,
+                'sender_id'       => $current_user_id,
+                'thread_id'       => $thread_id,
+                'content'         => $message_html,
+                'skip_moderation' => true,
             ) );
 
             if ( ! $result ) {
