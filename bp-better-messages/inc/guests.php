@@ -29,7 +29,6 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             $this->check_guest_auth();
 
             add_action('wp_enqueue_scripts', array($this, 'load_scripts'));
-            #add_action('wp_footer', array($this, 'html_element'), 999);
             add_action('rest_api_init', array($this, 'rest_api_init'));
             add_filter('better_messages_rest_is_user_authorized', array($this, 'guest_auth'), 10, 2);
             add_filter('better_messages_rest_user_item', array($this, 'guest_user_item'), 30, 3);
@@ -179,10 +178,6 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             return (bool) $wpdb->get_var($query);
         }
 
-        /**
-         * @param int $user_id
-         * @return array|BM_Guest_User|false|object|stdClass
-         */
         public function get_guest_user( int $user_id ) {
             $user_id = abs( $user_id );
 
@@ -519,8 +514,6 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         {
             if( is_user_logged_in() ) return;
 
-            //Better_Messages()->enqueue_js();
-            //Better_Messages()->enqueue_css();
         }
 
         public function html_element(){

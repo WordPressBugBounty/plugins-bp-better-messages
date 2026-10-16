@@ -245,12 +245,10 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
 
             $can_build = Better_Messages()->mobile_app && Better_Messages()->mobile_app->can_build;
 
-            $is_premium      = function_exists( 'bpbm_fs' ) && bpbm_fs()->is_premium();
+            $is_premium      = better_messages_is_websocket_build();
             $can_use_premium = Better_Messages()->functions->can_use_premium_code();
 
-            $download_url = ( $can_use_premium && ! $is_premium && function_exists( 'bpbm_fs' ) )
-                ? bpbm_fs()->_get_latest_download_local_url()
-                : '';
+            $download_url = ( $can_use_premium && ! $is_premium ) ? Better_Messages_License::ACCOUNT_URL : '';
 
             return array(
                 'settings'      => $settings,
@@ -262,7 +260,7 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 'apiUrl'        => get_rest_url(),
                 'hasWebSocket'  => $websocket,
                 'canBuild'         => $can_build,
-                'licenseUrl'       => admin_url( 'admin.php?page=bp-better-messages-pricing' ),
+                'licenseUrl'       => Better_Messages_License_Admin::instance()->can_change_license() ? admin_url( 'admin.php?page=better-messages-pricing' ) : 'https://www.better-messages.com/pricing/',
                 'downloadUrl'      => $download_url,
                 'canUsePremiumCode' => $can_use_premium,
                 'iosConnected'     => $ios_connected,
@@ -276,7 +274,7 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 'docsIosUrl'     => 'https://www.better-messages.com/docs/mobile-app/ios-application/',
                 'docsAndroidUrl' => 'https://www.better-messages.com/docs/mobile-app/android-application/',
                 'portalUrl'     => 'https://developer.apple.com/account/resources/identifiers/list',
-                'contactUrl'    => function_exists( 'bpbm_fs' ) && method_exists( bpbm_fs(), 'contact_url' ) ? bpbm_fs()->contact_url() : '',
+                'contactUrl'    => admin_url( 'admin.php?page=better-messages-contact' ),
             );
         }
 
@@ -407,12 +405,10 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                             $rgba = imagecolorat($img, $x, $y);
                             $colors = imagecolorsforindex($img, $rgba);
 
-                            // Skip fully transparent pixels
                             if ($colors['alpha'] === 127) {
                                 continue;
                             }
 
-                            // Check if non-transparent pixel is white
                             if ($colors['red'] !== 255 || $colors['green'] !== 255 || $colors['blue'] !== 255) {
                                 return new WP_Error(
                                     'rest_error',

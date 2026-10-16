@@ -93,18 +93,12 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Admin' ) ):
 
         public function enqueue_scripts(){
             if( ! defined('BM_DEV') ) return;
-            //$filepath = Better_Messages()->path . 'assets/admin/admin.js';
 
-            //$version = Better_Messages()->version;
-            //$version .= filemtime( $filepath );
-
-            //wp_register_script('better-messages-admin', Better_Messages()->url . 'assets/admin.js', [], $version, true );
-            //wp_enqueue_script( 'better-messages-admin' );
         }
 
         public function settings_page(){
             add_submenu_page(
-                'bp-better-messages',
+                'better-messages',
                 _x('Mobile App', 'Admin Menu', 'bp-better-messages'),
                 _x('Mobile App', 'Admin Menu', 'bp-better-messages'),
                 'manage_options',

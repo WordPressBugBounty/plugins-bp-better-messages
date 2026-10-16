@@ -38,7 +38,6 @@ if ( !class_exists( 'Better_Messages_WP_User_Manager' ) ){
             $user = get_userdata( $user_id );
             if( ! $user ) return $item;
 
-            // Set custom profile URL (if set this to false the user links becomes unclickable)
             $item['url'] = wpum_get_profile_url( $user );
 
             return $item;

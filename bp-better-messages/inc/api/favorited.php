@@ -138,7 +138,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Favorited' ) ):
 
             $is_starred = Better_Messages()->functions->is_message_starred( $args['message_id'], $args['user_id'] );
 
-            // Star.
             if ( 'star' == $args['action'] ) {
                 if ( true === $is_starred ) {
                     return true;
@@ -146,7 +145,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Favorited' ) ):
                     Better_Messages()->functions->add_message_meta( $args['message_id'], 'starred_by_user', $args['user_id'], false );
                     return true;
                 }
-                // Unstar.
             } else {
                 if ( false === $is_starred ) {
                     return true;

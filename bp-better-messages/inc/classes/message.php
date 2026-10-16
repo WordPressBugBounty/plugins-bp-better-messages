@@ -1,49 +1,16 @@
 <?php
 if( ! class_exists( 'BM_Messages_Message' ) ):
-    /**
-     * Single message class.
-     */
     class BM_Messages_Message {
-        /**
-         * ID of the message.
-         *
-         * @var int
-         */
         public $id;
 
-        /**
-         * ID of the message thread.
-         *
-         * @var int
-         */
         public $thread_id;
 
-        /**
-         * ID of the sender.
-         *
-         * @var int
-         */
         public $sender_id;
 
-        /**
-         * Subject line of the message.
-         *
-         * @var string
-         */
         public $subject;
 
-        /**
-         * Content of the message.
-         *
-         * @var string
-         */
         public $message;
 
-        /**
-         * Date the message was sent.
-         *
-         * @var string
-         */
         public $date_sent;
 
         public $created_at;
@@ -56,11 +23,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $skip_moderation = false;
 
-        /**
-         * Message recipients.
-         *
-         * @var bool|array
-         */
         public $recipients = false;
 
         public $count_unread = true;
@@ -89,11 +51,18 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
         public $ai_moderation_deferred = false;
 
-        /**
-         * Constructor.
-         *
-         * @param int|null $id Optional. ID of the message.
-         */
+        public $push_intent = null;
+
+        public $mobile_push_intent = null;
+
+        public $push_deferred = false;
+
+        public $notify_everyone = false;
+
+        public $notify_exclude = array();
+
+        public $unread_exclude = array();
+
         public function __construct( $id = null ) {
             $this->date_sent = bp_core_current_time();
             $this->sender_id = Better_Messages()->functions->get_current_user_id();
@@ -103,11 +72,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             }
         }
 
-        /**
-         * Set up data related to a specific message object.
-         *
-         * @param int $id ID of the message.
-         */
         public function populate( $id ) {
             global $wpdb;
 
@@ -122,11 +86,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             }
         }
 
-        /**
-         * Send a message.
-         *
-         * @return int|bool ID of the newly created message on success, false on failure.
-         */
         public function send() {
             global $wpdb;
 
@@ -140,19 +99,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             $this->temp_id = apply_filters( 'better_messages_message_temp_id_before_save', $this->temp_id, $this->id );
             $this->is_pending = apply_filters( 'better_messages_message_is_pending_before_save', $this->is_pending, $this->id );
 
-            /**
-             * Fires before the current message item gets saved.
-             *
-             * Please use this hook to filter the properties above. Each part will be passed in.
-             *
-             * @since 1.0.0
-             *
-             * @param BP_Messages_Message $this Current instance of the message item being saved. Passed by reference.
-             */
             do_action_ref_array( 'better_messages_message_before_save', array( &$this ) );
 
-            // Make sure we have at least one recipient before sending.
-            // Ephemeral chat rooms have no stored recipients by design.
             if ( empty( $this->recipients ) && ! Better_Messages_Chats()->is_ephemeral_thread( $this->thread_id ) ) {
                 return false;
             }
@@ -164,7 +112,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
             $new_thread = false;
 
-            // If we have no thread_id then this is the first message of a new thread.
             if ( empty( $this->thread_id ) ) {
                 if( ! $wpdb->insert( bm_get_table('threads'), [ 'subject' => $this->subject ], [ '%s' ] ) ){
                     return false;
@@ -174,7 +121,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 $new_thread      = true;
             }
 
-            // First insert the message into the messages table.
             if ( ! $wpdb->query( $wpdb->prepare( "INSERT INTO " . bm_get_table('messages') . " ( thread_id, sender_id, message, date_sent, created_at, updated_at, temp_id, is_pending ) VALUES ( %d, %d, %s, %s, %d, %d, %s, %d )", $this->thread_id, $this->sender_id, $this->message, $this->date_sent, $this->created_at, $this->updated_at, $this->temp_id, $this->is_pending ) ) ) {
                 return false;
             }
@@ -187,7 +133,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
 
             if ( $new_thread ) {
                 $unread_count = ( $this->count_unread ) ? 1 : 0;
-                // Add an recipient entry for all recipients.
                 foreach ( (array) $this->recipients as $recipient ) {
                     $wpdb->query( $wpdb->prepare( "
                     INSERT INTO 
@@ -197,8 +142,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                     $recipient_ids[] = $recipient->user_id;
                 }
 
-                // Add a sender recipient entry if the sender is not in the list of recipients.
-                // Skip for system messages (sender_id=0) — system is not a participant.
                 if ( $this->sender_id != 0 && ! in_array( $this->sender_id, $recipient_ids ) ) {
                     $wpdb->query( $wpdb->prepare(
                         "INSERT INTO " . bm_get_table('recipients') . "
@@ -207,16 +150,30 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 }
             } else {
                 if( $this->count_unread ) {
+                    $unread_exclude = array_values( array_filter( array_map( 'intval', (array) $this->unread_exclude ) ) );
+
                     $wpdb->query(
                         $wpdb->prepare(
-                            "UPDATE " . bm_get_table('recipients') . " 
+                            "UPDATE " . bm_get_table('recipients') . "
                             SET unread_count = unread_count + 1, is_deleted = 0, last_update = %d
-                            WHERE thread_id = %d AND user_id != %d",
+                            WHERE thread_id = %d AND user_id != %d" . ( count( $unread_exclude ) > 0 ? " AND user_id NOT IN (" . implode( ',', $unread_exclude ) . ")" : "" ),
                             $time,
                             $this->thread_id,
                             $this->sender_id
                         )
                     );
+
+                    if( count( $unread_exclude ) > 0 ){
+                        $wpdb->query(
+                            $wpdb->prepare(
+                                "UPDATE " . bm_get_table('recipients') . "
+                                SET is_deleted = 0, last_update = %d
+                                WHERE thread_id = %d AND user_id IN (" . implode( ',', $unread_exclude ) . ")",
+                                $time,
+                                $this->thread_id
+                            )
+                        );
+                    }
                 } else {
                     $wpdb->query(
                         $wpdb->prepare(
@@ -231,41 +188,17 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 }
             }
 
-            //wp_cache_delete('thread_' . $this->thread_id, 'bm_messages');
-            //Better_Messages()->hooks->clean_thread_cache( $this->thread_id );
-
-            /**
-             * Fires after the current message item has been saved.
-             *
-             * @since 1.0.0
-             *
-             * @param BP_Messages_Message $this Current instance of the message item being saved. Passed by reference.
-             */
             do_action_ref_array( 'better_messages_message_after_save', array( &$this ) );
 
             return $this->id;
         }
 
-        /**
-         * Get a list of recipients for a message.
-         *
-         * @return object $value List of recipients for a message.
-         */
         public function get_recipients() {
             global $wpdb;
 
             return $wpdb->get_results( $wpdb->prepare( "SELECT user_id FROM " . bm_get_table('recipients') . " WHERE thread_id = %d", $this->thread_id ) );
         }
 
-        /** Static Functions **************************************************/
-
-        /**
-         * Get list of recipient IDs from their usernames.
-         *
-         * @param array $recipient_usernames Usernames of recipients.
-         *
-         * @return bool|array $recipient_ids Array of Recepient IDs.
-         */
         public static function get_recipient_ids( $recipient_usernames ) {
             $recipient_ids = false;
 
@@ -283,24 +216,9 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 }
             }
 
-            /**
-             * Filters the array of recipients IDs.
-             *
-             * @since 2.8.0
-             *
-             * @param array $recipient_ids Array of recipients IDs that were retrieved based on submitted usernames.
-             * @param array $recipient_usernames Array of recipients usernames that were submitted by a user.
-             */
             return apply_filters( 'better_messages_message_get_recipient_ids', $recipient_ids, $recipient_usernames );
         }
 
-        /**
-         * Get the ID of the message last sent by the logged-in user for a given thread.
-         *
-         * @param int $thread_id ID of the thread.
-         *
-         * @return int|null ID of the message if found, otherwise null.
-         */
         public static function get_last_sent_for_user( $thread_id ) {
             global $wpdb;
 
@@ -309,15 +227,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             return is_numeric( $query ) ? (int) $query : $query;
         }
 
-        /**
-         * Check whether a user is the sender of a message.
-         *
-         * @param int $user_id ID of the user.
-         * @param int $message_id ID of the message.
-         *
-         * @return int|null Returns the ID of the message if the user is the
-         *                  sender, otherwise null.
-         */
         public static function is_user_sender( $user_id, $message_id ) {
             global $wpdb;
 
@@ -326,13 +235,6 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             return is_numeric( $query ) ? (int) $query : $query;
         }
 
-        /**
-         * Get the ID of the sender of a message.
-         *
-         * @param int $message_id ID of the message.
-         *
-         * @return int|null The ID of the sender if found, otherwise null.
-         */
         public static function get_message_sender( $message_id ) {
             global $wpdb;
 

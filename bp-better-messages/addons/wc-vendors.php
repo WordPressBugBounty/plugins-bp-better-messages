@@ -19,10 +19,6 @@ if ( ! class_exists( 'Better_Messages_WC_Vendors' ) ) {
         }
 
         public function __construct(){
-            /**
-             * WC Vendors loads WCV_Vendors class on setup_theme hook,
-             * which fires after plugins_loaded. Defer hook registration.
-             */
             add_action( 'after_setup_theme', array( $this, 'register_hooks' ), 21 );
         }
 

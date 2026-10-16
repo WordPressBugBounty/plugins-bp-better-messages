@@ -18,36 +18,27 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
 
         public function __construct()
         {
-            add_action( 'admin_init', array( $this, 'register_event' ) );
+            add_action( 'init', array( $this, 'register_event' ) );
             add_action( 'better_messages_bulk_sender_job', array( $this, 'process_queue' ) );
         }
 
         public function register_event()
         {
-            if ( ! wp_next_scheduled( 'better_messages_bulk_sender_job' ) ) {
-                wp_schedule_event( time(), 'one_minute', 'better_messages_bulk_sender_job' );
-            }
+            Better_Messages_Worker()->add_task( 'better_messages_bulk_sender_job', MINUTE_IN_SECONDS );
         }
 
-        /**
-         * Process the bulk message queue.
-         * Called by WP Cron every minute.
-         */
         public function process_queue()
         {
             global $wpdb;
 
-            // Prevent overlapping runs
             if ( get_transient( 'better_messages_bulk_processing_lock' ) ) {
                 return;
             }
 
-            // Set lock immediately to minimize race window
             set_transient( 'better_messages_bulk_processing_lock', 1, 300 );
 
             $table = bm_get_table( 'bulk_jobs' );
 
-            // Activate scheduled jobs that are due
             $now = current_time( 'mysql' );
             $wpdb->query( $wpdb->prepare(
                 "UPDATE `{$table}` SET `status` = 'processing', `started_at` = %s
@@ -55,7 +46,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 $now, $now
             ) );
 
-            // Find the oldest processing job
             $job = $wpdb->get_row( "SELECT * FROM `{$table}` WHERE `status` = 'processing' ORDER BY `id` ASC LIMIT 1" );
 
             if ( ! $job ) {
@@ -75,9 +65,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             }
         }
 
-        /**
-         * Process a single bulk job batch.
-         */
         private function process_job( $job )
         {
             global $wpdb;
@@ -103,30 +90,25 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 $attachment_ids = [];
             }
 
-            // Set started_at on first run
             if ( empty( $job->started_at ) ) {
                 $wpdb->update( $table, [ 'started_at' => current_time( 'mysql' ) ], [ 'id' => $job->id ] );
             }
 
-            // Follow-up mode: send to threads from parent job
             if ( (int) $job->parent_job_id > 0 ) {
                 $this->process_follow_up( $job, $attachment_ids );
                 return;
             }
 
-            // Single thread mode: send all recipients in one batch
             if ( $job->single_thread ) {
                 $this->process_single_thread( $job, $selectors, $attachment_ids );
                 return;
             }
 
-            // Per-user thread mode: paginated processing
             $current_page = (int) $job->current_page;
 
             $user_query = $this->get_user_query( $selectors, $job->sender_id, true, $current_page, $batch_size );
 
             if ( ! $user_query || empty( $user_query->results ) ) {
-                // No more users to process — mark as completed
                 $wpdb->update( $table, [
                     'status'       => 'completed',
                     'completed_at' => current_time( 'mysql' ),
@@ -134,7 +116,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 return;
             }
 
-            // Disable attachment thread_id validation for bulk sending
             $disable_check = ! empty( $attachment_ids );
             if ( $disable_check ) {
                 add_filter( 'better_messages_ensure_file_is_not_from_other_gallery', '__return_false' );
@@ -143,7 +124,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             $processed_in_batch = 0;
 
             foreach ( $user_query->results as $user_id ) {
-                // Re-check job status (might have been paused/cancelled)
                 $current_status = $wpdb->get_var( $wpdb->prepare(
                     "SELECT `status` FROM `{$table}` WHERE `id` = %d", $job->id
                 ) );
@@ -182,7 +162,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
 
                 $processed_in_batch++;
 
-                // Flush cache periodically
                 if ( $processed_in_batch % 50 === 0 ) {
                     wp_cache_flush();
                 }
@@ -192,10 +171,8 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 remove_filter( 'better_messages_ensure_file_is_not_from_other_gallery', '__return_false' );
             }
 
-            // Move to next page
             $new_page = $current_page + 1;
 
-            // Check if we're done
             $job_state = $wpdb->get_row( $wpdb->prepare(
                 "SELECT `processed_count`, `total_users`, `status` FROM `{$table}` WHERE `id` = %d", $job->id
             ) );
@@ -215,9 +192,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             }
         }
 
-        /**
-         * Handle single-thread mode (all recipients in one conversation).
-         */
         private function process_single_thread( $job, $selectors, $attachment_ids )
         {
             global $wpdb;
@@ -289,9 +263,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             ], [ 'id' => $job->id ] );
         }
 
-        /**
-         * Handle follow-up mode: send a new message into threads from parent job.
-         */
         private function process_follow_up( $job, $attachment_ids )
         {
             global $wpdb;
@@ -307,7 +278,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             $selectors         = json_decode( $job->selectors, true );
             $include_new_users = is_array( $selectors ) && ! empty( $selectors['include_new_users'] );
 
-            // Phase 1: Process existing parent threads
             $thread_ids = $wpdb->get_col( $wpdb->prepare(
                 "SELECT DISTINCT `thread_id` FROM `{$threads_table}` WHERE `job_id` = %d ORDER BY `id` ASC LIMIT %d OFFSET %d",
                 (int) $job->parent_job_id, $batch_size, $offset
@@ -329,7 +299,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             $processed_in_batch = 0;
 
             if ( ! empty( $thread_ids ) ) {
-                // Phase 1: send into existing threads
                 foreach ( $thread_ids as $thread_id ) {
                     $thread_id = (int) $thread_id;
 
@@ -386,7 +355,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                     }
                 }
             } else {
-                // Phase 2: send to new users not in parent job
                 $new_users_sent = (int) $wpdb->get_var( $wpdb->prepare(
                     "SELECT COUNT(*) FROM `{$threads_table}` WHERE `job_id` = %d AND `user_id` > 0",
                     $job->id
@@ -509,9 +477,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             ];
         }
 
-        /**
-         * Log an error for a bulk job.
-         */
         private function log_error( $job_id, $user_id, $error_message )
         {
             global $wpdb;
@@ -535,7 +500,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 'time'    => current_time( 'mysql' ),
             ];
 
-            // Keep only the last 100 errors to prevent unbounded growth
             if ( count( $error_log ) > 100 ) {
                 $error_log = array_slice( $error_log, -100 );
             }
@@ -545,10 +509,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
             ], [ 'id' => $job_id ] );
         }
 
-        /**
-         * Get user query for recipient selection.
-         * Uses plugin tables (bm_user_index, bm_user_roles_index) for fast lookups.
-         */
         public function get_user_query( $selectors, $sender_id, $real_query = false, $page = 1, $per_page = 20, $exclude_job_id = 0 )
         {
             global $wpdb;
@@ -559,7 +519,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
 
             $sentTo = isset( $selectors['sent-to'] ) ? $selectors['sent-to'] : 'all';
 
-            // Activity filter
             $activity_filter = isset( $selectors['activityFilter'] ) ? $selectors['activityFilter'] : 'any';
             $activity_days   = max( 1, intval( isset( $selectors['activityDays'] ) ? $selectors['activityDays'] : 30 ) );
             $activity_sql    = '';
@@ -571,7 +530,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 $activity_sql = $wpdb->prepare( " AND `last_activity` < %s", $activity_date );
             }
 
-            // Exclude users already sent to in parent job chain (covers chained follow-ups)
             $exclude_sql = '';
             if ( $exclude_job_id > 0 ) {
                 $exclude_sql = $wpdb->prepare(
@@ -659,7 +617,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                     });
                     $usersIds = array_values( $usersIds );
 
-                    // Apply activity filter for group mode
                     if ( $activity_sql !== '' && ! empty( $usersIds ) ) {
                         $id_placeholders = implode( ',', array_fill( 0, count( $usersIds ), '%d' ) );
                         $usersIds = $wpdb->get_col( $wpdb->prepare(
@@ -668,7 +625,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                         ));
                     }
 
-                    // Exclude users already in parent job chain
                     if ( $exclude_job_id > 0 && ! empty( $usersIds ) ) {
                         $already_sent = $wpdb->get_col( $wpdb->prepare(
                             "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` AND `bt2`.`user_id` > 0 WHERE `bt1`.`job_id` = %d",
@@ -705,7 +661,6 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                         ));
                     }
 
-                    // Exclude users already in parent job chain
                     if ( $exclude_job_id > 0 && ! empty( $usersIds ) ) {
                         $already_sent = $wpdb->get_col( $wpdb->prepare(
                             "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` AND `bt2`.`user_id` > 0 WHERE `bt1`.`job_id` = %d",

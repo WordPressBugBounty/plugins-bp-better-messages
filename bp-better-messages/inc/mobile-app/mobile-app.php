@@ -6,46 +6,32 @@ if ( !class_exists( 'Better_Messages_Mobile_App' ) ):
 
     class Better_Messages_Mobile_App
     {
-        /* @Better_Messages_Mobile_App_Database */
         public $database;
 
-        /* @Better_Messages_Mobile_App_Options */
         public $settings;
 
-        /* @Better_Messages_Mobile_App_Admin */
         public $admin;
 
-        /* @Better_Messages_Mobile_App_Hooks */
         public $hooks;
 
-        /* @Better_Messages_Mobile_App_Functions */
         public $functions;
 
-        /* @Better_Messages_Mobile_App_Auth */
         public $auth;
 
-        /* @Better_Messages_Mobile_App_JWT */
         public $jwt;
 
-        /* @Better_Messages_Mobile_App_IOS */
         public $ios;
 
-        /* @Better_Messages_Mobile_App_Android */
         public $android;
 
-        /* @Better_Messages_Mobile_App_Pushs */
         public $pushs;
 
-        /* @Better_Messages_Mobile_App_Builds */
         public $builds;
 
-        /* @Better_Messages_Mobile_App_Devices */
         public $devices;
 
-        /* @Better_Messages_Mobile_App_Screenshots */
         public $screenshots;
 
-        /* @Better_Messages_Mobile_App_Scripts */
         public $scripts;
 
         public $path;

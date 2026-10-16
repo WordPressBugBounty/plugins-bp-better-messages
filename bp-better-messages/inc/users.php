@@ -10,18 +10,14 @@ class Better_Messages_Users
 
     public static function instance()
     {
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if (null === $instance) {
             $instance = new Better_Messages_Users;
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
     public function __construct()
@@ -47,24 +43,18 @@ class Better_Messages_Users
         add_action( 'better_messages_sync_user_index', array( $this, 'sync_all_users'), 10, 0 );
         add_action( 'better_messages_sync_user_index_weekly', array( $this, 'sync_all_users'), 10, 0 );
 
-        add_action( 'admin_init', array( $this, 'register_weekly_worker' ) );
+        add_action( 'init', array( $this, 'register_weekly_worker' ) );
     }
 
     function register_weekly_worker(){
-        if ( ! wp_next_scheduled( 'better_messages_sync_user_index_weekly' ) ) {
-            wp_schedule_event( time() + 604800, 'weekly', 'better_messages_sync_user_index_weekly' );
-        }
+        Better_Messages_Worker()->add_task( 'better_messages_sync_user_index_weekly', WEEK_IN_SECONDS, WEEK_IN_SECONDS );
     }
 
     public function schedule_sync_all_users(){
         if( ! wp_get_scheduled_event( 'better_messages_sync_user_index' ) ){
             wp_schedule_single_event( time(), 'better_messages_sync_user_index' );
 
-            if( $event = wp_next_scheduled( 'better_messages_sync_user_index_weekly' ) ){
-                wp_unschedule_event($event, 'better_messages_sync_user_index_weekly');
-            }
-
-            $this->register_weekly_worker();
+            Better_Messages_Worker()->mark_run( 'better_messages_sync_user_index_weekly' );
         }
     }
 
@@ -112,7 +102,6 @@ class Better_Messages_Users
         $pages = ceil($number_of_users / $per_page);
 
         for ($page = 1; $page <= $pages; $page++){
-            // code to repeat here
             $offset = ($page - 1) * $per_page;
             $user_ids = $wpdb->get_col("SELECT ID FROM `{$wpdb->users}` ORDER BY ID LIMIT $offset, $per_page");
 
@@ -279,7 +268,6 @@ class Better_Messages_Users
         }
     }
 
-    // Avoid multiple updates in one request for the same user with the same time
     private array $updated_users_last_activity = [];
 
     public function update_last_activity( $user_id, $time = null ){

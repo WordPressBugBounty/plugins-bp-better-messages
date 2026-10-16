@@ -1,9 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-require_once __DIR__ . '/emojis/emoji-manifest.php';
-require_once __DIR__ . '/emojis/annotation-downloader.php';
-
 if ( !class_exists('Better_Messages_Emojis') ):
 
     class Better_Messages_Emojis
@@ -17,15 +14,6 @@ if ( !class_exists('Better_Messages_Emojis') ):
         ];
 
         public $set;
-
-        private $cdn_urls = [
-            'apple'    => 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@14.0.0/img/apple/sheets-256/64.png',
-            'twitter'  => 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@14.0.0/img/twitter/sheets-256/64.png',
-            'google'   => 'https://cdn.jsdelivr.net/npm/emoji-datasource-google@14.0.0/img/google/sheets-256/64.png',
-            'facebook' => 'https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@14.0.0/img/facebook/sheets-256/64.png',
-        ];
-
-        private $self_host_base = 'https://www.better-messages.com/emoji/';
 
         public static function instance()
         {
@@ -42,23 +30,51 @@ if ( !class_exists('Better_Messages_Emojis') ):
 
         public function __construct()
         {
-            $selected_set = Better_Messages()->settings['emojiSet'];
-            $this->set = $selected_set;
-
-            Better_Messages_Emoji_Manifest::instance();
-            Better_Messages_Emoji_Annotations::instance();
+            $this->set = Better_Messages()->settings['emojiSet'];
 
             add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
             add_filter( 'bp_better_messages_script_variables', array( $this, 'script_variables' ) );
+
+            add_filter( 'wordplus_pickers_emoji_dataset', function ( $dataset, $set, $locale ) {
+                return apply_filters( 'better_messages_get_emoji_dataset', $dataset, $set, $locale );
+            }, 10, 3 );
+
+            add_filter( 'wordplus_pickers_localize_emoji', function ( $emoji, $entry, $locale ) {
+                return apply_filters( 'better_messages_localize_emoji', $emoji, $entry, $locale );
+            }, 10, 3 );
+        }
+
+        public function sdk()
+        {
+            return function_exists( 'wordplus_pickers' ) && wordplus_pickers() ? wordplus_pickers()->emoji() : null;
         }
 
         public function script_variables( $vars ){
-            $vars['emojiDataUrl'] = Better_Messages_Emoji_Manifest::instance()->get_manifest_url();
+            $vars['emojiDataUrl'] = $this->sdk() ? $this->sdk()->data_url() : false;
             $vars['emojiHash']    = (string) get_option( 'bm-emoji-hash', '' );
             return $vars;
         }
 
         public function rest_api_init(){
+            $admin = function() {
+                return current_user_can( 'manage_options' );
+            };
+
+            $set_arg = array(
+                'set' => array(
+                    'required' => true,
+                    'type'     => 'string',
+                    'enum'     => array_keys( $this->emoji_sets ),
+                ),
+            );
+
+            $locale_arg = array(
+                'locale' => array(
+                    'required' => true,
+                    'type'     => 'string',
+                ),
+            );
+
             register_rest_route( 'better-messages/v1', '/getEmojiData', array(
                 'methods'             => 'GET',
                 'callback'            => array( $this, 'rest_get_emoji_data_legacy' ),
@@ -66,47 +82,54 @@ if ( !class_exists('Better_Messages_Emojis') ):
             ) );
 
             register_rest_route( 'better-messages/v1/admin', '/downloadEmojiSprite', array(
-                'methods' => 'POST',
-                'callback' => array( $this, 'rest_download_sprite' ),
-                'permission_callback' => function() {
-                    return current_user_can( 'manage_options' );
-                },
-                'args' => array(
-                    'set' => array(
-                        'required' => true,
-                        'type' => 'string',
-                        'enum' => array( 'apple', 'twitter', 'google', 'facebook' ),
-                    ),
-                ),
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_download_sprite' ),
+                'permission_callback' => $admin,
+                'args'                => $set_arg,
             ) );
 
             register_rest_route( 'better-messages/v1/admin', '/deleteEmojiSprite', array(
-                'methods' => 'POST',
-                'callback' => array( $this, 'rest_delete_sprite' ),
-                'permission_callback' => function() {
-                    return current_user_can( 'manage_options' );
-                },
-                'args' => array(
-                    'set' => array(
-                        'required' => true,
-                        'type' => 'string',
-                        'enum' => array( 'apple', 'twitter', 'google', 'facebook' ),
-                    ),
-                ),
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_delete_sprite' ),
+                'permission_callback' => $admin,
+                'args'                => $set_arg,
             ) );
 
             register_rest_route( 'better-messages/v1/admin', '/emojiSpriteStatus', array(
-                'methods' => 'GET',
-                'callback' => array( $this, 'rest_sprite_status' ),
-                'permission_callback' => function() {
-                    return current_user_can( 'manage_options' );
-                },
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_sprite_status' ),
+                'permission_callback' => $admin,
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/downloadEmojiAnnotations', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_download_annotations' ),
+                'permission_callback' => $admin,
+                'args'                => $locale_arg,
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/deleteEmojiAnnotations', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_delete_annotations' ),
+                'permission_callback' => $admin,
+                'args'                => $locale_arg,
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/emojiAnnotationsStatus', array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_annotations_status' ),
+                'permission_callback' => $admin,
+            ) );
+
+            register_rest_route( 'better-messages/v1/admin', '/refreshEmojiAnnotationsIndex', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_refresh_annotations_index' ),
+                'permission_callback' => $admin,
             ) );
         }
 
         public function rest_download_sprite( $request ) {
-            $set = $request->get_param( 'set' );
-            $result = $this->downloadSprite( $set );
+            $result = $this->downloadSprite( $request->get_param( 'set' ) );
 
             if ( is_wp_error( $result ) ) {
                 return new \WP_REST_Response( array(
@@ -123,9 +146,8 @@ if ( !class_exists('Better_Messages_Emojis') ):
                 return new \WP_REST_Response( array( 'error' => 'Invalid emoji set' ), 400 );
             }
 
-            $path = $this->getLocalSpritePath( $set );
-            if ( file_exists( $path ) ) {
-                @unlink( $path );
+            if ( $this->sdk() ) {
+                $this->sdk()->delete_sprite( $set );
             }
 
             return new \WP_REST_Response( array( 'deleted' => true ) );
@@ -136,8 +158,7 @@ if ( !class_exists('Better_Messages_Emojis') ):
         }
 
         public function rest_get_emoji_data_legacy() {
-            $manifest = Better_Messages_Emoji_Manifest::instance();
-            $data     = $manifest->get_manifest_data();
+            $data = $this->sdk() ? $this->sdk()->data() : null;
 
             if ( ! is_array( $data ) ) {
                 return new \WP_REST_Response( array( 'error' => 'Manifest could not be generated' ), 500 );
@@ -145,106 +166,73 @@ if ( !class_exists('Better_Messages_Emojis') ):
 
             $response = new \WP_REST_Response( $data );
             $response->header( 'Deprecation', 'true' );
-            $response->header( 'Link', '<' . $manifest->get_manifest_url() . '>; rel="successor-version"' );
+            $response->header( 'Link', '<' . $this->sdk()->data_url() . '>; rel="successor-version"' );
             return $response;
         }
 
+        public function rest_download_annotations( $request ) {
+            $locale = $this->sanitize_locale( $request->get_param( 'locale' ) );
+            $result = $this->sdk() ? $this->sdk()->download_annotations( $locale ) : new WP_Error( 'unavailable', '' );
+
+            if ( is_wp_error( $result ) ) {
+                return new WP_REST_Response( array( 'error' => $result->get_error_message() ), 500 );
+            }
+
+            return new WP_REST_Response( array(
+                'downloaded' => true,
+                'locale'     => $locale,
+                'size'       => $result['size'],
+                'status'     => $this->sdk()->annotations_status(),
+            ) );
+        }
+
+        public function rest_delete_annotations( $request ) {
+            $locale = $this->sanitize_locale( $request->get_param( 'locale' ) );
+
+            if ( $this->sdk() ) {
+                $this->sdk()->delete_annotations( $locale );
+            }
+
+            return new WP_REST_Response( array(
+                'deleted' => true,
+                'locale'  => $locale,
+                'status'  => $this->sdk() ? $this->sdk()->annotations_status() : array(),
+            ) );
+        }
+
+        public function rest_annotations_status() {
+            return new WP_REST_Response( array(
+                'status' => $this->sdk() ? $this->sdk()->annotations_status() : array(),
+                'index'  => $this->sdk() ? $this->sdk()->annotations_index() : array(),
+            ) );
+        }
+
+        public function rest_refresh_annotations_index() {
+            return new WP_REST_Response( array(
+                'index'  => $this->sdk() ? $this->sdk()->annotations_index( true ) : array(),
+                'status' => $this->sdk() ? $this->sdk()->annotations_status() : array(),
+            ) );
+        }
+
         public function getSpriteUrl(){
-            $delivery = Better_Messages()->settings['emojiSpriteDelivery'] ?? 'cdn';
-            $set = $this->set;
-
-            if ( $delivery === 'self-hosted' ) {
-                $local_url = $this->getLocalSpriteUrl( $set );
-                if ( $local_url ) {
-                    return trim( $local_url );
-                }
-                // Fallback to CDN if local file not available
-            }
-
-            return trim( $this->cdn_urls[ $set ] ?? $this->cdn_urls['apple'] );
+            return $this->sdk() ? $this->sdk()->sprite_url( true ) : '';
         }
 
-        /**
-         * Get the local sprite URL if the file has been downloaded.
-         */
-        private function getLocalSpriteUrl( $set ) {
-            $local_path = $this->getLocalSpritePath( $set );
-
-            if ( file_exists( $local_path ) ) {
-                $upload_dir = wp_upload_dir();
-                return $upload_dir['baseurl'] . '/better-messages/emoji/' . $set . '.png';
-            }
-
-            return false;
-        }
-
-        /**
-         * Get the local file system path for a sprite.
-         */
-        private function getLocalSpritePath( $set ) {
-            $upload_dir = wp_upload_dir();
-            return $upload_dir['basedir'] . '/better-messages/emoji/' . $set . '.png';
-        }
-
-        /**
-         * Download emoji sprite from Better Messages server to local uploads.
-         *
-         * @param string $set Emoji set name (apple, twitter, google, facebook)
-         * @return array|WP_Error Result with 'url' key on success
-         */
         public function downloadSprite( $set ) {
             if ( ! isset( $this->emoji_sets[ $set ] ) ) {
                 return new \WP_Error( 'invalid_set', 'Invalid emoji set' );
             }
 
-            $remote_url = $this->self_host_base . $set . '.png';
-            $local_path = $this->getLocalSpritePath( $set );
-            $local_dir  = dirname( $local_path );
-
-            // Ensure directory exists
-            if ( ! file_exists( $local_dir ) ) {
-                wp_mkdir_p( $local_dir );
-            }
-
-            // Download the file
-            if ( ! function_exists( 'download_url' ) ) {
-                require_once ABSPATH . 'wp-admin/includes/file.php';
-            }
-            $tmp_file = download_url( $remote_url, 60 );
-
-            if ( is_wp_error( $tmp_file ) ) {
-                return $tmp_file;
-            }
-
-            // Move to final location
-            if ( ! @rename( $tmp_file, $local_path ) ) {
-                // rename may fail across filesystems
-                if ( ! @copy( $tmp_file, $local_path ) ) {
-                    @unlink( $tmp_file );
-                    return new \WP_Error( 'move_failed', 'Could not save emoji sprite file' );
-                }
-                @unlink( $tmp_file );
-            }
-
-            return array(
-                'url'  => $this->getLocalSpriteUrl( $set ),
-                'size' => filesize( $local_path ),
-            );
+            return $this->sdk() ? $this->sdk()->download_sprite( $set ) : new \WP_Error( 'unavailable', 'Emoji sprites are not available' );
         }
 
-        /**
-         * Check which emoji sets are available locally.
-         */
         public function getLocalStatus() {
-            $result = array();
-            foreach ( array_keys( $this->emoji_sets ) as $set ) {
-                $path = $this->getLocalSpritePath( $set );
-                $result[ $set ] = array(
-                    'downloaded' => file_exists( $path ),
-                    'size'       => file_exists( $path ) ? filesize( $path ) : 0,
-                );
-            }
-            return $result;
+            return $this->sdk() ? $this->sdk()->sprite_status() : array();
+        }
+
+        private function sanitize_locale( $locale ) {
+            $locale = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) $locale );
+            return $locale === '' ? 'en_US' : $locale;
         }
 
     }

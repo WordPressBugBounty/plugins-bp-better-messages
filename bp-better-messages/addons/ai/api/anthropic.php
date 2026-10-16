@@ -158,9 +158,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
             }
         }
 
-        /**
-         * Fetch models from Anthropic API, cached for 24 hours
-         */
         private function get_all_models_cached()
         {
             $cached = get_transient( 'bm_anthropic_models' );
@@ -231,23 +228,15 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
             return $models;
         }
 
-        /**
-         * Get input token limit for an Anthropic model.
-         * All current Claude models support 200K context.
-         */
         private function get_model_input_limit( $model_id )
         {
             return 200000;
         }
 
-        /**
-         * Auto-trim Anthropic messages array if estimated token count exceeds model input limit.
-         * Removes oldest messages first, always keeps at least the last 2 entries.
-         */
         private function auto_trim_messages( $messages, $model_id )
         {
             $limit           = $this->get_model_input_limit( $model_id );
-            $effective_limit = (int) ( $limit * 0.85 ); // 15% buffer for system prompt + overhead
+            $effective_limit = (int) ( $limit * 0.85 );
 
             $estimate_tokens = function ( $content ) {
                 $tokens = 0;
@@ -260,7 +249,7 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                             $tokens += (int) ( mb_strlen( $block['text'] ) / 4 );
                         }
                         if ( isset( $block['source']['data'] ) ) {
-                            $tokens += 1600; // rough per-image/document estimate
+                            $tokens += 1600;
                         }
                     }
                 }
@@ -285,9 +274,51 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
             return $this->messagesProvider( $bot_id, $bot_user, $message, $ai_message_id, $stream );
         }
 
-        /**
-         * Stream response via Anthropic Messages API
-         */
+        private function build_attachment_blocks( $msg_id, $bot_settings )
+        {
+            $blocks = [];
+
+            if ( ! $bot_settings['images'] && ! $bot_settings['files'] ) {
+                return $blocks;
+            }
+
+            $attachments = Better_Messages()->functions->get_message_meta( $msg_id, 'attachments', true );
+
+            if ( empty( $attachments ) ) {
+                return $blocks;
+            }
+
+            $image_types = [ 'image/jpeg', 'image/png', 'image/gif', 'image/webp' ];
+
+            foreach ( $attachments as $id => $url ) {
+                $input = $this->get_attachment_input( $id, $bot_settings, $image_types, array_merge( $image_types, [ 'application/pdf' ] ) );
+
+                if ( ! $input ) {
+                    continue;
+                }
+
+                if ( $input['url'] !== '' ) {
+                    $source = [
+                        'type' => 'url',
+                        'url'  => $input['url']
+                    ];
+                } else {
+                    $source = [
+                        'type'       => 'base64',
+                        'media_type' => $input['mime'],
+                        'data'       => $input['data']
+                    ];
+                }
+
+                $blocks[] = [
+                    'type'   => $input['kind'] === 'image' ? 'image' : 'document',
+                    'source' => $source
+                ];
+            }
+
+            return $blocks;
+        }
+
         private function messagesProvider( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
         {
             $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
@@ -334,7 +365,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
 
                 $message_text = $this->get_context_text( $_message );
                 if ( empty( trim( $message_text ) ) && $_message->id !== $message->id ) {
-                    // Don't skip if message has attachments that the bot can process
                     $has_processable_attachments = false;
                     if ( $bot_settings['images'] || $bot_settings['files'] ) {
                         $check_attachments = Better_Messages()->functions->get_message_meta( $_message->id, 'attachments', true );
@@ -346,7 +376,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                 $content = [];
                 $role    = (int) $_message->sender_id === (int) $bot_user_id ? 'assistant' : 'user';
 
-                // In group context: strip mention HTML and prefix with sender name
                 if ( $is_group && $role === 'user' && ! empty( $message_text ) ) {
                     $message_text = $this->strip_mention_html( $message_text, $sender_names );
                     $sid = (int) $_message->sender_id;
@@ -354,43 +383,8 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                     $message_text = '[' . $sender_label . ']: ' . $message_text;
                 }
 
-                if ( $role === 'user' && ( $bot_settings['images'] || $bot_settings['files'] ) ) {
-                    $attachments = Better_Messages()->functions->get_message_meta( $_message->id, 'attachments', true );
-
-                    if ( ! empty( $attachments ) ) {
-                        foreach ( $attachments as $id => $url ) {
-                            $file = get_attached_file( $id );
-
-                            if ( $file && file_exists( $file ) && filesize( $file ) <= 20 * 1024 * 1024 ) {
-                                $ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
-
-                                if ( $bot_settings['images'] && in_array( $ext, [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ] ) ) {
-                                    $media_type = 'image/' . ( $ext === 'jpg' ? 'jpeg' : $ext );
-                                    $base64     = base64_encode( file_get_contents( $file ) );
-
-                                    $content[] = [
-                                        'type'   => 'image',
-                                        'source' => [
-                                            'type'       => 'base64',
-                                            'media_type' => $media_type,
-                                            'data'       => $base64
-                                        ]
-                                    ];
-                                } else if ( $bot_settings['files'] && $ext === 'pdf' ) {
-                                    $base64 = base64_encode( file_get_contents( $file ) );
-
-                                    $content[] = [
-                                        'type'   => 'document',
-                                        'source' => [
-                                            'type'       => 'base64',
-                                            'media_type' => 'application/pdf',
-                                            'data'       => $base64
-                                        ]
-                                    ];
-                                }
-                            }
-                        }
-                    }
+                if ( $role === 'user' ) {
+                    $content = $this->build_attachment_blocks( $_message->id, $bot_settings );
                 }
 
                 if ( ! empty( $message_text ) ) {
@@ -402,8 +396,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
 
                 if ( empty( $content ) ) continue;
 
-                // Claude requires alternating user/assistant messages
-                // Merge consecutive same-role messages
                 $last_index = count( $request_messages ) - 1;
                 if ( $last_index >= 0 && $request_messages[ $last_index ]['role'] === $role ) {
                     $existing_content = $request_messages[ $last_index ]['content'];
@@ -424,7 +416,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                 return;
             }
 
-            // Ensure first message is from user (Claude requirement)
             if ( $request_messages[0]['role'] !== 'user' ) {
                 array_unshift( $request_messages, [
                     'role'    => 'user',
@@ -432,10 +423,8 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                 ] );
             }
 
-            // Auto-trim if context exceeds model limit
             $request_messages = $this->auto_trim_messages( $request_messages, $bot_settings['model'] );
 
-            // Ensure first message is from user after trimming (Claude requirement)
             while ( ! empty( $request_messages ) && $request_messages[0]['role'] !== 'user' ) {
                 array_shift( $request_messages );
             }
@@ -474,7 +463,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                 $params['temperature'] = floatval( $bot_settings['temperature'] );
             }
 
-            // Extended thinking
             if ( ! empty( $bot_settings['extendedThinking'] ) && $bot_settings['extendedThinking'] === '1' ) {
                 $thinking_budget = 10000;
                 if ( ! empty( $bot_settings['thinkingBudget'] ) && intval( $bot_settings['thinkingBudget'] ) > 0 ) {
@@ -486,16 +474,13 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                     'budget_tokens' => $thinking_budget
                 ];
 
-                // Extended thinking requires max_tokens to be larger than budget
                 if ( $params['max_tokens'] <= $thinking_budget ) {
                     $params['max_tokens'] = $thinking_budget + 4096;
                 }
 
-                // Temperature must not be set when using extended thinking
                 unset( $params['temperature'] );
             }
 
-            // Web search
             if ( ! empty( $bot_settings['webSearch'] ) && $bot_settings['webSearch'] === '1' ) {
                 $params['tools'] = [ [
                     'type' => 'web_search_20250305',
@@ -608,7 +593,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                                     if ( isset( $data['message']['model'] ) ) {
                                         $model = $data['message']['model'];
                                     }
-                                    // Capture input token usage (includes cache tokens)
                                     if ( isset( $data['message']['usage'] ) ) {
                                         $usage = array_merge( $usage, $data['message']['usage'] );
                                     }
@@ -626,7 +610,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                                     if ( isset( $delta['type'] ) && $delta['type'] === 'text_delta' && isset( $delta['text'] ) ) {
                                         yield $delta['text'];
                                     }
-                                    // Skip thinking_delta - we don't output thinking to user
                                     break;
 
                                 case 'content_block_stop':
@@ -635,7 +618,6 @@ if ( ! class_exists( 'Better_Messages_Anthropic_API' ) ) {
                                     break;
 
                                 case 'message_delta':
-                                    // Merge output token usage
                                     if ( isset( $data['usage'] ) ) {
                                         $usage = array_merge( $usage, $data['usage'] );
                                     }

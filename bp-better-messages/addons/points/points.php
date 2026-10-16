@@ -5,7 +5,6 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages_Points' ) ) {
     class Better_Messages_Points
     {
-        /** @var Better_Messages_Points_Provider|null */
         private $provider = null;
 
         public static function instance()
@@ -77,11 +76,6 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
             }
         }
 
-        /**
-         * Auto-detect active points provider for backward compatibility.
-         * If a user had myCRED or GamiPress active before the pointsSystem setting existed,
-         * detect it based on plugin availability and configured charge rates.
-         */
         private function auto_detect_provider()
         {
             $mycred_provider = new Better_Messages_Points_MyCred();
@@ -114,9 +108,6 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
             return false;
         }
 
-        /**
-         * @return Better_Messages_Points_Provider|null
-         */
         public function get_provider()
         {
             return $this->provider;
@@ -135,7 +126,7 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
                 $this->provider->get_user_charge_rate( $user_id, $this->provider->setting_key( 'NewMessageCharge' ) ),
                 0, $thread_id, $user_id
             );
-            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, 0, $thread_id, $user_id ); // backward compat
+            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, 0, $thread_id, $user_id );
 
             if ( $charge_rate === 0 ) return $allowed;
 
@@ -167,7 +158,7 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
                 $this->provider->get_user_charge_rate( $user_id, $this->provider->setting_key( 'NewMessageCharge' ) ),
                 $message->id, $message->thread_id, $user_id
             );
-            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, $message->id, $message->thread_id, $user_id ); // backward compat
+            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, $message->id, $message->thread_id, $user_id );
 
             if ( $charge_rate === 0 ) return;
 
@@ -190,7 +181,6 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
                 $args['recipients'] = [ $args['recipients'] ];
             }
 
-            // Skip AI bot threads — they have their own pricing
             if ( count( $args['recipients'] ) === 1 ) {
                 $recipient_id = reset( $args['recipients'] );
                 if ( $recipient_id < 0 && class_exists( 'Better_Messages_AI' ) && isset( Better_Messages()->ai ) ) {
@@ -235,7 +225,7 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
 
             $charge_rate = $this->provider->get_user_charge_rate( $caller_user_id, $this->provider->setting_key( 'CallPricing' ) );
             $charge_rate = apply_filters( 'better_messages_points_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, $target_user_id );
-            $charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, $target_user_id ); // backward compat
+            $charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, $target_user_id );
 
             if ( $charge_rate === 0 ) return $error;
 
@@ -255,7 +245,7 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
 
             $charge_rate = $this->provider->get_user_charge_rate( $caller_user_id, $this->provider->setting_key( 'CallPricing' ) );
             $charge_rate = apply_filters( 'better_messages_points_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, 0 );
-            $charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, 0 ); // backward compat
+            $charge_rate = apply_filters( 'better_messages_mycred_call_charge_rate', $charge_rate, $thread_id, $caller_user_id, 0 );
             if ( $charge_rate === 0 ) return;
 
             if ( ! Better_Messages()->calls->call_has_confirmed_traffic( $message_id ) ) return;
@@ -334,7 +324,7 @@ if ( ! class_exists( 'Better_Messages_Points' ) ) {
             );
 
             $charge_rate = apply_filters( 'better_messages_points_message_charge_rate', $charge_rate, 0, $thread_id, $current_user_id );
-            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, 0, $thread_id, $current_user_id ); // backward compat
+            $charge_rate = apply_filters( 'better_messages_mycred_message_charge_rate', $charge_rate, 0, $thread_id, $current_user_id );
 
             if ( $charge_rate > 0 ) {
                 $thread_item['messageCharge'] = $charge_rate;

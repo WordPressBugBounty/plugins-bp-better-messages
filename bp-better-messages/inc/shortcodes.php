@@ -7,19 +7,15 @@ class Better_Messages_Shortcodes
     public static function instance()
     {
 
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if ( null === $instance ) {
             $instance = new Better_Messages_Shortcodes;
             $instance->setup_actions();
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
     public function setup_actions(){
@@ -35,9 +31,6 @@ class Better_Messages_Shortcodes
         add_shortcode( 'bp_better_messages', array( $this, 'bp_better_messages' ) );
         add_shortcode( 'better_messages', array( $this, 'bp_better_messages' ) );
 
-        /**
-         * Premium buttons
-         */
         add_shortcode( 'bp_better_messages_mini_chat_button',  array( $this, 'bp_better_messages_mini_chat_button' ) );
         add_shortcode( 'better_messages_mini_chat_button',  array( $this, 'bp_better_messages_mini_chat_button' ) );
 
@@ -262,13 +255,6 @@ class Better_Messages_Shortcodes
                     continue;
                 }
 
-                /**
-                 * saveXML() writes a CDATA section back out verbatim, and the icon markup is
-                 * then echoed into an HTML document. <title> and <desc> are HTML integration
-                 * points, so an HTML parser reads `<![CDATA[` inside them as a bogus comment
-                 * that ends at the very first `>` — everything after it becomes live markup.
-                 * Swapping the section for a text node makes saveXML() escape the content.
-                 */
                 if( $child->nodeType === XML_CDATA_SECTION_NODE ){
                     $element->replaceChild(
                         $element->ownerDocument->createTextNode( (string) $child->nodeValue ),

@@ -5,6 +5,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
     class Better_Messages_Moderation
     {
+        private $site_admin_ids = null;
+
         public static function instance()
         {
 
@@ -29,6 +31,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             add_action('better_messages_message_pending', array( $this, 'notify_pending_message' ), 10, 1 );
             add_action('better_messages_message_reported', array( $this, 'notify_reported_message' ), 10, 6 );
 
+            foreach( array( 'set_user_role', 'add_user_role', 'remove_user_role', 'deleted_user', 'granted_super_admin', 'revoked_super_admin', 'bp_better_chat_settings_updated' ) as $hook ){
+                add_action( $hook, array( $this, 'forget_site_admins' ), 10, 0 );
+            }
+
             add_action( 'show_user_profile', array( $this, 'render_user_section' ) );
             add_action( 'edit_user_profile', array( $this, 'render_user_section' ) );
         }
@@ -51,17 +57,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             <?php
         }
 
-        /*
-         * Check if a message must be pre moderated for this user in this thread
-         *
-         * @param int $user_id User ID to check
-         * @param int|null $thread_id Thread ID (optional)
-         * @param bool $is_new_conversation Whether this is a new conversation (true) or a reply (false)
-         * @return bool True if moderation is required, false otherwise
-         */
         public function is_moderation_enabled( $user_id, ?int $thread_id = null, $is_new_conversation = false )
         {
-            // Administrators are always exempt from moderation
             if( user_can( $user_id, 'bm_can_administrate' ) ){
                 return false;
             }
@@ -69,16 +66,13 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $result = false;
 
             if( Better_Messages()->settings['messagesPremoderation'] === '1' ) {
-                // Check if user is sending their first message ever
                 if( Better_Messages()->settings['messagesModerateFirstTimeSenders'] === '1' ) {
                     if( $this->is_first_time_sender( $user_id ) ) {
                         $result = true;
                     }
                 }
 
-                // Check role-based moderation only if not already flagged for moderation
                 if( ! $result ) {
-                    // Determine which roles list to check based on conversation type
                     $moderated_roles = $is_new_conversation
                         ? Better_Messages()->settings['messagesPremoderationRolesNewConv']
                         : Better_Messages()->settings['messagesPremoderationRolesReplies'];
@@ -96,7 +90,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     }
                 }
 
-                // Check blacklist/whitelist status in single query
                 $moderation_status = $this->get_user_moderation_status( $user_id, $thread_id );
 
                 if( $moderation_status !== null ){
@@ -107,24 +100,14 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return apply_filters( 'better_messages_is_moderation_enabled', $result, $user_id, $thread_id, $is_new_conversation );
         }
 
-        /**
-         * Check if user is sending their first message
-         *
-         * @param int $user_id User ID to check
-         * @return bool True if user has never had an approved message before, false otherwise
-         */
         public function is_first_time_sender( $user_id )
         {
-            // Check user meta to see if they've had an approved message
             $has_approved_message = Better_Messages()->functions->get_user_meta( $user_id, 'bm_has_approved_message', true );
 
-            // If meta is set to '1', user has had at least one approved message
             if( $has_approved_message === '1' ){
                 return false;
             }
 
-            // Meta not set - check if user has any sent messages in the database
-            // This handles users who sent messages before moderation was enabled
             global $wpdb;
             $table = bm_get_table('messages');
 
@@ -142,49 +125,28 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             ));
 
             if( $has_messages ){
-                // User has sent messages before, mark them as approved sender for future checks
                 Better_Messages()->functions->update_user_meta( $user_id, 'bm_has_approved_message', '1' );
                 return false;
             }
 
-            // No messages found, they are a first-time sender
             return true;
         }
 
-        /**
-         * Mark user as having sent an approved message
-         * Called when a message is sent without moderation or when a pending message is approved
-         *
-         * @param BM_Messages_Message $message Message object
-         */
         public function mark_user_as_approved_sender( $message )
         {
             if( ! isset( $message->sender_id ) || ! empty( $message->skip_moderation ) ){
                 return;
             }
 
-            // Mark user as having an approved message
             Better_Messages()->functions->update_user_meta( $message->sender_id, 'bm_has_approved_message', '1' );
         }
 
-        /**
-         * Get user moderation status (blacklist/whitelist) in a single query
-         *
-         * Checks both thread-specific and global moderation status.
-         * Priority: thread-specific whitelist > thread-specific blacklist > global blacklist
-         * (when thread_id is provided) or global whitelist > global blacklist (when thread_id is null)
-         *
-         * @param int $user_id User ID to check
-         * @param int|null $thread_id Thread ID for conversation-specific check (optional)
-         * @return bool|null True if blacklisted (force moderation), false if whitelisted (bypass), null if no match
-         */
         public function get_user_moderation_status( int $user_id, ?int $thread_id = null ): ?bool
         {
             global $wpdb;
 
             $table = bm_get_table('moderation');
 
-            // Build cache key
             $cache_key = $thread_id !== null
                 ? 'bm_mod_status_' . $user_id . '_' . $thread_id
                 : 'bm_mod_status_global_' . $user_id;
@@ -194,14 +156,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             if( $cached !== false ){
                 if( $cached === 'whitelist' ) return false;
                 if( $cached === 'blacklist' ) return true;
-                return null; // 'none'
+                return null;
             }
 
             if( $thread_id !== null ){
-                // When thread_id is provided:
-                // - Whitelist: check thread-specific OR global
-                // - Blacklist: check thread-specific OR global
-                // Priority order: thread whitelist (1) > global whitelist (2) > thread blacklist (3) > global blacklist (4)
                 $query = $wpdb->prepare(
                     "SELECT `type`,
                         CASE
@@ -226,8 +184,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     $thread_id
                 );
             } else {
-                // When thread_id is null: check only global entries
-                // Priority: whitelist (1) > blacklist (2)
                 $query = $wpdb->prepare(
                     "SELECT `type`,
                         CASE
@@ -264,20 +220,12 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $result;
         }
 
-        /**
-         * Check if user is whitelisted from premoderation
-         *
-         * @param int $user_id User ID to check
-         * @param int|null $thread_id Thread ID for conversation-specific whitelist (optional)
-         * @return bool True if user is whitelisted and doesn't need premoderation
-         */
         public function is_user_whitelisted( int $user_id, ?int $thread_id = null ): bool
         {
             global $wpdb;
 
             $table = bm_get_table('moderation');
 
-            // Build cache key based on context
             $cache_key = $thread_id !== null
                 ? 'bm_whitelist_' . $user_id . '_' . $thread_id
                 : 'bm_whitelist_global_' . $user_id;
@@ -289,7 +237,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
 
             if( $thread_id !== null ){
-                // Check thread-specific only
                 $query = $wpdb->prepare(
                     "SELECT COUNT(*) FROM {$table}
                     WHERE `user_id` = %d
@@ -300,7 +247,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     $thread_id
                 );
             } else {
-                // Check only global
                 $query = $wpdb->prepare(
                     "SELECT COUNT(*) FROM {$table}
                     WHERE `user_id` = %d
@@ -319,19 +265,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $is_whitelisted;
         }
 
-        /**
-         * Whitelist user from premoderation
-         *
-         * @param int $user_id User ID to whitelist
-         * @param int|null $thread_id Thread ID for conversation-specific whitelist (null or 0 for global)
-         * @param int|null $duration Duration in minutes (null for permanent)
-         * @return bool True on success, false on failure
-         */
         public function whitelist_user( int $user_id, ?int $thread_id = null, ?int $duration = null ): bool
         {
             global $wpdb;
 
-            // Administrators cannot be whitelisted - they are already exempt from moderation
             if( user_can( $user_id, 'bm_can_administrate' ) ){
                 return false;
             }
@@ -339,12 +276,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $admin_id = Better_Messages()->functions->get_current_user_id();
             $table = bm_get_table('moderation');
 
-            // Use 0 for global whitelist
             if( $thread_id === null ){
                 $thread_id = 0;
             }
 
-            // Remove from blacklist first (mutual exclusivity)
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM {$table}
                 WHERE `type` = 'force_moderation'
@@ -354,9 +289,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 $thread_id
             ));
 
-            // Prepare expiration
             if( $duration === null || $duration <= 0 ){
-                // Permanent whitelist
                 $query = $wpdb->prepare(
                     "INSERT INTO {$table}
                     (user_id, thread_id, type, expiration, admin_id)
@@ -369,7 +302,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     $admin_id
                 );
             } else {
-                // Time-limited whitelist
                 $seconds = $duration * 60;
                 $query = $wpdb->prepare(
                     "INSERT INTO {$table}
@@ -388,7 +320,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $wpdb->query( $query );
 
-            // Clear caches
             if( $thread_id > 0 ){
                 wp_cache_delete( 'bm_whitelist_' . $user_id . '_' . $thread_id, 'bm_messages' );
                 wp_cache_delete( 'bm_blacklist_' . $user_id . '_' . $thread_id, 'bm_messages' );
@@ -398,7 +329,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_delete( 'bm_blacklist_global_' . $user_id, 'bm_messages' );
             wp_cache_delete( 'bm_mod_status_global_' . $user_id, 'bm_messages' );
 
-            // Schedule cleanup if time-limited
             if( $duration !== null && $duration > 0 ){
                 $seconds = $duration * 60;
                 if( ! wp_get_scheduled_event( 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] ) ){
@@ -406,24 +336,15 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 }
             }
 
-            // Always return true - idempotent operation (already whitelisted is still success)
             return true;
         }
 
-        /**
-         * Remove user from the whitelist
-         *
-         * @param int $user_id User ID to remove from whitelist
-         * @param int|null $thread_id Thread ID for conversation-specific whitelist (null or 0 for global)
-         * @return bool True on success, false on failure
-         */
         public function unwhitelist_user( int $user_id, ?int $thread_id = null ): bool
         {
             global $wpdb;
 
             $table = bm_get_table('moderation');
 
-            // Use 0 for global whitelist
             if( $thread_id === null ){
                 $thread_id = 0;
             }
@@ -439,7 +360,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $wpdb->query( $query );
 
-            // Clear caches
             if( $thread_id > 0 ){
                 wp_cache_delete( 'bm_whitelist_' . $user_id . '_' . $thread_id, 'bm_messages' );
                 wp_cache_delete( 'bm_mod_status_' . $user_id . '_' . $thread_id, 'bm_messages' );
@@ -447,16 +367,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_delete( 'bm_whitelist_global_' . $user_id, 'bm_messages' );
             wp_cache_delete( 'bm_mod_status_global_' . $user_id, 'bm_messages' );
 
-            // Always return true - idempotent operation (not whitelisted is still success)
             return true;
         }
 
-        /**
-         * Get whitelisted users
-         *
-         * @param int|null $thread_id Thread ID for conversation-specific whitelist (null or 0 for global)
-         * @return array Array of whitelisted user data
-         */
         public function get_whitelisted_users( ?int $thread_id = null ): array
         {
             global $wpdb;
@@ -482,20 +395,12 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $results ?: [];
         }
 
-        /**
-         * Check if user is blacklisted for premoderation
-         *
-         * @param int $user_id User ID to check
-         * @param int|null $thread_id Thread ID for conversation-specific blacklist (optional)
-         * @return bool True if user is blacklisted and must be premoderated
-         */
         public function is_user_blacklisted( int $user_id, ?int $thread_id = null ): bool
         {
             global $wpdb;
 
             $table = bm_get_table('moderation');
 
-            // Build cache key based on context
             $cache_key = $thread_id !== null
                 ? 'bm_blacklist_' . $user_id . '_' . $thread_id
                 : 'bm_blacklist_global_' . $user_id;
@@ -507,7 +412,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
 
             if( $thread_id !== null ){
-                // Check thread-specific OR global in one query
                 $query = $wpdb->prepare(
                     "SELECT COUNT(*) FROM {$table}
                     WHERE `user_id` = %d
@@ -518,7 +422,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     $thread_id
                 );
             } else {
-                // Check only global
                 $query = $wpdb->prepare(
                     "SELECT COUNT(*) FROM {$table}
                     WHERE `user_id` = %d
@@ -537,19 +440,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $is_blacklisted;
         }
 
-        /**
-         * Blacklist user for premoderation
-         *
-         * @param int $user_id User ID to blacklist
-         * @param int|null $thread_id Thread ID for conversation-specific blacklist (null or 0 for global)
-         * @param int|null $duration Duration in minutes (null for permanent)
-         * @return bool True on success, false on failure
-         */
         public function blacklist_user( int $user_id, ?int $thread_id = null, ?int $duration = null ): bool
         {
             global $wpdb;
 
-            // Administrators cannot be blacklisted
             if( user_can( $user_id, 'bm_can_administrate' ) ){
                 return false;
             }
@@ -557,12 +451,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $admin_id = Better_Messages()->functions->get_current_user_id();
             $table = bm_get_table('moderation');
 
-            // Use 0 for global blacklist
             if( $thread_id === null ){
                 $thread_id = 0;
             }
 
-            // Remove from whitelist first (mutual exclusivity)
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM {$table}
                 WHERE `type` = 'bypass_moderation'
@@ -572,9 +464,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 $thread_id
             ));
 
-            // Prepare expiration
             if( $duration === null || $duration <= 0 ){
-                // Permanent blacklist
                 $query = $wpdb->prepare(
                     "INSERT INTO {$table}
                     (user_id, thread_id, type, expiration, admin_id)
@@ -587,7 +477,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     $admin_id
                 );
             } else {
-                // Time-limited blacklist
                 $seconds = $duration * 60;
                 $query = $wpdb->prepare(
                     "INSERT INTO {$table}
@@ -606,7 +495,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $wpdb->query( $query );
 
-            // Clear caches
             if( $thread_id > 0 ){
                 wp_cache_delete( 'bm_blacklist_' . $user_id . '_' . $thread_id, 'bm_messages' );
                 wp_cache_delete( 'bm_whitelist_' . $user_id . '_' . $thread_id, 'bm_messages' );
@@ -616,7 +504,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_delete( 'bm_whitelist_global_' . $user_id, 'bm_messages' );
             wp_cache_delete( 'bm_mod_status_global_' . $user_id, 'bm_messages' );
 
-            // Schedule cleanup if time-limited
             if( $duration !== null && $duration > 0 ){
                 $seconds = $duration * 60;
                 if( ! wp_get_scheduled_event( 'better_messages_clean_expired_ban', [ $thread_id, $user_id ] ) ){
@@ -624,24 +511,15 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 }
             }
 
-            // Always return true - idempotent operation (already blacklisted is still success)
             return true;
         }
 
-        /**
-         * Remove user from blacklist
-         *
-         * @param int $user_id User ID to remove from blacklist
-         * @param int|null $thread_id Thread ID for conversation-specific blacklist (null or 0 for global)
-         * @return bool True on success, false on failure
-         */
         public function unblacklist_user( int $user_id, ?int $thread_id = null ): bool
         {
             global $wpdb;
 
             $table = bm_get_table('moderation');
 
-            // Use 0 for global blacklist
             if( $thread_id === null ){
                 $thread_id = 0;
             }
@@ -657,7 +535,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $wpdb->query( $query );
 
-            // Clear caches
             if( $thread_id > 0 ){
                 wp_cache_delete( 'bm_blacklist_' . $user_id . '_' . $thread_id, 'bm_messages' );
                 wp_cache_delete( 'bm_mod_status_' . $user_id . '_' . $thread_id, 'bm_messages' );
@@ -665,16 +542,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_delete( 'bm_blacklist_global_' . $user_id, 'bm_messages' );
             wp_cache_delete( 'bm_mod_status_global_' . $user_id, 'bm_messages' );
 
-            // Always return true - idempotent operation (not blacklisted is still success)
             return true;
         }
 
-        /**
-         * Get blacklisted users
-         *
-         * @param int|null $thread_id Thread ID for conversation-specific blacklist (null or 0 for global)
-         * @return array Array of blacklisted user data
-         */
         public function get_blacklisted_users( ?int $thread_id = null ): array
         {
             global $wpdb;
@@ -738,6 +608,64 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
 
             return Better_Messages()->functions->is_user_exists( $user_id );
+        }
+
+        public function is_protected_user( int $thread_id, int $actor_id, int $user_id ){
+            if( Better_Messages()->functions->is_thread_super_moderator( $actor_id, $thread_id ) ){
+                return false;
+            }
+
+            return Better_Messages()->functions->is_thread_super_moderator( $user_id, $thread_id );
+        }
+
+        public function get_protected_users( int $thread_id, int $actor_id ){
+            if( Better_Messages()->functions->is_thread_super_moderator( $actor_id, $thread_id ) ){
+                return [];
+            }
+
+            $admin_ids = $this->get_site_admin_ids();
+
+            if( $this->is_ephemeral_thread( $thread_id ) ){
+                return $admin_ids;
+            }
+
+            return array_values( array_filter( $admin_ids, function( $admin_id ) use ( $thread_id ){
+                return Better_Messages()->functions->is_thread_participant( $admin_id, $thread_id, true );
+            } ) );
+        }
+
+        private function get_site_admin_ids(){
+            if( $this->site_admin_ids !== null ){
+                return $this->site_admin_ids;
+            }
+
+            $ids = get_transient( 'bm_site_admin_ids' );
+
+            if( ! is_array( $ids ) ){
+                $ids = get_users( array(
+                    'capability__in' => array( 'manage_options', 'bm_can_administrate' ),
+                    'fields'         => 'ID'
+                ) );
+
+                if( is_multisite() ){
+                    foreach( get_super_admins() as $login ){
+                        $user = get_user_by( 'login', $login );
+                        if( $user ) $ids[] = $user->ID;
+                    }
+                }
+
+                $ids = array_values( array_unique( array_map( 'intval', $ids ) ) );
+                set_transient( 'bm_site_admin_ids', $ids, HOUR_IN_SECONDS );
+            }
+
+            $this->site_admin_ids = $ids;
+
+            return $ids;
+        }
+
+        public function forget_site_admins(){
+            $this->site_admin_ids = null;
+            delete_transient( 'bm_site_admin_ids' );
         }
 
         public function restrict_group_call_join( $error, $thread_id, $user_id ){
@@ -816,7 +744,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $can_mute = Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id );
             $is_participant = $this->can_moderate_user( $thread_id, $user_id );
 
-            if( ! $can_mute || ! $is_participant ){
+            if( ! $can_mute || ! $is_participant || $this->is_protected_user( $thread_id, $current_user_id, $user_id ) ){
                 return new WP_Error(
                     'rest_forbidden',
                     _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
@@ -870,7 +798,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $can_mute = Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id );
             $is_participant = $this->can_moderate_user( $thread_id, $user_id );
 
-            if( ! $can_mute || ! $is_participant ){
+            if( ! $can_mute || ! $is_participant || $this->is_protected_user( $thread_id, $current_user_id, $user_id ) ){
                 return new WP_Error(
                     'rest_forbidden',
                     _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
@@ -932,9 +860,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
                     $time = $this->format_time($expiration);
 
-                    /**
-                     * With this global variable you can add extra message which will replace editor field
-                     */
                     global $bp_better_messages_restrict_send_message;
                     $bp_better_messages_restrict_send_message['bm_user_muted'] = sprintf(_x('You were muted in this conversation until %s', 'Message when user was muted in conversation', 'bp-better-messages'), $time);
 
@@ -1198,13 +1123,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_delete( $this->thread_cache_key( $thread_id ), 'bm_messages' );
         }
 
-        /**
-         * Approve a pending message
-         *
-         * @param int $message_id Message ID to approve
-         * @param int|null $approver_user_id User ID who approved (defaults to current user)
-         * @return bool True on success, false on failure
-         */
         public function approve_message( int $message_id, ?int $approver_user_id = null ): bool
         {
             global $wpdb;
@@ -1226,51 +1144,50 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $table = bm_get_table( 'messages');
             $new_time = Better_Messages()->functions->get_microtime();
 
-            // Set the message to not pending anymore and update the time it was sent so it appears just like a normal message with current time.
             $sql = $wpdb->prepare( "UPDATE $table SET is_pending = 0, created_at = %d, updated_at = %d WHERE id = %d", $new_time, $new_time, $message_id );
             $wpdb->query( $sql );
 
-            // When was the message originally sent?
             Better_Messages()->functions->update_message_meta( $message->id, 'original_sent_time', $message->created_at );
-            // Who approved the message?
             Better_Messages()->functions->update_message_meta( $message->id, 'approver_user_id', $approver_user_id );
 
             $saved_message = Better_Messages()->functions->get_message_meta( $message->id, 'pending_args' );
             Better_Messages()->functions->delete_message_meta( $message->id, 'pending_args' );
 
-            // Clear AI moderation flags since admin has approved the message
             Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_flagged' );
             Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_categories' );
             Better_Messages()->functions->delete_message_meta( $message->id, 'ai_moderation_result' );
 
             if( is_a( $saved_message, 'BM_Messages_Message' ) ){
-                $saved_message->created_at = $new_time;
+                $saved_message->created_at    = $new_time;
+                $saved_message->is_pending    = 0;
+                $saved_message->push_deferred = false;
+
+                if( isset( $saved_message->push_intent ) ){
+                    $saved_message->send_push = (bool) $saved_message->push_intent;
+                }
+
+                if( isset( $saved_message->mobile_push_intent ) ){
+                    $saved_message->mobile_push = (bool) $saved_message->mobile_push_intent;
+                }
+
+                Better_Messages()->mentions->process_mentions( (int) $message->thread_id, (int) $message->id, $message->message );
+
                 do_action_ref_array( 'better_messages_message_sent', array( &$saved_message ) );
             }
 
-            // Mark user as having an approved message so they are no longer a first-time sender
             Better_Messages()->functions->update_user_meta( $message->sender_id, 'bm_has_approved_message', '1' );
 
-            // Update thread timestamp for AJAX mode
             do_action( 'better_messages_thread_updated', $message->thread_id );
 
             return true;
         }
 
-        /**
-         * Approve all pending messages from a user
-         *
-         * @param int $user_id User ID whose messages to approve
-         * @param int|null $approver_user_id User ID who approved (defaults to current user)
-         * @return int Number of messages approved
-         */
         public function approve_all_pending_messages_from_user( int $user_id, ?int $approver_user_id = null ): int
         {
             global $wpdb;
 
             $table = bm_get_table( 'messages');
 
-            // Get all pending message IDs from this user
             $message_ids = $wpdb->get_col( $wpdb->prepare(
                 "SELECT id FROM {$table} WHERE sender_id = %d AND is_pending = 1",
                 $user_id
@@ -1291,19 +1208,12 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $approved_count;
         }
 
-        /**
-         * Delete all pending messages from a user
-         *
-         * @param int $user_id User ID whose pending messages to delete
-         * @return int Number of messages deleted
-         */
         public function delete_all_pending_messages_from_user( int $user_id ): int
         {
             global $wpdb;
 
             $table = bm_get_table( 'messages' );
 
-            // Get all pending message IDs from this user
             $message_ids = $wpdb->get_col( $wpdb->prepare(
                 "SELECT id FROM {$table} WHERE sender_id = %d AND is_pending = 1",
                 $user_id
@@ -1325,11 +1235,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $deleted_count;
         }
 
-        /**
-         * Get list of email addresses for moderation notifications
-         *
-         * @return array Array of valid email addresses
-         */
         private function get_notification_emails()
         {
             $emails_raw = Better_Messages()->settings['messagesModerationNotificationEmails'];
@@ -1338,20 +1243,13 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 return [];
             }
 
-            // Split by newlines and filter out empty lines
             $emails = array_filter( array_map( 'trim', explode( "\n", $emails_raw ) ) );
 
-            // Validate email addresses
             $valid_emails = array_filter( $emails, 'is_email' );
 
             return $valid_emails;
         }
 
-        /**
-         * Send email notification when a message is pending moderation
-         *
-         * @param BM_Messages_Message $message Message object
-         */
         public function notify_pending_message( $message )
         {
             if( ! isset( $message->sender_id ) || ! isset( $message->thread_id ) ){
@@ -1380,7 +1278,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 $message
             );
 
-            // Determine reason for pending
             $reason = _x( 'Pre-moderation rules', 'Moderation email', 'bp-better-messages' );
 
             if( ! empty( $message->ai_moderation_result ) ) {
@@ -1394,7 +1291,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 }
             }
 
-            // Build email body
             $email_body  = sprintf( _x( 'Sender: %s (ID: %d)', 'Moderation email', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
             $email_body .= sprintf( _x( 'Conversation: #%d', 'Moderation email', 'bp-better-messages' ), $thread_id ) . "\n";
             $email_body .= sprintf( _x( 'Reason: %s', 'Moderation email', 'bp-better-messages' ), $reason ) . "\n";
@@ -1413,7 +1309,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             if ( is_array( $attachments ) && ! empty( $attachments ) ) {
                 $email_body .= _x( 'Attachments:', 'Moderation email', 'bp-better-messages' ) . "\n";
                 foreach ( array_keys( $attachments ) as $att_id ) {
-                    $url = wp_get_attachment_url( $att_id );
+                    $url = Better_Messages_Storage()->get_file_url( $att_id, 'email' );
+                    if ( ! $url ) {
+                        $url = wp_get_attachment_url( $att_id );
+                    }
                     if ( $url ) {
                         $email_body .= '  - ' . $url . "\n";
                     }
@@ -1427,16 +1326,6 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
         }
 
-        /**
-         * Send email notification when a message is reported
-         *
-         * @param int $message_id Message ID
-         * @param int $thread_id Thread ID
-         * @param int $reporter_user_id User ID who reported
-         * @param string $category Report category
-         * @param string $description Report description
-         * @param array $reports All reports for this message
-         */
         public function notify_reported_message( $message_id, $thread_id, $reporter_user_id, $category, $description, $reports )
         {
             $emails = $this->get_notification_emails();

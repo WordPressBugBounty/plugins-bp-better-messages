@@ -1,7 +1,4 @@
 <?php
-/**
- * Settings page
- */
 defined( 'ABSPATH' ) || exit;
 wp_enqueue_script( 'react' );
 wp_enqueue_script( 'react-dom' );

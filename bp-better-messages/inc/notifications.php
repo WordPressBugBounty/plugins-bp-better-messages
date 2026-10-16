@@ -33,10 +33,8 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 add_filter( 'bp_get_email_args', array( $this, 'suppress_post_type_filters' ), 10, 2 );
             }
 
-            // Add REST API endpoint for test email and unsubscribe
             add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 
-            // Display unsubscribe confirmation message
             add_action( 'wp_footer', array( $this, 'display_unsubscribe_message' ) );
         }
 
@@ -102,13 +100,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
         {
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $notifications_interval > 0 ) {
-                if ( ! wp_next_scheduled('better_messages_send_notifications') ) {
-                    wp_schedule_event(time(), 'bp_better_messages_notifications', 'better_messages_send_notifications');
-                }
-            } else {
-                if ( wp_next_scheduled('better_messages_send_notifications') ) {
-                    wp_unschedule_event( wp_next_scheduled( 'better_messages_send_notifications' ), 'better_messages_send_notifications' );
-                }
+                Better_Messages_Worker()->add_task( 'better_messages_send_notifications', $notifications_interval * MINUTE_IN_SECONDS );
             }
         }
 
@@ -135,7 +127,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
             $descriptions[ 'messages-unread-group' ] = __( 'A member has unread private messages.', 'bp-better-messages' );
 
-            // Add these emails to the database.
             foreach ( $emails as $id => $email ) {
                 $post_args = bp_parse_args( $email, $defaults, 'install_email_' . $id );
 
@@ -232,6 +223,66 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             }
         }
 
+        public function email_candidate_where(){
+            $mentions    = bm_get_table( 'mentions' );
+            $threadsmeta = bm_get_table( 'threadsmeta' );
+            $types       = "'" . implode( "','", Better_Messages_Mentions::NOTIFY_TYPES ) . "'";
+
+            $alerts_since = time() - DAY_IN_SECONDS;
+
+            $where = "(
+                `recipients`.`is_muted` = 3
+                OR ( `recipients`.`is_muted` IN (0, 2) AND `recipients`.`thread_id` NOT IN ( SELECT `bm_thread_id` FROM `{$threadsmeta}` WHERE `meta_key` = 'email_disabled' AND `meta_value` = '1' ) )
+                OR EXISTS ( SELECT 1 FROM `{$mentions}` `m` WHERE `m`.`user_id` = `recipients`.`user_id` AND `m`.`thread_id` = `recipients`.`thread_id` AND `m`.`type` IN ({$types}) )
+                OR ( `recipients`.`is_muted` IN (0, 2) AND `recipients`.`thread_id` IN ( SELECT `bm_thread_id` FROM `{$threadsmeta}` WHERE `meta_key` = '_bm_call_alert_sent' AND CAST( `meta_value` AS UNSIGNED ) > {$alerts_since} ) )
+            )";
+
+            return apply_filters( 'better_messages_email_candidate_where', $where );
+        }
+
+        public function email_mode( $thread_id, $user_id ){
+            $levels = Better_Messages()->notification_levels;
+
+            $scope = $levels->get_user_email_scope( $user_id );
+
+            if ( $scope === 'off' || $levels->is_thread_locked( $thread_id ) ) {
+                $mode = false;
+            } else {
+                $level = $levels->get_effective_level( $thread_id, $user_id );
+
+                if ( $level === 'none' || ! $levels->email_channel_open( $thread_id ) ) {
+                    $mode = $levels->force_enabled() ? 'personal' : false;
+                } else if ( $level === 'mentions' || ( $scope === 'direct' && ! $levels->is_one_to_one( $thread_id ) ) ) {
+                    $mode = $scope === 'all' ? 'mentions_alerts' : 'mentions';
+                } else {
+                    $mode = 'all';
+                }
+            }
+
+            return apply_filters( 'better_messages_email_mode', $mode, $thread_id, $user_id, $scope );
+        }
+
+        public function email_mode_filter( $mode, $thread_id, $user_id ){
+            global $wpdb;
+
+            if ( $mode === 'all' ) {
+                return '';
+            }
+
+            $types = $mode === 'personal' ? Better_Messages_Mentions::PERSONAL_TYPES : Better_Messages_Mentions::NOTIFY_TYPES;
+
+            $rows = $wpdb->prepare(
+                "`messages`.`id` IN (SELECT `message_id` FROM `" . bm_get_table( 'mentions' ) . "` WHERE `thread_id` = %d AND `user_id` = %d AND `type` IN ('" . implode( "','", $types ) . "'))",
+                $thread_id, $user_id
+            );
+
+            if ( $mode === 'mentions_alerts' ) {
+                $rows = "( {$rows} OR `messages`.`id` IN (SELECT `bm_message_id` FROM `" . bm_get_table( 'meta' ) . "` WHERE `meta_key` = 'broadcast_alert') )";
+            }
+
+            return "AND {$rows}";
+        }
+
         public function update_last_email( $user_id, $thread_id, $time ){
             global $wpdb;
 
@@ -282,17 +333,8 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 $where[] = "`user_index`.`last_activity` < " . $wpdb->prepare('%s', $time);
                 $where[] = "AND `recipients`.`unread_count` > 0";
                 $where[] = "AND `recipients`.`is_deleted` = 0";
-                if ( Better_Messages()->settings['mentionsForceNotifications'] === '1' ) {
-                    $where[] = "AND (`recipients`.`is_muted` = 0 OR `recipients`.`user_id` IN (SELECT `m`.`user_id` FROM `" . bm_get_table('mentions') . "` `m` WHERE `m`.`thread_id` = `recipients`.`thread_id` AND `m`.`user_id` = `recipients`.`user_id` AND `m`.`type` = 'mention'))";
-                } else {
-                    $where[] = "AND `recipients`.`is_muted` = 0";
-                }
                 $where[] = "AND `recipients`.`user_id` > 0";
-                if ( Better_Messages()->settings['mentionsForceNotifications'] === '1' ) {
-                    $where[] = "AND (`recipients`.`thread_id` NOT IN( SELECT `bm_thread_id` FROM `" . bm_get_table('threadsmeta') . "` WHERE `meta_key` = 'email_disabled' AND `meta_value` = '1' ) OR `recipients`.`user_id` IN (SELECT `m`.`user_id` FROM `" . bm_get_table('mentions') . "` `m` WHERE `m`.`thread_id` = `recipients`.`thread_id` AND `m`.`user_id` = `recipients`.`user_id` AND `m`.`type` = 'mention'))";
-                } else {
-                    $where[] = "AND `recipients`.`thread_id` NOT IN( SELECT `bm_thread_id` FROM `" . bm_get_table('threadsmeta') . "` WHERE `meta_key` = 'email_disabled' AND `meta_value` = '1' )";
-                }
+                $where[] = "AND " . $this->email_candidate_where();
 
                 $group_by[] = "`user_index`.`ID`";
                 $group_by[] = "`recipients`.`thread_id`";
@@ -314,142 +356,58 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                 $unread_threads = $wpdb->get_results( $sql );
 
+                $floor = get_option( 'better_messages_notify_defaults_changed_at', false );
+
+                if ( $floor === false ) {
+                    $floor = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+                    add_option( 'better_messages_notify_defaults_changed_at', $floor, '', false );
+                }
+
+                $floor = (string) $floor;
+                $cap   = max( 1, (int) apply_filters( 'better_messages_email_digest_max_messages', 50 ) );
+                $seen  = array();
+
                 while ( is_array( $unread_threads ) && count( $unread_threads ) > 0 ){
                     $gmt_offset = get_option('gmt_offset') * 3600;
+                    $repeated   = false;
 
                     foreach ( $unread_threads as $thread ) {
-                        $user_id       = $thread->user_id;
-                        $thread_id     = $thread->thread_id;
+                        $user_id       = (int) $thread->user_id;
+                        $thread_id     = (int) $thread->thread_id;
                         $last_notified = $thread->last_email;
                         $last_date     = $thread->last_date;
 
-                        $this->sending_thread_id = $thread_id;
+                        $seen_key = $user_id . '|' . $thread_id . '|' . $last_date;
 
-                        $chat_id = null;
-                        $mention_override = false;
-
-                        // Check if user has unread mentions in this thread
-                        $user_has_mentions = false;
-                        if ( Better_Messages()->settings['mentionsForceNotifications'] === '1' ) {
-                            $user_has_mentions = (bool) $wpdb->get_var( $wpdb->prepare(
-                                "SELECT COUNT(*) FROM `" . bm_get_table('mentions') . "` WHERE `thread_id` = %d AND `user_id` = %d AND `type` = 'mention'",
-                                $thread_id, $user_id
-                            ) );
+                        if ( isset( $seen[ $seen_key ] ) ) {
+                            $repeated = true;
+                            continue;
                         }
+
+                        $seen[ $seen_key ] = true;
+
+                        $this->sending_thread_id = $thread_id;
 
                         $type = Better_Messages()->functions->get_thread_type( $thread_id );
 
-                        if( $type === 'group' ) {
-                            if ( Better_Messages()->settings['enableGroupsEmails'] !== '1' ) {
-                                $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'group_id');
-
-                                if (!empty($group_id)) {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            if ( Better_Messages()->settings['PSenableGroupsEmails'] !== '1' ) {
-                                $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'peepso_group_id');
-
-                                if (!empty($group_id)) {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            if ( Better_Messages()->settings['UMenableGroupsEmails'] !== '1' ) {
-                                $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'um_group_id');
-
-                                if (!empty($group_id)) {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            if( Better_Messages()->settings['FCenableGroupsEmails'] !== '1' ){
-                                $group_id = Better_Messages()->functions->get_thread_meta($thread_id, 'fluentcommunity_group_id');
-
-                                if ( ! empty( $group_id) ) {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-                            }
+                        try {
+                            $mode = $this->email_mode( $thread_id, $user_id );
+                        } catch ( Throwable $e ) {
+                            $mode = false;
                         }
 
-                        if( $type === 'course' ) {
-                            if ( Better_Messages()->settings['enableCoursesEmails'] !== '1' ) {
-                                if ( $user_has_mentions ) {
-                                    $mention_override = true;
-                                } else {
-                                    $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                    continue;
-                                }
-                            }
+                        if ( $mode === false ) {
+                            $this->update_last_email( $user_id, $thread_id, $last_date );
+                            continue;
                         }
 
-                        if( $type === 'chat-room' ) {
-                            $chat_id = Better_Messages()->functions->get_thread_meta($thread_id, 'chat_id');
-
-                            if (!empty($chat_id)) {
-                                $is_excluded_from_threads_list = Better_Messages()->functions->get_thread_meta($thread_id, 'exclude_from_threads_list');
-                                if ($is_excluded_from_threads_list === '1') {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        Better_Messages()->functions->update_thread_meta($thread_id, 'email_disabled', '1');
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-
-                                $notifications_enabled = Better_Messages()->functions->get_thread_meta($thread_id, 'enable_notifications');
-                                if ($notifications_enabled !== '1') {
-                                    if ( $user_has_mentions ) {
-                                        $mention_override = true;
-                                    } else {
-                                        Better_Messages()->functions->update_thread_meta($thread_id, 'email_disabled', '1');
-                                        $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                        continue;
-                                    }
-                                }
-                            }
+                        if ( $floor !== '' && ( ! $last_notified || $last_notified < $floor ) ) {
+                            $last_notified = $floor;
                         }
 
-                        if ( ! $this->is_user_emails_enabled( $user_id )  ) {
-                            if ( $user_has_mentions ) {
-                                $mention_override = true;
-                            } else {
-                                $this->update_last_email( $user_id, $thread_id, $thread->last_date );
-                                continue;
-                            }
-                        }
-
-                        // If thread was included due to muted override, treat as mention override
-                        if ( $user_has_mentions && ! $mention_override ) {
-                            $is_thread_muted = (bool) $wpdb->get_var( $wpdb->prepare(
-                                "SELECT is_muted FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = %d AND `user_id` = %d",
-                                $thread_id, $user_id
-                            ) );
-                            if ( $is_thread_muted ) {
-                                $mention_override = true;
-                            }
+                        if ( $last_notified && $last_date <= $last_notified ) {
+                            $this->update_last_email( $user_id, $thread_id, $last_date );
+                            continue;
                         }
 
                         if ( ! $last_notified || ( $last_date > $last_notified ) ) {
@@ -458,13 +416,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                             $ud = get_userdata( $user_id );
 
-                            $mention_filter = '';
-                            if ( $mention_override ) {
-                                $mention_filter = $wpdb->prepare(
-                                    "AND `messages`.`id` IN (SELECT `message_id` FROM `" . bm_get_table('mentions') . "` WHERE `thread_id` = %d AND `user_id` = %d AND `type` = 'mention')",
-                                    $thread->thread_id, $user_id
-                                );
-                            }
+                            $mention_filter = $this->email_mode_filter( $mode, $thread_id, $user_id );
 
                             $query = $wpdb->prepare( "
                                 SELECT
@@ -487,12 +439,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 {$mention_filter}
                                 ORDER BY id DESC
                                 LIMIT 0, %d
-                            ", $thread->thread_id, $last_notified, $user_id, $thread->unread_count );
+                            ", $thread->thread_id, $last_notified, $user_id, min( max( 1, (int) $thread->unread_count ), $cap ) );
 
                             $messages = array_reverse( $wpdb->get_results( $query ) );
 
                             if ( empty( $messages ) ) {
-                                $this->update_last_email( $user_id, $thread_id, gmdate('Y-m-d H:i:s') );
+                                $this->update_last_email( $user_id, $thread_id, $last_date );
                                 continue;
                             }
 
@@ -523,7 +475,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                 $last_message_id = 0;
 
                                 foreach ($messages as $message) {
-                                    // System messages (sender_id=0): display as centered italic text
                                     if ( (int) $message->sender_id === 0 ) {
                                         $_message = Better_Messages()->functions->format_message( $message->message, (int) $message->id, 'site', $user_id );
                                         $messageHtml .= '<tr><td colspan="2" style="text-align:center;color:#888;font-style:italic;padding:4px 0;">' . esc_html($_message) . '</td></tr>';
@@ -581,11 +532,11 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     }
                                 }
 
-                                // Check if BuddyPress email should be used
                                 $use_buddypress_email = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
+                                $sender = false;
+
                                 if ( $use_buddypress_email ) {
-                                    // Find last real (non-system) sender for BuddyPress email
                                     $email_sender_id = 0;
                                     foreach ( array_reverse($messages) as $_msg ) {
                                         if ( (int) $_msg->sender_id > 0 ) {
@@ -597,10 +548,11 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     $sender = $email_sender_id > 0 ? get_userdata( $email_sender_id ) : false;
 
                                     if ( ! is_object( $sender ) ){
-                                        $this->update_last_email( $user_id, $thread_id, $last_date );
-                                        continue;
+                                        $use_buddypress_email = false;
                                     }
+                                }
 
+                                if ( $use_buddypress_email ) {
                                     $args = array(
                                         'tokens' =>
                                             apply_filters('bp_better_messages_notification_tokens', array(
@@ -615,8 +567,8 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                                     'notification_type' => 'messages-unread',
                                                 )))
                                             ),
-                                                $ud, // userdata object of receiver
-                                                $sender, // userdata object of sender
+                                                $ud,
+                                                $sender,
                                                 $thread_id
                                             ),
                                     );
@@ -632,7 +584,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         $email_subject = _x('You have unread messages', 'Email notification header for non BuddyPress websites', 'bp-better-messages');
                                     }
 
-                                    // Prepare template data
                                     $template_data = array(
                                         'user_name'       => $user->display_name,
                                         'subject'         => $subject,
@@ -642,7 +593,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $user_id ) : '',
                                     );
 
-                                    // Get the email content using the customizable template system
                                     $content = $this->get_email_template( $template_data );
 
                                     add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
@@ -683,6 +633,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                         }
                     }
 
+                    if ( $repeated ) {
+                        break;
+                    }
+
                     $unread_threads = $wpdb->get_results( $sql );
                 }
             } finally {
@@ -715,7 +669,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             $pages = ceil($number_of_records / $per_page);
 
             for ($page = 1; $page <= $pages; $page++){
-                // code to repeat here
                 $offset = ($page - 1) * $per_page;
 
                 $rows = $wpdb->get_results("SELECT user_id, meta_value FROM `{$wpdb->usermeta}` WHERE `meta_key` = 'bp-better-messages-last-notified' ORDER BY user_id LIMIT $offset, $per_page");
@@ -758,9 +711,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return 'text/html';
         }
 
-        /**
-         * Register REST API routes
-         */
         public function register_rest_routes() {
             register_rest_route( 'better-messages/v1', '/sendTestEmail', array(
                 'methods'             => 'POST',
@@ -797,19 +747,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             ) );
         }
 
-        /**
-         * Permission callback for settings management
-         */
         public function can_manage_settings() {
             return current_user_can( 'manage_options' );
         }
 
-        /**
-         * REST API handler for sending test email
-         *
-         * @param WP_REST_Request $request
-         * @return WP_REST_Response|WP_Error
-         */
         public function rest_send_test_email( WP_REST_Request $request ) {
             $email = $request->get_param( 'email' );
 
@@ -825,11 +766,9 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             $subject      = __( 'Test Conversation', 'bp-better-messages' );
             $email_subject = sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), $subject );
 
-            // Check if BuddyPress email should be used
             $use_buddypress = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
             if ( $use_buddypress ) {
-                // Send test email via BuddyPress email system
                 $args = array(
                     'tokens' => array(
                         'messages.html' => $this->get_test_messages_html(),
@@ -843,14 +782,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 );
 
                 try {
-                    // bp_send_email can accept user ID, WP_User object, or email address
                     bp_send_email( 'messages-unread-group', $email, $args );
                     $sent = true;
                 } catch ( Exception $e ) {
                     $sent = false;
                 }
             } else {
-                // Use custom template system
                 $template_data = array(
                     'user_name'       => $current_user->display_name,
                     'subject'         => $subject,
@@ -860,10 +797,8 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                     'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $current_user->ID ) : '',
                 );
 
-                // Get the email content using the customizable template system
                 $content = $this->get_email_template( $template_data );
 
-                // Send the test email
                 add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
                 $sent = wp_mail( $email, $email_subject, $content );
                 remove_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
@@ -887,37 +822,21 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             }
         }
 
-        /**
-         * REST API handler for unsubscribing from message email notifications
-         *
-         * @param WP_REST_Request $request
-         * @return WP_REST_Response|WP_Error
-         */
         public function rest_unsubscribe( WP_REST_Request $request ) {
             $user_id = $request->get_param( 'user_id' );
             $token   = $request->get_param( 'token' );
 
-            // Verify the token
             if ( ! $this->verify_unsubscribe_token( $user_id, $token ) ) {
-                // Redirect to home with error
                 wp_redirect( add_query_arg( 'bm-unsubscribe', 'invalid', home_url() ) );
                 exit;
             }
 
-            // Disable message email notifications for this user using existing setting
             $this->user_emails_enabled_update( $user_id, 'no' );
 
-            // Redirect to confirmation page
             wp_redirect( add_query_arg( 'bm-unsubscribe', 'success', home_url() ) );
             exit;
         }
 
-        /**
-         * Generate unsubscribe token for a user
-         *
-         * @param int $user_id User ID
-         * @return string Token
-         */
         public function generate_unsubscribe_token( $user_id ) {
             $secret = wp_salt( 'auth' );
             $data   = $user_id . '|bm_unsubscribe';
@@ -925,25 +844,12 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return hash_hmac( 'sha256', $data, $secret );
         }
 
-        /**
-         * Verify unsubscribe token
-         *
-         * @param int $user_id User ID
-         * @param string $token Token to verify
-         * @return bool True if valid
-         */
         public function verify_unsubscribe_token( $user_id, $token ) {
             $expected_token = $this->generate_unsubscribe_token( $user_id );
 
             return hash_equals( $expected_token, $token );
         }
 
-        /**
-         * Generate unsubscribe URL for a user
-         *
-         * @param int $user_id User ID
-         * @return string Unsubscribe URL
-         */
         public function get_unsubscribe_url( $user_id ) {
             $token = $this->generate_unsubscribe_token( $user_id );
 
@@ -953,9 +859,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             ) );
         }
 
-        /**
-         * Display unsubscribe confirmation message in footer
-         */
         public function display_unsubscribe_message() {
             if ( ! isset( $_GET['bm-unsubscribe'] ) ) {
                 return;
@@ -991,22 +894,15 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             <?php
         }
 
-        /**
-         * Generate sample messages HTML for test email
-         *
-         * @return string Sample messages HTML
-         */
         private function get_test_messages_html() {
             $messages_html = '<table style="margin:1rem 0!important;width:100%;table-layout: auto !important;"><tbody>';
 
-            // Sample message 1
             $messages_html .= '<tr><td colspan="2"><b>' . sprintf( __( '%s wrote:', 'bp-better-messages' ), 'Jane Smith' ) . '</b></td></tr>';
             $messages_html .= '<tr>';
             $messages_html .= '<td style="padding-right: 10px;">' . __( 'Hello! This is a sample message to test how your email notifications will look.', 'bp-better-messages' ) . '</td>';
             $messages_html .= '<td style="width:1px;white-space:nowrap;vertical-align:top;text-align:right;text-overflow:ellipsis;overflow:hidden;"><i>' . date_i18n( get_option( 'time_format' ), strtotime( '-5 minutes' ) ) . '</i></td>';
             $messages_html .= '</tr>';
 
-            // Sample message 2
             $messages_html .= '<tr><td colspan="2"><b>' . sprintf( __( '%s wrote:', 'bp-better-messages' ), 'John Doe' ) . '</b></td></tr>';
             $messages_html .= '<tr>';
             $messages_html .= '<td style="padding-right: 10px;">' . __( 'Thanks for the message! Here is another sample to show how multiple messages appear in the email.', 'bp-better-messages' ) . '</td>';
@@ -1018,12 +914,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return $messages_html;
         }
 
-        /**
-         * Get the email template based on settings
-         *
-         * @param array $data Template data with placeholders
-         * @return string Rendered HTML email
-         */
         public function get_email_template( $data ) {
             $settings = Better_Messages()->settings;
             $mode = isset( $settings['emailTemplateMode'] ) ? $settings['emailTemplateMode'] : 'simple';
@@ -1035,34 +925,24 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return $this->render_simple_email_template( $data );
         }
 
-        /**
-         * Render email using simple mode settings
-         *
-         * @param array $data Template data
-         * @return string Rendered HTML
-         */
         public function render_simple_email_template( $data ) {
             $settings = Better_Messages()->settings;
 
-            // Get colors from settings or use defaults
             $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
             $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';
             $content_bg_color = ! empty( $settings['emailContentBgColor'] ) ? $settings['emailContentBgColor'] : '#ffffff';
             $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
 
-            // Get custom texts or use defaults
             $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
             $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
             $button_text = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
 
-            // Process header text placeholder
             if ( empty( $header_text ) ) {
                 $header_text = sprintf( __( 'Hi %s,', 'bp-better-messages' ), $data['user_name'] );
             } else {
                 $header_text = str_replace( '{{user_name}}', $data['user_name'], $header_text );
             }
 
-            // Process footer text placeholders
             if ( empty( $footer_text ) ) {
                 $footer_text = get_bloginfo( 'name' );
             } else {
@@ -1073,13 +953,11 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 );
             }
 
-            // Get logo HTML if logo is set
             $logo_html = '';
             if ( ! empty( $settings['emailLogoUrl'] ) ) {
                 $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 100%; height: auto;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
             }
 
-            // Build the email HTML
             ob_start();
             ?>
             <!doctype html>
@@ -1175,24 +1053,16 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return ob_get_clean();
         }
 
-        /**
-         * Render email using custom HTML template
-         *
-         * @param array $data Template data
-         * @return string Rendered HTML
-         */
         public function render_custom_email_template( $data ) {
             $template = Better_Messages_Options()->get_email_custom_html();
             $settings = Better_Messages()->settings;
 
-            // Get colors from settings or use defaults
             $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
             $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';
             $content_bg_color = ! empty( $settings['emailContentBgColor'] ) ? $settings['emailContentBgColor'] : '#ffffff';
             $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
             $button_text      = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
 
-            // Process header text
             $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
             if ( empty( $header_text ) ) {
                 $header_text = sprintf( __( 'Hi %s,', 'bp-better-messages' ), $data['user_name'] );
@@ -1200,7 +1070,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 $header_text = str_replace( '{{user_name}}', $data['user_name'], $header_text );
             }
 
-            // Process footer text
             $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
             if ( empty( $footer_text ) ) {
                 $footer_text = get_bloginfo( 'name' );
@@ -1212,19 +1081,16 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 );
             }
 
-            // Logo HTML
             $logo_html = '';
             if ( ! empty( $settings['emailLogoUrl'] ) ) {
                 $logo_html = '<tr><td style="text-align: center; padding: 20px 0 10px;"><img src="' . esc_url( $settings['emailLogoUrl'] ) . '" style="max-width: 100%; height: auto;" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '"></td></tr>';
             }
 
-            // Unsubscribe HTML
             $unsubscribe_html = '';
             if ( ! empty( $data['unsubscribe_url'] ) ) {
                 $unsubscribe_html = '<br><a href="' . esc_url( $data['unsubscribe_url'] ) . '" style="color: #999999; font-size: 11px; text-decoration: underline;">' . esc_html_x( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ) . '</a>';
             }
 
-            // Replace all placeholders
             $replacements = array(
                 '{{site_name}}'        => get_bloginfo( 'name' ),
                 '{{site_url}}'         => home_url(),
@@ -1248,28 +1114,17 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return str_replace( array_keys( $replacements ), array_values( $replacements ), $template );
         }
 
-        /**
-         * Adjust color brightness
-         *
-         * @param string $hex Hex color
-         * @param int $steps Steps to adjust (-255 to 255)
-         * @return string Adjusted hex color
-         */
         private function adjust_brightness( $hex, $steps ) {
-            // Remove # if present
             $hex = ltrim( $hex, '#' );
 
-            // Convert to RGB
             $r = hexdec( substr( $hex, 0, 2 ) );
             $g = hexdec( substr( $hex, 2, 2 ) );
             $b = hexdec( substr( $hex, 4, 2 ) );
 
-            // Adjust
             $r = max( 0, min( 255, $r + $steps ) );
             $g = max( 0, min( 255, $g + $steps ) );
             $b = max( 0, min( 255, $b + $steps ) );
 
-            // Convert back to hex
             return '#' . sprintf( '%02x%02x%02x', $r, $g, $b );
         }
     }

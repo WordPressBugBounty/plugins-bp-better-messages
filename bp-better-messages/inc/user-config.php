@@ -78,14 +78,6 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
             $friends_active   = Better_Messages()->functions->is_friends_active();
             $followers_active = Better_Messages()->functions->is_followers_active();
 
-            /*if( $friends_active && $followers_active ){
-                $default = 'only_friends,only_followers';
-            } else if( $friends_active ) {
-                $default = 'only_friends';
-            } else if( $followers_active ) {
-                $default = 'only_followers';
-            }*/
-
             if( Better_Messages()->functions->is_only_friends_mode() ){
                 $default = 'only_friends';
             } else if( Better_Messages()->functions->is_only_followers_mode()  ){
@@ -172,12 +164,35 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
 
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $user_id > 0 && $notifications_interval > 0 ) {
-                $notifications_options[] = [
-                        'id'      => 'email_notifications',
-                        'label'   => _x('Enable notifications via email', 'User settings', 'bp-better-messages'),
-                        'value'   => 'yes',
-                        'checked' => Better_Messages()->notifications->is_user_emails_enabled( $user_id ),
-                        'desc'    => _x('When enabled, you will receive notifications about new messages via email when you are offline.', 'User settings', 'bp-better-messages')
+                $email_scope = Better_Messages()->notification_levels->get_user_email_scope( $user_id );
+
+                $settings[] = [
+                    'id'      => 'email_scope',
+                    'title'   => _x('Email notifications', 'User settings', 'bp-better-messages'),
+                    'type'    => 'radio',
+                    'options' => [
+                        [
+                            'id'      => 'email_scope_all',
+                            'label'   => _x('All my notifications', 'User settings', 'bp-better-messages'),
+                            'value'   => 'all',
+                            'checked' => $email_scope === 'all',
+                            'desc'    => _x('An email about the unread messages of every conversation that notifies you, while you are offline.', 'User settings', 'bp-better-messages')
+                        ],
+                        [
+                            'id'      => 'email_scope_direct',
+                            'label'   => _x('Only one-to-one conversations, mentions and replies', 'User settings', 'bp-better-messages'),
+                            'value'   => 'direct',
+                            'checked' => $email_scope === 'direct',
+                            'desc'    => _x('Group conversations and chat rooms email you only when someone mentions you or replies to your message.', 'User settings', 'bp-better-messages')
+                        ],
+                        [
+                            'id'      => 'email_scope_off',
+                            'label'   => _x('Off', 'User settings', 'bp-better-messages'),
+                            'value'   => 'off',
+                            'checked' => $email_scope === 'off',
+                            'desc'    => _x('No emails about new messages.', 'User settings', 'bp-better-messages')
+                        ]
+                    ]
                 ];
             }
 
@@ -243,6 +258,15 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 case 'email_notifications':
                     $new_value = ( $value === 'false' ) ? 'no' : 'yes';
                     Better_Messages()->notifications->user_emails_enabled_update( $user_id, $new_value );
+
+                    if( $new_value === 'no' ){
+                        Better_Messages()->functions->delete_user_meta( $user_id, 'bm_email_scope' );
+                    }
+                    break;
+                case 'email_scope':
+                    if( $user_id > 0 && in_array( $value, array( 'all', 'direct', 'off' ), true ) ){
+                        Better_Messages()->notification_levels->set_user_email_scope( $user_id, $value );
+                    }
                     break;
                 case 'who_can_start_conversations':
                     Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_who_can_start_conversations', $value );

@@ -18,7 +18,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
 
         public function __construct()
         {
-            add_action( 'admin_init', array( $this, 'register_event' ) );
+            add_action( 'init', array( $this, 'register_event' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_deleted_messages_meta' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_old_messages' ) );
             add_action( 'better_messages_cleaner_job', array( $this, 'clean_preview_messages' ) );
@@ -30,9 +30,7 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
         }
 
         public function register_event(){
-            if ( ! wp_next_scheduled( 'better_messages_cleaner_job' ) ) {
-                wp_schedule_event( time(), 'better_messages_cleaner_job', 'better_messages_cleaner_job' );
-            }
+            Better_Messages_Worker()->add_task( 'better_messages_cleaner_job', 5 * MINUTE_IN_SECONDS );
         }
 
         public function clean_deleted_messages_meta(){
@@ -181,7 +179,6 @@ if ( !class_exists( 'Better_Messages_Cleaner' ) ):
                     Better_Messages()->functions->delete_message( $message_id, false, true, 'delete' );
                 }
             } else {
-                // Replace mode: remove media file, keep message with expired marker
                 foreach ( $message_ids as $message_id ) {
                     $message = Better_Messages()->functions->get_message( $message_id );
 

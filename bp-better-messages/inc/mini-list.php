@@ -7,19 +7,15 @@ class Better_Messages_Mini_List
     public static function instance()
     {
 
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if ( null === $instance ) {
             $instance = new Better_Messages_Mini_List;
             $instance->setup_actions();
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
     public function setup_actions()

@@ -438,6 +438,13 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Courses' ) ) {
 
         public function get_course_thread_id( $course_id )
         {
+            return Better_Messages()->functions->with_lock( 'fluent_course_thread|' . (int) $course_id, function () use ( $course_id ) {
+                return $this->find_or_create_course_thread( $course_id );
+            } );
+        }
+
+        private function find_or_create_course_thread( $course_id )
+        {
             global $wpdb;
 
             $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "

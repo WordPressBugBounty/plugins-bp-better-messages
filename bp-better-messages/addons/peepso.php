@@ -20,9 +20,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
         public function __construct()
         {
-            /**
-             * Adding header button
-             */
             add_filter('peepso_navigation', array(&$this, 'filter_peepso_navigation'));
 
             add_filter('peepso_profile_actions', array(&$this, 'profile_actions'), 99, 2);
@@ -66,7 +63,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             add_filter('bp_better_messages_script_variable', array( $this, 'script_variables' ) );
 
-            //add_filter('better_messages_is_verified', array( $this, 'user_verified' ), 20, 2 );
             add_filter('better_messages_rest_user_item', array( $this, 'rest_user_item'), 20, 3 );
 
             if( class_exists('PeepSoBlockUsers' ) && PeepSo::get_option('user_blocking_enable', 0) === 1 ) {
@@ -145,9 +141,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             $PeepSoBlockUsers = new PeepSoBlockUsers();
 
-            /**
-             *  Current user blocked other
-             */
             $is_blocked_1 = $PeepSoBlockUsers->is_user_blocking( Better_Messages()->functions->get_current_user_id(), $user_id_2 );
             if( $is_blocked_1 ) {
                 global $bp_better_messages_restrict_send_message;
@@ -155,9 +148,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 return false;
             }
 
-            /**
-             *  Other user blocked current user
-             */
             $is_blocked_2 = $PeepSoBlockUsers->is_user_blocking( $user_id_2, Better_Messages()->functions->get_current_user_id() );
 
             if( $is_blocked_2 ) {
@@ -213,7 +203,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                     $vip = PeepSoVIP::get_instance();
                     $icons = $vip->get_user_icons( $user_id );
                     if( is_array( $icons ) && count($icons) > 0 ) {
-                        //$display = PeepSo::get_option('vipso_where_to_display', 1);
                         $limit = PeepSo::get_option('vipso_display_how_many', 10);
 
                         $icons_html = '';
@@ -255,7 +244,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
                 return true;
             }
 
-            // Otherwise return previous var
             return $is_verified;
         }
 
@@ -402,9 +390,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
 
             $friend_id = key($participants['recipients']);
 
-            /**
-             * Allow users reply to admins even if not friends
-             */
             if( current_user_can('manage_options') || user_can( $friend_id, 'manage_options' ) || $friend_id < 0 ) {
                 return $allowed;
             }
@@ -435,11 +420,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             echo PeepSoTemplate::get_after_markup();
         }
 
-        /**
-         * Add the send message button when a user is viewing the friends list
-         * @param  array $options
-         * @return array
-         */
         public function member_options($options, $user_id)
         {
             $options['bm_message'] = array(
@@ -452,11 +432,6 @@ if ( !class_exists( 'Better_Messages_Peepso' ) ){
             return ($options);
         }
 
-        /**
-         * Add the send message button when a user is viewing the friends list
-         * @param  array $options
-         * @return array
-         */
         public function member_buttons($options, $user_id)
         {
 

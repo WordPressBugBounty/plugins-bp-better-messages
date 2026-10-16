@@ -746,20 +746,128 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
 
             $call_type = ( $type === 'video' ) ? 'video' : 'audio';
 
+            $alert = $this->call_alert_allowed( $thread_id, $user_id );
+
             $debounce_window = (int) apply_filters( 'better_messages_call_started_debounce_seconds', 300, $thread_id );
             if ( $debounce_window > 0 ) {
-                $last_emit = (int) Better_Messages()->functions->get_thread_meta( $thread_id, '_bm_call_started_emit_' . $call_type );
-                if ( $last_emit && ( time() - $last_emit ) < $debounce_window ) {
+                $debounced = Better_Messages()->functions->with_lock( 'call_started|' . $thread_id . '|' . $call_type, function () use ( $thread_id, $call_type, $alert, $debounce_window ) {
+                    wp_cache_delete( $thread_id, 'bm_thread_meta' );
+
+                    $last_emit = (int) Better_Messages()->functions->get_thread_meta( $thread_id, '_bm_call_started_emit_' . $call_type );
+                    if ( ! $alert && $last_emit && ( time() - $last_emit ) < $debounce_window ) {
+                        return true;
+                    }
+                    Better_Messages()->functions->update_thread_meta( $thread_id, '_bm_call_started_emit_' . $call_type, time() );
+
+                    return false;
+                } );
+
+                if ( $debounced ) {
                     return;
                 }
-                Better_Messages()->functions->update_thread_meta( $thread_id, '_bm_call_started_emit_' . $call_type, time() );
             }
 
-            Better_Messages()->functions->send_system_message( $thread_id, 'call_started', array(
+            $data = array(
                 'user_id'   => $user_id,
                 'user_name' => $user_id !== 0 ? Better_Messages()->functions->get_name( $user_id ) : '',
                 'call_type' => $call_type,
-            ) );
+            );
+
+            $overrides = array();
+
+            if ( $alert ) {
+                $name  = Better_Messages()->functions->get_plain_name( $user_id );
+                $title = $call_type === 'audio'
+                    ? sprintf( __( '%s started an audio call', 'bp-better-messages' ), $name )
+                    : sprintf( __( '%s started a video call', 'bp-better-messages' ), $name );
+
+                $overrides = array(
+                    'count_unread'    => true,
+                    'show_on_site'    => true,
+                    'send_push'       => true,
+                    'mobile_push'     => true,
+                    'notification'    => array(
+                        'title' => $title,
+                        'body'  => wp_strip_all_tags( html_entity_decode( Better_Messages()->functions->get_thread_title( $thread_id ) ) ),
+                    ),
+                    'notify_everyone' => true,
+                    'notify_exclude'  => array( $user_id ),
+                    'unread_exclude'  => array( $user_id ),
+                    'meta_data'       => array( 'broadcast_alert' => $user_id ),
+                );
+
+                $this->record_call_alert( $thread_id, $user_id );
+            }
+
+            Better_Messages()->functions->send_system_message( $thread_id, 'call_started', $data, $overrides );
+        }
+
+        public function call_alert_allowed( $thread_id, $user_id )
+        {
+            $thread_id = (int) $thread_id;
+            $user_id   = (int) $user_id;
+
+            $allowed = $user_id > 0 && ! Better_Messages()->functions->is_ai_bot_user( $user_id );
+
+            if ( $allowed ) {
+                $room = Better_Messages()->functions->get_thread_meta( $thread_id, 'call_alerts' );
+
+                if ( $room === 'off' ) {
+                    $allowed = false;
+                } else if ( $room !== 'on' ) {
+                    $allowed = ( Better_Messages()->settings['groupCallAlerts'] ?? '1' ) === '1';
+                }
+            }
+
+            if ( $allowed && Better_Messages()->notification_levels->is_thread_locked( $thread_id ) ) {
+                $allowed = false;
+            }
+
+            if ( $allowed ) {
+                $minutes  = isset( Better_Messages()->settings['groupCallAlertsCooldown'] ) ? max( 0, (int) Better_Messages()->settings['groupCallAlertsCooldown'] ) : 30;
+                $cooldown = (int) apply_filters( 'better_messages_call_alert_cooldown_seconds', $minutes * MINUTE_IN_SECONDS, $thread_id );
+                $last     = (int) Better_Messages()->functions->get_thread_meta( $thread_id, '_bm_call_alert_sent' );
+
+                if ( $cooldown > 0 && $last > 0 && ( time() - $last ) < $cooldown ) {
+                    $allowed = false;
+                }
+            }
+
+            if ( $allowed ) {
+                $per_hour = isset( Better_Messages()->settings['groupCallAlertsUserLimit'] ) ? max( 0, (int) Better_Messages()->settings['groupCallAlertsUserLimit'] ) : 3;
+                $limit    = (int) apply_filters( 'better_messages_call_alert_user_limit', $per_hour, $user_id );
+
+                if ( $limit > 0 && count( $this->recent_call_alerts( $user_id ) ) >= $limit ) {
+                    $allowed = false;
+                }
+            }
+
+            return (bool) apply_filters( 'better_messages_group_call_alert_allowed', $allowed, $thread_id, $user_id );
+        }
+
+        private function recent_call_alerts( $user_id )
+        {
+            $sent = Better_Messages()->functions->get_user_meta( $user_id, 'bm_call_alerts_sent', true );
+
+            if ( ! is_array( $sent ) ) {
+                return array();
+            }
+
+            $since = time() - HOUR_IN_SECONDS;
+
+            return array_values( array_filter( array_map( 'intval', $sent ), function ( $time ) use ( $since ) {
+                return $time > $since;
+            } ) );
+        }
+
+        private function record_call_alert( $thread_id, $user_id )
+        {
+            Better_Messages()->functions->update_thread_meta( $thread_id, '_bm_call_alert_sent', time() );
+
+            $sent   = $this->recent_call_alerts( $user_id );
+            $sent[] = time();
+
+            Better_Messages()->functions->update_user_meta( $user_id, 'bm_call_alerts_sent', $sent );
         }
     }
 

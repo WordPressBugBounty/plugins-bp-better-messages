@@ -147,12 +147,6 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
 
             return $is_valid_group;
         }
-        /**
-         * @param string $title
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_title(string $title, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $title;
@@ -167,12 +161,6 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             }
         }
 
-        /**
-         * @param string $title
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_image(string $title, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $title;
@@ -182,12 +170,6 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             return $group->get_avatar_url();
         }
 
-        /**
-         * @param string $title
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_url(string $title, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $title;
@@ -321,6 +303,12 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
         }
 
         public function get_group_thread_id( $group_id ){
+            return Better_Messages()->functions->with_lock( 'peepso_group_thread|' . (int) $group_id, function () use ( $group_id ) {
+                return $this->find_or_create_group_thread( $group_id );
+            } );
+        }
+
+        private function find_or_create_group_thread( $group_id ){
             global $wpdb;
 
             $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "
@@ -400,9 +388,6 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
             $array     = [];
             $user_ids  = [];
             $removed_ids  = [];
-            /**
-             * All users ids in thread
-             */
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
             foreach( $members as $index => $user_id ){
@@ -492,7 +477,6 @@ if ( !class_exists( 'Better_Messages_Peepso_Groups' ) ) {
 
         public function get_group_page( $group_id ){
             if (defined('WP_DEBUG') && true === WP_DEBUG) {
-                // some debug to add later
             } else {
                 error_reporting(0);
             }

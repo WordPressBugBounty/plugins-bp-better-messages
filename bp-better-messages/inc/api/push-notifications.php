@@ -38,28 +38,22 @@ if ( !class_exists( 'Better_Messages_Rest_Push_Notifications' ) ):
 
         public function save_user_push_subscription( WP_REST_Request $request ){
             $user_id      = Better_Messages()->functions->get_current_user_id();
-            $subscription = json_decode( wp_unslash( $request->get_param('sub') ) );
+            $subscription = json_decode( wp_unslash( (string) $request->get_param('sub') ) );
 
-            $user_push_subscriptions = Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_messages_push_subscriptions', true );
-            if( empty( $user_push_subscriptions ) || ! is_array( $user_push_subscriptions ) ) $user_push_subscriptions = array();
-            $user_push_subscriptions[ $subscription->endpoint ] = (array) $subscription->keys;
-            Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_messages_push_subscriptions', $user_push_subscriptions );
+            if( ! is_object( Better_Messages()->websocket ) || ! is_object( $subscription ) || ! isset( $subscription->endpoint, $subscription->keys ) ){
+                return false;
+            }
 
-            return true;
+            return Better_Messages()->websocket->save_push_subscription( $user_id, $subscription->endpoint, (array) $subscription->keys );
         }
 
         public function delete_user_push_subscription( WP_REST_Request $request ){
             $user_id      = Better_Messages()->functions->get_current_user_id();
-            $subscription = json_decode( wp_unslash( $request->get_param('sub') ) );
+            $subscription = json_decode( wp_unslash( (string) $request->get_param('sub') ) );
 
-            $user_push_subscriptions = Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_messages_push_subscriptions', true );
-            if( empty( $user_push_subscriptions ) || ! is_array( $user_push_subscriptions ) ) $user_push_subscriptions = array();
-
-            if( isset( $user_push_subscriptions[ $subscription->endpoint ] ) ){
-                unset( $user_push_subscriptions[ $subscription->endpoint ] );
+            if( is_object( Better_Messages()->websocket ) && is_object( $subscription ) && isset( $subscription->endpoint ) ){
+                Better_Messages()->websocket->delete_push_subscription( $user_id, $subscription->endpoint );
             }
-
-            Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_messages_push_subscriptions', $user_push_subscriptions );
 
             return true;
         }

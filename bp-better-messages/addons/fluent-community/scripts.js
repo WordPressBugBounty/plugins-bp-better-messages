@@ -275,6 +275,48 @@ new MutationObserver(bmFcSuppressPullToRefresh).observe(document.body, { childLi
 if( window.visualViewport ){
   var lastViewportHeight = window.visualViewport.height;
 
+  // FluentCommunity hides its bottom menu while the keyboard is up
+  // (fcom_keyboard_open) and shows it again once the visual viewport has grown
+  // back, which an iPhone reports at the end of the keyboard's slide: measured
+  // 560-600ms after the tap that closed it, the messenger standing in the
+  // menu's place until then and jumping up when the menu came (ticket 10500).
+  // The window is back to its full height 60ms after that tap, as the slide
+  // starts, but iOS fires no resize for it until the end either, so the frames
+  // after a field lets go are watched instead, and the menu comes back on the
+  // first one where the window has grown back. A field taking the focus again
+  // keeps the keyboard, and the menu away.
+  var isTyping = function(){
+    var active = document.activeElement;
+    return !! active && ( active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test( active.tagName ) );
+  };
+
+  var watchKeyboardClosing = function(){
+    var heightTyping = window.innerHeight;
+    var started = Date.now();
+
+    var frame = function(){
+      if( ! html.classList.contains('fcom_keyboard_open') || isTyping() || Date.now() - started > 1000 ) return;
+
+      if( window.innerHeight - heightTyping > 100 ){
+        html.classList.remove('fcom_keyboard_open');
+
+        var menu = document.querySelector('.fcom_mobile_menu');
+        if( menu ){
+          document.body.style.setProperty('--fcom-mobile-menu-height', menu.offsetHeight + 'px');
+        }
+        return;
+      }
+
+      requestAnimationFrame(frame);
+    };
+
+    requestAnimationFrame(frame);
+  };
+
+  document.addEventListener('focusout', function(){
+    if( html.classList.contains('fcom_keyboard_open') ) watchKeyboardClosing();
+  }, true);
+
   window.addEventListener('resize', updateDynamicCSS);
   window.addEventListener('orientationchange', updateDynamicCSS);
 

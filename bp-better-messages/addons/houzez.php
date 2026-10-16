@@ -298,13 +298,6 @@ if ( ! class_exists( 'Better_Messages_Houzez' ) ) {
 			return (bool) array_intersect( $viewer_data->roles, self::$REALTOR_TYPES );
 		}
 
-		/**
-		 * Validate that $post_id is a published CPT of $expected_type and build
-		 * the shared { name, url, avatar? } payload used by participantOverrides,
-		 * the rewrite_agent_user_item filter, and the "Chatting as X" banner.
-		 *
-		 * Returns null when the CPT is missing, trashed, or the wrong type.
-		 */
 		private function realtor_display( $post_id, $expected_type ) {
 			$post = get_post( $post_id );
 			if ( ! $post || $post->post_type !== $expected_type || $post->post_status !== 'publish' ) return null;
@@ -381,12 +374,6 @@ if ( ! class_exists( 'Better_Messages_Houzez' ) ) {
 				. '</div>';
 		}
 
-		/**
-		 * Resolve a property's "primary" realtor — the first published houzez_agent
-		 * referenced in `fave_agents`, falling back to the property's
-		 * `fave_property_agency`. Returns array( int $post_id, string $type ) or
-		 * array( 0, '' ) when nothing valid is found.
-		 */
 		private function get_property_primary_realtor( $property_id ) {
 			$agents = (array) get_post_meta( $property_id, 'fave_agents', false );
 			foreach ( $agents as $agent_post_id ) {

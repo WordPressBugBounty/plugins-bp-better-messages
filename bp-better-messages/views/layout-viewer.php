@@ -1,7 +1,4 @@
 <?php
-/**
- * Settings page
- */
 defined( 'ABSPATH' ) || exit;
 
 $messages_enabled = ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0';

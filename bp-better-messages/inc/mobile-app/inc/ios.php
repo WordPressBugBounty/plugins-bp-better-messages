@@ -111,25 +111,6 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 'permission_callback' => array( $this, 'ensure_api_access' )
             ) );
 
-            /*register_rest_route( 'better-messages/v1/admin/app', '/ios/createProfile', array(
-                'methods' => 'POST',
-                'callback' => array( $this, 'create_profile' ),
-                'permission_callback' => array( $this, 'ensure_api_access' )
-            ) );
-
-            register_rest_route( 'better-messages/v1/admin/app', '/ios/getDevices', array(
-                'methods' => 'GET',
-                'callback' => array( $this, 'get_devices' ),
-                'permission_callback' => array( $this, 'ensure_api_access' )
-            ) );
-
-            register_rest_route( 'better-messages/v1/admin/app', '/ios/addDevice', array(
-                'methods' => 'POST',
-                'callback' => array( $this, 'add_device' ),
-                'permission_callback' => array( $this, 'ensure_api_access' )
-            ) );*/
-
-
         }
 
         public function ensure_api_access(){
@@ -138,7 +119,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             if( ! $access ){
                 return new WP_Error(
                     'rest_error',
-                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'better-pwa-and-mobile-app' ),
+                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
                     array( 'status' => 406 )
                 );
             }
@@ -197,7 +178,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             $token = \BetterMessages\Firebase\JWT\JWT::encode($claims, $access['certificate'], 'ES256', $access['key_id']);
 
-            $expiration = 60 * 45; // 45 minutes
+            $expiration = 60 * 45;
 
             set_transient("better-messages-app-ios-push-token", $token, $expiration);
 
@@ -205,14 +186,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
         }
 
         public function hasApiErrors($response) {
-            // Initialize an empty WP_Error object
             $wpError = new WP_Error();
 
-            // Check if the errors property exists in the error object
             if (property_exists($response, 'errors')) {
-                // Loop through each error
                 foreach ($response->errors as $error) {
-                    // Add each error to the WP_Error object
                     $wpError->add($error->code, $error->detail);
                 }
             }
@@ -394,7 +371,6 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             if( $response['data'] ){
                 $bundleData = $response['data'][0];
 
-                // Get bundle capabilities
                 $capabilitiesUrl = 'https://api.appstoreconnect.apple.com/v1/bundleIds/' . $bundleData['id'] . '/bundleIdCapabilities';
                 $capabilitiesResponse = wp_remote_get($capabilitiesUrl, [
                     'headers'     => array(
@@ -497,23 +473,20 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
         public function create_bundle( WP_REST_Request $request ){
             $jwt = $this->get_jwt();
 
-            // Get the bundle identifier and name from the request
             $bundleIdentifier = $request->get_param('bundleIdentifier');
             $bundleName = $request->get_param('bundleName');
 
-            // Prepare the data for the request
             $data = [
                 'data' => [
                     'type' => 'bundleIds',
                     'attributes' => [
                         'identifier' => $bundleIdentifier,
                         'name' => $bundleName,
-                        'platform' => 'IOS' // or 'MAC_OS' or 'UNIVERSAL'
+                        'platform' => 'IOS'
                     ]
                 ]
             ];
 
-            // Send the POST request to the API
             $response = wp_remote_post('https://api.appstoreconnect.apple.com/v1/bundleIds', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $jwt,
@@ -522,21 +495,15 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 'body' => json_encode($data)
             ]);
 
-            // Check if the request was successful
             if (is_wp_error($response)) {
-                // Handle the error
                 return new WP_Error('request_failed', 'The network request failed.');
             }
 
-            // Parse the response
             $response = json_decode($response['body'], true);
 
-            // Check if the bundle was created successfully
             if ( isset( $response['data'] ) ) {
-                // The bundle was created successfully
                 return $response['data'];
             } else {
-                // The bundle was not created successfully
                 return new WP_Error('bundle_creation_failed', 'The bundle was not created successfully.');
             }
         }
@@ -641,11 +608,9 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
         public function upload_push_certificate( WP_REST_Request $request )
         {
             if ( ! isset($_FILES['file']) ) {
-                // Handle the error
                 return new WP_Error('no_file_uploaded', 'No file was uploaded.');
             }
 
-            // Access the uploaded file
             $file = $request->get_file_params()['file'];
 
             $team_id = $request->get_param('team_id');
@@ -662,14 +627,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             $certificate = file_get_contents($file['tmp_name']);
 
-            // Create the JWT payload
             $payload = [
                 'iss' => $team_id,
                 'iat' => time(),
             ];
 
             try {
-                // Sign the JWT
                 \BetterMessages\Firebase\JWT\JWT::encode($payload, $certificate, 'ES256', $key_id);
 
                 update_option( 'better-messages-app-ios-push-cert', [
@@ -683,8 +646,6 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             } catch (Exception $e) {
                 return new WP_Error('certificate_error', 'The certificate is not valid.');
             }
-
-            //$certificate = openssl_x509_parse($cer_content);
 
         }
 
@@ -726,31 +687,6 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             return $result;
         }
-
-        /*public function get_bundle_capabilities(){
-            $jwt = $this->get_jwt();
-
-            $response = wp_remote_get('https://api.appstoreconnect.apple.com/v1/bundleIds/54YSTNSYN4/bundleIdCapabilities', [
-                'headers'     => array(
-                    'Authorization' => 'Bearer ' . $jwt,
-                    'Content-Type' => 'application/json'
-                )
-            ]);
-
-            $response = json_decode($response['body']);
-
-            $data = $response->data;
-
-            $result = [];
-
-            if( count( $data ) > 0 ) {
-                foreach ($data as $item) {
-                    $result[] =  $item->attributes->capabilityType;
-                }
-            }
-
-            return $result;
-        }*/
 
         public function get_matched_profiles( WP_REST_Request $request ){
             $bundleId      = $request->get_param('bundleId');
@@ -817,20 +753,6 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             return $result;
         }
-
-        /*public function add_device( WP_REST_Request $request ){
-            $deviceId = $request->get_param('deviceId');
-            $settings = Better_Messages()->mobile_app->settings->get_settings();
-
-            $iosDevices = $settings['iosDevices'];
-            $iosDevices[] = $deviceId;
-
-            $settings['iosDevices'] = array_unique($iosDevices);
-
-            Better_Messages()->mobile_app->settings->update_settings( $settings );
-
-            return true;
-        }*/
 
         public function get_devices(){
             $jwt = $this->get_jwt();
@@ -1027,14 +949,11 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
         public function upload_certificate( WP_REST_Request $request )
         {
             if (!isset($_FILES['file'])) {
-                // Handle the error
                 return new WP_Error('no_file_uploaded', 'No file was uploaded.');
             }
 
-            // Access the uploaded file
             $file = $request->get_file_params()['file'];
 
-            // Access the password
             $certificate_id = $request->get_param('certificate');
 
 
@@ -1143,7 +1062,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             $jwt = $this->get_jwt();
 
-            $type = 'IOS_APP_DEVELOPMENT'; // https://developer.apple.com/documentation/appstoreconnectapi/profilecreaterequest/data/attributes
+            $type = 'IOS_APP_DEVELOPMENT';
 
             $bundleId      = $request->get_param('bundleId');
             $certificateId = $request->get_param('certificateId');
@@ -1160,7 +1079,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 default:
                     return new WP_Error(
                         'rest_forbidden',
-                        _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'better-pwa-and-mobile-app' ),
+                        _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
                         array( 'status' => 401 )
                     );
             }
@@ -1245,7 +1164,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             if( ! isset( $files['apiKey'] ) ) {
                 return new WP_Error(
                     'rest_error',
-                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'better-pwa-and-mobile-app' ),
+                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
                     array( 'status' => 406 )
                 );
             }
@@ -1279,7 +1198,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 } else {
                     return new WP_Error(
                         'rest_error',
-                        _x( 'Connection to Apple Developer Account was not successful', 'WP Admin', 'better-pwa-and-mobile-app' ),
+                        _x( 'Connection to Apple Developer Account was not successful', 'WP Admin', 'bp-better-messages' ),
                         array( 'status' => $code )
                     );
                 }
@@ -1293,7 +1212,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             if ( ! $credentials ) {
                 return new WP_Error(
                     'rest_error',
-                    _x( 'Credentials not found', 'Rest API Error', 'better-pwa-and-mobile-app' ),
+                    _x( 'Credentials not found', 'Rest API Error', 'bp-better-messages' ),
                     array( 'status' => 406 )
                 );
             }
@@ -1323,7 +1242,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 } else {
                     return new WP_Error(
                         'rest_error',
-                        _x( 'Connection to Apple Developer Account was not successful', 'WP Admin', 'better-pwa-and-mobile-app' ),
+                        _x( 'Connection to Apple Developer Account was not successful', 'WP Admin', 'bp-better-messages' ),
                         array( 'status' => $code )
                     );
                 }

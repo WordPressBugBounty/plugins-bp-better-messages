@@ -6,6 +6,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
     class Better_Messages_Rest_Api
     {
 
+        private $temp_id_locks = array();
+
         public static function instance()
         {
 
@@ -62,38 +64,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             add_action( 'wp_ajax_nopriv_better_messages_new_nonce_token', array( $this, 'rest_nonce' ) );
 
             add_filter('rest_post_dispatch', array( $this, 'rest_post_dispatch'), 10 , 3 );
-            //add_filter('rest_pre_serve_request', array( $this, 'serve_request' ), 10 , 4 );
         }
-
-        /* public function serve_request( $served, $result, WP_REST_Request $request, WP_REST_Server $server )
-        {
-            $route = $request->get_route();
-            if( str_starts_with( $route, '/better-messages/') ){
-                $attributes = $request->get_attributes();
-
-                if( isset( $attributes['callback'] ) ) {
-                    $callback = $attributes['callback'];
-
-                    if( is_array( $callback ) ) {
-                        $class = $callback[0];
-                        $method = $callback[1];
-
-                        if ( is_object( $class ) ) {
-                            $is_same_class = ( $class === $this );
-
-                            if( $is_same_class ) {
-                                switch ($method) {
-                                    case 'checkNew':
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return $served;
-        } */
 
         public function rest_post_dispatch( $result, $server, WP_REST_Request $request ){
             $route = $request->get_route();
@@ -102,7 +73,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 return $result;
             }
 
-            // Catch unauthorized send attempts
             if ( str_ends_with( $route, '/send' ) ) {
                 if ( isset( $result->data ) ) {
                     if ( isset( $result->data['code'] ) && $result->data['code'] === 'rest_cookie_invalid_nonce' ) {
@@ -118,13 +88,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
-            /**
-             * Filter to add custom headers to all Better Messages REST API responses.
-             *
-             * @param array           $headers  Associative array of header name => value.
-             * @param WP_REST_Response $result   The response object.
-             * @param WP_REST_Request  $request  The request object.
-             */
             $headers = apply_filters( 'better_messages_rest_response_headers', [], $result, $request );
 
             foreach ( $headers as $name => $value ) {
@@ -246,6 +209,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 register_rest_route('better-messages/v1', '/thread/(?P<id>\d+)/unmute', array(
                     'methods' => 'POST',
                     'callback' => array($this, 'unmute_thread'),
+                    'permission_callback' => array($this, 'check_thread_access'),
+                    'args' => array(
+                        'id' => array(
+                            'validate_callback' => function ($param, $request, $key) {
+                                return is_numeric($param);
+                            }
+                        ),
+                    ),
+                ));
+
+                register_rest_route('better-messages/v1', '/thread/(?P<id>\d+)/notifications', array(
+                    'methods' => 'POST',
+                    'callback' => array($this, 'set_thread_notifications'),
                     'permission_callback' => array($this, 'check_thread_access'),
                     'args' => array(
                         'id' => array(
@@ -378,7 +354,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 'callback' => array( $this, 'get_unique_conversation' ),
                 'permission_callback' => '__return_false'
 
-                //'permission_callback' => array( $this, 'is_user_authorized' )
             ) );
 
             if( Better_Messages()->settings['enableForwardMessages'] === '1' ) {
@@ -406,7 +381,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         public function get_unique_conversation( WP_REST_Request $request ){
             $thread_id = apply_filters('better_messages_get_unique_conversation', 0, sanitize_text_field( $request->get_param('key') ), Better_Messages()->functions->get_current_user_id() );
 
-            // Skip E2E threads when E2E is disabled globally
             if ( $thread_id
                 && Better_Messages()->settings['e2eEncryption'] !== '1'
                 && class_exists( 'Better_Messages_E2E_Encryption' )
@@ -451,6 +425,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     if( $message ){
                         $has_access = Better_Messages()->functions->check_access( $message->thread_id, $current_user_id )
                             && Better_Messages()->functions->can_read_chat_messages( $message->thread_id, $current_user_id );
+
+                        if( $has_access && (int) $message->is_pending === 1 && (int) $message->sender_id !== (int) $current_user_id
+                            && ! ( $current_user_id > 0 && user_can( $current_user_id, 'bm_can_administrate' ) ) ){
+                            $has_access = false;
+                        }
                         if( $has_access ){
                             $message->message_id = (int) $message->id;
                             unset( $message->id );
@@ -598,9 +577,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $clientThreads = array_unique(array_merge($alreadyRequestedThreads, (array) $request->get_param( 'threadIds' )));
 
             if( $clientThreads ){
-                /**
-                 * Threads existing on client, but not available in database anymore
-                 */
                 $missedThreads = $this->check_missing_threads( $current_user_id, $clientThreads );
 
                 if( count( $missedThreads ) > 0 && count( $visibleThreads ) > 0 ){
@@ -646,9 +622,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 if (count($return['deletedMessages']) === 0) unset($return['deletedMessages']);
 
-                /*$return['erasedThreads'] = $this->get_erased_threads($lastClient);
-                if (count($return['erasedThreads']) === 0) unset($return['erasedThreads']);*/
-
                 $changedUsers = $this->get_changed_users( $lastClient );
 
                 if( count( $changedUsers ) > 0 ) {
@@ -676,10 +649,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         }
 
         public function start_new_thread( WP_REST_Request $request ){
+            $members   = array_map( 'strval', array_filter( (array) $request->get_param( 'recipients' ), 'is_scalar' ) );
+            $members[] = (string) Better_Messages()->functions->get_current_user_id();
+            $members   = array_unique( $members );
+            sort( $members, SORT_STRING );
+
+            return Better_Messages()->functions->with_lock( 'new_conversation|' . implode( '|', $members ), function () use ( $request ) {
+                return $this->create_thread_from_request( $request );
+            } );
+        }
+
+        private function create_thread_from_request( WP_REST_Request $request ){
             $recipients = (array) $request->get_param( 'recipients');
 
-            // Allow addons (E2E) to intercept content/subject before sanitization.
-            // Returns array with 'subject' and 'content' keys, or null for default sanitization.
             $e2e_init = apply_filters( 'better_messages_new_thread_e2e_init', null, $request, $recipients );
 
             if ( $e2e_init ) {
@@ -740,8 +722,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     'errors' => $errors
                 );
             } else {
-                // Allow addons (E2E) to process after thread creation (e.g. send actual encrypted message)
-                // Note: the bp_better_messages_new_thread_created action is fired from within new_message()
                 $sent = apply_filters( 'better_messages_new_thread_after_create', $sent, $request, $current_user_id );
 
                 $result = array(
@@ -777,7 +757,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         public function get_pm_thread( WP_REST_Request $request ){
             $user_id   = intval( $request->get_param('user_id') );
             $create    = boolval( $request->get_param('create') );
-            $subject   = trim( sanitize_text_field( urldecode( $request->get_param('subject') ) ) );
+            $subject   = trim( sanitize_text_field( urldecode( (string) $request->get_param('subject') ) ) );
             $object_id = intval( $request->get_param('objectId') );
 
             $uniqueKeyParam = $request->get_param('uniqueKey');
@@ -985,10 +965,40 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 $user_id = Better_Messages()->functions->get_current_user_id();
             }
 
+            $this->lock_temp_id( $thread_id, $user_id, $temp_id );
+
             return (int) $wpdb->get_var( $wpdb->prepare(
                 "SELECT `id` FROM `" . bm_get_table('messages') . "` WHERE `thread_id` = %d AND `sender_id` = %d AND `temp_id` = %s ORDER BY `id` DESC LIMIT 1",
                 $thread_id, $user_id, $temp_id
             ) );
+        }
+
+        private function lock_temp_id( $thread_id, $user_id, $temp_id ){
+            $key = 'temp_id|' . bm_get_table('messages') . '|' . (int) $thread_id . '|' . (int) $user_id . '|' . $temp_id;
+
+            if( array_key_exists( $key, $this->temp_id_locks ) ) {
+                return;
+            }
+
+            $lock = Better_Messages()->functions->lock( $key, 30 );
+
+            if( ! is_string( $lock ) ) {
+                return;
+            }
+
+            if( empty( $this->temp_id_locks ) ) {
+                add_action( 'shutdown', array( $this, 'release_temp_id_locks' ) );
+            }
+
+            $this->temp_id_locks[ $key ] = $lock;
+        }
+
+        public function release_temp_id_locks(){
+            foreach( $this->temp_id_locks as $lock ) {
+                Better_Messages()->functions->unlock( $lock );
+            }
+
+            $this->temp_id_locks = array();
         }
 
         public function get_message_update( $thread_id, $message_id ){
@@ -1116,7 +1126,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             Better_Messages()->functions->before_message_send_filter( $args, $errors );
 
-            // Re-read $is_pending from $args, as filters (e.g. AI moderation) may have changed it
             $is_pending = (int) ( $args['is_pending'] ?? 0 );
 
             if( empty( $errors ) ){
@@ -1149,7 +1158,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             } else {
                 $update = false;
 
-                // Include an updated thread in response if a message was not sent with WebSocket or a message got pending moderation
                 $include_updated_data = ! isset( $args['temp_id'] ) || $is_pending || ! empty( $request->get_param('include_update') );
 
                 if( $include_updated_data ) {
@@ -1510,67 +1518,65 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
         }
 
         public function mute_thread(WP_REST_Request $request) {
-            global $wpdb;
-
-            $thread_id  = intval($request->get_param('id'));
+            $thread_id = intval( $request->get_param('id') );
             $user_id   = Better_Messages()->functions->get_current_user_id();
+            $levels    = Better_Messages()->notification_levels;
 
-            $current_value = $wpdb->get_var($wpdb->prepare(
-                "SELECT is_muted 
-                 FROM " . bm_get_table('recipients') . "
-                 WHERE `user_id` = %d
-                 AND `thread_id` = %d
-            ", $user_id, $thread_id ));
+            $stored = $levels->get_stored_level( $thread_id, $user_id );
 
-            if( is_null( $current_value ) ) return false;
+            if( is_null( $stored ) ) return false;
 
-            if( (int) $current_value === 0 ){
-                $time = Better_Messages()->functions->get_microtime();
+            if( $stored !== Better_Messages_Notification_Levels::NONE ){
+                $result = $levels->set_user_level( $thread_id, $user_id, 'none' );
 
-                $wpdb->get_var($wpdb->prepare(
-                    "UPDATE " . bm_get_table('recipients') . "
-                SET   `is_muted` = 1, `last_update` = %d
-                WHERE `user_id` = %d
-                AND   `thread_id` = %d
-                ", $time, $user_id, $thread_id ));
-
-                do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
-                do_action( 'better_messages_thread_updated', $thread_id, $user_id );
+                if( is_wp_error( $result ) ) return false;
             }
 
             return true;
         }
 
         public function unmute_thread(WP_REST_Request $request) {
-            global $wpdb;
-
-            $thread_id  = intval($request->get_param('id'));
-
+            $thread_id = intval( $request->get_param('id') );
             $user_id   = Better_Messages()->functions->get_current_user_id();
-            $time      = Better_Messages()->functions->get_microtime();
+            $levels    = Better_Messages()->notification_levels;
 
-            $current_value = $wpdb->get_var($wpdb->prepare(
-                "SELECT is_muted 
-                 FROM " . bm_get_table('recipients') . "
-                 WHERE `user_id` = %d
-                 AND `thread_id` = %d
-            ", $user_id, $thread_id ));
+            $stored = $levels->get_stored_level( $thread_id, $user_id );
 
-            if( is_null( $current_value ) ) return false;
+            if( is_null( $stored ) ) return false;
 
-            if( (int) $current_value === 1 ){
-                $wpdb->get_var($wpdb->prepare(
-                "UPDATE " . bm_get_table('recipients') . "
-                SET   `is_muted` = 0, `last_update` = %d
-                WHERE `user_id` = %d
-                AND   `thread_id` = %d
-                ", $time, $user_id, $thread_id ));
+            if( $levels->resolve_level( $stored, $thread_id ) === 'none' ){
+                $level = ( ! $levels->is_one_to_one( $thread_id ) && $levels->get_thread_default_level( $thread_id ) === 'none' ) ? 'all' : 'default';
 
-                do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
-                do_action( 'better_messages_thread_updated', $thread_id, $user_id );
+                $result = $levels->set_user_level( $thread_id, $user_id, $level );
+
+                if( is_wp_error( $result ) ) return false;
             }
 
             return true;
+        }
+
+        public function set_thread_notifications( WP_REST_Request $request ) {
+            $thread_id = intval( $request->get_param('id') );
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+            $level     = sanitize_key( (string) $request->get_param('level') );
+            $minutes   = intval( $request->get_param('minutes') );
+            $levels    = Better_Messages()->notification_levels;
+
+            if( ! in_array( $level, array( 'default', 'all', 'mentions', 'none' ), true ) ){
+                return new WP_Error( 'invalid_level', _x( 'This notification level is not available here', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 400 ) );
+            }
+
+            if( $minutes > 0 && ! in_array( $minutes, Better_Messages_Notification_Levels::snooze_durations(), true ) ){
+                return new WP_Error( 'invalid_duration', _x( 'This duration is not available', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 400 ) );
+            }
+
+            $result = $levels->set_user_level( $thread_id, $user_id, $level, max( 0, $minutes ) );
+
+            if( is_wp_error( $result ) ){
+                return $result;
+            }
+
+            return $levels->thread_payload( $thread_id, $user_id );
         }
 
         public function get_user_suggestions(){
@@ -1641,7 +1647,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
 
                 $exclude_current_user = false;
-                //$current_user_id = 0;
             } else {
                 $exclude[] = $current_user_id;
             }
@@ -1669,7 +1674,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $suggestions = Better_Messages_Search()->get_users_results( $search, $current_user_id, $exclude, $exclude_current_user, $count );
 
-            // Hide AI bots from suggestions in E2E encrypted threads
             if ( $thread_id > 0 && class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ) {
                 $suggestions = array_filter( $suggestions, function( $uid ) {
                     return ! ( $uid < 0 && isset( Better_Messages()->ai ) && Better_Messages()->ai->get_bot_id_from_user( $uid ) );
@@ -1755,6 +1759,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 return $return;
             }
 
+            if ( function_exists( 'Better_Messages_Files' ) ) {
+                Better_Messages_Files()->prime_messages( wp_list_pluck( $messages, 'id' ) );
+            }
+
             $user_ids   = [];
             $thread_ids = [];
 
@@ -1790,7 +1798,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 if( $apply_filters ) {
                     $messages[$key]->favorited = (Better_Messages()->functions->is_message_starred($message->message_id, $current_user_id)) ? 1 : 0;
-                    //$messages[$key]->onsite    = Better_Messages()->functions->format_message($message->message, (int) $message->message_id, 'site', $current_user_id);
                     $messages[$key]->message   = Better_Messages()->functions->format_message($message->message, (int) $message->message_id, 'stack', $current_user_id);
                 } else {
                     $messages[$key]->favorited = 0;
@@ -1885,7 +1892,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $exclude_sql = '';
             if( count( $thread_ids ) > 0 ) $exclude_sql = "`threads`.`id` NOT IN(" . implode(',', $thread_ids ) . ") AND ";
 
-            /** Find all unloaded unread */
             $sql = $wpdb->prepare("
                 SELECT
                 `threads`.`id` as `thread_id`,
@@ -2182,7 +2188,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
             $thread_id   = intval($request->get_param('id'));
 
-            // Loaded messages IDs
             $message_ids = (array) $request->get_param('messages');
 
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
@@ -2399,9 +2404,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $prevent_video_messages = Better_Messages()->functions->user_has_role( $current_user_id, (array) Better_Messages()->settings['restrictVideoMessages'] );
 
             foreach ( $get_threads as $thread ){
-                /**
-                 * Cache thread so child functions do not access database again
-                 */
                 wp_cache_set('thread_' . $thread->thread_id, (object) [
                     'id'      => $thread->thread_id,
                     'subject' => $thread->subject,
@@ -2413,7 +2415,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 if( $personal_data && ! $accessChecked ){
                     $has_access = Better_Messages()->functions->check_access( $thread->thread_id, $current_user_id );
 
-                    if( ! $has_access && current_user_can('bm_can_administrate') ){
+                    if( ! $has_access && $current_user_id > 0 && user_can( $current_user_id, 'bm_can_administrate' ) ){
                         $has_access   = true;
                         $admin_access = true;
                     }
@@ -2482,21 +2484,41 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     $thread_item['adminAccess'] = true;
                 }
 
+                $notification_levels = Better_Messages()->notification_levels;
+
+                if( $personal_data && $is_participant && isset( $thread->is_muted ) && ! is_null( $thread->is_muted ) ){
+                    $notification_payload = $notification_levels->thread_payload( $thread_id, $current_user_id, (int) $thread->is_muted );
+                } else {
+                    $notification_payload = $notification_levels->thread_payload( $thread_id, null );
+
+                    if( $personal_data ){
+                        $notification_payload['notificationLevel']      = 'default';
+                        $notification_payload['notificationMutedUntil'] = null;
+                        $notification_payload['isMuted']                = false;
+                    }
+                }
+
+                $thread_item['notificationDefault'] = $notification_payload['notificationDefault'];
+                $thread_item['notificationLocked']  = $notification_payload['notificationLocked'];
+
                 if( $personal_data ){
                     $unread = (int) $thread->unread_count;
 
                     $thread_item['isPinned'] = ( Better_Messages()->settings['pinnedThreads'] == '1' ) ? (int) $thread->is_pinned : 0;
-                    $thread_item['isMuted'] = (bool) $thread->is_muted;
+                    $thread_item['isMuted'] = (bool) $notification_payload['isMuted'];
+                    $thread_item['notificationLevel']      = $notification_payload['notificationLevel'];
+                    $thread_item['notificationMutedUntil'] = $notification_payload['notificationMutedUntil'];
                     $thread_item['isTranslated'] = (bool) apply_filters( 'better_messages_thread_is_translated', false, (int) $thread->is_translated, $current_user_id, $thread->thread_id );
                     $thread_item['permissions'] = [
                         'isModerator'          => Better_Messages()->functions->is_thread_super_moderator( $current_user_id, $thread->thread_id ),
                         'deleteAllowed'        => $delete_allowed,
                         'canDeleteOwnMessages' => Better_Messages()->settings['allowDeleteMessages'] === '1',
-                        'canDeleteAllMessages' => current_user_can('bm_can_administrate'),
+                        'canDeleteAllMessages' => $current_user_id > 0 && user_can( $current_user_id, 'bm_can_administrate' ),
                         'canEditOwnMessages'   => Better_Messages()->settings['allowEditMessages'] === '1',
-                        'canEditAllMessages'   => current_user_can('bm_can_administrate'),
+                        'canEditAllMessages'   => $current_user_id > 0 && user_can( $current_user_id, 'bm_can_administrate' ),
                         'canFavorite'          => Better_Messages()->settings['disableFavoriteMessages'] !== '1',
-                        'canMuteThread'        => ( Better_Messages()->settings['allowMuteThreads'] === '1' && ! $admin_access ),
+                        'canMuteThread'        => ( Better_Messages()->settings['allowMuteThreads'] === '1' && ! $admin_access && $is_participant && ! $notification_payload['notificationLocked'] ),
+                        'canMentionAll'        => ( ! $admin_access && Better_Messages()->mentions->can_mention_all( $thread_id, $current_user_id ) ),
                         'canTranslate'         => ( ! $admin_access && apply_filters( 'better_messages_can_translate_thread', false, $current_user_id, $thread->thread_id, $thread_type ) ),
                         'canEraseThread'       => Better_Messages()->functions->can_erase_thread( $current_user_id, $thread->thread_id ),
                         'canClearThread'       => Better_Messages()->functions->can_clear_thread( $current_user_id, $thread->thread_id ),

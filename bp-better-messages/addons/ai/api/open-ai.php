@@ -259,13 +259,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        /**
-         * Moderate content using OpenAI Moderation API
-         *
-         * @param string $text Text content to moderate
-         * @param array $image_data_uris Base64 data URIs of images (data:image/...;base64,...)
-         * @return array|WP_Error Moderation result array or WP_Error on failure
-         */
         public function moderate( $text = '', $image_data_uris = [] )
         {
             $text = trim( $text );
@@ -304,7 +297,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     'input' => $input
                 ];
 
-                // Images may take longer to process
                 $timeout = $has_images ? 30 : 10;
 
                 $response = $client->post( 'moderations', [
@@ -339,25 +331,16 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        /**
-         * Transcribe an audio file using OpenAI Whisper API
-         *
-         * @param int $attachment_id WordPress attachment ID
-         * @return string|\WP_Error Transcribed text or WP_Error on failure
-         */
         public function transcribe_audio( $attachment_id )
         {
-            $file_path = get_attached_file( $attachment_id );
+            $copy = Better_Messages()->ai->get_audio_copy( $attachment_id );
 
-            if ( ! $file_path || ! file_exists( $file_path ) ) {
-                return new \WP_Error( 'file_not_found', 'Audio file not found' );
+            if ( is_wp_error( $copy ) ) {
+                return $copy;
             }
 
-            if ( filesize( $file_path ) > 25 * 1024 * 1024 ) {
-                return new \WP_Error( 'file_too_large', 'Audio file exceeds 25MB limit' );
-            }
+            $file_path = $copy['path'];
 
-            // Create client WITHOUT Content-Type: application/json (multipart needs own boundary)
             $client = new \BetterMessages\GuzzleHttp\Client([
                 'base_uri' => 'https://api.openai.com/v1/',
                 'headers'  => [ 'Authorization' => 'Bearer ' . $this->get_api_key() ]
@@ -410,14 +393,11 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 } catch ( \Exception $ignored ) {}
 
                 return new \WP_Error( 'openai_error', $fullError );
+            } finally {
+                call_user_func( $copy['cleanup'] );
             }
         }
 
-        /**
-         * Fetch all model IDs from OpenAI API, cached for 24 hours.
-         *
-         * @return string[]|\WP_Error Sorted array of all model IDs or WP_Error
-         */
         private function get_all_models_cached()
         {
             $cached = get_transient( 'bm_openai_models' );
@@ -442,9 +422,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
-        /**
-         * Get chat/completion models (gpt-*, o1-*, etc.) from cached list.
-         */
         public function get_models()
         {
             $all = $this->get_all_models_cached();
@@ -496,9 +473,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             return $models;
         }
 
-        /**
-         * Get transcription-capable models (whisper-*, gpt-4o-transcribe, etc.) from cached list.
-         */
         public function get_transcription_models()
         {
             $all = $this->get_all_models_cached();
@@ -661,7 +635,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 $body = $response->getBody();
                 $data = json_decode($body, true);
 
-                // Build meta for cost calculation
                 $audio_meta = [
                     'usage'    => isset( $data['usage'] ) ? $data['usage'] : [],
                     'model'    => isset( $data['model'] ) ? $data['model'] : $bot_settings['model'],
@@ -741,7 +714,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                         do_action( 'better_messages_thread_updated', $message->thread_id, $message->sender_id );
                     }
                 } else {
-                    // No valid response from API
                     $args = [
                         'sender_id'  => $ai_message->sender_id,
                         'thread_id'  => $ai_message->thread_id,
@@ -865,7 +837,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                     $data = json_decode($response->getBody()->getContents(), true);
 
-                    // Data retrieved successfully
                 } catch ( \Exception $exception ) {
                     $fullError = $exception->getMessage();
 
@@ -959,6 +930,38 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
         }
 
+        private function get_responses_attachment_part( $attachment_id, $bot_settings, $links )
+        {
+            $image_types = [ 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp' ];
+            $link_types  = $links ? array_merge( $image_types, [ 'application/pdf' ] ) : [];
+
+            $input = $this->get_attachment_input( $attachment_id, $bot_settings, $image_types, $link_types );
+
+            if ( ! $input ) {
+                return null;
+            }
+
+            if ( $input['kind'] === 'image' ) {
+                return [
+                    'type'      => 'input_image',
+                    'image_url' => $input['url'] !== '' ? $input['url'] : 'data:' . $input['mime'] . ';base64,' . $input['data']
+                ];
+            }
+
+            if ( $input['url'] !== '' ) {
+                return [
+                    'type'     => 'input_file',
+                    'file_url' => $input['url']
+                ];
+            }
+
+            return [
+                'type'      => 'input_file',
+                'filename'  => $input['name'],
+                'file_data' => 'data:application/pdf;base64,' . $input['data']
+            ];
+        }
+
         function responseProvider( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
        {
             $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
@@ -1010,7 +1013,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     $group_instruction .= "\n\nPrevious conversation summary:\n" . $summary_context;
                 }
 
-                // Build conversation history as input (no server-side conversation)
                 foreach ( $thread_messages as $_message ) {
                     $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
                     if ( $is_error ) continue;
@@ -1041,27 +1043,10 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                         if ( ! empty( $attachments ) ) {
                             foreach ( $attachments as $id => $url ) {
-                                $file = get_attached_file( $id );
+                                $part = $this->get_responses_attachment_part( $id, $bot_settings, true );
 
-                                if ( $file && file_exists( $file ) && filesize( $file ) <= 20 * 1024 * 1024 ) {
-                                    $file_extension = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
-                                    $file_name = pathinfo( $file, PATHINFO_BASENAME );
-                                    $base64_content = base64_encode( file_get_contents( $file ) );
-
-                                    $mime_map = [ 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'bmp' => 'image/bmp', 'webp' => 'image/webp' ];
-                                    if ( $bot_settings['images'] && isset( $mime_map[ $file_extension ] ) ) {
-                                        $content[] = [
-                                            'type'      => 'input_image',
-                                            'image_url' => 'data:' . $mime_map[ $file_extension ] . ';base64,' . $base64_content
-                                        ];
-                                    } else if ( $bot_settings['files'] && $file_extension === 'pdf' ) {
-                                        $original_filename = (string) get_post_meta( $id, 'bp-better-messages-original-name', true );
-                                        $content[] = [
-                                            'type'      => 'input_file',
-                                            'filename'  => ! empty( $original_filename ) ? $original_filename : $file_name,
-                                            'file_data' => 'data:application/pdf;base64,' . $base64_content
-                                        ];
-                                    }
+                                if ( $part ) {
+                                    $content[] = $part;
                                 }
                             }
                         }
@@ -1091,35 +1076,19 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                    if ( ! empty($attachments) ) {
                        foreach ($attachments as $id => $url) {
-                           $file = get_attached_file( $id );
+                           $part = $this->get_responses_attachment_part( $id, $bot_settings, false );
 
-                           if( $file && file_exists($file) && filesize($file) <= 20 * 1024 * 1024 ){
-                               $file_extension = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
-                               $file_name = pathinfo( $file, PATHINFO_BASENAME );
-
-                               $file_content = file_get_contents( $file );
-                               $base64_content = base64_encode( $file_content );
-
-                                $mime_map = [ 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'bmp' => 'image/bmp', 'webp' => 'image/webp' ];
-                                if( $bot_settings['images'] && isset( $mime_map[ $file_extension ] ) ){
-                                    $input_images[] = $id;
-
-                                    $content[] = [
-                                        'type' => 'input_image',
-                                        'image_url' => 'data:' . $mime_map[ $file_extension ] . ';base64,' . $base64_content
-                                    ];
-                                } else if( $bot_settings['files'] && $file_extension === 'pdf' ){
-                                    $original_filename = (string) get_post_meta( $id, 'bp-better-messages-original-name', true );
-
-                                    $input_files[] = $id;
-                                    $content[] = [
-                                        'type' => 'input_file',
-                                        'filename' => ! empty( $original_filename ) ? $original_filename : $file_name,
-                                        'file_data' => 'data:application/pdf;base64,' . $base64_content
-                                    ];
-                                }
-
+                           if ( ! $part ) {
+                               continue;
                            }
+
+                           if ( $part['type'] === 'input_image' ) {
+                               $input_images[] = $id;
+                           } else {
+                               $input_files[] = $id;
+                           }
+
+                           $content[] = $part;
                        }
                    }
                }
@@ -1144,16 +1113,16 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 $tools[] = [
                     'type' => 'image_generation',
                     'partial_images' => 0,
-                    'model' => $bot_settings['imagesGenerationModel'], // gpt-image-1 or gpt-image-1-mini
-                    'quality' => $bot_settings['imagesGenerationQuality'], # low, medium, high, or auto
-                    'size' => $bot_settings['imagesGenerationSize'] # One of 1024x1024, 1024x1536, 1536x1024, or auto
+                    'model' => $bot_settings['imagesGenerationModel'],
+                    'quality' => $bot_settings['imagesGenerationQuality'],
+                    'size' => $bot_settings['imagesGenerationSize']
                 ];
             }
 
             if( $bot_settings['webSearch'] === '1' ){
                 $tools[] = [
                     'type' => 'web_search',
-                    'search_context_size' => $bot_settings['webSearchContextSize'], // low, medium, or high
+                    'search_context_size' => $bot_settings['webSearchContextSize'],
                 ];
             }
 
@@ -1166,7 +1135,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
             $params = [
                 'model' => $bot_settings['model'],
-                'service_tier' => $bot_settings['serviceTier'], // 'flex', 'default', 'priority', or 'auto'
+                'service_tier' => $bot_settings['serviceTier'],
                 'truncation' => 'auto',
                 'tools' => $tools,
             ];
@@ -1316,7 +1285,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                    $buffer .= $chunk;
 
-                   // Process full lines
                    while (($pos = strpos($buffer, "\n")) !== false) {
                        $line = trim(substr($buffer, 0, $pos));
                        $buffer = substr($buffer, $pos + 1);
@@ -1560,12 +1528,9 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     $last_ping = (int) Better_Messages()->functions->get_message_meta( $message_id, 'ai_last_ping' );
 
                     if( time() - $last_ping <= 3 * 60 ) {
-                        // if the last ping was within 3 minutes, skip processing
                         continue;
                     }
 
-                    // Without background mode, stalled responses mean the PHP process died
-                    // and the OpenAI response was also cancelled. Mark as failed and clean up.
                     $user_error = __( 'The response was interrupted. Please try again.', 'bp-better-messages' );
 
                     $args = [
@@ -1752,7 +1717,6 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                     $buffer .= $chunk;
 
-                    // Process full lines
                     while (($pos = strpos($buffer, "\n")) !== false) {
                         $line = trim(substr($buffer, 0, $pos));
                         $buffer = substr($buffer, $pos + 1);
@@ -1773,7 +1737,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                                     'system_fingerprint' => $system_fingerprint
                                 ]];
 
-                                return; // end of stream
+                                return;
                             }
 
                             $data = json_decode($json, true);

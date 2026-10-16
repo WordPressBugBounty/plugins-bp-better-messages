@@ -525,7 +525,6 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                     $attrs_after  = $matches[3];
                     $all_attrs    = $attrs_before . $attrs_after;
 
-                    // Skip links that are part of our own cart snapshot or product cards
                     if ( strpos( $all_attrs, 'bm-wc-cart-link' ) !== false ) {
                         return $matches[0];
                     }
@@ -719,10 +718,6 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
             }
             return '<div class="bm-wc-button-wrap">' . $button_html . '</div>';
         }
-
-        /* ---------------------------------------------------------------- *
-         * Shortcodes
-         * ---------------------------------------------------------------- */
 
         public function product_button_shortcode( $atts ){
             if ( Better_Messages()->settings['wooCommerceIntegration'] !== '1' ) {
@@ -973,6 +968,16 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
         }
 
         public function rest_post_cart_snapshot( $request ){
+            $thread_id = (int) $request->get_param( 'thread_id' );
+
+            return Better_Messages()->functions->with_lock( 'wc_cart_snapshot|' . $thread_id, function () use ( $request, $thread_id ) {
+                wp_cache_delete( $thread_id, 'bm_thread_meta' );
+
+                return $this->post_cart_snapshot( $request );
+            } );
+        }
+
+        private function post_cart_snapshot( $request ){
             $thread_id       = (int) $request->get_param( 'thread_id' );
             $current_user_id = (int) Better_Messages()->functions->get_current_user_id();
 
@@ -993,8 +998,6 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                 return new WP_REST_Response( array( 'posted' => false, 'reason' => 'no_wc' ) );
             }
 
-            // WC does not initialize the cart in REST API context. Force-load it
-            // so WC()->cart contains the customer's actual session cart.
             if ( ( ! WC()->cart || ! WC()->session ) && function_exists( 'wc_load_cart' ) ) {
                 wc_load_cart();
             }
@@ -1107,7 +1110,6 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                 return;
             }
 
-            // Ensure BM frontend JS + CSS are loaded so the button click handler works.
             Better_Messages()->load_scripts();
 
             if ( ! is_user_logged_in() && ! ( isset( Better_Messages()->guests ) && Better_Messages()->guests->guest_access_enabled() ) ) {

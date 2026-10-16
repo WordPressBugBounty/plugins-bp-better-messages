@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.14
+Stable tag: 3.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -361,6 +361,37 @@ Yes (WebSocket version). End-to-end encryption is enabled per thread — message
 
 The complete documentation, integration guides, REST API reference, hooks reference, video tutorials, and 80+ blog posts are at [www.better-messages.com](https://www.better-messages.com/).
 
+= Which external services does Better Messages connect to? =
+
+The plugin connects to WordPlus Cloud, the plugin author's service that sells and licenses the WebSocket version, only when an administrator uses one of these features:
+
+* **Plans, prices and reviews.** When an administrator opens Better Messages → Upgrade, the site asks WordPlus Cloud (api.wordplus.cloud) for the current plans, prices and customer reviews, and keeps the answer for an hour. No personal data is sent, only the request itself, which WordPress makes with the site's address. The administrator's browser then loads the reviews' photos from WordPlus Cloud.
+* **Contact form.** When an administrator sends a message from Better Messages → Support, the plugin sends what they wrote, their name and email address, any files they attach, any access details they choose to share, and the site's address and technical details (the WordPress, PHP, database and web server versions, the theme and the active plugins), which the form shows before sending.
+* **Better Messages Assistant, only after you press Start.** The AI assistant on Better Messages → Support sends nothing until an administrator presses Start under the list of what it sends. Start registers the site with WordPlus Cloud (its address, the plugin version and whether it is the free or the WebSocket version). Then each question goes to WordPlus Cloud's assistant service (rest.wordplus.cloud) with the site's address, the plugin's settings (without keys or passwords), the plugin, WordPress, PHP and theme versions, the active plugins and the administrator's language, and the answer comes back to the page. Questions and answers are stored and read by the plugin's team to improve the assistant. Visitors' data is never sent. "Turn off the assistant" under the chat stops it, and the `wordplus_sdk_assistant_enabled` filter hides it.
+* **Buying.** Buying happens on the WordPlus Cloud website (www.wordplus.cloud), never inside WordPress. The Upgrade buttons open it with the site's address. After paying, the plugin sends WordPlus Cloud the one-time code it came back with, the site's address, the plugin version and a random identifier of the site, and gets the licence key.
+* **Installing the WebSocket version, only when asked for.** If the buyer asks for it on the WordPlus Cloud checkout page, WordPlus Cloud contacts the site, and the site downloads the WebSocket version from WordPlus Cloud and installs it. Nothing is installed unless the buyer asks on that page.
+* **Licence check.** Once a licence key is saved, the site sends the key, its address and the plugin version to WordPlus Cloud once a day to confirm the licence.
+* **Emoji and sticker downloads, only when an administrator asks.** "Download emoji images to your server", the emoji names in other languages and the sticker packs come from WordPlus Cloud's CDN (cdn.wordplus.cloud), or from WordPlus Cloud (api.wordplus.cloud) when the CDN fails, and the sticker settings ask it for the list of packs when they open. The administrator's browser loads the packs' cover pictures from the same addresses. These requests send the plugin's name and version, and WordPress adds the site's address to every request it makes.
+* **Usage data, only if you opt in.** After the plugin is first activated, it asks once whether to share usage data, and nothing is sent unless an administrator chooses Allow & Continue. Then the site sends the administrator's name and email address (to tell them about security and feature updates), the site's address, title, language and time zone, the WordPress, PHP and plugin versions and whether the plugin is active, and, unless switched off, which of the plugin's features and settings are in use (on/off values, numbers and short setting values, never your content, addresses or keys, and the size of the site's messaging only as a range) and the names and versions of its plugins and themes. It sends them once a day when something changed, and when the plugin is activated, deactivated or deleted. The newsletter is a separate choice, off unless switched on. Each choice can be changed, or the sharing stopped, from the Opt out link under the plugin on the Plugins screen. Opting out has WordPlus Cloud erase what was shared. A site that opted in through Freemius in an earlier version stays opted in, and its administrators are told once that its data goes to WordPlus Cloud now. Only the WebSocket version adds the features and settings in use to what such a site shares, unless switched off. The free version shares them only once an administrator switches them on. A site that skipped Freemius's opt-in is not asked again.
+* **Deactivation feedback, only when you send it.** When the plugin is deactivated, it may ask why. The answer is sent to WordPlus Cloud only if the administrator submits it, without their email or the site's address unless they opted in to usage data and left "Anonymous feedback" unticked.
+
+WordPlus Cloud: [terms of service](https://www.wordplus.cloud/terms), [privacy policy](https://www.wordplus.cloud/privacy).
+
+= Which other services can Better Messages use? =
+
+Besides WordPlus Cloud, the plugin uses these services, each as described:
+
+* **Emoji images (jsDelivr).** Emoji show as Apple's images by default, and until the site downloads them, browsers load the image sheet from jsDelivr (cdn.jsdelivr.net), which receives the visitor's IP address. "Download emoji images to your server" in the emoji settings, or the native emoji set, stops it. jsDelivr: [terms of service](https://www.jsdelivr.com/terms), [privacy policy](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net).
+* **Video and media links (YouTube, Vimeo and other oEmbed providers).** With oEmbeds on, which is the default, a link to a provider WordPress's oEmbed support knows makes the site ask that provider for its player, and the player loads from the provider in the conversation. With "Privacy-friendly oEmbeds" on, a video loads only after a click. YouTube: [terms of service](https://www.youtube.com/t/terms), [Google privacy policy](https://policies.google.com/privacy). Vimeo: [terms of service](https://vimeo.com/terms), [privacy policy](https://vimeo.com/privacy).
+* **GIFs (GIPHY, KLIPY), only with your own API key.** Searches typed in the GIF picker go from the site to the chosen provider, with a random identifier for each member and never their name, and GIFs load in browsers from the provider's servers. GIPHY: [terms of service](https://giphy.com/terms), [privacy policy](https://giphy.com/privacy). KLIPY: [API terms](https://klipy.com/support/api-terms), [privacy policy](https://klipy.com/support/privacy-policy).
+* **Stipop stickers, only with your own API key.** The sticker store and sticker searches go to Stipop (messenger.stipop.io) with the member's numeric ID on the site and the chosen language, and the stickers load in browsers from img.stipop.io. Stipop: [terms of service](https://stipop.io/en/policies/terms), [privacy policy](https://stipop.io/en/policies/privacy).
+* **AI chat bots and AI features, only with your own API key.** With an OpenAI, Anthropic or Google Gemini key, the messages of conversations with an AI bot, with the bot's instructions, and the content an AI feature works on (messages it checks, voice messages it transcribes) go to that provider. OpenAI: [terms of use](https://openai.com/policies/terms-of-use), [privacy policy](https://openai.com/policies/privacy-policy). Anthropic: [commercial terms](https://www.anthropic.com/legal/commercial-terms), [privacy policy](https://www.anthropic.com/legal/privacy). Google Gemini: [API terms](https://ai.google.dev/gemini-api/terms), [privacy policy](https://policies.google.com/privacy).
+* **Location sharing, only when switched on.** Browsers showing a shared place load the map from tile.openstreetmap.org, and the place search and nearby places send the search text or the map's position to nominatim.openstreetmap.org and overpass-api.de. These addresses can be changed in the location settings. OpenStreetMap: [tile usage policy](https://operations.osmfoundation.org/policies/tiles/), [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/), [privacy policy](https://osmfoundation.org/wiki/Privacy_Policy). Overpass API: [terms](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html).
+* **OneSignal, only with the OneSignal plugin.** When the OneSignal integration is used, the site links each member's push subscription to their numeric ID on the site at OneSignal (api.onesignal.com), so message notifications reach them. OneSignal: [terms of service](https://onesignal.com/tos), [privacy policy](https://onesignal.com/privacy_policy).
+* **Cloud storage, only when connected.** With a storage provider connected (Amazon S3, Cloudflare R2 or another S3-compatible service), files sent in messages are kept with that provider in the administrator's own account, and browsers upload and download them there. The provider's own terms and privacy policy apply.
+* **Mobile App, only when an administrator sets one up.** On Better Messages → Mobile App, the Android signing key and its passwords are sent to the plugin author's app builder (builder.better-messages.com) to check or create them, and the Apple and Google keys the administrator enters are checked with Apple (api.appstoreconnect.apple.com) and Google. Apple: [privacy policy](https://www.apple.com/legal/privacy/). Google Firebase: [terms](https://firebase.google.com/terms), [privacy policy](https://policies.google.com/privacy).
+* **FFmpeg, only when downloaded.** "FFmpeg WASM (~30 MB)" in the media settings downloads the video converter once from better-messages.com to the site, which then serves it to the browsers that convert videos before sending them.
+
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/bp-better-messages` directory, or install the plugin through the WordPress plugins screen directly.
@@ -389,63 +420,108 @@ The complete documentation, integration guides, REST API reference, hooks refere
 
 **Important — please read before updating to 3.0**
 
-3.0 is a full redesign. Your conversations, settings and integrations carry across untouched — including the colors and sizes you set in the Customizer — but three things need your attention:
-
-* Custom CSS needs rewriting: the messenger's classes are now prefixed `bm-` instead of `bpbm-` and `bp-messages-`
-* Update the exclusion lists of any caching or optimisation plugin: the script and style files were renamed (`bp-messages*` → `better-messages*`, `bpbm-worker.js` → `bm-worker.js`)
-* The WordPress Customizer integration is gone — colors and sizes now live in the Appearance tab, and snippets calling `Better_Messages()->customize` stop working
+3.0 is a full redesign. Your conversations, settings and integrations carry across untouched — including the colors and sizes you set in the Customizer.
 
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
-= 3.0.14 =
-* Improved **Open Member Profile** in a mini chat: it opens the profile in a new tab, so the chat stays open
-* Improved a failed build in **Mobile App → Builds**: it now says why the build failed and what to fix, with the lines of the build log that show it
-* Improved the **Appearance** settings to no longer add classes to the page's body: each is set on the part of the messenger it styles — custom CSS that used one, such as body.bm-widgets-left, should target that part instead
-* Added editing the last message you sent by pressing the Up arrow in an empty reply box
-* Fixed someone made a member by opening a chat room with **Auto join users** missing from that room's online list until the page was reloaded, so the room looked empty to whoever came first
-* Fixed reporting a message showing "You already reported this message" right after the report went through
-* Fixed a message that only carried files staying in the conversation with nothing in it after its last file was removed by attachment retention
-* Fixed a mention showing as HTML code instead of @name on the Administration page, in the Approve and Reject windows and in exported transcripts
-* Fixed "Cannot reach the site" showing on pages where the messenger is not open when the connection drops
-* Fixed a forwarded file failing to open with **File Protection** on for members of the conversation it was forwarded into who are not in the one it was first sent in
-* Fixed messages looking sent to the sender while none of them reached the others, after a phone paused the page in the middle of a send: a send that gets no answer is sent again by itself, without holding back the messages after it
-* Fixed a message whose sending was cut off by reloading the page taking a long time to go out from the new page
-* Fixed the offline notice counting messages the site refused among those that will be sent once you are back online
-* Improved sending attachments on a slow connection: an upload that was cut off carries on where it stopped, and each new try is given more time
-* Fixed typed messages disappearing without being sent, with the **Bad Words Filter** in use, after its list of words once failed to load
-* Fixed the picture in the **Camera** window showing small in the middle of the preview after switching camera on an iPhone, sometimes until the window was closed
-* Fixed new messages not arriving until the page was reloaded after one request to the site got no answer, as when a phone paused the page in the middle of it: requests now give up after a minute and the messenger carries on
-* Fixed the messenger in one tab showing no new messages until it was reloaded, after another tab of the site was closed while it was resetting the messages kept in the browser
-* Fixed the messenger waiting for good when reopening the messages kept in the browser failed, instead of carrying on without them
-* Fixed the delivery status window showing "Loading..." for as long as it was open when the WebSocket server sent no answer
-* Fixed text smileys staying as text, and the banned word warning not showing, for the rest of the page after they failed to load once
-* Fixed the emoji picker and the stickers never loading when their data did not arrive
-* Fixed an encrypted attachment never showing when its download stalled
-* Fixed the recent chat heads being forgotten when a chat was opened or closed before the stored ones had been read
-* Fixed the forward window's list of conversations loading no further after one load failed
-* Fixed the app trying to answer a call for the rest of the session when the call was cancelled before it reached the app
-* Fixed a visitor who signed up as a guest while a chat room was open still being offered **Login** in that room, which took them to the login page, instead of the button to join it
-* Fixed a chat room that only members can read staying on its loading placeholders for someone who had just joined it, such as a guest joined by **Auto join users**, until the page was reloaded
-* Fixed **Set up encryption** being offered to someone who already has encryption keys when the site did not answer, which could replace the keys and leave earlier encrypted conversations unreadable
-* Fixed a call staying on "Connecting" on both sides when the answering side could not start it
-* Fixed a message reaching the others ahead of one sent just before it, such as a shared location
-* Fixed the app showing "Cannot reach the site" after a short loss of connection
-* Fixed the next voice message not playing on by itself with **File Protection** on
-* Fixed an encrypted file that could not be downloaded asking to restore your encryption keys, instead of saying it could not be downloaded
-* Fixed a conversation's **Files** tab leaving out files that were forwarded into it or sent by **Mass Messaging**, and listing a forwarded file twice in the conversation it came from
-* Fixed a conversation's **Files** tab showing the file of a message still held for moderation
-* Fixed **Pre-Moderation** not holding messages that other plugins send for a member, such as a listing's contact form, and a missed call or other automatic message making its sender approved under **First-Time Senders** — automatic messages sent with [`new_message()`](https://www.better-messages.com/hooks/php-functions/#new_message) can pass `skip_moderation`
-* Fixed a file sent on its own sticking out past the other messages, and parts of the messenger drawn larger than designed, on themes such as Twenty Twenty-Five
-* Fixed a file sent with a caption looking like two separate boxes in the **Outlined** message design: the file and its caption are now outlined as one message
-* Updated the Freemius SDK to 2.13.5
-* Security improvement: the **Users** widget's member list, and the users list in the REST API, are only served to someone the widget is shown to, and list only the members it is set to show, so a site that does not use it no longer lists its members to visitors
+= 3.1.0 =
+* Added **WordPlus Cloud**, the new name and home of the cloud behind the WebSocket version: your licences, sites, downloads and invoices in one account at [www.wordplus.cloud](https://www.wordplus.cloud/). [Read the introduction](https://www.better-messages.com/blog/wordplus-cloud/)
+* Removed the Freemius SDK, added licences and updates of the WebSocket version from WordPlus Cloud. Your licence moves over by itself on the first page load after the update, with the same key, and realtime messaging, calls and mobile apps keep working without any action
+* Added **Cloud Storage** for attachments, in the free version too: keep files in Cloudflare R2, Bunny.net Storage, or Amazon S3 and any S3-compatible service, chosen per type of file under **Attachments → File Groups**. Files go straight from the browser or the mobile app to the storage, and members open them through links that expire
+* Added **Better Messages Assistant**, an AI assistant on Better Messages → Support, in the free version too: it answers from the documentation and your settings, opens the setting it talks about, prepares setting changes for you to review and save, writes code snippets with links to the hooks they use, and fills in the contact form for anything a person should look at. It sends nothing until you press Start, and **Ask AI** in every Better Messages page header opens it
+* Added **live streaming in chat rooms** with the Live Stream plugin, on the WebSocket version: a room shows its stream the way it shows a group video call, beside the messages, and the chat room editor can start one
+* Added **end-to-end encryption of group calls** on the WebSocket version, off by default under **Group Calls → End-to-End Encryption**: their audio and video are encrypted in each browser and app with a key only your site gives out
+* Added new **Licence**, **Upgrade** and **Support** pages: the licence with the sites using it, the plans with a free trial, and a contact form that takes files
+* Added **Max File Size by Type**, a separate upload limit for images, videos, audio and other files
+* Added **notification levels** for group conversations and chat rooms: each member chooses **All messages**, **Mentions and replies** or **Nothing** for a conversation from its menu, and administrators choose the default for each kind of conversation under **Notifications → Conversation Notifications**
+* Added replies that notify like mentions: a reply to your message in a group conversation notifies you and marks the conversation as a mention does
+* Added muting a conversation for a set time, after which it notifies again by itself
+* Added **@all** to mention everyone in a group conversation or chat room, allowed to moderators by default under **Notifications → Mention Everyone (@all)** and set for each chat room in its settings
+* Added **Group Call Alerts** on the WebSocket version: members are notified by push, email and a pop-up with who started the call, how many are in it and a Join button when a group call starts in their conversation, with a sound of its own and a cooldown and a limit for each member under **Notifications**
+* Added a mark for new reactions to your messages, in the conversation list and in the conversation, with a button that jumps to each message reacted to
+* Added a choice of what members are emailed about, in their messenger settings: all notifications, only one-to-one conversations, mentions and replies, or nothing, with the default under **Notifications → Default Email Scope**
+* Added hooks and a REST route for notification levels, listed in the [Notification levels](https://www.better-messages.com/docs/features/notification-levels/) documentation
+* Improved **Force Notifications for Mentions**, now **Force Notifications for Mentions and Replies**, which no longer emails a member who turned email off
+* Improved chat rooms with notifications off, which now notify their members about mentions and replies. Hidden chat rooms never notify
+* Improved Media Optimization: a picked file is converted at once, so its preview shows what will be sent, and a file still too large after converting says so before it is sent
+* Improved licences on WordPress networks: the licence of a network-activated plugin belongs to the network, and only a network administrator can change it
+* Improved the Voice and Video Messages add-on offer: it shows where the add-on is needed, in the Voice Messages and Video Messages settings and the AI bot editor, instead of on an Add-ons page, and says when the licence of the add-on is not active
+* Improved the admin page addresses, which lose their bp- prefix (admin.php?page=better-messages and so on). Old addresses keep working
+* Improved background jobs, which now run on one scheduled worker that never runs twice at once
+* Improved the open and close animation of the bubble launcher: the panel grows out of the launcher in one piece, with its list at full height from the start, and stays smooth on a busy page
+* Improved the built-in prices of the AI chat bots with the newest models: Claude Fable 5.1, Opus 5.5, Sonnet 5.5 and Haiku 5.5, GPT-6, Gemini 3.5 to 3.8 Flash and Nano Banana 2.1, the lower price of GPT-5.6 Sol, and the higher price Gemini 3.6 to 3.8 Flash take on January 1, 2027, applied on that date by itself
+* Improved the **Web Search** setting of OpenAI and Claude bots, which now shows the price per search
+* Improved the realtime connection of the WebSocket version, which now goes to the addresses of WordPlus Cloud: browsers connect to ws.wordplus.cloud, and requests go to rest.wordplus.cloud, in place of cloud.better-messages.com, and group calls connect to video.rtc.wordplus.cloud in place of video-cloud.better-messages.com. Nothing changes for a self-hosted server. If your site has a Content Security Policy, allow wss://ws.wordplus.cloud, wss://*.de.wordplus.cloud, https://rest.wordplus.cloud, wss://*.rtc.wordplus.cloud and https://*.rtc.wordplus.cloud in its connect-src
+* Improved the privacy of the WebSocket version: what your site sends through the realtime server is encrypted with keys only those allowed to read it get, a key for each conversation that changes when someone leaves it, in place of one key for the whole site. Messages, files, conversation names and profiles cannot be read or changed on the way
+* Improved online statuses on the WebSocket version: a page now gets the status of the people it shows, not of everyone on the site, which cuts most of the realtime traffic of busy sites. Someone coming online still shows at once
+* Improved page loads and reconnects on the WebSocket version: the realtime server keeps the last 5 minutes of every conversation (encrypted), so reloading, opening another page of the site or coming back to the messenger on a phone no longer asks your site for updates, and messages missed meanwhile show at once
+* Improved the JavaScript API for online statuses: `BetterMessages.getOnlineUsers()` and a callback on the `better_messages_user_online`, `better_messages_user_offline` or `better_messages_online_users_loaded` hook get the status of everyone for their page as before, the new `BetterMessages.watchOnlineUsers( ids )` follows chosen users, and the `better_messages_presence_all` filter keeps every page on everyone, for code that listens to the page events
+* Improved your own camera in calls, which shows the way the others see it again, not mirrored, as in 2.0: while the call rings, in the corner of a 1:1 call and on your tile in a group call, in the browser and in the mobile app. A shared screen is never mirrored
+* Improved building the mobile app: your site sends the files of the messenger with the build request, so a firewall or the bot protection of a CDN that blocks the build server no longer stops a build
+* Improved the iOS setup of the mobile app: once a screen sharing App ID is selected, the App ID of the app lists App Groups too, and a build missing it names the App ID and the App Group to assign
+* Improved the chat toggle in calls: a **Show Chat** button in the call controls replaces the chevron on the edge of the call, which could cover the buttons of a participant, and full screen hides it
+* Improved the picture of group calls: the camera sends in a modern codec where the device encodes it in hardware, with a fallback every device can play, in three sizes up to 1080p, and each participant receives the size their screen shows
+* Improved the moderator buttons in group calls, which show a spinner until the change takes effect
+* Improved **Mute user** in the member menu of a chat room, which is red like Kick and Ban, and so is the button of its form
+* Improved calls for keyboards and screen readers: Answer, Reject and every call control are buttons that Tab reaches and Enter or Space presses, and the focus goes back where it was when the call ends
+* Fixed AI chat bots on Claude Opus 4.7 and 4.8 counting the old Opus 4 price, three times what they cost
+* Fixed web searches of Claude bots counting as free instead of $10 per 1,000, and those of OpenAI bots on GPT-4o and GPT-4.1 counting $25 per 1,000 instead of $10
+* Fixed images from Gemini preview models counting as free in the costs of the AI chat bots
+* Fixed some messages, voice and video messages included, being stored twice when sent from a phone or tablet with the messenger open in more than one tab or window, or sent again while the first try was still saving
+* Fixed two conversations being created between the same members when a private, product, listing or order conversation was opened twice at the same moment, also with **Single Conversation Per Recipient** on
+* Fixed a chat room, group or course conversation being created twice when its first members opened it at the same moment
+* Fixed a reaction or a report being lost when two members reacted to or reported one message at the same moment
+* Fixed a member added to an end-to-end encrypted conversation losing access to it when another member was added at the same moment
+* Fixed an AI chat bot answering a message twice, and a summary, digest, translation or transcription being made and charged twice, when it was asked for twice at the same moment
+* Fixed a file uploaded in parts being corrupted, or a file uploaded to Cloud Storage being added twice, when a part or the upload was sent again while the first try was still running
+* Fixed a WooCommerce cart snapshot being posted twice, a pinned message being listed twice, and "started a call" showing twice when each happened twice at the same moment
+* Fixed the online count in the **Chat Rooms** list missing for everyone but the moderators of the room when the room has **Hide participants list** on
+* Fixed chat room moderators being able to mute and ban a site administrator, who they already could not remove, and being offered all three on an administrator
+* Fixed a muted chat room moderator or administrator getting the reply area, where every message failed to send, instead of the notice that they are muted
+* Fixed starting a new conversation freezing the messenger and flooding the site with requests when the page sizes the messenger to its content, as a row of a page builder can
+* Fixed an uploaded audio file showing as a voice message with no name or download: it shows as a file again, with a play button and a download link
+* Fixed the link under **Advanced Mini Chats** in the BuddyPress, PeepSo and Ultimate Member settings, which now opens the Mini chats switch under **Appearance → Mini widgets**
+* Fixed 1:1 calls that move to the media server, on sites that turn call encryption on with the BETTER_MESSAGES_CALL_ENCRYPTION_ENABLED constant, encrypting only their data messages: their audio and video are now encrypted too
+* Fixed the controls of a group call wrapping onto a second row once the connection quality shows, instead of folding into More
+* Fixed your own camera on a phone showing on your tile in a group video call at half its width in a black frame
+* Fixed some messenger, admin and mobile app texts that stayed in English on translated sites, such as the upload limits, the offline banner and the login error of the app
+* Fixed the **Messages** and **Chat Room** blocks not loading in the block editor on WordPress 5.9 to 6.5
+* Fixed a PHP 8.5 deprecation notice that the WebSocket version wrote to the debug log every minute
+* Fixed deprecation notices on PHP 8.1 and newer when a private conversation is opened through the REST API without a subject, and when a call ends
+* Security improvement: starting a group call now checks the call type and who may start one, so Lock Room, Mute All and broadcast mode always hold
+* Security improvement: a reply can only point to a message of its own conversation, so an AI chat bot never reads a message of another one
+* Security improvement: AI chat bots answer mentions and replies only in conversations they are part of
+* Security improvement: a message held for moderation cannot be loaded by other members of the conversation
+* Fixed a group call that the call server could not start still posting "started a call"
+* Fixed BuddyBoss App push notifications of a new message going to the wrong members and to the sender
+* Fixed releasing a message held by AI moderation on a site without the realtime server
+* Fixed members seeing the edit and delete buttons on the messages of everyone after an administrator wrote in the conversation
+* Fixed clearing a conversation leaving its unread counts behind
+* Fixed the mention badge missing on a conversation that first arrived with a new message, in the mobile app and in browsers without shared workers
+* Fixed an edited or reacted older message, arriving while the conversation is open, making the messages between it and the loaded ones count as loaded
+* Fixed guest sign-up sometimes failing with a server error when the guest enters no name
+* Fixed the time of a call card squeezing its label in a mini chat: the time now ends the last line of the card, and cards are more compact in mini chats and on phones
+* Fixed deleted, hidden and encrypted message placeholders, location cards, file names and voice messages squeezing their text in a mini chat
+* Fixed the first tap on Send often only closing the keyboard on a phone, so a message needed a second tap, on iPhones and in FluentCommunity, SureDash and web apps installed to the home screen
+* Fixed the bottom menu of FluentCommunity coming back late after the keyboard closed on an iPhone, with the reply area jumping up when it came
+* Fixed a tap that brings back the hidden call controls on a phone also pressing the button under the finger, which could end the call
+* Fixed a tap on an action button of the conversation info panel missing it on a phone right after editing the subject
+* Fixed Private Message and links to a conversation on a phone showing the conversations list first and sliding to the conversation a moment later: it opens straight away, as in 2.0
+* Fixed new messages being marked as read at once, with no sound, pop-up or push notification, after the messenger was closed on a phone with a conversation open: closing now goes back to the conversations list, as in 2.0
+* Fixed Query Monitor reporting scripts and styles on the settings page as enqueued but never printed
+* Fixed mentions sitting a little above or below the words around them, in the reply area and in messages
+* Fixed the pin and mute icons of a conversation in the list sitting higher than its name and time
+* Fixed the unread count of a muted conversation being hard to see in the conversation list
 * Other minor bugfixes and improvements
 
 [See the full changelog](https://www.better-messages.com/changelog/) for every earlier version.
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+The Freemius SDK is removed. A site that shared usage data through Freemius shares it with WordPlus Cloud now, and a WebSocket licence saved on the site moves there by itself on the first page load after the update.
 
 = 3.0.0 =
 A full redesign: a rebuilt Appearance tab with live preview, location and video messages, per-conversation translation, and the Mobile App page out of alpha. CSS classes and script filenames changed — update custom CSS and caching exclusion lists. The Customizer is gone, but its colors carry over.

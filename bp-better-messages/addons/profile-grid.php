@@ -45,7 +45,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
 
             $pmrequests = new PM_request;
 
-            // Set custom profile URL (if set this to false the user links becomes unclickable)
             $item['url'] = $this->get_user_profile_url( $user_id );
 
             $avatarid = $pmrequests->profile_magic_get_user_field_value( $user_id, 'pm_user_avatar' );
@@ -56,8 +55,6 @@ if ( !class_exists( 'Better_Messages_Profile_Grid' ) ){
                     $item['avatar'] = $pm_avatar[0];
                 }
             }
-            // Set custom name
-            //$item['name'] = 'Custom name';
 
             return $item;
         }

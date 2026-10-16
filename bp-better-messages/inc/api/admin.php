@@ -981,11 +981,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
                         $attachment_id = Better_Messages()->functions->get_message_meta( $message['id'], $is_video ? 'bpbm_video_messages' : 'bpbm_voice_messages', true );
 
-                        $attachment_url = wp_get_attachment_url( $attachment_id );
-                        if( $attachment_url ) {
+                        $cloud_url = $attachment_id ? Better_Messages_Storage()->get_file_url( $attachment_id, 'admin' ) : null;
+
+                        if( $cloud_url ) {
                             $content .= '<div><ul>';
-                            $content .= '<li><a target="_blank" href="' . $attachment_url . '">' . $attachment_url . '</a></li>';
+                            $content .= '<li><a target="_blank" href="' . esc_url( $cloud_url ) . '">' . esc_html( Better_Messages_Storage()->original_name( $attachment_id ) ) . '</a></li>';
                             $content .= '</ul></div>';
+                        } else {
+                            $attachment_url = wp_get_attachment_url( $attachment_id );
+                            if( $attachment_url ) {
+                                $content .= '<div><ul>';
+                                $content .= '<li><a target="_blank" href="' . $attachment_url . '">' . $attachment_url . '</a></li>';
+                                $content .= '</ul></div>';
+                            }
                         }
                     }
 
@@ -997,7 +1005,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
                         $content .= '<ul>';
                         foreach ( $attachments as $id => $attachment ){
-                            $content .= '<li><a target="_blank" href="' . $attachment . '">' . $attachment . '</a></li>';
+                            $cloud_url = Better_Messages_Storage()->get_file_url( $id, 'admin' );
+
+                            if( $cloud_url ) {
+                                $content .= '<li><a target="_blank" href="' . esc_url( $cloud_url ) . '">' . esc_html( Better_Messages_Storage()->original_name( $id ) ) . '</a></li>';
+                            } else {
+                                $content .= '<li><a target="_blank" href="' . $attachment . '">' . $attachment . '</a></li>';
+                            }
                         }
                         $content .= '</ul>';
                         $content .= '</div>';
@@ -1413,6 +1427,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 return new WP_Error( 'invalid_data', 'No settings provided', array( 'status' => 400 ) );
             }
 
+            $has_storage = class_exists( 'Better_Messages_Storage_Admin' );
+
+            if ( array_key_exists( 'storageGroups', $data ) ) {
+                $storage_groups = $data['storageGroups'];
+                unset( $data['storageGroups'] );
+
+                if ( $has_storage ) {
+                    $saved = Better_Messages_Storage_Admin()->save_groups( $storage_groups );
+
+                    if ( is_wp_error( $saved ) ) {
+                        return $saved;
+                    }
+                }
+            }
+
             if ( isset( $data['emojiSettings'] ) ) {
                 $emoji_json = $data['emojiSettings'];
                 unset( $data['emojiSettings'] );
@@ -1436,6 +1465,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
             $response_settings = Better_Messages_Options::instance()->settings;
             $response_settings['emailCustomHtml'] = Better_Messages_Options::instance()->get_email_custom_html();
+
+            if ( $has_storage ) {
+                $response_settings['storageGroups'] = Better_Messages_Storage()->get_settings()['groups'];
+            }
 
             return rest_ensure_response( array(
                 'success'  => true,
@@ -1857,7 +1890,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
         private function readable_mentions( $content ){
             $readable = preg_replace(
-                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+)&quot;&gt;((?:(?!&lt;).)*?)&lt;\/span&gt;/s',
+                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+|all)&quot;&gt;((?:(?!&lt;).)*?)&lt;\/span&gt;/s',
                 '<span class="bm-mention" data-user-id="$1">$2</span>',
                 (string) $content
             );
@@ -1881,8 +1914,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                     $name         = wp_basename( $original_url ? $original_url : $url );
                 }
 
+                $file_url  = $is_private ? '' : $url;
+                $cloud_url = Better_Messages_Storage()->get_file_url( $attachment_id );
+
+                if( $cloud_url ){
+                    $file_url = $cloud_url === Better_Messages_Files()->get_proxy_url( (int) $attachment_id ) ? '' : $cloud_url;
+                }
+
                 $files[] = array(
-                    'url'  => $is_private ? '' : $url,
+                    'url'  => $file_url,
                     'name' => $name,
                 );
             }

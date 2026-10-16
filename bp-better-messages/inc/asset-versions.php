@@ -101,6 +101,10 @@ if ( ! class_exists( 'Better_Messages_Asset_Versions' ) ):
                 return null;
             }
 
+            if ( strpos( $this->url_path( $registered->src ), '/vendor/sdk/' ) !== false ) {
+                return null;
+            }
+
             $own_file = strpos( $registered->src, Better_Messages()->url ) === 0;
 
             if ( ! $own_file && ! $this->is_own_handle( $handle ) ) {
@@ -163,31 +167,17 @@ if ( ! class_exists( 'Better_Messages_Asset_Versions' ) ):
             $query_at = strpos( $url, '?' );
             $base     = $query_at === false ? $url : substr( $url, 0, $query_at );
             $pairs    = $query_at === false ? array() : explode( '&', substr( $url, $query_at + 1 ) );
-            $encoded  = rawurlencode( $version );
-            $kept     = array( self::MARKER . '=' . $encoded );
-            $has_ver  = false;
+            $kept     = array( self::MARKER . '=' . rawurlencode( $version ) );
 
             foreach ( $pairs as $pair ) {
                 $name = strstr( $pair, '=', true );
                 $name = $name === false ? $pair : $name;
 
-                if ( $pair === '' || $name === self::MARKER ) {
+                if ( $pair === '' || $name === self::MARKER || $name === 'ver' ) {
                     continue;
                 }
 
-                if ( $name === 'ver' ) {
-                    if ( $pair === 'ver' || $pair === 'ver=' ) {
-                        continue;
-                    }
-
-                    $has_ver = true;
-                }
-
                 $kept[] = $pair;
-            }
-
-            if ( ! $has_ver ) {
-                $kept[] = 'ver=' . $encoded;
             }
 
             return $base . '?' . implode( '&', $kept ) . $fragment;

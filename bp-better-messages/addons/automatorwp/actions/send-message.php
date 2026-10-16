@@ -9,11 +9,6 @@ class AutomatorWP_Better_Messages_Send_Message extends AutomatorWP_Integration_A
     public $thread_id;
     public $message_id;
 
-    /**
-     * Register the trigger
-     *
-     * @since 1.0.0
-     */
     public function register() {
         automatorwp_register_action( $this->action, array(
             'integration'       => $this->integration,
@@ -67,16 +62,6 @@ class AutomatorWP_Better_Messages_Send_Message extends AutomatorWP_Integration_A
 
     }
 
-    /**
-     * Action execution function
-     *
-     * @since 1.0.0
-     *
-     * @param stdClass  $action             The action object
-     * @param int       $user_id            The user ID
-     * @param array     $action_options     The action's stored options (with tags already passed)
-     * @param stdClass  $automation         The action's automation object
-     */
     public function execute( $action, $user_id, $action_options, $automation ) {
 
         $sender_id  = (int) $action_options['sender_id'];
@@ -111,10 +96,8 @@ class AutomatorWP_Better_Messages_Send_Message extends AutomatorWP_Integration_A
 
         $result = Better_Messages()->functions->new_message( $data );
 
-        // If there was an error, it'll be logged in action log with an error message.
         if ( is_wp_error( $result ) ) {
             $error_message = $result->get_error_message();
-            // Complete action with errors and log Error message.
 
         } else {
             $this->thread_id  = $result['thread_id'];
@@ -122,11 +105,6 @@ class AutomatorWP_Better_Messages_Send_Message extends AutomatorWP_Integration_A
         }
     }
 
-    /**
-     * Register required hooks
-     *
-     * @since 1.0.0
-     */
     public function hooks() {
         parent::hooks();
     }

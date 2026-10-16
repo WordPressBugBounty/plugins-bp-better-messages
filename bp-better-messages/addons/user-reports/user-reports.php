@@ -56,6 +56,17 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
         {
             $message_id = (int) $request->get_param( 'messageId' );
 
+            return Better_Messages()->functions->with_lock( 'message_reports|' . $message_id, function () use ( $request, $message_id ) {
+                wp_cache_delete( $message_id, 'bm_message_meta' );
+
+                return $this->remove_report( $request );
+            } );
+        }
+
+        private function remove_report( WP_REST_Request $request )
+        {
+            $message_id = (int) $request->get_param( 'messageId' );
+
             if ( ! $message_id ) {
                 return new WP_Error( 'no_message_id', 'No message id provided', array( 'status' => 400 ) );
             }
@@ -118,6 +129,17 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
         }
 
         public function report_message( WP_REST_Request $request)
+        {
+            $message_id = (int) $request->get_param( 'message_id' );
+
+            return Better_Messages()->functions->with_lock( 'message_reports|' . $message_id, function () use ( $request, $message_id ) {
+                wp_cache_delete( $message_id, 'bm_message_meta' );
+
+                return $this->save_report( $request );
+            } );
+        }
+
+        private function save_report( WP_REST_Request $request )
         {
             $current_user_id = Better_Messages()->functions->get_current_user_id();
 

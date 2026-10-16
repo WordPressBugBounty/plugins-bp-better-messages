@@ -28,15 +28,12 @@ if ( ! class_exists( 'Better_Messages_HivePress' ) ) {
             if( Better_Messages()->settings['hivepressIntegration'] !== '1' ) return;
 
             if ( ! is_admin() ) {
-                // Listing page
                 add_filter('hivepress/v1/templates/listing_view_page', [$this, 'alter_listing_view_page']);
                 add_filter( 'hivepress/v1/templates/vendor_view_block', [ $this, 'alter_vendor_view_block' ] );
 
-                // Vendor Page
                 add_filter( 'hivepress/v1/templates/vendor_view_page', [ $this, 'alter_vendor_view_page' ] );
                 add_filter( 'hivepress/v1/templates/listing_view_block', [ $this, 'alter_listing_view_block' ] );
 
-                // Booking extension pages
                 if ( hivepress()->get_version( 'bookings' ) ) {
                     add_filter( 'hivepress/v1/templates/booking_view_block', [ $this, 'alter_booking_view_block' ] );
                     add_filter( 'hivepress/v1/templates/booking_view_page', [ $this, 'alter_booking_view_page' ] );

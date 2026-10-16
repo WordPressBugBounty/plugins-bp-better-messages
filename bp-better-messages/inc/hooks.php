@@ -42,9 +42,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             add_action( 'admin_notices', array( $this, 'admin_notice') );
             add_action( 'in_admin_header', array( $this, 'hide_admin_notices_on_bm_pages' ) );
 
-            //if( Better_Messages()->settings['fastStart'] == '1' ) {
             add_action( 'template_redirect', array($this, 'catch_fast_thread'), 0 );
-            //}
 
             if( Better_Messages()->settings['friendsMode'] == '1' && function_exists('friends_check_friendship') ) {
                 add_filter( 'better_messages_can_send_message', array( $this, 'disable_non_friends_reply' ), 10, 3);
@@ -120,26 +118,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_action( 'template_redirect', array( $this, 'update_last_activity' ) );
 
-            /*
-             * BuddyBoss trying to fix
-             */
             add_action('wp_enqueue_scripts', array( $this, 'inbox_counter_javascript' ) );
             add_filter('messages_thread_get_inbox_count', array( $this, 'replace_unread_count' ), 10, 2 );
 
             add_action( 'wp_footer', array( $this, 'mobile_popup_button') );
             add_action( 'fluent_community/portal_footer', array( $this, 'mobile_popup_button') );
 
-            /*
-             * BeeHive premium theme integration
-             * https://www.wordplus.org/beehive
-            */
             add_action('wp_head', array( $this, 'beehive_theme_integration' ), 100 );
             add_action('wp_head', array( $this, 'max_height_css' ), 100 );
             add_filter( 'update_user_metadata', array( $this, 'override_last_activity' ), 1, 5 );
 
-            /**
-             * PMPRO Access
-             */
             if( defined('PMPROBP_DIR') && function_exists('pmpro_bp_user_can') ){
                 add_action( 'better_messages_before_new_thread', array( $this, 'disable_thread_for_pmpro_restricted_role' ), 10, 2);
                 add_filter( 'better_messages_can_send_message', array( $this, 'disable_messages_for_pmpro_restricted_role' ), 10, 3);
@@ -152,9 +140,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter( 'better_messages_can_send_message', array( $this, 'disable_message_to_deleted_users' ), 10, 3);
 
-            /**
-             * https://wordpress.org/plugins/asgaros-forum/
-             */
             if( class_exists('AsgarosForum') ){
                 add_action('asgarosforum_custom_profile_menu',        array( $this, 'asragaros_profile_link'));
                 if( apply_filters('asgarosforum_filter_show_header', true) ){
@@ -166,9 +151,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 add_action('asgarosforum_after_post_author', array( $this, 'asragaros_thread_view'), 10, 2);
             }
 
-            /**
-             * BBPress
-             */
             if( class_exists('bbPress') ){
                 if( Better_Messages()->settings['bbPressAuthorDetailsLink'] === '1' ) {
                     add_action('bbp_theme_after_reply_author_details', array($this, 'pm_link_bbpress'));
@@ -176,9 +158,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
             if( Better_Messages()->settings['allowMuteThreads'] === '1' ) {
-                /**
-                 * Remove standard Email & Notifications
-                 */
                 add_filter('bp_email_validate', array($this, 'mute_thread_remove_standard_email'), 10, 2);
                 add_action('bp_notification_after_save', array( $this, 'mute_thread_delete_notification'), 10, 1 );
             }
@@ -247,10 +226,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_Peepso::instance();
             }
 
-            /*
-             * Block, Suspend, Report for BuddyPress. BPTK_Block only appears on `init`,
-             * after this runs, so the plugin is recognised by its main class.
-             */
             if( class_exists( 'BP_Toolkit' ) || class_exists( 'BPTK_Block' ) ) {
                 require_once Better_Messages()->path . 'addons/bp-toolkit.php';
                 Better_Messages_BP_Toolkit::instance();
@@ -458,10 +433,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         {
             if ( ! is_string($message) || strpos($message, '<!-- BM-SYSTEM-MESSAGE:') !== 0 ) return $message;
 
-            // For 'stack' context, pass through — frontend handles rendering
             if ( $context === 'stack' ) return $message;
 
-            // For other contexts (notifications, push, etc.), return plain text
             preg_match('/<!-- BM-SYSTEM-MESSAGE:(\w+)/', $message, $matches);
             $type = isset($matches[1]) ? $matches[1] : '';
 
@@ -483,6 +456,13 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     return sprintf(__('%1$s changed the subject to "%2$s"', 'bp-better-messages'), $name, $subject);
                 case 'image_changed':
                     return __('Conversation image was changed', 'bp-better-messages');
+                case 'call_started':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $name = is_array($data) && ! empty($data['user_name']) ? $data['user_name'] : __('A user', 'bp-better-messages');
+                    $call_type = is_array($data) && isset($data['call_type']) ? $data['call_type'] : 'video';
+                    return $call_type === 'audio'
+                        ? sprintf(__('%s started an audio call', 'bp-better-messages'), $name)
+                        : sprintf(__('%s started a video call', 'bp-better-messages'), $name);
                 default:
                     return '';
             }
@@ -499,6 +479,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $system_data = Better_Messages()->functions->get_message_meta( $message_id, 'system_data', true );
             if ( $system_data && is_array($system_data) ) {
                 $meta['systemData'] = $system_data;
+            }
+
+            $broadcast_alert = (int) Better_Messages()->functions->get_message_meta( $message_id, 'broadcast_alert', true );
+            if ( $broadcast_alert !== 0 ) {
+                $meta['broadcastAlert'] = $broadcast_alert;
             }
 
             return $meta;
@@ -1165,9 +1150,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $sender_id       = $reply_message->sender_id;
             $message_content = str_replace('<!-- BPBM REPLY -->', '', $reply_message->message);
 
-            #remove_filter( 'bp_better_messages_after_format_message', array( Better_Messages()->urls, 'nice_links' ), 100 );
             $message_content = Better_Messages()->functions->format_message($message_content, $reply_message_id, 'stack', $user_id);
-            #add_filter( 'bp_better_messages_after_format_message', array( Better_Messages()->urls, 'nice_links' ), 100, 4 );
 
             $sender = get_userdata( $sender_id );
             if( ! $sender ) {
@@ -1549,7 +1532,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! is_user_logged_in() ) return false;
             $max_height = Better_Messages()->functions->initial_container_height();
 
-            #echo '<style type="text/css">body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .bm-side-threads-wrapper > .bm-column > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .bm-side-threads-wrapper > .bm-column > .scroller > .scroller,body:not(.bm-mobile) .bm-wrap.bm-wrap-main > .scroller > .scroller{max-height:'. $max_height .'px;}body:not(.bm-mobile) .bm-threads-wrapper{max-height:' . ($max_height) .'px!important;}</style>';
             echo '<style type="text/css">.bm-threads-wrapper{height:' . $max_height . '}</style>';
         }
 
@@ -1657,23 +1639,19 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function replace_unread_count( $unread_count, $user_id ){
-            /** Replacing BuddyBoss Messages Count */
             if( class_exists('BuddyBoss_Theme') || function_exists( 'buddyboss_theme_register_required_plugins' ) ) {
                 return 0;
             }
 
             if( Better_Messages()->settings['mechanism'] === 'websocket'){
-                /** BuddyX Counter */
                 if( defined('BUDDYX_MINIMUM_WP_VERSION') ){
                     return 0;
                 }
 
-                /** BuddyXPro Counter */
                 if( defined('BUDDYXPRO_MINIMUM_WP_VERSION') ){
                     return 0;
                 }
 
-                /** CERA Counter */
                 if( defined('GRIMLOCK_BUDDYPRESS_VERSION')){
                     return 0;
                 }
@@ -1995,9 +1973,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $friend_id = key($participants['recipients']);
 
-            /**
-             * Allow users reply to admins even if not friends
-             */
             if( current_user_can('manage_options') || user_can( $friend_id, 'manage_options' ) || $friend_id < 0 ) {
                 return $allowed;
             }
@@ -2185,7 +2160,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! class_exists('BuddyPress') && ! defined('ultimatemember_version') ){
                 if( Better_Messages()->settings['chatPage'] == '0' ){
                     echo '<div class="notice notice-error">';
-                    echo '<p><b>Better Messages</b> require <b><a href="'. admin_url('admin.php?page=bp-better-messages#/general').'">installing Messages Location</a></b>.</p>';
+                    echo '<p><b>Better Messages</b> require <b><a href="'. admin_url('admin.php?page=better-messages#/general').'">installing Messages Location</a></b>.</p>';
                     echo '</div>';
                 }
             } else {
@@ -2235,7 +2210,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
             if( function_exists('pmpro_has_membership_access') ) {
-                // PM PRO PLUGIN ACTIVE
                 $hasaccess = pmpro_has_membership_access(NULL, NULL, false);
 
                 if( ! $hasaccess ) return $content;
@@ -2324,9 +2298,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         function cron_intervals( $schedules )
         {
-            /*
-             * Cron for our new mailer!
-             */
             $schedules[ 'fifteen_minutes' ] = array(
                 'interval' => 60 * 15,
                 'display'  => 'Every Fifteen Minutes',
@@ -2365,7 +2336,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
     }
 
-    // Fallback
     if( ! class_exists('BP_Better_Messages_Hooks') ){
         class BP_Better_Messages_Hooks extends Better_Messages_Hooks {}
     }

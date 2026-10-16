@@ -10,17 +10,20 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
         public static function instance(): ?Better_Messages_Mobile_App_Builds
         {
-            // Store the instance locally to avoid private static replication
             static $instance = null;
-            // Only run these methods if they haven't been run previously
 
             if (null === $instance) {
                 $instance = new Better_Messages_Mobile_App_Builds();
             }
 
-            // Always return the instance
             return $instance;
-            // The last metroid is in captivity. The galaxy is at peace.
+        }
+
+        private function licensed_site()
+        {
+            $id = Better_Messages_License::instance()->get_activation_id();
+
+            return $id > 0 ? (object) array( 'id' => $id ) : false;
         }
 
         public function __construct(){
@@ -33,14 +36,10 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
         public function builds_checker()
         {
-            if ( ! wp_next_scheduled('ba_check_build_statuses') ) {
-                wp_schedule_event( time(), 'ba_every_five_minutes', 'ba_check_build_statuses' );
-            }
+            Better_Messages_Worker()->add_task( 'ba_check_build_statuses', 5 * MINUTE_IN_SECONDS );
 
-            $has_builds = Better_Messages_Mobile_App()->can_build;
-
-            if ( $has_builds && ! wp_next_scheduled('better_messages_app_refresh_core_version') ) {
-                wp_schedule_event( time() + HOUR_IN_SECONDS, 'twicedaily', 'better_messages_app_refresh_core_version' );
+            if ( Better_Messages_Mobile_App()->can_build ) {
+                Better_Messages_Worker()->add_task( 'better_messages_app_refresh_core_version', 12 * HOUR_IN_SECONDS, HOUR_IN_SECONDS );
             }
         }
 
@@ -726,24 +725,21 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('invalid_type', 'Type must be development or production');
             }
 
-            $fs_site = bpbm_fs()->get_site();
+            $fs_site = $this->licensed_site();
 
             if( ! $fs_site ){
                 return new WP_Error('invalid_site', 'The site is not valid');
             }
 
             if ($platform === 'ios' && $type === 'development') {
-                // Code for iOS development
                 return $this->get_ios_dev_build_info();
             } else if ($platform === 'ios' && $type === 'production') {
-                // Code for iOS production
                 return $this->get_ios_dist_build_info();
             } else if ($platform === 'android' && $type === 'development') {
                 return $this->get_android_dev_build_info();
             } else if ($platform === 'android' && $type === 'production') {
                 return $this->get_android_prod_build_info();
             } else {
-                // Code for other cases
                 return new WP_Error('not_implemented', 'This type of application is not implemented yet');
             }
         }
@@ -809,17 +805,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
                 return json_decode($request['body'], true );
 
-                /*
-                $response = json_decode($request['body'], true );
-
-                if ( wp_remote_retrieve_response_code($request) != 200 ) {
-                    if( isset( $response['error'] ) ){
-                        return new WP_Error('request_failed', $response['error']);
-                    } else {
-                        return new WP_Error('request_failed', 'The network request failed.');
-                    }
-                }*/
-
             } else if( $build->platform === 'android' ){
                 return new WP_Error('not_implemented', 'Android builds are not implemented yet');
             } else {
@@ -860,7 +845,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             }
 
             if ($platform === 'ios' && $type === 'development') {
-                // Code for iOS development
                 $info = $this->get_ios_dev_build_info(true);
 
                 if( is_wp_error( $info ) ){
@@ -869,7 +853,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
                 return $this->process_build_request( $info );
             } else if ($platform === 'ios' && $type === 'production') {
-                // Code for iOS production
                 $info = $this->get_ios_dist_build_info(true);
 
                 if( is_wp_error( $info ) ){
@@ -894,7 +877,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
                 return $this->process_build_request( $info );
             } else {
-                // Code for other cases
                 return new WP_Error('not_implemented', 'This type of application is not implemented yet');
             }
         }
@@ -915,13 +897,13 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
             $domain = $parse['host'];
 
-            $fs_site = bpbm_fs()->get_site();
+            $fs_site = $this->licensed_site();
 
             if( ! $fs_site ){
                 return new WP_Error('site_not_connected', 'The site is not connected');
             }
 
-            if( ! bpbm_fs()->has_features_enabled_license() ){
+            if( ! Better_Messages_License::instance()->is_active() ){
                 return new WP_Error( 'site_not_licensed', 'The website has no active WebSocket license' );
             }
 
@@ -1042,13 +1024,13 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             $parse = parse_url($site_url);
             $domain = $parse['host'];
 
-            $fs_site = bpbm_fs()->get_site();
+            $fs_site = $this->licensed_site();
 
             if( ! $fs_site ){
                 return new WP_Error('site_not_connected', 'The site is not connected');
             }
 
-            if( ! bpbm_fs()->has_features_enabled_license() ){
+            if( ! Better_Messages_License::instance()->is_active() ){
                 return new WP_Error( 'site_not_licensed', 'The website has no active WebSocket license' );
             }
 
@@ -1143,7 +1125,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             return $return;
         }
 
-        public function get_ios_broadcast_bundle( $bundle_id, $app_capabilities, $type = 'development' )
+        public function get_ios_broadcast_bundle( $bundle_id, array $app_bundle, $type = 'development' )
         {
             if( empty( $bundle_id ) ){
                 if( $this->core_requires( 'broadcast' ) ){
@@ -1168,14 +1150,20 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 $missing[] = $bundle['identifier'];
             }
 
-            if( ! in_array( 'APP_GROUPS', $app_capabilities, true ) ){
-                $missing[] = 'the app';
+            if( ! in_array( 'APP_GROUPS', $app_bundle['capabilities'], true ) ){
+                $missing[] = $app_bundle['identifier'];
             }
 
             if( count( $missing ) > 0 ){
                 return new WP_Error(
                     'missing_app_groups',
-                    'App Groups is missing on: ' . implode( ', ', $missing ) . '. Register the App Group in the Apple Developer portal and add the capability to both App IDs.'
+                    sprintf(
+                        'App Groups is missing on: %1$s. In the Apple Developer portal, enable App Groups on both %2$s and %3$s, and assign the App Group %4$s to each.',
+                        implode( ', ', $missing ),
+                        $app_bundle['identifier'],
+                        $bundle['identifier'],
+                        'group.' . $app_bundle['identifier']
+                    )
                 );
             }
 
@@ -1207,7 +1195,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             $parse = parse_url($site_url);
             $domain = $parse['host'];
 
-            $fs_site = bpbm_fs()->get_site();
+            $fs_site = $this->licensed_site();
 
             if( ! $fs_site ){
                 return new WP_Error('site_not_connected', 'The site is not connected');
@@ -1219,28 +1207,13 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('invalid_access', 'Connection to Apple Developer Account is not configured');
             }
 
-            if( ! bpbm_fs()->has_features_enabled_license() ){
+            if( ! Better_Messages_License::instance()->is_active() ){
                 return new WP_Error( 'site_not_licensed', 'The website has no active WebSocket license' );
             }
 
             if( ! $team_id ){
                 return new WP_Error('no_team_id', 'The Team ID is not set');
             }
-
-            /* $certificate = Better_Messages()->mobile_app->ios->get_certificate( $certificate_id );
-
-            if( is_wp_error( $certificate ) ){
-                return $certificate;
-            }
-
-            $allowed_cert_types = [
-                'DEVELOPMENT',
-                'IOS_DEVELOPMENT'
-            ];
-
-            if( !in_array( $certificate['certificateType'], $allowed_cert_types ) ){
-                return new WP_Error('invalid_certificate', 'The certificate is not a development certificate');
-            } */
 
             if( empty( $bundle_id ) ){
                 return new WP_Error('no_bundle', 'The Development App ID is not selected');
@@ -1277,16 +1250,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('no_devices', 'There are no devices registered. Please ensure to add at least one device to the Apple Developer Account');
             }
 
-            /*$profile = Better_Messages()->mobile_app->ios->get_provisioning_profile( $profile_id );
-
-            if( is_wp_error( $profile ) ){
-                return $profile;
-            }
-
-            if( $profile['profileState'] !== 'ACTIVE' ){
-                return new WP_Error('invalid_profile', 'The provisioning profile is not active');
-            }*/
-
             if( empty( $notification_bundle_id ) ){
                 return new WP_Error('no_notification_bundle', 'The Development notification service App ID is not selected');
             }
@@ -1303,7 +1266,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return $prefix_check;
             }
 
-            $broadcast_bundle = $this->get_ios_broadcast_bundle( $settings['iosBundleBroadcastDev'], $existing_capabilities, 'development' );
+            $broadcast_bundle = $this->get_ios_broadcast_bundle( $settings['iosBundleBroadcastDev'], $bundle, 'development' );
 
             if( is_wp_error( $broadcast_bundle ) ){
                 return $broadcast_bundle;
@@ -1315,26 +1278,8 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return $prefix_check;
             }
 
-            /*$notification_profile = Better_Messages()->mobile_app->ios->get_provisioning_profile( $notification_profile_id );
-
-            if( is_wp_error( $notification_profile ) ){
-                return $notification_profile;
-            }
-
-            if( $notification_profile['profileState'] !== 'ACTIVE' ){
-                return new WP_Error('invalid_notification_profile', 'The notification provisioning profile is not active');
-            }*/
-
             if( ! $build_info ) {
-                //unset($profile['profileContent']);
-                //unset($certificate['certificateContent']);
 
-                /*if ($profile['certificates'] && count($profile['certificates']) > 0) {
-                    $profile['certificates'] = array_map(function ($certificate) {
-                        unset($certificate['certificateContent']);
-                        return $certificate;
-                    }, $profile['certificates']);
-                }*/
             }
 
             if( ! $settings['iosAppNameDev'] ){
@@ -1403,13 +1348,13 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             $parse = parse_url($site_url);
             $domain = $parse['host'];
 
-            $fs_site = bpbm_fs()->get_site();
+            $fs_site = $this->licensed_site();
 
             if( ! $fs_site ){
                 return new WP_Error('site_not_connected', 'The site is not connected');
             }
 
-            if( ! bpbm_fs()->has_features_enabled_license() ){
+            if( ! Better_Messages_License::instance()->is_active() ){
                 return new WP_Error( 'site_not_licensed', 'The website has no active WebSocket license' );
             }
 
@@ -1474,7 +1419,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return $prefix_check;
             }
 
-            $broadcast_bundle = $this->get_ios_broadcast_bundle( $settings['iosBundleBroadcast'], $existing_capabilities, 'production' );
+            $broadcast_bundle = $this->get_ios_broadcast_bundle( $settings['iosBundleBroadcast'], $bundle, 'production' );
 
             if( is_wp_error( $broadcast_bundle ) ){
                 return $broadcast_bundle;
@@ -1580,13 +1525,10 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
         }
 
         public function incrementMinorVersion($version) {
-            // Split the version string into major and minor parts
             list($major, $minor) = explode('.', $version);
 
-            // Increment the minor version
             $minor++;
 
-            // Return the new version string
             return $major . '.' . $minor;
         }
 
@@ -1598,9 +1540,17 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
 
             $builder_server = apply_filters('better_messages_mobile_app_builder_server', 'https://builder.better-messages.com');
 
+            $body = $data;
+
+            $app_bundle = Better_Messages_Mobile_App()->scripts ? Better_Messages_Mobile_App()->scripts->get_build_bundle() : false;
+
+            if( $app_bundle !== false ){
+                $body['app_bundle'] = $app_bundle;
+            }
+
             $request = wp_remote_post($builder_server . '/api/requestBuild', array(
-                'body'    => $data,
-                'timeout' => 30
+                'body'    => $body,
+                'timeout' => 60
             ));
 
             if( Better_Messages()->functions->is_response_good( $request ) !== true ){

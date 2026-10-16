@@ -28,9 +28,6 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
 
             add_action('wp_ajax_buddyboss_theme_get_header_unread_messages', array($this, 'buddyboss_theme_get_header_unread_messages'), 9);
 
-            /**
-             * BuddyBoss moderation
-             */
             if( function_exists('bp_is_moderation_member_blocking_enable') ){
                 $bb_blocking_enabled = bp_is_moderation_member_blocking_enable();
                 if( $bb_blocking_enabled ){
@@ -58,9 +55,6 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 add_filter( 'bp_disable_group_messages', '__return_false' );
             }
 
-            /**
-             * BuddyBoss Pushs
-             */
             if (function_exists('bb_onesingnal_send_notification') && $this->bb_pushs_active() ) {
                 add_filter( 'better_messages_send_onesignal_push', array( $this, 'send_pushs' ), 10, 7 );
                 add_filter( 'better_messages_bulk_pushs', array( $this, 'send_bulk_pushs' ), 10, 4 );
@@ -451,23 +445,17 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 $online = Better_Messages()->websocket->get_online_users();
             }
 
-            $recipients = array_keys( $message->recipients );
+            $recipients = Better_Messages()->notification_levels->get_notify_recipients( $message, 'push' );
 
             foreach ($recipients as $user_id) {
+                if( $user_id <= 0 || $user_id === (int) $message->sender_id ) continue;
+
                 if( isset( $online[ $user_id ] ) ) continue;
 
                 if( Better_Messages()->functions->get_user_meta( $user_id, 'better_messages_new_message_app', true ) == 'no' ) {
                     continue;
                 }
 
-                // Check if user not muted the thread
-                $muted_threads = Better_Messages()->functions->get_user_muted_threads( $user_id );
-
-                if( isset($muted_threads[ $thread_id ]) ){
-                    continue;
-                }
-
-                // Conversation URL
                 $url = Better_Messages()->functions->get_user_thread_url( $thread_id, $user_id );
                 $subject = sprintf( __('New message from %s', 'bp-better-messages'), Better_Messages()->functions->get_plain_name( $message->sender_id ) );
                 $content = sprintf( __('You have new message from %s', 'bp-better-messages'), Better_Messages()->functions->get_plain_name( $message->sender_id ) );
@@ -663,9 +651,6 @@ if ( !class_exists( 'Better_Messages_BuddyBoss' ) ) {
                 return $allowed;
             }
 
-            /**
-             * Not block in group thread
-             */
             if( count($participants['recipients']) > 1 ){
                 return $allowed;
             }

@@ -172,9 +172,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             }
         }
 
-        /**
-         * Parse Gemini-specific error format
-         */
         private function parse_gemini_error( $e )
         {
             $error = $e->getMessage();
@@ -193,9 +190,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return $error;
         }
 
-        /**
-         * Fetch models from Gemini API, cached for 24 hours
-         */
         private function get_all_models_cached()
         {
             $cached = get_transient( 'bm_gemini_models' );
@@ -252,12 +246,9 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $name    = $model['name'] ?? '';
                 $methods = $model['supportedGenerationMethods'] ?? [];
 
-                // Only include models that support generateContent
                 if ( in_array( 'generateContent', $methods ) ) {
-                    // Strip "models/" prefix
                     $model_id = str_replace( 'models/', '', $name );
 
-                    // Only include gemini models
                     if ( str_starts_with( $model_id, 'gemini' ) ) {
                         $models[] = $model_id;
                     }
@@ -269,23 +260,16 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return $models;
         }
 
-        /**
-         * Check if a Gemini model supports native image generation (responseModalities: IMAGE).
-         */
         private function model_supports_image_generation( $model_id )
         {
             $image_models = Better_Messages()->ai->get_image_pricing();
             if ( isset( $image_models[ $model_id ] ) ) {
                 return true;
             }
-            // Strip common suffixes like -preview, -latest
             $base = preg_replace( '/-(preview|latest)$/', '', $model_id );
             return $base !== $model_id && isset( $image_models[ $base ] );
         }
 
-        /**
-         * Get the input token limit for a model from cached model info.
-         */
         private function get_model_input_limit( $model_id )
         {
             $models = $this->get_all_models_cached();
@@ -303,9 +287,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return 900000;
         }
 
-        /**
-         * Build parts array for a user message (images, files, text).
-         */
         private function build_user_parts( $msg_id, $message_text, $bot_settings )
         {
             $parts = [];
@@ -314,38 +295,34 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $attachments = Better_Messages()->functions->get_message_meta( $msg_id, 'attachments', true );
 
                 if ( ! empty( $attachments ) ) {
-                    $mime_map = [
-                        'jpg'  => 'image/jpeg',
-                        'jpeg' => 'image/jpeg',
-                        'png'  => 'image/png',
-                        'gif'  => 'image/gif',
-                        'webp' => 'image/webp',
-                        'bmp'  => 'image/bmp',
-                    ];
+                    $image_types = [ 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp' ];
+                    $link_types  = [];
+
+                    if ( preg_match( '/^(?:models\/)?gemini-(\d+)/', (string) $bot_settings['model'], $version ) && (int) $version[1] >= 3 ) {
+                        $link_types = [ 'image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'application/pdf' ];
+                    }
 
                     foreach ( $attachments as $id => $url ) {
-                        $file = get_attached_file( $id );
+                        $input = $this->get_attachment_input( $id, $bot_settings, $image_types, $link_types, 15 * 1024 * 1024 );
 
-                        if ( $file && file_exists( $file ) && filesize( $file ) <= 20 * 1024 * 1024 ) {
-                            $ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+                        if ( ! $input ) {
+                            continue;
+                        }
 
-                            if ( $bot_settings['images'] && isset( $mime_map[ $ext ] ) ) {
-                                $base64  = base64_encode( file_get_contents( $file ) );
-                                $parts[] = [
-                                    'inline_data' => [
-                                        'mime_type' => $mime_map[ $ext ],
-                                        'data'      => $base64
-                                    ]
-                                ];
-                            } else if ( $bot_settings['files'] && $ext === 'pdf' ) {
-                                $base64  = base64_encode( file_get_contents( $file ) );
-                                $parts[] = [
-                                    'inline_data' => [
-                                        'mime_type' => 'application/pdf',
-                                        'data'      => $base64
-                                    ]
-                                ];
-                            }
+                        if ( $input['url'] !== '' ) {
+                            $parts[] = [
+                                'file_data' => [
+                                    'mime_type' => $input['mime'],
+                                    'file_uri'  => $input['url']
+                                ]
+                            ];
+                        } else {
+                            $parts[] = [
+                                'inline_data' => [
+                                    'mime_type' => $input['mime'],
+                                    'data'      => $input['data']
+                                ]
+                            ];
                         }
                     }
                 }
@@ -358,10 +335,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return $parts;
         }
 
-        /**
-         * Build Gemini contents array from messages.
-         * Includes stored thinking parts (with thoughtSignature) for model messages.
-         */
         private function build_contents( $thread_messages, $bot_user_id, $bot_settings, $current_user_msg_id, $sender_names = array() )
         {
             $is_group = ! empty( $sender_names );
@@ -384,7 +357,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $parts = [];
                 $role  = (int) $_message->sender_id === (int) $bot_user_id ? 'model' : 'user';
 
-                // In group context: strip mention HTML and prefix with sender name
                 if ( $is_group && $role === 'user' && ! empty( $message_text ) ) {
                     $message_text = $this->strip_mention_html( $message_text, $sender_names );
                     $sid = (int) $_message->sender_id;
@@ -395,7 +367,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 if ( $role === 'user' ) {
                     $parts = $this->build_user_parts( $_message->id, $message_text, $bot_settings );
                 } else {
-                    // Include stored thinking parts with signatures for model messages
                     $thought_parts = Better_Messages()->functions->get_message_meta( $_message->id, 'gemini_thought_parts', true );
                     if ( ! empty( $thought_parts ) && is_array( $thought_parts ) ) {
                         foreach ( $thought_parts as $tp ) {
@@ -414,7 +385,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
 
                 if ( empty( $parts ) ) continue;
 
-                // Gemini requires alternating user/model roles
                 $last_index = count( $contents ) - 1;
                 if ( $last_index >= 0 && $contents[ $last_index ]['role'] === $role ) {
                     $contents[ $last_index ]['parts'] = array_merge( $contents[ $last_index ]['parts'], $parts );
@@ -429,14 +399,10 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return $contents;
         }
 
-        /**
-         * Auto-trim contents if estimated token count exceeds model input limit.
-         * Removes oldest messages first, always keeps at least the last 2 entries.
-         */
         private function auto_trim_contents( $contents, $model_id )
         {
             $limit           = $this->get_model_input_limit( $model_id );
-            $effective_limit = (int) ( $limit * 0.85 ); // 15% buffer for system prompt + overhead
+            $effective_limit = (int) ( $limit * 0.85 );
 
             $estimate_tokens = function ( $parts ) {
                 $tokens = 0;
@@ -445,7 +411,7 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                         $tokens += (int) ( mb_strlen( $part['text'] ) / 4 );
                     }
                     if ( isset( $part['inline_data']['data'] ) ) {
-                        $tokens += 258; // rough per-image estimate
+                        $tokens += 258;
                     }
                 }
                 return $tokens;
@@ -469,9 +435,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             return $this->streamContentProvider( $bot_id, $bot_user, $message, $ai_message_id, $stream );
         }
 
-        /**
-         * Stream response via Gemini GenerateContent API
-         */
         private function streamContentProvider( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
         {
             $bot_settings = Better_Messages()->ai->get_bot_settings( $bot_id );
@@ -497,7 +460,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
 
             $this->enrich_with_reply_context( $thread_messages, $message, $sender_names );
 
-            // System prompt
             $system_prompt = '';
             if ( ! empty( $bot_settings['instruction'] ) ) {
                 $system_prompt = $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id );
@@ -512,7 +474,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $system_prompt .= "\n\nPrevious conversation summary:\n" . $summary_context;
             }
 
-            // Build limits
             $limits = '';
             $can_generate_images = $bot_settings['imagesGeneration'] === '1' && $this->model_supports_image_generation( $model_id );
 
@@ -527,7 +488,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $limits .= ' You must generate no more than ' . intval( $bot_settings['maxImagesPerResponse'] ) . ' image(s) per response.';
             }
 
-            // Generation config
             $generation_config = [];
 
             if ( ! empty( $bot_settings['temperature'] ) && is_numeric( $bot_settings['temperature'] ) ) {
@@ -538,7 +498,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $generation_config['maxOutputTokens'] = intval( $bot_settings['maxOutputTokens'] );
             }
 
-            // Extended thinking (Gemini thinking mode)
             if ( $bot_settings['extendedThinking'] === '1' ) {
                 $thinking_config = [ 'thinkingMode' => 'enabled' ];
 
@@ -549,12 +508,10 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 $generation_config['thinkingConfig'] = $thinking_config;
             }
 
-            // Image generation (native — only for models that support it)
             if ( $can_generate_images ) {
                 $generation_config['responseModalities'] = [ 'TEXT', 'IMAGE' ];
             }
 
-            // Tools
             $tools = [];
             if ( $bot_settings['webSearch'] === '1' ) {
                 $tools[] = [ 'google_search' => new \stdClass() ];
@@ -569,7 +526,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             if ( ! $stream ) {
                 $url = 'models/' . urlencode( $model_id ) . ':generateContent?key=' . urlencode( $this->get_api_key() );
 
-                // Build full conversation history
                 $contents = $this->build_contents( $thread_messages, $bot_user_id, $bot_settings, $message->id, $sender_names );
 
                 if ( empty( $contents ) ) {
@@ -586,7 +542,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
 
                 $contents = $this->auto_trim_contents( $contents, $model_id );
 
-                // Ensure first message is from user after trimming (Gemini requirement)
                 while ( ! empty( $contents ) && $contents[0]['role'] !== 'user' ) {
                     array_shift( $contents );
                 }
@@ -689,7 +644,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             $max_images              = ! empty( $bot_settings['maxImagesPerResponse'] ) ? intval( $bot_settings['maxImagesPerResponse'] ) : 0;
             $thought_parts_collected = [];
 
-            // Build full conversation history (with stored thinking parts + signatures)
             $contents = $this->build_contents( $thread_messages, $bot_user_id, $bot_settings, $message->id, $sender_names );
 
             if ( empty( $contents ) ) {
@@ -697,7 +651,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 return;
             }
 
-            // Ensure first message is from user (Gemini requirement)
             if ( $contents[0]['role'] !== 'user' ) {
                 array_unshift( $contents, [
                     'role'  => 'user',
@@ -705,10 +658,8 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                 ] );
             }
 
-            // Auto-trim if context exceeds model limit
             $contents = $this->auto_trim_contents( $contents, $model_id );
 
-            // Ensure first message is from user after trimming (Gemini requirement)
             while ( ! empty( $contents ) && $contents[0]['role'] !== 'user' ) {
                 array_shift( $contents );
             }
@@ -779,10 +730,8 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                                 file_put_contents( ABSPATH . 'gemini.log', time() . ' - chunk' . "\n", FILE_APPEND | LOCK_EX );
                             }
 
-                            // Extract text, images, and thinking parts from candidates
                             if ( isset( $data['candidates'][0]['content']['parts'] ) ) {
                                 foreach ( $data['candidates'][0]['content']['parts'] as $part ) {
-                                    // Capture thinking parts (with thoughtSignature) instead of skipping
                                     if ( isset( $part['thought'] ) && $part['thought'] === true ) {
                                         $thought_entry = [ 'text' => $part['text'] ?? '' ];
                                         if ( isset( $part['thoughtSignature'] ) ) {
@@ -794,7 +743,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                                     if ( isset( $part['text'] ) ) {
                                         yield $part['text'];
                                     }
-                                    // Handle inline image data
                                     if ( isset( $part['inlineData']['mimeType'] ) && str_starts_with( $part['inlineData']['mimeType'], 'image/' ) ) {
                                         if ( $max_images > 0 && count( $images_generated ) >= $max_images ) {
                                             continue;
@@ -833,7 +781,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                                                 $attachment_meta[ $attachment_id ] = wp_get_attachment_url( $attachment_id );
                                             }
                                         } catch ( \Throwable $e ) {
-                                            // Skip failed image
                                         } finally {
                                             if ( file_exists( $temp_path ) ) {
                                                 @unlink( $temp_path );
@@ -845,22 +792,18 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                                 }
                             }
 
-                            // Track grounding (web search) calls
                             if ( isset( $data['candidates'][0]['groundingMetadata']['searchEntryPoint'] ) ) {
                                 $web_search_calls++;
                             }
 
-                            // Track usage
                             if ( isset( $data['usageMetadata'] ) ) {
                                 $usage = $data['usageMetadata'];
                             }
 
-                            // Check for model info
                             if ( isset( $data['modelVersion'] ) ) {
                                 $model = $data['modelVersion'];
                             }
 
-                            // Check for finish
                             if ( isset( $data['candidates'][0]['finishReason'] ) ) {
                                 $finish_reason = $data['candidates'][0]['finishReason'];
 
@@ -870,11 +813,9 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                                 }
 
                                 if ( in_array( $finish_reason, [ 'STOP', 'MAX_TOKENS', 'RECITATION' ] ) ) {
-                                    // Last chunk before finish
                                 }
                             }
 
-                            // Check for errors in promptFeedback
                             if ( isset( $data['promptFeedback']['blockReason'] ) ) {
                                 $reason = $data['promptFeedback']['blockReason'];
                                 yield ['error', 'Prompt blocked by Gemini: ' . $reason];
@@ -884,12 +825,10 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
                     }
                 }
 
-                // Save attachment meta if any images were generated
                 if ( ! empty( $attachment_meta ) ) {
                     Better_Messages()->functions->update_message_meta( $ai_message_id, 'attachments', $attachment_meta );
                 }
 
-                // Stream ended, yield finish
                 $meta = [
                     'model'    => $model,
                     'provider' => 'gemini',
@@ -930,10 +869,6 @@ if ( ! class_exists( 'Better_Messages_Gemini_API' ) ) {
             }
         }
 
-        /**
-         * Store Gemini-specific response data (thought parts with signatures) as separate meta
-         * so they can be included in subsequent conversation history.
-         */
         public function on_response_completed( $ai_message_id, $message_id, $meta )
         {
             if ( ! empty( $meta['gemini_thought_parts'] ) ) {

@@ -19,9 +19,6 @@ class Better_Messages_Privacy {
         add_action( 'admin_init', array( $this, 'add_privacy_policy_content' ) );
     }
 
-    /**
-     * Register data exporter.
-     */
     public function register_exporter( $exporters ) {
         $exporters['better-messages'] = array(
             'exporter_friendly_name' => __( 'Better Messages', 'bp-better-messages' ),
@@ -30,9 +27,6 @@ class Better_Messages_Privacy {
         return $exporters;
     }
 
-    /**
-     * Register data eraser.
-     */
     public function register_eraser( $erasers ) {
         $erasers['better-messages'] = array(
             'eraser_friendly_name' => __( 'Better Messages', 'bp-better-messages' ),
@@ -41,9 +35,6 @@ class Better_Messages_Privacy {
         return $erasers;
     }
 
-    /**
-     * Export personal data for a user.
-     */
     public function export_personal_data( $email_address, $page = 1 ) {
         global $wpdb;
 
@@ -69,7 +60,6 @@ class Better_Messages_Privacy {
 
         $offset = ( $page - 1 ) * $per_page;
 
-        // Get messages sent by this user
         $messages = $wpdb->get_results( $wpdb->prepare(
             "SELECT m.id, m.thread_id, m.message, m.date_sent, t.subject
              FROM {$messages_table} m
@@ -115,10 +105,6 @@ class Better_Messages_Privacy {
         );
     }
 
-    /**
-     * Erase personal data for a user.
-     * Anonymizes messages rather than deleting to preserve conversation context for other participants.
-     */
     public function erase_personal_data( $email_address, $page = 1 ) {
         global $wpdb;
 
@@ -146,7 +132,6 @@ class Better_Messages_Privacy {
             );
         }
 
-        // Find messages not yet anonymized (no <!-- BM-PRIVACY-REMOVED --> marker in content)
         $message_ids = $wpdb->get_col( $wpdb->prepare(
             "SELECT id FROM {$messages_table}
              WHERE sender_id = %d AND message NOT LIKE %s
@@ -162,7 +147,6 @@ class Better_Messages_Privacy {
 
             $meta_table = bm_get_table( 'meta' );
 
-            // Delete attachment files if setting enabled
             if ( Better_Messages()->settings['privacyDeleteAttachments'] === '1' && $meta_table ) {
                 $attachment_rows = $wpdb->get_results(
                     "SELECT bm_message_id, meta_key, meta_value FROM {$meta_table}
@@ -179,18 +163,15 @@ class Better_Messages_Privacy {
                         }
                     }
 
-                    // Remove the attachment meta from the message
                     $wpdb->delete( $meta_table, array(
                         'bm_message_id' => $row->bm_message_id,
                         'meta_key'      => $row->meta_key,
                     ) );
 
-                    // Bump message update time so clients re-sync
                     Better_Messages()->functions->update_message_update_time( $row->bm_message_id );
                 }
             }
 
-            // Anonymize message content
             $microtime = Better_Messages()->functions->get_microtime();
             $wpdb->query( $wpdb->prepare(
                 "UPDATE {$messages_table}
@@ -200,7 +181,6 @@ class Better_Messages_Privacy {
                 $microtime
             ) );
 
-            // Remove remaining message meta (reactions, etc.)
             if ( $meta_table ) {
                 $wpdb->query(
                     "DELETE FROM {$meta_table} WHERE bm_message_id IN ({$ids_placeholder})"
@@ -222,15 +202,12 @@ class Better_Messages_Privacy {
 
         return array(
             'items_removed'  => $items_removed,
-            'items_retained' => $done, // recipients records retained
+            'items_retained' => $done,
             'messages'       => $messages,
             'done'           => $done,
         );
     }
 
-    /**
-     * Add suggested privacy policy content.
-     */
     public function add_privacy_policy_content() {
         if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
             return;
@@ -238,14 +215,12 @@ class Better_Messages_Privacy {
 
         $sections = array();
 
-        // Introduction
         $sections[] = sprintf(
             '<h3>%s</h3><p>%s</p>',
             __( 'Private Messaging', 'bp-better-messages' ),
             __( 'This site uses Better Messages for private messaging between users. The following describes what personal data is collected, how it is used, and your rights regarding that data.', 'bp-better-messages' )
         );
 
-        // What data is collected
         $sections[] = sprintf(
             '<h4>%s</h4><p>%s</p><ul>' .
             '<li>%s</li>' .
@@ -263,7 +238,6 @@ class Better_Messages_Privacy {
             __( 'Emoji reactions you add to messages', 'bp-better-messages' )
         );
 
-        // Guest users
         if ( Better_Messages()->settings['guestChat'] ?? false ) {
             $sections[] = sprintf(
                 '<h4>%s</h4><p>%s</p>',
@@ -272,14 +246,12 @@ class Better_Messages_Privacy {
             );
         }
 
-        // Browser storage
         $sections[] = sprintf(
             '<h4>%s</h4><p>%s</p>',
             __( 'Browser storage', 'bp-better-messages' ),
             __( 'A copy of your recent messages and conversation data is cached in your browser (IndexedDB) for faster loading. This data stays on your device and is not shared. You can clear it by clearing your browser data.', 'bp-better-messages' )
         );
 
-        // Third-party services
         $third_party_items = array();
 
         if ( Better_Messages()->settings['oEmbedEnable'] === '1' && ( ! isset( Better_Messages()->settings['privacyEmbeds'] ) || Better_Messages()->settings['privacyEmbeds'] !== '1' ) ) {
@@ -302,12 +274,21 @@ class Better_Messages_Privacy {
             $third_party_items[] = __( 'Sticker images are loaded directly from Stipop\'s servers (img.stipop.io) when displayed in messages, which may receive your IP address.', 'bp-better-messages' );
         }
 
-        if ( bpbm_fs()->is__premium_only() && ( Better_Messages()->settings['videoCalls'] ?? false ) ) {
+        if ( better_messages_is_websocket_build() && ( Better_Messages()->settings['videoCalls'] ?? false ) ) {
             $third_party_items[] = __( 'Group voice and video calls are routed through a cloud service to connect participants. Private one-on-one calls are established directly between users.', 'bp-better-messages' );
         }
 
-        if ( bpbm_fs()->is__premium_only() && Better_Messages()->realtime ) {
-            $third_party_items[] = __( 'Real-time message delivery is handled through a cloud server (cloud.better-messages.com). Your messages are encrypted in transit and pass through this server for instant delivery.', 'bp-better-messages' );
+        if ( better_messages_is_websocket_build() && Better_Messages()->realtime ) {
+            $hosts = array_unique( array_filter( array(
+                (string) wp_parse_url( Better_Messages()->websocket->server(), PHP_URL_HOST ),
+                (string) wp_parse_url( Better_Messages()->websocket->api_server(), PHP_URL_HOST ),
+            ) ) );
+
+            $third_party_items[] = sprintf(
+                /* translators: %s: the realtime server's host names, such as ws.wordplus.cloud, rest.wordplus.cloud */
+                __( 'Real-time message delivery is handled through a cloud server (%s). Your messages are encrypted in transit and pass through this server for instant delivery.', 'bp-better-messages' ),
+                esc_html( implode( ', ', $hosts ) )
+            );
         }
 
         if ( ! empty( $third_party_items ) ) {
@@ -323,7 +304,6 @@ class Better_Messages_Privacy {
             );
         }
 
-        // AI Chat Bots
         if ( class_exists( 'Better_Messages_AI' ) && Better_Messages()->ai ) {
             $sections[] = sprintf(
                 '<h4>%s</h4><p>%s</p>',
@@ -332,7 +312,6 @@ class Better_Messages_Privacy {
             );
         }
 
-        // Data retention and rights
         $sections[] = sprintf(
             '<h4>%s</h4><p>%s</p>',
             __( 'Data retention and your rights', 'bp-better-messages' ),

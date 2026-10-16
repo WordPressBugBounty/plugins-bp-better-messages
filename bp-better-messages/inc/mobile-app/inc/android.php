@@ -119,7 +119,6 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
                     header('Content-Length: ' . filesize($zipFile));
                     readfile($zipFile);
 
-                    // Clean up temporary files
                     unlink($jksFile);
                     unlink($infoFile);
                 } else {
@@ -224,7 +223,9 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
             $error    = curl_error($ch);
             $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-            curl_close($ch);
+            if ( PHP_VERSION_ID < 80000 ) {
+                curl_close($ch);
+            }
 
             if( $error ) {
                 return new WP_Error(
@@ -262,7 +263,6 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
                 'keyPassword' => $keyPassword
             ];
 
-            // Save the keystore to a file
             update_option('better-messages-app-android-keystore', [
                 'keystore' => base64_encode($keyStore),
                 'info' => $info
@@ -391,7 +391,6 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
                 );
             }
 
-            // Save the keystore to a file
             update_option('better-messages-app-android-keystore', [
                 'keystore' => $keystoreBase64,
                 'info' => $args
@@ -403,11 +402,9 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
         public function upload_firebase_file( WP_REST_Request $request )
         {
             if ( ! isset($_FILES['file']) ) {
-                // Handle the error
                 return new WP_Error('no_file_uploaded', 'No file was uploaded.');
             }
 
-            // Access the uploaded file
             $file = $request->get_file_params()['file'];
 
             $key = $request->get_param('key');
@@ -582,7 +579,6 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
 
             $serviceAccount = json_decode( $firebaseFile, true );
 
-            // create a JWT
             $now_seconds = time();
 
             $payload = array(
@@ -590,13 +586,12 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
                 "sub" => $serviceAccount['client_email'],
                 "aud" => "https://www.googleapis.com/oauth2/v4/token",
                 "iat" => $now_seconds,
-                "exp" => $now_seconds+(60*60),  // Maximum expiration time is one hour
+                "exp" => $now_seconds+(60*60),
                 "scope" => "https://www.googleapis.com/auth/cloud-platform"
             );
 
             $jwt = \BetterMessages\Firebase\JWT\JWT::encode($payload, $serviceAccount['private_key'], "RS256");
 
-            // create a POST request to the Google OAuth2.0 server
             $data = array(
                 "grant_type" => "urn:ietf:params:oauth:grant-type:jwt-bearer",
                 "assertion" => $jwt
@@ -613,7 +608,7 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
             $response = json_decode($result, true);
 
             $token = $response['access_token'];
-            $expiration = 60 * 45; // 45 minutes
+            $expiration = 60 * 45;
 
             $result = [
                 'project_id' => $serviceAccount['project_id'],

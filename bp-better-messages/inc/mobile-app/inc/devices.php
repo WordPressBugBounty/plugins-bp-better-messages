@@ -10,17 +10,13 @@ if ( ! class_exists('Better_Messages_Mobile_App_Devices') ) {
 
         public static function instance(): ?Better_Messages_Mobile_App_Devices
         {
-            // Store the instance locally to avoid private static replication
             static $instance = null;
-            // Only run these methods if they haven't been run previously
 
             if (null === $instance) {
                 $instance = new Better_Messages_Mobile_App_Devices();
             }
 
-            // Always return the instance
             return $instance;
-            // The last metroid is in captivity. The galaxy is at peace.
         }
 
         public function __construct()

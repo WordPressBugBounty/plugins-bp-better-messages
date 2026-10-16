@@ -1,12 +1,6 @@
 <?php
-// Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Component Class.
- *
- * @since 1.0.0
- */
 class Better_Messages_Component extends BP_Component
 {
 
@@ -15,28 +9,21 @@ class Better_Messages_Component extends BP_Component
     public static function instance()
     {
 
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if ( null === $instance ) {
             $instance = new Better_Messages_Component;
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
-    /**
-     * @since 1.0.0
-     */
     public function __construct()
     {
         parent::start(
             'bp_better_messages_tab',
-            'Messages', //__( 'Messages', 'bp-better-messages' ),
+            'Messages',
             '',
             array(
                 'adminbar_myaccount_order' => 50
@@ -47,11 +34,6 @@ class Better_Messages_Component extends BP_Component
 
     }
 
-    /**
-     * Set some hooks to maximize BuddyPress integration.
-     *
-     * @since 1.0.0
-     */
     public function setup_hooks()
     {
         add_action( 'bp_ready', array( $this, 'remove_standard_tab' ) );
@@ -89,16 +71,10 @@ class Better_Messages_Component extends BP_Component
         return $canonical_url;
     }
 
-    /**
-     * Set up component global variables.
-     *
-     * @since 1.0.0
-     */
     public function setup_globals( $args = array() )
     {
         $slug = Better_Messages()->settings['bpProfileSlug'];
 
-        // All globals for component.
         $args = array(
             'slug'          => $slug,
             'has_directory' => false
@@ -106,19 +82,12 @@ class Better_Messages_Component extends BP_Component
 
         parent::setup_globals( $args );
 
-        // Was the user redirected from WP Admin ?
         $this->was_redirected = false;
     }
 
 
-    /**
-     * Set up the component entries in the WordPress Admin Bar.
-     *
-     * @since 1.3
-     */
     public function setup_admin_bar( $wp_admin_nav = array() )
     {
-        // Menus for logged in user
         if ( ! is_user_logged_in() ) return;
 
         $messages_total = Better_Messages()->functions->get_total_threads_for_user( Better_Messages()->functions->get_current_user_id(), 'unread' );
@@ -166,11 +135,6 @@ class Better_Messages_Component extends BP_Component
         parent::setup_admin_bar( $wp_admin_nav );
     }
 
-    /**
-     * Set up component navigation.
-     *
-     * @since 1.0.0
-     */
     public function setup_nav( $main_nav = array(), $sub_nav = array() )
     {
         if ( ! bm_bp_is_active( 'messages' ) ) return false;
@@ -199,40 +163,21 @@ class Better_Messages_Component extends BP_Component
         parent::setup_nav( $main_nav, $sub_nav );
     }
 
-    /**
-     * Set the BuddyPress screen for the requested actions
-     *
-     * @since 1.0.0
-     */
     public function set_screen()
     {
-        // Allow plugins to do things there..
         do_action( 'bp_better_messages_screen' );
-        // Prepare the template part.
         add_action( 'bp_template_content', array( $this, 'content' ), 20 );
 
-        // Load the template
         bp_core_load_template( 'members/single/plugins' );
     }
 
-    /**
-     * Output the Comments page content
-     *
-     * @since 1.0.0
-     */
     public function content()
     {
         echo Better_Messages()->functions->get_page();
     }
 
-    /**
-     * Figure out if the user was redirected from the WP Admin
-     *
-     * @since 1.0.0
-     */
     public function was_redirected( $prevent_access )
     {
-        // Catch this, true means the user is about to be redirected
         $this->was_redirected = $prevent_access;
 
         return $prevent_access;

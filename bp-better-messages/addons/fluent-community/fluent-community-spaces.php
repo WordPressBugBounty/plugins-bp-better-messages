@@ -126,12 +126,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             $this->sync_thread_members( $thread_id );
         }
 
-        /**
-         * @param string $url
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_url(string $url, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $url;
@@ -147,12 +141,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             return $url;
         }
 
-        /**
-         * @param string $title
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_title(string $title, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $title;
@@ -167,12 +155,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             }
         }
 
-        /**
-         * @param string $image
-         * @param int $thread_id
-         * @param BM_Thread $thread
-         * @return string
-         */
         public function group_thread_image(string $image, int $thread_id, $thread ){
             $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
             if( $thread_type !== 'group' ) return $image;
@@ -365,6 +347,12 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
         }
 
         public function get_group_thread_id( $group_id ){
+            return Better_Messages()->functions->with_lock( 'fluent_space_thread|' . (int) $group_id, function () use ( $group_id ) {
+                return $this->find_or_create_group_thread( $group_id );
+            } );
+        }
+
+        private function find_or_create_group_thread( $group_id ){
             global $wpdb;
 
             $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "
@@ -454,9 +442,6 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community_Spaces' ) ) {
             $user_ids  = [];
             $removed_ids  = [];
 
-            /**
-             * All users ids in thread
-             */
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
             foreach( $members as $user_id ){

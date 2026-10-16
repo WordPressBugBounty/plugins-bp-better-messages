@@ -12,40 +12,16 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
         protected $api_key = '';
         protected $bot_api_key = '';
 
-        /**
-         * @return string Provider ID ('openai', 'anthropic', 'gemini')
-         */
         abstract public function get_provider_id();
 
-        /**
-         * @return string Human-readable provider name
-         */
         abstract public function get_provider_name();
 
-        /**
-         * Validate the current API key
-         */
         abstract public function check_api_key();
 
-        /**
-         * @return string[]|\WP_Error Array of model IDs
-         */
         abstract public function get_models();
 
-        /**
-         * @return string[] Array of supported feature IDs
-         */
         abstract public function get_supported_features();
 
-        /**
-         * @return \Generator|null Generator yielding response data, or null if handled directly (e.g., audio)
-         *
-         * Generator yield contract:
-         *   string           - Text content delta
-         *   ['tick']         - Keep-alive (no-op)
-         *   ['finish', $meta] - Response complete with metadata array
-         *   ['error', $msg]  - Error with message string
-         */
         abstract public function getResponseGenerator( $bot_id, $bot_user, $message, $ai_message_id, $stream = true );
 
         public function get_api_key()
@@ -71,92 +47,48 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return in_array( $feature, $this->get_supported_features() );
         }
 
-        /**
-         * @return string[]|\WP_Error
-         */
         public function get_transcription_models()
         {
             return [];
         }
 
-        /**
-         * @return array|\WP_Error
-         */
         public function moderate( $text = '', $image_data_uris = [] )
         {
             return new \WP_Error( 'not_supported', 'Moderation not supported by this provider' );
         }
 
-        /**
-         * @return string|\WP_Error
-         */
         public function transcribe_audio( $attachment_id )
         {
             return new \WP_Error( 'not_supported', 'Transcription not supported by this provider' );
         }
 
-        /**
-         * Generate a non-streaming summary. Override in providers.
-         *
-         * @param string $system_prompt System instruction
-         * @param string $user_content  Messages text to summarize
-         * @param string $model         Model ID (empty = provider default)
-         * @param int    $max_tokens    Max output tokens
-         * @return string|\WP_Error     Summary text or error
-         */
         public function generateSummary( $system_prompt, $user_content, $model = '', $max_tokens = 3000 )
         {
             return new \WP_Error( 'not_supported', 'Summarization not supported by this provider' );
         }
 
-        /**
-         * Generate a non-streaming digest. By default delegates to generateSummary().
-         * Override in providers that support web search tools.
-         *
-         * @param string $system_prompt System instruction
-         * @param string $user_content  Digest topic/instructions
-         * @param string $model         Model ID
-         * @param int    $max_tokens    Max output tokens
-         * @param array  $options       Additional options (webSearch, webSearchContextSize)
-         * @return array|\WP_Error      ['text' => ..., 'usage' => ...] or error
-         */
         public function generateDigest( $system_prompt, $user_content, $model = '', $max_tokens = 3000, $options = [] )
         {
             return $this->generateSummary( $system_prompt, $user_content, $model, $max_tokens );
         }
 
-        /**
-         * Cancel a response via provider API. Override in providers that support it.
-         */
         public function cancel_response_api( $response_id )
         {
             return true;
         }
 
-        /**
-         * Handle message deletion. Override for providers with conversation state.
-         */
         public function on_message_deleted( $message_id, $thread_id, $message )
         {
         }
 
-        /**
-         * Called after response is fully completed and saved. Override for provider-specific meta.
-         */
         public function on_response_completed( $ai_message_id, $message_id, $meta )
         {
         }
 
-        /**
-         * Background job to recover stalled responses. Override for providers that support it.
-         */
         public function ensureResponseCompletionJob()
         {
         }
 
-        /**
-         * Check if an error message indicates a transient/retryable failure
-         */
         protected function is_transient_error( $error_message )
         {
             $transient_patterns = [
@@ -192,9 +124,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return false;
         }
 
-        /**
-         * Convert a raw API error into a user-friendly message
-         */
         protected function get_user_friendly_error( $error_message )
         {
             $lower = strtolower( $error_message );
@@ -228,11 +157,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $friendly;
         }
 
-        /**
-         * Wrap getResponseGenerator with automatic retry for transient errors.
-         * Retries up to 3 times with increasing delays (5s, 15s, 30s).
-         * Only retries errors that occur before any content is streamed (connection-level failures).
-         */
         protected function get_voice_transcript( $_message )
         {
             if ( strpos( (string) $_message->message, '<!-- BPBM-VOICE-MESSAGE -->' ) === false ) {
@@ -257,6 +181,64 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             }
 
             return $this->append_location_context( $_message->id, $text );
+        }
+
+        protected function get_attachment_input( $attachment_id, $bot_settings, array $image_types, array $link_types = array(), $link_max_bytes = 0 )
+        {
+            $storage = Better_Messages_Storage();
+            $mime    = $storage->content_type( $attachment_id );
+
+            if ( $bot_settings['images'] && in_array( $mime, $image_types, true ) ) {
+                $kind = 'image';
+            } else if ( $bot_settings['files'] && $mime === 'application/pdf' ) {
+                $kind = 'pdf';
+            } else {
+                return null;
+            }
+
+            $max_bytes = 20 * 1024 * 1024;
+            $size      = $storage->get_file_size( $attachment_id );
+
+            if ( $size <= 0 || $size > $max_bytes ) {
+                return null;
+            }
+
+            $input = array(
+                'kind' => $kind,
+                'mime' => $mime,
+                'name' => $storage->original_name( $attachment_id ),
+                'url'  => '',
+                'data' => '',
+            );
+
+            if ( $storage->is_cloud_file( $attachment_id )
+                && in_array( $mime, $link_types, true )
+                && ( $link_max_bytes <= 0 || $size <= $link_max_bytes )
+                && apply_filters( 'better_messages_ai_file_links', true, $attachment_id, $this->get_provider_id() ) ) {
+                $signed = $storage->signed_url( $attachment_id, 'inline' );
+
+                if ( $signed && ! empty( $signed['url'] ) ) {
+                    $input['url'] = $signed['url'];
+                    return $input;
+                }
+            }
+
+            $copy = $storage->get_local_copy( $attachment_id, $max_bytes );
+
+            if ( is_wp_error( $copy ) ) {
+                return null;
+            }
+
+            $contents = file_get_contents( $copy['path'] );
+            call_user_func( $copy['cleanup'] );
+
+            if ( $contents === false || $contents === '' ) {
+                return null;
+            }
+
+            $input['data'] = base64_encode( $contents );
+
+            return $input;
         }
 
         protected function prepare_voice_input( $bot_id, $message )
@@ -324,7 +306,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
                 $first = $gen->current();
 
-                // If first yield is a retryable error, try again
                 if ( is_array( $first ) && $first[0] === 'error' ) {
                     $is_transient = $this->is_transient_error( $first[1] );
 
@@ -337,7 +318,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     }
                 }
 
-                // Return a generator that re-emits the already-consumed first value, then continues
                 return ( function () use ( $first, $gen ) {
                     yield $first;
                     $gen->next();
@@ -348,15 +328,11 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 } )();
             }
 
-            // All retries exhausted — return the last error as a generator
             return ( function () use ( $first ) {
                 yield $first;
             } )();
         }
 
-        /**
-         * Apply the bot system-prompt filter (also fires the deprecated alias).
-         */
         protected function get_bot_instruction( $instruction, $bot_id, $sender_id, $thread_id, $message_id )
         {
             $instruction = apply_filters( 'better_messages_ai_bot_instruction', $instruction, $bot_id, $sender_id, $thread_id, $message_id );
@@ -369,9 +345,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             );
         }
 
-        /**
-         * Create a Guzzle HTTP client
-         */
         protected function get_guzzle_client( $base_uri, $headers = [] )
         {
             $config = [
@@ -384,9 +357,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return new \BetterMessages\GuzzleHttp\Client( $config );
         }
 
-        /**
-         * Extract error message from a Guzzle exception
-         */
         protected function parse_guzzle_error( $e )
         {
             $error = $e->getMessage();
@@ -405,10 +375,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $error;
         }
 
-        /**
-         * Get thread messages from database for building conversation history.
-         * When $limit > 0, returns only the most recent $limit messages (in chronological order).
-         */
         protected function get_thread_messages( $thread_id, $up_to_created_at, $limit = 0, $exclude_welcome = false )
         {
             global $wpdb;
@@ -448,12 +414,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             ) );
         }
 
-        /**
-         * Get thread messages with summary context compression.
-         * If useSummaryContext is enabled and a summary exists, loads only messages after the summary.
-         *
-         * @return array [ 'summary' => string|null, 'messages' => array ]
-         */
         protected function get_thread_messages_with_summary( $thread_id, $up_to_created_at, $limit, $bot_user_id, $bot_settings )
         {
             $exclude_welcome = isset( $bot_settings['welcomeMessageInContext'] ) && $bot_settings['welcomeMessageInContext'] === '0';
@@ -461,7 +421,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             if ( ! empty( $bot_settings['useSummaryContext'] ) && $bot_settings['useSummaryContext'] === '1' ) {
                 global $wpdb;
 
-                // Find last summary in the thread from any bot
                 $last_summary = $wpdb->get_row( $wpdb->prepare(
                     "SELECT m.id, m.created_at, m.message
                     FROM `" . bm_get_table('messages') . "` m
@@ -511,12 +470,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             );
         }
 
-        /**
-         * Enrich thread messages with reply-to context.
-         * If the triggering message is a reply to another message that is not in the context,
-         * inject the replied-to message so the bot can access its content and attachments.
-         * Also annotates the replying message text with a reply indicator.
-         */
         protected function enrich_with_reply_context( &$thread_messages, $message, $sender_names = array() )
         {
             $reply_to_id = Better_Messages()->functions->get_message_meta( $message->id, 'reply_to', true );
@@ -526,11 +479,10 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
             $reply_to_id = (int) $reply_to_id;
             $replied_msg = Better_Messages()->functions->get_message( $reply_to_id );
-            if ( ! $replied_msg ) {
+            if ( ! $replied_msg || (int) $replied_msg->thread_id !== (int) $message->thread_id ) {
                 return;
             }
 
-            // Check if the replied-to message is already in the context
             $already_in_context = false;
             foreach ( $thread_messages as $msg ) {
                 if ( (int) $msg->id === $reply_to_id ) {
@@ -539,14 +491,12 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 }
             }
 
-            // If not in context, inject it right before the triggering message
             if ( ! $already_in_context ) {
                 $last = array_pop( $thread_messages );
                 $thread_messages[] = $replied_msg;
                 $thread_messages[] = $last;
             }
 
-            // Annotate the triggering message with reply context
             $replied_text = preg_replace( '/<!--(.|\s)*?-->/', '', $replied_msg->message );
             $replied_text = wp_strip_all_tags( $this->decode_entities_deep( $replied_text ) );
 
@@ -563,7 +513,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $replied_sender_id = (int) $replied_msg->sender_id;
             $replied_sender_name = isset( $sender_names[ $replied_sender_id ] ) ? $sender_names[ $replied_sender_id ] : '';
 
-            // Check if replied-to message has attachments
             $replied_attachments = Better_Messages()->functions->get_message_meta( $reply_to_id, 'attachments', true );
             $has_attachments = ! empty( $replied_attachments );
 
@@ -586,7 +535,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             }
             $reply_prefix .= ']: ';
 
-            // Find and annotate the triggering message
             foreach ( $thread_messages as &$msg ) {
                 if ( (int) $msg->id === (int) $message->id ) {
                     $msg->message = $reply_prefix . $msg->message;
@@ -596,19 +544,12 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             unset( $msg );
         }
 
-        /**
-         * Check if a thread is a group conversation (more than 2 participants).
-         */
         protected function is_group_thread( $thread_id )
         {
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
             return count( $recipients ) > 2;
         }
 
-        /**
-         * Resolve display names for sender IDs in thread messages.
-         * Returns an array mapping sender_id => display_name.
-         */
         protected function resolve_sender_names( $thread_messages, $bot_user_id )
         {
             global $wpdb;
@@ -652,10 +593,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $names;
         }
 
-        /**
-         * Build a group context system instruction supplement.
-         * Tells the bot about the conversation participants and how to mention them.
-         */
         protected function get_group_context_instruction( $sender_names, $bot_user_id, $bot_name = '' )
         {
             $participants = array();
@@ -727,13 +664,13 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             };
 
             $text = preg_replace_callback(
-                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+)&quot;&gt;(@[^&]*)&lt;\/span&gt;/',
+                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+|all)&quot;&gt;(@[^&]*)&lt;\/span&gt;/',
                 $callback,
                 $text
             );
 
             $text = preg_replace_callback(
-                '/<span class="bm-mention" data-user-id="(-?\d+)">(@[^<]*)<\/span>/',
+                '/<span class="bm-mention" data-user-id="(-?\d+|all)">(@[^<]*)<\/span>/',
                 $callback,
                 $text
             );
@@ -741,9 +678,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $text;
         }
 
-        /**
-         * Convert {{mention:USER_ID:@Username}} placeholders to entity-encoded mention HTML.
-         */
         public function convert_mention_placeholders( $text )
         {
             $tag = '{{mention:';
@@ -784,10 +718,24 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $result;
         }
 
-        /**
-         * Common process_reply logic for all providers
-         */
         public function process_reply( $bot_id, $message_id )
+        {
+            $lock = Better_Messages()->functions->lock( 'ai_reply|' . (int) $message_id, 0 );
+
+            if ( $lock === false ) {
+                return;
+            }
+
+            try {
+                wp_cache_delete( (int) $message_id, 'bm_message_meta' );
+
+                $this->reply_to_message( $bot_id, $message_id );
+            } finally {
+                Better_Messages()->functions->unlock( $lock );
+            }
+        }
+
+        private function reply_to_message( $bot_id, $message_id )
         {
             if ( wp_get_scheduled_event( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message_id ] ) ) {
                 wp_clear_scheduled_hook( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message_id ] );
@@ -818,7 +766,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $ai_user_id    = absint( $bot_user->id ) * -1;
             $ai_thread_id  = $message->thread_id;
 
-            // Show typing indicator (mark_thread_read is handled by v2/send when bot response is delivered)
             if ( Better_Messages()->websocket ) {
                 Better_Messages()->websocket->send_typing( $ai_thread_id, $ai_user_id );
             }
@@ -832,9 +779,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             }
         }
 
-        /**
-         * Group conversation reply: generate full response, then send as regular message.
-         */
         private function process_reply_group( $bot_id, $message_id, $message, $bot_user, $ai_user_id, $ai_thread_id, $recipient_user_id, $settings )
         {
             $dataProvider = $this->getResponseGeneratorWithRetry( $bot_id, $bot_user, $message, 0, false );
@@ -845,7 +789,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 return;
             }
 
-            // Consume generator fully to collect response
             $parts = [];
             $meta  = null;
             $error = null;
@@ -868,7 +811,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     $parts[] = $part;
                 }
 
-                // Send periodic typing indicator
                 if ( Better_Messages()->websocket && time() - $last_typing >= 2 ) {
                     $last_typing = time();
                     Better_Messages()->websocket->send_typing( $ai_thread_id, $ai_user_id );
@@ -893,7 +835,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $raw_text = implode( '', $parts );
             $content = '<!-- BM-AI -->' . $this->convert_mention_placeholders( htmlentities( $raw_text ) );
 
-            // Send as a regular message with unread counting
             $ai_message_id = Better_Messages()->functions->new_message( [
                 'sender_id'    => $ai_user_id,
                 'thread_id'    => $ai_thread_id,
@@ -901,26 +842,20 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 'count_unread' => true,
                 'return'       => 'message_id',
                 'error_type'   => 'wp_error',
-                'skip_moderation' => true
+                'skip_moderation' => true,
+                'meta_data'    => [ 'ai_response_for' => (int) $message_id ]
             ] );
 
             if ( is_wp_error( $ai_message_id ) ) {
                 return;
             }
 
-            Better_Messages()->functions->add_message_meta( $ai_message_id, 'ai_response_for', $message_id );
             Better_Messages()->functions->update_message_meta( $message_id, 'ai_response_id', $ai_message_id );
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_provider', $this->get_provider_id() );
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'completed' );
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_provider_meta', json_encode( $meta ) );
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_finish', time() );
 
-            // Process mentions in bot response
-            if ( isset( Better_Messages()->mentions ) ) {
-                Better_Messages()->mentions->process_mentions( $ai_thread_id, $ai_message_id, $content );
-            }
-
-            // Calculate and store cost
             $cost_data = Better_Messages()->ai->calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $recipient_user_id, $ai_thread_id );
 
             do_action( 'better_messages_ai_response_completed', $ai_message_id, $message_id, $cost_data, $bot_id, $recipient_user_id );
@@ -931,9 +866,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $this->on_response_completed( $ai_message_id, $message_id, $meta );
         }
 
-        /**
-         * 1:1 conversation reply: placeholder message with streaming.
-         */
         private function process_reply_stream( $bot_id, $message_id, $message, $bot_user, $ai_user_id, $ai_thread_id, $recipient_user_id, $settings )
         {
             $ai_message_id = Better_Messages()->functions->get_message_meta( $message_id, 'ai_response_id' );
@@ -993,19 +925,16 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             $provider      = $this;
             $last_typing   = time();
 
-            /**
-             * Write to the stream, buffering if the cloud connection is not yet established.
-             * ThroughStream emits 'data' events immediately on write(), but if no listener
-             * is attached yet (Browser hasn't piped the stream), the data is lost.
-             * We detect readiness by checking for 'data' listeners on the stream.
-             */
-            $streamWrite = function ( $data ) use ( $stream, &$pendingWrites ) {
+            $streamWrite = function ( $data ) use ( $stream, &$pendingWrites, $recipient_user_id ) {
                 try {
                     if ( ! is_object( $stream ) || ! method_exists( $stream, 'write' ) ) {
                         return;
                     }
 
-                    // Flush any buffered writes first
+                    if ( Better_Messages()->websocket && method_exists( Better_Messages()->websocket, 'seal_stream_chunk' ) ) {
+                        $data = Better_Messages()->websocket->seal_stream_chunk( $data, $recipient_user_id );
+                    }
+
                     if ( ! empty( $pendingWrites ) && count( $stream->listeners( 'data' ) ) > 0 ) {
                         foreach ( $pendingWrites as $buffered ) {
                             $stream->write( $buffered );
@@ -1073,7 +1002,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     }
 
                     if ( is_array( $part ) && $part[0] === 'finish' ) {
-                        // Flush any buffered stream writes before ending
                         try {
                             if ( ! empty( $pendingWrites ) && is_object( $stream ) && method_exists( $stream, 'write' ) ) {
                                 foreach ( $pendingWrites as $buffered ) {
@@ -1097,11 +1025,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
                         Better_Messages()->functions->update_message( $args );
 
-                        // Process mentions in bot response
-                        if ( isset( Better_Messages()->mentions ) ) {
-                            Better_Messages()->mentions->process_mentions( $ai_thread_id, $ai_message_id, $args['content'] );
-                        }
-
                         $meta = $part[1];
 
                         Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'completed' );
@@ -1111,7 +1034,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                         Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
                         Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
 
-                        // Calculate and store cost
                         $cost_data = Better_Messages()->ai->calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $recipient_user_id, $ai_thread_id );
 
                         do_action( 'better_messages_ai_response_completed', $ai_message_id, $message_id, $cost_data, $bot_id, $recipient_user_id );
@@ -1144,7 +1066,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             };
 
             if ( Better_Messages()->websocket ) {
-                $socket_server = apply_filters( 'bp_better_messages_realtime_server', 'https://cloud.better-messages.com/' );
+                $socket_server = Better_Messages()->websocket->api_server();
                 $bm_endpoint   = $socket_server . 'streamMessage';
 
                 $browser->post( $bm_endpoint, [

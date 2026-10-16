@@ -1,35 +1,22 @@
 <?php
-// Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Component Class.
- *
- * @since 1.0.0
- */
 class Better_Messages_Group extends BP_Group_Extension
 {
 
     public static function instance()
     {
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if ( null === $instance ) {
             $instance = new Better_Messages_Group;
             $instance->setup_hooks();
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
-    /**
-     * @since 1.0.0
-     */
     public function __construct()
     {
         if( Better_Messages()->settings['enableGroups'] === '1' ){
@@ -81,12 +68,6 @@ class Better_Messages_Group extends BP_Group_Extension
         }
     }
 
-    /**
-     * @param string $title
-     * @param int $thread_id
-     * @param BM_Thread $thread
-     * @return string
-     */
     public function group_thread_title(string $title, int $thread_id, $thread ){
         $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
         if( $thread_type !== 'group' ) return $title;
@@ -100,12 +81,6 @@ class Better_Messages_Group extends BP_Group_Extension
         }
     }
 
-    /**
-     * @param string $title
-     * @param int $thread_id
-     * @param BM_Thread $thread
-     * @return string
-     */
     public function group_thread_image($image, int $thread_id, $thread ){
         $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
         if( $thread_type !== 'group' ) return $image;
@@ -129,12 +104,6 @@ class Better_Messages_Group extends BP_Group_Extension
         return $image;
     }
 
-    /**
-     * @param string $title
-     * @param int $thread_id
-     * @param BM_Thread $thread
-     * @return string
-     */
     public function group_thread_url(string $title, int $thread_id, $thread ){
         $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
         if( $thread_type !== 'group' ) return $title;
@@ -144,11 +113,6 @@ class Better_Messages_Group extends BP_Group_Extension
         return bp_get_group_permalink( $group );
     }
 
-    /**
-     * Set some hooks to maximize BuddyPress integration.
-     *
-     * @since 1.0.0
-     */
     public function setup_hooks()
     {
         if( Better_Messages()->settings['enableGroups'] === '1' ) {
@@ -335,6 +299,12 @@ class Better_Messages_Group extends BP_Group_Extension
     }
 
     public function get_group_thread_id( $group_id ){
+        return Better_Messages()->functions->with_lock( 'bp_group_thread|' . (int) $group_id, function () use ( $group_id ) {
+            return $this->find_or_create_group_thread( $group_id );
+        } );
+    }
+
+    private function find_or_create_group_thread( $group_id ){
         global $wpdb;
 
         $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "
@@ -409,9 +379,6 @@ class Better_Messages_Group extends BP_Group_Extension
         $user_ids  = [];
         $removed_ids = [];
 
-        /**
-         * All users ids in thread
-         */
         $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
         foreach( $members as $index => $member ){

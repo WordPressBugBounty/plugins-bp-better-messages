@@ -29,15 +29,9 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
         public function register_cron_schedules()
         {
-            if ( ! wp_next_scheduled( 'bm_cron_summarization' ) ) {
-                wp_schedule_event( time(), 'hourly', 'bm_cron_summarization' );
-            }
+            Better_Messages_Worker()->add_task( 'bm_cron_summarization', HOUR_IN_SECONDS );
         }
 
-        /**
-         * Get the per-thread summarization config.
-         * Returns null if not configured.
-         */
         public function get_thread_config( $thread_id )
         {
             $raw = Better_Messages()->functions->get_thread_meta( $thread_id, 'ai_summarization' );
@@ -59,9 +53,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             ) );
         }
 
-        /**
-         * Save the per-thread summarization config.
-         */
         public function save_thread_config( $thread_id, $config )
         {
             $sanitized = array();
@@ -84,10 +75,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return $sanitized;
         }
 
-        /**
-         * Get the per-thread digest config.
-         * Returns null if not configured.
-         */
         public function get_thread_digest_config( $thread_id )
         {
             $raw = Better_Messages()->functions->get_thread_meta( $thread_id, 'ai_digest_config' );
@@ -109,9 +96,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             ) );
         }
 
-        /**
-         * Save the per-thread digest config.
-         */
         public function save_thread_digest_config( $thread_id, $config )
         {
             $sanitized = array();
@@ -119,7 +103,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             $sanitized['botId']    = intval( $config['botId'] ?? 0 );
             $sanitized['schedule'] = in_array( $config['schedule'] ?? '', array( 'hourly', 'twicedaily', 'daily' ) ) ? $config['schedule'] : 'daily';
 
-            // Validate digest times (HH:MM format)
             $times = isset( $config['digestTimes'] ) && is_array( $config['digestTimes'] ) ? $config['digestTimes'] : array( '09:00' );
             $valid_times = array();
             foreach ( $times as $time ) {
@@ -273,12 +256,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             }
 
             $lock_key = 'bm_generating_summary_' . $thread_id;
-            if ( get_transient( $lock_key ) ) {
+            if ( ! Better_Messages()->functions->claim_transient( $lock_key, 300 ) ) {
                 return new \WP_Error( 'already_in_progress', __( 'Summary generation is already in progress', 'bp-better-messages' ), array( 'status' => 409 ) );
             }
-            set_transient( $lock_key, 1, 300 );
 
-            // Pre-validate before closing connection
             $bot_id = (int) $config['botId'];
 
             if ( ! Better_Messages()->ai->bot_exists( $bot_id ) ) {
@@ -385,12 +366,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             }
 
             $lock_key = 'bm_generating_digest_' . $thread_id;
-            if ( get_transient( $lock_key ) ) {
+            if ( ! Better_Messages()->functions->claim_transient( $lock_key, 300 ) ) {
                 return new \WP_Error( 'already_in_progress', __( 'Digest generation is already in progress', 'bp-better-messages' ), array( 'status' => 409 ) );
             }
-            set_transient( $lock_key, 1, 300 );
 
-            // Pre-validate before closing connection
             $bot_id = (int) $config['botId'];
 
             if ( ! Better_Messages()->ai->bot_exists( $bot_id ) ) {
@@ -430,9 +409,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             exit;
         }
 
-        /**
-         * Get bots in the thread that have digest enabled.
-         */
         private function get_available_digest_bots( $thread_id )
         {
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
@@ -466,9 +442,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return $bots;
         }
 
-        /**
-         * Get bots in the thread that have summarization enabled.
-         */
         private function get_available_bots( $thread_id )
         {
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
@@ -502,11 +475,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return $bots;
         }
 
-        /**
-         * Generate a summary for a thread.
-         * Which bot is determined from thread config.
-         * How to summarize (style, model, etc.) comes from bot settings.
-         */
         public function generate_summary( $thread_id, $user_id = 0 )
         {
             ignore_user_abort( true );
@@ -628,7 +596,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 'count_unread' => true,
                 'return'       => 'message_id',
                 'error_type'   => 'wp_error',
-                'skip_moderation' => true
+                'skip_moderation' => true,
+                'process_mentions' => false
             ) );
 
             if ( is_wp_error( $message_id ) ) {
@@ -661,16 +630,9 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
             Better_Messages()->ai->calculate_and_store_cost( $message_id, $provider_meta, $bot_id, $user_id, $thread_id, true );
 
-            if ( isset( Better_Messages()->mentions ) ) {
-                Better_Messages()->mentions->process_mentions( $thread_id, $message_id, $content );
-            }
-
             return (int) $message_id;
         }
 
-        /**
-         * Generate a digest for a thread.
-         */
         public function generate_digest( $thread_id )
         {
             ignore_user_abort( true );
@@ -759,7 +721,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 'count_unread' => true,
                 'return'       => 'message_id',
                 'error_type'   => 'wp_error',
-                'skip_moderation' => true
+                'skip_moderation' => true,
+                'process_mentions' => false
             ) );
 
             if ( is_wp_error( $message_id ) ) {
@@ -810,9 +773,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return $prompt;
         }
 
-        /**
-         * Get recent digest messages for a thread.
-         */
         private function get_recent_digests( $thread_id, $limit = 3 )
         {
             global $wpdb;
@@ -1040,10 +1000,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             ) );
         }
 
-        /**
-         * Send a JSON response and close the connection so the client returns immediately.
-         * PHP continues executing after this call.
-         */
         private function send_json_and_close( $data )
         {
             ignore_user_abort( true );
@@ -1051,7 +1007,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
 
             $json = wp_json_encode( $data );
 
-            // Clean any existing output buffers
             while ( ob_get_level() > 0 ) {
                 ob_end_clean();
             }
@@ -1085,9 +1040,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             return false;
         }
 
-        /**
-         * Log an error to the bot's post meta. Keeps last 20 entries.
-         */
         private function log_bot_error( $bot_id, $thread_id, $type, $error_message )
         {
             $meta_key = '_bm_ai_errors';
@@ -1188,7 +1140,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 }
             }
 
-            // Digest loop
             $digest_rows = $wpdb->get_results(
                 "SELECT bm_thread_id, meta_value FROM `{$meta_table}` WHERE meta_key = 'ai_digest_config'"
             );
@@ -1211,7 +1162,6 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                     continue;
                 }
 
-                // Check if current hour matches any configured digest time
                 $digest_times = isset( $config['digestTimes'] ) && is_array( $config['digestTimes'] ) ? $config['digestTimes'] : array( '09:00' );
 
                 if ( $schedule !== 'hourly' ) {
@@ -1226,11 +1176,10 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                     }
                 }
 
-                // Check minimum interval to prevent duplicate runs within the same hour
                 $last_digest_at = $this->get_last_digest_created_at( $thread_id );
                 if ( $last_digest_at > 0 ) {
                     $last_time = (int) ( $last_digest_at / 10 / 1000 );
-                    if ( ( time() - $last_time ) < 3000 ) { // 50 min guard
+                    if ( ( time() - $last_time ) < 3000 ) {
                         continue;
                     }
                 }

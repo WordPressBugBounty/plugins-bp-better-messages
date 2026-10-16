@@ -156,9 +156,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             return $allowed;
         }
 
-        /**
-         * Create a new bulk messaging job (queued for WP Cron processing).
-         */
         public function create_job( WP_REST_Request $request ){
             global $wpdb;
 
@@ -168,7 +165,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             $content = Better_Messages()->functions->filter_message_content( $message );
 
-            // Resolve sender first so we can exclude them from the user query
             $sender_id = get_current_user_id();
             $custom_sender = $request->get_param( 'sender_id' );
             if ( ! empty( $custom_sender ) && $this->is_admin() ) {
@@ -263,7 +259,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 );
             }
 
-            // Mark attachments as claimed by a job so orphan cleanup won't delete them
             foreach ( $attachment_ids as $att_id ) {
                 delete_post_meta( $att_id, 'bp-better-messages-bulk-attachment' );
                 update_post_meta( $att_id, 'bp-better-messages-bulk-job-id', $job_id );
@@ -276,9 +271,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             ];
         }
 
-        /**
-         * Create a follow-up job that sends a new message into threads from a parent job.
-         */
         public function create_follow_up( WP_REST_Request $request ){
             global $wpdb;
 
@@ -331,7 +323,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     $parent_selectors['include_new_users'] = true;
                     $selectors_json = wp_json_encode( $parent_selectors );
 
-                    // Count new matching users (exclude sender + users already in parent job)
                     $sender_id     = (int) $parent_job->sender_id;
                     $current_query = $this->get_user_query( $parent_selectors, false, 1, 20, $sender_id, $parent_job_id );
                     $new_user_count = $current_query ? (int) $current_query->total_users : 0;
@@ -412,9 +403,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             ];
         }
 
-        /**
-         * Pause a processing bulk job.
-         */
         public function pause_job( WP_REST_Request $request ){
             global $wpdb;
             $job_id = intval( $request->get_param( 'id' ) );
@@ -438,9 +426,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             return [ 'success' => true, 'status' => 'paused' ];
         }
 
-        /**
-         * Resume a paused bulk job.
-         */
         public function resume_job( WP_REST_Request $request ){
             global $wpdb;
             $job_id = intval( $request->get_param( 'id' ) );
@@ -464,9 +449,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             return [ 'success' => true, 'status' => 'processing' ];
         }
 
-        /**
-         * Cancel a bulk job.
-         */
         public function cancel_job( WP_REST_Request $request ){
             global $wpdb;
             $job_id = intval( $request->get_param( 'id' ) );
@@ -493,9 +475,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             return [ 'success' => true, 'status' => 'cancelled' ];
         }
 
-        /**
-         * Get status of a single bulk job.
-         */
         public function get_job_status( WP_REST_Request $request ){
             global $wpdb;
             $job_id = intval( $request->get_param( 'id' ) );
@@ -524,9 +503,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             ];
         }
 
-        /**
-         * Upload an attachment for bulk messaging.
-         */
         public function upload_attachment( WP_REST_Request $request ){
             if ( empty( $_FILES['file'] ) ) {
                 return new WP_Error( 'no_file', __('No file uploaded', 'bp-better-messages'), [ 'status' => 400 ] );
@@ -536,7 +512,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             require_once( ABSPATH . 'wp-admin/includes/file.php' );
             require_once( ABSPATH . 'wp-admin/includes/media.php' );
 
-            // Restore original filename if sent via safe upload, and enforce byte limit
             $decoded_name = '';
             $original_name = $request->get_param( 'original_name' );
             if ( ! empty( $original_name ) && class_exists( 'Better_Messages_Files' ) ) {
@@ -591,7 +566,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             }
 
             if ( (int) $job->parent_job_id > 0 ) {
-                // Follow-up: only delete this job's messages, not the shared threads
                 $message_ids = $wpdb->get_col( $wpdb->prepare(
                     "SELECT `message_id` FROM `{$threads_table}` WHERE `job_id` = %d AND `message_id` > 0",
                     $job_id
@@ -601,7 +575,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     Better_Messages()->functions->delete_message( (int) $message_id, false, true, 'delete' );
                 }
             } else {
-                // Parent: erase entire threads
                 $entries = $wpdb->get_results( $wpdb->prepare(
                     "SELECT `thread_id` FROM `{$threads_table}` WHERE `job_id` = %d",
                     $job_id
@@ -615,7 +588,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     Better_Messages()->functions->erase_thread( $thread_id );
                 }
 
-                // Delete all descendant follow-up jobs and their messages
                 $descendant_ids = $this->get_descendant_job_ids( $job_id );
                 foreach ( $descendant_ids as $desc_id ) {
                     $desc_message_ids = $wpdb->get_col( $wpdb->prepare(
@@ -630,7 +602,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 }
             }
 
-            // Delete job threads and job record
             $wpdb->delete( $threads_table, [ 'job_id' => $job_id ] );
             $wpdb->delete( $table, [ 'id' => $job_id ] );
 
@@ -654,7 +625,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $key   = sanitize_text_field( $request->get_param( 'property' ) );
             $value = sanitize_text_field( $request->get_param( 'value' ) );
 
-            // Map old property names to column names
             $column_map = [
                 'disableReply' => 'disable_reply',
             ];
@@ -669,7 +639,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             $wpdb->update( $table, [ $column => $value ], [ 'id' => $job_id ] );
 
-            // Propagate disable_reply to all descendant follow-up jobs
             if ( $column === 'disable_reply' ) {
                 $descendant_ids = $this->get_descendant_job_ids( $job_id );
                 foreach ( $descendant_ids as $desc_id ) {
@@ -770,7 +739,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     $count    = count( $user_ids );
                     if ( $count > 0 ) {
                         $names = [];
-                        // Show up to 5 names, then "+ N more"
                         $show_ids = array_slice( $user_ids, 0, 5 );
                         foreach ( $show_ids as $uid ) {
                             $user = get_userdata( (int) $uid );
@@ -788,7 +756,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     break;
             }
 
-            // Activity filter
             $activity_filter = isset( $selectors['activityFilter'] ) ? $selectors['activityFilter'] : 'any';
             $activity_days   = isset( $selectors['activityDays'] ) ? (int) $selectors['activityDays'] : 30;
             if ( $activity_filter === 'active_within' ) {
@@ -851,7 +818,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             $sentTo = isset( $selectors['sent-to'] ) ? $selectors['sent-to'] : 'all';
 
-            // Activity filter
             $activity_filter = isset( $selectors['activityFilter'] ) ? $selectors['activityFilter'] : 'any';
             $activity_days   = max( 1, intval( isset( $selectors['activityDays'] ) ? $selectors['activityDays'] : 30 ) );
             $activity_sql    = '';
@@ -863,7 +829,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $activity_sql = $wpdb->prepare( " AND `last_activity` < %s", $activity_date );
             }
 
-            // Exclude users already sent to in parent job chain (covers chained follow-ups)
             $exclude_sql = '';
             if ( $exclude_job_id > 0 ) {
                 $exclude_sql = $wpdb->prepare(
@@ -957,7 +922,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     });
                     $usersIds = array_values( $usersIds );
 
-                    // Apply activity filter for group mode
                     if ( $activity_sql !== '' && ! empty( $usersIds ) ) {
                         $id_placeholders = implode( ',', array_fill( 0, count( $usersIds ), '%d' ) );
                         $usersIds = $wpdb->get_col( $wpdb->prepare(
@@ -966,7 +930,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                         ));
                     }
 
-                    // Exclude users already in parent job chain
                     if ( $exclude_job_id > 0 && ! empty( $usersIds ) ) {
                         $already_sent = $wpdb->get_col( $wpdb->prepare(
                             "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` AND `bt2`.`user_id` > 0 WHERE `bt1`.`job_id` = %d",
@@ -995,7 +958,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                     });
                     $usersIds = array_values( $usersIds );
 
-                    // Split into registered users (positive) and guests (negative)
                     $registered_ids = array_values( array_filter( $usersIds, function( $uid ) { return $uid > 0; } ) );
                     $guest_ids      = array_values( array_filter( $usersIds, function( $uid ) { return $uid < 0; } ) );
 
@@ -1009,7 +971,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
                     $usersIds = array_values( array_merge( $registered_ids, $guest_ids ) );
 
-                    // Exclude users already in parent job chain
                     if ( $exclude_job_id > 0 && ! empty( $usersIds ) ) {
                         $already_sent = $wpdb->get_col( $wpdb->prepare(
                             "SELECT DISTINCT `bt2`.`user_id` FROM `{$threads_table}` AS `bt1` INNER JOIN `{$threads_table}` AS `bt2` ON `bt2`.`thread_id` = `bt1`.`thread_id` WHERE `bt1`.`job_id` = %d",
@@ -1077,7 +1038,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $job_id, $per_page, $offset
             ) );
 
-            // Follow-up entries have user_id=0; resolve from any ancestor job
             if ( $parent_job_id > 0 ) {
                 $zero_thread_ids = [];
                 foreach ( $entries as $entry ) {
@@ -1231,7 +1191,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             $current_user_id = get_current_user_id();
 
-            // Clean up old preview messages (older than 24 hours)
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM `" . bm_get_table('messages') . "` WHERE `thread_id` = 0 AND `sender_id` = %d AND `date_sent` < %s",
                 $current_user_id,

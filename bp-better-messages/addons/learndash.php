@@ -704,6 +704,19 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
 
         public function get_course_thread_id( $course_id, $create = true )
         {
+            $thread_id = $this->find_or_create_course_thread( $course_id, false );
+
+            if ( $thread_id || ! $create ) {
+                return $thread_id;
+            }
+
+            return Better_Messages()->functions->with_lock( 'learndash_course_thread|' . (int) $course_id, function () use ( $course_id ) {
+                return $this->find_or_create_course_thread( $course_id, true );
+            } );
+        }
+
+        private function find_or_create_course_thread( $course_id, $create )
+        {
             global $wpdb;
 
             $course_id = (int) $course_id;
@@ -748,6 +761,19 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
         }
 
         public function get_group_thread_id( $group_id, $create = true )
+        {
+            $thread_id = $this->find_or_create_group_thread( $group_id, false );
+
+            if ( $thread_id || ! $create ) {
+                return $thread_id;
+            }
+
+            return Better_Messages()->functions->with_lock( 'learndash_group_thread|' . (int) $group_id, function () use ( $group_id ) {
+                return $this->find_or_create_group_thread( $group_id, true );
+            } );
+        }
+
+        private function find_or_create_group_thread( $group_id, $create )
         {
             global $wpdb;
 

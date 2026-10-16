@@ -6,13 +6,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
     class Better_Messages_Ultimate_Member
     {
 
-        /**
-         * An approved member who stops being approved (deactivated, rejected, sent back for
-         * review) is cut off the realtime server at once, and let back in when approved again.
-         * A member never approved cannot log in, so their first approval changes nothing there.
-         * Ultimate Member before 2.8.7 does not say what the status was, so there any status but
-         * approved cuts the member off.
-         */
         public function on_account_status_changed( $status, $user_id, $old_status = null ){
             if( ! isset( Better_Messages()->websocket ) || ! Better_Messages()->websocket ) return;
 
@@ -20,7 +13,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
 
             if( $status === 'approved' ){
                 Better_Messages()->websocket->restore_user( $user_id, 'ultimate-member' );
-                // A member the eligibility filter below cut off on a role change goes back too.
                 Better_Messages()->websocket->check_user_access( $user_id );
             } else if( $old_status === 'approved' || ( ( $old_status === null || $old_status === '' ) && $this->has_sessions( $user_id ) ) ){
                 Better_Messages()->websocket->revoke_user( $user_id, 'ultimate-member' );
@@ -35,11 +27,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             return ! empty( $sessions );
         }
 
-        /**
-         * A member whose account status is set to anything but approved gets no realtime
-         * connection, whatever wrote the status: the page hands them no key to connect with. A user
-         * without a status, as every user from before Ultimate Member has, is not held back.
-         */
         public function can_connect( $can_connect, $user_id ){
             if( ! $can_connect || (int) $user_id <= 0 ) return $can_connect;
 
@@ -318,7 +305,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             if( ! is_user_logged_in() ) return false;
             ob_start();
 
-            //<span class="um-tab-notifier">1</span>
             ?>
             <script type="text/javascript">
                 wp.hooks.addAction('better_messages_update_unread', 'better_messages', function( unread ) {
@@ -413,9 +399,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             reset($participants['recipients']);
 
             $user_id_2 = key($participants['recipients']);
-            /**
-             * Allow users reply to admins even if not friends
-             */
             if( current_user_can('manage_options') || user_can( $user_id_2, 'manage_options' ) ) {
                 return $allowed;
             }
@@ -479,9 +462,6 @@ if ( !class_exists( 'Better_Messages_Ultimate_Member' ) ){
             reset($participants['recipients']);
 
             $friend_id = key($participants['recipients']);
-            /**
-             * Allow users reply to admins even if not friends
-             */
             if( current_user_can('manage_options') || user_can( $friend_id, 'manage_options' ) || $friend_id < 0 ) {
                 return $allowed;
             }

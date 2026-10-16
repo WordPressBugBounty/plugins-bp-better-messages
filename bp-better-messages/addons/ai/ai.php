@@ -25,7 +25,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             add_filter( 'bp_better_messages_pre_format_message', array( $this, 'strip_ai_marker' ), 1, 4 );
 
             if ( version_compare(phpversion(), '8.1', '>=') ) {
-                // Requires PHP 8.1+
                 require_once "dependencies/autoload.php";
                 require_once "api/provider-interface.php";
                 require_once "api/provider-factory.php";
@@ -40,7 +39,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $this->api = Better_Messages_OpenAI_API::instance();
                 Better_Messages_AI_Summarization::instance();
 
-                add_action( 'admin_init', array( $this, 'register_event' ) );
+                add_action( 'init', array( $this, 'register_event' ) );
                 add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
                 add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
 
@@ -108,9 +107,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function register_event()
         {
-            if ( ! wp_next_scheduled( 'better_messages_ai_ensure_completion_job' ) ) {
-                wp_schedule_event( time(), 'better_messages_ai_ensure_completion_job', 'better_messages_ai_ensure_completion_job' );
-            }
+            Better_Messages_Worker()->add_task( 'better_messages_ai_ensure_completion_job', 5 * MINUTE_IN_SECONDS );
         }
 
         public function get_user_roles( $roles, $user_id )
@@ -165,7 +162,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         }
 
         public function restrict_new_thread_if_needed( &$args, &$errors ){
-            // Get array with recipients user ids, which user trying to start conversation with
             $recipients = $args['recipients'];
 
             if( $recipients && count( $recipients ) === 1 ){
@@ -250,7 +246,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( $message_id ) {
                 $first_message = Better_Messages()->functions->get_message( (int) $message_id );
                 if ( $first_message && isset( $first_message->created_at ) ) {
-                    // 10 = 1ms in the created_at format (ms * 10); place the welcome just before the user's first message.
                     $created_at = (int) $first_message->created_at - 10;
                 }
             }
@@ -440,7 +435,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                                     if ($is_waiting_for_response) {
                                         $time_ago = time() - $is_waiting_for_response;
-                                        $time_limit = 60 * 5; // 5 minutes
+                                        $time_limit = 60 * 5;
 
                                         if ($time_ago < $time_limit) {
                                             $allowed = false;
@@ -553,10 +548,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Check if a user has sufficient balance for a group mention/reply bot response.
-         * Returns true if the bot should respond, false if the user lacks balance.
-         */
         private function check_group_mention_balance( $user_id, $bot_settings )
         {
             if ( ( $bot_settings['userPricingChargeGroupMentions'] ?? '0' ) !== '1' ) {
@@ -594,7 +585,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $mode = $bot_settings['userPricingMode'] ?? 'disabled';
             if ( $mode === 'disabled' ) return;
 
-            // Skip charging for group mentions/replies if not enabled
             if ( ( $bot_settings['userPricingChargeGroupMentions'] ?? '0' ) !== '1' ) {
                 $ai_message = Better_Messages()->functions->get_message( $ai_message_id );
                 if ( $ai_message ) {
@@ -635,7 +625,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_user_charge', $charge_amount );
 
-            // Store points charged in ai_usage table
             global $wpdb;
             $ai_usage_table = bm_get_table('ai_usage');
             if ( $ai_usage_table ) {
@@ -649,12 +638,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function check_if_api_key_valid()
         {
-            // Invalidate cached models lists when API keys change
             delete_transient( 'bm_openai_models' );
             delete_transient( 'bm_anthropic_models' );
             delete_transient( 'bm_gemini_models' );
 
-            // Validate OpenAI key
             if ( ! empty( Better_Messages()->settings['openAiApiKey'] ) ) {
                 $this->api->update_api_key();
                 $this->api->check_api_key();
@@ -662,7 +649,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 delete_option( 'better_messages_openai_error' );
             }
 
-            // Validate Anthropic key
             if ( ! empty( Better_Messages()->settings['anthropicApiKey'] ) ) {
                 $provider = Better_Messages_AI_Provider_Factory::create( 'anthropic' );
                 $provider->set_api_key( Better_Messages()->settings['anthropicApiKey'] );
@@ -671,7 +657,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 delete_option( 'better_messages_anthropic_error' );
             }
 
-            // Validate Gemini key
             if ( ! empty( Better_Messages()->settings['geminiApiKey'] ) ) {
                 $provider = Better_Messages_AI_Provider_Factory::create( 'gemini' );
                 $provider->set_api_key( Better_Messages()->settings['geminiApiKey'] );
@@ -807,7 +792,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
-            // Admin bot CRUD endpoints
             register_rest_route('better-messages/v1/admin/ai', '/bots', array(
                 'methods' => 'GET',
                 'callback' => array( $this, 'rest_get_bots'),
@@ -859,7 +843,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 ),
             ));
 
-            // Bot conversation management endpoints
             register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/conversations', array(
                 'methods' => 'GET',
                 'callback' => array( $this, 'rest_get_bot_conversations'),
@@ -917,7 +900,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 ),
             ));
 
-            // Test API key endpoint
             register_rest_route('better-messages/v1/admin/ai', '/testApiKey', array(
                 'methods' => 'POST',
                 'callback' => array( $this, 'rest_test_api_key'),
@@ -930,7 +912,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
-            // Token usage endpoint
             register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/usage', array(
                 'methods' => 'GET',
                 'callback' => array( $this, 'rest_get_bot_usage'),
@@ -944,7 +925,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 ),
             ));
 
-            // Error log endpoint
             register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/errors', array(
                 'methods' => 'GET',
                 'callback' => array( $this, 'rest_get_bot_errors'),
@@ -982,9 +962,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         }
 
-        /**
-         * Get the provider instance for a specific bot
-         */
         public function get_bot_provider( $bot_id )
         {
             $settings    = $this->get_bot_settings( $bot_id );
@@ -1006,9 +983,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $provider;
         }
 
-        /**
-         * REST: Create AI response (delegates to bot's provider)
-         */
         public function handle_create_response( WP_REST_Request $request )
         {
             Better_Messages()->functions->end_browser_output();
@@ -1022,9 +996,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * REST: Cancel AI response (determines provider from message meta)
-         */
         public function handle_cancel_response( WP_REST_Request $request )
         {
             global $wpdb;
@@ -1055,7 +1026,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                     Better_Messages()->functions->add_message_meta( $message_id, 'ai_waiting_for_cancel', time() );
 
-                    // For OpenAI: wait for response_id and cancel via API
                     if ( $provider_id === 'openai' ) {
                         $response_id = Better_Messages()->functions->get_message_meta( $message_id, 'openai_response_id' );
 
@@ -1088,14 +1058,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             do_action( 'better_messages_thread_updated', $thread_id, $user_id );
                         }
                     } else {
-                        // For non-OpenAI providers: just clean up
                         Better_Messages()->functions->delete_message( $message_id, $thread_id );
                         Better_Messages()->functions->delete_thread_meta( $thread_id, 'ai_waiting_for_response' );
                         do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
                         do_action( 'better_messages_thread_updated', $thread_id, $user_id );
                     }
                 } else {
-                    // Last message is not an AI message (e.g. cancel pressed before AI placeholder was created)
                     Better_Messages()->functions->delete_thread_meta( $thread_id, 'ai_waiting_for_response' );
                     do_action( 'better_messages_thread_self_update', $thread_id, $user_id );
                     do_action( 'better_messages_thread_updated', $thread_id, $user_id );
@@ -1152,9 +1120,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * Get a provider instance using message meta for API key context
-         */
         private function get_bot_provider_by_message( $message_id, $provider_id )
         {
             $bot_id = Better_Messages()->functions->get_message_meta( $message_id, 'ai_bot_id' );
@@ -1169,9 +1134,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $provider;
         }
 
-        /**
-         * REST: Get models for a specific provider
-         */
         public function handle_get_models( WP_REST_Request $request )
         {
             $provider_id = $request->get_param( 'provider' ) ?: 'openai';
@@ -1188,9 +1150,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $provider->get_models();
         }
 
-        /**
-         * REST: Get transcription models for a specific provider
-         */
         public function handle_get_transcription_models( WP_REST_Request $request )
         {
             $provider_id = $request->get_param( 'provider' ) ?: 'openai';
@@ -1202,9 +1161,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $provider->get_transcription_models();
         }
 
-        /**
-         * REST: Get available providers info
-         */
         public function handle_get_providers( WP_REST_Request $request )
         {
             return Better_Messages_AI_Provider_Factory::get_providers_info();
@@ -1307,9 +1263,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return apply_filters( 'better_messages_get_ai_bots', $bots, $current_user_id );
         }
 
-        /**
-         * REST: Get bots (paginated)
-         */
         public function rest_get_bots( WP_REST_Request $request )
         {
             $page     = max( 1, (int) ( $request->get_param('page') ?: 1 ) );
@@ -1352,9 +1305,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * REST: Create a new bot
-         */
         public function rest_create_bot( WP_REST_Request $request )
         {
             $name = sanitize_text_field( $request->get_param('name') ?: '' );
@@ -1381,9 +1331,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $this->format_bot_for_rest( $post );
         }
 
-        /**
-         * REST: Update a bot
-         */
         public function rest_update_bot( WP_REST_Request $request )
         {
             $bot_id = (int) $request->get_param('id');
@@ -1395,7 +1342,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $params = $request->get_json_params();
 
-            // Update title if provided
             if ( isset( $params['name'] ) ) {
                 $name = sanitize_text_field( $params['name'] );
                 if ( ! empty( $name ) ) {
@@ -1407,7 +1353,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Update avatar if provided
             if ( isset( $params['avatarId'] ) ) {
                 $avatar_id = (int) $params['avatarId'];
                 if ( $avatar_id > 0 ) {
@@ -1417,12 +1362,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Update settings if provided
             if ( isset( $params['settings'] ) && is_array( $params['settings'] ) ) {
                 $new_settings = $params['settings'];
                 $old_settings = $this->get_bot_settings( $bot_id );
 
-                // Sanitize
                 foreach ( $new_settings as $key => $value ) {
                     if ( is_string( $value ) ) {
                         if ( $key === 'instruction' || $key === 'summarizationPrompt' || $key === 'welcomeMessage' ) {
@@ -1433,7 +1376,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                 }
 
-                // Handle fileSearchVectorIds
                 if ( ! empty( $new_settings['fileSearchVectorIds'] ) && is_string( $new_settings['fileSearchVectorIds'] ) ) {
                     $lines = explode( "\n", $new_settings['fileSearchVectorIds'] );
                     $vector_ids = array();
@@ -1448,12 +1390,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                     $new_settings['fileSearchVectorIds'] = array_unique( $vector_ids );
                 } else if ( isset( $new_settings['fileSearchVectorIds'] ) && is_array( $new_settings['fileSearchVectorIds'] ) ) {
-                    // Already an array, keep it
                 } else {
                     $new_settings['fileSearchVectorIds'] = $old_settings['fileSearchVectorIds'];
                 }
 
-                // Handle userPricingExemptRoles
                 if ( isset( $new_settings['userPricingExemptRoles'] ) && is_array( $new_settings['userPricingExemptRoles'] ) ) {
                     $new_settings['userPricingExemptRoles'] = array_map( 'sanitize_text_field', $new_settings['userPricingExemptRoles'] );
                 } else {
@@ -1471,9 +1411,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $this->format_bot_for_rest( $post );
         }
 
-        /**
-         * REST: Delete a bot
-         */
         public function rest_delete_bot( WP_REST_Request $request )
         {
             $bot_id = (int) $request->get_param('id');
@@ -1486,22 +1423,17 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $bot_user = $this->get_bot_user( $bot_id );
 
             if ( $bot_user ) {
-                // Delete the guest user record
                 global $wpdb;
                 $wpdb->delete( bm_get_table('guests'), array( 'id' => $bot_user->id ) );
                 wp_cache_delete( 'bot_user_' . $bot_id, 'bm_messages' );
                 wp_cache_delete( 'guest_user_' . $bot_user->id, 'bm_messages' );
             }
 
-            // Force delete, skip trash
             wp_delete_post( $bot_id, true );
 
             return array( 'success' => true );
         }
 
-        /**
-         * REST: Batch cleanup bot data (messages/threads) with progress
-         */
         public function rest_cleanup_bot_data( WP_REST_Request $request )
         {
             global $wpdb;
@@ -1563,7 +1495,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                 }
 
-                // Remove bot from this thread's recipients so next batch picks up new threads
                 $wpdb->delete( bm_get_table('recipients'), array(
                     'thread_id' => $thread_id,
                     'user_id'   => $bot_user_id,
@@ -1584,9 +1515,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * REST: Get all conversations a bot participates in
-         */
         public function rest_get_bot_conversations( WP_REST_Request $request )
         {
             global $wpdb;
@@ -1629,13 +1557,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $thread_ids = array_map( 'intval', $thread_ids );
             $placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
 
-            // Thread types (uses caching internally)
             $thread_types = array();
             foreach ( $thread_ids as $tid ) {
                 $thread_types[ $tid ] = Better_Messages()->functions->get_thread_type( $tid );
             }
 
-            // Batch: recipient counts per thread
             $count_rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT thread_id, COUNT(*) as cnt FROM " . bm_get_table('recipients') . "
                  WHERE thread_id IN ($placeholders) GROUP BY thread_id",
@@ -1646,8 +1572,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $thread_recipient_counts[ (int) $r->thread_id ] = (int) $r->cnt;
             }
 
-            // For label building: only need up to 5 non-bot participants per thread
-            // Use a query with row numbering to limit per thread
             $recip_rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT thread_id, user_id FROM " . bm_get_table('recipients') . "
                  WHERE thread_id IN ($placeholders) AND user_id != %d
@@ -1673,7 +1597,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Batch: user display names
             $user_names = array();
             if ( ! empty( $all_user_ids ) ) {
                 $all_user_ids = array_unique( $all_user_ids );
@@ -1687,7 +1610,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Batch: guest names
             $guest_names = array();
             if ( ! empty( $all_guest_ids ) && isset( Better_Messages()->guests ) ) {
                 foreach ( array_unique( $all_guest_ids ) as $gid ) {
@@ -1698,7 +1620,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Batch: last message dates
             $last_msg_rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT thread_id, MAX(created_at) as last_date FROM " . bm_get_table('messages') . "
                  WHERE thread_id IN ($placeholders) GROUP BY thread_id",
@@ -1709,7 +1630,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $last_messages[ (int) $r->thread_id ] = $r->last_date;
             }
 
-            // Batch: chat_id for chat-room threads
             $chat_room_ids = array();
             foreach ( $thread_ids as $tid ) {
                 if ( isset( $thread_types[ $tid ] ) && $thread_types[ $tid ] === 'chat-room' ) {
@@ -1736,7 +1656,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Batch: per-conversation bot settings
             $settings_key = 'ai_bot_settings_' . $bot_id;
             $settings_rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT bm_thread_id, meta_value FROM " . bm_get_table('threadsmeta') . "
@@ -1751,14 +1670,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Build response
             $conversations = array();
             foreach ( $thread_ids as $thread_id ) {
                 $thread_type = isset( $thread_types[ $thread_id ] ) ? $thread_types[ $thread_id ] : 'thread';
                 $recipient_count = isset( $thread_recipient_counts[ $thread_id ] ) ? $thread_recipient_counts[ $thread_id ] : 0;
                 $sample_users = isset( $thread_sample_users[ $thread_id ] ) ? $thread_sample_users[ $thread_id ] : array();
 
-                // Thread label
                 $label = '';
                 if ( $thread_type === 'chat-room' && isset( $chat_labels[ $thread_id ] ) ) {
                     $label = $chat_labels[ $thread_id ];
@@ -1776,7 +1693,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             $participant_names[] = isset( $guest_names[ $gid ] ) ? $guest_names[ $gid ] : sprintf( 'Guest #%d', $gid );
                         }
                     }
-                    $others = $recipient_count - 1 - count( $participant_names ); // -1 for bot
+                    $others = $recipient_count - 1 - count( $participant_names );
                     $label = implode( ', ', $participant_names );
                     if ( $others > 0 ) {
                         $label .= sprintf( ' +%d', $others );
@@ -1801,9 +1718,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * REST: Add bot to a conversation
-         */
         public function rest_add_bot_to_conversation( WP_REST_Request $request )
         {
             $bot_id    = (int) $request->get_param('id');
@@ -1845,9 +1759,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return array( 'success' => true );
         }
 
-        /**
-         * REST: Remove bot from a conversation
-         */
         public function rest_remove_bot_from_conversation( WP_REST_Request $request )
         {
             $bot_id    = (int) $request->get_param('id');
@@ -1870,9 +1781,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return array( 'success' => true );
         }
 
-        /**
-         * REST: Test an AI provider API key
-         */
         public function rest_test_api_key( WP_REST_Request $request )
         {
             $provider_id = sanitize_text_field( $request->get_param('provider') );
@@ -1888,7 +1796,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return new WP_Error( 'invalid_provider', 'Unknown provider', array( 'status' => 400 ) );
             }
 
-            // Use provided key or fall back to saved global key
             if ( ! empty( $api_key ) ) {
                 $provider->set_api_key( $api_key );
             } else {
@@ -1899,7 +1806,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $provider->set_api_key( $global_key );
             }
 
-            // Clear model cache to force a fresh API call
             $cache_keys = array(
                 'openai'    => 'bm_openai_models',
                 'anthropic' => 'bm_anthropic_models',
@@ -1924,9 +1830,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             ), 200 );
         }
 
-        /**
-         * REST: Test cloud AI callback URL reachability
-         */
         public function rest_test_callback( WP_REST_Request $request ) {
             $cloud = Better_Messages_Cloud_AI::instance();
             $simulate_blocked = ! empty( $request->get_param('simulateBlocked') );
@@ -1959,9 +1862,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             ), 200 );
         }
 
-        /**
-         * REST: Get token usage stats for a bot
-         */
         public function rest_get_bot_usage( WP_REST_Request $request )
         {
             global $wpdb;
@@ -1981,7 +1881,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return $empty;
             }
 
-            // Get total count
             $total = (int) $wpdb->get_var( $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$ai_usage_table} WHERE bot_id = %d",
                 $bot_id
@@ -1991,7 +1890,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return $empty;
             }
 
-            // Get paginated items
             $offset = ( $page - 1 ) * $per_page;
             $rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT id, message_id, thread_id, user_id, is_summary, points_charged, cost_data, created_at
@@ -2036,7 +1934,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $items[] = $item;
             }
 
-            // Get overall totals via PHP aggregation (compatible with all MySQL/MariaDB versions)
             $all_cost_rows = $wpdb->get_col( $wpdb->prepare(
                 "SELECT cost_data FROM {$ai_usage_table} WHERE bot_id = %d",
                 $bot_id
@@ -2091,7 +1988,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $totals['totalPointsCharged'] = $grand_points;
             }
 
-            // Resolve user display names for userId fields
             $user_ids = array_unique( array_filter( array_column( $items, 'userId' ) ) );
             $users = array();
             foreach ( $user_ids as $uid ) {
@@ -2111,9 +2007,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * REST: Get recent errors for a bot
-         */
         public function rest_get_bot_errors( WP_REST_Request $request )
         {
             global $wpdb;
@@ -2153,7 +2046,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Include digest/summary errors from post meta
             $post_meta_errors = get_post_meta( $bot_id, '_bm_ai_errors', true );
             if ( is_array( $post_meta_errors ) ) {
                 foreach ( $post_meta_errors as $entry ) {
@@ -2166,7 +2058,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     );
                 }
 
-                // Re-sort by date descending, limit to 20
                 usort( $items, function( $a, $b ) {
                     return $b['date'] <=> $a['date'];
                 } );
@@ -2176,15 +2067,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return array( 'items' => $items );
         }
 
-        /**
-         * Parse usage tokens from provider meta into a normalized format.
-         *
-         * For Anthropic: input_tokens includes ALL input (regular + cache).
-         *   cache_creation_input_tokens and cache_read_input_tokens are subsets of input_tokens.
-         * For OpenAI Responses API: input_tokens is total, input_tokens_details.cached_tokens is the cached subset.
-         *   output_tokens_details.reasoning_tokens gives thinking tokens (subset of output_tokens).
-         * For Gemini: candidatesTokenCount is text output, thoughtsTokenCount is thinking output (separate).
-         */
         private function parse_usage_tokens( $usage, $provider = '' )
         {
             $result = array(
@@ -2198,11 +2080,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
 
             if ( isset( $usage['input_tokens'] ) ) {
-                // OpenAI & Anthropic format
                 $result['inputTokens']  = (int) $usage['input_tokens'];
                 $result['outputTokens'] = (int) ( $usage['output_tokens'] ?? 0 );
 
-                // Anthropic cache tokens
                 if ( isset( $usage['cache_read_input_tokens'] ) ) {
                     $result['cacheReadTokens'] = (int) $usage['cache_read_input_tokens'];
                 }
@@ -2210,17 +2090,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     $result['cacheWriteTokens'] = (int) $usage['cache_creation_input_tokens'];
                 }
 
-                // OpenAI cached tokens (Responses API)
                 if ( isset( $usage['input_tokens_details']['cached_tokens'] ) ) {
                     $result['cacheReadTokens'] = (int) $usage['input_tokens_details']['cached_tokens'];
                 }
 
-                // OpenAI reasoning tokens (subset of output_tokens)
                 if ( isset( $usage['output_tokens_details']['reasoning_tokens'] ) ) {
                     $result['thinkingTokens'] = (int) $usage['output_tokens_details']['reasoning_tokens'];
                 }
 
-                // OpenAI audio tokens (Responses API)
                 if ( isset( $usage['input_tokens_details']['audio_tokens'] ) ) {
                     $result['audioInputTokens'] = (int) $usage['input_tokens_details']['audio_tokens'];
                 }
@@ -2228,15 +2105,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     $result['audioOutputTokens'] = (int) $usage['output_tokens_details']['audio_tokens'];
                 }
             } else if ( isset( $usage['promptTokenCount'] ) ) {
-                // Gemini format
                 $result['inputTokens']  = (int) $usage['promptTokenCount'];
                 $result['outputTokens'] = (int) ( $usage['candidatesTokenCount'] ?? 0 );
 
-                // Gemini thinking tokens are SEPARATE from candidatesTokenCount
                 if ( isset( $usage['thoughtsTokenCount'] ) ) {
                     $thinking = (int) $usage['thoughtsTokenCount'];
                     $result['thinkingTokens'] = $thinking;
-                    // Add to output since thinking is charged at output rate
                     $result['outputTokens'] += $thinking;
                 }
 
@@ -2244,7 +2118,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     $result['cacheReadTokens'] = (int) $usage['cachedContentTokenCount'];
                 }
             } else if ( isset( $usage['total_tokens'] ) ) {
-                // Legacy OpenAI format
                 $result['inputTokens']  = (int) ( $usage['prompt_tokens'] ?? 0 );
                 $result['outputTokens'] = (int) ( $usage['completion_tokens'] ?? 0 );
 
@@ -2256,7 +2129,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     $result['thinkingTokens'] = (int) $usage['completion_tokens_details']['reasoning_tokens'];
                 }
 
-                // Audio tokens (legacy Chat Completions)
                 if ( isset( $usage['prompt_tokens_details']['audio_tokens'] ) ) {
                     $result['audioInputTokens'] = (int) $usage['prompt_tokens_details']['audio_tokens'];
                 }
@@ -2268,24 +2140,44 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $result;
         }
 
-        /**
-         * Built-in pricing for tool calls.
-         * Returns cost per single call in USD.
-         */
         public function get_tool_pricing()
         {
             return array(
-                'web_search_reasoning'     => 0.01,   // OpenAI reasoning models (gpt-5, o-series): $10 per 1k calls + search tokens at model rate
-                'web_search_non_reasoning' => 0.025,  // OpenAI non-reasoning models: $25 per 1k calls, search tokens free
-                'file_search'              => 0.0025, // OpenAI: $2.50 per 1k calls
-                'gemini_search_2x'         => 0.035,  // Gemini 2.x: $35 per 1k grounded prompts
-                'gemini_search_3x'         => 0.014,  // Gemini 3.x: $14 per 1k search queries
+                'web_search'       => 0.01,
+                'file_search'      => 0.0025,
+                'gemini_search_2x' => 0.035,
+                'gemini_search_3x' => 0.014,
             );
         }
 
-        /**
-         * Calculate cost for generated images based on model, quality and size.
-         */
+        public function get_web_search_usage( $meta )
+        {
+            $provider = isset( $meta['provider'] ) ? $meta['provider'] : '';
+            $model    = isset( $meta['model'] ) ? $meta['model'] : '';
+
+            $calls = isset( $meta['web_search_calls'] ) ? (int) $meta['web_search_calls'] : 0;
+
+            if ( $calls === 0 && $provider === 'anthropic' && isset( $meta['usage']['server_tool_use']['web_search_requests'] ) ) {
+                $calls = (int) $meta['usage']['server_tool_use']['web_search_requests'];
+            }
+
+            if ( $calls <= 0 ) {
+                return array( 'calls' => 0, 'cost' => 0 );
+            }
+
+            $tool_pricing = $this->get_tool_pricing();
+
+            if ( $provider === 'gemini' ) {
+                $price = preg_match( '/gemini-3/', $model ) ? $tool_pricing['gemini_search_3x'] : $tool_pricing['gemini_search_2x'];
+            } else if ( $provider === 'openai' || $provider === 'anthropic' ) {
+                $price = $tool_pricing['web_search'];
+            } else {
+                $price = 0;
+            }
+
+            return array( 'calls' => $calls, 'cost' => $calls * $price );
+        }
+
         private function calc_image_cost( $images )
         {
             if ( empty( $images ) || ! is_array( $images ) ) {
@@ -2300,21 +2192,21 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $quality = isset( $img['quality'] ) ? $img['quality'] : 'medium';
                 $size    = isset( $img['size'] ) ? $img['size'] : '1024x1024';
 
-                // 'auto' defaults
                 if ( $quality === 'auto' ) $quality = 'medium';
                 if ( $size === 'auto' )    $size = '1024x1024';
+
+                if ( ! isset( $pricing[ $model ] ) ) {
+                    $model = preg_replace( '/-(preview|latest)$/', '', $model );
+                }
 
                 if ( isset( $pricing[ $model ][ $quality ][ $size ] ) ) {
                     $total += $pricing[ $model ][ $quality ][ $size ];
                 } else if ( isset( $pricing[ $model ]['default'][ $size ] ) ) {
-                    // Gemini models use 'default' quality
                     $total += $pricing[ $model ]['default'][ $size ];
                 } else if ( isset( $pricing[ $model ]['default'] ) ) {
-                    // Gemini fallback: first available size in default quality
                     $sizes = $pricing[ $model ]['default'];
                     $total += reset( $sizes );
                 } else if ( isset( $pricing[ $model ]['medium']['1024x1024'] ) ) {
-                    // OpenAI fallback to medium 1024x1024
                     $total += $pricing[ $model ]['medium']['1024x1024'];
                 }
             }
@@ -2322,30 +2214,20 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return round( $total, 6 );
         }
 
-        /**
-         * Return model pricing rules in a JSON-serializable format for the frontend.
-         * Structure: { provider: [ [pattern, {input, output, cacheRead, cacheWrite}], ... ] }
-         */
         public function get_model_pricing_rules()
         {
-            // Call get_model_pricing with dummy args to populate the static $rules
             $this->get_model_pricing( '', '' );
 
-            // Access the static rules via reflection-free approach: just rebuild from the same source
             $result = array();
             foreach ( array( 'anthropic', 'openai', 'gemini' ) as $provider ) {
                 $result[ $provider ] = array();
             }
 
-            // We need the raw rules — get_model_pricing uses a static var, so let's just
-            // expose the same data structure. The patterns are PHP regex strings like "/foo/"
-            // which JS can reconstruct via new RegExp(inner).
             $rules = $this->get_pricing_rules_raw();
 
             foreach ( $rules as $provider => $provider_rules ) {
                 $result[ $provider ] = array();
                 foreach ( $provider_rules as $rule ) {
-                    // Strip PHP regex delimiters: "/pattern/" -> "pattern"
                     $pattern = trim( $rule[0], '/' );
                     $result[ $provider ][] = array( $pattern, $rule[1] );
                 }
@@ -2354,9 +2236,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $result;
         }
 
-        /**
-         * Return the raw pricing rules array (used by both get_model_pricing and get_model_pricing_rules).
-         */
         private function get_pricing_rules_raw()
         {
             static $rules = null;
@@ -2364,20 +2243,31 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( $rules === null ) {
                 $rules = array(
                     'anthropic' => array(
-                        array( '/claude-opus-4-[56]/',  array( 'input' => 5,     'output' => 25,   'cacheRead' => 0.50,  'cacheWrite' => 6.25 ) ),
+                        array( '/claude-(fable|mythos)-5-1/', array( 'input' => 10, 'output' => 50,   'cacheRead' => 0.25,  'cacheWrite' => 12.50 ) ),
+                        array( '/claude-(fable|mythos)-5/',   array( 'input' => 10, 'output' => 50,   'cacheRead' => 1,     'cacheWrite' => 12.50 ) ),
+                        array( '/claude-opus-5-5/',     array( 'input' => 4,     'output' => 20,   'cacheRead' => 0.20,  'cacheWrite' => 5 ) ),
+                        array( '/claude-opus-5/',       array( 'input' => 5,     'output' => 25,   'cacheRead' => 0.50,  'cacheWrite' => 6.25 ) ),
+                        array( '/claude-opus-4-[5-8]/', array( 'input' => 5,     'output' => 25,   'cacheRead' => 0.50,  'cacheWrite' => 6.25 ) ),
                         array( '/claude-opus-4-1/',     array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
                         array( '/claude-opus-4/',       array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
+                        array( '/claude-sonnet-5-5/',   array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.10,  'cacheWrite' => 2.50 ) ),
+                        array( '/claude-sonnet-5/',     array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.20,  'cacheWrite' => 2.50 ) ),
                         array( '/claude-sonnet-4/',     array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
                         array( '/claude-3-7-sonnet/',   array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
                         array( '/claude-3-5-sonnet/',   array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
+                        array( '/claude-haiku-5-5/',    array( 'input' => 0.10,  'output' => 0.50, 'cacheRead' => 0.01,  'cacheWrite' => 0.125 ) ),
                         array( '/claude-haiku-4/',      array( 'input' => 1,     'output' => 5,    'cacheRead' => 0.10,  'cacheWrite' => 1.25 ) ),
                         array( '/claude-3-5-haiku/',    array( 'input' => 0.80,  'output' => 4,    'cacheRead' => 0.08,  'cacheWrite' => 1 ) ),
                         array( '/claude-3-opus/',       array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
                         array( '/claude-3-haiku/',      array( 'input' => 0.25,  'output' => 1.25, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
                     ),
                     'openai' => array(
+                        array( '/gpt-6-astra/',           array( 'input' => 10,    'output' => 50,   'cacheRead' => 1,     'cacheWrite' => 10 ) ),
+                        array( '/gpt-6\\.1-sol/',          array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.10,  'cacheWrite' => 2 ) ),
+                        array( '/gpt-6-sol/',             array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
+                        array( '/gpt-6-luna/',            array( 'input' => 0.10,  'output' => 0.50, 'cacheRead' => 0.01,  'cacheWrite' => 0.10 ) ),
                         array( '/gpt-5\\.6-luna/',         array( 'input' => 0.20,  'output' => 1.20, 'cacheRead' => 0.02,  'cacheWrite' => 0.20 ) ),
-                        array( '/gpt-5\\.6-sol/',          array( 'input' => 5,     'output' => 30,   'cacheRead' => 0.50,  'cacheWrite' => 5 ) ),
+                        array( '/gpt-5\\.6-sol/',          array( 'input' => 4,     'output' => 20,   'cacheRead' => 0.40,  'cacheWrite' => 4 ) ),
                         array( '/gpt-5\\.6-terra/',        array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
                         array( '/gpt-5\\.5-pro/',          array( 'input' => 30,    'output' => 180,  'cacheRead' => 30,    'cacheWrite' => 30 ) ),
                         array( '/gpt-5\\.5/',              array( 'input' => 5,     'output' => 30,   'cacheRead' => 0.50,  'cacheWrite' => 5 ) ),
@@ -2404,6 +2294,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                         array( '/gpt-4o-audio/',          array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 2.50,  'cacheWrite' => 2.50, 'audioInput' => 40,   'audioOutput' => 80 ) ),
                         array( '/gpt-4o-realtime/',       array( 'input' => 5,     'output' => 20,   'cacheRead' => 2.50,  'cacheWrite' => 5,    'audioInput' => 40,   'audioOutput' => 80 ) ),
                         array( '/gpt-4o/',                array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 1.25,  'cacheWrite' => 2.50 ) ),
+                        array( '/gpt-realtime-2\\.1-mini/', array( 'input' => 0.60, 'output' => 2.40, 'cacheRead' => 0.06,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
+                        array( '/gpt-realtime-2/',        array( 'input' => 4,     'output' => 24,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
                         array( '/gpt-realtime-mini/',     array( 'input' => 0.60,  'output' => 2.40, 'cacheRead' => 0.06,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
                         array( '/gpt-realtime-1\.5/',     array( 'input' => 4,     'output' => 16,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
                         array( '/gpt-realtime/',          array( 'input' => 4,     'output' => 16,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
@@ -2421,6 +2313,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                         array( '/o4-mini/',               array( 'input' => 1.10,  'output' => 4.40, 'cacheRead' => 0.275, 'cacheWrite' => 1.10 ) ),
                     ),
                     'gemini' => array(
+                        array( '/gemini-3\\.[678]-flash/',       array( 'input' => 1.50,  'output' => 7.50, 'cacheRead' => 0.15,  'cacheWrite' => 1.50 ), '2027-01-01' ),
+                        array( '/gemini-3\\.[678]-flash/',       array( 'input' => 0.75,  'output' => 3.75, 'cacheRead' => 0.075, 'cacheWrite' => 0.75 ) ),
+                        array( '/gemini-3\\.5-flash-lite/',     array( 'input' => 0.30,  'output' => 2.50, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
+                        array( '/gemini-3\\.5-flash/',          array( 'input' => 1.50,  'output' => 9,    'cacheRead' => 0.15,  'cacheWrite' => 1.50 ) ),
+                        array( '/gemini-nano-banana/',          array( 'input' => 1.50,  'output' => 7.50, 'cacheRead' => 1.50,  'cacheWrite' => 1.50 ) ),
+                        array( '/gemini-omni/',                 array( 'input' => 1.50,  'output' => 9,    'cacheRead' => 1.50,  'cacheWrite' => 1.50 ) ),
                         array( '/gemini-3\\.1-pro/',            array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
                         array( '/gemini-3\\.1-flash-lite/',     array( 'input' => 0.25,  'output' => 1.50, 'cacheRead' => 0.025, 'cacheWrite' => 0.25 ) ),
                         array( '/gemini-3\\.1-flash-image/',    array( 'input' => 0.50,  'output' => 3,    'cacheRead' => 0.50,  'cacheWrite' => 0.50 ) ),
@@ -2436,16 +2334,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                         array( '/gemini-2\\.0-flash/',          array( 'input' => 0.10,  'output' => 0.40, 'cacheRead' => 0.025, 'cacheWrite' => 0.10 ) ),
                     ),
                 );
+
+                $today = gmdate( 'Y-m-d' );
+
+                foreach ( $rules as $provider => $provider_rules ) {
+                    $rules[ $provider ] = array_values( array_filter( $provider_rules, function ( $rule ) use ( $today ) {
+                        return ! isset( $rule[2] ) || $rule[2] <= $today;
+                    } ) );
+                }
             }
 
             return $rules;
         }
 
-        /**
-         * Built-in pricing database for known AI models.
-         * Prices are per 1 million tokens in USD.
-         * Returns array with keys: input, output, cacheRead, cacheWrite — or null if model not found.
-         */
         public function get_model_pricing( $model_id, $provider )
         {
             $rules = $this->get_pricing_rules_raw();
@@ -2463,14 +2364,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return null;
         }
 
-        /**
-         * Get image generation pricing table.
-         * Returns array of model => quality => size => price per image.
-         */
         public function get_image_pricing()
         {
             return array(
-                    // OpenAI models
                     'gpt-image-1-mini' => array(
                             'low'    => array( '1024x1024' => 0.005, '1024x1536' => 0.006, '1536x1024' => 0.006 ),
                             'medium' => array( '1024x1024' => 0.011, '1024x1536' => 0.015, '1536x1024' => 0.015 ),
@@ -2491,7 +2387,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             'medium' => array( '1024x1024' => 0.053, '1024x1536' => 0.041, '1536x1024' => 0.041 ),
                             'high'   => array( '1024x1024' => 0.211, '1024x1536' => 0.165, '1536x1024' => 0.165 ),
                     ),
-                    // Gemini models (native image generation — single quality level)
+                    'gemini-nano-banana-2.1' => array(
+                            'default' => array( '1024x1024' => 0.0336, '2048x2048' => 0.0504, '4096x4096' => 0.113 ),
+                    ),
+                    'gemini-3.1-flash-lite-image' => array(
+                            'default' => array( '1024x1024' => 0.0336 ),
+                    ),
                     'gemini-2.0-flash' => array(
                             'default' => array( '1024x1024' => 0.039 ),
                     ),
@@ -2507,11 +2408,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * Calculate the cost of an AI response and store it as message meta.
-         * Uses bot-configured prices if set, otherwise falls back to built-in pricing database.
-         * Returns the cost array or null if no pricing data available.
-         */
         public function calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $user_id = 0, $thread_id = 0, $is_summary = false )
         {
             $usage    = isset( $meta['usage'] ) ? $meta['usage'] : array();
@@ -2520,7 +2416,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $parsed = $this->parse_usage_tokens( $usage, $provider );
 
-            // Get prices: bot settings first, then built-in database
             $bot_settings = $this->get_bot_settings( $bot_id );
             $custom_input  = floatval( $bot_settings['inputTokenPrice'] );
             $custom_output = floatval( $bot_settings['outputTokenPrice'] );
@@ -2540,17 +2435,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $prices = $this->get_model_pricing( $model, $provider );
             }
 
-            // OpenAI service tier pricing adjustments (only for built-in prices)
             $service_tier = isset( $meta['service_tier'] ) ? $meta['service_tier'] : '';
             if ( $prices && ! $has_custom ) {
                 if ( $service_tier === 'flex' ) {
-                    // Flex = 50% discount
                     $prices['input']      *= 0.5;
                     $prices['output']     *= 0.5;
                     $prices['cacheRead']  *= 0.5;
                     $prices['cacheWrite'] *= 0.5;
                 } else if ( $service_tier === 'priority' ) {
-                    // Priority = 2x cost
                     $prices['input']      *= 2;
                     $prices['output']     *= 2;
                     $prices['cacheRead']  *= 2;
@@ -2558,28 +2450,15 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            // Image cost
             $images     = isset( $meta['images_generated'] ) ? $meta['images_generated'] : array();
             $image_cost = $this->calc_image_cost( $images );
 
-            // Tool call costs (OpenAI built-in tools)
             $tool_pricing      = $this->get_tool_pricing();
-            $web_search_calls  = isset( $meta['web_search_calls'] ) ? (int) $meta['web_search_calls'] : 0;
             $file_search_calls = isset( $meta['file_search_calls'] ) ? (int) $meta['file_search_calls'] : 0;
 
-            // Web search cost depends on provider
-            // Anthropic: no per-call fee, web search results are billed as regular input tokens
-            if ( $provider === 'anthropic' ) {
-                $web_search_cost = 0;
-            } elseif ( $provider === 'gemini' && $web_search_calls > 0 ) {
-                $is_gemini_3 = preg_match( '/gemini-3/', $model );
-                $web_search_cost = $web_search_calls * ( $is_gemini_3 ? $tool_pricing['gemini_search_3x'] : $tool_pricing['gemini_search_2x'] );
-            } elseif ( $provider === 'openai' && $web_search_calls > 0 ) {
-                $is_reasoning = preg_match( '/^(gpt-5|o[1-9])/', $model );
-                $web_search_cost = $web_search_calls * ( $is_reasoning ? $tool_pricing['web_search_reasoning'] : $tool_pricing['web_search_non_reasoning'] );
-            } else {
-                $web_search_cost = 0;
-            }
+            $web_search       = $this->get_web_search_usage( $meta );
+            $web_search_calls = $web_search['calls'];
+            $web_search_cost  = $web_search['cost'];
 
             $file_search_cost  = $file_search_calls * $tool_pricing['file_search'];
             $tool_cost         = $web_search_cost + $file_search_cost;
@@ -2622,7 +2501,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $regular_input  = max( 0, $input_tokens - $cache_read - $cache_write );
 
                 if ( ( $audio_input > 0 || $audio_output > 0 ) && isset( $prices['audioInput'] ) ) {
-                    // Audio models: text and audio tokens have different rates
                     $text_input  = max( 0, $regular_input - $audio_input );
                     $text_output = max( 0, $parsed['outputTokens'] - $audio_output );
 
@@ -2634,7 +2512,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
                 $total_cost  = $input_cost + $output_cost + $image_cost + $tool_cost;
 
-                // What it would cost without cache discounts
                 $no_cache_cost = ( $input_tokens * $prices['input'] ) / 1000000;
                 $cache_savings = $no_cache_cost - $input_cost;
 
@@ -2645,21 +2522,18 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $cost_data['cacheSavings'] = round( max( 0, $cache_savings ), 6 );
                 $cost_data['prices']       = $prices;
             } else if ( $tool_cost > 0 || $image_cost > 0 ) {
-                // Even without token pricing, we can still calculate tool + image costs
                 $cost_data['toolCost']  = round( $tool_cost, 6 );
                 $cost_data['totalCost'] = round( $image_cost + $tool_cost, 6 );
             }
 
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_cost', json_encode( $cost_data ) );
 
-            // Write to dedicated ai_usage table (persists even if message is deleted)
             global $wpdb;
             $ai_usage_table = bm_get_table('ai_usage');
 
             if ( $ai_usage_table ) {
                 $created_at = 0;
 
-                // Resolve thread_id and created_at from message
                 if ( $ai_message_id > 0 ) {
                     $messages_table = bm_get_table('messages');
                     $msg = $wpdb->get_row( $wpdb->prepare(
@@ -2692,9 +2566,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $cost_data;
         }
 
-        /**
-         * Format a bot post for REST response
-         */
         private function format_bot_for_rest( $post )
         {
             $settings = $this->get_bot_settings( $post->ID );
@@ -2788,7 +2659,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             Better_Messages()->functions->delete_message_meta( $message_id, 'bm_moderation_pending' );
 
-            // Already processed by another path (callback vs cron race)
             $already_flagged = Better_Messages()->functions->get_message_meta( $message_id, 'ai_moderation_flagged' );
             if ( ! empty( $already_flagged ) ) {
                 return;
@@ -2803,7 +2673,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             if ( $is_flagged ) {
                 if ( $was_waiting ) {
-                    // Upgrade from waiting (2) to held (1)
                     $table = bm_get_table( 'messages' );
                     $wpdb->query( $wpdb->prepare( "UPDATE $table SET is_pending = 1 WHERE id = %d", $message_id ) );
                 }
@@ -2812,15 +2681,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $this->notify_ai_moderation( $message );
             } else {
                 if ( $was_waiting ) {
-                    // Safe — release message and fire deferred notifications
                     $this->release_ai_pending_message( $message );
                 }
             }
         }
 
-        /**
-         * Process transcription result from cloud AI callback.
-         */
         private function process_cloud_transcription_result( $message_id, $attachment_id, $result ) {
             $text = isset( $result['text'] ) ? $result['text'] : '';
 
@@ -2840,16 +2705,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Release a message that was held with is_pending=2 (waiting for AI).
-         * Sets is_pending=0 and fires the message_sent action to trigger notifications.
-         */
         private function release_ai_pending_message( $message ) {
             global $wpdb;
 
             $table = bm_get_table( 'messages' );
 
-            // Release — message is already visible via websocket, just clear the pending flag
             $wpdb->query( $wpdb->prepare(
                 "UPDATE $table SET is_pending = 0 WHERE id = %d",
                 $message->id
@@ -2863,21 +2723,34 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Send push notifications for a message that was deferred due to AI moderation.
-         * Called after AI clears the message (is_pending 2 → 0).
-         */
         private function send_deferred_push_notifications( $message ) {
-            if ( ! isset( $message->recipients ) || empty( $message->recipients ) ) {
+            if ( ! Better_Messages()->websocket ) {
                 return;
             }
 
-            $sender_id = $message->sender_id;
-            $thread_id = $message->thread_id;
+            $sender_id = (int) $message->sender_id;
+            $thread_id = (int) $message->thread_id;
 
-            foreach ( $message->recipients as $recipient_id => $recipient ) {
-                $recipient_id = (int) $recipient_id;
-                if ( $recipient_id === (int) $sender_id ) {
+            $message->push_deferred = false;
+            $message->is_pending    = 0;
+            $message->is_update     = false;
+            $message->send_push     = isset( $message->push_intent ) ? (bool) $message->push_intent : true;
+            $message->mobile_push   = isset( $message->mobile_push_intent ) ? (bool) $message->mobile_push_intent : true;
+
+            if ( $message->mobile_push ) {
+                $mobile = apply_filters( 'better_messages_realtime_server_send_data', array(), $message );
+
+                if ( ! empty( $mobile['mobile_pushs'] ) ) {
+                    Better_Messages()->websocket->send_mobile_pushs( $mobile['mobile_pushs'] );
+                }
+            }
+
+            foreach ( Better_Messages()->notification_levels->get_notify_recipients( $message, 'push' ) as $recipient_id ) {
+                if ( $recipient_id === 0 || $recipient_id === $sender_id ) {
+                    continue;
+                }
+
+                if ( ! Better_Messages()->notifications->user_web_push_enabled( $recipient_id ) ) {
                     continue;
                 }
 
@@ -2894,14 +2767,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Cron job: retry unfinished BM moderation tasks.
-         *
-         * Finds messages with 'bm_moderation_pending' meta (set when task is sent).
-         * This meta is deleted when result is processed.
-         * If it's still present after 30s, we retry via sync call.
-         * If it's still present after 30 min, we give up (release if held, clean up if flagged).
-         */
         public function retry_pending_moderation() {
             global $wpdb;
 
@@ -2926,16 +2791,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $pending_since = (int) $row->pending_since;
                 $age = $now - $pending_since;
 
-                // Too fresh — skip (give callback time to arrive)
                 if ( $age < 30 ) {
                     continue;
                 }
 
-                // Older than 30 min — give up
                 if ( $age > 1800 ) {
                     Better_Messages()->functions->delete_message_meta( $message_id, 'bm_moderation_pending' );
 
-                    // If held (is_pending=2), release it
                     $message_obj = Better_Messages()->functions->get_message( $message_id );
                     if ( $message_obj && (int) $message_obj->is_pending === 2 ) {
                         $this->release_ai_pending_message( $message_obj );
@@ -2960,7 +2822,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $moderate = $this->build_bm_moderate_payload( $message_id, $content, $message->thread_id, $message->sender_id );
 
-                // Sync mode — gets cached result from cloud or waits for worker
                 $result = Better_Messages_Cloud_AI::instance()->send_task(
                     'moderate',
                     array( 'moderate' => $moderate ),
@@ -2969,7 +2830,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 );
 
                 if ( is_wp_error( $result ) ) {
-                    continue; // Will retry next cron run
+                    continue;
                 }
 
                 $moderate_result = isset( $result['moderate'] ) ? $result['moderate'] : null;
@@ -3028,13 +2889,16 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     continue;
                 }
 
-                if ( get_transient( 'bm_transcribing_' . $attachment_id ) ) {
+                if ( ! Better_Messages()->functions->claim_transient( 'bm_transcribing_' . $attachment_id, 2 * MINUTE_IN_SECONDS ) ) {
                     continue;
                 }
 
                 $result = Better_Messages_Cloud_AI::instance()->transcribe( $attachment_id, $message_id );
 
                 if ( is_wp_error( $result ) ) {
+                    if ( ! in_array( $result->get_error_code(), array( 'cloud_ai_timeout', 'cloud_ai_unavailable' ), true ) ) {
+                        delete_transient( 'bm_transcribing_' . $attachment_id );
+                    }
                     continue;
                 }
 
@@ -3078,6 +2942,24 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
 
             return $attachment_id ? (int) $attachment_id : 0;
+        }
+
+        public function get_audio_copy( $attachment_id ) {
+            $copy = Better_Messages_Storage()->get_local_copy( (int) $attachment_id, 25 * 1024 * 1024 );
+
+            if ( ! is_wp_error( $copy ) ) {
+                return $copy;
+            }
+
+            if ( $copy->get_error_code() === 'bm_storage_too_large' ) {
+                return new WP_Error( 'file_too_large', 'Audio file exceeds 25MB limit' );
+            }
+
+            if ( $copy->get_error_code() === 'bm_storage_missing' ) {
+                return new WP_Error( 'file_not_found', 'Audio file not found' );
+            }
+
+            return $copy;
         }
 
         public function get_voice_transcript( $message_id, $transcribe = false ) {
@@ -3215,15 +3097,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function transcribe_voice_attachment( $message_id, $attachment_id ) {
             $lock_key = 'bm_transcribing_' . $attachment_id;
 
-            if ( get_transient( $lock_key ) ) {
+            if ( ! Better_Messages()->functions->claim_transient( $lock_key, 2 * MINUTE_IN_SECONDS ) ) {
                 return new WP_Error(
                     'already_processing',
                     _x( 'Transcription is already in progress', 'Rest API Error', 'bp-better-messages' ),
                     array( 'status' => 409 )
                 );
             }
-
-            set_transient( $lock_key, true, 2 * MINUTE_IN_SECONDS );
 
             $provider = Better_Messages()->settings['voiceTranscriptionProvider'] ?? 'openai';
 
@@ -3295,9 +3175,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             );
         }
 
-        /**
-         * Get all available translation languages as array of {id, label} for UI.
-         */
         public function get_all_translation_languages() {
             $names = $this->get_language_names();
             $native = array(
@@ -3334,9 +3211,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return Better_Messages()->functions->can_use_premium_code();
         }
 
-        /**
-         * REST: Batch translate messages in a thread for the current user.
-         */
         public function translate_messages( WP_REST_Request $request ) {
             $thread_id   = intval( $request->get_param( 'id' ) );
             $body        = $request->get_json_params();
@@ -3356,9 +3230,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $texts = array();
 
+            $lock = Better_Messages()->functions->lock( 'translate|' . $thread_id . '|' . $target_lang );
+
             foreach ( $message_ids as $msg_id ) {
                 $message = Better_Messages()->functions->get_message( $msg_id );
                 if ( ! $message || (int) $message->thread_id !== $thread_id ) continue;
+
+                wp_cache_delete( $msg_id, 'bm_message_meta' );
 
                 $all = $this->get_translations( $msg_id );
                 if ( array_key_exists( $target_lang, $all ) ) continue;
@@ -3390,6 +3268,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $pending[ $target_lang ] = time();
                 $this->save_translations_pending( $msg_id, $pending );
             }
+
+            Better_Messages()->functions->unlock( $lock );
 
             if ( empty( $texts ) ) {
                 return new WP_REST_Response( array( 'status' => 'nothing_to_translate' ), 200 );
@@ -3635,9 +3515,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return array_values( $languages );
         }
 
-        /**
-         * Mark message as pending translation before WebSocket broadcast (priority 5).
-         */
         public function translate_on_send_mark( $message ) {
             $languages = $this->get_translation_languages( $message );
             if ( empty( $languages ) ) return;
@@ -3650,9 +3527,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $this->save_translations_pending( $msg_id, $pending );
         }
 
-        /**
-         * Dispatch translation request after WebSocket broadcast (priority 20).
-         */
         public function translate_on_send_dispatch( $message ) {
             $languages = $this->get_translation_languages( $message );
             if ( empty( $languages ) ) return;
@@ -3677,9 +3551,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Handle BM Cloud AI translation callback.
-         */
         public function handle_translate_callback( $translate_data, $request_id ) {
             $req_info = get_transient( 'bm_translate_req_' . $request_id );
             if ( ! $req_info ) return;
@@ -3697,32 +3568,20 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $this->store_translations( $translations, $target_lang, $thread_id );
         }
 
-        /**
-         * Get translations JSON object from message meta.
-         */
         private function get_translations( $message_id ) {
             $raw = Better_Messages()->functions->get_message_meta( $message_id, 'bm_translations', true );
             return ( is_array( $raw ) ) ? $raw : ( ! empty( $raw ) ? json_decode( $raw, true ) : array() );
         }
 
-        /**
-         * Save translations JSON object to message meta.
-         */
         private function save_translations( $message_id, $data ) {
             Better_Messages()->functions->update_message_meta( $message_id, 'bm_translations', wp_slash( wp_json_encode( $data, JSON_UNESCAPED_UNICODE ) ) );
         }
 
-        /**
-         * Get pending translations JSON object from message meta.
-         */
         private function get_translations_pending( $message_id ) {
             $raw = Better_Messages()->functions->get_message_meta( $message_id, 'bm_translations_pending', true );
             return ( is_array( $raw ) ) ? $raw : ( ! empty( $raw ) ? json_decode( $raw, true ) : array() );
         }
 
-        /**
-         * Save pending translations JSON object to message meta.
-         */
         private function save_translations_pending( $message_id, $data ) {
             if ( empty( $data ) ) {
                 Better_Messages()->functions->delete_message_meta( $message_id, 'bm_translations_pending' );
@@ -3731,9 +3590,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Remove a pending language from multiple messages.
-         */
         private function clear_pending_for_texts( $texts, $target_lang ) {
             foreach ( $texts as $t ) {
                 $msg_id = (int) $t['key'];
@@ -3743,9 +3599,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Store translations in message meta and broadcast updates.
-         */
         private function store_translations( $translations, $target_lang, $thread_id ) {
             foreach ( $translations as $item ) {
                 $message_id = (int) $item['key'];
@@ -3754,13 +3607,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 if ( $message_id <= 0 ) continue;
 
                 if ( ! empty( $translated ) ) {
-                    // Sanitize LLM output: only allow safe formatting tags
                     $translated = wp_kses( $translated, array(
                         'b' => array(), 'i' => array(), 'u' => array(), 's' => array(),
                         'strong' => array(), 'em' => array(), 'br' => array(),
                     ) );
 
-                    // Process URLs through format_message (oEmbed, link previews)
                     $translated = Better_Messages()->functions->format_message( $translated, $message_id, 'stack' );
 
                     $message  = Better_Messages()->functions->get_message( $message_id );
@@ -3783,9 +3634,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Add translation data to message meta in REST/WebSocket responses.
-         */
         public function translation_message_meta( $meta, $message_id, $thread_id, $content ) {
             if ( ! $this->is_translatable_content( $content ) ) return $meta;
 
@@ -3826,9 +3674,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $meta;
         }
 
-        /**
-         * Track translation token usage.
-         */
         private function track_translation_cost( $provider_id, $usage, $model ) {
             $parsed = $this->parse_usage_tokens( $usage, $provider_id );
 
@@ -3844,9 +3689,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             update_option( 'bm_translation_usage', $stats, false );
         }
 
-        /**
-         * Clear cached translations when a message is edited.
-         */
         public function retranslate_on_edit( $message_id, $thread_id ) {
             Better_Messages()->functions->delete_message_meta( $message_id, 'bm_translations' );
             Better_Messages()->functions->delete_message_meta( $message_id, 'bm_translations_pending' );
@@ -3858,9 +3700,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $this->translate_on_send_dispatch( $message );
         }
 
-        /**
-         * Add translation language selector to user settings.
-         */
         public function translation_user_config( $settings, $user_id ) {
             if ( ! $this->user_can_translate( $user_id ) ) return $settings;
 
@@ -3895,9 +3734,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $settings;
         }
 
-        /**
-         * Save translation language user setting.
-         */
         public function translation_user_setting_saved( $option, $value, $user_id ) {
             if ( $option !== 'translation_language' ) return;
 
@@ -3907,15 +3743,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Cron: Retry pending translations that timed out (BM Cloud AI provider).
-         */
         public function retry_pending_translations() {
             global $wpdb;
 
             $meta_table = bm_get_table( 'meta' );
             $cutoff     = time() - 120;
-            $max_age    = time() - 1800; // give up after 30 minutes
+            $max_age    = time() - 1800;
 
             $rows = $wpdb->get_results(
                 "SELECT bm_message_id, meta_value FROM {$meta_table}
@@ -3946,7 +3779,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 foreach ( $pending as $target_lang => $timestamp ) {
                     $ts = (int) $timestamp;
-                    if ( $ts > $cutoff ) continue; // not yet timed out
+                    if ( $ts > $cutoff ) continue;
 
                     if ( $ts < $max_age || array_key_exists( $target_lang, $all ) || $too_short ) {
                         unset( $pending[ $target_lang ] );
@@ -3957,15 +3790,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     $result = Better_Messages_Cloud_AI::instance()->translate( $texts, $target_lang, true );
 
                     if ( is_wp_error( $result ) ) {
-                        // Auth error — non-retriable, give up
                         if ( $result->get_error_code() === 'cloud_ai_auth_error' ) {
                             unset( $pending[ $target_lang ] );
                         }
-                        // Retriable (503, 504, network) — leave pending for next cron cycle
                         continue;
                     }
 
-                    // Sync mode returns result directly
                     if ( ! empty( $result['success'] ) && ! empty( $result['translate']['translations'] ) ) {
                         $this->store_translations( $result['translate']['translations'], $target_lang, (int) $message->thread_id );
 
@@ -4120,7 +3950,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $voice_messages_banner = '';
             if( ! class_exists('BP_Better_Messages_Voice_Messages') ){
                 $voice_messages_banner = '<div class="bp-better-messages-banner bm-error">';
-                $voice_messages_banner .= sprintf(_x('<a href="%s" target="_blank">Voice and Video Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages'), admin_url('admin.php?page=bp-better-messages-addons') );
+                $voice_messages_banner .= sprintf(_x('<a href="%s" target="_blank">Voice and Video Messages</a> add-on is required to use audio models.', 'Settings page', 'bp-better-messages'), esc_url( class_exists( 'Better_Messages_License_Admin' ) ? Better_Messages_License_Admin::instance()->voice_addon_url() : 'https://www.better-messages.com/docs/addons/voice-messages/' ) );
                 $voice_messages_banner .= '</div>';
             }
 
@@ -4130,7 +3960,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             </div>
             <?php } else if ( ! $any_key_exists ){ ?>
                 <div class="bm-admin-error" style="font-size: 150%;margin: 10px 0">
-                    <?php echo sprintf(_x('Website must have at least one valid API Key configured. Setup keys at <a href="%s">settings page</a>.', 'Settings page', 'bp-better-messages'), add_query_arg( 'page', 'bp-better-messages', admin_url('admin.php') ) . '#integrations_openai' ); ?>
+                    <?php echo sprintf(_x('Website must have at least one valid API Key configured. Setup keys at <a href="%s">settings page</a>.', 'Settings page', 'bp-better-messages'), add_query_arg( 'page', 'better-messages', admin_url('admin.php') ) . '#integrations_openai' ); ?>
                 </div>
             <?php } else  { ?>
             <div class="bm-ai-chat-bot-settings"
@@ -4485,7 +4315,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
-            // Skip E2E encrypted threads — bots cannot read encrypted content
             if ( class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( (int) $message->thread_id ) ) {
                 return;
             }
@@ -4511,10 +4340,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $this->check_mention_trigger( $message, $sender_id );
         }
 
-        /**
-         * Extract bot ID from a bot guest user_id (negative).
-         * Returns bot post ID or false.
-         */
         public function get_bot_id_from_user( $user_id )
         {
             $bot_id = Better_Messages()->guests->get_bot_id( $user_id );
@@ -4522,9 +4347,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $bot_id > 0 ? $bot_id : false;
         }
 
-        /**
-         * Check if a message mentions any AI bots and trigger responses.
-         */
         private function check_mention_trigger( $message, $sender_id )
         {
             $content = $message->message;
@@ -4549,6 +4371,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     continue;
                 }
 
+                if ( ! Better_Messages()->functions->is_thread_participant( $mentioned_user_id, (int) $message->thread_id, true ) ) {
+                    continue;
+                }
+
                 $bot_settings = $this->get_bot_settings( $bot_id );
 
                 if ( $bot_settings['enabled'] !== '1' || $bot_settings['respondToMentions'] !== '1' ) {
@@ -4563,30 +4389,23 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Handle reply to a message — trigger bot if the replied-to message was from a bot.
-         */
         public function on_message_reply( $message, $replied_to_message )
         {
             $sender_id = (int) $message->sender_id;
             $replied_sender_id = (int) $replied_to_message->sender_id;
 
-            // Skip E2E encrypted threads
             if ( class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( (int) $message->thread_id ) ) {
                 return;
             }
 
-            // Only care about replies to bot messages (negative user IDs)
             if ( $replied_sender_id >= 0 ) {
                 return;
             }
 
-            // Don't trigger if the sender is also a bot
             if ( $sender_id < 0 && $this->get_bot_id_from_user( $sender_id ) ) {
                 return;
             }
 
-            // Must be a group conversation (1:1 is handled by on_message_sent)
             $recipients = Better_Messages()->functions->get_recipients( (int) $message->thread_id );
             if ( count( $recipients ) <= 2 ) {
                 return;
@@ -4595,6 +4414,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $bot_id = $this->get_bot_id_from_user( $replied_sender_id );
 
             if ( ! $bot_id || ! $this->bot_exists( $bot_id ) ) {
+                return;
+            }
+
+            if ( (int) $replied_to_message->thread_id !== (int) $message->thread_id
+                || ! Better_Messages()->functions->is_thread_participant( $replied_sender_id, (int) $message->thread_id, true ) ) {
                 return;
             }
 
@@ -4608,7 +4432,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
-            // Don't double-trigger if this message also @mentions the same bot
             $content = $message->message;
             $mention_match = '&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;';
             preg_match_all( '/' . preg_quote( $mention_match, '/' ) . '(-?\d+)&quot;/', $content, $matches );
@@ -4617,16 +4440,13 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $mentioned_ids = array_unique( array_map( 'intval', $matches[1] ) );
                 $bot_user_id = $replied_sender_id;
                 if ( in_array( $bot_user_id, $mentioned_ids ) ) {
-                    return; // Already handled by check_mention_trigger
+                    return;
                 }
             }
 
             $this->trigger_bot_response( $bot_id, $message, $sender_id );
         }
 
-        /**
-         * Trigger an AI bot response to a message.
-         */
         private function trigger_bot_response( $bot_id, $message, $sender_id )
         {
             global $wpdb;
@@ -4671,36 +4491,20 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $provider->process_reply( $bot_id, $message_id );
         }
 
-        /**
-         * Check whether AI moderation should run in background for this message.
-         * Only "flag" mode uses background (message is sent regardless, so no blocking needed).
-         */
         private function is_background_moderation()
         {
             return Better_Messages()->settings['aiModerationAction'] === 'flag';
         }
 
-        /**
-         * Prepare message text for translation: strip embedded content, keep only formatting HTML.
-         */
         private function prepare_translation_text( $content ) {
-            // Remove GIFs
             $content = preg_replace( '/<span class="(?:bm|bpbm)-gif">.*?<\/span>/s', '', $content );
-            // Remove stickers
             $content = preg_replace( '/<span class="(?:bm|bpbm)-sticker">.*?<\/span>/s', '', $content );
-            // Remove reply quotes
             $content = preg_replace( '/<span class="(?:bm|bpbm)-replied-message"[^>]*>.*?<\/span>/s', '', $content );
-            // Remove HTML comments
             $content = preg_replace( '/<!--.*?-->/s', '', $content );
 
             return trim( strip_tags( $content, '<b><i><u><s><strong><em><br>' ) );
         }
 
-        /**
-         * Check if message content is suitable for AI processing (moderation/translation).
-         * Returns false for voice messages, AI bot messages, call messages, deleted messages, E2E encrypted,
-         * file-only messages, privacy-removed, system messages, stickers, GIFs.
-         */
         public function is_translatable_content( $content ) {
             if ( strpos( $content, '<!-- BM-AI -->' ) === 0 ) {
                 if ( Better_Messages()->settings['aiTranslationBots'] !== '1' ) return false;
@@ -4731,9 +4535,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return true;
         }
 
-        /**
-         * Check if a sender bypasses AI moderation (admin, role bypass, whitelist).
-         */
         private function sender_bypasses_moderation( $sender_id, $thread_id )
         {
             $settings = Better_Messages()->settings;
@@ -4767,10 +4568,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return false;
         }
 
-        /**
-         * Get base64 data URIs from attachment IDs, filtering to only image mime types.
-         * Uses base64 encoding so that the site doesn't need to be publicly accessible.
-         */
         private function get_image_data_uris_from_attachments( $attachment_ids )
         {
             $image_data_uris = [];
@@ -4789,12 +4586,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $image_data_uris;
         }
 
-        /**
-         * Convert a WordPress image attachment to a base64 data URI.
-         *
-         * @param int $attachment_id
-         * @return string|false Data URI string or false on failure
-         */
         private function get_attachment_base64_data_uri( $attachment_id )
         {
             $mime_type = get_post_mime_type( $attachment_id );
@@ -4802,12 +4593,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return false;
             }
 
-            $file_path = get_attached_file( $attachment_id );
-            if( ! $file_path || ! file_exists( $file_path ) ) {
+            $copy = Better_Messages_Storage()->get_local_copy( $attachment_id, 20 * 1024 * 1024 );
+            if( is_wp_error( $copy ) ) {
                 return false;
             }
 
-            $contents = file_get_contents( $file_path );
+            $contents = file_get_contents( $copy['path'] );
+            call_user_func( $copy['cleanup'] );
+
             if( $contents === false ) {
                 return false;
             }
@@ -4815,14 +4608,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return 'data:' . $mime_type . ';base64,' . base64_encode( $contents );
         }
 
-        /**
-         * Pre-send hook for AI moderation.
-         * In background mode: skips API call, defers to background processing.
-         * In synchronous mode: calls OpenAI API inline (hold mode only).
-         */
         public function moderate_message_content( &$args, &$errors )
         {
-            // Skip moderation if an earlier hook already blocked the message
             if( ! empty( $errors ) ) {
                 return;
             }
@@ -4856,7 +4643,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $provider = $settings['aiModerationProvider'] ?? 'openai';
 
-            // Flag mode: defer to background — message sends normally, flagged after
             if ( $this->is_background_moderation() ) {
                 $args['ai_moderation_deferred'] = true;
                 return;
@@ -4866,7 +4652,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $bm_categories = (array) ( $settings['aiModerationCategories'] ?? [] );
                 $result = Better_Messages_Cloud_AI::instance()->moderate( $content, $bm_categories, $image_data_uris, $thread_id, $sender_id );
 
-                // Timeout or unavailable — hold for async processing (is_pending=2)
                 if ( is_wp_error( $result ) ) {
                     $error_code = $result->get_error_code();
                     if ( in_array( $error_code, [ 'cloud_ai_timeout', 'cloud_ai_unavailable', 'http_request_failed' ] ) ) {
@@ -4879,7 +4664,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             } else {
                 $result = $this->api->moderate( $content, $image_data_uris );
 
-                // Fail open on API error
                 if( is_wp_error( $result ) ) {
                     return;
                 }
@@ -4921,9 +4705,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $args['is_pending'] = 1;
         }
 
-        /**
-         * Build the moderation payload for BM Cloud AI.
-         */
         private function build_bm_moderate_payload( $message_id, $content, $thread_id = 0, $sender_id = 0 ) {
             $settings = Better_Messages()->settings;
 
@@ -4965,9 +4746,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $moderate;
         }
 
-        /**
-         * Filter flagged categories by enabled categories and threshold.
-         */
         private function get_flagged_categories( $result )
         {
             $settings = Better_Messages()->settings;
@@ -4994,10 +4772,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return $flagged_categories;
         }
 
-        /**
-         * Called after message is saved. Schedules background AI moderation if deferred,
-         * or saves moderation meta inline if result is already available (synchronous mode).
-         */
         public function schedule_background_moderation( &$message )
         {
             if( ! empty( $message->ai_moderation_result ) ) {
@@ -5011,8 +4785,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     Better_Messages()->functions->update_message_meta( $message->id, 'ai_moderation_provider', $message->ai_moderation_provider );
                 }
 
-                // Send email notification only for "flag" action (message sent normally).
-                // For "hold" action, notify_pending_message in moderation.php handles the email.
                 if( empty( $message->is_pending ) ){
                     $this->notify_ai_moderation( $message );
                 }
@@ -5044,9 +4816,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             ] );
         }
 
-        /**
-         * REST endpoint callback for background moderation.
-         */
         public function rest_moderate_message( WP_REST_Request $request )
         {
             $message_id = (int) $request->get_param('message_id');
@@ -5056,10 +4825,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * Run the actual AI moderation check in the background.
-         * Called via self-request or WP-Cron fallback.
-         */
         public function run_background_moderation( $message_id )
         {
             $message = Better_Messages()->functions->get_message( $message_id );
@@ -5068,7 +4833,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
-            // Already processed (e.g. cron fired after self-request already handled it)
             $already_checked = Better_Messages()->functions->get_message_meta( $message_id, 'ai_moderation_checked' );
             if( ! empty( $already_checked ) ) {
                 return;
@@ -5076,7 +4840,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             Better_Messages()->functions->update_message_meta( $message_id, 'ai_moderation_checked', '1' );
 
-            // Skip E2E encrypted messages — content is ciphertext, cannot be moderated
             if ( is_string( $message->message ) && class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $message->message, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) {
                 return;
             }
@@ -5102,7 +4865,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $provider = $settings['aiModerationProvider'] ?? 'openai';
 
-            // Better Messages Cloud AI — async moderation via cloud worker with callback
             if ( $provider === 'bm' ) {
                 $moderate = $this->build_bm_moderate_payload( $message_id, $has_text ? $content : '', $message->thread_id, $message->sender_id );
 
@@ -5119,7 +4881,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $result = $this->api->moderate( $has_text ? $content : '', $image_data_uris );
 
-            // Fail open on API error — message stays as-is
             if( is_wp_error( $result ) ) {
                 return;
             }
@@ -5152,9 +4913,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $this->notify_ai_moderation( $message );
         }
 
-        /**
-         * Send email notification for AI-flagged messages.
-         */
         private function notify_ai_moderation( $message )
         {
             $emails = Better_Messages()->settings['messagesModerationNotificationEmails'];
@@ -5212,7 +4970,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( is_array( $attachments ) && ! empty( $attachments ) ) {
                 $body .= _x( 'Attachments:', 'AI Moderation', 'bp-better-messages' ) . "\n";
                 foreach ( array_keys( $attachments ) as $att_id ) {
-                    $url = wp_get_attachment_url( $att_id );
+                    $url = Better_Messages_Storage()->get_file_url( $att_id, 'email' );
+                    if ( ! $url ) {
+                        $url = wp_get_attachment_url( $att_id );
+                    }
                     if ( $url ) {
                         $body .= '  - ' . $url . "\n";
                     }
@@ -5229,9 +4990,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        /**
-         * REST callback: transcribe a voice message.
-         */
         public function transcribe_voice_message( WP_REST_Request $request )
         {
             $message_id    = intval( $request->get_param( 'message_id' ) );
@@ -5260,9 +5018,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return Better_Messages_Rest_Api()->get_messages( (int) $message->thread_id, [ $message_id ] );
         }
 
-        /**
-         * Add canTranscribe and cached transcription to voice message meta.
-         */
         public function voice_transcription_meta( $meta, $message_id, $thread_id, $content )
         {
             $is_voice_message = strpos( $content, '<!-- BPBM-VOICE-MESSAGE -->' ) !== false;

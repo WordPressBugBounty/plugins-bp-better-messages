@@ -4,15 +4,6 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'better_messages_activation', 'bp_install_email_templates' );
 
 if ( ! function_exists( 'bp_bm_get_post_by_title' ) ) {
-    /**
-     * Replacement for deprecated core get_page_by_title().
-     *
-     * @param string       $post_title Exact post title to match.
-     * @param string       $output     OBJECT, ARRAY_A or ARRAY_N.
-     * @param string|array $post_type  Post type or array of post types.
-     *
-     * @return WP_Post|array|null
-     */
     function bp_bm_get_post_by_title( $post_title, $output = OBJECT, $post_type = 'page' ) {
         $query = new WP_Query( array(
             'post_type'              => $post_type,
@@ -59,7 +50,6 @@ function bp_install_email_templates()
 
     $descriptions[ 'messages-unread-group' ] = __( 'A member has unread private messages.', 'bp-better-messages' );
 
-    // Add these emails to the database.
     foreach ( $emails as $id => $email ) {
         $post_args = bp_parse_args( $email, $defaults, 'install_email_' . $id );
 
@@ -95,14 +85,22 @@ add_action( 'better_messages_deactivation', 'better_messages_unschedule_cron' );
 function better_messages_unschedule_cron()
 {
 	wp_unschedule_event( wp_next_scheduled( 'better_messages_send_notifications' ), 'better_messages_send_notifications' );
+	wp_clear_scheduled_hook( 'better_messages_worker_job' );
+	wp_clear_scheduled_hook( 'better_messages_worker_job', array( 'soon' ) );
+	delete_option( 'better_messages_worker_migrated' );
 }
 
 
 function better_messages_activation()
 {
+    if ( function_exists( 'Better_Messages_Init' ) ) {
+        Better_Messages_Init();
+    }
+
     require_once trailingslashit( dirname(__FILE__) ) . 'api/db-migrate.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'users.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'capabilities.php';
+    require_once trailingslashit( dirname(__FILE__) ) . 'worker.php';
 
     Better_Messages_Rest_Api_DB_Migrate()->install_tables();
     Better_Messages_Rest_Api_DB_Migrate()->migrations();

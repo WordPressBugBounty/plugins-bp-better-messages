@@ -5,8 +5,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
     class Better_Messages_Functions
     {
-        private  $multisite_resolved = null;
-
         public static function instance()
         {
             static $instance = null;
@@ -33,16 +31,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             do_action_ref_array( 'better_messages_before_message_send', array( &$args, &$errors ));
         }
 
-        /**
-         * @param int $user_id
-         * @param string $subject
-         * @param string $message
-         * @param bool $fast_start
-         * @param bool $scrollToContainer
-         * @return string
-         *
-         * @since 2.0.60
-         */
         public function create_conversation_link( int $user_id, string $subject = '', string $message = '', bool $fast_start = false, bool $scrollToContainer = true ): string
         {
             $args = [
@@ -69,24 +57,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
-        /**
-         * @param int $user_id
-         * @return string
-         *
-         * @since 2.0.60
-         */
         public function private_message_link(int $user_id ): string
         {
             return $this->create_conversation_link( $user_id, '', '', Better_Messages()->settings['fastStart'] == '1' );
         }
 
-        /**
-         * @param int $thread_id
-         * @param int $user_id
-         * @return string
-         *
-         * @since 2.0.63
-         */
         public function get_user_messages_url( int $user_id, ?int $thread_id = null ): string {
             $link = Better_Messages()->functions->get_link( $user_id );
 
@@ -105,11 +80,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
-        /**
-         * @param $user_id
-         * @param $thread_id
-         * @return array|string[]
-         */
         public function can_reply_in_conversation($user_id, $thread_id ): array
         {
             $can_send = $this->can_send_message_filter( Better_Messages()->functions->check_access( $thread_id ), $user_id, $thread_id );
@@ -135,11 +105,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        /**
-         * @param $starter_id
-         * @param array $recipients
-         * @return array
-         */
         public function can_start_conversation($starter_id, array $recipients = [], $uniqueKey = null ): array
         {
             $args = array(
@@ -296,7 +261,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function clear_thread( $thread_id ){
-            // Can be alot of messages!
             set_time_limit(0);
 
             global $wpdb;
@@ -311,14 +275,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $time = bp_core_current_time();
 
-            // Updating users unread counters in local db
-            $wpdb->prepare(
-            "UPDATE " . bm_get_table('recipients') . " 
+            $wpdb->query( $wpdb->prepare(
+            "UPDATE " . bm_get_table('recipients') . "
             SET unread_count = 0,
             last_read = %s,
             last_delivered = %s
             WHERE thread_id = %d",
-            $time, $time, $thread_id );
+            $time, $time, $thread_id ) );
+
+            $wpdb->query( $wpdb->prepare( "DELETE FROM `" . bm_get_table('mentions') . "` WHERE `thread_id` = %d", $thread_id ) );
 
             do_action( 'better_messages_thread_updated', $thread_id );
             do_action( 'better_messages_thread_cleared', $thread_id );
@@ -589,11 +554,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        /**
-         * @param $user_id
-         * @param $exclude_threads
-         * @return array
-         */
         public function get_threads($user_id = false )
         {
             if( $user_id === false ) $user_id = Better_Messages()->functions->get_current_user_id();
@@ -625,6 +585,32 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             FROM  " . bm_get_table('messages') . "
             WHERE `id` = %d
             ", $message_id ) );
+        }
+
+        public function get_valid_reply_to( $value, $thread_id, $new_thread = false ){
+            if( $new_thread || (int) $thread_id <= 0 ){
+                return 0;
+            }
+
+            if( is_int( $value ) ){
+                $message_id = $value;
+            } else if( is_string( $value ) && $value !== '' && ctype_digit( $value ) ){
+                $message_id = (int) $value;
+            } else {
+                return 0;
+            }
+
+            if( $message_id <= 0 ){
+                return 0;
+            }
+
+            $replied = $this->get_message( $message_id );
+
+            if( ! $replied || (int) $replied->thread_id !== (int) $thread_id ){
+                return 0;
+            }
+
+            return $message_id;
         }
 
         public function get_messages( $thread_id, $message = false, $action = 'last_messages', $count = 50 ){
@@ -689,10 +675,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             if( $cache ){
                 $recipients = wp_cache_get( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
 
-                // Entries stored before the int cast moved ahead of wp_cache_set()
-                // hold raw DB strings, and callers compare user_id with ===. Only a
-                // persistent object cache can carry one of those across the update,
-                // so check the shape once and rebuild rather than serve it.
                 if ( is_array( $recipients ) && ! empty( $recipients ) ) {
                     $first = current( $recipients );
 
@@ -714,11 +696,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
                 $results    = $wpdb->get_results( $sql );
 
-                // Cast all items from the messages DB table as integers. This runs
-                // on the way in rather than on the way out so that a cache hit does
-                // not rebuild every recipient object again — in a chat room with
-                // 100k participants that cost 68ms and 76MB on each of the five
-                // calls a single send makes.
                 foreach ( (array) $results as $recipient ) {
                     $recipients[ $recipient->user_id ] = (object) array_map( 'intval', (array) $recipient );
                 }
@@ -726,12 +703,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 wp_cache_set( 'bm_thread_recipients_' . $thread_id, $recipients, 'bm_messages' );
             }
 
-            /**
-             * Filters the recipients of a message thread.
-             *
-             * @param array $recipients Array of recipient objects.
-             * @param int   $thread_id  ID of the current thread.
-             */
             return apply_filters( 'bm_messages_thread_get_recipients', $recipients, $thread_id );
         }
 
@@ -770,15 +741,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return array_merge( $sorted, $missing );
         }
 
-        /**
-         * Get all thread user ids including currently logged-in user
-         *
-         * @param int $thread_id
-         * @param boolean $cache
-         * @return array
-         *
-         * @since 2.0.55
-         */
         public function get_recipients_ids( int $thread_id, bool $cache = true ): array
         {
             $recipients = $this->get_recipients( $thread_id, $cache );
@@ -986,16 +948,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $message = apply_filters( 'bp_better_messages_pre_format_message', $message, $message_id, $context, $user_id );
 
-            // Removing slashes
-            //$message = wp_unslash( $message );
-
             if ( $context == 'site' ) {
                 $message = $this->truncate( $message, 100 );
             } else {
-                // New line to html <br>
-                //var_dump( 'before', $message );
-                //$message = nl2br( $message );
-                //var_dump( 'after', $message );
             }
 
             $message = apply_filters( 'bp_better_messages_after_format_message', $message, $message_id, $context, $user_id );
@@ -1499,13 +1454,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        /**
-         * @param int $thread_id
-         * @param int $user_id
-         * @return bool
-         *
-         * @since 2.0.55
-         */
         public function is_user_participant(int $thread_id, int $user_id ): bool
         {
             if( ! $this->is_conversation_exists( $thread_id ) || ! $this->is_user_exists( $user_id ) ){
@@ -1521,20 +1469,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             ", $user_id, $thread_id));
         }
 
-        /**
-         * Add user to specific conversation
-         *
-         * @param int $thread_id
-         * @param int $user_id
-         * @return bool
-         */
         public function add_participant_to_thread( int $thread_id, int $user_id, string $context = '' ): bool
         {
             if( ! $this->is_conversation_exists( $thread_id ) || ! $this->is_user_exists( $user_id ) ){
                 return false;
             }
 
-            // Prevent adding AI bots to E2E encrypted threads
             if ( $user_id < 0 && class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id ) ) {
                 if ( isset( Better_Messages()->ai ) && Better_Messages()->ai->get_bot_id_from_user( $user_id ) ) {
                     return false;
@@ -1567,11 +1507,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return false;
         }
 
-        /**
-         * @param int $thread_id
-         * @param int $user_id
-         * @return bool
-         */
         public function remove_participant_from_thread(int $thread_id, int $user_id ): bool
         {
             if( ! $this->is_conversation_exists( $thread_id ) || ! $this->is_user_exists( $user_id ) ){
@@ -1678,7 +1613,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
 
                 if( ! $exclude_deleted ){
-                    // If deleted included, need to sort not deleted to be first
                     $sql = $wpdb->prepare("SELECT thread_id
                     FROM " . bm_get_table('recipients') . " as recipients
                     WHERE recipients.thread_id IN (" . implode( ',', $thread_ids ) . ")
@@ -1692,16 +1626,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $thread_ids;
         }
 
-        /**
-         * @param int $to
-         * @param int|null $from
-         * @param bool $create
-         * @param string $subject
-         * @return array
-         *
-         * @since 2.0.64
-         */
         public function get_private_conversation_id( int $to, ?int $from = null, bool $create = true, string $subject = '', $uniqueKey = null): array{
+            if( ! $create ) {
+                return $this->find_or_create_private_conversation( $to, $from, $create, $subject, $uniqueKey );
+            }
+
+            $pair = array( $to, (int) ( $from ?: $this->get_current_user_id() ) );
+            sort( $pair );
+
+            return $this->with_lock( 'private_conversation|' . implode( '|', $pair ) . '|' . (string) $uniqueKey, function () use ( $to, $from, $create, $subject, $uniqueKey ) {
+                return $this->find_or_create_private_conversation( $to, $from, $create, $subject, $uniqueKey );
+            } );
+        }
+
+        private function find_or_create_private_conversation( int $to, ?int $from, bool $create, string $subject, $uniqueKey ): array{
             if( ! Better_Messages()->functions->is_user_authorized() ) {
                 return [
                     'result' => 'not_allowed',
@@ -1761,12 +1699,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $can_start;
         }
 
-        /**
-         * @param int $to
-         * @param int|null $from
-         * @param bool $create
-         * @return array
-         */
         public function get_pm_thread_id( int $to, ?int $from = null, bool $create = true, string $subject = '' ): array
         {
             return $this->get_private_conversation_id( $to, $from, $create, $subject );
@@ -1779,15 +1711,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        /**
-         * Create new empty conversation
-         *
-         * @param array $user_ids
-         * @param string $subject
-         * @return int
-         *
-         * @since 2.0.55
-         */
         public function create_new_conversation( array $user_ids, string $subject = '' ){
             if( ! is_array( $user_ids ) || count( $user_ids ) === 0 ){
                 return false;
@@ -1816,21 +1739,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $new_thread_id;
         }
 
-        /**
-         * Get existing or creating new unique conversation based on unique key and user ids
-         *
-         * @param array  $user_ids
-         * @param string $unique_key
-         * @param string $subject
-         * @return int
-         *
-         * @since 2.0.67
-         */
         public function get_unique_conversation_id( array $user_ids, string $unique_key, string $subject = '' ){
             if( ! is_array( $user_ids ) || count( $user_ids ) === 0 ){
                 return false;
             }
 
+            $members = array_map( 'intval', array_unique( $user_ids ) );
+            sort( $members );
+
+            return $this->with_lock( 'unique_conversation|' . $unique_key . '|' . implode( '|', $members ), function () use ( $user_ids, $unique_key, $subject ) {
+                return $this->find_or_create_unique_conversation( $user_ids, $unique_key, $subject );
+            } );
+        }
+
+        private function find_or_create_unique_conversation( array $user_ids, string $unique_key, string $subject ){
             global $wpdb;
 
             $user_ids = array_unique( $user_ids );
@@ -1882,13 +1804,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $thread = $this->get_thread( $thread_id );
 
                 if( $thread ) {
-                    // Skip E2E threads when E2E is disabled globally,
-                    // so users can create a new non-encrypted conversation
                     if ( Better_Messages()->settings['e2eEncryption'] !== '1'
                         && class_exists( 'Better_Messages_E2E_Encryption' )
                         && Better_Messages_E2E_Encryption::is_e2e_thread( $thread_id )
                     ) {
-                        // Fall through to create new conversation below
                     } else {
                         return $thread_id;
                     }
@@ -1930,11 +1849,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return false;
         }
 
-        /**
-         * Check if conversation exists
-         * @param int $thread_id
-         * @return bool
-         */
         public function is_conversation_exists(int $thread_id ) : bool {
             $thread = $this->get_thread( $thread_id );
 
@@ -1945,11 +1859,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return false;
         }
 
-        /**
-         * Check if user exists
-         * @param int $user_id
-         * @return bool
-         */
         public function is_user_exists(int $user_id ) : bool {
             if( $user_id >= 0 ) {
                 $user = get_userdata($user_id);
@@ -1973,10 +1882,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function clean_string( $string )
         {
-            //$string = str_replace( PHP_EOL, ' ', $string );
-            //$string = preg_replace( '/[\r\n]+/', "\n", $string );
-            //$string = preg_replace( '/[ \t]+/', ' ', $string );
-            //$string = preg_replace( '<br>', '', $string );
             return trim($string);
         }
 
@@ -1995,16 +1900,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $default = 'rgb(0,0,0)';
 
-            //Return default if no color provided
             if(empty($color))
                 return $default;
 
-            //Sanitize $color if "#" is provided
             if ($color[0] == '#' ) {
                 $color = substr( $color, 1 );
             }
 
-            //Check if color has 6 or 3 characters and get values
             if (strlen($color) == 6) {
                 $hex = array( $color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5] );
             } elseif ( strlen( $color ) == 3 ) {
@@ -2013,10 +1915,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return $default;
             }
 
-            //Convert hexadec to rgb
             $rgb =  array_map('hexdec', $hex);
 
-            //Check if opacity is set(rgba or rgb)
             if($opacity){
                 if(abs($opacity) > 1)
                     $opacity = 1.0;
@@ -2025,7 +1925,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $output = 'rgb('.implode(",",$rgb).')';
             }
 
-            //Return rgb(a) color string
             return $output;
         }
 
@@ -2045,12 +1944,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $undeleted;
         }
 
-        /**
-         * @param int $thread_id
-         * @return string
-         *
-         * @since 2.0.55
-         */
         public function get_conversation_layout(int $thread_id ){
             $initialHeight = $this->initial_container_height();
             return '<div class="bm-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-thread-id="' . $thread_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
@@ -2058,7 +1951,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_page( $args = [] ){
             if (defined('WP_DEBUG') && true === WP_DEBUG) {
-                // some debug to add later
             } else {
                 error_reporting(0);
             }
@@ -2078,17 +1970,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $class = 'bm-wrap-main' . ( $host_sized ? ' bm-host-sized' : '' );
             $style = $host_sized ? '' : ' style="height: ' . esc_attr( $this->initial_container_height() ) . '"';
 
-            /**
-             * `messengerFill` ("Fill the window"). Written here, on the
-             * container, rather than styled from the body class the design
-             * also emits: the class is the transport, the attribute is what
-             * the stylesheet matches. Written server-side and not left to the
-             * app so the placeholder already has its final height — the inline
-             * style above is the non-filling one, and adding the attribute a
-             * frame later would resize the messenger in front of the visitor.
-             * BetterMessages keeps it in sync afterwards for the Design
-             * preview, which flips the body class live.
-             */
             $fill = Better_Messages_Design::instance()->get_design_option( 'messengerFill', false )
                 ? ' data-fill-window="1"' : '';
 
@@ -2101,7 +1982,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function get_group_page( $group_id ){
             if (defined('WP_DEBUG') && true === WP_DEBUG) {
-                // some debug to add later
             } else {
                 error_reporting(0);
             }
@@ -2124,6 +2004,49 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             ob_start();
             echo '<div class="bm-wrap bm-threads-list" style="height:' . $height . 'px"></div>';
             return ob_get_clean();
+        }
+
+        public function lock( $key, $timeout = 10 ) {
+            global $wpdb;
+
+            $name = 'bm_' . md5( DB_NAME . '|' . $wpdb->base_prefix . '|' . $key );
+            $got  = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, $timeout ) );
+
+            if ( $got === null ) {
+                return null;
+            }
+
+            return (int) $got === 1 ? $name : false;
+        }
+
+        public function unlock( $lock ) {
+            global $wpdb;
+
+            if ( is_string( $lock ) && $lock !== '' ) {
+                $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );
+            }
+        }
+
+        public function with_lock( $key, callable $work, $timeout = 10 ) {
+            $lock = $this->lock( $key, $timeout );
+
+            try {
+                return $work();
+            } finally {
+                $this->unlock( $lock );
+            }
+        }
+
+        public function claim_transient( $transient, $expiration ) {
+            return $this->with_lock( 'transient|' . $transient, function () use ( $transient, $expiration ) {
+                if ( get_transient( $transient ) ) {
+                    return false;
+                }
+
+                set_transient( $transient, 1, $expiration );
+
+                return true;
+            } );
         }
 
         public function get_thread_meta( $thread_id, $key = '' ) {
@@ -2208,10 +2131,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        /**
-         * @param int $thread_id
-         * @return BM_Thread | false
-         */
         public function get_thread(int $thread_id ){
             global $wpdb;
 
@@ -2232,10 +2151,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $thread;
         }
 
-        /**
-         * @param int $thread_id
-         * @return string
-         */
         public function get_thread_type( int $thread_id ): string {
             $thread_type = wp_cache_get( 'thread_' . $thread_id . '_type', 'bm_messages' );
 
@@ -2641,11 +2556,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $item;
         }
 
-        /**
-         * Build encrypted and HMAC-signed user profile for WebSocket server caching.
-         * The server stores the encrypted data opaquely and verifies the signature
-         * before caching to prevent client-side tampering.
-         */
         public function build_ws_profile( $user_id, $user_data = null ) {
             if ( ! $user_data ) {
                 $user_data = $this->rest_user_item( $user_id, false );
@@ -2653,24 +2563,41 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $role_hashes = $this->get_user_role_hashes( $user_id );
 
-            $plaintext = [
-                'user_id'     => (int) $user_id,
-                'name'        => $user_data['name'],
-                'avatar'      => $user_data['avatar'],
-                'url'         => $user_data['url'] ?? '',
-                'verified'    => (int) ( $user_data['verified'] ?? 0 ),
-                'role_hashes' => $role_hashes,
-            ];
+            $sealing = Better_Messages_WebSocket()->relay_encryption_enabled();
+            $profile = $sealing ? Better_Messages_Relay_Keys()->profile( $user_id ) : null;
 
-            $hash = md5( json_encode( $plaintext ) );
+            if ( null !== $profile ) {
+                $encrypted = $profile['pd'];
+                $hash      = $profile['pdh'];
 
-            $encrypted = [
-                'user_id'  => (int) $user_id,
-                'name'     => Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['name'] ),
-                'avatar'   => Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['avatar'] ),
-                'url'      => $user_data['url'] ? Better_Messages_WebSocket()->encrypt_message_for_website( $user_data['url'] ) : '',
-                'verified' => (int) ( $user_data['verified'] ?? 0 ),
-            ];
+                unset( $encrypted['role_hashes'] );
+            } else if ( $sealing ) {
+                $encrypted = [
+                    'user_id'  => (int) $user_id,
+                    'verified' => (int) ( $user_data['verified'] ?? 0 ),
+                ];
+
+                $hash = md5( json_encode( [ (int) $user_id, $role_hashes ] ) );
+            } else {
+                $plaintext = [
+                    'user_id'     => (int) $user_id,
+                    'name'        => $user_data['name'],
+                    'avatar'      => $user_data['avatar'],
+                    'url'         => $user_data['url'] ?? '',
+                    'verified'    => (int) ( $user_data['verified'] ?? 0 ),
+                    'role_hashes' => $role_hashes,
+                ];
+
+                $hash = md5( json_encode( $plaintext ) );
+
+                $encrypted = [
+                    'user_id'  => (int) $user_id,
+                    'name'     => $user_data['name'],
+                    'avatar'   => $user_data['avatar'],
+                    'url'      => $user_data['url'] ? $user_data['url'] : '',
+                    'verified' => (int) ( $user_data['verified'] ?? 0 ),
+                ];
+            }
 
             if ( isset( $user_data['status'] ) ) {
                 $encrypted['status'] = $user_data['status'];
@@ -2720,8 +2647,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         private function role_hash_secret() {
             $license_secret = '';
-            if ( class_exists( 'Better_Messages_WebSocket' ) ) {
-                $license_secret = (string) Better_Messages_WebSocket()->secret_key;
+            if ( class_exists( 'Better_Messages_License' ) ) {
+                $license_secret = (string) Better_Messages_License::instance()->get_key();
             }
             if ( $license_secret !== '' ) return $license_secret;
             return wp_salt( 'auth' );
@@ -2860,15 +2787,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             if(trim($input) === "") return $input;
             return preg_replace(
                 array(
-                    // Remove comment(s)
                     '#\s*("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')\s*|\s*\/\*(?!\!|@cc_on)(?>[\s\S]*?\*\/)\s*|\s*(?<![\:\=])\/\/.*(?=[\n\r]|$)|^\s*|\s*$#',
-                    // Remove white-space(s) outside the string and regex
                     '#("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\'|\/\*(?>.*?\*\/)|\/(?!\/)[^\n\r]*?\/(?=[\s.,;]|[gimuy]|$))|\s*([!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])\s*#s',
-                    // Remove the last semicolon
                     '#;+\}#',
-                    // Minify object attribute(s) except JSON attribute(s). From `{'foo':'bar'}` to `{foo:'bar'}`
                     '#([\{,])([\'])(\d+|[a-z_][a-z0-9_]*)\2(?=\:)#i',
-                    // --ibid. From `foo['bar']` to `foo.bar`
                     '#([a-z0-9_\)\]])\[([\'"])([a-z_][a-z0-9_]*)\2\]#i'
                 ),
                 array(
@@ -2885,26 +2807,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             if(trim($input) === "") return $input;
             return preg_replace(
                 array(
-                    // Remove comment(s)
                     '#("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')|\/\*(?!\!)(?>.*?\*\/)|^\s*|\s*$#s',
-                    // Remove unused white-space(s)
                     '#("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\'|\/\*(?>.*?\*\/))|\s*+;\s*+(})\s*+|\s*+([*$~^|]?+=|[{};,>~]|\s(?![0-9\.])|!important\b)\s*+|([[(:])\s++|\s++([])])|\s++(:)\s*+(?!(?>[^{}"\']++|"(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')*+{)|^\s++|\s++\z|(\s)\s+#si',
-                    // Replace `0(cm|em|ex|in|mm|pc|pt|px|vh|vw|%)` with `0`
                     '#(?<=[\s:])(0)(cm|em|ex|in|mm|pc|pt|px|vh|vw|%)#si',
-                    // Replace `:0 0 0 0` with `:0`
                     '#:(0\s+0|0\s+0\s+0\s+0)(?=[;\}]|\!important)#i',
-                    // Replace `background-position:0` with `background-position:0 0`
                     '#(background-position):0(?=[;\}])#si',
-                    // Replace `0.6` with `.6`, but only when preceded by `:`, `,`, `-` or a white-space
                     '#(?<=[\s:,\-])0+\.(\d+)#s',
-                    // Minify string value
                     '#(\/\*(?>.*?\*\/))|(?<!content\:)([\'"])([a-z_][a-z0-9\-_]*?)\2(?=[\s\{\}\];,])#si',
                     '#(\/\*(?>.*?\*\/))|(\burl\()([\'"])([^\s]+?)\3(\))#si',
-                    // Minify HEX color code
                     '#(?<=[\s:,\-]\#)([a-f0-6]+)\1([a-f0-6]+)\2([a-f0-6]+)\3#i',
-                    // Replace `(border|outline):none` with `(border|outline):0`
                     '#(?<=[\{;])(border|outline):none(?=[;\}\!])#',
-                    // Remove empty selector(s)
                     '#(\/\*(?>.*?\*\/))|(^|[\{\}])(?:[^\s\{\}]+)\{\}#s'
                 ),
                 array(
@@ -2926,10 +2838,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function license_proposal( $return = false ){
             ob_start();
             if( ! Better_Messages()->functions->can_use_premium_code() ) {
-                echo '<a style="font-size: 10px;" href="' .  admin_url('admin.php?page=bp-better-messages-pricing') . '">' . __('Get WebSocket License', 'bp-better-messages') . '</a>';
+                echo '<a style="font-size: 10px;" href="' .  admin_url('admin.php?page=better-messages-pricing') . '">' . __('Get WebSocket License', 'bp-better-messages') . '</a>';
             } else {
-                if( ! bpbm_fs()->is_premium() ){
-                    $url = bpbm_fs()->_get_latest_download_local_url();
+                if( ! $this->is_websocket_build() ){
+                    $url = Better_Messages_License::ACCOUNT_URL;
                     $string = sprintf(__('<a href="%s" target="_blank">Download</a> and install Premium version of plugin to use this feature', 'bp-better-messages'), $url);
                     echo '<span style="display: block;margin: 10px 0;max-width: 200px;padding: 10px;color: #721c24;background-color: #f8d7da;border: 1px solid #f5c6cb;">' . $string . '</span>';
                 }
@@ -3026,23 +2938,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
-        /*
-         * Inserts a new key/value before the key in the array.
-         *
-         * @param $key
-         *   The key to insert before.
-         * @param $array
-         *   An array to insert in to.
-         * @param $new_key
-         *   The key to insert.
-         * @param $new_value
-         *   An value to insert.
-         *
-         * @return
-         *   The new array if the key exists, FALSE otherwise.
-         *
-         * @see array_insert_after()
-         */
         function array_insert_before($key, array &$array, $new_key, $new_value) {
             if (array_key_exists($key, $array)) {
                 $new = array();
@@ -3057,23 +2952,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return FALSE;
         }
 
-        /*
-         * Inserts a new key/value after the key in the array.
-         *
-         * @param $key
-         *   The key to insert after.
-         * @param $array
-         *   An array to insert in to.
-         * @param $new_key
-         *   The key to insert.
-         * @param $new_value
-         *   An value to insert.
-         *
-         * @return
-         *   The new array if the key exists, FALSE otherwise.
-         *
-         * @see array_insert_before()
-         */
         function array_insert_after($key, array &$array, $new_key, $new_value) {
             if (array_key_exists ($key, $array)) {
                 $new = array();
@@ -3130,61 +3008,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function can_use_premium_code_premium_only(){
-            if( $this->is_network_subsite_and_has_license() ) {
-                return true;
-            }
-
-            return bpbm_fs()->can_use_premium_code__premium_only();
+            return $this->is_websocket_build() && $this->can_use_premium_code();
         }
 
         public function can_use_premium_code(){
-            if( $this->is_network_subsite_and_has_license() ) {
-                return true;
-            }
-
-            return bpbm_fs()->can_use_premium_code();
+            return Better_Messages_License::instance()->is_active();
         }
 
-        public function is_network_subsite_and_has_license(){
-            if( defined('MULTISITE') && defined('SUBDOMAIN_INSTALL') && MULTISITE === true && SUBDOMAIN_INSTALL === false ) {
-                if( $this->multisite_resolved !== null ){
-                    return $this->multisite_resolved;
-                }
-
-                if( is_plugin_active_for_network(basename(Better_Messages()->path) . '/bp-better-messages.php') ) {
-                    $network = get_network();
-                    $main_site_id = (int)$network->site_id;
-                    $main_blog_id = (int)$network->blog_id;
-                    if (get_current_blog_id() !== $main_blog_id) {
-                        $fs_blog = get_blog_option($main_blog_id, 'fs_accounts', false);
-                        if (isset($fs_blog['sites']['bp-better-messages'])) {
-                            $site = $fs_blog['sites']['bp-better-messages'];
-
-                            if (isset($site->license_id)) {
-                                $license_id = $site->license_id;
-
-                                $fs_network = get_network_option($main_site_id, 'fs_accounts', false);
-                                if (isset($fs_network['all_licenses']['1557']) && is_array($fs_network['all_licenses']['1557'])) {
-                                    foreach ($fs_network['all_licenses']['1557'] as $_license) {
-                                        if ( (int)$license_id === (int)$_license->id ) {
-                                            define('BP_BETTER_MESSAGES_FORCE_LICENSE_KEY', $_license->secret_key);
-                                            define('BP_BETTER_MESSAGES_FORCE_DOMAIN', $site->url);
-                                            $this->multisite_resolved = true;
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $this->multisite_resolved = false;
-
-                return false;
-            }
-
-            return false;
+        public function is_websocket_build(){
+            return better_messages_is_websocket_build();
         }
 
         public function render_login_form(){
@@ -3391,25 +3223,14 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function after_template_include(){
-            #add_filter( 'the_content', 'convert_smilies', 20 );
         }
 
         public function archive_thread( $user_id, $thread_id ){
             global $wpdb;
-            /**
-             * Fires before a message thread is marked as deleted.
-             *
-             * @since 2.2.0
-             * @since 2.7.0 The $user_id parameter was added.
-             *
-             * @param int $thread_id ID of the thread being deleted.
-             * @param int $user_id   ID of the user that the thread is being deleted for.
-             */
             do_action( 'bp_messages_thread_before_mark_delete', $thread_id, $user_id );
 
             $time = Better_Messages()->functions->get_microtime();
 
-            // Mark messages as deleted
             $wpdb->query( $wpdb->prepare( "UPDATE " . bm_get_table('recipients') . " SET is_deleted = 1, last_update = %d WHERE thread_id = %d AND user_id = %d", $time, $thread_id, $user_id ) );
 
             do_action( 'better_messages_thread_updated', $thread_id );
@@ -3425,16 +3246,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $microtime = Better_Messages()->functions->get_microtime();
 
-            // Parse the default arguments.
             $r = bp_parse_args( $args, array(
                 'sender_id'        => Better_Messages()->functions->get_current_user_id(),
-                'thread_id'        => false,   // False for a new message, thread id for a reply to a thread.
-                'recipients'       => array(), // Can be an array of usernames, user_ids or mixed.
+                'thread_id'        => false,
+                'recipients'       => array(),
                 'subject'          => false,
                 'content'          => false,
                 'send_push'        => true,
                 'mobile_push'      => true,
-                'count_unread'     => true, // If false - no sound notification will be also played
+                'count_unread'     => true,
                 'show_on_site'     => true,
                 'meta'             => false,
                 'notification'     => false,
@@ -3455,9 +3275,12 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'ai_moderation_provider' => null,
                 'ai_moderation_deferred' => false,
                 'suppress_new_thread_created' => false,
+                'process_mentions' => true,
+                'notify_everyone'  => false,
+                'notify_exclude'   => [],
+                'unread_exclude'   => [],
             ), 'bm_new_message' );
 
-            // Bail if no sender or no content.
             if ( ( ! is_numeric( $r['sender_id'] ) || $r['sender_id'] === false ) || empty( $r['content'] ) ) {
                 if ( 'wp_error' === $r['error_type'] ) {
                     if ( ! is_numeric( $r['sender_id'] ) || $r['sender_id'] === false ) {
@@ -3475,6 +3298,25 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
+            if ( ! empty( $r['temp_id'] ) && ! empty( $r['thread_id'] ) && (int) $r['sender_id'] !== 0 && ! $r['is_update'] ) {
+                $existing_message_id = Better_Messages_Rest_Api()->get_temp_id_message( (int) $r['thread_id'], $r['temp_id'], (int) $r['sender_id'] );
+
+                if ( $existing_message_id > 0 ) {
+                    if ( $r['return'] === 'message_id' ) {
+                        return $existing_message_id;
+                    }
+
+                    if ( $r['return'] === 'both' ) {
+                        return [
+                            'thread_id'  => (int) $r['thread_id'],
+                            'message_id' => $existing_message_id
+                        ];
+                    }
+
+                    return (int) $r['thread_id'];
+                }
+            }
+
             if ( $r['is_pending'] === null ) {
                 $r['is_pending'] = 0;
 
@@ -3487,7 +3329,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            // Create a new message object.
             $message                = new BM_Messages_Message;
             $message->thread_id     = $r['thread_id'];
             $message->sender_id     = $r['sender_id'];
@@ -3511,26 +3352,24 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $message->ai_moderation_result = $r['ai_moderation_result'];
             $message->ai_moderation_provider = $r['ai_moderation_provider'];
             $message->ai_moderation_deferred = $r['ai_moderation_deferred'];
+            $message->notify_everyone = (bool) $r['notify_everyone'];
+            $message->notify_exclude  = array_map( 'intval', (array) $r['notify_exclude'] );
+            $message->unread_exclude  = array_values( array_filter( array_map( 'intval', (array) $r['unread_exclude'] ) ) );
 
             $is_pending = $message->is_pending;
             $new_thread = false;
 
-            // If we have a thread ID...
             if ( ! empty( $r['thread_id'] ) ) {
                 $message->recipients = Better_Messages()->functions->get_recipients( $r['thread_id'] );
 
-                // Strip the sender from the recipient list, and unset them if they are
-                // not alone. If they are alone, let them talk to themselves.
                 if ( isset( $message->recipients[ $r['sender_id'] ] ) && ( count( $message->recipients ) > 1 ) ) {
                     unset( $message->recipients[ $r['sender_id'] ] );
                 }
 
-                // Set a default reply subject if none was sent.
                 if ( empty( $message->subject ) && isset( $thread->messages[0] ) ) {
                     $message->subject = sprintf( __( 'Re: %s', 'bp-better-messages' ), $thread->messages[0]->subject );
                 }
 
-                // ...otherwise use the recipients passed
             } else {
                 if ( empty( $r['recipients'] ) ) {
                     if ( 'wp_error' === $r['error_type'] ) {
@@ -3543,10 +3382,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( ! is_array( $r['recipients'] ) ){
                     $r['recipients'] = [$r['recipients']];
                 }
-                // Remove duplicates & bail if no recipients.
                 $recipient_ids = array_map( 'intval', array_unique( $r['recipients'] ) );
 
-                // Format this to match existing recipients.
                 if( ! $message->recipients ) $message->recipients = [];
 
                 foreach ( (array) $recipient_ids as $i => $recipient_id ) {
@@ -3575,72 +3412,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         if (!empty($excluded_from_thread_list)) {
                             $message->count_unread = false;
                             $message->send_global = false;
-                        } else {
-                            $notifications_enabled = Better_Messages()->functions->get_thread_meta($message->thread_id, 'enable_notifications');
-                            if ($notifications_enabled !== '1') {
-                                $message->send_push = false;
-                                $message->mobile_push = false;
-                            }
+                            $message->send_push = false;
+                            $message->mobile_push = false;
                         }
                     }
                 }
-
-               if( $type === 'group' ) {
-                   if ( Better_Messages()->settings['enableGroupsPushs'] !== '1' ) {
-                       $group_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'group_id');
-
-                       if ( ! empty( $group_id ) ) {
-                           $message->send_push = false;
-                           $message->mobile_push = false;
-                       }
-                   }
-
-                   if ( Better_Messages()->settings['PSenableGroupsPushs'] !== '1' ) {
-                       $group_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'peepso_group_id');
-
-                       if ( ! empty( $group_id ) ) {
-                           $message->send_push = false;
-                           $message->mobile_push = false;
-                       }
-                   }
-
-                   if ( Better_Messages()->settings['UMenableGroupsPushs'] !== '1' ) {
-                       $group_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'um_group_id');
-
-                       if ( ! empty( $group_id ) ) {
-                           $message->send_push = false;
-                           $message->mobile_push = false;
-                       }
-                   }
-
-                   if( Better_Messages()->settings['FCenableGroupsPushs'] !== '1' ){
-                       $group_id = Better_Messages()->functions->get_thread_meta($message->thread_id, 'fluentcommunity_group_id');
-
-                       if ( ! empty( $group_id ) ) {
-                           $message->send_push = false;
-                           $message->mobile_push = false;
-                       }
-                   }
-               }
-
-               if( $type === 'course' ) {
-                   if ( Better_Messages()->settings['enableCoursesPushs'] !== '1' ) {
-                       $message->send_push = false;
-                       $message->mobile_push = false;
-                   }
-               }
             }
-
-            /*if( $is_pending !== 0 ){
-                $message->count_unread = false;
-                $message->send_global = false;
-                $message->send_push = false;
-                $message->mobile_push = false;
-            }*/
 
             $message->new_thread = (bool) $new_thread;
 
-            // Bail if message failed to send.
             $send = $message->send();
 
             if ( false === is_int( $send ) ) {
@@ -3666,6 +3446,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             $this->delete_all_message_meta( $message->id );
+
+            if( isset( $args['meta_data'] ) && is_array( $args['meta_data'] ) && array_key_exists( 'reply_to', $args['meta_data'] ) ){
+                $valid_reply_to = $this->get_valid_reply_to( $args['meta_data']['reply_to'], (int) $message->thread_id, $new_thread );
+
+                if( $valid_reply_to > 0 ){
+                    $args['meta_data']['reply_to'] = $valid_reply_to;
+                } else {
+                    unset( $args['meta_data']['reply_to'] );
+                }
+            }
 
             if( isset($args['meta_data']) && is_array( $args['meta_data'] ) && count( $args['meta_data'] ) > 0 ){
                 $sanitize_meta_value = function( $value ) use ( &$sanitize_meta_value ) {
@@ -3716,46 +3506,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            Better_Messages()->mentions->process_mentions( $message->thread_id, $message->id, $message->message );
-
-            // Force push notifications for mentioned users even when push was suppressed
-            if ( Better_Messages()->settings['mentionsForceNotifications'] === '1' ) {
-                $mentioned_users = Better_Messages()->mentions->get_mentions_for_message( $message->thread_id, $message->id );
-                if ( ! empty( $mentioned_users ) ) {
-                    if ( ! $message->send_push ) {
-                        $message->send_push = true;
-                        $message->mentions_only_push = true;
-                    }
-                    if ( ! $message->mobile_push ) {
-                        $message->mobile_push = true;
-                        $message->mentions_only_mobile_push = true;
-                    }
-                    if ( ! isset( $message->send_global ) || ! $message->send_global ) {
-                        $message->send_global = true;
-                        $message->mentions_only_push = true;
-                    }
-                }
+            if( $r['process_mentions'] ) {
+                Better_Messages()->mentions->process_mentions( $message->thread_id, $message->id, $message->message );
             }
 
-            //do_action( 'better_messages_thread_updated', $message->thread_id );
-
-            /**
-             * Fires after a message has been successfully sent.
-             *
-             * @since 1.1.0
-             *
-             * @param BP_Messages_Message $message Message object. Passed by reference.
-             */
-
             if( $is_pending !== 1 ){
-                // is_pending=2: waiting for AI moderation — deliver via websocket but suppress push notifications
                 if( $is_pending === 2 ){
-                    $message->send_push = false;
+                    $message->push_intent        = (bool) $message->send_push;
+                    $message->mobile_push_intent = (bool) $message->mobile_push;
+                    $message->push_deferred      = true;
+                    $message->send_push          = false;
                 }
 
                 do_action_ref_array( 'better_messages_message_sent', array( &$message ) );
 
-                // Fire reply hook when message is a reply to another message
                 if( isset( $args['meta_data']['reply_to'] ) && ! empty( $args['meta_data']['reply_to'] ) ){
                     $replied_to_message_id = (int) $args['meta_data']['reply_to'];
                     $replied_to_message = $this->get_message( $replied_to_message_id );
@@ -3783,11 +3547,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     'message_id' => (int) $message->id
                 ];
             }
-            // Return the thread ID.
             return (int) $message->thread_id;
         }
 
-        public function send_system_message( $thread_id, $type, $data = [] ) {
+        public function send_system_message( $thread_id, $type, $data = [], $overrides = [] ) {
             $content = '<!-- BM-SYSTEM-MESSAGE:' . sanitize_key( $type ) . ' -->';
 
             $args = [
@@ -3803,6 +3566,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 'return'       => 'message_id',
                 'meta_data'    => [ 'system_data' => $data ],
             ];
+
+            foreach ( array( 'count_unread', 'show_on_site', 'send_push', 'mobile_push', 'notification', 'notify_everyone', 'notify_exclude', 'unread_exclude' ) as $key ) {
+                if ( array_key_exists( $key, (array) $overrides ) ) {
+                    $args[ $key ] = $overrides[ $key ];
+                }
+            }
+
+            if ( ! empty( $overrides['meta_data'] ) && is_array( $overrides['meta_data'] ) ) {
+                $args['meta_data'] = array_merge( $args['meta_data'], $overrides['meta_data'] );
+            }
 
             return $this->new_message( $args );
         }
@@ -3836,7 +3609,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function update_message( $args = '' ){
             global $wpdb;
 
-            // Parse the default arguments.
             $r = bp_parse_args( $args, array(
                 'sender_id'    => Better_Messages()->functions->get_current_user_id(),
                 'thread_id'    => false,
@@ -3857,7 +3629,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return false;
             }
 
-            #$message->recipients = $message->get_recipients();
             $message->recipients = Better_Messages()->functions->get_recipients( $message->thread_id );
 
             $message->message = apply_filters( 'better_messages_message_content_before_save', $r['content'], $message->id );
@@ -3876,7 +3647,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             do_action( 'better_messages_thread_updated', $message->thread_id );
 
-            Better_Messages()->mentions->process_mentions( $message->thread_id, $message->id, $message->message );
+            Better_Messages()->mentions->process_mentions( $message->thread_id, $message->id, $message->message, true );
 
             if( function_exists('Better_Messages_WebSocket') ) {
                 $message->count_unread     = $r['count_unread'] ? true : false;
@@ -4172,7 +3943,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             wp_parse_str( $query, $qs );
-            $qs = urlencode_deep( $qs ); // This re-URL-encodes things that were already in the query string.
+            $qs = urlencode_deep( $qs );
             $hash_args = [];
             if ( is_array( $args[0] ) ) {
                 foreach ( $args[0] as $k => $v ) {
@@ -4276,11 +4047,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
-        /**
-         * @param $thread_id
-         * @param $user_id
-         * @return string
-         */
         public function get_user_thread_url($thread_id, $user_id ): string
         {
             return $this->get_user_messages_url( $user_id, $thread_id );
@@ -4299,10 +4065,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         }
 
-        /**
-         *
-         * @return string
-         */
         public function plugin_mode(){
             if( class_exists('BuddyPress') ){
                 return 'buddypress';
@@ -4365,7 +4127,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $range = [ $lastMax, min( $preRange ) ];
                 $lastMax = max( $preRange );
                 $ranges[] = $range;
-                //$ranges[] = [min($preRange), max($preRange)];
             }
 
 
@@ -4450,13 +4211,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         private function messages_placeholder( $thread_type = 'thread', $bubbles = null ){
             $design = Better_Messages_Design::instance();
 
-            // Enough bubbles to fill the tallest the container can be. Seven
-            // was fixed, which filled one window and left a band of empty
-            // column above them in every taller one. Nothing here can measure
-            // the box — this is printed before any script runs — but the
-            // container clips its overflow, so sizing for the maximum and
-            // letting a short one clip is exact where a guess is not. 64px is
-            // roughly one bubble with its share of the stack spacing.
             if ( $bubbles === null ) {
                 $maxHeight = (int) apply_filters( 'bp_better_messages_max_height', $design->get_design_var_int( '--bm-max-height' ) );
                 $bubbles   = max( 7, min( 40, (int) ceil( $maxHeight / 64 ) + 1 ) );
@@ -4819,6 +4573,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return method_exists( 'BP_Better_Messages_Voice_Messages', 'video_messages_script_vars' );
         }
 
+        public function voice_messages_addon_licensed(){
+            if( ! $this->has_voice_messages_addon() ) return false;
+
+            if( class_exists( 'Better_Messages_Voice_License' ) ) {
+                return Better_Messages_Voice_License::instance()->is_active();
+            }
+
+            return ! class_exists( 'Better_Messages_Legacy_Voice_Addon' ) || ! Better_Messages_Legacy_Voice_Addon::adopted() || Better_Messages_Legacy_Voice_Addon::is_licensed();
+        }
+
+        public function voice_messages_addon_usable(){
+            return $this->voice_messages_addon_supported() && $this->voice_messages_addon_licensed();
+        }
+
         public function is_valid_user_id( $user_id ){
             if( $user_id > 0 ){
                 $user = get_userdata( $user_id );
@@ -4950,15 +4718,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
         public function is_response_good($response)
         {
-            // Check if the request was successful
             if ( is_wp_error($response) ) {
-                // Handle the error appropriately
                 return new WP_Error('request_failed', 'The network request failed: ' . $response->get_error_message());
             }
 
-            // Check if the request was authorized
             if (wp_remote_retrieve_response_code($response) == 401) {
-                // Handle the authorization error
                 return new WP_Error('unauthorized', 'The request was not authorized.');
             }
 
@@ -5038,13 +4802,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $messages_allowedtags      = $this->get_allowedtags();
             $messages_allowedtags['p'] = array();
 
-            /**
-             * Filters the allowed HTML tags for BuddyPress Messages content.
-             *
-             * @since 3.0.0
-             *
-             * @param array $value Array of allowed HTML tags and attributes.
-             */
             $messages_allowedtags = apply_filters( 'better_messages_allowed_tags', $messages_allowedtags );
 
             return wp_kses( $content, $messages_allowedtags );
@@ -5098,7 +4855,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            $server = apply_filters( 'bp_better_messages_realtime_server', 'https://cloud.better-messages.com/' );
+            $server = Better_Messages()->websocket->api_server();
 
             $response = wp_remote_post( $server . 'checkGroupRoom', array(
                 'blocking' => true,
@@ -5129,9 +4886,6 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
 endif;
 
-/**
- * @return Better_Messages_Functions instance | null
- */
 function Better_Messages_Functions()
 {
     return Better_Messages_Functions::instance();

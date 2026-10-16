@@ -24,13 +24,6 @@ if ( !class_exists( 'Better_Messages_wpForo' ) ){
 
             add_filter('better_messages_rest_user_item', array( $this, 'user_meta' ), 20, 3 );
 
-            /*
-            if( Better_Messages()->settings['chatPage'] === '0' ) {
-                add_filter('wpforo_init_member_templates', array( $this, 'profile_tab'), 10, 1 );
-                add_action( 'admin_init', array( $this, 'admin_init' ) );
-                add_filter('bp_better_messages_page', array($this, 'message_page_url'), 10, 2);
-            }*/
-
         }
 
 
@@ -74,7 +67,6 @@ if ( !class_exists( 'Better_Messages_wpForo' ) ){
 
         public function user_meta( $item, $user_id, $include_personal ){
             $user = WPF()->member->get_member( $user_id );
-            // Set custom profile URL (if set this to false the user links becomes unclickable)
 
             if( $user ) {
                 $item['url'] = $user['profile_url'];
@@ -83,8 +75,6 @@ if ( !class_exists( 'Better_Messages_wpForo' ) ){
                     $item['avatar'] = $user['avatar'];
                 }
             }
-            // Set custom name
-            #$item['name'] = 'Custom name';
 
             return $item;
         }

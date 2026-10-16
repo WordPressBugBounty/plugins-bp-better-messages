@@ -48,10 +48,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
 
         }
 
-        /**
-         * Render message button next to user badges.
-         * On user-view page: full button. On post/comment author: compact icon.
-         */
         public function message_button( $user_id )
         {
             if ( ! is_user_logged_in() ) {
@@ -88,9 +84,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             }
         }
 
-        /**
-         * Full button on user-view profile page
-         */
         private function render_profile_button( $url, $label, $user_id )
         {
             echo '<div class="bm-suredash-profile-actions" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">';
@@ -123,9 +116,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo '</div>';
         }
 
-        /**
-         * Compact icon button next to post/comment authors
-         */
         private function render_author_button( $url, $label, $user_id )
         {
             echo '<a href="' . esc_url( $url ) . '" class="bm-suredash-author-pm" title="' . esc_attr( $label ) . '" style="display:inline-flex;align-items:center;margin-left:4px;color:inherit;opacity:0.6;text-decoration:none;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">';
@@ -133,9 +123,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo '</a>';
         }
 
-        /**
-         * Check if we're on the user-view page
-         */
         private function is_user_view_page()
         {
             if ( function_exists( 'suredash_get_sub_queried_page' ) ) {
@@ -146,9 +133,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             return strpos( $request_uri, '/user-view/' ) !== false;
         }
 
-        /**
-         * Inject Messages link into SureDash sidebar navigation
-         */
         public function sidebar_js()
         {
             if ( ! is_user_logged_in() ) {
@@ -196,9 +180,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo Better_Messages()->functions->minify_js( $script );
         }
 
-        /**
-         * Inject Messages link into SureDash profile dropdown
-         */
         public function dropdown_js()
         {
             if ( ! is_user_logged_in() ) {
@@ -233,18 +214,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo Better_Messages()->functions->minify_js( $script );
         }
 
-        /**
-         * Inject Messages into the mobile bottom bar
-         *
-         * SureDash builds that bar from block markup in the portal template, so
-         * there is no server-side menu filter to add an item to the way
-         * FluentCommunity offers `fluent_community/mobile_menu`. The bar's own
-         * items are the template for the new one: clone the House entry, swap
-         * its icon, label and href, and carry the notification badge markup
-         * over from the Bell entry so the counter looks native rather than
-         * bolted on. The badge also answers to `.bm-suredash-unread-count`, so
-         * counter_script keeps it live with no extra wiring.
-         */
         public function mobile_menu_js()
         {
             if ( ! is_user_logged_in() ) {
@@ -357,9 +326,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo Better_Messages()->functions->minify_js( $script );
         }
 
-        /**
-         * Real-time unread counter updates
-         */
         public function counter_script()
         {
             if ( ! is_user_logged_in() ) {
@@ -388,9 +354,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo Better_Messages()->functions->minify_js( $script );
         }
 
-        /**
-         * Bridge SureDash dark/light mode to Better Messages
-         */
         public function dark_mode_script()
         {
             ob_start();
@@ -436,18 +399,12 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             echo Better_Messages()->functions->minify_js( $script );
         }
 
-        /**
-         * Register "messages" as a SureDash portal sub-page
-         */
         public function register_messages_subpage( $queries )
         {
             $queries[] = 'messages';
             return $queries;
         }
 
-        /**
-         * Render Better Messages page inside the SureDash portal
-         */
         public function render_messages_page( $content, $type )
         {
             if ( $type !== 'messages' ) {
@@ -461,9 +418,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             return Better_Messages()->functions->get_page( array( 'full_screen' => false ) );
         }
 
-        /**
-         * Customize user data in REST API for SureDash profile URLs
-         */
         public function rest_user_item( $item, $user_id, $include_personal )
         {
             if ( $user_id <= 0 ) {
@@ -483,9 +437,6 @@ if ( ! class_exists( 'Better_Messages_SureDash' ) ) {
             return $item;
         }
 
-        /**
-         * Make BM fill full portal height via CSS variables + JS measurement
-         */
         public function portal_height_script()
         {
             ?>

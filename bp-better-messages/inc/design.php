@@ -809,6 +809,37 @@ class Better_Messages_Design {
         remove_action( 'wp_print_styles', 'print_emoji_styles' );
     }
 
+    private function hold_page_observers() {
+        global $wp_filter;
+
+        $held = array();
+        foreach ( array( 'wp_enqueue_scripts', 'wp_head', 'wp_print_styles', 'wp_print_scripts', 'wp_footer', 'wp_print_footer_scripts' ) as $hook ) {
+            if ( ! isset( $wp_filter[ $hook ] ) || ! $wp_filter[ $hook ] instanceof WP_Hook ) {
+                continue;
+            }
+            foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+                foreach ( $callbacks as $callback ) {
+                    $function = $callback['function'];
+                    if ( is_array( $function ) && isset( $function[0] ) && is_object( $function[0] ) && 0 === strpos( get_class( $function[0] ), 'QM_' ) ) {
+                        $held[] = array( $hook, $function, $priority, $callback['accepted_args'] );
+                    }
+                }
+            }
+        }
+
+        foreach ( $held as $item ) {
+            remove_action( $item[0], $item[1], $item[2] );
+        }
+
+        return $held;
+    }
+
+    private function release_page_observers( $held ) {
+        foreach ( $held as $item ) {
+            add_action( $item[0], $item[1], $item[2], $item[3] );
+        }
+    }
+
     private function style_markup_only( $html ) {
         if ( ! preg_match_all( '/<link\b[^>]*>|<style\b[^>]*>.*?<\/style>/is', (string) $html, $matches ) ) {
             return '';
@@ -881,8 +912,10 @@ class Better_Messages_Design {
 
         $head = '';
         $body = '';
+        $held = array();
         try {
             if ( null === $queued ) {
+                $held = $this->hold_page_observers();
                 add_action( 'wp_head', array( $this, 'drop_admin_bar_from_capture' ), 2 );
                 ob_start();
                 try {
@@ -898,6 +931,8 @@ class Better_Messages_Design {
                 } catch ( \Throwable $e ) {
                 }
                 $footer_html = ob_get_clean();
+                $this->release_page_observers( $held );
+                $held = array();
 
                 $queued = array(
                     'head'   => $this->style_markup_only( $head_html ),
@@ -923,7 +958,7 @@ class Better_Messages_Design {
             }
             echo '</div>';
             $this->render_theme_armor();
-            if ( 'widgets' === $surface && ! function_exists( 'Better_Messages_Mini' ) && file_exists( __DIR__ . '/mini.php' ) && function_exists( 'bpbm_fs' ) && bpbm_fs()->is__premium_only() && isset( $bm->settings['mechanism'] ) && 'websocket' === $bm->settings['mechanism'] ) {
+            if ( 'widgets' === $surface && ! function_exists( 'Better_Messages_Mini' ) && file_exists( __DIR__ . '/mini.php' ) && better_messages_is_websocket_build() && isset( $bm->settings['mechanism'] ) && 'websocket' === $bm->settings['mechanism'] ) {
                 require_once __DIR__ . '/mini.php';
             }
             if ( function_exists( 'Better_Messages_Mini_List' ) ) {
@@ -940,6 +975,7 @@ class Better_Messages_Design {
             $this->render_preview_listener();
             $body = ob_get_clean();
         } finally {
+            $this->release_page_observers( $held );
             remove_filter( 'bp_better_messages_script_variable', array( $this, 'preview_script_variables' ), 999 );
             $this->manifest_surface = '';
             $bm->js_loaded        = $saved_js;

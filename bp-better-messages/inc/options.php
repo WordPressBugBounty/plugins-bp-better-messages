@@ -6,6 +6,15 @@ class Better_Messages_Options
     public  $settings ;
     public $defaults;
 
+    const OLD_PAGES = array(
+        'bp-better-messages'            => 'better-messages',
+        'bp-better-messages-chat-rooms' => 'better-messages-chat-rooms',
+        'bp-better-messages-ai'         => 'better-messages-ai',
+        'bp-better-messages-account'    => 'better-messages-account',
+        'bp-better-messages-pricing'    => 'better-messages-pricing',
+        'bp-better-messages-contact'    => 'better-messages-contact',
+    );
+
     public static function instance()
     {
         static  $instance = null ;
@@ -36,6 +45,10 @@ class Better_Messages_Options
             'attachmentsProxyMethod'      => 'php',
             'attachmentsXAccelPrefix'     => '/bm-files/',
             'attachmentsMaxSize'          => wp_max_upload_size() / 1024 / 1024,
+            'attachmentsMaxSizeImages'    => 0,
+            'attachmentsMaxSizeVideos'    => 0,
+            'attachmentsMaxSizeAudio'     => 0,
+            'attachmentsMaxSizeOther'     => 0,
             'attachmentsMaxNumber'        => 0,
             'attachmentsUploadMethod'     => 'post',
             'attachmentsRandomizeFilenames'     => '0',
@@ -219,6 +232,14 @@ class Better_Messages_Options
             'stipopLanguage'              => 'en',
             'allowMuteThreads'            => '1',
             'mentionsForceNotifications'  => '0',
+            'notifyLevelGroupThreads'     => 'all',
+            'notifyLevelGroups'           => 'all',
+            'notifyLevelCourses'          => 'all',
+            'emailScopeDefault'           => 'all',
+            'mentionAllPermission'        => 'moderators',
+            'groupCallAlerts'             => '1',
+            'groupCallAlertsCooldown'     => 30,
+            'groupCallAlertsUserLimit'    => 3,
             'callsRevertIcons'            => '0',
             'callRequestTimeLimit'        => '30',
             'callsLimitFriends'           => '0',
@@ -280,6 +301,10 @@ class Better_Messages_Options
             'dialingSoundId'              => 0,
             'dialingSoundUrl'             => '',
 
+            'groupCallSound'              => 100,
+            'groupCallSoundId'            => 0,
+            'groupCallSoundUrl'           => '',
+
             'modernLayout'                => 'left',
             'deletedBehaviour'            => 'ignore',
             'unreadCounter'               => 'messages',
@@ -305,6 +330,7 @@ class Better_Messages_Options
             'groupAudioCallsGroups'       => '0',
             'groupAudioCallsThreads'      => '0',
             'groupAudioCallsChats'        => '0',
+            'groupCallsEncryption'        => '0',
             'allowUsersRestictNewThreads' => '0',
             'enableGroupsEmails'          => '1',
             'enableGroupsPushs'           => '0',
@@ -354,20 +380,19 @@ class Better_Messages_Options
             'GamiPressLogNewThread'            => 'Better Messages: {user} deducted {points} {points_type} for new conversation #{id} for a new total of {total_points} {points_type}',
             'GamiPressLogCallUsage'            => 'Better Messages: {user} deducted {points} {points_type} for call usage #{id} for a new total of {total_points} {points_type}',
             'createEmailTemplate'           => '1',
-            // Email template customization
-            'emailTemplateSource'           => 'buddypress',  // 'buddypress' or 'custom' (for BP sites)
-            'emailTemplateMode'             => 'simple',      // 'simple' or 'custom'
-            'emailLogoId'                   => 0,             // Attachment ID for logo
-            'emailLogoUrl'                  => '',            // URL of the logo
-            'emailPrimaryColor'             => '#21759b',     // Primary/button color
-            'emailBackgroundColor'          => '#f6f6f6',     // Background color
-            'emailContentBgColor'           => '#ffffff',     // Content area background
-            'emailTextColor'                => '#333333',     // Text color
-            'emailHeaderText'               => '',            // Custom header text (empty = default "Hi {name}")
-            'emailFooterText'               => '',            // Custom footer text
-            'emailButtonText'               => '',            // Custom button text (empty = default)
-            'emailCustomHtml'               => '',            // Full custom HTML template
-            'emailUnsubscribeLink'          => '0',           // Show unsubscribe link in message emails
+            'emailTemplateSource'           => 'buddypress',
+            'emailTemplateMode'             => 'simple',
+            'emailLogoId'                   => 0,
+            'emailLogoUrl'                  => '',
+            'emailPrimaryColor'             => '#21759b',
+            'emailBackgroundColor'          => '#f6f6f6',
+            'emailContentBgColor'           => '#ffffff',
+            'emailTextColor'                => '#333333',
+            'emailHeaderText'               => '',
+            'emailFooterText'               => '',
+            'emailButtonText'               => '',
+            'emailCustomHtml'               => '',
+            'emailUnsubscribeLink'          => '0',
             'notificationsOfflineDelay'     => 15,
             'bbPressAuthorDetailsLink'      => '0',
             'enableGroupsFiles'             => '0',
@@ -626,13 +651,12 @@ class Better_Messages_Options
 
         $this->settings = $this->get_effective_settings( ! is_admin() && current_user_can( 'manage_options') );
 
-        // Migrate emailCustomHtml from main settings to separate option if needed
         if( ! empty( $this->settings['emailCustomHtml'] ) ){
             $existing = get_option( 'better-messages-email-custom-html', '' );
             if( empty( $existing ) ){
                 update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
             }
-            $this->settings['emailCustomHtml'] = ''; // Clear from main settings
+            $this->settings['emailCustomHtml'] = '';
         }
     }
 
@@ -645,7 +669,7 @@ class Better_Messages_Options
     {
         $args = get_option( 'bp-better-chat-settings', array() );
 
-        if ( ! Better_Messages()->functions->can_use_premium_code() || ! bpbm_fs()->is_premium() ) {
+        if ( ! Better_Messages()->functions->can_use_premium_code_premium_only() ) {
             $args['mechanism'] = 'ajax';
             $args['miniChatsEnable'] = '0';
             $args['combinedChatsEnable'] = '0';
@@ -664,7 +688,7 @@ class Better_Messages_Options
             $args['userStatuses'] = '0';
         }
 
-        if( Better_Messages()->functions->can_use_premium_code() && bpbm_fs()->is_premium() ){
+        if( Better_Messages()->functions->can_use_premium_code_premium_only() ){
             $args['mechanism'] = 'websocket';
             $args['encryptionEnabled'] = '1';
         }
@@ -683,6 +707,11 @@ class Better_Messages_Options
         }
 
         return $this->parse_settings( $args );
+    }
+
+    public function default_settings()
+    {
+        return $this->defaults;
     }
 
     private function parse_settings( $args )
@@ -717,11 +746,6 @@ class Better_Messages_Options
         return $order;
     }
 
-    /**
-     * Get email custom HTML template (loaded on demand to avoid bloating main settings)
-     *
-     * @return string
-     */
     public function get_email_custom_html()
     {
         return get_option( 'better-messages-email-custom-html', '' );
@@ -730,11 +754,40 @@ class Better_Messages_Options
     public function setup_actions()
     {
         add_action( 'admin_menu', array( $this, 'settings_page' ) );
+        add_action( 'admin_menu', array( $this, 'old_pages' ), 100 );
+        add_action( 'network_admin_menu', array( $this, 'old_pages' ), 100 );
     }
 
-    /**
-     * Settings page
-     */
+    public function old_pages()
+    {
+        foreach ( self::OLD_PAGES as $old => $new ) {
+            if ( is_network_admin() && ( ! class_exists( 'Better_Messages_License_Admin' ) || ! in_array( $new, Better_Messages_License_Admin::PAGES, true ) ) ) {
+                continue;
+            }
+
+            $hook = add_submenu_page( '', '', '', 'read', $old, '__return_null' );
+
+            if ( $hook ) {
+                add_action( 'load-' . $hook, array( $this, 'leave_old_page' ) );
+            }
+        }
+    }
+
+    public function leave_old_page()
+    {
+        $old = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+        if ( ! isset( self::OLD_PAGES[ $old ] ) ) {
+            return;
+        }
+
+        $args         = wp_unslash( $_GET );
+        $args['page'] = self::OLD_PAGES[ $old ];
+
+        wp_safe_redirect( add_query_arg( urlencode_deep( $args ), self_admin_url( 'admin.php' ) ) );
+        exit;
+    }
+
     public function settings_page()
     {
         $administration_menu_title = _x('Administration', 'WP Admin', 'bp-better-messages');
@@ -770,17 +823,17 @@ class Better_Messages_Options
             __( 'Better Messages' ),
             $plugin_menu_title,
             'manage_options',
-            'bp-better-messages',
+            'better-messages',
             array( $this, 'settings_page_new_html' ),
             'dashicons-format-chat'
         );
 
         add_submenu_page(
-            'bp-better-messages',
+            'better-messages',
             _x( 'Settings', 'WP Admin', 'bp-better-messages' ),
             _x( 'Settings', 'WP Admin', 'bp-better-messages' ),
             'manage_options',
-            'bp-better-messages',
+            'better-messages',
             array( $this, 'settings_page_new_html' ),
             0
         );
@@ -792,7 +845,7 @@ class Better_Messages_Options
         }
 
         add_submenu_page(
-            'bp-better-messages',
+            'better-messages',
             _x( 'Administration', 'WP Admin', 'bp-better-messages' ),
             $administration_menu_title,
             $administration_cap,
@@ -802,45 +855,25 @@ class Better_Messages_Options
         );
 
         add_submenu_page(
-            'bp-better-messages',
+            'better-messages',
             _x( 'Chat Rooms', 'WP Admin', 'bp-better-messages' ),
             _x( 'Chat Rooms', 'WP Admin', 'bp-better-messages' ),
             'manage_options',
-            'bp-better-messages-chat-rooms',
+            'better-messages-chat-rooms',
             array( $this, 'chat_rooms_page_html' ),
             3
         );
 
         add_submenu_page(
-            'bp-better-messages',
+            'better-messages',
             _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
             _x( 'AI Chat Bots', 'WP Admin', 'bp-better-messages' ),
             'manage_options',
-            'bp-better-messages-ai',
+            'better-messages-ai',
             array( $this, 'ai_bots_page_new_html' ),
             4
         );
-        //}
 
-        /* add_submenu_page(
-            'bp-better-messages',
-            _x('System', 'WP Admin', 'bp-better-messages'),
-            _x('System', 'WP Admin', 'bp-better-messages'),
-            'manage_options',
-            'better-messages-system',
-            array($this, 'system_page_html'),
-            5
-        ); */
-
-        /*add_submenu_page(
-            'bp-better-messages',
-            _x('Moderation', 'Admin Menu', 'bp-better-messages'),
-            _x('Moderation', 'Admin Menu', 'bp-better-messages'),
-            'manage_options',
-            'better-messages-moderation',
-            array($this, 'moderation_page_html'),
-            2
-        );*/
     }
 
     public function settings_page_new_html()
@@ -856,12 +889,10 @@ class Better_Messages_Options
                 'name' => translate_user_role( $role_data['name'] ),
             );
         }
-        // wpRoles = editable roles minus administrator (no bm-guest, no bm-bot)
         $wp_roles = $roles;
 
         $roles[] = array( 'key' => 'bm-guest', 'name' => _x( 'Guests', 'Settings page', 'bp-better-messages' ) );
 
-        // allRoles includes administrator, bm-guest, bm-bot (used for role-to-role "To" dropdown)
         $all_roles_list = array();
         foreach ( $all_roles as $role_key => $role_data ) {
             $all_roles_list[] = array(
@@ -884,50 +915,35 @@ class Better_Messages_Options
             }
         }
 
-        $is_premium = function_exists('bpbm_fs') && bpbm_fs()->is_premium();
+        $is_premium = better_messages_is_websocket_build();
         $can_use_premium = Better_Messages()->functions->can_use_premium_code();
         $websocket_allowed = Better_Messages()->functions->can_use_premium_code_premium_only();
 
-        $license_url = admin_url('admin.php?page=bp-better-messages-pricing');
-        $account_url = admin_url('admin.php?page=bp-better-messages-account');
+        $license_url = admin_url('admin.php?page=better-messages-pricing');
+        $account_url = admin_url('admin.php?page=better-messages-account');
 
-        $is_trial_utilized = function_exists('bpbm_fs') ? bpbm_fs()->is_trial_utilized() : true;
-        $trial_url = ( function_exists('bpbm_fs') && ! $is_trial_utilized && ! $can_use_premium ) ? bpbm_fs()->get_trial_url() : '';
+        $license_data = Better_Messages_License::instance()->get();
+        $is_trial_utilized = ! empty( $license_data['had_license'] );
+        $trial_url = ( ! $is_trial_utilized && ! $can_use_premium ) ? admin_url('admin.php?page=better-messages-pricing&trial=1') : '';
+
+        if ( ! Better_Messages_License_Admin::instance()->can_change_license() ) {
+            $license_url = 'https://www.better-messages.com/pricing/';
+            $account_url = '';
+            $trial_url   = '';
+        }
 
         $has_websocket_class = class_exists('Better_Messages_WebSocket');
-        $download_url = '';
-        if ( $can_use_premium && ! $is_premium && function_exists('bpbm_fs') ) {
-            $download_url = bpbm_fs()->_get_latest_download_local_url();
-        }
-
-        $reconnect_url = '';
-        if ( $is_premium && ! $can_use_premium && function_exists('bpbm_fs') ) {
-            $user = bpbm_fs()->get_user();
-            $reconnect_url = $user ? $account_url : bpbm_fs()->get_reconnect_url();
-        }
+        $download_url = ( $can_use_premium && ! $is_premium ) ? Better_Messages_License::ACCOUNT_URL : '';
+        $reconnect_url = ( $is_premium && ! $can_use_premium ) ? $account_url : '';
 
         $site_id = $has_websocket_class ? Better_Messages_WebSocket()->site_id : '';
 
         $license_check = array();
-        if ( $can_use_premium && $has_websocket_class && function_exists('bpbm_fs') ) {
-            $user = bpbm_fs()->get_user();
-            $site = bpbm_fs()->get_site();
-            if ( $user && $site ) {
-                $license_check = array(
-                    'check' => array(
-                        'domain'      => $site_id,
-                        'license_key' => base64_encode( Better_Messages_WebSocket()->secret_key ),
-                        'site'        => $site->id,
-                    ),
-                    'lock' => array(
-                        'domain'      => $site_id,
-                        'license_key' => base64_encode( Better_Messages_WebSocket()->secret_key ),
-                        'site'        => $site->id,
-                        'user'        => $user->id,
-                        'auth'        => hash('sha256', $user->secret_key),
-                    ),
-                );
-            }
+
+        if ( $can_use_premium && $has_websocket_class ) {
+            $license_check = array(
+                'domain' => Better_Messages()->functions->clean_site_url( Better_Messages_License::instance()->url() ),
+            );
         }
 
 
@@ -967,51 +983,26 @@ class Better_Messages_Options
         $has_friends     = Better_Messages()->functions->is_friends_active();
         $has_peepso      = class_exists('PeepSo');
 
-        // BuddyPress sub-feature detection
         $has_bp_friends  = function_exists('friends_check_friendship');
         $has_bp_groups   = function_exists('bm_bp_is_active') && bm_bp_is_active('groups');
 
-        // PeepSo sub-feature detection
         $has_peepso_friends = class_exists('PeepSoFriendsPlugin');
         $has_peepso_groups  = class_exists('PeepSoGroupsPlugin') || class_exists('PeepSoGroup');
 
-        // Ultimate Member sub-feature detection
         $has_um_friends    = class_exists('UM_Friends_API');
         $has_um_groups     = class_exists('UM_Groups');
         $has_um_followers  = class_exists('UM_Followers_API');
 
-        // BuddyBoss App
         $has_buddyboss_app = function_exists('bbapp_send_push_notification');
 
+        $cron_status    = Better_Messages_Worker()->status();
         $cron_jobs_late = false;
-        $cron_jobs_list = array(
-            'better_messages_send_notifications',
-            'better_messages_sync_unread',
-            'better_messages_cleaner_job',
-            'better_messages_ai_ensure_completion_job',
-            'better_messages_sync_user_index_weekly',
-        );
-        $cron_events = _get_cron_array();
-        $cron_time   = time();
-        $cron_status = array();
-        if ( is_array( $cron_events ) ) {
-            foreach ( $cron_events as $timestamp => $event ) {
-                foreach ( $event as $hook => $details ) {
-                    if ( in_array( $hook, $cron_jobs_list, true ) ) {
-                        $is_late = $timestamp - ( $cron_time - ( 10 * MINUTE_IN_SECONDS ) ) < 0;
-                        if ( $is_late ) {
-                            $cron_jobs_late = true;
-                        }
-                        $cron_status[ $hook ] = array(
-                            'is_late'   => $is_late,
-                            'time_diff' => human_time_diff( $timestamp, $cron_time ) . ( $is_late ? ' ago' : '' ),
-                        );
-                    }
-                }
+        foreach ( $cron_status as $cron_entry ) {
+            if ( $cron_entry['is_late'] ) {
+                $cron_jobs_late = true;
             }
         }
 
-        // Database info for Tools tab
         global $wpdb;
         $db_info = array();
         if ( class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ) {
@@ -1032,10 +1023,9 @@ class Better_Messages_Options
 
         $last_sync_raw = get_option( 'bm_sync_user_roles_index_finish', false );
         $last_sync = $last_sync_raw ? wp_date( 'd-m-Y H:i', $last_sync_raw ) : '-';
-        $next_sync_raw = wp_next_scheduled( 'better_messages_sync_user_index_weekly' );
+        $next_sync_raw = Better_Messages_Worker()->next_run( 'better_messages_sync_user_index_weekly' );
         $next_sync = $next_sync_raw ? wp_date( 'd-m-Y H:i', $next_sync_raw ) : '-';
 
-        // MyCred point types
         $mycred_point_types = array();
         if ( function_exists( 'mycred_get_types' ) ) {
             $mc_types = mycred_get_types();
@@ -1047,7 +1037,6 @@ class Better_Messages_Options
             }
         }
 
-        // GamiPress point types
         $gamipress_point_types = array();
         if ( function_exists( 'gamipress_get_points_types' ) ) {
             $gp_types = gamipress_get_points_types();
@@ -1059,7 +1048,6 @@ class Better_Messages_Options
             }
         }
 
-        // Emoji sets
         $emoji_sets = array();
         if ( class_exists( 'Better_Messages_Emojis' ) ) {
             $emoji_sets = Better_Messages_Emojis()->emoji_sets;
@@ -1094,11 +1082,25 @@ class Better_Messages_Options
             $chat_rooms_count = isset( $counts['publish'] ) ? (int) $counts['publish'] : 0;
         }
 
-        // Load emailCustomHtml from separate option for frontend display
         $settings_for_frontend = $this->settings;
         $settings_for_frontend['emailCustomHtml'] = $this->get_email_custom_html();
 
+        $storage_data = null;
+
+        if ( class_exists( 'Better_Messages_Storage_Admin' ) ) {
+            $settings_for_frontend['storageGroups'] = Better_Messages_Storage()->routes();
+            $storage_data = array(
+                'groups' => Better_Messages_Storage_Admin()->groups_status(),
+                'guides' => array(
+                    'r2'    => 'https://www.better-messages.com/docs/cloud-storage/cloudflare-r2/',
+                    'bunny' => 'https://www.better-messages.com/docs/cloud-storage/bunny-net/',
+                    's3'    => 'https://www.better-messages.com/docs/cloud-storage/s3-compatible/',
+                ),
+            );
+        }
+
         $settings_data = array(
+            'storage'            => $storage_data,
             'settings'           => $settings_for_frontend,
             'roles'              => $roles,
             'allRoles'           => $all_roles_list,
@@ -1152,10 +1154,11 @@ class Better_Messages_Options
             'hasLearnDashInstructorRole' => $has_learndash_instructor_role,
             'hasMasterStudy'     => $has_masterstudy,
             'hasFriends'         => $has_friends,
-            'hasVoiceMessages'   => Better_Messages()->functions->voice_messages_addon_supported(),
+            'hasVoiceMessages'   => Better_Messages()->functions->voice_messages_addon_usable(),
+            'voiceAddon'         => class_exists( 'Better_Messages_License_Admin' ) ? Better_Messages_License_Admin::instance()->voice_addon() : null,
             'translationLanguages' => class_exists('Better_Messages_AI') ? Better_Messages_AI::instance()->get_all_translation_languages() : array(),
-            'giphyError'         => get_option( 'better_messages_gifs_giphy_error', get_option( 'bp_better_messages_giphy_error', false ) ),
-            'klipyError'         => get_option( 'better_messages_gifs_klipy_error', false ),
+            'giphyError'         => function_exists( 'wordplus_pickers' ) && wordplus_pickers() ? wordplus_pickers()->gif_key_error( 'giphy' ) : get_option( 'better_messages_gifs_giphy_error', get_option( 'bp_better_messages_giphy_error', false ) ),
+            'klipyError'         => function_exists( 'wordplus_pickers' ) && wordplus_pickers() ? wordplus_pickers()->gif_key_error( 'klipy' ) : get_option( 'better_messages_gifs_klipy_error', false ),
             'gifProviders'       => class_exists( 'Better_Messages_Gif_Provider_Factory' ) ? Better_Messages_Gif_Provider_Factory::get_providers_info() : array(),
             'stipopError'        => get_option( 'bp_better_messages_stipop_error', false ),
             'stickerManifestUrl' => class_exists( 'Better_Messages_Stickers_Manager' ) ? Better_Messages_Stickers_Manager::instance()->get_manifest_url_for_current_locale() : '',
@@ -1178,6 +1181,7 @@ class Better_Messages_Options
             'hasUmFollowers'     => $has_um_followers,
             'hasFcSpaces'        => $has_fluent_community,
             'hasFcCourses'       => $has_fluent_community && class_exists( 'FluentCommunity\\Modules\\Course\\Model\\Course' ),
+            'chatRoomsUrl'       => admin_url( 'admin.php?page=better-messages-chat-rooms' ),
             'hasBuddyBossApp'    => $has_buddyboss_app,
             'hasOneSignal'       => defined('ONESIGNAL_PLUGIN_URL') || defined('ONESIGNAL_VERSION_V3') || class_exists('OneSignal'),
             'hasProgressify'     => class_exists('DaftPlug\Progressify\Plugin') || defined('PROGRESSIFY_VERSION'),
@@ -1217,10 +1221,10 @@ class Better_Messages_Options
                 'google'   => 'https://cdn.jsdelivr.net/npm/emoji-datasource-google@14.0.0/img/google/sheets-256/64.png',
                 'facebook' => 'https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@14.0.0/img/facebook/sheets-256/64.png',
             ),
-            'emojiDatasetBaseUrl' => Better_Messages()->url . 'assets/emojies/',
+            'emojiDatasetBaseUrl' => Better_Messages_Emojis()->sdk() ? Better_Messages_Emojis()->sdk()->datasets_url() : '',
             'emojiSpriteStatus'  => Better_Messages_Emojis()->getLocalStatus(),
             'currentLocale'         => determine_locale(),
-            'contactUrl'         => method_exists( bpbm_fs(), 'contact_url' ) ? bpbm_fs()->contact_url() : '',
+            'contactUrl'         => admin_url( 'admin.php?page=better-messages-contact' ),
             'emailPreviewStrings' => array(
                 'testConversation' => __( 'Test Conversation', 'bp-better-messages' ),
                 'emailSubject'     => sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), __( 'Test Conversation', 'bp-better-messages' ) ),
@@ -1252,7 +1256,7 @@ class Better_Messages_Options
             'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse'
         );
 
-        $has_voice_messages = class_exists('BP_Better_Messages_Voice_Messages');
+        $has_voice_messages = class_exists('BP_Better_Messages_Voice_Messages') && Better_Messages()->functions->voice_messages_addon_licensed();
 
         $voice_transcription_ready = version_compare( phpversion(), '8.1', '>=' )
             && class_exists('Better_Messages_AI')
@@ -1274,6 +1278,7 @@ class Better_Messages_Options
             'providers'        => $providers,
             'voices'           => $voices,
             'hasVoiceMessages' => $has_voice_messages,
+            'voiceAddon'       => class_exists( 'Better_Messages_License_Admin' ) ? Better_Messages_License_Admin::instance()->voice_addon() : null,
             'voiceTranscriptionReady' => $voice_transcription_ready,
             'imagePricing'     => $image_pricing,
             'modelPricing'     => $model_pricing,
@@ -1281,7 +1286,7 @@ class Better_Messages_Options
             'pluginUrl'        => Better_Messages()->url,
             'pluginVersion'    => Better_Messages()->version,
             'phpVersion'       => phpversion(),
-            'settingsUrl'      => add_query_arg( 'page', 'bp-better-messages', admin_url('admin.php') ) . '#/integrations/openai',
+            'settingsUrl'      => add_query_arg( 'page', 'better-messages', admin_url('admin.php') ) . '#/integrations/openai',
             'pointsSystemActive' => class_exists( 'Better_Messages_Points' ) && Better_Messages_Points()->get_provider() !== null,
             'pointsSystemName'   => ( class_exists( 'Better_Messages_Points' ) && Better_Messages_Points()->get_provider() )
                 ? Better_Messages_Points()->get_provider()->get_provider_name()
@@ -1324,7 +1329,9 @@ class Better_Messages_Options
             'defaultSettings'      => $default_settings,
             'groupVideoCallsChats' => ( Better_Messages()->settings['groupCallsChats'] ?? '0' ) === '1',
             'groupAudioCallsChats' => ( Better_Messages()->settings['groupAudioCallsChats'] ?? '0' ) === '1',
-            'callsSettingsUrl'     => admin_url( 'admin.php?page=bp-better-messages#/group-calls' ),
+            'callsSettingsUrl'     => admin_url( 'admin.php?page=better-messages#/group-calls' ),
+            'mentionAllPermission' => Better_Messages()->settings['mentionAllPermission'] ?? 'moderators',
+            'groupCallAlerts'      => ( Better_Messages()->settings['groupCallAlerts'] ?? '1' ) === '1',
         );
 
         ?>
@@ -1346,6 +1353,8 @@ class Better_Messages_Options
             'messagesEnabled'      => $messages_enabled,
             'reportsEnabled'       => $reports_enabled,
             'guestsEnabled'        => $can_administrate,
+            'filesEnabled'         => $can_administrate,
+            'canManageFiles'       => current_user_can('manage_options'),
             'bulkMessagingEnabled'  => $bulk_messaging_enabled,
             'exportEnabled'        => current_user_can('manage_options'),
             'pluginUrl'            => Better_Messages()->url,
@@ -1368,10 +1377,6 @@ class Better_Messages_Options
         include $this->path . 'layout-moderation.php';
     }
 
-    /**
-     * Recursively sanitize an array — strings get sanitize_text_field,
-     * numbers and booleans pass through, sub-arrays recurse.
-     */
     public function sanitize_array_recursive( $arr ) {
         $sanitized = array();
         foreach ( $arr as $key => $value ) {
@@ -1387,17 +1392,10 @@ class Better_Messages_Options
         return $sanitized;
     }
 
-    /**
-     * Sanitize emoji customization data.
-     */
     public function sanitize_emoji_data( $emojies ) {
         return $this->sanitize_array_recursive( $emojies );
     }
 
-    /**
-     * Sanitize an inline SVG markup string with a tag/attribute whitelist.
-     * Used for the bubbleIcon setting where users can paste SVG from lucide.dev etc.
-     */
     public function sanitize_svg( $svg ) {
         $allowed_attrs = array(
             'xmlns'             => true,
@@ -1896,8 +1894,6 @@ class Better_Messages_Options
             $settings['aiModerationEnabled'] = '0';
         }
 
-        // When AI moderation is disabled, sub-setting inputs are disabled and not submitted.
-        // Preserve existing sub-settings from database to prevent silent reset to defaults.
         if( $settings['aiModerationEnabled'] !== '1' ) {
             $existing = $this->settings;
             if( ! isset( $settings['aiModerationAction'] ) ){
@@ -1933,7 +1929,6 @@ class Better_Messages_Options
             }
         }
 
-        // Validate threshold is within 0-1 range
         if( isset( $settings['aiModerationThreshold'] ) ){
             $settings['aiModerationThreshold'] = max( 0, min( 1, (float) $settings['aiModerationThreshold'] ) );
             $settings['aiModerationThreshold'] = (string) $settings['aiModerationThreshold'];
@@ -2210,6 +2205,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['groupAudioCallsChats'] ) ){
             $settings['groupAudioCallsChats'] = '0';
+        }
+
+        if( ! isset( $settings['groupCallsEncryption'] ) ){
+            $settings['groupCallsEncryption'] = '0';
         }
 
         if( ! isset( $settings['allowUsersRestictNewThreads'] ) ){
@@ -2648,6 +2647,41 @@ class Better_Messages_Options
             $settings['mentionsForceNotifications'] = '0';
         }
 
+        foreach ( array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses' ) as $level_key ) {
+            if( ! isset( $settings[ $level_key ] ) || ! in_array( $settings[ $level_key ], array( 'all', 'mentions', 'none' ), true ) ) {
+                $settings[ $level_key ] = isset( $this->settings[ $level_key ] ) && in_array( $this->settings[ $level_key ], array( 'all', 'mentions', 'none' ), true ) ? $this->settings[ $level_key ] : 'all';
+            }
+        }
+
+        if( ! isset( $settings['emailScopeDefault'] ) || ! in_array( $settings['emailScopeDefault'], array( 'all', 'direct', 'off' ), true ) ) {
+            $settings['emailScopeDefault'] = isset( $this->settings['emailScopeDefault'] ) && in_array( $this->settings['emailScopeDefault'], array( 'all', 'direct', 'off' ), true ) ? $this->settings['emailScopeDefault'] : 'all';
+        }
+
+        if( ! isset( $settings['mentionAllPermission'] ) || ! in_array( $settings['mentionAllPermission'], array( 'nobody', 'moderators', 'everyone' ), true ) ) {
+            $settings['mentionAllPermission'] = isset( $this->settings['mentionAllPermission'] ) && in_array( $this->settings['mentionAllPermission'], array( 'nobody', 'moderators', 'everyone' ), true ) ? $this->settings['mentionAllPermission'] : 'moderators';
+        }
+
+        if( ! isset( $settings['groupCallAlerts'] ) ) {
+            $settings['groupCallAlerts'] = '0';
+        }
+
+        if( isset( $settings['groupCallAlertsCooldown'] ) ) {
+            $settings['groupCallAlertsCooldown'] = min( 1440, max( 0, intval( $settings['groupCallAlertsCooldown'] ) ) );
+        }
+
+        if( isset( $settings['groupCallAlertsUserLimit'] ) ) {
+            $settings['groupCallAlertsUserLimit'] = min( 100, max( 0, intval( $settings['groupCallAlertsUserLimit'] ) ) );
+        }
+
+        $notify_defaults = array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses', 'emailScopeDefault' );
+
+        foreach ( $notify_defaults as $notify_key ) {
+            if( isset( $this->settings[ $notify_key ] ) && $this->settings[ $notify_key ] !== $settings[ $notify_key ] ) {
+                update_option( 'better_messages_notify_defaults_changed_at', gmdate( 'Y-m-d H:i:s' ), false );
+                break;
+            }
+        }
+
         if( ! isset( $settings['emailUnsubscribeLink'] ) ) {
             $settings['emailUnsubscribeLink'] = '0';
         }
@@ -2729,7 +2763,6 @@ class Better_Messages_Options
             $settings[ $location_key ] = (string) round( $location_value, 6 );
         }
 
-        // Enum validations for select/radio fields
         if( ! isset( $settings['sidebarCompactMode'] ) || ! in_array( $settings['sidebarCompactMode'], ['auto', 'always_compact', 'always_expanded'], true ) ) {
             $settings['sidebarCompactMode'] = 'auto';
         }
@@ -2794,12 +2827,10 @@ class Better_Messages_Options
             $settings['wooCommercePrePurchaseCheckoutPlacement'] = 'after_order_summary';
         }
 
-        // Email template source validation (for BuddyPress sites)
         if( ! isset( $settings['emailTemplateSource'] ) || ! in_array( $settings['emailTemplateSource'], ['buddypress', 'custom'] ) ) {
             $settings['emailTemplateSource'] = 'buddypress';
         }
 
-        // Email template mode validation
         if( ! isset( $settings['emailTemplateMode'] ) || ! in_array( $settings['emailTemplateMode'], ['simple', 'custom'] ) ) {
             $settings['emailTemplateMode'] = 'simple';
         }
@@ -2856,7 +2887,6 @@ class Better_Messages_Options
 
         $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules', 'aiModerationSiteContext' ];
 
-        // Fields that need special HTML handling (processed separately with wp_kses)
         $html_fields = [ 'emailCustomHtml' ];
 
         $svg_icon_fields = [
@@ -2886,6 +2916,8 @@ class Better_Messages_Options
             'rateLimitNewThread'        => 0,
             'notificationsInterval'     => 0,
             'notificationsOfflineDelay' => 0,
+            'groupCallAlertsCooldown'   => 0,
+            'groupCallAlertsUserLimit'  => 0,
             'notificationSound'         => 0,
             'notificationSoundId'       => 0,
             'sentSound'                 => 0,
@@ -2894,8 +2926,14 @@ class Better_Messages_Options
             'callSoundId'               => 0,
             'dialingSound'              => 0,
             'dialingSoundId'            => 0,
+            'groupCallSound'            => 0,
+            'groupCallSoundId'          => 0,
             'modernBorderRadius'        => 0,
             'attachmentsMaxSize'        => 1,
+            'attachmentsMaxSizeImages'  => 0,
+            'attachmentsMaxSizeVideos'  => 0,
+            'attachmentsMaxSizeAudio'   => 0,
+            'attachmentsMaxSizeOther'   => 0,
             'attachmentsMaxNumber'      => 0,
             'voiceMessagesMaxDuration'  => 0,
             'voiceMessagesAutoDelete'   => 0,
@@ -2930,7 +2968,6 @@ class Better_Messages_Options
         ];
 
         foreach ( $settings as $key => $value ) {
-            /** Processing checkbox groups **/
 
             if( in_array( $key, $arrays ) ){
                 $this->settings[$key] = $this->sanitize_array_recursive( (array) $value );
@@ -2940,10 +2977,8 @@ class Better_Messages_Options
                     $this->settings[$key][] = sanitize_text_field( $val );
                 }
             } else if ( in_array( $key, $html_fields ) ) {
-                // HTML fields are processed separately with wp_kses later
                 $this->settings[$key] = $value;
             } else if ( in_array( $key, $svg_icon_fields, true ) && is_string( $value ) && stripos( ltrim( $value ), '<svg' ) === 0 ) {
-                // Custom SVG icon — sanitize with SVG-safe tag/attribute whitelist
                 $this->settings[$key] = $this->sanitize_svg( wp_unslash( $value ) );
             } else {
                 if( in_array( $key, $textareas ) ){
@@ -2970,7 +3005,8 @@ class Better_Messages_Options
             'notificationSound',
             'sentSound',
             'callSound',
-            'dialingSound'
+            'dialingSound',
+            'groupCallSound'
         ];
 
         foreach ( $sounds_keys as $key ) {
@@ -2988,7 +3024,6 @@ class Better_Messages_Options
             }
         }
 
-        // Process email logo
         if( $this->settings['emailLogoId'] > 0 ){
             $attachment_url = wp_get_attachment_url( $this->settings['emailLogoId'] );
             if( $attachment_url && wp_attachment_is_image( $this->settings['emailLogoId'] ) ){
@@ -3002,12 +3037,10 @@ class Better_Messages_Options
             $this->settings['emailLogoUrl'] = '';
         }
 
-        // Sanitize pointsBalanceUrl as URL
         if( isset( $this->settings['pointsBalanceUrl'] ) && ! empty( $this->settings['pointsBalanceUrl'] ) ){
             $this->settings['pointsBalanceUrl'] = esc_url_raw( $this->settings['pointsBalanceUrl'] );
         }
 
-        // Validate email colors (hex format)
         $email_color_keys = ['emailPrimaryColor', 'emailBackgroundColor', 'emailContentBgColor', 'emailTextColor'];
         $email_color_defaults = [
             'emailPrimaryColor'     => '#21759b',
@@ -3019,15 +3052,12 @@ class Better_Messages_Options
         foreach ( $email_color_keys as $color_key ) {
             if( isset( $this->settings[$color_key] ) ){
                 $color = $this->settings[$color_key];
-                // Validate hex color format
                 if( ! preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color) ){
                     $this->settings[$color_key] = $email_color_defaults[$color_key];
                 }
             }
         }
 
-        // Handle email custom HTML — allow email-specific CSS properties (mso-*, Margin, vendor prefixes)
-        // that wp_kses would otherwise strip. Only admins can save this content.
         if( isset( $this->settings['emailCustomHtml'] ) && ! empty( $this->settings['emailCustomHtml'] ) ){
             $allow_all_css = function( $styles ) {
                 return array_merge( $styles, array(
@@ -3038,7 +3068,6 @@ class Better_Messages_Options
             };
             add_filter( 'safe_style_css', $allow_all_css );
 
-            // Allow all HTML tags that are needed for email templates
             $allowed_html = array_merge(
                 wp_kses_allowed_html('post'),
                 array(
@@ -3084,7 +3113,6 @@ class Better_Messages_Options
             $this->settings['wooCommerceMessagesSlug'] = 'messages';
         }
 
-        // Ensure required output formats are in attachmentsFormats when optimization is enabled
         if ( is_array( $this->settings['attachmentsFormats'] ) ) {
             $required_formats = array();
             if ( $this->settings['transcodingImageFormat'] !== 'original' ) {
@@ -3104,11 +3132,10 @@ class Better_Messages_Options
 
         wp_unschedule_hook('better_messages_send_notifications');
 
-        // Save emailCustomHtml to separate option to avoid bloating main settings
         if( isset( $this->settings['emailCustomHtml'] ) && ! empty( $this->settings['emailCustomHtml'] ) ){
             update_option( 'better-messages-email-custom-html', $this->settings['emailCustomHtml'], false );
         }
-        $this->settings['emailCustomHtml'] = ''; // Don't store in main settings
+        $this->settings['emailCustomHtml'] = '';
 
         update_option( 'bp-better-chat-settings', $this->settings );
         $this->settings = $this->get_effective_settings();
@@ -3117,7 +3144,6 @@ class Better_Messages_Options
 
         update_option( 'bp-better-chat-settings-updated', true );
 
-        // Ensure user index is created if initial sync never completed
         $last_sync = get_option( 'bm_sync_user_roles_index_finish', false );
         if ( ! $last_sync ) {
             Better_Messages()->users->sync_all_users();

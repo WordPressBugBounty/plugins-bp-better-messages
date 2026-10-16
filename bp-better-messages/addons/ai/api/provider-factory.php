@@ -5,12 +5,6 @@ if( ! defined( 'ABSPATH' ) ) exit;
 if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
     class Better_Messages_AI_Provider_Factory
     {
-        /**
-         * Create a provider instance
-         *
-         * @param string $provider_id Provider identifier ('openai', 'anthropic', 'gemini')
-         * @return Better_Messages_AI_Provider|null
-         */
         public static function create( $provider_id )
         {
             switch ( $provider_id ) {
@@ -25,11 +19,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
             }
         }
 
-        /**
-         * Get info about all available providers (for admin UI)
-         *
-         * @return array
-         */
         public static function get_providers_info()
         {
             $providers = [
@@ -66,12 +55,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
             return apply_filters( 'better_messages_ai_providers_info', $providers );
         }
 
-        /**
-         * Get global API key for a provider
-         *
-         * @param string $provider_id
-         * @return string
-         */
         public static function get_global_api_key( $provider_id )
         {
             switch ( $provider_id ) {

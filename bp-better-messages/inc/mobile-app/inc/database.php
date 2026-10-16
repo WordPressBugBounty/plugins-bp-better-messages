@@ -113,8 +113,6 @@ if (!class_exists('Better_Messages_Mobile_App_Database')):
             if( $current_version < 0.3 ){
                 $columns = $wpdb->get_col( "SHOW COLUMNS FROM `{$table}`" );
 
-                // 0.2 stored the native calls flags per device for a day before the
-                // feature moved to runtime detection. Drop them where that build ran.
                 if( is_array( $columns ) ) {
                     foreach( array( 'native_calls', 'native_calls_version' ) as $column ){
                         if( in_array( $column, $columns, true ) ){

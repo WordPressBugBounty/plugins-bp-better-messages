@@ -1,14 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Block, Suspend, Report for BuddyPress (bp-toolkit) integration.
- *
- * The plugin keeps its own block list in the `bptk_block` user meta and blocks
- * BuddyPress messages both ways: the blocked member can't write to the member who
- * blocked them, and the member who blocked can't write to them either. This applies
- * the same rule to Better Messages conversations, for replies and for new ones.
- */
 if ( !class_exists( 'Better_Messages_BP_Toolkit' ) ){
 
     class Better_Messages_BP_Toolkit
@@ -32,10 +24,6 @@ if ( !class_exists( 'Better_Messages_BP_Toolkit' ) ){
             add_action( 'better_messages_before_new_thread', array( $this, 'disable_start_thread_for_blocked_users' ), 10, 2 );
         }
 
-        /**
-         * BPTK_Block is defined on `init` and only when BuddyPress is active, so this
-         * is the check that the plugin is really blocking anything.
-         */
         public function is_active(){
             return class_exists( 'BPTK_Block' );
         }
@@ -49,9 +37,6 @@ if ( !class_exists( 'Better_Messages_BP_Toolkit' ) ){
                 return $allowed;
             }
 
-            /**
-             * Not block in group thread
-             */
             if( count( $participants['recipients'] ) > 1 ){
                 return $allowed;
             }
@@ -102,12 +87,6 @@ if ( !class_exists( 'Better_Messages_BP_Toolkit' ) ){
             }
         }
 
-        /**
-         * Members the given user blocked.
-         *
-         * @param int $user_id
-         * @return int[]
-         */
         public function get_blocked_users( $user_id ){
             if( (int) $user_id === 0 ) return [];
 

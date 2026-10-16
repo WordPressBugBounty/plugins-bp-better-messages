@@ -81,16 +81,12 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
 
             add_filter( 'bp_get_message_thread_view_link',  array( $this, 'thread_link' ), 20, 2 );
 
-            // I have 0 idea why this fixes messages link when using Youzer plugin
             add_action( 'bp_ready', array( $this, 'fix_youzer' ) );
 
             add_action( 'bp_screens', array( $this, 'fix_404' ) );
 
             add_action( 'bp_core_user_updated_last_activity', array( $this, 'override_last_activity_2' ), 10, 2 );
 
-            /**
-             * Youzify button
-             */
             add_filter( 'youzify_get_send_message_button', array( $this, 'modify_youzify_button' ), 20 );
 
             add_action('better_messages_mobile_settings', array($this, 'mobile_settings'), 5, 1);
@@ -348,13 +344,11 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
                 ];
 
                 if ($message->thread_id) {
-                    // Existing threads
                     $args['thread_id'] = $message->thread_id;
 
                     Better_Messages()->functions->new_message($args);
                     $message->recipients = [];
                 } else if (isset($message->recipients) && is_array($message->recipients) && !empty($message->recipients)) {
-                    // New threads
                     $recipients = $message->recipients;
 
                     $bm_recipients = [];

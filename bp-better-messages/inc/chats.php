@@ -12,19 +12,15 @@ class Better_Messages_Chats
     public static function instance()
     {
 
-        // Store the instance locally to avoid private static replication
         static $instance = null;
 
-        // Only run these methods if they haven't been run previously
         if ( null === $instance ) {
             $instance = new Better_Messages_Chats;
             $instance->setup_actions();
         }
 
-        // Always return the instance
         return $instance;
 
-        // The last metroid is in captivity. The galaxy is at peace.
     }
 
     public function setup_actions(){
@@ -34,8 +30,6 @@ class Better_Messages_Chats
 
         add_shortcode( 'bp_better_messages_chat_room', array( $this, 'layout' ) );
         add_shortcode( 'better_messages_chat_room', array( $this, 'layout' ) );
-
-        //add_action( 'messages_message_sent', array( $this, 'on_message_sent' ) );
 
         add_action( "save_post_bpbm-chat", array( $this, 'on_chat_update' ), 10, 3 );
         add_action( 'before_delete_post',  array( $this, 'on_chat_delete' ), 10, 1 );
@@ -135,12 +129,6 @@ class Better_Messages_Chats
         }
     }
 
-    /**
-     * @param string $title
-     * @param int $thread_id
-     * @param BM_Thread $thread
-     * @return string
-     */
     public function chat_thread_title(string $title, int $thread_id, $thread ){
         $thread_type = Better_Messages()->functions->get_thread_type( $thread_id );
         if( $thread_type !== 'chat-room' ) return $title;
@@ -600,20 +588,6 @@ class Better_Messages_Chats
             $rooms[] = $room;
         }
 
-        if ( ! empty( $thread_ids ) ) {
-            $thread_placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
-
-            $by_thread = $this->fetch_packed_recipients( $thread_ids, $thread_placeholders );
-
-            foreach ( $rooms as &$room ) {
-                if ( $room['ephemeral'] === 1 || $room['hideParticipants'] === 1 ) continue;
-                $room['participants'] = isset( $by_thread[ $room['thread_id'] ] )
-                    ? $by_thread[ $room['thread_id'] ]
-                    : array();
-            }
-            unset( $room );
-        }
-
         $show_online = Better_Messages()->realtime
             && ! empty( Better_Messages()->settings['chatRoomsShowOnline'] )
             && Better_Messages()->settings['chatRoomsShowOnline'] === '1';
@@ -621,6 +595,21 @@ class Better_Messages_Chats
         if ( $show_online ) {
             foreach ( $rooms as &$room ) {
                 $room['showOnline'] = empty( $room['loginRequired'] ) && $room['hideParticipantsCount'] !== 1 ? 1 : 0;
+            }
+            unset( $room );
+        }
+
+        if ( ! empty( $thread_ids ) ) {
+            $thread_placeholders = implode( ',', array_fill( 0, count( $thread_ids ), '%d' ) );
+
+            $by_thread = $this->fetch_packed_recipients( $thread_ids, $thread_placeholders );
+
+            foreach ( $rooms as &$room ) {
+                if ( $room['ephemeral'] === 1 ) continue;
+                if ( $room['hideParticipants'] === 1 && $room['showOnline'] !== 1 ) continue;
+                $room['participants'] = isset( $by_thread[ $room['thread_id'] ] )
+                    ? $by_thread[ $room['thread_id'] ]
+                    : array();
             }
             unset( $room );
         }
@@ -822,7 +811,7 @@ class Better_Messages_Chats
         }
 
         $defaults = $this->get_chat_settings( 0 );
-        update_post_meta( $post_id, 'bpbm-chat-settings', $defaults );
+        $this->save_chat_settings( $post_id, $defaults );
 
         return $this->format_chat_room_for_rest( $post_id );
     }
@@ -1078,6 +1067,8 @@ class Better_Messages_Chats
             set_post_thumbnail( $new_id, get_post_thumbnail_id( $chat_id ) );
         }
 
+        $this->save_chat_settings( $new_id, $settings );
+
         $copy_participants = ! empty( $request->get_param( 'copyParticipants' ) );
 
         if ( $copy_participants ) {
@@ -1241,12 +1232,16 @@ class Better_Messages_Chats
             $settings['auto_remove_inactive']            = '0';
             $settings['auto_add']                        = array();
             $settings['enable_notifications']            = '0';
+            $settings['notification_level']              = 'none';
             $settings['enable_chat_email_notifications'] = '0';
             $settings['hide_from_thread_list']           = '1';
         }
 
-        $was_ephemeral = $this->get_chat_settings( $chat_id );
-        $was_ephemeral = $was_ephemeral['ephemeral_participants'] === '1';
+        $this->normalize_notification_settings( $settings );
+
+        $stored_settings = $this->get_chat_settings( $chat_id );
+        $previous_level  = $stored_settings['notification_level'];
+        $was_ephemeral   = $stored_settings['ephemeral_participants'] === '1';
 
         foreach ( array( 'group_video_calls', 'group_audio_calls' ) as $call_field ) {
             if ( isset( $settings[ $call_field ] ) ) {
@@ -1335,6 +1330,8 @@ class Better_Messages_Chats
         } else {
             Better_Messages()->functions->delete_thread_meta( $thread_id, 'email_disabled' );
         }
+
+        $this->sync_notification_meta( $thread_id, $settings, $previous_level );
 
         if ( isset( $settings['can_join'] ) ) {
             update_post_meta( $chat_id, 'bpbm-chat-can-join', $settings['can_join'] );
@@ -1590,6 +1587,7 @@ class Better_Messages_Chats
 
             if( $is_moderator ){
                 $thread_item['restricted'] = Better_Messages()->moderation->get_restricted_users( $thread_id );
+                $thread_item['chatRoom']['protectedUsers'] = Better_Messages()->moderation->get_protected_users( $thread_id, $user_id );
             }
 
             if ( ! $can_read ) {
@@ -1639,6 +1637,7 @@ class Better_Messages_Chats
             } else {
                 if( $is_moderator ){
                     $thread_item['restricted'] = Better_Messages()->moderation->get_restricted_users( $thread_id );
+                    $thread_item['chatRoom']['protectedUsers'] = Better_Messages()->moderation->get_protected_users( $thread_id, $user_id );
                 }
 
                 if ( $is_closed && ! $is_moderator ) {
@@ -1913,6 +1912,9 @@ class Better_Messages_Chats
             'enable_system_messages'          => '0',
             'system_messages_disabled_types'  => array(),
             'enable_notifications'            => '0',
+            'notification_level'              => '',
+            'mention_all'                     => 'default',
+            'call_alerts'                     => 'default',
             'allow_guests'                    => '0',
             'show_to_guests'                  => '0',
             'show_when_closed'                => '0',
@@ -1949,7 +1951,54 @@ class Better_Messages_Chats
             $result['can_reply'][] = 'bm-guest';
         }
 
+        $this->normalize_notification_settings( $result );
+
         return $result;
+    }
+
+    public function normalize_notification_settings( array &$settings ) {
+        if ( ! isset( $settings['notification_level'] ) || ! in_array( $settings['notification_level'], array( 'all', 'mentions', 'none' ), true ) ) {
+            $settings['notification_level'] = ( isset( $settings['enable_notifications'] ) && $settings['enable_notifications'] === '1' ) ? 'all' : 'mentions';
+        }
+
+        $settings['enable_notifications'] = $settings['notification_level'] === 'all' ? '1' : '0';
+
+        if ( ! isset( $settings['mention_all'] ) || ! in_array( $settings['mention_all'], array( 'default', 'nobody', 'moderators', 'everyone' ), true ) ) {
+            $settings['mention_all'] = 'default';
+        }
+
+        if ( ! isset( $settings['call_alerts'] ) || ! in_array( $settings['call_alerts'], array( 'default', 'on', 'off' ), true ) ) {
+            $settings['call_alerts'] = 'default';
+        }
+    }
+
+    private function sync_notification_meta( $thread_id, array $settings, $previous_level = '' ) {
+        if ( ! $thread_id ) {
+            return;
+        }
+
+        Better_Messages()->functions->update_thread_meta( $thread_id, 'notification_level', $settings['notification_level'] );
+
+        foreach ( array( 'mention_all', 'call_alerts' ) as $key ) {
+            if ( $settings[ $key ] === 'default' ) {
+                Better_Messages()->functions->delete_thread_meta( $thread_id, $key );
+            } else {
+                Better_Messages()->functions->update_thread_meta( $thread_id, $key, $settings[ $key ] );
+            }
+        }
+
+        $rank = array( 'none' => 0, 'mentions' => 1, 'all' => 2 );
+
+        if ( $previous_level !== '' && isset( $rank[ $previous_level ] ) && $rank[ $settings['notification_level'] ] > $rank[ $previous_level ] ) {
+            global $wpdb;
+
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE `" . bm_get_table( 'recipients' ) . "` SET `last_email` = %s WHERE `thread_id` = %d AND `is_muted` = 0",
+                gmdate( 'Y-m-d H:i:s' ), $thread_id
+            ) );
+        }
+
+        Better_Messages()->notification_levels->forget_thread( $thread_id );
     }
 
     public function save_post( $post_id, $post ){
@@ -1957,12 +2006,10 @@ class Better_Messages_Chats
             return $post->ID;
         }
 
-        //Verify it came from proper authorization.
         if ( ! wp_verify_nonce($_POST['bpbm_save_chat_nonce'], 'bpbm-save-chat-settings-' . $post->ID ) ) {
             return $post->ID;
         }
 
-        //Check if the current user can edit the post
         if ( ! current_user_can( 'manage_options' ) ) {
             return $post->ID;
         }
@@ -2024,6 +2071,17 @@ class Better_Messages_Chats
             if ( ! isset( $settings['enable_notifications'] ) ) {
                 $settings['enable_notifications'] = '0';
             }
+
+            $stored_settings = $this->get_chat_settings( $post->ID );
+            $previous_level  = $stored_settings['notification_level'];
+
+            foreach ( array( 'notification_level', 'mention_all', 'call_alerts' ) as $notification_key ) {
+                if ( ! isset( $settings[ $notification_key ] ) ) {
+                    $settings[ $notification_key ] = $stored_settings[ $notification_key ];
+                }
+            }
+
+            $this->normalize_notification_settings( $settings );
 
             if ( ! isset( $settings['allow_guests'] ) ) {
                 $settings['allow_guests'] = '0';
@@ -2107,6 +2165,8 @@ class Better_Messages_Chats
                 Better_Messages()->functions->delete_thread_meta( $thread_id, 'email_disabled' );
             }
 
+            $this->sync_notification_meta( $thread_id, $settings, $previous_level );
+
             if( isset( $settings['can_join'] ) ) {
                 update_post_meta( $post->ID, 'bpbm-chat-can-join', $settings['can_join'] );
             } else {
@@ -2129,9 +2189,6 @@ class Better_Messages_Chats
 
     }
 
-    /**
-     * @deprecated Use render_chat_settings() instead
-     */
     public function bpbm_chat_settings( $post ){
         $this->render_chat_settings( $post );
     }
@@ -2166,7 +2223,6 @@ class Better_Messages_Chats
         $full_screen = isset($args['full_screen']) ? $args['full_screen'] : '0';
 
         if (defined('WP_DEBUG') && true === WP_DEBUG) {
-            // some debug to add later
         } else {
             error_reporting(0);
         }
@@ -2323,12 +2379,13 @@ class Better_Messages_Chats
     }
 
     public function user_can_reply( $user_id, $chat_id ){
-        if( user_can( $user_id, 'manage_options') ) return true;
         if( Better_Messages()->functions->is_ai_bot_user( $user_id ) ) return true;
 
         $thread_id = $this->get_chat_thread_id( $chat_id );
 
-        if( Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ) return true;
+        if( user_can( $user_id, 'manage_options') || Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ){
+            return isset( Better_Messages()->moderation ) ? Better_Messages()->moderation->can_send_reply( true, $user_id, $thread_id ) : true;
+        }
 
         $post = get_post( $chat_id );
         if ( $post && $post->post_status === 'draft' ) return false;
@@ -2349,13 +2406,21 @@ class Better_Messages_Chats
     }
 
     public function get_chat_thread_id( $chat_id ){
-        global $wpdb;
-
         $cache_key = (int) $chat_id;
 
         if ( array_key_exists( $cache_key, $this->chat_thread_id_cache ) ) {
             return $this->chat_thread_id_cache[ $cache_key ];
         }
+
+        return Better_Messages()->functions->with_lock( 'chat_thread|' . $cache_key, function () use ( $chat_id ) {
+            return $this->find_or_create_chat_thread( $chat_id );
+        } );
+    }
+
+    private function find_or_create_chat_thread( $chat_id ){
+        global $wpdb;
+
+        $cache_key = (int) $chat_id;
 
         $thread_id = (int) $wpdb->get_var( $wpdb->prepare( "
         SELECT bm_thread_id
@@ -2594,7 +2659,6 @@ class Better_Messages_Chats
                 }
 
                 if( count($to_exclude_users) > 0 ){
-                    // Ensure AI bot users (negative IDs) are never auto-excluded
                     $to_exclude_users = array_filter( $to_exclude_users, function( $uid ) {
                         return $uid > 0 || ! Better_Messages()->functions->is_ai_bot_user( $uid );
                     });

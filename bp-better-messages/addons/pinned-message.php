@@ -134,7 +134,7 @@ if ( !class_exists( 'Better_Messages_Pinned_Message' ) ) {
             global $wpdb;
 
             $sql = $wpdb->prepare("
-            SELECT `bm_message_id`
+            SELECT DISTINCT `bm_message_id`
             FROM `" . bm_get_table('meta') . "`
             WHERE `meta_key` = 'is_pinned'
             AND `bm_message_id` IN (SELECT id FROM `" . bm_get_table('messages') . "` WHERE `thread_id` = %d)

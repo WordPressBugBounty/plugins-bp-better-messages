@@ -23,13 +23,10 @@ if ( ! class_exists( 'Better_Messages_Progressify' ) ) {
         {
             global $wpdb;
 
-            // Detect which version of Progressify is active
             if ( defined('PROGRESSIFY_VERSION') ) {
-                // New version (wordpress.org)
                 $this->table_name   = $wpdb->prefix . 'progressify_push_notifications_subscribers';
                 $this->vapid_option = 'progressify_vapid_keys';
             } else {
-                // Old version (codecanyon / daftplug-progressify)
                 $this->table_name   = $wpdb->prefix . 'daftplug_progressify_push_notifications_subscribers';
                 $this->vapid_option = 'daftplug_progressify_vapid_keys';
             }

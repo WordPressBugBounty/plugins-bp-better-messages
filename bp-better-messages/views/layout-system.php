@@ -1,7 +1,4 @@
 <?php
-/**
- * Settings page
- */
 defined( 'ABSPATH' ) || exit;?>
 
 <div class="wrap">

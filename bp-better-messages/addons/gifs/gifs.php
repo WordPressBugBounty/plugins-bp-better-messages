@@ -2,10 +2,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-require_once __DIR__ . '/provider-interface.php';
 require_once __DIR__ . '/provider-factory.php';
-require_once __DIR__ . '/giphy.php';
-require_once __DIR__ . '/klipy.php';
 
 if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
     class Better_Messages_Gifs
@@ -24,7 +21,6 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
         public function __construct()
         {
             add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
-            add_action( 'bp_better_chat_settings_updated', array( $this, 'on_settings_updated' ) );
 
             add_filter( 'bp_better_messages_pre_format_message', array( $this, 'format_message' ), 9, 4 );
             add_filter( 'bp_better_messages_after_format_message', array( $this, 'after_format_message' ), 9, 4 );
@@ -186,53 +182,11 @@ if ( ! class_exists( 'Better_Messages_Gifs' ) ) {
             return $result;
         }
 
-        public function on_settings_updated( $settings )
-        {
-            $old = Better_Messages()->settings;
-
-            $gif_keys = array(
-                'gifsProvider',
-                'giphyApiKey', 'giphyContentRating', 'giphyLanguage',
-                'klipyApiKey', 'klipyLocale',
-            );
-
-            $changed = false;
-            foreach ( $gif_keys as $key ) {
-                $new_val = isset( $settings[ $key ] ) ? $settings[ $key ] : null;
-                $old_val = isset( $old[ $key ] ) ? $old[ $key ] : null;
-                if ( $new_val !== null && $new_val !== $old_val ) {
-                    $changed = true;
-                    break;
-                }
-            }
-
-            if ( $changed ) {
-                self::flush_cache();
-            }
-
-            $provider_id = isset( $settings['gifsProvider'] )
-                ? $settings['gifsProvider']
-                : Better_Messages_Gif_Provider_Factory::get_active_provider_id();
-
-            if ( $provider_id === 'disabled' ) {
-                return;
-            }
-
-            $provider = Better_Messages_Gif_Provider_Factory::create( $provider_id );
-            if ( $provider && ! empty( $provider->get_api_key() ) ) {
-                $provider->check_api_key();
-            }
-        }
-
         public static function flush_cache()
         {
-            global $wpdb;
-            $like = $wpdb->esc_like( '_transient_bm_gifs_' ) . '%';
-            $wpdb->query( $wpdb->prepare(
-                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-                $like,
-                $wpdb->esc_like( '_transient_timeout_bm_gifs_' ) . '%'
-            ) );
+            if ( function_exists( 'wordplus_pickers' ) && wordplus_pickers() ) {
+                wordplus_pickers()->flush_gif_cache();
+            }
         }
 
         public function format_message( $message, $message_id, $context, $user_id )

@@ -1,9 +1,4 @@
 <?php
-/**
- * @var array    $attributes The array of attributes for this block.
- * @var string   $content    Rendered block output. ie. <InnerBlocks.Content />.
- * @var WP_Block $block      The instance of the WP_Block class that represents the block being rendered.
- */
 
 $chat_id = intval( $attributes['chatId'] );
 $full_screen = ! empty( $attributes['fullScreen'] ) ? '1' : '0';

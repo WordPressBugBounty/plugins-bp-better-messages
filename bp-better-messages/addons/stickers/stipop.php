@@ -187,7 +187,6 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
                     }
                     return $desc;
                 } else {
-                    //return str_replace('<span class="bm-sticker">', '<span class="bm-sticker" data-desc="' . base64_encode($desc) . '">',$message);
                 }
             }
 
@@ -261,7 +260,6 @@ if ( !class_exists( 'Better_Messages_Stickers' ) ):
 
             $latest_stickers = Better_Messages()->functions->get_user_meta($user_id, 'bpbm_latest_stickers_cache', true);
             if (!!$latest_stickers && isset($latest_stickers[$sticker_id])) {
-                //probably sort here later
             } else {
                 Better_Messages()->functions->delete_user_meta($user_id, 'bpbm_latest_stickers_cache');
             }

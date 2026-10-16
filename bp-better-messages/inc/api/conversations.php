@@ -186,7 +186,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 $otherModerators = array_diff($moderators, [$user_id]);
 
                 if ( empty($otherModerators) ) {
-                    // There are no other moderators besides the current user
                     return new WP_Error(
                         'rest_forbidden',
                         _x( 'Sorry, you are moderator of this conversation, please assign other moderator, before you can leave it', 'Rest API Error', 'bp-better-messages' ),
@@ -441,14 +440,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             if( $messages_count === 0 ){
                 $time = bp_core_current_time();
 
-                // Updating users unread counters in local db
-                $wpdb->prepare(
-                "UPDATE " . bm_get_table('recipients') . " 
+                $wpdb->query( $wpdb->prepare(
+                "UPDATE " . bm_get_table('recipients') . "
                 SET unread_count = 0,
                 last_read = %s,
                 last_delivered = %s
                 WHERE thread_id = %d",
-                $time, $time, $thread_id );
+                $time, $time, $thread_id ) );
+
+                $wpdb->query( $wpdb->prepare( "DELETE FROM `" . bm_get_table('mentions') . "` WHERE `thread_id` = %d", $thread_id ) );
 
                 do_action( 'better_messages_thread_updated', $thread_id );
                 do_action( 'better_messages_thread_cleared', $thread_id );

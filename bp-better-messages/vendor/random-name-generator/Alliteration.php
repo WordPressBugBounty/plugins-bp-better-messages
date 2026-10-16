@@ -54,6 +54,11 @@ class Alliteration extends AbstractGenerator implements Generator
     protected function _getRandomWord(array $words, $startingLetter = null)
     {
         $wordsToSearch = $startingLetter === null ? $words : preg_grep("/^{$startingLetter}/", $words);
+
+        if (empty($wordsToSearch)) {
+            $wordsToSearch = $words;
+        }
+
         return $this->_randomizer ? $this->_randomizer->getArrayValue($wordsToSearch) : $wordsToSearch[array_rand($wordsToSearch)];
     }
 }

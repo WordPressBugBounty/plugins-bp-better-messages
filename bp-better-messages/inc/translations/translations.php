@@ -22,15 +22,8 @@ class Better_Messages_Translations {
         $this->upload_dir = $upload['basedir'] . '/better-messages/i18n/';
         $this->upload_url = $upload['baseurl'] . '/better-messages/i18n/';
 
-        // Inject WordPress.org translations into WP update system for premium installs
         add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'inject_translation_updates' ) );
     }
-
-    // The JS translation path is gone. It located a JED .json by md5 of a
-    // script path, which needed three generated stub files in assets/js
-    // that existed for no other reason. Every enqueue now calls
-    // get_php_translation_file_url() below, which builds the same map from
-    // inc/translations/frontend-strings.php and the PHP catalogue.
 
     private function in_script_locale( $script_handle, $resolver ) {
         if ( ! has_filter( 'better_messages_i18n_locale' ) ) {
@@ -50,9 +43,6 @@ class Better_Messages_Translations {
         return $result;
     }
 
-        /**
-     * Get inline translation data when file caching failed.
-     */
     public function get_inline_translations( $script_handle ) {
         return isset( $this->inline_fallback[ $script_handle ] ) ? $this->inline_fallback[ $script_handle ] : false;
     }
@@ -61,13 +51,6 @@ class Better_Messages_Translations {
         return isset( $this->file_versions[ $script_handle ] ) ? $this->file_versions[ $script_handle ] : null;
     }
 
-    /**
-     * Cache a translations array as an external JS file for browser caching.
-     *
-     * @param string $script_handle Registered WP script handle
-     * @param array  $translations  Translation map (key→value)
-     * @return string|false URL of the cached JS file, or false on failure
-     */
     private function cache_translations_js( $script_handle, $translations ) {
         $locale     = determine_locale();
         $js_content = '(function(){window.Better_Messages_i18n=' . wp_json_encode( $translations, JSON_UNESCAPED_UNICODE ) . '})();';
@@ -84,7 +67,6 @@ class Better_Messages_Translations {
         }
 
         if ( wp_mkdir_p( $this->upload_dir ) && @file_put_contents( $file_path, $js_content ) !== false ) {
-            // Clean old versions
             $old_pattern = $this->upload_dir . 'bm-i18n-' . $cache_key . '-*.js';
             foreach ( glob( $old_pattern ) as $old_file ) {
                 if ( $old_file !== $file_path ) {
@@ -94,25 +76,15 @@ class Better_Messages_Translations {
             return $file_url;
         }
 
-        // File write failed -- store for inline fallback
         $this->inline_fallback[ $script_handle ] = $translations;
         return false;
     }
 
-    /**
-     * Inject WordPress.org translation updates into the WP update system.
-     * This ensures premium installs get translations even when the plugin
-     * directory name differs from the WordPress.org slug.
-     *
-     * @param object $transient The update_plugins transient data.
-     * @return object
-     */
     public function inject_translation_updates( $transient ) {
         if ( ! is_object( $transient ) ) {
             return $transient;
         }
 
-        // Skip if translations for our slug are already present (free version installed or Freemius handled it)
         if ( ! empty( $transient->translations ) ) {
             foreach ( $transient->translations as $tr ) {
                 if ( isset( $tr['slug'] ) && $tr['slug'] === 'bp-better-messages' ) {
@@ -121,7 +93,6 @@ class Better_Messages_Translations {
             }
         }
 
-        // translations_api() is an admin-only function
         if ( ! function_exists( 'translations_api' ) ) {
             $file = ABSPATH . 'wp-admin/includes/translation-install.php';
             if ( ! file_exists( $file ) ) {
@@ -139,7 +110,6 @@ class Better_Messages_Translations {
             return $transient;
         }
 
-        // Only download translations for languages installed on this site
         $site_locales = get_available_languages();
         $site_locales[] = determine_locale();
         $site_locales = array_unique( $site_locales );
@@ -154,12 +124,10 @@ class Better_Messages_Translations {
         foreach ( $api['translations'] as $translation ) {
             $language = $translation['language'];
 
-            // Only install for languages this site uses
             if ( ! in_array( $language, $site_locales, true ) ) {
                 continue;
             }
 
-            // Skip if already installed and up to date
             if ( isset( $installed_locales[ $language ] ) ) {
                 $local  = strtotime( $installed_locales[ $language ]['PO-Revision-Date'] );
                 $remote = strtotime( $translation['updated'] );
@@ -361,9 +329,6 @@ class Better_Messages_Translations {
         return false;
     }
 
-    /**
-     * Clear cached translation files for the current locale.
-     */
     public function clear_cache() {
         if ( ! is_dir( $this->upload_dir ) ) {
             return;
@@ -382,5 +347,4 @@ function Better_Messages_Translations() {
     return Better_Messages_Translations::instance();
 }
 
-// Initialize immediately so the update hook is registered early
 Better_Messages_Translations();

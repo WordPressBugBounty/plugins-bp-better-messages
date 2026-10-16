@@ -2,23 +2,13 @@
 
 use Uncanny_Automator\Recipe;
 
-/**
- * Class Automator_Send_Action
- */
 class Automator_Send_Message_Action {
 	use Recipe\Actions;
 
 
-	/**
-	 * Automator_Sample_Action constructor.
-	 */
 	public function __construct() {
 		$this->setup_action();
 	}
-
-	/**
-	 *
-	 */
 
 	protected function setup_action() {
 
@@ -80,13 +70,6 @@ class Automator_Send_Message_Action {
 		$this->register_action();
 	}
 
-	/**
-	 * @param int $user_id
-	 * @param array $action_data
-	 * @param int $recipe_id
-	 * @param array $args
-	 * @param $parsed
-	 */
 	protected function process_action( $user_id, $action_data, $recipe_id, $args, $parsed ) {
 		$action_meta = $action_data['meta'];
 
@@ -95,7 +78,6 @@ class Automator_Send_Message_Action {
         $subject   = Automator()->parse->text( $action_meta['BM_SUBJECT'], $recipe_id, $user_id, $args );
         $content   = Automator()->parse->text( $action_meta['BM_CONTENT'], $recipe_id, $user_id, $args );
 
-		// Parsing fields to return an actual value from token
 		$data = array(
 			'sender_id'  => $sender_id,
 			'recipients' => $recipient,
@@ -124,14 +106,11 @@ class Automator_Send_Message_Action {
 
         $send = Better_Messages()->functions->new_message( $data );
 
-		// If there was an error, it'll be logged in action log with an error message.
 		if ( is_wp_error( $send ) ) {
 			$error_message = $send->get_error_message();
-			// Complete action with errors and log Error message.
 			Automator()->complete->action( $user_id, $action_data, $recipe_id, $error_message );
 		}
 
-		// Everything went fine. Complete action.
 		Automator()->complete->action( $user_id, $action_data, $recipe_id );
 	}
 }

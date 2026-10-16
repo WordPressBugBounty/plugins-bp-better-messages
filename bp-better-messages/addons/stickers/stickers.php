@@ -10,6 +10,8 @@ require_once __DIR__ . '/rest.php';
 if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
     class Better_Messages_Stickers_Manager
     {
+        const ADOPTED_OPTION = 'better_messages_stickers_adopted';
+
         private static $instance = null;
 
         public static function instance()
@@ -22,27 +24,114 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
         public function __construct()
         {
-            // Boot sub-systems. They register their own hooks.
             Better_Messages_Stickers_REST::instance();
 
             add_action( 'rest_api_init', array( $this, 'register_public_routes' ) );
             add_action( 'bp_better_chat_settings_updated', array( $this, 'on_settings_updated' ) );
             add_filter( 'bp_better_messages_script_variables', array( $this, 'script_variables' ) );
 
-            // Defer first-boot hash sync to the `init` hook so the main settings option
-            // is fully loaded and we don't race with Better_Messages()->settings being unset.
-            add_action( 'init', array( $this, 'ensure_hash_exists' ), 20 );
+            add_filter( 'wordplus_stickers_pack_roots', array( $this, 'pack_roots' ) );
+            add_filter( 'wordplus_pickers_user_roles', array( $this, 'user_roles' ), 10, 2 );
+            add_filter( 'wordplus_stickers_roles', array( $this, 'panel_roles' ) );
+            add_action( 'wordplus_sticker_packs_saved', array( $this, 'on_packs_saved' ), 10, 2 );
+
+            add_action( 'init', array( $this, 'adopt_packs' ), 20 );
         }
 
-        public function ensure_hash_exists()
+        public static function library()
         {
-            $pm   = Better_Messages_Sticker_Pack_Manager::instance();
-            $hash = $pm->get_hash();
+            $pickers = function_exists( 'wordplus_pickers' ) ? wordplus_pickers() : null;
+            return $pickers && method_exists( $pickers, 'stickers' ) ? $pickers->stickers() : null;
+        }
 
-            if ( $hash === '' ) {
-                $packs = $pm->get_all();
-                if ( ! empty( $packs ) ) {
-                    $pm->update_hash();
+        public function pack_roots( $roots )
+        {
+            $roots[] = Better_Messages_Sticker_Pack_Manager::ROOT;
+            return $roots;
+        }
+
+        public function user_roles( $roles, $user_id )
+        {
+            return (int) $user_id !== 0 ? (array) Better_Messages()->functions->get_user_roles( (int) $user_id ) : $roles;
+        }
+
+        public function panel_roles( $roles )
+        {
+            $roles   = array_values( array_filter( (array) $roles, function( $role ) {
+                return ! is_array( $role ) || ( $role['key'] ?? '' ) !== 'administrator';
+            } ) );
+            $roles[] = array( 'key' => 'bm-guest', 'name' => _x( 'Guests', 'Settings page', 'bp-better-messages' ) );
+
+            return $roles;
+        }
+
+        public function enqueue_panel()
+        {
+            $library = self::library();
+
+            if ( $library && method_exists( $library, 'admin' ) ) {
+                $library->admin()->enqueue();
+            }
+        }
+
+        public function adopt_packs()
+        {
+            $library = self::library();
+            if ( ! $library ) {
+                return;
+            }
+
+            $checked = get_option( self::ADOPTED_OPTION, false );
+            if ( false !== $checked && (string) $checked === $this->stored_packs_hash() ) {
+                return;
+            }
+
+            if ( false === get_option( WordPlus_SDK_Stickers::OPTION, false ) ) {
+                $packs = get_option( Better_Messages_Sticker_Pack_Manager::OPTION_KEY, array() );
+
+                if ( is_array( $packs ) && ! empty( $packs ) && $library->adopt( $packs, Better_Messages_Sticker_Pack_Manager::ROOT ) ) {
+                    $upload = wp_upload_dir();
+                    foreach ( glob( trailingslashit( $upload['basedir'] ) . 'better-messages/stickers/bm-stickers-*.json' ) ?: array() as $old ) {
+                        @unlink( $old );
+                    }
+                }
+            }
+
+            update_option( self::ADOPTED_OPTION, $this->stored_packs_hash(), true );
+        }
+
+        private function stored_packs_hash()
+        {
+            $stored = get_option( 'bp-better-chat-settings', array() );
+
+            return is_array( $stored ) && isset( $stored[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ] ) && is_scalar( $stored[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ] ) ? (string) $stored[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ] : '';
+        }
+
+        public function on_packs_saved( $packs, $meta )
+        {
+            update_option( Better_Messages_Sticker_Pack_Manager::OPTION_KEY, $packs, false );
+
+            $stored = get_option( 'bp-better-chat-settings', array() );
+            if ( ! is_array( $stored ) ) {
+                $stored = array();
+            }
+
+            $stored[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ]    = isset( $meta['hash'] ) ? $meta['hash'] : '';
+            $stored[ Better_Messages_Sticker_Pack_Manager::SUMMARY_KEY ] = isset( $meta['summary'] ) ? $meta['summary'] : array();
+
+            $enable = ( ! isset( $stored['stickersProvider'] ) || $stored['stickersProvider'] === '' ) && empty( $stored['stipopApiKey'] ) && ! empty( $packs );
+            if ( $enable ) {
+                $stored['stickersProvider'] = 'builtin';
+            }
+
+            update_option( 'bp-better-chat-settings', $stored );
+            update_option( self::ADOPTED_OPTION, $this->stored_packs_hash(), true );
+
+            if ( isset( Better_Messages()->settings ) && is_array( Better_Messages()->settings ) ) {
+                Better_Messages()->settings[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ]    = $stored[ Better_Messages_Sticker_Pack_Manager::HASH_KEY ];
+                Better_Messages()->settings[ Better_Messages_Sticker_Pack_Manager::SUMMARY_KEY ] = $stored[ Better_Messages_Sticker_Pack_Manager::SUMMARY_KEY ];
+                if ( $enable ) {
+                    Better_Messages()->settings['stickersProvider'] = 'builtin';
                 }
             }
         }
@@ -90,11 +179,9 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                 return new WP_Error( 'missing_sticker', __( 'Missing sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
             }
 
-            $sticker_url = Better_Messages_Sticker_Pack_Manager::rewrite_url( $sticker_url );
-
-            $upload = wp_upload_dir();
-            $prefix = trailingslashit( $upload['baseurl'] ) . 'better-messages/stickers/packs/';
-            if ( strpos( $sticker_url, $prefix ) !== 0 || strpos( $sticker_url, '..' ) !== false ) {
+            $library     = self::library();
+            $sticker_url = $library ? $library->rewrite_url( $sticker_url ) : $sticker_url;
+            if ( ! $library || strpos( $sticker_url, '..' ) !== false || ! $library->owns_url( $sticker_url ) ) {
                 return new WP_Error( 'invalid_sticker', __( 'Invalid sticker URL.', 'bp-better-messages' ), array( 'status' => 400 ) );
             }
 
@@ -159,18 +246,16 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
         public function rest_get_manifest_url()
         {
-            $locale = determine_locale();
-            $url    = Better_Messages_Sticker_Manifest::instance()->get_manifest_url( $locale );
-            return rest_ensure_response( array(
-                'url'    => $url,
-                'locale' => $locale,
-                'hash'   => Better_Messages_Sticker_Pack_Manager::instance()->get_hash(),
-            ) );
+            $library = self::library();
+            return $library ? $library->rest()->manifest() : rest_ensure_response( array( 'url' => '', 'locale' => determine_locale(), 'hash' => '' ) );
         }
 
         public function on_settings_updated( $settings )
         {
-            Better_Messages_Sticker_Manifest::instance()->delete_manifests();
+            $library = self::library();
+            if ( $library ) {
+                $library->manifest()->delete_manifests();
+            }
         }
 
         public function is_enabled(){
@@ -184,7 +269,6 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
             if ( $provider === 'builtin' ) {
                 return ! empty( $this->get_allowed_pack_ids() );
             }
-            // Empty provider: backward-compat detection.
             if ( ! empty( Better_Messages()->settings['stipopApiKey'] ) ) {
                 return true;
             }
@@ -199,17 +283,12 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                 return $provider;
             }
 
-            // Empty provider: backward-compat detection.
             return ! empty( $settings['stipopApiKey'] ) ? 'stipop' : 'disabled';
         }
 
         private function get_allowed_pack_ids(){
-            $settings = Better_Messages()->settings;
-            $summary  = isset( $settings['stickerPacksSummary'] ) ? $settings['stickerPacksSummary'] : null;
-
-            if ( ! is_array( $summary ) ) {
-                return array();
-            }
+            $library = self::library();
+            $summary = $library ? $library->summary() : array();
 
             if ( empty( $summary ) ) {
                 return array();
@@ -217,8 +296,6 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
 
             $user_id    = Better_Messages()->functions->get_current_user_id();
             $user_roles = Better_Messages()->functions->get_user_roles( $user_id );
-            // Admins bypass per-role restrictions so a pack limited to e.g.
-            // "editor" is still visible to site administrators.
             $is_admin   = $user_id > 0 && user_can( $user_id, 'bm_can_administrate' );
             $ids        = array();
 
@@ -262,8 +339,8 @@ if ( ! class_exists( 'Better_Messages_Stickers_Manager' ) ) {
             if ( ! $this->is_builtin_active() ) {
                 return '';
             }
-            $url = Better_Messages_Sticker_Manifest::instance()->get_manifest_url( determine_locale() );
-            return $url ? $url : '';
+            $library = self::library();
+            return $library ? $library->manifest_url( determine_locale() ) : '';
         }
     }
 }

@@ -131,10 +131,6 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
 
             $user_id_2 = array_pop($participants['recipients']);
 
-            //var_dump( 'test' );
-            /**
-             *  Current user blocked other
-             */
             $is_blocked_1 = $this->is_user_blocked( Better_Messages()->functions->get_current_user_id(), $user_id_2 );
             if( $is_blocked_1 ) {
                 global $bp_better_messages_restrict_send_message;
@@ -142,9 +138,6 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
                 return false;
             }
 
-            /**
-             *  Other user blocked current user
-             */
             $is_blocked_2 = $this->is_user_blocked( $user_id_2, Better_Messages()->functions->get_current_user_id() );
 
             if( $is_blocked_2 ) {
@@ -229,9 +222,6 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
             } else if( count($blocked_user_roles) === 0 || (count($blocker_user_roles)) === 0 ) {
                 $can_block = false;
             } else {
-                /**
-                 * Administrator can't be blocked
-                 */
                 if ( in_array('administrator', $blocked_user_roles) || user_can( $blocked_id, 'bm_can_administrate' ) ) {
                     $can_block = false;
                 }
@@ -252,9 +242,6 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
                     }
                 }
 
-                /**
-                 * Administrator always can block
-                 */
                 if (in_array('administrator', $blocker_user_roles)) {
                     $can_block = true;
                 }

@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.6;
+        private $db_version = 2.94;
 
         public static function instance()
         {
@@ -117,7 +117,187 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 bm_get_table('bulk_jobs'),
                 bm_get_table('bulk_job_threads'),
                 bm_get_table('ai_usage'),
+                bm_get_table('files'),
             ];
+        }
+
+        public function files_table_sql(){
+            return "CREATE TABLE `" . bm_get_table('files') . "` (
+                    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                    `blog_id` bigint(20) NOT NULL DEFAULT 1,
+                    `attachment_id` bigint(20) DEFAULT NULL,
+                    `object_id` bigint(20) unsigned NOT NULL DEFAULT 0,
+                    `thread_id` bigint(20) NOT NULL DEFAULT 0,
+                    `message_id` bigint(20) NOT NULL DEFAULT 0,
+                    `uploader_id` bigint(20) NOT NULL DEFAULT 0,
+                    `name` varchar(255) NOT NULL DEFAULT '',
+                    `mime` varchar(100) NOT NULL DEFAULT '',
+                    `size` bigint(20) unsigned NOT NULL DEFAULT 0,
+                    `kind` varchar(10) NOT NULL DEFAULT 'file',
+                    `created_at` bigint(20) NOT NULL DEFAULT 0,
+                    `updated_at` bigint(20) NOT NULL DEFAULT 0,
+                    PRIMARY KEY (`id`),
+                    UNIQUE KEY `blog_attachment` (`blog_id`, `attachment_id`),
+                    KEY `object_id` (`object_id`),
+                    KEY `blog_thread_created` (`blog_id`, `thread_id`, `created_at`),
+                    KEY `blog_uploader` (`blog_id`, `uploader_id`),
+                    KEY `blog_created` (`blog_id`, `created_at`)
+                ) ENGINE=InnoDB;";
+        }
+
+        public function move_storage_to_sdk(){
+            global $wpdb;
+
+            $files_table = bm_get_table('files');
+
+            if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $files_table ) ) !== $files_table ){
+                return;
+            }
+
+            if( empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'object_id'" ) ) ){
+                $wpdb->query( "ALTER TABLE `{$files_table}` ADD COLUMN `object_id` bigint(20) unsigned NOT NULL DEFAULT 0 AFTER `attachment_id`, ADD INDEX `object_id` (`object_id`)" );
+            }
+
+            $storage = Better_Messages_Storage();
+            $sdk     = $storage->sdk();
+
+            if( ! $sdk ){
+                return;
+            }
+
+            $sdk->get_settings();
+
+            $has_old_columns = ! empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'location'" ) );
+
+            if( $has_old_columns && $sdk->install() ){
+                $blog_id = get_current_blog_id();
+                $base    = trailingslashit( $storage->base_dir_name() );
+                $objects = $sdk->table();
+                $last    = 0;
+
+                do {
+                    $rows = $wpdb->get_results( $wpdb->prepare(
+                        "SELECT * FROM `{$files_table}` WHERE `blog_id` = %d AND `id` > %d ORDER BY `id` ASC LIMIT 500",
+                        $blog_id, $last
+                    ) );
+
+                    foreach( $rows as $row ){
+                        $last = (int) $row->id;
+
+                        if( $row->attachment_id === null ){
+                            if( in_array( $row->state, array( 'deleting', 'removing', 'delete_failed' ), true ) && $row->object_key !== '' ){
+                                $wpdb->insert( $objects, array(
+                                    'blog_id'         => $blog_id,
+                                    'location'        => (string) $row->location,
+                                    'object_key'      => (string) $row->object_key,
+                                    'state'           => 'deleting',
+                                    'attempts'        => (int) $row->attempts,
+                                    'next_attempt_at' => (int) $row->next_attempt_at,
+                                    'error'           => $row->error,
+                                    'created_at'      => (int) $row->created_at,
+                                    'updated_at'      => time(),
+                                ) );
+                            } else if( $row->state === 'uploading' && $row->object_key !== '' && $row->location !== '' ){
+                                $wpdb->insert( $objects, array(
+                                    'blog_id'         => $blog_id,
+                                    'location'        => (string) $row->location,
+                                    'object_key'      => (string) $row->object_key,
+                                    'state'           => 'deleting',
+                                    'next_attempt_at' => time(),
+                                    'created_at'      => (int) $row->created_at,
+                                    'updated_at'      => time(),
+                                ) );
+                            }
+
+                            $wpdb->delete( $files_table, array( 'id' => (int) $row->id ) );
+                            continue;
+                        }
+
+                        $attachment_id = (int) $row->attachment_id;
+                        $file          = (string) get_post_meta( $attachment_id, '_wp_attached_file', true );
+                        $location      = (string) $row->location;
+                        $object_key    = (string) $row->object_key;
+
+                        if( $location === '' ){
+                            $location   = (string) get_post_meta( $attachment_id, Better_Messages_Storage::META_LOCATION, true );
+                            $object_key = (string) get_post_meta( $attachment_id, Better_Messages_Storage::META_KEY, true );
+                        }
+
+                        $state = (string) $row->state;
+
+                        if( $state === 'moving' ){
+                            $state = $object_key !== '' && $location !== '' ? 'stored' : ( $location !== '' ? 'pending_move' : 'local' );
+                        }
+
+                        if( ! in_array( $state, array( 'local', 'pending_move', 'stored', 'failed', 'deleting', 'removing', 'delete_failed' ), true ) ){
+                            $state = $location !== '' && $object_key !== '' ? 'stored' : 'local';
+                        }
+
+                        if( in_array( $state, array( 'local', 'failed' ), true ) && $location !== '' && $object_key !== '' ){
+                            $state = 'stored';
+                        }
+
+                        $deleting = in_array( $state, array( 'deleting', 'removing', 'delete_failed' ), true );
+                        $existing = $sdk->get( Better_Messages_Storage::PLUGIN, $attachment_id, '', true );
+
+                        if( $existing ){
+                            $object_id = (int) $existing->id;
+                        } else {
+                            $wpdb->insert( $objects, array(
+                                'blog_id'         => $blog_id,
+                                'plugin'          => Better_Messages_Storage::PLUGIN,
+                                'ref'             => $deleting && ! get_post( $attachment_id ) ? null : $attachment_id,
+                                'variant'         => '',
+                                'path'            => $file,
+                                'item_key'        => strpos( $file, $base ) === 0 ? substr( $file, strlen( $base ) ) : ltrim( $file, '/' ),
+                                'name'            => mb_substr( (string) $row->name, 0, 255 ),
+                                'mime'            => $row->kind === 'e2e' ? 'application/octet-stream' : Better_Messages_Storage::stored_type( (string) $row->mime ),
+                                'size'            => (int) $row->size,
+                                'user_id'         => (int) $row->uploader_id,
+                                'location'        => in_array( $state, array( 'local', 'failed' ), true ) ? '' : $location,
+                                'target'          => $row->target === null ? null : (string) $row->target,
+                                'object_key'      => in_array( $state, array( 'local', 'failed', 'pending_move' ), true ) ? '' : $object_key,
+                                'state'           => $state === 'removing' ? 'deleting' : $state,
+                                'attempts'        => (int) $row->attempts,
+                                'next_attempt_at' => (int) $row->next_attempt_at,
+                                'error'           => $row->error,
+                                'created_at'      => (int) $row->created_at,
+                                'updated_at'      => time(),
+                            ) );
+
+                            $object_id = (int) $wpdb->insert_id;
+                        }
+
+                        if( $object_id > 0 ){
+                            $wpdb->update( $files_table, array( 'object_id' => $object_id ), array( 'id' => (int) $row->id ) );
+                        }
+                    }
+                } while( count( $rows ) === 500 );
+
+                $missing = (int) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$wpdb->postmeta} m LEFT JOIN `{$objects}` o ON o.`blog_id` = %d AND o.`plugin` = %s AND o.`ref` = m.`post_id` AND o.`variant` = '' AND o.`state` = 'stored'
+                     WHERE m.`meta_key` = %s AND o.`id` IS NULL",
+                    $blog_id, Better_Messages_Storage::PLUGIN, Better_Messages_Storage::META_LOCATION
+                ) );
+
+                if( $missing === 0 ){
+                    $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE `meta_key` IN ('bm-storage-location','bm-storage-key','bm-storage-size','bm-storage-etag')" );
+                }
+            }
+
+            $stored = get_option( Better_Messages_Storage::OPTION, false );
+
+            if( is_array( $stored ) && $sdk->has_locations() ){
+                update_option( Better_Messages_Storage::OPTION, array( 'groups' => isset( $stored['groups'] ) && is_array( $stored['groups'] ) ? $stored['groups'] : array() ), false );
+                delete_option( Better_Messages_Storage::SITE_OPTION );
+            }
+
+            foreach( array( 'better_messages_storage_migration', 'better_messages_storage_sweeps', 'better_messages_storage_fallbacks' ) as $option ){
+                delete_option( $option );
+            }
+
+            $storage->reset_caches();
+            $storage->schedule_job();
         }
 
         public function update_collate(){
@@ -140,6 +320,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 bm_get_table('bulk_jobs'),
                 bm_get_table('bulk_job_threads'),
                 bm_get_table('ai_usage'),
+                bm_get_table('files'),
             ];
 
             foreach( $tables as $table ){
@@ -183,8 +364,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                        `thread_id` bigint(20) NOT NULL,
                        `message_id` bigint(20) NOT NULL,
                        `user_id` bigint(20) NOT NULL,
-                       `type` enum('mention','reply','reaction') NOT NULL,
-                       PRIMARY KEY (`id`)
+                       `type` enum('mention','reply','reaction','everyone') NOT NULL,
+                       PRIMARY KEY (`id`),
+                       KEY `user_thread_index` (`user_id`, `thread_id`),
+                       KEY `message_id_index` (`message_id`)
                     ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('messages') ."` (
@@ -360,7 +543,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     KEY `bot_id_index` (`bot_id`),
                     KEY `bot_id_created_at` (`bot_id`, `created_at`),
                     KEY `message_id_index` (`message_id`)
-                ) ENGINE=InnoDB;"
+                ) ENGINE=InnoDB;",
+
+                $this->files_table_sql()
             ];
 
             dbDelta($sql);
@@ -459,7 +644,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
 
                         Better_Messages_Users()->schedule_sync_all_users();
 
-                        // Migrating data from usermeta to new table
                         $wpdb->query("
                         INSERT INTO `" . bm_get_table('users') . "` (ID, last_activity)
                         SELECT `user_id` as `ID`, `meta_value` as `last_activity`
@@ -476,7 +660,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         ON DUPLICATE KEY 
                         UPDATE last_activity = `guests`.`last_active`");
 
-                        // Deleting old user meta to clean up
                         $wpdb->query("DELETE FROM  `{$wpdb->usermeta}` WHERE `meta_key` = 'bpbm_last_activity'");
                         $wpdb->query("ALTER TABLE `" . bm_get_table('guests') . "` DROP `last_active`;");
                     }
@@ -613,7 +796,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             ) ENGINE=InnoDB;"
                         ]);
 
-                        // Migrate old bpbm-bulk-report posts to new table
                         $reports = get_posts([
                             'post_type'      => 'bpbm-bulk-report',
                             'post_status'    => 'any',
@@ -672,7 +854,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                                     }
                                 }
 
-                                // Delete old post and its meta
                                 wp_delete_post( $report->ID, true );
                             }
                         }
@@ -716,7 +897,6 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         ) ENGINE=InnoDB;"]);
                     },
                     function () {
-                        // Migrate points system: auto-detect provider for existing installs
                         $stored = get_option( 'bp-better-chat-settings', [] );
                         $current = $stored['pointsSystem'] ?? 'none';
                         if ( $current !== 'none' ) return;
@@ -889,6 +1069,80 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             Better_Messages()->guests->delete_guest_user( (int) $guest_id );
                         }
                     }
+                ],
+                '2.8' => [
+                    function (){
+                        global $wpdb;
+
+                        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+                        $files_table = bm_get_table('files');
+
+                        if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $files_table ) ) === $files_table ){
+                            $has_blog_id = $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'blog_id'" );
+
+                            if( empty( $has_blog_id ) ){
+                                $wpdb->query( "DROP TABLE `{$files_table}`" );
+                            }
+                        }
+
+                        dbDelta( [ $this->files_table_sql() ] );
+                    }
+                ],
+                '2.9' => [
+                    function (){
+                        global $wpdb;
+
+                        $files_table = bm_get_table('files');
+
+                        if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $files_table ) ) === $files_table && ! empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'upload_id'" ) ) ){
+                            $wpdb->query( "ALTER TABLE `{$files_table}` MODIFY `upload_id` varchar(1024) NOT NULL DEFAULT ''" );
+                        }
+                    }
+                ],
+                '2.91' => [
+                    function (){
+                        global $wpdb;
+
+                        $files_table = bm_get_table('files');
+
+                        if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $files_table ) ) !== $files_table || empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'location'" ) ) ){
+                            return;
+                        }
+
+                        if( empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'target'" ) ) ){
+                            $wpdb->query( "ALTER TABLE `{$files_table}` ADD COLUMN `target` varchar(32) DEFAULT NULL AFTER `location`" );
+                        }
+
+                        if( empty( $wpdb->get_var( "SHOW INDEX FROM `{$files_table}` WHERE Key_name = 'blog_target'" ) ) ){
+                            $wpdb->query( "ALTER TABLE `{$files_table}` ADD INDEX `blog_target` (`blog_id`, `target`)" );
+                        }
+                    }
+                ],
+                '2.92' => [
+                    function (){
+                        global $wpdb;
+
+                        $files_table = bm_get_table('files');
+
+                        if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $files_table ) ) !== $files_table || empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$files_table}` LIKE 'object_key'" ) ) ){
+                            return;
+                        }
+
+                        if( empty( $wpdb->get_var( "SHOW INDEX FROM `{$files_table}` WHERE Key_name = 'object_key'" ) ) ){
+                            $wpdb->query( "ALTER TABLE `{$files_table}` ADD INDEX `object_key` (`object_key`(191))" );
+                        }
+                    }
+                ],
+                '2.93' => [
+                    function (){
+                        $this->move_storage_to_sdk();
+                    }
+                ],
+                '2.94' => [
+                    function (){
+                        $this->migrate_mentions_table();
+                    }
                 ]
             ];
 
@@ -916,6 +1170,47 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             }
 
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function migrate_mentions_table(){
+            global $wpdb;
+
+            $table = bm_get_table('mentions');
+
+            if( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ){
+                return;
+            }
+
+            $type = $wpdb->get_row( "SHOW COLUMNS FROM `{$table}` LIKE 'type'" );
+
+            if( $type && strpos( (string) $type->Type, "'everyone'" ) === false ){
+                $wpdb->query( "ALTER TABLE `{$table}` MODIFY `type` enum('mention','reply','reaction','everyone') NOT NULL" );
+            }
+
+            if( empty( $wpdb->get_var( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'user_thread_index'" ) ) ){
+                $wpdb->query( "ALTER TABLE `{$table}` ADD INDEX `user_thread_index` (`user_id`, `thread_id`)" );
+            }
+
+            if( empty( $wpdb->get_var( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'message_id_index'" ) ) ){
+                $wpdb->query( "ALTER TABLE `{$table}` ADD INDEX `message_id_index` (`message_id`)" );
+            }
+
+            $recipients = bm_get_table('recipients');
+
+            do {
+                $ids = $wpdb->get_col( "SELECT `m`.`id`
+                    FROM `{$table}` `m`
+                    LEFT JOIN `{$recipients}` `r` ON `r`.`thread_id` = `m`.`thread_id` AND `r`.`user_id` = `m`.`user_id`
+                    WHERE `m`.`type` IN ('mention','reply')
+                    AND ( `r`.`id` IS NULL OR `r`.`unread_count` = 0 )
+                    LIMIT 5000" );
+
+                if( empty( $ids ) ){
+                    break;
+                }
+
+                $wpdb->query( "DELETE FROM `{$table}` WHERE `id` IN (" . implode( ',', array_map( 'intval', $ids ) ) . ")" );
+            } while( count( $ids ) === 5000 );
         }
 
         public function migrate_translation_columns(){
@@ -1047,9 +1342,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'thread_id'  => "bigint(20) NOT NULL",
                         'message_id' => "bigint(20) NOT NULL",
                         'user_id'    => "bigint(20) NOT NULL",
-                        'type'       => "enum('mention','reply','reaction') NOT NULL",
+                        'type'       => "enum('mention','reply','reaction','everyone') NOT NULL",
                     ],
                     'primary_key' => 'id',
+                    'keys' => [
+                        'user_thread_index' => 'user_id, thread_id',
+                        'message_id_index'  => 'message_id',
+                    ],
                 ],
                 'messages' => [
                     'columns' => [
@@ -1265,9 +1564,112 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'message_id_index'  => 'message_id',
                     ],
                 ],
+                'files' => [
+                    'columns' => [
+                        'id'            => "bigint(20) unsigned NOT NULL AUTO_INCREMENT",
+                        'blog_id'       => "bigint(20) NOT NULL DEFAULT 1",
+                        'attachment_id' => "bigint(20) DEFAULT NULL",
+                        'object_id'     => "bigint(20) unsigned NOT NULL DEFAULT 0",
+                        'thread_id'     => "bigint(20) NOT NULL DEFAULT 0",
+                        'message_id'    => "bigint(20) NOT NULL DEFAULT 0",
+                        'uploader_id'   => "bigint(20) NOT NULL DEFAULT 0",
+                        'name'          => "varchar(255) NOT NULL DEFAULT ''",
+                        'mime'          => "varchar(100) NOT NULL DEFAULT ''",
+                        'size'          => "bigint(20) unsigned NOT NULL DEFAULT 0",
+                        'kind'          => "varchar(10) NOT NULL DEFAULT 'file'",
+                        'created_at'    => "bigint(20) NOT NULL DEFAULT 0",
+                        'updated_at'    => "bigint(20) NOT NULL DEFAULT 0",
+                    ],
+                    'primary_key' => 'id',
+                    'unique_keys' => [
+                        'blog_attachment' => 'blog_id, attachment_id',
+                    ],
+                    'keys' => [
+                        'object_id'           => 'object_id',
+                        'blog_thread_created' => 'blog_id, thread_id, created_at',
+                        'blog_uploader'       => 'blog_id, uploader_id',
+                        'blog_created'        => 'blog_id, created_at',
+                    ],
+                ],
             ];
 
+            $schemas = array_merge( $schemas, $this->sdk_schemas() );
+
             return apply_filters( 'better_messages_db_schemas', $schemas );
+        }
+
+        private function sdk_schemas(){
+            global $wpdb;
+
+            $schemas = [];
+
+            if ( (int) get_site_option( 'wordplus_storage_db', 0 ) > 0 ) {
+                $schemas['storage_objects'] = [
+                    'shared'      => true,
+                    'table_name'  => isset( $wpdb->wordplus_storage_objects ) ? $wpdb->wordplus_storage_objects : $wpdb->base_prefix . 'wordplus_storage_objects',
+                    'columns'     => [
+                        'id'              => "bigint(20) unsigned NOT NULL AUTO_INCREMENT",
+                        'blog_id'         => "bigint(20) NOT NULL DEFAULT 1",
+                        'plugin'          => "varchar(64) NOT NULL DEFAULT ''",
+                        'ref'             => "bigint(20) DEFAULT NULL",
+                        'variant'         => "varchar(32) NOT NULL DEFAULT ''",
+                        'path'            => "varchar(1024) NOT NULL DEFAULT ''",
+                        'item_key'        => "varchar(1024) NOT NULL DEFAULT ''",
+                        'name'            => "varchar(255) NOT NULL DEFAULT ''",
+                        'mime'            => "varchar(100) NOT NULL DEFAULT ''",
+                        'size'            => "bigint(20) unsigned NOT NULL DEFAULT 0",
+                        'user_id'         => "bigint(20) NOT NULL DEFAULT 0",
+                        'location'        => "varchar(32) NOT NULL DEFAULT ''",
+                        'target'          => "varchar(32) DEFAULT NULL",
+                        'object_key'      => "varchar(1024) NOT NULL DEFAULT ''",
+                        'upload_id'       => "varchar(1024) NOT NULL DEFAULT ''",
+                        'state'           => "varchar(20) NOT NULL DEFAULT 'local'",
+                        'attempts'        => "smallint(5) unsigned NOT NULL DEFAULT 0",
+                        'next_attempt_at' => "bigint(20) NOT NULL DEFAULT 0",
+                        'error'           => "text NULL",
+                        'created_at'      => "bigint(20) NOT NULL DEFAULT 0",
+                        'updated_at'      => "bigint(20) NOT NULL DEFAULT 0",
+                    ],
+                    'primary_key' => 'id',
+                    'unique_keys' => [
+                        'item' => 'blog_id, plugin, ref, variant',
+                    ],
+                    'keys'        => [
+                        'queue'      => 'blog_id, state, next_attempt_at',
+                        'place'      => 'blog_id, location',
+                        'target'     => 'blog_id, target',
+                        'uploads'    => 'blog_id, plugin, user_id, state',
+                        'object_key' => 'object_key(191)',
+                    ],
+                ];
+            }
+
+            if ( (int) get_option( 'wordplus_push_db', 0 ) > 0 ) {
+                $schemas['push_subscriptions'] = [
+                    'shared'      => true,
+                    'table_name'  => isset( $wpdb->wordplus_push_subscriptions ) ? $wpdb->wordplus_push_subscriptions : $wpdb->prefix . 'wordplus_push_subscriptions',
+                    'columns'     => [
+                        'id'            => "bigint(20) unsigned NOT NULL AUTO_INCREMENT",
+                        'user_id'       => "bigint(20) unsigned NOT NULL",
+                        'endpoint_hash' => "char(64) NOT NULL",
+                        'endpoint'      => "text NOT NULL",
+                        'p256dh'        => "varchar(200) NOT NULL",
+                        'auth'          => "varchar(100) NOT NULL",
+                        'device'        => "varchar(100) NOT NULL DEFAULT ''",
+                        'created_at'    => "datetime NOT NULL",
+                        'updated_at'    => "datetime NOT NULL",
+                    ],
+                    'primary_key' => 'id',
+                    'unique_keys' => [
+                        'endpoint_hash' => 'endpoint_hash',
+                    ],
+                    'keys'        => [
+                        'user_id' => 'user_id',
+                    ],
+                ];
+            }
+
+            return $schemas;
         }
 
         public function build_create_sql( $table_name, $schema ){
@@ -1448,12 +1850,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     }
                 }
 
+                $shared          = ! empty( $schema['shared'] );
                 $missing_indexes = [];
                 $extra_indexes   = [];
                 foreach ( $expected_indexes as $name => $exp ) {
                     if ( ! isset( $actual_idx_normalized[ $name ] )
-                         || $actual_idx_normalized[ $name ]['columns'] !== $exp['columns']
-                         || $actual_idx_normalized[ $name ]['unique'] !== $exp['unique'] ) {
+                         || ( ! $shared && $actual_idx_normalized[ $name ]['columns'] !== $exp['columns'] )
+                         || ( ! $shared && $actual_idx_normalized[ $name ]['unique'] !== $exp['unique'] ) ) {
                         $missing_indexes[] = [
                             'name'    => $name,
                             'unique'  => $exp['unique'],
@@ -1469,6 +1872,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                             'columns' => $act['columns'],
                         ];
                     }
+                }
+
+                if ( $shared ) {
+                    $extra         = [];
+                    $extra_indexes = [];
                 }
 
                 $status = ( empty( $missing ) && empty( $extra ) && empty( $enum_mismatches ) && empty( $missing_indexes ) && empty( $extra_indexes ) ) ? 'ok' : 'mismatch';
@@ -1782,6 +2190,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 return [ 'dropped' => [], 'errors' => [ "Unknown table: {$logical}" ] ];
             }
 
+            if ( ! empty( $schemas[ $logical ]['shared'] ) ) {
+                return [ 'dropped' => [], 'errors' => [ "{$logical} is shared with other WordPlus plugins, so nothing is dropped from it." ] ];
+            }
+
             $expected_index_names = [ 'PRIMARY' ];
             if ( ! empty( $schemas[ $logical ]['unique_keys'] ) ) {
                 $expected_index_names = array_merge( $expected_index_names, array_keys( $schemas[ $logical ]['unique_keys'] ) );
@@ -1823,6 +2235,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             $schemas = $this->get_schemas();
             if ( ! isset( $schemas[ $logical ] ) ) {
                 return [ 'dropped' => [], 'errors' => [ "Unknown table: {$logical}" ] ];
+            }
+
+            if ( ! empty( $schemas[ $logical ]['shared'] ) ) {
+                return [ 'dropped' => [], 'errors' => [ "{$logical} is shared with other WordPlus plugins, so nothing is dropped from it." ] ];
             }
 
             $expected_cols = array_keys( $schemas[ $logical ]['columns'] );

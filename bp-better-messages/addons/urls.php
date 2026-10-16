@@ -174,16 +174,16 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                         ];
 
                         $excluded_oembed = [
-                            'facebook',  // issues on ajax refresh
-                            'giphy',     // not works
-                            'reverbnation', // not works
-                            'twitter',   // mini chats issues
-                            'cloudup',   // mini chats issues
-                            'imgur',     // mini chats issues,
-                            'instagram', // mini chats and ajax refresh issues
-                            'issuu', // mini chats issues
-                            'reddit', // too long content usually
-                            'plugins', // not needed in messages,
+                            'facebook',
+                            'giphy',
+                            'reverbnation',
+                            'twitter',
+                            'cloudup',
+                            'imgur',
+                            'instagram',
+                            'issuu',
+                            'reddit',
+                            'plugins',
                         ];
 
                         $is_excluded = false;
@@ -221,9 +221,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                                     $html = '<span class="bm-iframe-container">' . $embed_html . '</span>';
                                 }
                             } else if( isset($embed->html) ) {
-                                // Non-video embeds (SoundCloud, Flickr, etc.) can contain
-                                // arbitrary scripts that can't be sandboxed with a simple
-                                // iframe swap — skip them when privacy embeds is enabled.
                                 if ( ! $privacy_embeds ) {
                                     $html = $embed->html;
                                 }
@@ -278,9 +275,8 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             ob_start();
             ?>
             <a href="<?php echo $url; ?>" target="_blank" class="url-wrap">
-                <?php /*if ( $info[ 'image' ] ) { ?>
-                    <span class="url-image" style="background-image: url(<?php echo esc_attr( $info[ 'image' ] ); ?>)"></span>
-                <?php }*/?>
+                <?php
+?>
                 <span class="url-description">
                     <span class="url-title"><?php echo esc_attr( $info[ 'title' ] ); ?></span>
                     <span class="url-site"><?php echo esc_attr( $info[ 'site' ] ); ?></span>
@@ -446,15 +442,10 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             return strpos( $poster, 'https://' ) === 0 ? $poster : '';
         }
 
-        /**
-         * Render a privacy-friendly embed placeholder.
-         * Shows a thumbnail with a play button — the actual iframe loads only on click.
-         */
         public function render_privacy_embed( $url, $embed ) {
             $provider  = isset( $embed->provider_name ) ? strtolower( $embed->provider_name ) : '';
             $title     = isset( $embed->title ) ? esc_attr( $embed->title ) : '';
 
-            // Extract the iframe src from the embed HTML
             $iframe_src = '';
             if ( isset( $embed->html ) ) {
                 $tags = better_messages_html_tag_processor( $embed->html );
@@ -463,7 +454,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                     $iframe_src = (string) $tags->get_attribute( 'src' );
                 }
 
-                // YouTube: switch to privacy-enhanced mode
                 if ( $iframe_src !== '' && $provider === 'youtube' ) {
                     $iframe_src = str_replace( 'youtube.com', 'youtube-nocookie.com', $iframe_src );
                     $iframe_src = $this->add_youtube_playsinline( $iframe_src );
@@ -482,9 +472,6 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 . '</span>';
         }
 
-        /**
-         * Extract YouTube video ID from URL.
-         */
         private function extract_youtube_id( $url ) {
             $patterns = [
                 '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
