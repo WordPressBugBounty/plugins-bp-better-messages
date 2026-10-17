@@ -246,6 +246,8 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
                 wp_cache_delete( 'guest_user_' . $guest->id, 'bm_messages' );
 
+                do_action( 'better_messages_revoke_user', $guest_user_id );
+
                 $sql = $wpdb->prepare("
                 SELECT `threads`.`id`
                 FROM `" .  bm_get_table('threads') . "` `threads`
@@ -404,6 +406,8 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 $return['pds'] = $ws_profile['pds'];
                 $return['role_hashes']     = $ws_profile['role_hashes'];
                 $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
+                $return['gk'] = Better_Messages_WebSocket()->user_socket_key( $user_id );
+                $return['ak'] = Better_Messages_WebSocket()->user_socket_key( 0 );
             }
 
             return $return;
@@ -502,6 +506,8 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                     $return['pds'] = $ws_profile['pds'];
                     $return['role_hashes']     = $ws_profile['role_hashes'];
                     $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
+                    $return['gk'] = Better_Messages_WebSocket()->user_socket_key( -$guest_id );
+                    $return['ak'] = Better_Messages_WebSocket()->user_socket_key( 0 );
                 }
 
                 return $return;

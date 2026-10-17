@@ -9,7 +9,7 @@ return array(
 	'lightbox/lightbox.min.js' => '96e6403337',
 	'menus/menus.min.js' => '10e646a831',
 	'pages/pages.min.css' => 'db3e11e74b',
-	'pages/pages.min.js' => '666f1d4d01',
+	'pages/pages.min.js' => '4df9096f77',
 	'pickers/emoji-text.min.js' => 'd6b4c3f3b7',
 	'pickers/pickers-loader.min.js' => 'aa9cbb0250',
 	'pickers/pickers.min.css' => '1ee8a08d5c',
@@ -28,5 +28,5 @@ return array(
 	'tracking/survey.min.css' => '0cc12a6bca',
 	'tracking/survey.min.js' => 'ef9a013dec',
 	'ui/ui.min.css' => 'ccbb556001',
-	'ui/ui.min.js' => '55a40e941a',
+	'ui/ui.min.js' => '36fe139a03',
 );

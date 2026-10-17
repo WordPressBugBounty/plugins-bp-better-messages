@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) || exit;
 return array(
 	'hashes'  => array(
 		'ar' => array(
-			'wordplus-sdk-pages' => '2ba4b41e536e6e6a',
+			'wordplus-sdk-pages' => 'c9405679e34732af',
 			'wordplus-ui' => 'ff709b6996033b52',
 			'wordplus-sdk-survey' => '9a789f7bce23d959',
 			'wordplus-toasts' => 'f0d30076a21d4487',
@@ -15,7 +15,7 @@ return array(
 			'wordplus-pickers' => 'b207153bc927463d',
 		),
 		'bg_BG' => array(
-			'wordplus-sdk-pages' => 'bda6c33d7bac8066',
+			'wordplus-sdk-pages' => '7f7373179a1fdd31',
 			'wordplus-ui' => '0b6c429492bf06ea',
 			'wordplus-sdk-survey' => 'f299e79a4d72f7d9',
 			'wordplus-toasts' => 'b67315b938db97c7',
@@ -25,7 +25,7 @@ return array(
 			'wordplus-pickers' => '4567b73263eda857',
 		),
 		'cs_CZ' => array(
-			'wordplus-sdk-pages' => 'bb564433acbde079',
+			'wordplus-sdk-pages' => '959334d85f21f3b7',
 			'wordplus-ui' => '3012c5e58fde4d9c',
 			'wordplus-sdk-survey' => '00d9623d0233b01a',
 			'wordplus-toasts' => '6284550db5948c54',
@@ -35,7 +35,7 @@ return array(
 			'wordplus-pickers' => '155941c442a301c8',
 		),
 		'da_DK' => array(
-			'wordplus-sdk-pages' => 'a5605fd7e84ccdde',
+			'wordplus-sdk-pages' => '3b1acdc49b6adaf4',
 			'wordplus-ui' => '2726e71a9e248afd',
 			'wordplus-sdk-survey' => 'b669767e05da4487',
 			'wordplus-toasts' => 'de8c595bb2c23d5a',
@@ -45,7 +45,7 @@ return array(
 			'wordplus-pickers' => 'c4a73ba5a27e202e',
 		),
 		'de_DE' => array(
-			'wordplus-sdk-pages' => '90484505d7af195a',
+			'wordplus-sdk-pages' => 'c91d600aaab9e29f',
 			'wordplus-ui' => '234849e9fc812b0a',
 			'wordplus-sdk-survey' => '528da96b9bf739dc',
 			'wordplus-toasts' => '8b9e6621b9502efb',
@@ -55,7 +55,7 @@ return array(
 			'wordplus-pickers' => '32c9b43b9e916385',
 		),
 		'el' => array(
-			'wordplus-sdk-pages' => '9d0e0eafbe5bb6b0',
+			'wordplus-sdk-pages' => 'e8a9edfc79de5413',
 			'wordplus-ui' => 'a5c734c4656e298f',
 			'wordplus-sdk-survey' => 'b57d6557a020c356',
 			'wordplus-toasts' => 'd1a7e85ab248f743',
@@ -65,7 +65,7 @@ return array(
 			'wordplus-pickers' => 'a8ee9970ca90c755',
 		),
 		'es_ES' => array(
-			'wordplus-sdk-pages' => '58f16f956aecd13a',
+			'wordplus-sdk-pages' => '522c8c8741f5e5d7',
 			'wordplus-ui' => '30f6a885ebf512db',
 			'wordplus-sdk-survey' => '6eaefb8100efa9d6',
 			'wordplus-toasts' => 'ab063ac67fd58233',
@@ -75,7 +75,7 @@ return array(
 			'wordplus-pickers' => '82455e4344e34c4b',
 		),
 		'et' => array(
-			'wordplus-sdk-pages' => 'da241262df81dc43',
+			'wordplus-sdk-pages' => 'a73e0577423125b0',
 			'wordplus-ui' => 'cced713ad67be418',
 			'wordplus-sdk-survey' => '75142ef263379e1c',
 			'wordplus-toasts' => '21e8cd50048f5daf',
@@ -85,7 +85,7 @@ return array(
 			'wordplus-pickers' => 'bdbdcc9cccb803ef',
 		),
 		'fa_IR' => array(
-			'wordplus-sdk-pages' => '4fce26203f2c2b20',
+			'wordplus-sdk-pages' => '1e56c577a0ba9864',
 			'wordplus-ui' => 'f1e60c14cb96eb5e',
 			'wordplus-sdk-survey' => '2a487b226828c381',
 			'wordplus-toasts' => '7b670db40c29e7cc',
@@ -95,7 +95,7 @@ return array(
 			'wordplus-pickers' => '037e2072e5efcafe',
 		),
 		'fi' => array(
-			'wordplus-sdk-pages' => '093f316678c8c44d',
+			'wordplus-sdk-pages' => 'ed2c1364883015ea',
 			'wordplus-ui' => 'c8c5240fd16df16b',
 			'wordplus-sdk-survey' => '27e8d5b1e544e89c',
 			'wordplus-toasts' => '09143b6656552453',
@@ -105,7 +105,7 @@ return array(
 			'wordplus-pickers' => '63af358b8d9a86c3',
 		),
 		'fr_FR' => array(
-			'wordplus-sdk-pages' => 'b63277319004a738',
+			'wordplus-sdk-pages' => '5e527c40accabd19',
 			'wordplus-ui' => 'e1b818a0a1bab78d',
 			'wordplus-sdk-survey' => '6872a3afdc58cb54',
 			'wordplus-toasts' => '7217475bd95772df',
@@ -115,7 +115,7 @@ return array(
 			'wordplus-pickers' => 'ec060484292b289b',
 		),
 		'he_IL' => array(
-			'wordplus-sdk-pages' => '0c0fac229674d50c',
+			'wordplus-sdk-pages' => '143381f7b743a357',
 			'wordplus-ui' => 'b9fb3ff8cb8967fc',
 			'wordplus-sdk-survey' => 'd368ab67a5055ca0',
 			'wordplus-toasts' => '37a2bac85a5ca13f',
@@ -125,7 +125,7 @@ return array(
 			'wordplus-pickers' => '178e1a9b29aad7a1',
 		),
 		'hu_HU' => array(
-			'wordplus-sdk-pages' => '98fdbaab513a088b',
+			'wordplus-sdk-pages' => '361d18d7d79e804d',
 			'wordplus-ui' => '1388b32a23c9c4b3',
 			'wordplus-sdk-survey' => 'cc923726ebe9ada9',
 			'wordplus-toasts' => '898e9883d17a0522',
@@ -135,7 +135,7 @@ return array(
 			'wordplus-pickers' => 'f19f687a9cce6732',
 		),
 		'it_IT' => array(
-			'wordplus-sdk-pages' => '65b67c85cbeab01c',
+			'wordplus-sdk-pages' => '83fbfe9048f939f1',
 			'wordplus-ui' => '2ff8abe0afd42d3f',
 			'wordplus-sdk-survey' => '9e3df868bacb9686',
 			'wordplus-toasts' => '4a366beca81caf76',
@@ -145,7 +145,7 @@ return array(
 			'wordplus-pickers' => 'c0fbcf5a45c69d26',
 		),
 		'ja' => array(
-			'wordplus-sdk-pages' => '8cbe388015e5ffc3',
+			'wordplus-sdk-pages' => '6f6974f2d99d01b2',
 			'wordplus-ui' => '5527becbb9d8f175',
 			'wordplus-sdk-survey' => 'f6a7cc3a82a50db2',
 			'wordplus-toasts' => '9f4ef347ad04dc7e',
@@ -155,7 +155,7 @@ return array(
 			'wordplus-pickers' => 'e7cae558f0ad1ad6',
 		),
 		'lt_LT' => array(
-			'wordplus-sdk-pages' => '8d4593415db292d4',
+			'wordplus-sdk-pages' => '38282d6a5423b3dc',
 			'wordplus-ui' => '48ffc0b93f39f0a9',
 			'wordplus-sdk-survey' => '5dc3cb5c2a8706de',
 			'wordplus-toasts' => '0d54a3710b47c14a',
@@ -165,7 +165,7 @@ return array(
 			'wordplus-pickers' => '6c297ca2628cb5e3',
 		),
 		'lv' => array(
-			'wordplus-sdk-pages' => '166c56d97704cbb3',
+			'wordplus-sdk-pages' => '1082199f8bfd370b',
 			'wordplus-ui' => 'ccc1a5b6b92bb0f8',
 			'wordplus-sdk-survey' => 'fde354520eb79253',
 			'wordplus-toasts' => 'cdc8d22ce6db90aa',
@@ -175,7 +175,7 @@ return array(
 			'wordplus-pickers' => '74dd7a7345891b89',
 		),
 		'nl_NL' => array(
-			'wordplus-sdk-pages' => 'ac6a8abd2755a74e',
+			'wordplus-sdk-pages' => '320fad9499724ec4',
 			'wordplus-ui' => 'bc52803822d8cf89',
 			'wordplus-sdk-survey' => '90382b24ac625f87',
 			'wordplus-toasts' => '4ef61a8356ae42b0',
@@ -185,7 +185,7 @@ return array(
 			'wordplus-pickers' => '30f2e96b253aa6ab',
 		),
 		'pl_PL' => array(
-			'wordplus-sdk-pages' => '6352d77851995c3f',
+			'wordplus-sdk-pages' => '42a901679ac4e49f',
 			'wordplus-ui' => 'd3d04e5ed857fff2',
 			'wordplus-sdk-survey' => 'bc71527f0ea37529',
 			'wordplus-toasts' => '6b8d111cdde4b4ec',
@@ -195,7 +195,7 @@ return array(
 			'wordplus-pickers' => '3e367146563f3268',
 		),
 		'pt_BR' => array(
-			'wordplus-sdk-pages' => '18522297cafa5685',
+			'wordplus-sdk-pages' => '537ad7a9895b66fb',
 			'wordplus-ui' => '42dab28db5fdcc48',
 			'wordplus-sdk-survey' => 'cfd431d700d443f4',
 			'wordplus-toasts' => 'ed539a4b2b0081fb',
@@ -205,7 +205,7 @@ return array(
 			'wordplus-pickers' => 'a1faff0c88b9c852',
 		),
 		'pt_PT' => array(
-			'wordplus-sdk-pages' => '63dd947a46be7c9d',
+			'wordplus-sdk-pages' => '40c745cfba4d60c1',
 			'wordplus-ui' => '946275c6aeee3563',
 			'wordplus-sdk-survey' => '3994ab5c0d287f4b',
 			'wordplus-toasts' => 'ac1b22745d604301',
@@ -215,7 +215,7 @@ return array(
 			'wordplus-pickers' => 'e16432adf0af25b4',
 		),
 		'ro_RO' => array(
-			'wordplus-sdk-pages' => '7811b152467e770b',
+			'wordplus-sdk-pages' => 'f9572307f410f6d8',
 			'wordplus-ui' => '5092defa62dfe54e',
 			'wordplus-sdk-survey' => '03e043418f842517',
 			'wordplus-toasts' => 'bfbb2ff3e96dc80b',
@@ -225,7 +225,7 @@ return array(
 			'wordplus-pickers' => 'c9362064c3b33479',
 		),
 		'ru_RU' => array(
-			'wordplus-sdk-pages' => 'e2b44684d825540f',
+			'wordplus-sdk-pages' => 'ee6d673fc8af5842',
 			'wordplus-ui' => 'f8b01ffc66058ee0',
 			'wordplus-sdk-survey' => 'a4682754c36c4663',
 			'wordplus-toasts' => '19b07d5a26f8c537',
@@ -235,7 +235,7 @@ return array(
 			'wordplus-pickers' => 'dc1e40aeaa796daf',
 		),
 		'sk_SK' => array(
-			'wordplus-sdk-pages' => 'c2e7b9f7be8fbfe3',
+			'wordplus-sdk-pages' => '27711ded282c2965',
 			'wordplus-ui' => 'd4782d16097ad32a',
 			'wordplus-sdk-survey' => 'aade584d848dbb44',
 			'wordplus-toasts' => '40f9ba947cdabca4',
@@ -245,7 +245,7 @@ return array(
 			'wordplus-pickers' => '624836c11051693b',
 		),
 		'sv_SE' => array(
-			'wordplus-sdk-pages' => '8ed6ed55f95233b2',
+			'wordplus-sdk-pages' => 'f2d17b1b8467aaaf',
 			'wordplus-ui' => '1e8d146502cd29b2',
 			'wordplus-sdk-survey' => '2babc4fd96e116e0',
 			'wordplus-toasts' => '06f97ba0d84f9dfa',
@@ -255,7 +255,7 @@ return array(
 			'wordplus-pickers' => 'ae3f42c5ecef92c9',
 		),
 		'tr_TR' => array(
-			'wordplus-sdk-pages' => '4f989e557fcd07c3',
+			'wordplus-sdk-pages' => 'f769fb62c1c38c1d',
 			'wordplus-ui' => '19517d1c73f71786',
 			'wordplus-sdk-survey' => '987613ba6e2240a5',
 			'wordplus-toasts' => 'c5343a9ddb659c47',
@@ -265,7 +265,7 @@ return array(
 			'wordplus-pickers' => 'b87e76bc82c6e858',
 		),
 		'uk' => array(
-			'wordplus-sdk-pages' => '633a79cf88d1bbeb',
+			'wordplus-sdk-pages' => 'ce82e07c8d1f3317',
 			'wordplus-ui' => '38116642ae524000',
 			'wordplus-sdk-survey' => '91e3a4dec10499d9',
 			'wordplus-toasts' => '702ed1cc96bf7428',
@@ -275,7 +275,7 @@ return array(
 			'wordplus-pickers' => 'dc15aff7d0190d7b',
 		),
 		'vi' => array(
-			'wordplus-sdk-pages' => 'afe55df45c4ea6c5',
+			'wordplus-sdk-pages' => '9856002115b642b0',
 			'wordplus-ui' => '0a5ed78b9b308cb2',
 			'wordplus-sdk-survey' => 'c700cb840a4b0699',
 			'wordplus-toasts' => '560d686ff7f19bb6',
@@ -285,7 +285,7 @@ return array(
 			'wordplus-pickers' => 'a3ce4d1161ac3e6d',
 		),
 		'zh_CN' => array(
-			'wordplus-sdk-pages' => 'c01083bc7e43e471',
+			'wordplus-sdk-pages' => 'cd1c787de9d8c38e',
 			'wordplus-ui' => 'd1d0bda7791628eb',
 			'wordplus-sdk-survey' => '7bd6b17510ce08b7',
 			'wordplus-toasts' => '080c323d6f30309b',
@@ -459,6 +459,11 @@ return array(
 			array( 'The licence is active on this site', 'Licence page' ),
 			array( 'Beta versions are on', 'Licence page' ),
 			array( 'Beta versions are off', 'Licence page' ),
+			array( '%1$s %2$s is available, a beta version.', 'Licence page' ),
+			array( '%1$s %2$s is available.', 'Licence page' ),
+			array( 'Update now', 'Licence page' ),
+			array( '%s could not be checked. Try again in a minute.', 'Licence page' ),
+			array( '%1$s %2$s is the newest version.', 'Licence page' ),
 			array( 'Download from your account', 'Licence page' ),
 			array( 'Upload plugin', 'Licence page' ),
 			array( 'See plans', 'Licence page' ),
@@ -526,6 +531,9 @@ return array(
 			array( 'Get beta versions', 'Licence page' ),
 			array( 'Beta versions come out before a release, so you can try what is new early, and the release reaches this site either way.', 'Licence page' ),
 			array( 'Try them on a staging site first.', 'Licence page' ),
+			array( 'Check for updates', 'Licence page' ),
+			array( 'WordPress looks for updates twice a day. Check now to see a new version at once.', 'Licence page' ),
+			array( 'Check now', 'Licence page' ),
 			array( 'Sites using this licence', 'Licence page' ),
 			array( 'None yet.', 'Licence page' ),
 			array( 'Site', 'Licence page' ),

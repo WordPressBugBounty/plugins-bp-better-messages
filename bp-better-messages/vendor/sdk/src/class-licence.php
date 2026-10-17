@@ -117,6 +117,11 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
             return preg_match( '#^[a-z][a-z0-9+.-]*://#i', $domain ) ? $domain : 'https://' . ltrim( $domain, '/' );
         }
 
+        private function unchecked()
+        {
+            return null !== $this->forced_key() && null !== $this->forced_domain();
+        }
+
         public function on_init()
         {
             $this->maybe_migrate();
@@ -139,7 +144,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
 
         public function maybe_refresh_stale()
         {
-            if ( wp_doing_ajax() || wp_doing_cron() || null !== $this->forced_key() || '' === $this->get_key() ) {
+            if ( wp_doing_ajax() || wp_doing_cron() || $this->unchecked() || '' === $this->get_key() ) {
                 return;
             }
 
@@ -169,7 +174,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
 
         public function check_due()
         {
-            if ( null !== $this->forced_key() || '' === $this->get_key() ) {
+            if ( $this->unchecked() || '' === $this->get_key() ) {
                 return false;
             }
 
@@ -188,7 +193,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
 
         public function maybe_check_in_plugins()
         {
-            if ( wp_doing_ajax() || wp_doing_cron() || null !== $this->forced_key() || '' === $this->get_key() || ! $this->is_active() ) {
+            if ( wp_doing_ajax() || wp_doing_cron() || $this->unchecked() || '' === $this->get_key() || ! $this->is_active() ) {
                 return;
             }
 
@@ -556,8 +561,9 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
         public function recover()
         {
             $data = $this->get();
+            $key  = $this->get_key();
 
-            if ( empty( $data['key'] ) || null !== $this->forced_key() ) {
+            if ( '' === $key || $this->unchecked() ) {
                 return new WP_Error( 'no_license', 'No licence key' );
             }
 
@@ -573,7 +579,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
             $this->save( $data );
             $this->forget_secret();
 
-            $result = $this->activate( $data['key'] );
+            $result = $this->activate( $key );
 
             if ( is_wp_error( $result ) ) {
                 $data                   = $this->get();
@@ -755,7 +761,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
                 $result = $this->get();
             }
 
-            if ( null === $this->forced_key() && $this->is_active() && count( $this->sdk->products_on( $this->store ) ) > 1 ) {
+            if ( ! $this->unchecked() && $this->is_active() && count( $this->sdk->products_on( $this->store ) ) > 1 ) {
                 $this->check_in_others();
                 $result = $this->get();
             }
@@ -832,7 +838,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
         {
             $key = $this->get_key();
 
-            if ( '' === $key || null !== $this->forced_key() ) {
+            if ( '' === $key || $this->unchecked() ) {
                 return $this->get();
             }
 
@@ -897,7 +903,7 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
             $data = $this->get();
             $url  = $this->url();
 
-            if ( $this->is_active() && null === $this->site_credentials()
+            if ( $this->is_active() && ! $this->deactivated_here( $data ) && null === $this->site_credentials()
                 && ( empty( $data['activations'][ $url ]['credentials_asked'] ) || $this->secret_required( $data ) ) ) {
                 $data['activations'][ $url ]['credentials_asked'] = time();
                 $this->save( $data );
@@ -943,11 +949,15 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
         {
             $data = $this->get();
 
-            if ( ! empty( $data['key'] ) || ! empty( $data['migration_checked'] ) || null !== $this->forced_key() ) {
+            if ( ! empty( $data['key'] ) || ! empty( $data['migration_checked'] ) || $this->unchecked() ) {
                 return;
             }
 
             $migrated = $this->read_freemius();
+
+            if ( null !== $migrated && null !== $this->forced_key() && $migrated['key'] !== $this->forced_key() ) {
+                $migrated = null;
+            }
 
             if ( null === $migrated && $this->is_network() && ! is_main_site() ) {
                 return;

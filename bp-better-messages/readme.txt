@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -426,7 +426,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
-= 3.1.0 =
+= 3.1.0 - 3.1.2 =
 * Added **WordPlus Cloud**, the new name and home of the cloud behind the WebSocket version: your licences, sites, downloads and invoices in one account at [www.wordplus.cloud](https://www.wordplus.cloud/). [Read the introduction](https://www.better-messages.com/blog/wordplus-cloud/)
 * Removed the Freemius SDK, added licences and updates of the WebSocket version from WordPlus Cloud. Your licence moves over by itself on the first page load after the update, with the same key, and realtime messaging, calls and mobile apps keep working without any action
 * Added **Cloud Storage** for attachments, in the free version too: keep files in Cloudflare R2, Bunny.net Storage, or Amazon S3 and any S3-compatible service, chosen per type of file under **Attachments → File Groups**. Files go straight from the browser or the mobile app to the storage, and members open them through links that expire
@@ -434,6 +434,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Added **live streaming in chat rooms** with the Live Stream plugin, on the WebSocket version: a room shows its stream the way it shows a group video call, beside the messages, and the chat room editor can start one
 * Added **end-to-end encryption of group calls** on the WebSocket version, off by default under **Group Calls → End-to-End Encryption**: their audio and video are encrypted in each browser and app with a key only your site gives out
 * Added new **Licence**, **Upgrade** and **Support** pages: the licence with the sites using it, the plans with a free trial, and a contact form that takes files
+* Added **Check for updates** on the **Licence** page of the WebSocket version: it asks for a new version at once, a beta too when beta versions are on, and links to the update
 * Added **Max File Size by Type**, a separate upload limit for images, videos, audio and other files
 * Added **notification levels** for group conversations and chat rooms: each member chooses **All messages**, **Mentions and replies** or **Nothing** for a conversation from its menu, and administrators choose the default for each kind of conversation under **Notifications → Conversation Notifications**
 * Added replies that notify like mentions: a reply to your message in a group conversation notifies you and marks the conversation as a mention does
@@ -463,9 +464,11 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Improved the iOS setup of the mobile app: once a screen sharing App ID is selected, the App ID of the app lists App Groups too, and a build missing it names the App ID and the App Group to assign
 * Improved the chat toggle in calls: a **Show Chat** button in the call controls replaces the chevron on the edge of the call, which could cover the buttons of a participant, and full screen hides it
 * Improved the picture of group calls: the camera sends in a modern codec where the device encodes it in hardware, with a fallback every device can play, in three sizes up to 1080p, and each participant receives the size their screen shows
+* Improved group video calls from computers without a hardware video encoder, mostly Windows laptops: their camera now goes out at 720p, so a slower computer keeps up and the others no longer see its picture freeze
 * Improved the moderator buttons in group calls, which show a spinner until the change takes effect
-* Improved **Mute user** in the member menu of a chat room, which is red like Kick and Ban, and so is the button of its form
+* Improved **Mute user**, **Unmute user** and **Unban user** in the member menu of a chat room, which are red like Kick and Ban, and so is the button of the mute form
 * Improved calls for keyboards and screen readers: Answer, Reject and every call control are buttons that Tab reaches and Enter or Space presses, and the focus goes back where it was when the call ends
+* Fixed pages with the messenger responding slowly to clicks in Chrome, Edge and other Chromium browsers, most of all beside a large chat room with many members online
 * Fixed AI chat bots on Claude Opus 4.7 and 4.8 counting the old Opus 4 price, three times what they cost
 * Fixed web searches of Claude bots counting as free instead of $10 per 1,000, and those of OpenAI bots on GPT-4o and GPT-4.1 counting $25 per 1,000 instead of $10
 * Fixed images from Gemini preview models counting as free in the costs of the AI chat bots
@@ -477,6 +480,9 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Fixed an AI chat bot answering a message twice, and a summary, digest, translation or transcription being made and charged twice, when it was asked for twice at the same moment
 * Fixed a file uploaded in parts being corrupted, or a file uploaded to Cloud Storage being added twice, when a part or the upload was sent again while the first try was still running
 * Fixed a WooCommerce cart snapshot being posted twice, a pinned message being listed twice, and "started a call" showing twice when each happened twice at the same moment
+* Fixed the online list, of a chat room too, staying empty after opening the messenger from another page of the site in the WebSocket version, for up to 40 seconds with the member showing offline to everyone else. It now shows who is online at once, as in 3.0
+* Fixed the online list of chat rooms and presence rooms showing No users online for a moment on each page load in the WebSocket version: it shows you at once, and after a reload the people it showed before
+* Fixed a visitor who has not joined a chat room as a guest seeing its online list, which could show nobody to them: it appears once they chat as a guest
 * Fixed the online count in the **Chat Rooms** list missing for everyone but the moderators of the room when the room has **Hide participants list** on
 * Fixed chat room moderators being able to mute and ban a site administrator, who they already could not remove, and being offered all three on an administrator
 * Fixed a muted chat room moderator or administrator getting the reply area, where every message failed to send, instead of the notice that they are muted
@@ -494,6 +500,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Security improvement: a reply can only point to a message of its own conversation, so an AI chat bot never reads a message of another one
 * Security improvement: AI chat bots answer mentions and replies only in conversations they are part of
 * Security improvement: a message held for moderation cannot be loaded by other members of the conversation
+* Security improvement: each guest connects to the WebSocket server with a key of their own, so a visitor can no longer connect as another guest, and a deleted guest is cut off the WebSocket server at once
 * Fixed a group call that the call server could not start still posting "started a call"
 * Fixed BuddyBoss App push notifications of a new message going to the wrong members and to the sender
 * Fixed releasing a message held by AI moderation on a site without the realtime server

@@ -500,6 +500,24 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                 'args'                => array( 'enabled' => array( 'required' => true, 'type' => 'boolean' ) ),
             ) );
 
+            if ( $this->product->updater() ) {
+                register_rest_route( $namespace, $base . '/updates', array(
+                    'methods'             => 'POST',
+                    'callback'            => function () {
+                        $plugins = array();
+
+                        foreach ( WordPlus_SDK::instance()->products_on( $this->product->licence_store() ) as $product ) {
+                            if ( $product->updater() ) {
+                                $plugins[] = $product->updater()->check_at_once();
+                            }
+                        }
+
+                        return array( 'plugins' => $plugins );
+                    },
+                    'permission_callback' => $licensing,
+                ) );
+            }
+
             register_rest_route( $namespace, $base . '/sites', array(
                 'methods'             => 'GET',
                 'callback'            => function () {
