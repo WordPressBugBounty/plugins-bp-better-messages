@@ -727,6 +727,7 @@ function _bm_js_translation_strings() {
     __('Authorization required', 'bp-better-messages');
     _x('Successfully subscribed to Web Push notifications', 'Push Notifications', 'bp-better-messages');
     _x('Failed to subscribe to Web Push notifications. Please ensure that your web browser permission settings allows to send notifications at this website.', 'Push Notifications', 'bp-better-messages');
+    _x('This website could not set up Web Push notifications in your browser. Please contact the website administrator.', 'Push Notifications', 'bp-better-messages');
     _x('Successfully unsubscribed from Web Push notifications', 'Push Notifications', 'bp-better-messages');
     _x('Encrypted message', 'Push notification', 'bp-better-messages');
     __('Continue with account', 'bp-better-messages');

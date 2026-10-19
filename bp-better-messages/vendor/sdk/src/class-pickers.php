@@ -289,7 +289,6 @@ if ( ! class_exists( 'WordPlus_SDK_Pickers' ) ) {
         {
             global $wpdb;
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
                 $wpdb->esc_like( '_transient_wplus_gifs_' ) . '%',

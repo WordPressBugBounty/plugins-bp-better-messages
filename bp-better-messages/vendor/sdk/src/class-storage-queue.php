@@ -55,8 +55,8 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
 
             do_action( 'wordplus_storage_index', min( 5, $budget ) );
 
-            $finished = $this->run_rows( "state = 'pending_move'", array( $this, 'move_row' ), $started, $budget )
-                && $this->run_rows( "target IS NOT NULL AND state IN ('local','failed','stored')", array( $this, 'move_to_target' ), $started, $budget );
+            $finished = $this->run_rows( false, array( $this, 'move_row' ), $started, $budget )
+                && $this->run_rows( true, array( $this, 'move_to_target' ), $started, $budget );
 
             $left = $budget - ( microtime( true ) - $started );
 
@@ -111,7 +111,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             }
         }
 
-        private function run_rows( $where, $callback, $started, $budget )
+        private function run_rows( $targets, $callback, $started, $budget )
         {
             global $wpdb;
 
@@ -119,10 +119,15 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             $cursor = 0;
 
             do {
-                $rows = $wpdb->get_results( $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND {$where} AND next_attempt_at <= %d AND id > %d ORDER BY id ASC LIMIT 20", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                    get_current_blog_id(), $now, $cursor
-                ) );
+                $rows = $targets
+                    ? $wpdb->get_results( $wpdb->prepare(
+                        "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND target IS NOT NULL AND state IN ('local','failed','stored') AND next_attempt_at <= %d AND id > %d ORDER BY id ASC LIMIT 20",
+                        get_current_blog_id(), $now, $cursor
+                    ) )
+                    : $wpdb->get_results( $wpdb->prepare(
+                        "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND state = 'pending_move' AND next_attempt_at <= %d AND id > %d ORDER BY id ASC LIMIT 20",
+                        get_current_blog_id(), $now, $cursor
+                    ) );
 
                 foreach ( $rows as $row ) {
                     if ( microtime( true ) - $started > $budget ) {
@@ -173,10 +178,8 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             }
 
             ignore_user_abort( true );
-            set_time_limit( 300 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
 
-            $in   = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-            $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE id IN ({$in})", $ids ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+            $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ) );
 
             $later = false;
 
@@ -673,18 +676,18 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             $started = microtime( true );
             $now     = time();
             $retired = get_site_option( self::RETIRED_OPTION, array() );
-            $blogs   = ! empty( $retired ) ? array( get_current_blog_id(), 0 ) : array( get_current_blog_id() );
-            $in      = implode( ',', array_fill( 0, count( $blogs ), '%d' ) );
+            $blog    = get_current_blog_id();
+            $also    = ! empty( $retired ) ? 0 : $blog;
 
-            $wpdb->query( $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-                "UPDATE {$wpdb->wordplus_storage_objects} SET state = 'deleting', next_attempt_at = %d WHERE blog_id IN ({$in}) AND state = 'removing' AND updated_at < %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-                array_merge( array( $now ), $blogs, array( $now - 600 ) )
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$wpdb->wordplus_storage_objects} SET state = 'deleting', next_attempt_at = %d WHERE blog_id IN (%d, %d) AND state = 'removing' AND updated_at < %d",
+                $now, $blog, $also, $now - 600
             ) );
 
             do {
                 $rows = $wpdb->get_results( $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id IN ({$in}) AND state IN ('deleting','delete_failed') AND next_attempt_at <= %d ORDER BY id ASC LIMIT 20", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-                    array_merge( $blogs, array( $now ) )
+                    "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id IN (%d, %d) AND state IN ('deleting','delete_failed') AND next_attempt_at <= %d ORDER BY id ASC LIMIT 20",
+                    $blog, $also, $now
                 ) );
 
                 foreach ( $rows as $row ) {
@@ -889,22 +892,19 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             return ( 'local' === $id || '' === $id ) ? '' : (string) $id;
         }
 
-        private function selection_sql( $from )
-        {
-            global $wpdb;
-
-            if ( '' === $from ) {
-                return $wpdb->prepare( "blog_id = %d AND ref IS NOT NULL AND state IN ('local','failed')", get_current_blog_id() );
-            }
-
-            return $wpdb->prepare( "blog_id = %d AND ref IS NOT NULL AND state = 'stored' AND location = %s", get_current_blog_id(), $from );
-        }
-
         public function remaining( $from, $cursor = 0 )
         {
             global $wpdb;
 
-            $row = $wpdb->get_row( "SELECT COUNT(*) AS files, COALESCE(SUM(size), 0) AS bytes FROM {$wpdb->wordplus_storage_objects} WHERE " . $this->selection_sql( $from ) . $wpdb->prepare( ' AND id > %d', (int) $cursor ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $row = '' === $from
+                ? $wpdb->get_row( $wpdb->prepare(
+                    "SELECT COUNT(*) AS files, COALESCE(SUM(size), 0) AS bytes FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL AND state IN ('local','failed') AND id > %d",
+                    get_current_blog_id(), (int) $cursor
+                ) )
+                : $wpdb->get_row( $wpdb->prepare(
+                    "SELECT COUNT(*) AS files, COALESCE(SUM(size), 0) AS bytes FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL AND state = 'stored' AND location = %s AND id > %d",
+                    get_current_blog_id(), $from, (int) $cursor
+                ) );
 
             return array( 'files' => (int) $row->files, 'bytes' => (int) $row->bytes );
         }
@@ -1061,7 +1061,15 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
                         break;
                     }
 
-                    $row = $wpdb->get_row( "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE " . $this->selection_sql( $state['from'] ) . $wpdb->prepare( ' AND id > %d ORDER BY id ASC LIMIT 1', (int) $state['cursor'] ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                    $row = '' === $state['from']
+                        ? $wpdb->get_row( $wpdb->prepare(
+                            "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL AND state IN ('local','failed') AND id > %d ORDER BY id ASC LIMIT 1",
+                            get_current_blog_id(), (int) $state['cursor']
+                        ) )
+                        : $wpdb->get_row( $wpdb->prepare(
+                            "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL AND state = 'stored' AND location = %s AND id > %d ORDER BY id ASC LIMIT 1",
+                            get_current_blog_id(), (string) $state['from'], (int) $state['cursor']
+                        ) );
 
                     if ( ! $row ) {
                         $state['status']      = 'done';

@@ -728,6 +728,7 @@ function _bm_frontend_translations_map() {
         array( '__', 'Authorization required' ),
         array( '_x', 'Successfully subscribed to Web Push notifications', 'Push Notifications' ),
         array( '_x', 'Failed to subscribe to Web Push notifications. Please ensure that your web browser permission settings allows to send notifications at this website.', 'Push Notifications' ),
+        array( '_x', 'This website could not set up Web Push notifications in your browser. Please contact the website administrator.', 'Push Notifications' ),
         array( '_x', 'Successfully unsubscribed from Web Push notifications', 'Push Notifications' ),
         array( '_x', 'Encrypted message', 'Push notification' ),
         array( '__', 'Continue with account' ),

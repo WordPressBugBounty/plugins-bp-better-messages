@@ -49,7 +49,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Admin' ) ) {
                 $ips = is_array( $ips ) ? $ips : array();
 
                 if ( function_exists( 'dns_get_record' ) && ! empty( $ips ) ) {
-                    $records = @dns_get_record( $host, DNS_AAAA ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+                    $records = @dns_get_record( $host, DNS_AAAA );
 
                     foreach ( is_array( $records ) ? $records : array() as $record ) {
                         if ( ! empty( $record['ipv6'] ) ) {
@@ -364,7 +364,6 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Admin' ) ) {
                 'usage'     => $storage->usage(),
                 'files'     => (object) $files,
                 'origins'   => $this->origins(),
-                'curl'      => WordPlus_SDK_Storage_S3::has_curl(),
                 'direct'    => $direct,
                 'fallbacks' => $storage->direct()->fallbacks_today(),
                 'migration' => $storage->queue()->migration_payload(),
@@ -1316,7 +1315,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Admin' ) ) {
         {
             $path = $this->storage->sdk()->path( 'storage/worker.js' );
 
-            return array( 'script' => is_readable( $path ) ? (string) file_get_contents( $path ) : '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            return array( 'script' => is_readable( $path ) ? (string) file_get_contents( $path ) : '' );
         }
 
         public function rest_test_worker( WP_REST_Request $request )
@@ -1371,7 +1370,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Admin' ) ) {
                 ? self::step( 'range', 'ok', _x( 'Partial downloads work, so videos can seek.', 'Storage', 'wordplus-sdk' ) )
                 : self::step( 'range', 'warn', _x( 'Partial downloads do not work, so videos may not seek on iPhone. Paste the current Worker script again.', 'Storage', 'wordplus-sdk' ) );
 
-            $forged       = preg_replace( '/sig=[^&]+/', 'sig=' . rtrim( strtr( base64_encode( random_bytes( 32 ) ), '+/', '-_' ), '=' ), $valid ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+            $forged       = preg_replace( '/sig=[^&]+/', 'sig=' . rtrim( strtr( base64_encode( random_bytes( 32 ) ), '+/', '-_' ), '=' ), $valid );
             $denied       = $this->remote( $forged, array( 'timeout' => 20 ) );
             $expired      = $this->remote( WordPlus_SDK_Storage::worker_url( $location, $key, time() - 60, 'attachment', 'test.txt' ), array( 'timeout' => 20 ) );
             $forged_code  = is_wp_error( $denied ) ? 0 : (int) wp_remote_retrieve_response_code( $denied );

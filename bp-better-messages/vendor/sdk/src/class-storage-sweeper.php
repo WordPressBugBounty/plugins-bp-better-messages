@@ -187,17 +187,16 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Sweeper' ) ) {
             }
 
             $keys = array_map( 'strval', array_keys( $candidates ) );
-            $in   = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
 
             $known = array_flip( array_merge(
-                $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT object_key FROM {$table} WHERE object_key IN ({$in}) AND state <> 'orphan'", $keys ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+                $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT object_key FROM {$wpdb->wordplus_storage_objects} WHERE object_key IN (" . implode( ',', array_fill( 0, count( $keys ), '%s' ) ) . ") AND state <> 'orphan'", $keys ) ),
                 array_map( 'strval', (array) apply_filters( 'wordplus_storage_known_keys', array(), $keys ) )
             ) );
 
             $orphans = array();
 
-            foreach ( $wpdb->get_results( $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-                "SELECT id, object_key, created_at FROM {$table} WHERE blog_id = %d AND location = %s AND state = 'orphan' AND object_key IN ({$in})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+            foreach ( $wpdb->get_results( $wpdb->prepare(
+                "SELECT id, object_key, created_at FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND location = %s AND state = 'orphan' AND object_key IN (" . implode( ',', array_fill( 0, count( $keys ), '%s' ) ) . ')',
                 array_merge( array( get_current_blog_id(), $location['id'] ), $keys )
             ) ) as $row ) {
                 $orphans[ $row->object_key ] = $row;

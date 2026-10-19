@@ -63,7 +63,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
         public function data( $locale = '' )
         {
             $file = $this->data_file( $locale );
-            $data = $file ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $data = $file ? json_decode( (string) file_get_contents( $file ), true ) : null;
 
             return is_array( $data ) ? $data : null;
         }
@@ -88,14 +88,14 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
 
             $data = $this->build( $set, $locale );
 
-            if ( ! $data || ! wp_mkdir_p( $dir ) || false === file_put_contents( $file, wp_json_encode( $data, JSON_UNESCAPED_UNICODE ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+            if ( ! $data || ! wp_mkdir_p( $dir ) || false === file_put_contents( $file, wp_json_encode( $data, JSON_UNESCAPED_UNICODE ) ) ) {
                 return false;
             }
 
             $rules = "<IfModule mod_headers.c>\n<FilesMatch \"^[a-z]+-[A-Za-z0-9_-]+" . self::DATA_NAME . "$\">\n  Header set Cache-Control \"public, max-age=31536000, immutable\"\n</FilesMatch>\n</IfModule>\n";
 
-            if ( ! file_exists( $dir . '.htaccess' ) || file_get_contents( $dir . '.htaccess' ) !== $rules ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-                file_put_contents( $dir . '.htaccess', $rules ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+            if ( ! file_exists( $dir . '.htaccess' ) || file_get_contents( $dir . '.htaccess' ) !== $rules ) {
+                file_put_contents( $dir . '.htaccess', $rules );
             }
 
             foreach ( $this->data_files( preg_quote( $set . '-' . $locale, '/' ) ) as $old ) {
@@ -145,7 +145,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
         private function build( $set, $locale )
         {
             $file    = $this->root . '/pickers/data/emoji/' . $set . '.json';
-            $dataset = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $dataset = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null;
 
             if ( ! is_array( $dataset ) ) {
                 return false;
@@ -226,7 +226,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
         private function annotations( $locale )
         {
             $file = $this->annotations_path( $locale );
-            $data = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $data = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null;
 
             if ( ! is_array( $data ) ) {
                 return array();
@@ -380,7 +380,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
             $this->adopt();
 
             $file    = $this->root . '/pickers/data/emoji/' . $set . '.json';
-            $dataset = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $dataset = file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null;
 
             if ( ! file_exists( $this->sprite_path( $set ) ) || ! is_array( $dataset ) || empty( $dataset['sheet']['cols'] ) || empty( $dataset['emojis'] ) ) {
                 return new WP_Error( 'no_sprite', __( 'The emoji set has not been downloaded.', 'wordplus-sdk' ) );
@@ -442,7 +442,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
             }
 
             if ( ! file_exists( $dir . '.htaccess' ) ) {
-                file_put_contents( $dir . '.htaccess', "<IfModule mod_headers.c>\n<FilesMatch \"\\.png$\">\n  Header set Cache-Control \"public, max-age=2592000\"\n</FilesMatch>\n</IfModule>\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+                file_put_contents( $dir . '.htaccess', "<IfModule mod_headers.c>\n<FilesMatch \"\\.png$\">\n  Header set Cache-Control \"public, max-age=2592000\"\n</FilesMatch>\n</IfModule>\n" );
             }
 
             $saved = $this->save( $dir . 'index.json', (string) wp_json_encode( array( 'set' => $set, 'keys' => array_map( 'strval', array_keys( $keys ) ) ) ) );
@@ -460,7 +460,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
         {
             $set  = $this->set();
             $file = 'native' === $set ? '' : $this->images_dir( $set ) . 'index.json';
-            $data = '' !== $file && file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $data = '' !== $file && file_exists( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null;
 
             return is_array( $data ) && isset( $data['keys'] ) ? $data : null;
         }
@@ -490,7 +490,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
             wp_delete_file( $dir . '.htaccess' );
 
             if ( is_dir( $dir ) ) {
-                rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+                WordPlus_SDK::files()->rmdir( $dir );
             }
         }
 
@@ -665,7 +665,7 @@ if ( ! class_exists( 'WordPlus_SDK_Emoji' ) ) {
         {
             $this->adopt();
 
-            if ( ! wp_mkdir_p( dirname( $file ) ) || false === file_put_contents( $file, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+            if ( ! wp_mkdir_p( dirname( $file ) ) || false === file_put_contents( $file, $body ) ) {
                 return new WP_Error( 'save_failed', __( 'The file could not be saved.', 'wordplus-sdk' ) );
             }
 

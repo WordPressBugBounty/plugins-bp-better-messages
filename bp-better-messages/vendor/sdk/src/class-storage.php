@@ -713,7 +713,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
         {
             global $wpdb;
 
-            $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->wordplus_storage_objects}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
+            $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->wordplus_storage_objects}" );
             delete_site_option( self::SCHEMA_OPTION );
             $this->table_ready = null;
         }
@@ -769,15 +769,17 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
                 return 0;
             }
 
-            $values = array();
-            $now    = time();
+            $added = 0;
+            $now   = time();
 
             foreach ( $files as $args ) {
                 $path     = isset( $args['path'] ) ? ltrim( (string) $args['path'], '/' ) : '';
                 $location = isset( $args['location'] ) ? (string) $args['location'] : '';
 
-                $values[] = $wpdb->prepare(
-                    '(%d, %s, %d, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, 0, 0, %d, %d)',
+                $wpdb->query( $wpdb->prepare(
+                    "INSERT IGNORE INTO {$wpdb->wordplus_storage_objects}
+                    (blog_id, plugin, ref, variant, path, item_key, name, mime, size, user_id, location, object_key, state, attempts, next_attempt_at, created_at, updated_at)
+                    VALUES (%d, %s, %d, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, 0, 0, %d, %d)",
                     get_current_blog_id(),
                     (string) $plugin,
                     (int) $args['ref'],
@@ -793,16 +795,14 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
                     '' !== $location ? 'stored' : 'local',
                     ! empty( $args['created'] ) ? (int) $args['created'] : $now,
                     $now
-                );
-            }
+                ) );
 
-            $wpdb->query( "INSERT IGNORE INTO {$wpdb->wordplus_storage_objects}
-                (blog_id, plugin, ref, variant, path, item_key, name, mime, size, user_id, location, object_key, state, attempts, next_attempt_at, created_at, updated_at)
-                VALUES " . implode( ',', $values ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                ++$added;
+            }
 
             $this->row_cache = array();
 
-            return count( $values );
+            return $added;
         }
 
         public function get( $plugin, $ref, $variant = '', $fresh = false )
@@ -840,8 +840,10 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
             }
 
             foreach ( array_chunk( $refs, 500 ) as $chunk ) {
-                $in   = implode( ',', array_fill( 0, count( $chunk ), '%d' ) );
-                $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND plugin = %s AND variant = %s AND ref IN ({$in})", array_merge( array( get_current_blog_id(), (string) $plugin, (string) $variant ), $chunk ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+                $rows = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT * FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND plugin = %s AND variant = %s AND ref IN (" . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ')',
+                    array_merge( array( get_current_blog_id(), (string) $plugin, (string) $variant ), $chunk )
+                ) );
 
                 $found = array();
 
@@ -1168,7 +1170,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
 
         public static function rename( $from, $to )
         {
-            return rename( $from, $to ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+            return WordPlus_SDK::files()->move( $from, $to, true );
         }
 
         public function delete_local( $relative )
@@ -1196,7 +1198,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
                 wp_delete_file( trailingslashit( $dir ) . '.htaccess' );
                 wp_delete_file( trailingslashit( $dir ) . 'index.php' );
 
-                if ( ! rmdir( $dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+                if ( ! WordPlus_SDK::files()->rmdir( $dir ) ) {
                     break;
                 }
 
@@ -1298,7 +1300,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
         public static function pull_zone_url( array $location, $key, $expires )
         {
             $path  = '/' . ltrim( (string) $key, '/' );
-            $token = 'HS256-' . rtrim( strtr( base64_encode( hash_hmac( 'sha256', $path . (int) $expires, $location['token_key'], true ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+            $token = 'HS256-' . rtrim( strtr( base64_encode( hash_hmac( 'sha256', $path . (int) $expires, $location['token_key'], true ) ), '+/', '-_' ), '=' );
 
             return 'https://' . $location['pull_zone_host'] . '/' . WordPlus_SDK_Storage_S3::encode_key( $key ) . '?token=' . $token . '&expires=' . (int) $expires;
         }
@@ -1311,7 +1313,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
                 'exp' => (int) $expires,
                 'd'   => $disposition,
                 'n'   => $name,
-                'sig' => rtrim( strtr( base64_encode( $signature ), '+/', '-_' ), '=' ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+                'sig' => rtrim( strtr( base64_encode( $signature ), '+/', '-_' ), '=' ),
             ), '', '&', PHP_QUERY_RFC3986 );
         }
 
@@ -1354,11 +1356,9 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
                 return array();
             }
 
-            $where = '' !== $plugin ? $wpdb->prepare( ' AND plugin = %s', (string) $plugin ) : '';
-
             $rows = $wpdb->get_results( $wpdb->prepare(
-                "SELECT location, state, plugin, COUNT(*) AS files, COALESCE(SUM(size), 0) AS bytes FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL{$where} GROUP BY location, state, plugin", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                get_current_blog_id()
+                "SELECT location, state, plugin, COUNT(*) AS files, COALESCE(SUM(size), 0) AS bytes FROM {$wpdb->wordplus_storage_objects} WHERE blog_id = %d AND ref IS NOT NULL AND ( %s = '' OR plugin = %s ) GROUP BY location, state, plugin",
+                get_current_blog_id(), (string) $plugin, (string) $plugin
             ), ARRAY_A );
 
             return array_map( function ( $row ) {

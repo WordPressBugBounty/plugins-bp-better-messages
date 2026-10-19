@@ -4,9 +4,9 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
     final class WordPlus_SDK_Storage_S3
     {
-        const MAX_SINGLE_PUT = 67108864;
+        const MAX_REQUEST = 33554432;
 
-        const MAX_WITHOUT_CURL = 33554432;
+        const MAX_SINGLE_PUT = 8388608;
 
         private $scheme;
         private $host;
@@ -251,11 +251,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
 
             $url = $this->url( $key, $canonical_query );
 
-            if ( self::has_curl() ) {
-                $result = $this->send_curl( $method, $url, $send_headers, $body, $file, $offset, $length, $sink, $timeout );
-            } else {
-                $result = $this->send_wp( $method, $url, $send_headers, $body, $file, $offset, $length, $sink, $timeout );
-            }
+            $result = $this->send( $method, $url, $send_headers, $body, $file, $offset, $length, $sink, $timeout );
 
             if ( ! empty( $result['headers']['date'] ) ) {
                 $this->last_date = (int) strtotime( $result['headers']['date'] );
@@ -286,159 +282,20 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
             return $result;
         }
 
-        public static function has_curl()
-        {
-            return function_exists( 'curl_init' );
-        }
-
-        // phpcs:disable WordPress.WP.AlternativeFunctions
-        private function send_curl( $method, $url, array $headers, $body, $file, $offset, $length, $sink, $timeout )
-        {
-            $response_headers = array();
-            $handle           = null;
-            $sink_handle      = null;
-            $error_body       = '';
-
-            $ch = curl_init( $url );
-
-            $header_lines = array( 'Expect:' );
-
-            foreach ( $headers as $name => $value ) {
-                $header_lines[] = $name . ': ' . $value;
-            }
-
-            $verify = (bool) apply_filters( 'https_ssl_verify', true, $url );
-
-            $options = array(
-                CURLOPT_CUSTOMREQUEST  => $method,
-                CURLOPT_HTTPHEADER     => $header_lines,
-                CURLOPT_CONNECTTIMEOUT => 15,
-                CURLOPT_TIMEOUT        => $timeout,
-                CURLOPT_FOLLOWLOCATION => false,
-                CURLOPT_SSL_VERIFYPEER => $verify,
-                CURLOPT_SSL_VERIFYHOST => $verify ? 2 : 0,
-                CURLOPT_CAINFO         => ABSPATH . WPINC . '/certificates/ca-bundle.crt',
-                CURLOPT_USERAGENT      => 'WordPlus SDK/' . WordPlus_SDK::instance()->version() . '; ' . home_url( '/' ),
-                CURLOPT_HEADERFUNCTION => function ( $ch, $line ) use ( &$response_headers ) {
-                    $pos = strpos( $line, ':' );
-
-                    if ( false !== $pos ) {
-                        $response_headers[ strtolower( trim( substr( $line, 0, $pos ) ) ) ] = trim( substr( $line, $pos + 1 ) );
-                    }
-
-                    return strlen( $line );
-                },
-            );
-
-            if ( 'HEAD' === $method ) {
-                $options[ CURLOPT_NOBODY ] = true;
-            }
-
-            if ( '' !== $file ) {
-                $handle = fopen( $file, 'rb' );
-
-                if ( ! $handle ) {
-                    self::close( $ch );
-
-                    return array( 'code' => 0, 'headers' => array(), 'body' => '', 'error' => 'Cannot read ' . wp_basename( $file ) );
-                }
-
-                if ( $offset > 0 ) {
-                    fseek( $handle, $offset );
-                }
-
-                $remaining = $length;
-
-                $options[ CURLOPT_UPLOAD ]       = true;
-                $options[ CURLOPT_INFILESIZE ]   = $length;
-                $options[ CURLOPT_READFUNCTION ] = function ( $ch, $fh, $size ) use ( $handle, &$remaining ) {
-                    if ( $remaining <= 0 ) {
-                        return '';
-                    }
-
-                    $chunk = fread( $handle, min( $size, $remaining ) );
-
-                    if ( false === $chunk ) {
-                        return '';
-                    }
-
-                    $remaining -= strlen( $chunk );
-
-                    return $chunk;
-                };
-            } elseif ( '' !== $body || in_array( $method, array( 'PUT', 'POST' ), true ) ) {
-                $options[ CURLOPT_POSTFIELDS ] = $body;
-            }
-
-            if ( '' !== $sink ) {
-                $sink_handle = fopen( $sink, 'wb' );
-
-                if ( ! $sink_handle ) {
-                    if ( $handle ) {
-                        fclose( $handle );
-                    }
-
-                    self::close( $ch );
-
-                    return array( 'code' => 0, 'headers' => array(), 'body' => '', 'error' => 'Cannot write ' . wp_basename( $sink ) );
-                }
-
-                $options[ CURLOPT_WRITEFUNCTION ] = function ( $ch, $data ) use ( $sink_handle, &$error_body ) {
-                    if ( (int) curl_getinfo( $ch, CURLINFO_RESPONSE_CODE ) >= 300 ) {
-                        $error_body .= $data;
-
-                        return strlen( $data );
-                    }
-
-                    return fwrite( $sink_handle, $data );
-                };
-            } else {
-                $options[ CURLOPT_RETURNTRANSFER ] = true;
-            }
-
-            curl_setopt_array( $ch, $options );
-
-            $response = curl_exec( $ch );
-            $code     = (int) curl_getinfo( $ch, CURLINFO_RESPONSE_CODE );
-            $error    = false === $response ? curl_error( $ch ) : '';
-
-            self::close( $ch );
-
-            if ( $handle ) {
-                fclose( $handle );
-            }
-
-            if ( $sink_handle ) {
-                fclose( $sink_handle );
-            }
-
-            if ( '' !== $sink ) {
-                $response = $error_body;
-            }
-
-            return array(
-                'code'    => '' !== $error ? 0 : $code,
-                'headers' => $response_headers,
-                'body'    => is_string( $response ) ? $response : '',
-                'error'   => $error,
-            );
-        }
-
-        private static function close( $ch )
-        {
-            if ( PHP_VERSION_ID < 80000 ) {
-                curl_close( $ch );
-            }
-        }
-
-        private function send_wp( $method, $url, array $headers, $body, $file, $offset, $length, $sink, $timeout )
+        private function send( $method, $url, array $headers, $body, $file, $offset, $length, $sink, $timeout )
         {
             if ( '' !== $file ) {
-                if ( $length > self::MAX_WITHOUT_CURL ) {
-                    return array( 'code' => 0, 'headers' => array(), 'body' => '', 'error' => 'The PHP cURL extension is needed for files over 32 MB' );
+                if ( $length > self::MAX_REQUEST ) {
+                    return array( 'code' => 0, 'headers' => array(), 'body' => '', 'error' => 'A request over 32 MB' );
                 }
 
                 $body = (string) file_get_contents( $file, false, null, $offset, $length );
+            }
+
+            $headers['Expect'] = '';
+
+            if ( 'PUT' === $method && '' === (string) $body ) {
+                $headers['Content-Length'] = '0';
             }
 
             $args = array(
@@ -448,6 +305,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
                 'timeout'     => $timeout,
                 'redirection' => 0,
                 'decompress'  => false,
+                'user-agent'  => 'WordPlus SDK/' . WordPlus_SDK::instance()->version() . '; ' . home_url( '/' ),
             );
 
             if ( '' !== $sink ) {
@@ -482,7 +340,6 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
                 'error'   => '',
             );
         }
-        // phpcs:enable
 
         public function put_file( $key, $path, array $headers = array() )
         {
@@ -492,7 +349,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
                 return $this->put_file_multipart( $key, $path, $size, $headers );
             }
 
-            $headers['content-md5'] = base64_encode( md5_file( $path, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+            $headers['content-md5'] = base64_encode( md5_file( $path, true ) );
 
             return $this->request( 'PUT', $key, array(
                 'headers' => $headers,
@@ -503,7 +360,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
 
         public function put_string( $key, $body, array $headers = array() )
         {
-            $headers['content-md5'] = base64_encode( md5( $body, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+            $headers['content-md5'] = base64_encode( md5( $body, true ) );
 
             return $this->request( 'PUT', $key, array(
                 'headers' => $headers,
@@ -522,14 +379,19 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
 
         public function put_file_multipart( $key, $path, $size, array $headers = array(), $max_parts = 10000 )
         {
+            $part_size = self::part_size( $size, $max_parts );
+
+            if ( $part_size > self::MAX_REQUEST ) {
+                return array( 'ok' => false, 'code' => 0, 'error' => 'Too large for this storage', 'headers' => array(), 'body' => '' );
+            }
+
             $upload_id = $this->create_multipart( $key, $headers );
 
             if ( '' === $upload_id ) {
                 return array( 'ok' => false, 'code' => 0, 'error' => $this->last_error, 'headers' => array(), 'body' => '' );
             }
 
-            $part_size = self::part_size( $size, $max_parts );
-            $parts     = array();
+            $parts = array();
             $number    = 1;
 
             for ( $offset = 0; $offset < $size; $offset += $part_size ) {
@@ -752,7 +614,7 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_S3' ) ) {
                 'query'   => array( 'cors' => '' ),
                 'headers' => array(
                     'content-type' => 'application/xml',
-                    'content-md5'  => base64_encode( md5( $xml, true ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+                    'content-md5'  => base64_encode( md5( $xml, true ) ),
                 ),
                 'body'    => $xml,
             ) );

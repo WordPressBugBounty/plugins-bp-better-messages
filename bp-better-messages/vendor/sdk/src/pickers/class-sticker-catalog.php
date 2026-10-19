@@ -59,6 +59,7 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
             if ( $code !== 200 ) {
                 return new WP_Error(
                     'catalog_http_error',
+                    /* translators: %d: the HTTP status code the sticker catalogue answered with */
                     sprintf( __( 'Failed to fetch sticker catalog (HTTP %d).', 'wordplus-sdk' ), $code )
                 );
             }
@@ -81,7 +82,7 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
 
         private function is_zip( $file )
         {
-            return is_file( $file ) && "PK\x03\x04" === (string) file_get_contents( $file, false, null, 0, 4 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            return is_file( $file ) && "PK\x03\x04" === (string) file_get_contents( $file, false, null, 0, 4 );
         }
 
         public function install( $remote_id, $languages = array() )
@@ -157,6 +158,7 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
                 $variant = $variants_by_lang[ $lang ];
                 if ( empty( $variant['downloadUrl'] ) ) {
                     $this->rmrf( $tmp_root );
+                    /* translators: %s: a sticker pack's language code */
                     return new WP_Error( 'variant_missing_download', sprintf( __( 'Variant "%s" has no download URL.', 'wordplus-sdk' ), $lang ) );
                 }
 
@@ -176,6 +178,7 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
                 if ( ! filesize( $tmp_zip ) || $zip->open( $tmp_zip ) !== true ) {
                     wp_delete_file( $tmp_zip );
                     $this->rmrf( $tmp_root );
+                    /* translators: %s: a sticker pack's language code */
                     return new WP_Error( 'zip_open_failed', sprintf( __( 'Could not open the sticker pack archive for "%s".', 'wordplus-sdk' ), $lang ) );
                 }
 
@@ -185,6 +188,7 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
                     $zip->close();
                     wp_delete_file( $tmp_zip );
                     $this->rmrf( $tmp_root );
+                    /* translators: %s: a sticker pack's language code */
                     return new WP_Error( 'zip_extract_failed', sprintf( __( 'Could not extract the sticker pack archive for "%s".', 'wordplus-sdk' ), $lang ) );
                 }
                 $zip->close();
@@ -193,12 +197,14 @@ if ( ! class_exists( 'WordPlus_SDK_Sticker_Catalog' ) ) {
                 $pack_json_path = $this->find_pack_json( $lang_dir );
                 if ( ! $pack_json_path ) {
                     $this->rmrf( $tmp_root );
+                    /* translators: %s: a sticker pack's language code */
                     return new WP_Error( 'pack_json_missing', sprintf( __( 'Sticker pack archive for "%s" is missing pack.json.', 'wordplus-sdk' ), $lang ) );
                 }
 
                 $pack_data = json_decode( file_get_contents( $pack_json_path ), true );
                 if ( ! is_array( $pack_data ) ) {
                     $this->rmrf( $tmp_root );
+                    /* translators: %s: a sticker pack's language code */
                     return new WP_Error( 'pack_json_invalid', sprintf( __( 'Sticker pack archive for "%s" contains an invalid pack.json.', 'wordplus-sdk' ), $lang ) );
                 }
 

@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.2
+Stable tag: 3.1.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -426,7 +426,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
-= 3.1.0 - 3.1.2 =
+= 3.1.0 - 3.1.3 =
 * Added **WordPlus Cloud**, the new name and home of the cloud behind the WebSocket version: your licences, sites, downloads and invoices in one account at [www.wordplus.cloud](https://www.wordplus.cloud/). [Read the introduction](https://www.better-messages.com/blog/wordplus-cloud/)
 * Removed the Freemius SDK, added licences and updates of the WebSocket version from WordPlus Cloud. Your licence moves over by itself on the first page load after the update, with the same key, and realtime messaging, calls and mobile apps keep working without any action
 * Added **Cloud Storage** for attachments, in the free version too: keep files in Cloudflare R2, Bunny.net Storage, or Amazon S3 and any S3-compatible service, chosen per type of file under **Attachments → File Groups**. Files go straight from the browser or the mobile app to the storage, and members open them through links that expire
@@ -465,6 +465,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Improved the chat toggle in calls: a **Show Chat** button in the call controls replaces the chevron on the edge of the call, which could cover the buttons of a participant, and full screen hides it
 * Improved the picture of group calls: the camera sends in a modern codec where the device encodes it in hardware, with a fallback every device can play, in three sizes up to 1080p, and each participant receives the size their screen shows
 * Improved group video calls from computers without a hardware video encoder, mostly Windows laptops: their camera now goes out at 720p, so a slower computer keeps up and the others no longer see its picture freeze
+* Improved screen sharing in group calls, which is now smooth in movement and stays sharp on text: it goes out at 1080p and up to 30 frames a second, encoded in hardware where the device can, and Chrome on a Mac or Windows encodes the camera in hardware too
 * Improved the moderator buttons in group calls, which show a spinner until the change takes effect
 * Improved **Mute user**, **Unmute user** and **Unban user** in the member menu of a chat room, which are red like Kick and Ban, and so is the button of the mute form
 * Improved calls for keyboards and screen readers: Answer, Reject and every call control are buttons that Tab reaches and Enter or Space presses, and the focus goes back where it was when the call ends
@@ -521,6 +522,14 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Fixed mentions sitting a little above or below the words around them, in the reply area and in messages
 * Fixed the pin and mute icons of a conversation in the list sitting higher than its name and time
 * Fixed the unread count of a muted conversation being hard to see in the conversation list
+* Fixed the email about a started group call arriving empty and going to members on Mentions and replies, who get the pop-up and the push only, and it now uses the BuddyPress email template when that is chosen
+* Fixed a microphone turned on and off quickly in a group call leaving a silent copy of it in the call until that person left, on phones that take a moment to start their microphone
+* Fixed someone whose own network dropped for a while during a group call coming back on a call server farther away for the rest of the call
+* Fixed the first message of a new end-to-end encrypted conversation being lost when a recipient had not set up encryption yet, or when it held only files
+* Fixed web push notifications that could not be turned on when plugins are switched off on the home page, as Freesoul Deactivate Plugins does, or when a removed plugin left its service worker in the browser
+* Improved group calls: a microphone nobody in the call hears is no longer sent until someone joins, which saves the upload and battery of someone waiting alone in a call
+* Improved group calls on the cloud call servers: the servers can now choose more efficient video codecs, such as H.265 on devices that encode it in hardware, while every browser keeps a picture it can show
+* Security improvement: a link preview no longer follows a redirect to a private or loopback address, and no longer requests the image of the page, which was never shown
 * Other minor bugfixes and improvements
 
 [See the full changelog](https://www.better-messages.com/changelog/) for every earlier version.

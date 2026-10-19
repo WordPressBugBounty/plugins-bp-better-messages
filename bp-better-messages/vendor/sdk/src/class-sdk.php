@@ -97,9 +97,8 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
             add_action( 'rest_api_init', array( $sdk, 'rest_api_init' ), 0 );
 
-            if ( isset( $_GET[ self::PUSH_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                add_action( 'wp_loaded', array( $sdk, 'serve_push_worker' ) );
-            }
+            add_filter( 'query_vars', array( $sdk, 'push_query_var' ) );
+            add_action( 'parse_request', array( $sdk, 'maybe_serve_push_worker' ) );
 
             add_action( 'deleted_user', array( $sdk, 'push_deleted_user' ) );
 
@@ -403,10 +402,31 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             }
 
             if ( isset( $GLOBALS['wp_version'] ) && version_compare( (string) $GLOBALS['wp_version'], '6.1', '<' ) ) {
-                @$wpdb->$property = $table; // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+                @$wpdb->$property = $table;
             } else {
                 $wpdb->$property = $table;
             }
+        }
+
+        public static function files()
+        {
+            static $files = null;
+
+            if ( null === $files ) {
+                if ( ! class_exists( 'WP_Filesystem_Direct', false ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+                    require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+                }
+
+                $files = new WP_Filesystem_Direct( null );
+            }
+
+            return $files;
+        }
+
+        public static function several_activated()
+        {
+            return did_action( 'activated_plugin' ) > 1;
         }
 
         public function locate( $relative )
@@ -703,6 +723,20 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             }
 
             return $this->push;
+        }
+
+        public function push_query_var( $vars )
+        {
+            $vars[] = self::PUSH_QUERY_VAR;
+
+            return $vars;
+        }
+
+        public function maybe_serve_push_worker( $wp )
+        {
+            if ( is_object( $wp ) && ! empty( $wp->query_vars[ self::PUSH_QUERY_VAR ] ) ) {
+                $this->serve_push_worker();
+            }
         }
 
         public function serve_push_worker()

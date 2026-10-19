@@ -56,34 +56,18 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
                 }
             }
 
-            $blacklist = [
-                '127.0.0.1',
-                'localhost',
-                '::1',
-                '0.0.0.0',
-                '10.0.0.0/8',
-                '172.16.0.0/12',
-                '192.168.0.0/16'
-            ];
+            $home = parse_url( get_option( 'home' ), PHP_URL_HOST );
 
-            if( in_array( $parts['host'], $blacklist ) ){
-                return false;
+            if ( is_string( $home ) && strtolower( $home ) === strtolower( $parts['host'] ) ) {
+                return true;
             }
 
-            if (filter_var($parts['host'], FILTER_VALIDATE_IP)) {
-                foreach ($blacklist as $blocked) {
-                    if (strpos($blocked, '/') !== false) {
-                        list($subnet, $mask) = explode('/', $blocked);
-                        if ((ip2long($parts['host']) & ~((1 << (32 - $mask)) - 1)) == ip2long($subnet)) {
-                            return false;
-                        }
-                    } else if ($parts['host'] === $blocked) {
-                        return false;
-                    }
-                }
-            }
+            $host = trim( $parts['host'], '.' );
+            $ip   = filter_var( $host, FILTER_VALIDATE_IP ) ? $host : gethostbyname( $host );
 
-            return true;
+            $public_only = defined( 'FILTER_FLAG_GLOBAL_RANGE' ) ? FILTER_FLAG_GLOBAL_RANGE : FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+
+            return filter_var( $ip, FILTER_VALIDATE_IP, $public_only ) !== false;
         }
 
         public function nice_links( $message, $message_id, $context, $user_id )
@@ -290,45 +274,61 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
         {
 
             $args = [
-                'user-agent' => $this->user_agent,
-                'headers' => []
+                'user-agent'  => $this->user_agent,
+                'headers'     => [],
+                'redirection' => 0
             ];
 
             if( isset ( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
                 $args['headers']['Accept-Language'] = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
             }
 
-            $response = wp_remote_get( $url, $args );
+            $location = $url;
 
-            if ( !is_wp_error( $response ) && $response[ 'response' ][ 'code' ] == '200' ) {
-                $tags = $this->getMetaTags( $response[ 'body' ] );
+            for ( $hop = 0; $hop <= 5; $hop++ ) {
+                $response = wp_safe_remote_get( $location, $args );
+
+                if ( is_wp_error( $response ) ) {
+                    return false;
+                }
+
+                $code = (int) wp_remote_retrieve_response_code( $response );
+
+                if ( $code < 300 || $code > 399 ) {
+                    break;
+                }
+
+                $next = wp_remote_retrieve_header( $response, 'location' );
+
+                if ( is_array( $next ) ) {
+                    $next = end( $next );
+                }
+
+                if ( ! is_string( $next ) || $next === '' ) {
+                    return false;
+                }
+
+                $location = WP_Http::make_absolute_url( $next, $location );
+
+                if ( ! $this->is_url_allowed( $location ) ) {
+                    return false;
+                }
+            }
+
+            if ( $code === 200 ) {
+                $tags = $this->getMetaTags( wp_remote_retrieve_body( $response ) );
 
                 $url_parts = parse_url( $url );
 
                 $info = array(
                     'title'       => false,
                     'description' => false,
-                    'image'       => false,
                     'site'        => $url_parts[ 'host' ]
                 );
 
                 if ( isset( $tags[ 'title' ] ) ) $info[ 'title' ] = $tags[ 'title' ];
                 if ( isset( $tags[ 'og:title' ] ) ) $info[ 'title' ] = $tags[ 'og:title' ];
                 if ( isset( $tags[ 'og:description' ] ) ) $info[ 'description' ] = $tags[ 'og:description' ];
-
-                if ( isset( $tags[ 'thumbnail' ] ) ) $info[ 'image' ] = $tags[ 'thumbnail' ];
-                if ( isset( $tags[ 'twitter:image' ] ) ) $info[ 'image' ] = $tags[ 'twitter:image' ];
-                if ( isset( $tags[ 'og:image' ] ) ) $info[ 'image' ] = $tags[ 'og:image' ];
-
-                if ( $info[ 'image' ] ) {
-                    $image_check = wp_remote_get( $info[ 'image' ], array(
-                        'user-agent' => $this->user_agent
-                    ) );
-
-                    if ( is_wp_error( $image_check ) || $image_check[ 'response' ][ 'code' ] != '200' ) {
-                        $info[ 'image' ] = false;
-                    }
-                }
 
                 if ( isset( $tags[ 'og:site_name' ] ) ) $info[ 'site' ] = $tags[ 'og:site_name' ];
 

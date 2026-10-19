@@ -228,13 +228,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             $threadsmeta = bm_get_table( 'threadsmeta' );
             $types       = "'" . implode( "','", Better_Messages_Mentions::NOTIFY_TYPES ) . "'";
 
-            $alerts_since = time() - DAY_IN_SECONDS;
-
             $where = "(
                 `recipients`.`is_muted` = 3
                 OR ( `recipients`.`is_muted` IN (0, 2) AND `recipients`.`thread_id` NOT IN ( SELECT `bm_thread_id` FROM `{$threadsmeta}` WHERE `meta_key` = 'email_disabled' AND `meta_value` = '1' ) )
                 OR EXISTS ( SELECT 1 FROM `{$mentions}` `m` WHERE `m`.`user_id` = `recipients`.`user_id` AND `m`.`thread_id` = `recipients`.`thread_id` AND `m`.`type` IN ({$types}) )
-                OR ( `recipients`.`is_muted` IN (0, 2) AND `recipients`.`thread_id` IN ( SELECT `bm_thread_id` FROM `{$threadsmeta}` WHERE `meta_key` = '_bm_call_alert_sent' AND CAST( `meta_value` AS UNSIGNED ) > {$alerts_since} ) )
             )";
 
             return apply_filters( 'better_messages_email_candidate_where', $where );
@@ -253,7 +250,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 if ( $level === 'none' || ! $levels->email_channel_open( $thread_id ) ) {
                     $mode = $levels->force_enabled() ? 'personal' : false;
                 } else if ( $level === 'mentions' || ( $scope === 'direct' && ! $levels->is_one_to_one( $thread_id ) ) ) {
-                    $mode = $scope === 'all' ? 'mentions_alerts' : 'mentions';
+                    $mode = 'mentions';
                 } else {
                     $mode = 'all';
                 }
@@ -275,10 +272,6 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 "`messages`.`id` IN (SELECT `message_id` FROM `" . bm_get_table( 'mentions' ) . "` WHERE `thread_id` = %d AND `user_id` = %d AND `type` IN ('" . implode( "','", $types ) . "'))",
                 $thread_id, $user_id
             );
-
-            if ( $mode === 'mentions_alerts' ) {
-                $rows = "( {$rows} OR `messages`.`id` IN (SELECT `bm_message_id` FROM `" . bm_get_table( 'meta' ) . "` WHERE `meta_key` = 'broadcast_alert') )";
-            }
 
             return "AND {$rows}";
         }
@@ -476,7 +469,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                                 foreach ($messages as $message) {
                                     if ( (int) $message->sender_id === 0 ) {
-                                        $_message = Better_Messages()->functions->format_message( $message->message, (int) $message->id, 'site', $user_id );
+                                        $_message = Better_Messages()->functions->format_message( $message->message, (int) $message->id, 'email', $user_id );
                                         $messageHtml .= '<tr><td colspan="2" style="text-align:center;color:#888;font-style:italic;padding:4px 0;">' . esc_html($_message) . '</td></tr>';
                                         $messageRaw .= $_message . "\n\n";
                                         $last_sender_id = 0;
@@ -545,6 +538,17 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         }
                                     }
 
+                                    if ( $email_sender_id === 0 ) {
+                                        foreach ( array_reverse($messages) as $_msg ) {
+                                            $system_data = Better_Messages()->functions->get_message_meta( (int) $_msg->id, 'system_data', true );
+
+                                            if ( is_array( $system_data ) && isset( $system_data['user_id'] ) && (int) $system_data['user_id'] > 0 ) {
+                                                $email_sender_id = (int) $system_data['user_id'];
+                                                break;
+                                            }
+                                        }
+                                    }
+
                                     $sender = $email_sender_id > 0 ? get_userdata( $email_sender_id ) : false;
 
                                     if ( ! is_object( $sender ) ){
@@ -558,7 +562,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                             apply_filters('bp_better_messages_notification_tokens', array(
                                                 'messages.html' => $messageHtml,
                                                 'messages.raw' => $messageRaw,
-                                                'sender.name' => trim( wp_strip_all_tags( $bm_user['name'] ) ),
+                                                'sender.name' => trim( wp_strip_all_tags( Better_Messages()->functions->rest_user_item( $email_sender_id, false )['name'] ) ),
                                                 'thread.id' => $thread_id,
                                                 'thread.url' => sanitize_url( Better_Messages()->functions->add_hash_arg( 'conversation/' . $thread_id, [], Better_Messages()->functions->get_link($user_id) ) ),
                                                 'subject' => $subject,

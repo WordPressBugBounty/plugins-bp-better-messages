@@ -58,6 +58,30 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
 
             $waiting[ $this->product->slug() ] = time();
             update_user_meta( $user_id, self::WELCOME_META, $waiting );
+
+            add_action( 'shutdown', array( $this, 'forget_welcome_after_bulk' ) );
+        }
+
+        public function forget_welcome_after_bulk()
+        {
+            if ( ! WordPlus_SDK::several_activated() ) {
+                return;
+            }
+
+            $user_id = get_current_user_id();
+            $waiting = get_user_meta( $user_id, self::WELCOME_META, true );
+
+            if ( ! is_array( $waiting ) || ! isset( $waiting[ $this->product->slug() ] ) ) {
+                return;
+            }
+
+            unset( $waiting[ $this->product->slug() ] );
+
+            if ( array() === $waiting ) {
+                delete_user_meta( $user_id, self::WELCOME_META );
+            } else {
+                update_user_meta( $user_id, self::WELCOME_META, $waiting );
+            }
         }
 
         public function maybe_welcome()
@@ -84,8 +108,7 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                 update_user_meta( $user_id, self::WELCOME_META, $waiting );
             }
 
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            if ( isset( $_GET['activate-multi'] ) || $since < time() - DAY_IN_SECONDS || ! $this->needs_licence() || ! $this->can_change_license() ) {
+            if ( $since < time() - DAY_IN_SECONDS || ! $this->needs_licence() || ! $this->can_change_license() ) {
                 return;
             }
 
@@ -236,8 +259,19 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                             $this->assistant()->enqueue();
                         }
                     } );
+
+                    if ( 'contact' === $page ) {
+                        add_action( 'load-' . $hook, array( $this, 'keep_contact_message' ) );
+                    }
                 }
             }
+        }
+
+        public function keep_contact_message()
+        {
+            add_filter( 'removable_query_args', function ( $args ) {
+                return array_values( array_diff( (array) $args, array( 'message' ) ) );
+            } );
         }
 
         public function is_page_screen( $screen_id )
@@ -272,22 +306,7 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
         {
             $licence = $this->product->licence();
             $user    = wp_get_current_user();
-            $install = null;
             $words   = $this->product->words();
-
-            if ( 'pricing' === $page && '' !== $this->query( 'wordplus_code' ) ) {
-                $install = array(
-                    'result' => 'claim',
-                    'code'   => $this->query( 'wordplus_code' ),
-                    'state'  => $this->query( 'state' ),
-                );
-            } elseif ( 'pricing' === $page && '' !== $this->query( 'wordplus_installed' ) ) {
-                $install = array( 'result' => 'installed' );
-            } elseif ( 'pricing' === $page && '' !== $this->query( 'wordplus_saved' ) ) {
-                $install = array( 'result' => 'saved' );
-            }
-
-            $topic = sanitize_key( $this->query( 'topic' ) );
 
             $settings = (string) $this->product->get( 'urls.settings' );
             $support  = array();
@@ -336,18 +355,15 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                 'checkout' => array(
                     'site'    => $licence->url(),
                     'return'  => $this->product->page_url( 'pricing' ),
-                    'state'   => 'pricing' === $page && null === $install ? $this->checkout_state() : '',
-                    'trial'   => '' !== $this->query( 'trial' ),
+                    'state'   => 'pricing' === $page ? $this->checkout_state() : '',
+                    'trial'   => false,
                     'install' => ! $this->product->is_paid_build() && $this->product->install() && $this->product->install()->can_install() ? $this->product->install()->endpoint() : '',
                 ),
-                'install'  => $install,
-                'welcome'  => 'account' === $page && $this->product->slug() === $this->query( 'welcome' ) && $this->needs_licence(),
+                'install'  => null,
+                'needsLicence' => 'account' === $page && $this->needs_licence(),
+                'welcome'  => false,
                 'support'  => 'contact' === $page ? array(
-                    'prefill'  => array(
-                        'topic'   => in_array( $topic, self::SUPPORT_TYPES, true ) ? $topic : '',
-                        'summary' => $this->query( 'summary' ),
-                        'message' => $this->query( 'message', true ),
-                    ),
+                    'prefill'  => array( 'topic' => '', 'summary' => '', 'message' => '' ),
                     'siteInfo' => $this->site_info(),
                     'limits'   => $this->support_limits(),
                 ) : null,
@@ -364,16 +380,6 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             );
         }
 
-        private function query( $key, $multiline = false )
-        {
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-            if ( ! isset( $_GET[ $key ] ) || ! is_string( $_GET[ $key ] ) ) {
-                return '';
-            }
-
-            return $multiline ? sanitize_textarea_field( wp_unslash( $_GET[ $key ] ) ) : sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
-            // phpcs:enable WordPress.Security.NonceVerification.Recommended
-        }
 
         public function summary()
         {

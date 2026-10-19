@@ -66,7 +66,7 @@ if ( ! class_exists( 'WordPlus_SDK_I18n' ) ) {
                 return false;
             }
 
-            if ( ! wp_mkdir_p( $dir ) || false === @file_put_contents( $dir . $name, $this->script( $data ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.PHP.NoSilencedErrors.Discouraged
+            if ( ! wp_mkdir_p( $dir ) || false === @file_put_contents( $dir . $name, $this->script( $data ) ) ) {
                 $this->inline[ $handle ] = $data;
 
                 return false;
@@ -74,8 +74,8 @@ if ( ! class_exists( 'WordPlus_SDK_I18n' ) ) {
 
             $rules = "<IfModule mod_headers.c>\n<FilesMatch \"^[a-z-]+-[A-Za-z0-9_]+" . self::NAME . "$\">\n  Header set Cache-Control \"public, max-age=31536000, immutable\"\n</FilesMatch>\n</IfModule>\n";
 
-            if ( ! file_exists( $dir . '.htaccess' ) || file_get_contents( $dir . '.htaccess' ) !== $rules ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-                file_put_contents( $dir . '.htaccess', $rules ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+            if ( ! file_exists( $dir . '.htaccess' ) || file_get_contents( $dir . '.htaccess' ) !== $rules ) {
+                file_put_contents( $dir . '.htaccess', $rules );
             }
 
             foreach ( glob( $dir . '*.js' ) ?: array() as $old ) {

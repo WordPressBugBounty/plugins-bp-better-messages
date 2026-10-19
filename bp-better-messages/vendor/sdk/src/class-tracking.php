@@ -773,6 +773,14 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
                 $entry             = $this->entry( $product, $network );
                 $entry['redirect'] = get_current_user_id();
                 $this->save( $product, $entry, $network );
+
+                add_action( 'shutdown', function () use ( $product, $network ) {
+                    if ( WordPlus_SDK::several_activated() ) {
+                        $entry = $this->entry( $product, $network );
+                        unset( $entry['redirect'] );
+                        $this->save( $product, $entry, $network );
+                    }
+                } );
             }
         }
 
@@ -984,19 +992,24 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
 
         private function handle_link()
         {
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-            if ( ! isset( $_GET['wordplus_sdk_tracking'], $_GET['plugin'], $_GET['_wpnonce'] ) ) {
+            if ( ! isset( $_GET['wordplus_sdk_tracking'], $_GET['_wpnonce'] ) ) {
                 return;
             }
 
-            $action  = sanitize_key( wp_unslash( $_GET['wordplus_sdk_tracking'] ) );
-            $product = $this->sdk->product( sanitize_key( wp_unslash( $_GET['plugin'] ) ) );
-            $nonce   = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
-            // phpcs:enable WordPress.Security.NonceVerification.Recommended
+            $product = null;
 
-            if ( null === $product || ! $this->asks( $product ) || ! $this->can_choose( $product ) || ! wp_verify_nonce( $nonce, 'wordplus_sdk_tracking_' . $product->slug() ) ) {
+            foreach ( $this->sdk->products() as $candidate ) {
+                if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wordplus_sdk_tracking_' . $candidate->slug() ) ) {
+                    $product = $candidate;
+                    break;
+                }
+            }
+
+            if ( null === $product || ! $this->asks( $product ) || ! $this->can_choose( $product ) ) {
                 return;
             }
+
+            $action = sanitize_key( wp_unslash( $_GET['wordplus_sdk_tracking'] ) );
 
             if ( 'skip' === $action && '' === $this->state( $product ) ) {
                 $this->skip( $product );
@@ -1039,8 +1052,7 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
                 unset( $entry['redirect'] );
                 $this->save( $product, $entry );
 
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                if ( '' !== $this->state( $product ) || isset( $_GET['activate-multi'] ) || '' === $this->page( $product ) || ! $this->can_choose( $product ) ) {
+                if ( '' !== $this->state( $product ) || '' === $this->page( $product ) || ! $this->can_choose( $product ) ) {
                     continue;
                 }
 
@@ -1186,8 +1198,9 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
 
         private function on_screen( WordPlus_SDK_Product $product )
         {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            return '' !== $this->page( $product ) && isset( $_GET['page'] ) && $this->page( $product ) === sanitize_text_field( wp_unslash( $_GET['page'] ) );
+            global $plugin_page;
+
+            return '' !== $this->page( $product ) && is_string( $plugin_page ) && $this->page( $product ) === $plugin_page;
         }
 
         private function on_own_screen( WordPlus_SDK_Product $product )
