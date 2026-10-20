@@ -59,5 +59,9 @@ function better_messages_usage_data()
     $rooms                        = wp_count_posts( 'bpbm-chat' );
     $usage['size.chat_rooms']     = $range( isset( $rooms->publish ) ? $rooms->publish : 0 );
 
+    if ( function_exists( 'Better_Messages_Get_Started' ) ) {
+        $usage = array_merge( $usage, Better_Messages_Get_Started()->usage() );
+    }
+
     return $usage;
 }

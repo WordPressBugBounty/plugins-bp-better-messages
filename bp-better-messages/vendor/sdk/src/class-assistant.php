@@ -229,9 +229,7 @@ if ( ! class_exists( 'WordPlus_SDK_Assistant' ) ) {
 
         private function trial_available()
         {
-            $data = $this->product->licence()->get();
-
-            return 'none' === $this->licence_state() && empty( $data['had_license'] );
+            return 'none' === $this->licence_state() && ! $this->product->trial()->used();
         }
 
         public function context()

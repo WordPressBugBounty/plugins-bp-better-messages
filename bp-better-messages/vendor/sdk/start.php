@@ -5,7 +5,7 @@ if ( ! isset( $GLOBALS['wordplus_sdk_copies'] ) || ! is_array( $GLOBALS['wordplu
     $GLOBALS['wordplus_sdk_copies'] = array();
 }
 
-$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.2';
+$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.3';
 
 if ( is_readable( __DIR__ . '/realtime/realtime.php' ) ) {
     require_once __DIR__ . '/realtime/realtime.php';

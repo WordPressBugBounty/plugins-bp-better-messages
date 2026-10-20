@@ -32,6 +32,8 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
             'didnt_work', 'dont_share_info', 'temporary', 'other',
         );
 
+        const EVENTS = array( 'activated', 'deactivated', 'uninstalled', 'trial_notice_shown', 'trial_notice_started', 'trial_notice_later' );
+
         const SNOOZES = array( 3600, 86400, 604800 );
 
         const PRIVACY_URL = 'https://www.wordplus.cloud/privacy';
@@ -569,6 +571,19 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
             $entry['synced_at'] = time();
             $entry['version']   = $product->version();
             $this->save( $product, $this->keep_confirm( $entry, $answer ) );
+
+            return true;
+        }
+
+        public function queue( WordPlus_SDK_Product $product, $event )
+        {
+            if ( ! $this->enabled( $product ) || self::IN !== $this->state( $product ) || ! in_array( $event, self::EVENTS, true ) ) {
+                return false;
+            }
+
+            $entry             = $this->entry( $product );
+            $entry['events'][] = array( 'type' => (string) $event, 'at' => time() );
+            $this->save( $product, $entry );
 
             return true;
         }

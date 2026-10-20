@@ -25,6 +25,7 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             add_action( 'network_admin_menu', array( $this, 'menu' ), 30 );
             add_action( 'admin_notices', array( $this, 'copy_notice' ) );
             add_action( 'admin_init', array( $this, 'maybe_welcome' ), 98 );
+            $product->trial()->admin_hooks();
 
             if ( array() !== (array) $product->get( 'assistant', array() ) ) {
                 add_action( 'admin_init', function () {
@@ -211,6 +212,8 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             <?php
         }
 
+        const ROCKET = '&nbsp;<svg class="wordplus-sdk-rocket" width="11" height="11" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true" focusable="false" style="vertical-align:-1px"><path d="M505.12019,19.09375c-1.18945-5.53125-6.65819-11-12.207-12.1875C460.716,0,435.507,0,410.40747,0,307.17523,0,245.26909,55.20312,199.05238,128H94.83772c-16.34763.01562-35.55658,11.875-42.88664,26.48438L2.51562,253.29688A28.4,28.4,0,0,0,0,264a24.00867,24.00867,0,0,0,24.00582,24H127.81618l-22.47457,22.46875c-11.36521,11.36133-12.99607,32.25781,0,45.25L156.24582,406.625c11.15623,11.1875,32.15619,13.15625,45.27726,0l22.47457-22.46875V488a24.00867,24.00867,0,0,0,24.00581,24,28.55934,28.55934,0,0,0,10.707-2.51562l98.72834-49.39063c14.62888-7.29687,26.50776-26.5,26.50776-42.85937V312.79688c72.59753-46.3125,128.03493-108.40626,128.03493-211.09376C512.07526,76.5,512.07526,51.29688,505.12019,19.09375ZM384.04033,168A40,40,0,1,1,424.05,128,40.02322,40.02322,0,0,1,384.04033,168Z"/></svg>';
+
         public function state_meta()
         {
             return 'wordplus_sdk_state_' . str_replace( '-', '_', $this->product->slug() );
@@ -235,8 +238,24 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             }
 
             if ( '' !== $this->product->page( 'pricing' ) ) {
-                $label            = $this->product->has_access() ? _x( 'Pricing', 'Admin menu', 'wordplus-sdk' ) : _x( 'Upgrade', 'Admin menu', 'wordplus-sdk' );
-                $hooks['pricing'] = add_submenu_page( $parent, $label, $label . '&nbsp;&#x27a4;', $licensing, $this->product->page( 'pricing' ), $render, 93 );
+                $slug  = $this->product->page( 'pricing' );
+                $label = $this->product->has_access() ? _x( 'Pricing', 'Admin menu', 'wordplus-sdk' ) : _x( 'Upgrade', 'Admin menu', 'wordplus-sdk' );
+
+                $hooks['pricing'] = add_submenu_page( $parent, $label, $label . ( $this->product->has_access() ? '&nbsp;&#x27a4;' : self::ROCKET ), $licensing, $slug, $render, 93 );
+
+                if ( $this->product->trial()->in_menu() ) {
+                    $trial = _x( 'Start trial', 'Admin menu', 'wordplus-sdk' );
+                    $link  = 'admin.php?page=' . $slug . '&trial=1';
+
+                    add_submenu_page( $parent, $trial, $trial . self::ROCKET, $licensing, $link, '', 93 );
+
+                    add_action( 'admin_head', function () use ( $parent, $slug ) {
+                        remove_submenu_page( $parent, $slug );
+                    } );
+                    add_filter( 'submenu_file', function ( $submenu_file ) use ( $slug, $link ) {
+                        return isset( $GLOBALS['plugin_page'] ) && $slug === $GLOBALS['plugin_page'] ? $link : $submenu_file;
+                    } );
+                }
             }
 
             foreach ( $hooks as $page => $hook ) {
@@ -321,7 +340,6 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                     'root'  => '/' . trim( (string) $this->product->get( 'rest.namespace' ), '/' ) . '/' . trim( (string) $this->product->get( 'rest.base' ), '/' ),
                     'nonce' => wp_create_nonce( 'wp_rest' ),
                 ),
-                'assets'   => WordPlus_SDK::instance()->url( 'pages/images/' ),
                 'product'  => array(
                     'slug'          => $this->product->slug(),
                     'name'          => $this->product->name(),
@@ -408,7 +426,7 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                 'migrated'      => ! empty( $data['migrated_from'] ),
                 'checkedAt'     => isset( $data['checked_at'] ) ? (int) $data['checked_at'] : null,
                 'checkDue'      => $this->can_change_license() && $licence->check_due(),
-                'trialUsed'     => ! empty( $data['had_license'] ),
+                'trialUsed'     => $this->product->trial()->used(),
                 'beta'          => $this->product->wants_beta(),
                 'betaOffered'   => false !== $this->product->updater(),
                 'staging'       => ! empty( $data['activations'][ $url ]['staging'] ),
@@ -537,7 +555,13 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             register_rest_route( $namespace, $base . '/pricing', array(
                 'methods'             => 'GET',
                 'callback'            => function () {
-                    return $this->cached_get( 'api/v1/plugins/' . rawurlencode( $this->product->slug() ) . '/pricing', 'wordplus_sdk_pricing_' . str_replace( '-', '_', $this->product->slug() ), HOUR_IN_SECONDS );
+                    $locale  = (string) preg_replace( '/[^A-Za-z_]/', '', determine_locale() );
+                    $kept    = 'wordplus_sdk_pricing_' . str_replace( '-', '_', $this->product->slug() ) . ( 'en_US' === $locale ? '' : '_' . strtolower( $locale ) );
+                    $pricing = $this->cached_get( 'api/v1/plugins/' . rawurlencode( $this->product->slug() ) . '/pricing?lang=' . rawurlencode( $locale ), $kept, HOUR_IN_SECONDS );
+
+                    $this->product->trial()->remember( $pricing );
+
+                    return $pricing;
                 },
                 'permission_callback' => $admin,
             ) );
@@ -787,7 +811,8 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                 'PHP'            => PHP_VERSION . ', memory ' . ( '-1' === (string) ini_get( 'memory_limit' ) ? 'unlimited' : ini_get( 'memory_limit' ) ) . ', uploads ' . size_format( wp_max_upload_size() ),
                 'Database'       => method_exists( $wpdb, 'db_server_info' ) ? (string) $wpdb->db_server_info() : (string) $wpdb->db_version(),
                 'Web server'     => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
-                'Theme'          => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $theme->parent() ? ' (child of ' . $theme->parent()->get( 'Name' ) . ' ' . $theme->parent()->get( 'Version' ) . ')' : '' ),
+                'Browser'        => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
+                'Theme'        => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $theme->parent() ? ' (child of ' . $theme->parent()->get( 'Name' ) . ' ' . $theme->parent()->get( 'Version' ) . ')' : '' ),
                 'Active plugins' => implode( ', ', $plugins ),
             ) );
 

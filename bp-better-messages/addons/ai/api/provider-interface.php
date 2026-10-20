@@ -146,6 +146,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 $friendly = __( 'The message could not be processed due to content restrictions.', 'bp-better-messages' );
             } elseif ( strpos( $lower, 'voice transcription' ) !== false ) {
                 $friendly = __( 'The voice message could not be transcribed. Please try again or send a text message.', 'bp-better-messages' );
+            } elseif ( strpos( $lower, 'interrupted' ) !== false ) {
+                $friendly = __( 'The response was interrupted. Please try again.', 'bp-better-messages' );
             } else {
                 $friendly = __( 'Something went wrong while generating a response. Please try again.', 'bp-better-messages' );
             }
@@ -950,7 +952,38 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 } catch ( \Throwable $e ) {}
             };
 
-            $process = function () use ( &$process, &$last_ping, &$last_typing, $loop, $stream, $dataProvider, $message_id, $ai_user_id, $ai_message_id, $ai_thread_id, &$parts, &$pendingWrites, $recipient_user_id, $provider, $bot_id, $streamWrite ) {
+            $fail = function ( $raw_error ) use ( $loop, $stream, $message_id, $ai_user_id, $ai_message_id, $ai_thread_id, $recipient_user_id, $provider, $streamWrite ) {
+                $user_error = $provider->get_user_friendly_error( $raw_error );
+
+                $streamWrite( $user_error );
+
+                try {
+                    if ( is_object( $stream ) && method_exists( $stream, 'end' ) ) { $stream->end(); }
+                } catch ( \Throwable $e ) {}
+
+                $loop->stop();
+
+                $args = [
+                    'sender_id'  => $ai_user_id,
+                    'thread_id'  => $ai_thread_id,
+                    'message_id' => $ai_message_id,
+                    'content'    => '<!-- BM-AI -->' . $user_error
+                ];
+
+                Better_Messages()->functions->update_message( $args );
+
+                Better_Messages()->functions->delete_message_meta( $message_id, 'ai_waiting_for_response' );
+                Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
+                do_action( 'better_messages_thread_self_update', $ai_thread_id, $recipient_user_id );
+                do_action( 'better_messages_thread_updated', $ai_thread_id, $recipient_user_id );
+
+                Better_Messages()->functions->add_message_meta( $ai_message_id, 'ai_response_error', $raw_error );
+                Better_Messages()->functions->add_message_meta( $message_id, 'ai_response_error', $raw_error );
+                Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'failed' );
+                Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
+            };
+
+            $process = function () use ( &$process, &$last_ping, &$last_typing, $loop, $stream, $dataProvider, $message_id, $ai_user_id, $ai_message_id, $ai_thread_id, &$parts, &$pendingWrites, $recipient_user_id, $provider, $bot_id, $streamWrite, $fail ) {
                 if ( defined( 'BM_DEBUG' ) ) {
                     file_put_contents( ABSPATH . 'ai-provider.log', time() . ' - tick' . "\n", FILE_APPEND | LOCK_EX );
                 }
@@ -969,35 +1002,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     $part = $dataProvider->current();
 
                     if ( is_array( $part ) && $part[0] === 'error' ) {
-                        $raw_error = $part[1];
-                        $user_error = $provider->get_user_friendly_error( $raw_error );
-
-                        $streamWrite( $user_error );
-
-                        try {
-                            if ( is_object( $stream ) && method_exists( $stream, 'end' ) ) { $stream->end(); }
-                        } catch ( \Throwable $e ) {}
-
-                        $loop->stop();
-
-                        $args = [
-                            'sender_id'  => $ai_user_id,
-                            'thread_id'  => $ai_thread_id,
-                            'message_id' => $ai_message_id,
-                            'content'    => '<!-- BM-AI -->' . $user_error
-                        ];
-
-                        Better_Messages()->functions->update_message( $args );
-
-                        Better_Messages()->functions->delete_message_meta( $message_id, 'ai_waiting_for_response' );
-                        Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
-                        do_action( 'better_messages_thread_self_update', $ai_thread_id, $recipient_user_id );
-                        do_action( 'better_messages_thread_updated', $ai_thread_id, $recipient_user_id );
-
-                        Better_Messages()->functions->add_message_meta( $ai_message_id, 'ai_response_error', $raw_error );
-                        Better_Messages()->functions->add_message_meta( $message_id, 'ai_response_error', $raw_error );
-                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'failed' );
-                        Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
+                        $fail( $part[1] );
                         return;
                     }
 
@@ -1055,13 +1060,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
                     $loop->futureTick( $process );
                 } else {
-                    try {
-                        if ( is_object( $stream ) && method_exists( $stream, 'end' ) ) {
-                            $stream->end();
-                        }
-                    } catch ( \Throwable $e ) {}
-
-                    $loop->stop();
+                    $fail( 'response interrupted: the reply ended without a result' );
                 }
             };
 

@@ -102,10 +102,16 @@ function better_messages_activation()
     require_once trailingslashit( dirname(__FILE__) ) . 'capabilities.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'worker.php';
 
+    $first_install = get_option( 'better_messages_2_db_version', 0 ) === 0;
+
     Better_Messages_Rest_Api_DB_Migrate()->install_tables();
     Better_Messages_Rest_Api_DB_Migrate()->migrations();
 
     do_action( 'better_messages_activation' );
+
+    if ( $first_install && function_exists( 'Better_Messages_Get_Started' ) ) {
+        Better_Messages_Get_Started()->first_install();
+    }
 }
 
 function better_messages_deactivation()

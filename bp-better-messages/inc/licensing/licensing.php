@@ -56,7 +56,27 @@ wordplus_sdk_register( array(
             'stage'   => 'admin.php?page=bp-better-messages#{route}?scrollTo={key}&stage={stage}',
         ),
     ),
+    'trial'        => array(
+        'days'    => 3,
+        'card'    => true,
+        'ready'   => 'better_messages_trial_ready',
+        'preview' => 'better_messages_trial_preview',
+    ),
 ) );
+
+function better_messages_trial_preview()
+{
+    return defined( 'BM_DEV' ) && defined( 'BM_TRIAL_PREVIEW' ) && BM_TRIAL_PREVIEW;
+}
+
+function better_messages_trial_ready()
+{
+    global $wpdb;
+
+    $table = bm_get_table( 'messages' );
+
+    return null !== $wpdb->get_var( "SELECT 1 FROM `{$table}` `first` INNER JOIN `{$table}` `second` ON `second`.`thread_id` = `first`.`thread_id` AND `second`.`sender_id` <> `first`.`sender_id` AND `second`.`sender_id` <> 0 WHERE `first`.`sender_id` <> 0 LIMIT 1" );
+}
 
 function better_messages_licensing_words()
 {

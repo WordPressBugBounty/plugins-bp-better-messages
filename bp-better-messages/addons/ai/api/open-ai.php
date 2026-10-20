@@ -1108,6 +1108,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             }
 
             $tools = [];
+            $tool_call_limits = [];
 
             if( $bot_settings['imagesGeneration'] === '1' ){
                 $tools[] = [
@@ -1117,6 +1118,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     'quality' => $bot_settings['imagesGenerationQuality'],
                     'size' => $bot_settings['imagesGenerationSize']
                 ];
+                $tool_call_limits[] = intval( $bot_settings['maxImagesPerResponse'] );
             }
 
             if( $bot_settings['webSearch'] === '1' ){
@@ -1124,6 +1126,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     'type' => 'web_search',
                     'search_context_size' => $bot_settings['webSearchContextSize'],
                 ];
+                $tool_call_limits[] = intval( $bot_settings['maxWebSearchCalls'] );
             }
 
             if( $bot_settings['fileSearch'] === '1' && is_array($bot_settings['fileSearchVectorIds']) && count( $bot_settings['fileSearchVectorIds'] ) > 0 ){
@@ -1131,6 +1134,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     'type' => 'file_search',
                     'vector_store_ids' => $bot_settings['fileSearchVectorIds']
                 ];
+                $tool_call_limits[] = intval( $bot_settings['maxFileSearchCalls'] );
             }
 
             $params = [
@@ -1139,6 +1143,10 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                 'truncation' => 'auto',
                 'tools' => $tools,
             ];
+
+            if ( count( $tool_call_limits ) > 0 && min( $tool_call_limits ) > 0 ) {
+                $params['max_tool_calls'] = array_sum( $tool_call_limits );
+            }
 
             if ( $open_ai_conversation ) {
                 $params['conversation'] = $open_ai_conversation['id'];
@@ -1235,6 +1243,12 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                     if ( $file_search_calls > 0 ) {
                         $meta['file_search_calls'] = $file_search_calls;
                     }
+                    if ( ! empty( $data['tool_usage']['image_gen'] ) ) {
+                        $meta['image_generation_usage'] = [
+                            'model' => $bot_settings['imagesGenerationModel'],
+                            'usage' => $data['tool_usage']['image_gen'],
+                        ];
+                    }
 
                     if ( ! empty( $text ) ) {
                         yield $text;
@@ -1264,6 +1278,8 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
             $max_file_searches = ! empty( $bot_settings['maxFileSearchCalls'] ) ? intval( $bot_settings['maxFileSearchCalls'] ) : 0;
             $web_search_calls = 0;
             $file_search_calls = 0;
+            $ended = false;
+            $has_text = false;
 
             try {
                $response = $client->post('responses', [
@@ -1337,6 +1353,9 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                                case 'response.output_text.delta':
                                    $message_id = $data['item_id'];
                                    $text = $data['delta'];
+                                   if ( $text !== '' ) {
+                                       $has_text = true;
+                                   }
                                    yield $text;
                                    break;
 
@@ -1424,6 +1443,7 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                                    break;
 
                                case 'response.failed':
+                                   $ended = true;
                                    $errorMessage = 'Unknown error';
                                    if( isset( $data['response']['error']['message'] ) ){
                                         $errorMessage = $data['response']['error']['message'];
@@ -1432,7 +1452,15 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                                    yield ['error', $errorMessage];
                                    break;
 
+                               case 'error':
+                                   $ended = true;
+                                   yield [ 'error', $data['message'] ?? ( $data['error']['message'] ?? 'Unknown error' ) ];
+                                   break;
+
+                               case 'response.incomplete':
                                case 'response.completed':
+                                   $ended = true;
+
                                    if( count( $attachment_meta ) > 0 ) {
                                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'attachments', $attachment_meta );
                                    }
@@ -1443,8 +1471,19 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                                        'model' => $model,
                                        'provider' => 'openai',
                                        'service_tier' => $data['response']['service_tier'] ?? '',
-                                       'usage' => $data['response']['usage']
+                                       'usage' => $data['response']['usage'] ?? []
                                    ];
+
+                                   if ( $type === 'response.incomplete' ) {
+                                       $incomplete_reason = $data['response']['incomplete_details']['reason'] ?? 'unknown';
+
+                                       if ( ! $has_text && count( $images_generated ) === 0 ) {
+                                           yield [ 'error', 'response incomplete: ' . $incomplete_reason ];
+                                           break;
+                                       }
+
+                                       $array['incomplete'] = $incomplete_reason;
+                                   }
 
                                    if ( $open_ai_conversation ) {
                                        $array['conversation_id'] = $open_ai_conversation['id'];
@@ -1452,6 +1491,13 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
 
                                    if( count( $images_generated ) > 0 ){
                                        $array['images_generated'] = $images_generated;
+                                   }
+
+                                   if ( ! empty( $data['response']['tool_usage']['image_gen'] ) ) {
+                                       $array['image_generation_usage'] = [
+                                           'model' => $bot_settings['imagesGenerationModel'],
+                                           'usage' => $data['response']['tool_usage']['image_gen'],
+                                       ];
                                    }
 
                                    if ( $web_search_calls > 0 ) {
@@ -1470,6 +1516,10 @@ if ( ! class_exists( 'Better_Messages_OpenAI_API' ) ) {
                            }
                        }
                    }
+               }
+
+               if ( ! $ended ) {
+                   yield [ 'error', 'response interrupted: the stream ended before the response was completed' ];
                }
            } catch ( GuzzleException $e ) {
                $fullError = $this->parse_guzzle_error( $e );

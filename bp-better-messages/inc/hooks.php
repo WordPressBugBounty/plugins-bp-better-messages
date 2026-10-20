@@ -2157,13 +2157,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 echo '</div>';
             }
 
-            if( ! class_exists('BuddyPress') && ! defined('ultimatemember_version') ){
-                if( Better_Messages()->settings['chatPage'] == '0' ){
-                    echo '<div class="notice notice-error">';
-                    echo '<p><b>Better Messages</b> require <b><a href="'. admin_url('admin.php?page=better-messages#/general').'">installing Messages Location</a></b>.</p>';
-                    echo '</div>';
-                }
-            } else {
+            if( current_user_can( 'manage_options' ) && Better_Messages_Get_Started()->messages_page_missing() ){
+                $this->messages_page_notice();
+            }
+
+            if( class_exists('BuddyPress') || defined('ultimatemember_version') ){
                 if( ! bm_bp_is_active('messages') && ! defined('ultimatemember_version') ) {
                     $url = admin_url('options-general.php?page=bp-components');
                     if( defined('BP_PLATFORM_VERSION') ){
@@ -2174,6 +2172,39 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     echo '</div>';
                 }
             }
+        }
+
+        private function messages_page_notice(){
+            $config = array(
+                'url'        => esc_url_raw( rest_url( 'better-messages/v1/admin/settings/createPage' ) ),
+                'nonce'      => wp_create_nonce( 'wp_rest' ),
+                'getStarted' => admin_url( 'admin.php?page=better-messages#/get-started' ),
+                'label'      => _x( 'Create the Messages page', 'Admin notice', 'bp-better-messages' ),
+                'busy'       => _x( 'Creating the page...', 'Admin notice', 'bp-better-messages' ),
+                'done'       => _x( 'The Messages page is ready. Members read and answer their messages there.', 'Admin notice', 'bp-better-messages' ),
+                'view'       => _x( 'View the page', 'Admin notice', 'bp-better-messages' ),
+                'next'       => _x( 'Get started', 'Admin notice', 'bp-better-messages' ),
+                'failed'     => _x( 'The page could not be created. Choose a page in the settings instead.', 'Admin notice', 'bp-better-messages' ),
+            );
+
+            echo '<div class="notice notice-warning" id="bm-messages-page-notice">';
+            echo '<p><strong>Better Messages</strong> ' . esc_html_x( 'needs a page where members read and answer their messages.', 'Admin notice', 'bp-better-messages' ) . '</p>';
+            echo '<p><button type="button" class="button button-primary bm-create-messages-page">' . esc_html( $config['label'] ) . '</button> ';
+            echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=better-messages#/general' ) ) . '">' . esc_html_x( 'Choose an existing page', 'Admin notice', 'bp-better-messages' ) . '</a></p>';
+            echo '</div>';
+
+            wp_print_inline_script_tag( '(function(d,c){'
+                . 'var n=d.getElementById("bm-messages-page-notice");if(!n)return;'
+                . 'var b=n.querySelector(".bm-create-messages-page"),p=n.getElementsByTagName("p");'
+                . 'var link=function(href,text,primary){var a=d.createElement("a");a.className="button"+(primary?" button-primary":"");a.href=href;a.textContent=text;return a;};'
+                . 'b.addEventListener("click",function(){'
+                . 'b.disabled=true;b.textContent=c.busy;'
+                . 'fetch(c.url,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-WP-Nonce":c.nonce},body:JSON.stringify({target:"chatPage"})})'
+                . '.then(function(r){return r.json().then(function(j){if(!r.ok||!j.pageUrl)throw j;return j;});})'
+                . '.then(function(j){n.className="notice notice-success";p[0].textContent=c.done;p[1].textContent="";p[1].appendChild(link(j.pageUrl,c.view,true));p[1].appendChild(d.createTextNode(" "));p[1].appendChild(link(c.getStarted,c.next,false));})'
+                . '.catch(function(){b.disabled=false;b.textContent=c.label;p[0].textContent=c.failed;});'
+                . '});'
+                . '})(document,' . wp_json_encode( $config ) . ');' );
         }
 
         public function chat_page($content){

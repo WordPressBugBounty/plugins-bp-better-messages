@@ -1482,16 +1482,37 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $target = 'chatPage';
             }
 
+            $page_id = $this->create_messages_page( $target, (string) $request->get_param( 'title' ), (string) $request->get_param( 'slug' ) );
+
+            if ( is_wp_error( $page_id ) ) {
+                return $page_id;
+            }
+
+            return rest_ensure_response( array(
+                'success'   => true,
+                'pageId'    => $page_id,
+                'pageTitle' => get_post_field( 'post_title', $page_id ),
+                'pageUrl'   => get_permalink( $page_id ),
+                'target'    => $target,
+                'settings'  => Better_Messages_Options::instance()->settings,
+            ) );
+        }
+
+        public function create_messages_page( $target = 'chatPage', $title = '', $slug = '' ) {
+            if ( ! in_array( $target, array( 'chatPage', 'guestChatPage' ), true ) ) {
+                $target = 'chatPage';
+            }
+
             $page_title = $target === 'guestChatPage'
                 ? _x( 'Guest Messages', 'Default page title', 'bp-better-messages' )
                 : _x( 'Messages', 'Default page title', 'bp-better-messages' );
 
-            $requested_title = trim( (string) $request->get_param( 'title' ) );
+            $requested_title = trim( (string) $title );
             if ( $requested_title !== '' ) {
                 $page_title = $requested_title;
             }
 
-            $requested_slug = sanitize_title( (string) $request->get_param( 'slug' ) );
+            $requested_slug = sanitize_title( (string) $slug );
 
             if ( function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( 'page' ) ) {
                 $page_content = '<!-- wp:better-messages/user-inbox /-->';
@@ -1510,7 +1531,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 $page_args['post_name'] = $requested_slug;
             }
 
-            $page_id = wp_insert_post( $page_args );
+            $page_id = wp_insert_post( $page_args, true );
 
             if ( is_wp_error( $page_id ) ) {
                 return new WP_Error( 'create_failed', $page_id->get_error_message(), array( 'status' => 500 ) );
@@ -1520,14 +1541,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             $existing[ $target ] = (string) $page_id;
             Better_Messages_Options::instance()->update_settings( $existing );
 
-            return rest_ensure_response( array(
-                'success'   => true,
-                'pageId'    => $page_id,
-                'pageTitle' => $page_title,
-                'pageUrl'   => get_permalink( $page_id ),
-                'target'    => $target,
-                'settings'  => Better_Messages_Options::instance()->settings,
-            ) );
+            return (int) $page_id;
         }
 
         public function rest_sync_user_index( WP_REST_Request $request ) {

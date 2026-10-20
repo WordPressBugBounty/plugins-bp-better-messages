@@ -2214,6 +2214,51 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return round( $total, 6 );
         }
 
+        public function get_image_token_pricing()
+        {
+            return array(
+                'gpt-image-1'      => array( 'textInput' => 5.00, 'imageInput' => 10.00, 'textOutput' => 0,     'imageOutput' => 40.00 ),
+                'gpt-image-1-mini' => array( 'textInput' => 2.00, 'imageInput' => 2.50,  'textOutput' => 0,     'imageOutput' => 8.00 ),
+                'gpt-image-1.5'    => array( 'textInput' => 5.00, 'imageInput' => 8.00,  'textOutput' => 10.00, 'imageOutput' => 32.00 ),
+                'gpt-image-2'      => array( 'textInput' => 5.00, 'imageInput' => 8.00,  'textOutput' => 0,     'imageOutput' => 30.00 ),
+            );
+        }
+
+        private function calc_image_token_cost( $generation )
+        {
+            if ( ! is_array( $generation ) || empty( $generation['model'] ) || empty( $generation['usage'] ) || ! is_array( $generation['usage'] ) ) {
+                return null;
+            }
+
+            $pricing = $this->get_image_token_pricing();
+            $model   = (string) $generation['model'];
+
+            if ( ! isset( $pricing[ $model ] ) ) {
+                return null;
+            }
+
+            $prices = $pricing[ $model ];
+            $usage  = $generation['usage'];
+            $in     = isset( $usage['input_tokens_details'] ) && is_array( $usage['input_tokens_details'] ) ? $usage['input_tokens_details'] : null;
+            $out    = isset( $usage['output_tokens_details'] ) && is_array( $usage['output_tokens_details'] ) ? $usage['output_tokens_details'] : null;
+
+            $text_input   = $in ? (int) ( $in['text_tokens'] ?? 0 ) : (int) ( $usage['input_tokens'] ?? 0 );
+            $image_input  = $in ? (int) ( $in['image_tokens'] ?? 0 ) : 0;
+            $text_output  = $out ? (int) ( $out['text_tokens'] ?? 0 ) : 0;
+            $image_output = $out ? (int) ( $out['image_tokens'] ?? 0 ) : (int) ( $usage['output_tokens'] ?? 0 );
+
+            $cost = $text_input * $prices['textInput']
+                  + $image_input * $prices['imageInput']
+                  + $text_output * $prices['textOutput']
+                  + $image_output * $prices['imageOutput'];
+
+            return array(
+                'cost'         => round( $cost / 1000000, 6 ),
+                'inputTokens'  => $text_input + $image_input,
+                'outputTokens' => $text_output + $image_output,
+            );
+        }
+
         public function get_model_pricing_rules()
         {
             $this->get_model_pricing( '', '' );
@@ -2450,8 +2495,12 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 }
             }
 
-            $images     = isset( $meta['images_generated'] ) ? $meta['images_generated'] : array();
-            $image_cost = $this->calc_image_cost( $images );
+            $images      = isset( $meta['images_generated'] ) ? $meta['images_generated'] : array();
+            $image_usage = $this->calc_image_token_cost( $meta['image_generation_usage'] ?? null );
+            if ( $image_usage !== null && $image_usage['outputTokens'] === 0 && ! empty( $images ) ) {
+                $image_usage = null;
+            }
+            $image_cost  = $image_usage !== null ? $image_usage['cost'] : $this->calc_image_cost( $images );
 
             $tool_pricing      = $this->get_tool_pricing();
             $file_search_calls = isset( $meta['file_search_calls'] ) ? (int) $meta['file_search_calls'] : 0;
@@ -2477,6 +2526,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'provider'         => $provider,
                 'userId'           => (int) $user_id,
             );
+
+            if ( $image_usage !== null ) {
+                $cost_data['imageInputTokens']  = $image_usage['inputTokens'];
+                $cost_data['imageOutputTokens'] = $image_usage['outputTokens'];
+            }
 
             if ( $web_search_calls > 0 ) {
                 $cost_data['webSearchCalls'] = $web_search_calls;

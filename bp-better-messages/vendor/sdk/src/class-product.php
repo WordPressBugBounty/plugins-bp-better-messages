@@ -12,6 +12,8 @@ if ( ! class_exists( 'WordPlus_SDK_Product' ) ) {
 
         private $install = null;
 
+        private $trial = null;
+
         private $network = null;
 
         public function __construct( array $config )
@@ -38,6 +40,7 @@ if ( ! class_exists( 'WordPlus_SDK_Product' ) ) {
                     'pages'  => array( 'account' => $slug . '-licence', 'pricing' => $slug . '-pricing', 'contact' => $slug . '-contact', 'optin' => $slug . '-optin' ),
                 ),
                 'tracking'         => true,
+                'trial'            => false,
                 'rest'             => array( 'namespace' => 'wordplus/v1', 'base' => $slug, 'install' => 'wordplus/v1/' . $slug . '/install' ),
                 'force_key'        => '',
                 'force_domain'     => '',
@@ -233,6 +236,21 @@ if ( ! class_exists( 'WordPlus_SDK_Product' ) ) {
             }
 
             return $this->admin;
+        }
+
+        public function trial()
+        {
+            if ( null === $this->trial ) {
+                require_once __DIR__ . '/class-trial.php';
+                $this->trial = new WordPlus_SDK_Trial( $this );
+            }
+
+            return $this->trial;
+        }
+
+        public function trial_offer()
+        {
+            return $this->trial()->offer();
         }
 
         public function updater()

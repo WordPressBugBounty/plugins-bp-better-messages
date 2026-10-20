@@ -812,10 +812,6 @@ class Better_Messages_Options
         if( $notifications_count > 0 ){
             $administration_menu_title .= " <span class='awaiting-mod count-{$notifications_count} bm-reports-count'>{$notifications_count}</span>";
             $plugin_menu_title .= " <span class='awaiting-mod count-{$notifications_count} bm-reports-count'>{$notifications_count}</span>";
-
-            wp_register_style('bm-reports-count', false);
-            wp_add_inline_style('bm-reports-count', '.awaiting-mod.bm-reports-count+.fs-trial{display:none!important}');
-            wp_enqueue_style( 'bm-reports-count' );
         }
 
 
@@ -922,9 +918,11 @@ class Better_Messages_Options
         $license_url = admin_url('admin.php?page=better-messages-pricing');
         $account_url = admin_url('admin.php?page=better-messages-account');
 
-        $license_data = Better_Messages_License::instance()->get();
-        $is_trial_utilized = ! empty( $license_data['had_license'] );
-        $trial_url = ( ! $is_trial_utilized && ! $can_use_premium ) ? admin_url('admin.php?page=better-messages-pricing&trial=1') : '';
+        $license_product = Better_Messages_License::instance()->product();
+        $trial_offer = $license_product ? $license_product->trial_offer() : null;
+        $is_trial_utilized = null === $trial_offer;
+        $trial_url = ( null !== $trial_offer && ! $can_use_premium ) ? $trial_offer['url'] : '';
+        $trial_days = null !== $trial_offer ? (int) $trial_offer['days'] : 0;
 
         if ( ! Better_Messages_License_Admin::instance()->can_change_license() ) {
             $license_url = 'https://www.better-messages.com/pricing/';
@@ -1114,6 +1112,7 @@ class Better_Messages_Options
             'accountUrl'         => $account_url,
             'isTrialUtilized'    => $is_trial_utilized,
             'trialUrl'           => $trial_url,
+            'trialDays'          => $trial_days,
             'hasWebSocketClass'  => $has_websocket_class,
             'downloadUrl'        => $download_url,
             'reconnectUrl'       => $reconnect_url,
@@ -1211,6 +1210,7 @@ class Better_Messages_Options
             'ffmpegSize'         => class_exists('Better_Messages_Files') ? Better_Messages_Files::get_ffmpeg_info()['size'] : '',
             'aiBotsCount'                => $ai_bots_count,
             'chatRoomsCount'             => $chat_rooms_count,
+            'getStarted'                 => Better_Messages_Get_Started()->init_data(),
             'wooCommerceProductSupportUserData'     => $woocommerce_product_support_user,
             'wooCommerceOrderSupportUserData'       => $woocommerce_order_support_user,
             'wooCommercePrePurchaseSupportUserData' => $woocommerce_pre_purchase_support_user,

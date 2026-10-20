@@ -800,20 +800,29 @@ class Better_Messages_Chats
             return new WP_Error( 'missing_title', __( 'Chat room title is required', 'bp-better-messages' ), array( 'status' => 400 ) );
         }
 
-        $post_id = wp_insert_post( array(
-            'post_type'   => 'bpbm-chat',
-            'post_title'  => $title,
-            'post_status' => 'publish',
-        ) );
+        $post_id = $this->create_chat_room( $title );
 
         if ( is_wp_error( $post_id ) ) {
             return $post_id;
         }
 
-        $defaults = $this->get_chat_settings( 0 );
-        $this->save_chat_settings( $post_id, $defaults );
-
         return $this->format_chat_room_for_rest( $post_id );
+    }
+
+    public function create_chat_room( $title, $settings = array() ) {
+        $post_id = wp_insert_post( array(
+            'post_type'   => 'bpbm-chat',
+            'post_title'  => $title,
+            'post_status' => 'publish',
+        ), true );
+
+        if ( is_wp_error( $post_id ) ) {
+            return $post_id;
+        }
+
+        $this->save_chat_settings( $post_id, array_merge( $this->get_chat_settings( 0 ), $settings ) );
+
+        return (int) $post_id;
     }
 
     public function rest_admin_update_chat_room( WP_REST_Request $request ) {
