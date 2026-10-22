@@ -4301,57 +4301,40 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 . '</div></div>';
         }
 
-        private function side_tab_restricted( $setting_key ){
-            $restricted = isset( Better_Messages()->settings[ $setting_key ] ) ? Better_Messages()->settings[ $setting_key ] : array();
-
-            if ( ! is_array( $restricted ) || count( $restricted ) === 0 ) {
-                return false;
-            }
-
-            $roles = $this->get_user_roles( $this->get_current_user_id() );
-
-            foreach ( $restricted as $role ) {
-                if ( in_array( $role, $roles, true ) ) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private function side_tabs_count(){
-            $settings = Better_Messages()->settings;
-            $logged   = is_user_logged_in();
-            $count    = 1;
+            $vars = Better_Messages()->script_variables;
+
+            if ( empty( $vars ) ) {
+                $vars = Better_Messages()->get_script_variables();
+            }
+
+            $logged = is_user_logged_in();
+            $count  = 1;
 
             $tabs = array(
-                array( $logged && $this->is_friends_active(), 'combinedFriendsEnable',   'restrictViewSideFriends' ),
-                array( $logged && $this->is_groups_active(),  'combinedGroupsEnable',    'restrictViewSideGroups' ),
-                array( $logged && $this->is_courses_active(), 'combinedCoursesEnable',   'restrictViewSideCourses' ),
-                array( true,                                  'combinedAIBotsEnable',    'restrictViewSideAIBots' ),
-                array( true,                                  'combinedChatRoomsEnable', 'restrictViewSideChatRooms' ),
-                array( true,                                  'combinedUsersEnable',     'restrictViewSideUsers' ),
+                array( 'friends', 'combinedFriends' ),
+                array( 'groups',  'combinedGroups' ),
+                array( 'courses', 'combinedCourses' ),
+                array( '',        'combinedAIBots' ),
+                array( '',        'combinedChatRooms' ),
+                array( '',        'combinedUsers' ),
             );
 
             foreach ( $tabs as $tab ) {
-                list( $available, $setting_key, $restrict_key ) = $tab;
+                list( $feature, $flag ) = $tab;
 
-                if ( ! $available ) {
+                if ( $feature !== '' && ( ! $logged || ( $vars[ $feature ] ?? '0' ) !== '1' ) ) {
                     continue;
                 }
 
-                if ( ! isset( $settings[ $setting_key ] ) || $settings[ $setting_key ] !== '1' ) {
-                    continue;
-                }
-
-                if ( $this->side_tab_restricted( $restrict_key ) ) {
+                if ( ( $vars[ $flag ] ?? '0' ) !== '1' ) {
                     continue;
                 }
 
                 $count++;
             }
 
-            return $count;
+            return $count + Better_Messages()->navigation->has_tabs_on( 'side' );
         }
 
         private function side_tabs_placeholder(){

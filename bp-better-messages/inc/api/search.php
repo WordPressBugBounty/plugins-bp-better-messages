@@ -162,6 +162,10 @@ if ( !class_exists( 'Better_Messages_Search' ) ):
         public function get_messages_results( $search, $user_id ){
             global $wpdb;
 
+            if( Better_Messages()->hooks->is_view_restricted( $user_id ) ){
+                return array();
+            }
+
             $query = $wpdb->prepare( "
                 SELECT " . bm_get_table('messages') . ".thread_id,
                 COUNT(" . bm_get_table('messages') . ".thread_id) as count,

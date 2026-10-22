@@ -520,6 +520,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 return array( 'results' => array() );
             }
 
+            if( Better_Messages()->hooks->is_view_restricted( Better_Messages()->functions->get_current_user_id() ) ){
+                return array( 'results' => array() );
+            }
+
             if( mb_strlen( $search ) < 2 ){
                 return array( 'results' => array() );
             }

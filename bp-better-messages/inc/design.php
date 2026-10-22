@@ -606,6 +606,12 @@ class Better_Messages_Design {
             foreach ( array( 'miniMessages', 'miniChats', 'miniFriends', 'miniGroups', 'miniCourses', 'miniAIBots', 'miniChatRooms', 'miniUsers' ) as $key ) {
                 $vars[ $key ] = '0';
             }
+
+            if ( ! empty( $vars['customTabs'] ) && is_array( $vars['customTabs'] ) ) {
+                foreach ( $vars['customTabs'] as $index => $tab ) {
+                    $vars['customTabs'][ $index ]['bars'] = array_values( array_diff( (array) ( $tab['bars'] ?? array() ), array( 'mini' ) ) );
+                }
+            }
         }
 
         return $vars;

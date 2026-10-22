@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.1.4
+    Version: 3.1.5
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) ) {
     class Better_Messages
     {
-        public  $version = '3.1.4';
+        public  $version = '3.1.5';
 
         public  $db_version = '3.0.0';
 
@@ -49,6 +49,8 @@ if ( ! class_exists( 'Better_Messages' ) ) {
 
 
         public $mini_list;
+
+        public $navigation;
 
         public $emoji;
 
@@ -187,6 +189,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             require_once __DIR__ . '/inc/notification-levels.php';
             require_once __DIR__ . '/inc/chats.php';
             require_once __DIR__ . '/inc/mini-list.php';
+            require_once __DIR__ . '/inc/navigation.php';
             require_once __DIR__ . '/inc/user-config.php';
             require_once __DIR__ . '/inc/shortcodes.php';
             require_once __DIR__ . '/inc/rest-api.php';
@@ -245,6 +248,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             $this->notification_levels = Better_Messages_Notification_Levels();
             $this->chats = Better_Messages_Chats();
             $this->mini_list = Better_Messages_Mini_List();
+            $this->navigation = Better_Messages_Navigation();
             $this->files = Better_Messages_Files();
             $this->storage = Better_Messages_Storage();
             Better_Messages_Storage_Admin();
@@ -889,9 +893,16 @@ if ( ! class_exists( 'Better_Messages' ) ) {
 
             $localEncryption = ( $this->settings['encryptionLocal'] === '1' );
 
+            $db_roles  = $this->functions->get_user_roles( get_current_user_id() );
+            $db_access = serialize( $db_roles );
+
+            if ( array_intersect( $db_roles, (array) $this->settings['restrictViewMessages'] ) ) {
+                $db_access .= ':restrictViewMessages';
+            }
+
             $script_variables = array(
                 'dbGeneration'           => (int) get_option( 'bm_local_db_generation', 1 ),
-                'dbAccess'               => md5( serialize( $this->functions->get_user_roles( get_current_user_id() ) ) ),
+                'dbAccess'               => md5( $db_access ),
                 'dbEncryption'           => ( $localEncryption ? md5( $ukey ) : '' ),
                 'localDb'                => apply_filters( 'better_messages_local_db_policy', array(
                     'limitWeb'             => 150 * 1024 * 1024,
@@ -1020,6 +1031,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                 'widgetMessagesShowUnreadCount' => ( ( $this->settings['widgetMessagesShowUnreadCount'] ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetIconFriends'      => (string) ( $this->settings['widgetIconFriends'] ?? '' ),
                 'widgetIconGroups'       => (string) ( $this->settings['widgetIconGroups'] ?? '' ),
+                'widgetIconCourses'      => (string) ( $this->settings['widgetIconCourses'] ?? '' ),
                 'widgetIconAIBots'       => (string) ( $this->settings['widgetIconAIBots'] ?? '' ),
                 'widgetIconChatRooms'    => (string) ( $this->settings['widgetIconChatRooms'] ?? '' ),
                 'widgetIconUsers'        => (string) ( $this->settings['widgetIconUsers'] ?? '' ),
@@ -1043,6 +1055,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                 'participantsOnlineFirst' => ( ( $this->settings['participantsOnlineFirst'] ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetFriendsShowSearch'   => ( ( $this->settings['widgetFriendsShowSearch']   ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetGroupsShowSearch'    => ( ( $this->settings['widgetGroupsShowSearch']    ?? '1' ) === '1' ? '1' : '0' ),
+                'widgetCoursesShowSearch'   => ( ( $this->settings['widgetCoursesShowSearch']   ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetAIBotsShowSearch'    => ( ( $this->settings['widgetAIBotsShowSearch']    ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetChatRoomsShowSearch' => ( ( $this->settings['widgetChatRoomsShowSearch'] ?? '1' ) === '1' ? '1' : '0' ),
                 'widgetUsersShowSearch'     => ( ( $this->settings['widgetUsersShowSearch']     ?? '1' ) === '1' ? '1' : '0' ),

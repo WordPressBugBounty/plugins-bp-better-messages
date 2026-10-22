@@ -1480,7 +1480,7 @@ function better_messages_design_schema() {
 
                 array(
                     'label'       => _x( 'Side panel', 'Settings page', 'bp-better-messages' ),
-                    'description' => _x( 'The vertical tab strip beside the side list, shown when more than one widget is on it. Drag to reorder: the first tab is the one the messenger opens on. The gear opens the widget\'s own page', 'Settings page', 'bp-better-messages' ),
+                    'description' => _x( 'The vertical tab strip beside the side list, shown when more than one tab is on it. Drag to reorder: the first tab is the one the messenger opens on. The pencil renames a tab, the gear opens the settings of the widget, and Add tab adds a tab of your own', 'Settings page', 'bp-better-messages' ),
                     'controls'    => array(
                         array(
                             'id'        => 'sidePanelTabsOrder',
@@ -1811,7 +1811,7 @@ function better_messages_design_schema() {
 
                 array(
                     'label'       => _x( 'Widget bar', 'Settings page', 'bp-better-messages' ),
-                    'description' => _x( 'Drag to reorder: the first tab is the one the bubble opens on. The gear opens the widget\'s own page. An icon picked here is used on the side panel and the mobile tab bar too', 'Settings page', 'bp-better-messages' ),
+                    'description' => _x( 'Drag to reorder: the first tab is the one the bubble opens on. The pencil renames a tab, the gear opens the settings of the widget, and Add tab adds a tab of your own. An icon or a name given here is used on the side panel and the mobile tab bar too', 'Settings page', 'bp-better-messages' ),
                     'controls'    => array_merge( array(
                         array(
                             'id'      => 'miniWidgetsOrder',
@@ -2340,7 +2340,7 @@ function better_messages_design_schema() {
 
                 array(
                     'label'       => _x( 'Tab bar', 'Settings page', 'bp-better-messages' ),
-                    'description' => _x( 'The bottom bar of the full screen messenger. Drag to reorder: the first tab is the one the messenger opens on. The gear opens the widget\'s own page', 'Settings page', 'bp-better-messages' ),
+                    'description' => _x( 'The bottom bar of the full screen messenger. Drag to reorder: the first tab is the one the messenger opens on. The pencil renames a tab, the gear opens the settings of the widget, and Add tab adds a tab of your own', 'Settings page', 'bp-better-messages' ),
                     'controls'    => array(
                         array(
                             'id'        => 'mobileTabsOrder',

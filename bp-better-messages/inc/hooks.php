@@ -78,7 +78,14 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 && count(Better_Messages()->settings['restrictViewMessages']) > 0
             ) {
                 add_filter( 'bp_better_messages_after_format_message', array( $this, 'hide_message_for_restricted_role' ), 10, 4 );
+                add_filter( 'better_messages_rest_message_meta', array( $this, 'hide_text_meta_for_restricted_role' ), 100, 4 );
                 add_filter( 'bp_better_messages_fast', array( $this, 'disable_fast_mode' ), 10, 1 );
+            }
+
+            if( ! empty( Better_Messages()->settings['restrictVoiceMessages'] ) || ! empty( Better_Messages()->settings['restrictVideoMessages'] ) ) {
+                add_action( 'better_messages_before_message_send', array( $this, 'disable_restricted_voice_video_messages' ), 10, 2 );
+                add_action( 'better_messages_before_new_thread', array( $this, 'disable_restricted_voice_video_messages' ), 10, 2 );
+                add_filter( 'bp_better_messages_script_variable', array( $this, 'restricted_voice_video_script_variables' ), 10, 1 );
             }
 
             if(
@@ -1855,45 +1862,47 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_fast_mode( $enabled ){
-            $user_id          = Better_Messages()->functions->get_current_user_id();
-            $restricted_roles = (array) Better_Messages()->settings['restrictViewMessages'];
-            $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
-
-            $is_restricted = false;
-            foreach( $user_roles as $user_role ){
-                if( in_array( $user_role, $restricted_roles ) ){
-                    $is_restricted = true;
-                }
-            }
-
-            if( $is_restricted ){
-                return '0';
-            }
-
-            return $enabled;
+            return '0';
         }
 
         public function hide_message_for_restricted_role( $message, $message_id, $context, $user_id ){
-            if( ! Better_Messages()->functions->is_valid_user_id( $user_id ) ){
-                return $message;
-            }
-
-            $restricted_roles = (array) Better_Messages()->settings['restrictViewMessages'];
-
-            $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
-
-            $is_restricted = false;
-            foreach( $user_roles as $user_role ){
-                if( in_array( $user_role, $restricted_roles ) ){
-                    $is_restricted = true;
-                }
-            }
-
-            if( $is_restricted ){
+            if( $this->is_view_restricted( $user_id ) ){
                 return Better_Messages()->settings['restrictViewMessagesMessage'];
             }
 
             return $message;
+        }
+
+        public function is_view_restricted( $user_id ){
+            $restricted_roles = (array) Better_Messages()->settings['restrictViewMessages'];
+
+            if( empty( $restricted_roles ) || ! Better_Messages()->functions->is_valid_user_id( $user_id ) ){
+                return false;
+            }
+
+            return count( array_intersect( Better_Messages()->functions->get_user_roles( $user_id ), $restricted_roles ) ) > 0;
+        }
+
+        public function hide_text_meta( $meta ){
+            $meta = (array) $meta;
+
+            foreach( array( 'translation', 'translations', 'translationSkipped', 'translationsSkipped', 'translationPending', 'translationsPending', 'transcription', 'transcribing' ) as $key ){
+                unset( $meta[ $key ] );
+            }
+
+            if( isset( $meta['canTranscribe'] ) ){
+                $meta['canTranscribe'] = false;
+            }
+
+            return $meta;
+        }
+
+        public function hide_text_meta_for_restricted_role( $meta, $message_id, $thread_id, $content ){
+            if( ! is_array( $meta ) || ! $this->is_view_restricted( Better_Messages()->functions->get_current_user_id() ) ){
+                return $meta;
+            }
+
+            return $this->hide_text_meta( $meta );
         }
 
         public function disable_new_thread_button_if_needed( $vars ){
@@ -1944,6 +1953,34 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( $is_restricted ) {
                 $errors['restrictNewThreadsMessage'] = Better_Messages()->settings['restrictNewThreadsMessage'];
             }
+        }
+
+        public function disable_restricted_voice_video_messages( &$args, &$errors ){
+            if( empty( $args['meta_data'] ) || ! is_array( $args['meta_data'] ) || isset( $args['meta_data']['forwarded_from_message'] ) ) return;
+
+            $user_id = isset( $args['sender_id'] ) ? (int) $args['sender_id'] : Better_Messages()->functions->get_current_user_id();
+
+            if( ! empty( $args['meta_data']['bpbm_voice_messages'] ) && Better_Messages()->functions->user_has_role( $user_id, (array) Better_Messages()->settings['restrictVoiceMessages'] ) ) {
+                $errors['restrictVoiceMessages'] = _x( 'Sorry, you are not allowed to send voice messages', 'Rest API Error', 'bp-better-messages' );
+            }
+
+            if( ! empty( $args['meta_data']['bpbm_video_messages'] ) && Better_Messages()->functions->user_has_role( $user_id, (array) Better_Messages()->settings['restrictVideoMessages'] ) ) {
+                $errors['restrictVideoMessages'] = _x( 'Sorry, you are not allowed to send video messages', 'Rest API Error', 'bp-better-messages' );
+            }
+        }
+
+        public function restricted_voice_video_script_variables( $vars ){
+            $roles = Better_Messages()->functions->get_user_roles( Better_Messages()->functions->get_current_user_id() );
+
+            if( count( array_intersect( $roles, (array) Better_Messages()->settings['restrictVoiceMessages'] ) ) > 0 ) {
+                $vars['preventVoiceMessages'] = '1';
+            }
+
+            if( count( array_intersect( $roles, (array) Better_Messages()->settings['restrictVideoMessages'] ) ) > 0 ) {
+                $vars['preventVideoMessages'] = '1';
+            }
+
+            return $vars;
         }
 
         public function disable_archived_reply($allowed, $user_id, $thread_id){

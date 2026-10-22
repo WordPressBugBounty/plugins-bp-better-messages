@@ -1064,7 +1064,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 }
             };
 
-            if ( Better_Messages()->websocket ) {
+            if ( Better_Messages()->websocket && ! Better_Messages()->hooks->is_view_restricted( $recipient_user_id ) ) {
                 $socket_server = Better_Messages()->websocket->api_server();
                 $bm_endpoint   = $socket_server . 'streamMessage';
 

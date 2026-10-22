@@ -1578,7 +1578,7 @@ class Better_Messages_Chats
             $can_read = $this->user_can_read( $user_id, $chat_id );
 
             if( Better_Messages()->websocket ){
-                $thread_item['chatRoom']['broadcastToken'] = $can_read
+                $thread_item['chatRoom']['broadcastToken'] = $can_read && ! Better_Messages()->hooks->is_view_restricted( $user_id )
                     ? Better_Messages()->websocket->get_thread_broadcast_token( $thread_id )
                     : '';
             }

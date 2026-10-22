@@ -2,9 +2,9 @@
 Contributors: wordplus
 Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 3.1.4
+Stable tag: 3.1.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -425,6 +425,21 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 **Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
+
+= 3.1.5 =
+* Added [custom tabs](https://www.better-messages.com/docs/features/custom-tabs/) on the mini widgets bar, the side panel and the mobile tab bar, from **Settings → Appearance**: a link, a page shown inside the messenger, or content with shortcodes rendered for each member, hidden per role and bar
+* Added [renaming of the built-in tabs](https://www.better-messages.com/docs/features/custom-tabs/#renaming-the-built-in-tabs), one name for all three bars
+* Added the [`better_messages_navigation_tabs`](https://www.better-messages.com/hooks/js-filters/#better_messages_navigation_tabs) JavaScript filter and the [`better_messages_custom_tabs`](https://www.better-messages.com/hooks/php-filters/#better_messages_custom_tabs) PHP filter, to add, remove, reorder and rename the tabs of every bar from code — see [Custom navigation tabs](https://www.better-messages.com/docs/development/guides/custom-tabs/)
+* Fixed the Courses widget icon picked in Appearance showing in the preview but not on the site, and its Show Search Box switch doing nothing
+* Fixed the collapsed side panel showing the stock icons instead of the widget icons picked in Appearance
+* Fixed the side panel showing the wrong number of tabs for a moment while the messenger loads
+* Fixed the Restricted Roles of voice and video messages not applying in New Conversation, where restricted members and guests still had the mic and the camera: the site now also refuses their recordings
+* Fixed **Unique Guest Names** letting a guest sign up or rename with the username or display name of a member, an administrator too
+* Fixed **Restrict Message Viewing** letting restricted members read some messages: new messages, edits and AI replies as they arrived, ephemeral chat rooms, conversations they were added to, AI translations and transcripts, search results, and messages stored before the restriction
+* Improved the sound of calls on the cloud call servers over unstable connections, as each audio packet now carries a copy of the one before it
+* Improved video in calls on computers whose hardware video encoder drops camera frames: this is now detected, and the camera is encoded in software from its next start
+* Tested up to WordPress 7.2
+* Other minor bugfixes and improvements
 
 = 3.1.4 =
 * Added **Better Messages → Settings → Get started**, the page a new site opens on: one click each sets up the Messages page, chat with visitors, a chat room on its own page and the plugins on the site

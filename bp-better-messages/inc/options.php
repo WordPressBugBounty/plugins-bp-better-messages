@@ -646,7 +646,9 @@ class Better_Messages_Options
             'miniWidgetsOrder'              => [],
             'rememberLastTab'               => '0',
             'sidePanelTabsOrder'            => [],
-            'mobileTabsOrder'               => []
+            'mobileTabsOrder'               => [],
+            'customTabs'                    => [],
+            'tabLabels'                     => []
         );
 
         $this->settings = $this->get_effective_settings( ! is_admin() && current_user_can( 'manage_options') );
@@ -2969,7 +2971,11 @@ class Better_Messages_Options
 
         foreach ( $settings as $key => $value ) {
 
-            if( in_array( $key, $arrays ) ){
+            if ( $key === 'customTabs' ) {
+                $this->settings[$key] = Better_Messages_Navigation::sanitize_custom_tabs( $value );
+            } else if ( $key === 'tabLabels' ) {
+                $this->settings[$key] = Better_Messages_Navigation::sanitize_tab_labels( $value );
+            } else if( in_array( $key, $arrays ) ){
                 $this->settings[$key] = $this->sanitize_array_recursive( (array) $value );
             } else if ( is_array( $value ) ) {
                 $this->settings[$key] = array();

@@ -363,12 +363,12 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $data = [];
 
-            $name = sanitize_user( trim( sanitize_text_field( $request->get_param('name') ) ) );
+            $name = $this->clean_name( $request->get_param('name') );
 
             if( ! empty( $name ) ){
                 $data['name'] = $name;
 
-                if( $this->names_must_be_unique() && $this->check_if_name_already_used( $name ) ){
+                if( $this->names_must_be_unique() && $name !== (string) $guest_user->name && $this->is_name_taken( $name, absint( $user_id ) ) ){
                     return new WP_Error(
                         'rest_forbidden',
                         _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),
@@ -413,11 +413,32 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             return $return;
         }
 
-        public function check_if_name_already_used($name)
+        public function check_if_name_already_used( $name, $guest_id = 0 )
         {
             global $wpdb;
-            $sql = $wpdb->prepare("SELECT COUNT(*) FROM `{$this->table}` WHERE `name` LIKE %s", $wpdb->esc_like( $name ) );
+            $sql = $wpdb->prepare("SELECT COUNT(*) FROM `{$this->table}` WHERE `name` LIKE %s AND `id` != %d", $wpdb->esc_like( $name ), absint( $guest_id ) );
             return (bool) $wpdb->get_var( $sql );
+        }
+
+        public function is_name_taken( $name, $guest_id = 0 )
+        {
+            global $wpdb;
+
+            $taken = $this->check_if_name_already_used( $name, $guest_id );
+
+            if( ! $taken ){
+                $taken = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM `{$wpdb->users}` WHERE `user_login` = %s OR `display_name` = %s LIMIT 1", $name, $name ) );
+            }
+
+            return (bool) apply_filters( 'better_messages_guest_name_taken', $taken, $name, absint( $guest_id ) );
+        }
+
+        public function clean_name( $name )
+        {
+            $name = (string) preg_replace( '/\p{Cf}+/u', '', (string) $name );
+            $name = (string) preg_replace( '/[\p{Z}\s]+/u', ' ', $name );
+
+            return sanitize_user( trim( sanitize_text_field( $name ) ) );
         }
 
         public function names_must_be_unique()
@@ -449,9 +470,9 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             if( $registerData ){
                 if( isset( $registerData['name'] ) ){
-                    $name = trim( sanitize_text_field( $registerData['name'] ) );
+                    $name = $this->clean_name( $registerData['name'] );
 
-                    if( $name && $this->names_must_be_unique() && $this->check_if_name_already_used( $name ) ){
+                    if( $name && $this->names_must_be_unique() && $this->is_name_taken( $name ) ){
                         return new WP_Error(
                             'rest_forbidden',
                             _x( 'Sorry, such this name already used by someone else. Please try to use other name.', 'Rest API Error', 'bp-better-messages' ),

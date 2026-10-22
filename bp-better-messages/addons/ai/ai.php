@@ -3359,6 +3359,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function user_can_translate( $user_id ) {
             $user_id = (int) $user_id;
             if ( $user_id <= 0 ) return false;
+            if ( Better_Messages()->hooks->is_view_restricted( $user_id ) ) return false;
 
             $allowed = (array) ( Better_Messages()->settings['aiTranslationRoles'] ?? [] );
             if ( empty( $allowed ) ) return true;
@@ -5048,6 +5049,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         {
             $message_id    = intval( $request->get_param( 'message_id' ) );
             $attachment_id = Better_Messages()->functions->get_message_meta( $message_id, 'bpbm_voice_messages', true );
+
+            if ( Better_Messages()->hooks->is_view_restricted( Better_Messages()->functions->get_current_user_id() ) ) {
+                return new WP_Error( 'rest_forbidden', Better_Messages()->settings['restrictViewMessagesMessage'], array( 'status' => 403 ) );
+            }
 
             if ( ! $attachment_id ) {
                 return new WP_Error(

@@ -39,7 +39,9 @@ class Better_Messages_Mini_List
         $chat_rooms = isset( Better_Messages()->script_variables['miniChatRooms'] ) && Better_Messages()->script_variables['miniChatRooms'] === '1';
         $users      = isset( Better_Messages()->script_variables['miniUsers'] ) && Better_Messages()->script_variables['miniUsers'] === '1';
 
-        if( $threads || $friends || $groups || $courses || $ai_bots || $chat_rooms || $users ) {
+        $custom_tabs = Better_Messages()->navigation->has_tabs_on( 'mini' ) > 0;
+
+        if( $threads || $friends || $groups || $courses || $ai_bots || $chat_rooms || $users || $custom_tabs ) {
             $class = "bm-wrap bm-mini-widgets-wrap";
 
             $mod = Better_Messages_Design::instance()->get_design_var_int( '--bm-mini-widget-offset-y' );
