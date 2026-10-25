@@ -1033,7 +1033,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter('intermediate_image_sizes', '__return_empty_array');
                 add_filter('big_image_size_threshold', '__return_false');
-                $attachment_id = media_handle_sideload( $file, 0, null, array( 'post_status' => 'private' ) );
+                $attachment_id = $this->media_handle( $file );
                 remove_filter('big_image_size_threshold', '__return_false');
                 remove_filter('intermediate_image_sizes', '__return_empty_array');
 
@@ -1092,6 +1092,98 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $type  = isset( $types[ $group ] ) ? $types[ $group ] : 'other';
 
             return apply_filters( 'bp_better_messages_attachment_max_size', $sizes[ $type ], $thread_id, $user_id, $group );
+        }
+
+        public function media_handle( $file, $mark_waiting = false, array $overrides = array( 'test_form' => false ) )
+        {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+
+            $mark = function ( $attachment_id ) {
+                add_post_meta( $attachment_id, 'better-messages-waiting-for-message', time(), true );
+            };
+
+            if ( $mark_waiting ) {
+                add_action( 'add_attachment', $mark );
+            }
+
+            $limit     = (string) ini_get( 'memory_limit' );
+            $unbounded = wp_convert_hr_to_bytes( $limit ) <= 0;
+            $bounded   = false;
+
+            if ( $unbounded ) {
+                $bound = apply_filters( 'better_messages_upload_memory_limit', '2048M' );
+
+                if ( ! empty( $bound ) && wp_convert_hr_to_bytes( (string) $bound ) > memory_get_usage( true ) && false !== ini_set( 'memory_limit', (string) $bound ) ) {
+                    $bounded = wp_convert_hr_to_bytes( (string) ini_get( 'memory_limit' ) ) > 0;
+                }
+            }
+
+            try {
+                if ( $unbounded && ! $bounded && $this->is_media_upload( $file ) ) {
+                    return $this->insert_without_media_metadata( $file, $overrides );
+                }
+
+                if ( is_array( $file ) ) {
+                    return media_handle_sideload( $file, 0, null, array( 'post_status' => 'private' ) );
+                }
+
+                return media_handle_upload( $file, 0, array( 'post_status' => 'private' ), $overrides );
+            } finally {
+                if ( $bounded ) {
+                    ini_set( 'memory_limit', $limit );
+                }
+
+                if ( $mark_waiting ) {
+                    remove_action( 'add_attachment', $mark );
+                }
+            }
+        }
+
+        private function is_media_upload( $file )
+        {
+            if ( is_array( $file ) ) {
+                $name = isset( $file['name'] ) ? (string) $file['name'] : '';
+            } else {
+                $name = isset( $_FILES[ $file ]['name'] ) ? (string) $_FILES[ $file ]['name'] : '';
+            }
+
+            $type = (string) wp_check_filetype( $name )['type'];
+
+            return strpos( $type, 'audio/' ) === 0 || strpos( $type, 'video/' ) === 0;
+        }
+
+        private function insert_without_media_metadata( $file, array $overrides )
+        {
+            $time = current_time( 'mysql' );
+
+            if ( is_array( $file ) ) {
+                $name    = (string) $file['name'];
+                $handled = wp_handle_sideload( $file, array( 'test_form' => false ), $time );
+            } else {
+                $name    = (string) $_FILES[ $file ]['name'];
+                $handled = wp_handle_upload( $_FILES[ $file ], $overrides, $time );
+            }
+
+            if ( isset( $handled['error'] ) ) {
+                return new WP_Error( 'upload_error', $handled['error'] );
+            }
+
+            $attachment_id = wp_insert_attachment( array(
+                'post_mime_type' => $handled['type'],
+                'guid'           => $handled['url'],
+                'post_parent'    => 0,
+                'post_title'     => sanitize_text_field( pathinfo( $name, PATHINFO_FILENAME ) ),
+                'post_content'   => '',
+                'post_status'    => 'private',
+            ), $handled['file'], 0, true );
+
+            if ( ! is_wp_error( $attachment_id ) ) {
+                wp_update_attachment_metadata( $attachment_id, array( 'filesize' => (int) filesize( $handled['file'] ) ) );
+            }
+
+            return $attachment_id;
         }
 
         public function handle_upload( WP_REST_Request $request )
@@ -1192,7 +1284,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter( 'intermediate_image_sizes', '__return_empty_array' );
                 add_filter( 'big_image_size_threshold', '__return_false' );
-                $attachment_id = media_handle_upload( 'file', 0, array( 'post_status' => 'private' ), $upload_overrides );
+                $attachment_id = $this->media_handle( 'file', true, $upload_overrides );
                 remove_filter( 'big_image_size_threshold', '__return_false' );
                 remove_filter( 'intermediate_image_sizes', '__return_empty_array' );
 
@@ -2266,7 +2358,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
                 add_filter( 'intermediate_image_sizes', '__return_empty_array' );
                 add_filter( 'big_image_size_threshold', '__return_false' );
-                $attachment_id = media_handle_sideload( $file_array, 0, null, array( 'post_status' => 'private' ) );
+                $attachment_id = $this->media_handle( $file_array, true );
                 remove_filter( 'big_image_size_threshold', '__return_false' );
                 remove_filter( 'intermediate_image_sizes', '__return_empty_array' );
 

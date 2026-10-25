@@ -9,6 +9,9 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
     class Better_Messages_Fluent_Community
     {
+        const MESSAGES_ICON = '<svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"></path></svg>';
+
+        private $messages_icon = null;
 
         public static function instance()
         {
@@ -28,7 +31,11 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             add_action('wp_head', [$this, 'load_styles']);
             add_action( 'fluent_community/before_js_loaded', [$this, 'load_javascript'] );
             add_action( 'wp_head', [$this, 'load_javascript'] );
-            add_action( 'fluent_community/before_header_menu_items', [$this, 'add_messages_menu'] );
+            if( Better_Messages()->settings['FCheaderIconPosition'] === 'start' ) {
+                add_action( 'fluent_community/before_header_right_menu_items', [$this, 'add_messages_menu'], 1 );
+            } else {
+                add_action( 'fluent_community/before_header_menu_items', [$this, 'add_messages_menu'] );
+            }
             add_action( 'fluent_community/mobile_menu', [$this, 'add_messages_mobile_menu'], 10, 3 );
 
             if( Better_Messages()->settings['chatPage'] === '0' ) {
@@ -419,9 +426,44 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             return $data;
         }
 
+        public function messages_icon()
+        {
+            if ( $this->messages_icon !== null ) {
+                return $this->messages_icon;
+            }
+
+            $icon = Better_Messages()->settings['FCmenuIcon'];
+
+            if ( is_string( $icon ) && stripos( ltrim( $icon ), '<svg' ) === 0 ) {
+                $icon = Better_Messages()->options->sanitize_svg( trim( $icon ) );
+            } else {
+                $icon = '';
+            }
+
+            if ( $icon !== '' ) {
+                $icon = preg_replace_callback( '/<svg\b[^>]*>/i', function ( $match ) {
+                    $tag = preg_replace( '/\s(?:width|height)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $match[0] );
+
+                    if ( ! preg_match( '/\sviewbox\s*=/i', $tag ) ) {
+                        $tag = preg_replace( '/^<svg/i', '<svg viewBox="0 0 24 24"', $tag );
+                    }
+
+                    return preg_replace( '/^<svg/i', '<svg width="20px" height="20px"', $tag );
+                }, $icon, 1 );
+            } else {
+                $icon = self::MESSAGES_ICON;
+            }
+
+            $this->messages_icon = apply_filters( 'better_messages_fluent_community_menu_icon', $icon );
+
+            return $this->messages_icon;
+        }
+
         public function add_messages_mobile_menu( $menu, $header_height, $footer_height )
         {
             if( ! is_user_logged_in() ) return $menu;
+
+            if( Better_Messages()->settings['FCphoneIconPlace'] === 'header' ) return $menu;
 
             $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
 
@@ -429,7 +471,7 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             $item = [
                     'permalink' => $url,
-                    'icon_svg' => '<svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"></path></svg>',
+                    'icon_svg' => $this->messages_icon(),
                     'html'     => '<span class="bm-unread-badge" style="display: none;"></span>'
             ];
 
@@ -448,15 +490,15 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             if( ! is_user_logged_in() ) return;
             $url = Better_Messages()->settings['chatPage'] === '0' ? Helper::baseUrl('messages') :  Better_Messages()->functions->get_user_messages_url(get_current_user_id());
             if( $url === '' ) return;
+
+            $desktop_only = Better_Messages()->settings['FCphoneIconPlace'] === 'bottom' ? ' fcom_desktop_only' : '';
             ?>
-            <li class="top_menu_item fcom_better_messages_menu_li fcom_countable_notification_holder  fcom_desktop_only">
+            <li class="top_menu_item fcom_better_messages_menu_li fcom_countable_notification_holder<?php echo $desktop_only; ?>">
                 <a href="<?php echo $url; ?>"
                    class="el-badge fcom_better_messages_menu fcom_theme_button item el-tooltip__trigger el-tooltip__trigger">
                     <div class="better_messages_icon">
                         <i class="el-icon">
-                            <svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"></path>
-                            </svg>
+                            <?php echo $this->messages_icon(); ?>
                         </i>
                     </div>
                     <sup class="el-badge__content el-badge__content--danger bm-unread-badge is-fixed" style="display: none"></sup>

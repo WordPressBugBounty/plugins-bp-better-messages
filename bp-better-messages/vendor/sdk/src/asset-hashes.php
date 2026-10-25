@@ -9,7 +9,7 @@ return array(
 	'lightbox/lightbox.min.js' => '96e6403337',
 	'menus/menus.min.js' => '10e646a831',
 	'pages/pages.min.css' => '07f20f0362',
-	'pages/pages.min.js' => 'bd70eac5cb',
+	'pages/pages.min.js' => 'aa4ad99fcb',
 	'pickers/emoji-text.min.js' => 'd6b4c3f3b7',
 	'pickers/pickers-loader.min.js' => 'aa9cbb0250',
 	'pickers/pickers.min.css' => '1ee8a08d5c',

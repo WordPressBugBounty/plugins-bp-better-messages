@@ -786,6 +786,7 @@ function _bm_frontend_translations_map() {
         array( '_x', 'End Call', 'Private Call Screen' ),
         array( '_x', 'The other side lost connection', 'Call Screen' ),
         array( '_x', 'Reconnecting...', 'Call Screen' ),
+        array( '_x', 'Optimizing video quality...', 'Call Screen' ),
         array( '_x', 'User rejected your call', 'Private Call Screen' ),
         array( '_x', 'User you are trying to call is already in call. Please try later.', 'Private Call Screen' ),
         array( '_x', 'Microphone', 'Call Screen' ),

@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 3.1.5
+Stable tag: 3.1.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -426,6 +426,28 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 
 **Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
 
+= 3.1.6 =
+* Added `data-thread-id` and `data-thread-type` to the open conversation (`.bm-thread-col`), and `data-open-thread-id` and `data-open-thread-type` to the card around it and to mini chat windows, so custom CSS can style one conversation, or every chat room, its background and info panel included
+* Added **Settings → Integrations → FluentCommunity → Messages Icon** for the Messages button in the portal header and bottom menu, **Position in the Header** to put it at the start of the header icons or next to the profile picture, and **Messages Button on Phones** to show it on phones in the header, the bottom menu or both
+* Improved video in calls on the cloud call servers from Windows and Linux computers: the camera is tested as it turns on, with a spinner on its button, and goes out at up to 1080p in the codec the computer handles best: its hardware H.264 on Windows where it keeps up, else VP9
+* Improved calls on the cloud call servers when a camera struggles during the call: it steps down from 1080p to 720p, or switches to a lighter codec while everyone sees "Optimizing video quality..." on its tile, in the browser and in the mobile app
+* Improved screen sharing in calls on the cloud call servers from Windows and Linux computers, which now share in VP9 as smoothly as a Mac shares in H.264, where the hardware H.264 encoder of some Windows computers held a shared screen to a few frames a second
+* Improved the CPU use of calls on the cloud call servers with many cameras, as the statistics of each connection are read once instead of once for every video
+* Fixed voice and video messages recorded in Chrome failing to upload on sites whose PHP memory limit is unlimited, where they stayed at "Waiting to send"
+* Fixed a message the site keeps failing to take holding back every message sent after it, also each time it was sent again by itself
+* Fixed text messages waiting for a file, voice or video message that is still uploading, or for a message stuck in another conversation
+* Fixed **Send now** on a waiting message trying an older failing message first instead of sending the message it was pressed on
+* Fixed uploads that failed halfway staying in the Media Library instead of being removed with the other unused uploads
+* Fixed each new page or tab fetching the encryption keys again when another open tab of the site had already fetched them
+* Fixed the unread count sitting low in its circle in the collapsed conversations list on FluentCommunity and on themes with a tall line height
+* Fixed the counts in search results sitting low in their circles, and the date and New messages labels of a conversation growing taller, on FluentCommunity and on themes with a tall line height
+* Fixed deleting a message taking seconds on sites with many files, as it looked through every file sent in the messenger instead of the files of that message
+* Fixed a message sent again after a lost connection waiting until the first send had finished all its work, instead of being answered as soon as the message was saved
+* Fixed a camera paused by its device during a call on the cloud call servers, such as Safari on an iPad sent to the background, showing the others its last picture frozen instead of the avatar until it came back
+* Fixed the messenger never finishing its load, even after a reload, when the browser database opened but stopped answering, as in Safari after a Mac woke from sleep: it moves to a fresh database, and every reload after that loads at once
+* Fixed browser database timeouts the messenger works around reaching error tracking tools by the thousand as uncaught errors
+* Other minor bugfixes and improvements
+
 = 3.1.5 =
 * Added [custom tabs](https://www.better-messages.com/docs/features/custom-tabs/) on the mini widgets bar, the side panel and the mobile tab bar, from **Settings → Appearance**: a link, a page shown inside the messenger, or content with shortcodes rendered for each member, hidden per role and bar
 * Added [renaming of the built-in tabs](https://www.better-messages.com/docs/features/custom-tabs/#renaming-the-built-in-tabs), one name for all three bars
@@ -467,112 +489,6 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Improved the deactivation survey: an admin who just installed the plugin is asked what they were trying to do, in a question above the answer box
 * Improved the settings on phones and short screens: the header no longer covers the page title, and the side menu has a thin scrollbar
 * Improved the usage data, for sites that share it: it also says how far the site got in Get started, which cards are done, dismissed or not set up, and when the trial notice was shown and which of its buttons was clicked
-* Other minor bugfixes and improvements
-
-= 3.1.0 - 3.1.3 =
-* Added **WordPlus Cloud**, the new name and home of the cloud behind the WebSocket version: your licences, sites, downloads and invoices in one account at [www.wordplus.cloud](https://www.wordplus.cloud/). [Read the introduction](https://www.better-messages.com/blog/wordplus-cloud/)
-* Removed the Freemius SDK, added licences and updates of the WebSocket version from WordPlus Cloud. Your licence moves over by itself on the first page load after the update, with the same key, and realtime messaging, calls and mobile apps keep working without any action
-* Added **Cloud Storage** for attachments, in the free version too: keep files in Cloudflare R2, Bunny.net Storage, or Amazon S3 and any S3-compatible service, chosen per type of file under **Attachments → File Groups**. Files go straight from the browser or the mobile app to the storage, and members open them through links that expire
-* Added **Better Messages Assistant**, an AI assistant on Better Messages → Support, in the free version too: it answers from the documentation and your settings, opens the setting it talks about, prepares setting changes for you to review and save, writes code snippets with links to the hooks they use, and fills in the contact form for anything a person should look at. It sends nothing until you press Start, and **Ask AI** in every Better Messages page header opens it
-* Added **live streaming in chat rooms** with the Live Stream plugin, on the WebSocket version: a room shows its stream the way it shows a group video call, beside the messages, and the chat room editor can start one
-* Added **end-to-end encryption of group calls** on the WebSocket version, off by default under **Group Calls → End-to-End Encryption**: their audio and video are encrypted in each browser and app with a key only your site gives out
-* Added new **Licence**, **Upgrade** and **Support** pages: the licence with the sites using it, the plans with a free trial, and a contact form that takes files
-* Added **Check for updates** on the **Licence** page of the WebSocket version: it asks for a new version at once, a beta too when beta versions are on, and links to the update
-* Added **Max File Size by Type**, a separate upload limit for images, videos, audio and other files
-* Added **notification levels** for group conversations and chat rooms: each member chooses **All messages**, **Mentions and replies** or **Nothing** for a conversation from its menu, and administrators choose the default for each kind of conversation under **Notifications → Conversation Notifications**
-* Added replies that notify like mentions: a reply to your message in a group conversation notifies you and marks the conversation as a mention does
-* Added muting a conversation for a set time, after which it notifies again by itself
-* Added **@all** to mention everyone in a group conversation or chat room, allowed to moderators by default under **Notifications → Mention Everyone (@all)** and set for each chat room in its settings
-* Added **Group Call Alerts** on the WebSocket version: members are notified by push, email and a pop-up with who started the call, how many are in it and a Join button when a group call starts in their conversation, with a sound of its own and a cooldown and a limit for each member under **Notifications**
-* Added a mark for new reactions to your messages, in the conversation list and in the conversation, with a button that jumps to each message reacted to
-* Added a choice of what members are emailed about, in their messenger settings: all notifications, only one-to-one conversations, mentions and replies, or nothing, with the default under **Notifications → Default Email Scope**
-* Added hooks and a REST route for notification levels, listed in the [Notification levels](https://www.better-messages.com/docs/features/notification-levels/) documentation
-* Improved **Force Notifications for Mentions**, now **Force Notifications for Mentions and Replies**, which no longer emails a member who turned email off
-* Improved chat rooms with notifications off, which now notify their members about mentions and replies. Hidden chat rooms never notify
-* Improved Media Optimization: a picked file is converted at once, so its preview shows what will be sent, and a file still too large after converting says so before it is sent
-* Improved licences on WordPress networks: the licence of a network-activated plugin belongs to the network, and only a network administrator can change it
-* Improved the Voice and Video Messages add-on offer: it shows where the add-on is needed, in the Voice Messages and Video Messages settings and the AI bot editor, instead of on an Add-ons page, and says when the licence of the add-on is not active
-* Improved the admin page addresses, which lose their bp- prefix (admin.php?page=better-messages and so on). Old addresses keep working
-* Improved background jobs, which now run on one scheduled worker that never runs twice at once
-* Improved the open and close animation of the bubble launcher: the panel grows out of the launcher in one piece, with its list at full height from the start, and stays smooth on a busy page
-* Improved the built-in prices of the AI chat bots with the newest models: Claude Fable 5.1, Opus 5.5, Sonnet 5.5 and Haiku 5.5, GPT-6, Gemini 3.5 to 3.8 Flash and Nano Banana 2.1, the lower price of GPT-5.6 Sol, and the higher price Gemini 3.6 to 3.8 Flash take on January 1, 2027, applied on that date by itself
-* Improved the **Web Search** setting of OpenAI and Claude bots, which now shows the price per search
-* Improved the realtime connection of the WebSocket version, which now goes to the addresses of WordPlus Cloud: browsers connect to ws.wordplus.cloud, and requests go to rest.wordplus.cloud, in place of cloud.better-messages.com, and group calls connect to video.rtc.wordplus.cloud in place of video-cloud.better-messages.com. Nothing changes for a self-hosted server. If your site has a Content Security Policy, allow wss://ws.wordplus.cloud, wss://*.de.wordplus.cloud, https://rest.wordplus.cloud, wss://*.rtc.wordplus.cloud and https://*.rtc.wordplus.cloud in its connect-src
-* Improved the privacy of the WebSocket version: what your site sends through the realtime server is encrypted with keys only those allowed to read it get, a key for each conversation that changes when someone leaves it, in place of one key for the whole site. Messages, files, conversation names and profiles cannot be read or changed on the way
-* Improved online statuses on the WebSocket version: a page now gets the status of the people it shows, not of everyone on the site, which cuts most of the realtime traffic of busy sites. Someone coming online still shows at once
-* Improved page loads and reconnects on the WebSocket version: the realtime server keeps the last 5 minutes of every conversation (encrypted), so reloading, opening another page of the site or coming back to the messenger on a phone no longer asks your site for updates, and messages missed meanwhile show at once
-* Improved the JavaScript API for online statuses: `BetterMessages.getOnlineUsers()` and a callback on the `better_messages_user_online`, `better_messages_user_offline` or `better_messages_online_users_loaded` hook get the status of everyone for their page as before, the new `BetterMessages.watchOnlineUsers( ids )` follows chosen users, and the `better_messages_presence_all` filter keeps every page on everyone, for code that listens to the page events
-* Improved your own camera in calls, which shows the way the others see it again, not mirrored, as in 2.0: while the call rings, in the corner of a 1:1 call and on your tile in a group call, in the browser and in the mobile app. A shared screen is never mirrored
-* Improved building the mobile app: your site sends the files of the messenger with the build request, so a firewall or the bot protection of a CDN that blocks the build server no longer stops a build
-* Improved the iOS setup of the mobile app: once a screen sharing App ID is selected, the App ID of the app lists App Groups too, and a build missing it names the App ID and the App Group to assign
-* Improved the chat toggle in calls: a **Show Chat** button in the call controls replaces the chevron on the edge of the call, which could cover the buttons of a participant, and full screen hides it
-* Improved the picture of group calls: the camera sends in a modern codec where the device encodes it in hardware, with a fallback every device can play, in three sizes up to 1080p, and each participant receives the size their screen shows
-* Improved group video calls from computers without a hardware video encoder, mostly Windows laptops: their camera now goes out at 720p, so a slower computer keeps up and the others no longer see its picture freeze
-* Improved screen sharing in group calls, which is now smooth in movement and stays sharp on text: it goes out at 1080p and up to 30 frames a second, encoded in hardware where the device can, and Chrome on a Mac or Windows encodes the camera in hardware too
-* Improved the moderator buttons in group calls, which show a spinner until the change takes effect
-* Improved **Mute user**, **Unmute user** and **Unban user** in the member menu of a chat room, which are red like Kick and Ban, and so is the button of the mute form
-* Improved calls for keyboards and screen readers: Answer, Reject and every call control are buttons that Tab reaches and Enter or Space presses, and the focus goes back where it was when the call ends
-* Fixed pages with the messenger responding slowly to clicks in Chrome, Edge and other Chromium browsers, most of all beside a large chat room with many members online
-* Fixed AI chat bots on Claude Opus 4.7 and 4.8 counting the old Opus 4 price, three times what they cost
-* Fixed web searches of Claude bots counting as free instead of $10 per 1,000, and those of OpenAI bots on GPT-4o and GPT-4.1 counting $25 per 1,000 instead of $10
-* Fixed images from Gemini preview models counting as free in the costs of the AI chat bots
-* Fixed some messages, voice and video messages included, being stored twice when sent from a phone or tablet with the messenger open in more than one tab or window, or sent again while the first try was still saving
-* Fixed two conversations being created between the same members when a private, product, listing or order conversation was opened twice at the same moment, also with **Single Conversation Per Recipient** on
-* Fixed a chat room, group or course conversation being created twice when its first members opened it at the same moment
-* Fixed a reaction or a report being lost when two members reacted to or reported one message at the same moment
-* Fixed a member added to an end-to-end encrypted conversation losing access to it when another member was added at the same moment
-* Fixed an AI chat bot answering a message twice, and a summary, digest, translation or transcription being made and charged twice, when it was asked for twice at the same moment
-* Fixed a file uploaded in parts being corrupted, or a file uploaded to Cloud Storage being added twice, when a part or the upload was sent again while the first try was still running
-* Fixed a WooCommerce cart snapshot being posted twice, a pinned message being listed twice, and "started a call" showing twice when each happened twice at the same moment
-* Fixed the online list, of a chat room too, staying empty after opening the messenger from another page of the site in the WebSocket version, for up to 40 seconds with the member showing offline to everyone else. It now shows who is online at once, as in 3.0
-* Fixed the online list of chat rooms and presence rooms showing No users online for a moment on each page load in the WebSocket version: it shows you at once, and after a reload the people it showed before
-* Fixed a visitor who has not joined a chat room as a guest seeing its online list, which could show nobody to them: it appears once they chat as a guest
-* Fixed the online count in the **Chat Rooms** list missing for everyone but the moderators of the room when the room has **Hide participants list** on
-* Fixed chat room moderators being able to mute and ban a site administrator, who they already could not remove, and being offered all three on an administrator
-* Fixed a muted chat room moderator or administrator getting the reply area, where every message failed to send, instead of the notice that they are muted
-* Fixed starting a new conversation freezing the messenger and flooding the site with requests when the page sizes the messenger to its content, as a row of a page builder can
-* Fixed an uploaded audio file showing as a voice message with no name or download: it shows as a file again, with a play button and a download link
-* Fixed the link under **Advanced Mini Chats** in the BuddyPress, PeepSo and Ultimate Member settings, which now opens the Mini chats switch under **Appearance → Mini widgets**
-* Fixed 1:1 calls that move to the media server, on sites that turn call encryption on with the BETTER_MESSAGES_CALL_ENCRYPTION_ENABLED constant, encrypting only their data messages: their audio and video are now encrypted too
-* Fixed the controls of a group call wrapping onto a second row once the connection quality shows, instead of folding into More
-* Fixed your own camera on a phone showing on your tile in a group video call at half its width in a black frame
-* Fixed some messenger, admin and mobile app texts that stayed in English on translated sites, such as the upload limits, the offline banner and the login error of the app
-* Fixed the **Messages** and **Chat Room** blocks not loading in the block editor on WordPress 5.9 to 6.5
-* Fixed a PHP 8.5 deprecation notice that the WebSocket version wrote to the debug log every minute
-* Fixed deprecation notices on PHP 8.1 and newer when a private conversation is opened through the REST API without a subject, and when a call ends
-* Security improvement: starting a group call now checks the call type and who may start one, so Lock Room, Mute All and broadcast mode always hold
-* Security improvement: a reply can only point to a message of its own conversation, so an AI chat bot never reads a message of another one
-* Security improvement: AI chat bots answer mentions and replies only in conversations they are part of
-* Security improvement: a message held for moderation cannot be loaded by other members of the conversation
-* Security improvement: each guest connects to the WebSocket server with a key of their own, so a visitor can no longer connect as another guest, and a deleted guest is cut off the WebSocket server at once
-* Fixed a group call that the call server could not start still posting "started a call"
-* Fixed BuddyBoss App push notifications of a new message going to the wrong members and to the sender
-* Fixed releasing a message held by AI moderation on a site without the realtime server
-* Fixed members seeing the edit and delete buttons on the messages of everyone after an administrator wrote in the conversation
-* Fixed clearing a conversation leaving its unread counts behind
-* Fixed the mention badge missing on a conversation that first arrived with a new message, in the mobile app and in browsers without shared workers
-* Fixed an edited or reacted older message, arriving while the conversation is open, making the messages between it and the loaded ones count as loaded
-* Fixed guest sign-up sometimes failing with a server error when the guest enters no name
-* Fixed the time of a call card squeezing its label in a mini chat: the time now ends the last line of the card, and cards are more compact in mini chats and on phones
-* Fixed deleted, hidden and encrypted message placeholders, location cards, file names and voice messages squeezing their text in a mini chat
-* Fixed the first tap on Send often only closing the keyboard on a phone, so a message needed a second tap, on iPhones and in FluentCommunity, SureDash and web apps installed to the home screen
-* Fixed the bottom menu of FluentCommunity coming back late after the keyboard closed on an iPhone, with the reply area jumping up when it came
-* Fixed a tap that brings back the hidden call controls on a phone also pressing the button under the finger, which could end the call
-* Fixed a tap on an action button of the conversation info panel missing it on a phone right after editing the subject
-* Fixed Private Message and links to a conversation on a phone showing the conversations list first and sliding to the conversation a moment later: it opens straight away, as in 2.0
-* Fixed new messages being marked as read at once, with no sound, pop-up or push notification, after the messenger was closed on a phone with a conversation open: closing now goes back to the conversations list, as in 2.0
-* Fixed Query Monitor reporting scripts and styles on the settings page as enqueued but never printed
-* Fixed mentions sitting a little above or below the words around them, in the reply area and in messages
-* Fixed the pin and mute icons of a conversation in the list sitting higher than its name and time
-* Fixed the unread count of a muted conversation being hard to see in the conversation list
-* Fixed the email about a started group call arriving empty and going to members on Mentions and replies, who get the pop-up and the push only, and it now uses the BuddyPress email template when that is chosen
-* Fixed a microphone turned on and off quickly in a group call leaving a silent copy of it in the call until that person left, on phones that take a moment to start their microphone
-* Fixed someone whose own network dropped for a while during a group call coming back on a call server farther away for the rest of the call
-* Fixed the first message of a new end-to-end encrypted conversation being lost when a recipient had not set up encryption yet, or when it held only files
-* Fixed web push notifications that could not be turned on when plugins are switched off on the home page, as Freesoul Deactivate Plugins does, or when a removed plugin left its service worker in the browser
-* Improved group calls: a microphone nobody in the call hears is no longer sent until someone joins, which saves the upload and battery of someone waiting alone in a call
-* Improved group calls on the cloud call servers: the servers can now choose more efficient video codecs, such as H.265 on devices that encode it in hardware, while every browser keeps a picture it can show
-* Security improvement: a link preview no longer follows a redirect to a private or loopback address, and no longer requests the image of the page, which was never shown
 * Other minor bugfixes and improvements
 
 [See the full changelog](https://www.better-messages.com/changelog/) for every earlier version.

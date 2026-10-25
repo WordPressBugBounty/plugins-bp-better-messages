@@ -36,8 +36,9 @@ if ( ! class_exists( 'WordPlus_SDK_Product' ) ) {
                 'addons'           => array(),
                 'equivalent_plans' => array(),
                 'menu'             => array(
-                    'parent' => $slug,
-                    'pages'  => array( 'account' => $slug . '-licence', 'pricing' => $slug . '-pricing', 'contact' => $slug . '-contact', 'optin' => $slug . '-optin' ),
+                    'parent'  => $slug,
+                    'pages'   => array( 'account' => $slug . '-licence', 'pricing' => $slug . '-pricing', 'contact' => $slug . '-contact', 'optin' => $slug . '-optin' ),
+                    'upgrade' => true,
                 ),
                 'tracking'         => true,
                 'trial'            => false,

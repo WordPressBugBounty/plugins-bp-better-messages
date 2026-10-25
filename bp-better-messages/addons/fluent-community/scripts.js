@@ -56,7 +56,7 @@ document.addEventListener('fluentCommunityUtilReady', function () {
   updateDynamicCSS();
 
   document.addEventListener('click', function(e) {
-    var link = e.target.closest('.fcom_mobile_menu a');
+    var link = e.target.closest('.fcom_mobile_menu a, a.fcom_better_messages_menu');
     if( link && link.querySelector('.bm-unread-badge') && window.location.pathname.endsWith(path) && window.location.hash && window.location.hash !== '#/' && window.location.hash !== '#' ) {
       e.preventDefault();
       e.stopPropagation();

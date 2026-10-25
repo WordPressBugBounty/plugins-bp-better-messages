@@ -238,10 +238,11 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
             }
 
             if ( '' !== $this->product->page( 'pricing' ) ) {
-                $slug  = $this->product->page( 'pricing' );
-                $label = $this->product->has_access() ? _x( 'Pricing', 'Admin menu', 'wordplus-sdk' ) : _x( 'Upgrade', 'Admin menu', 'wordplus-sdk' );
+                $slug    = $this->product->page( 'pricing' );
+                $upgrade = ! $this->product->has_access() && false !== $this->product->get( 'menu.upgrade' );
+                $label   = $upgrade ? _x( 'Upgrade', 'Admin menu', 'wordplus-sdk' ) : _x( 'Pricing', 'Admin menu', 'wordplus-sdk' );
 
-                $hooks['pricing'] = add_submenu_page( $parent, $label, $label . ( $this->product->has_access() ? '&nbsp;&#x27a4;' : self::ROCKET ), $licensing, $slug, $render, 93 );
+                $hooks['pricing'] = add_submenu_page( $parent, $label, $label . ( $upgrade ? self::ROCKET : '&nbsp;&#x27a4;' ), $licensing, $slug, $render, 93 );
 
                 if ( $this->product->trial()->in_menu() ) {
                     $trial = _x( 'Start trial', 'Admin menu', 'wordplus-sdk' );
@@ -346,6 +347,7 @@ if ( ! class_exists( 'WordPlus_SDK_Admin' ) ) {
                     'icon'          => (string) $this->product->get( 'icon' ),
                     'version'       => $this->product->version(),
                     'paidBuild'     => $this->product->is_paid_build(),
+                    'upgrade'       => false !== $this->product->get( 'menu.upgrade' ),
                     'canActivate'   => $this->product->can_activate(),
                     'equivalentPlans' => (object) array_map( 'strval', (array) $this->product->get( 'equivalent_plans', array() ) ),
                     'forceConstant' => (string) $this->product->get( 'force_key' ),

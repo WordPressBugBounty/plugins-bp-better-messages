@@ -466,6 +466,9 @@ class Better_Messages_Options
             'FCmobileCoursesEnable'         => '0',
             'FCcourseChatButton'            => '1',
             'FCcourseInstructorButton'      => '1',
+            'FCmenuIcon'                    => '',
+            'FCphoneIconPlace'              => 'bottom',
+            'FCheaderIconPosition'          => 'end',
 
             'coursesShowInfoCard'           => '1',
             'enableCoursesEmails'           => '1',
@@ -2857,6 +2860,14 @@ class Better_Messages_Options
             $settings['videoMessagesAutoDeleteMode'] = 'complete';
         }
 
+        if( ! isset( $settings['FCphoneIconPlace'] ) || ! in_array( $settings['FCphoneIconPlace'], ['bottom', 'header', 'both'], true ) ) {
+            $settings['FCphoneIconPlace'] = 'bottom';
+        }
+
+        if( ! isset( $settings['FCheaderIconPosition'] ) || ! in_array( $settings['FCheaderIconPosition'], ['start', 'end'], true ) ) {
+            $settings['FCheaderIconPosition'] = 'end';
+        }
+
         if( ! isset( $settings['suggestedConversations'] ) ) {
             $settings['suggestedConversations'] = [];
         } else {
@@ -2900,7 +2911,8 @@ class Better_Messages_Options
             'widgetIconChatRooms',
             'widgetIconUsers',
             'widgetIconCourses',
-            'mobileButtonIcon'
+            'mobileButtonIcon',
+            'FCmenuIcon'
         ];
 
         $int_only = [

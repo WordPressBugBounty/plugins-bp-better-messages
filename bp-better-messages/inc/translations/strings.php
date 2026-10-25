@@ -785,6 +785,7 @@ function _bm_js_translation_strings() {
     _x('End Call', 'Private Call Screen', 'bp-better-messages');
     _x('The other side lost connection', 'Call Screen', 'bp-better-messages');
     _x('Reconnecting...', 'Call Screen', 'bp-better-messages');
+    _x('Optimizing video quality...', 'Call Screen', 'bp-better-messages');
     _x('User rejected your call', 'Private Call Screen', 'bp-better-messages');
     _x('User you are trying to call is already in call. Please try later.', 'Private Call Screen', 'bp-better-messages');
     _x('Microphone', 'Call Screen', 'bp-better-messages');
@@ -2684,6 +2685,18 @@ function _bm_js_translation_strings() {
     _x('Enable All', 'Settings page', 'bp-better-messages');
     _x('Disable All', 'Settings page', 'bp-better-messages');
     _x('No emojis match your search', 'Settings page', 'bp-better-messages');
+    _x('FluentCommunity Messages Button', 'Settings page', 'bp-better-messages');
+    _x('Messages Icon', 'Settings page', 'bp-better-messages');
+    _x('The icon of the Messages button in the FluentCommunity header and bottom menu. Without one, the default icon shows', 'Settings page', 'bp-better-messages');
+    _x('Position in the Header', 'Settings page', 'bp-better-messages');
+    _x('Where the Messages button sits among the header icons, on desktop and on phones', 'Settings page', 'bp-better-messages');
+    _x('Next to the profile picture', 'Settings page', 'bp-better-messages');
+    _x('At the start of the icon row', 'Settings page', 'bp-better-messages');
+    _x('Messages Button on Phones', 'Settings page', 'bp-better-messages');
+    _x('Where phones and tablets show the Messages button. On screens up to 1024px wide, FluentCommunity hides the header buttons and shows its bottom menu instead', 'Settings page', 'bp-better-messages');
+    _x('Bottom menu', 'Settings page', 'bp-better-messages');
+    _x('Header', 'Settings page', 'bp-better-messages');
+    _x('Header and bottom menu', 'Settings page', 'bp-better-messages');
     _x('FluentCommunity Messages Page', 'Settings page', 'bp-better-messages');
     _x('Remove padding from the messages container and use all available space within the FluentCommunity messages page', 'Settings page', 'bp-better-messages');
     _x('Show a page title at the top of the messages page, matching the style of other FluentCommunity pages', 'Settings page', 'bp-better-messages');
@@ -3995,9 +4008,6 @@ function _bm_js_translation_strings() {
     _x('Administration', 'WP Admin', 'bp-better-messages');
     _x('Use default (%s)', 'WP Admin', 'bp-better-messages');
     _x('Use default', 'WP Admin', 'bp-better-messages');
-    __( 'The details could not be loaded just now.', 'wordplus-sdk' );
-    __( 'They are on %s.', 'wordplus-sdk' );
-    __( 'The update could not be unpacked into the plugin\'s folder.', 'wordplus-sdk' );
     _x('Logout', 'Mobile App - User settings', 'bp-better-messages');
     _x( 'User not found', 'Mobile App - Rest API Error', 'bp-better-messages' );
     _x( 'You have no conversation with this user', 'Mobile App - Rest API Error', 'bp-better-messages' );
@@ -4088,4 +4098,7 @@ function _bm_js_translation_strings() {
     __( 'No encryption key found for this thread', 'bp-better-messages' );
     __( 'New encrypted conversation from %s', 'bp-better-messages' );
     __( 'End-to-end encrypted conversation', 'bp-better-messages' );
+    __( 'The details could not be loaded just now.', 'wordplus-sdk' );
+    __( 'They are on %s.', 'wordplus-sdk' );
+    __( 'The update could not be unpacked into the plugin\'s folder.', 'wordplus-sdk' );
 }

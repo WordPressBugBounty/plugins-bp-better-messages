@@ -973,8 +973,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             ) );
         }
 
+        private function temp_id_lock_key( $thread_id, $user_id, $temp_id ){
+            return 'temp_id|' . bm_get_table('messages') . '|' . (int) $thread_id . '|' . (int) $user_id . '|' . $temp_id;
+        }
+
         private function lock_temp_id( $thread_id, $user_id, $temp_id ){
-            $key = 'temp_id|' . bm_get_table('messages') . '|' . (int) $thread_id . '|' . (int) $user_id . '|' . $temp_id;
+            $key = $this->temp_id_lock_key( $thread_id, $user_id, $temp_id );
 
             if( array_key_exists( $key, $this->temp_id_locks ) ) {
                 return;
@@ -991,6 +995,17 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             }
 
             $this->temp_id_locks[ $key ] = $lock;
+        }
+
+        public function release_temp_id_lock( $thread_id, $user_id, $temp_id ){
+            $key = $this->temp_id_lock_key( $thread_id, $user_id, $temp_id );
+
+            if( ! isset( $this->temp_id_locks[ $key ] ) ) {
+                return;
+            }
+
+            Better_Messages()->functions->unlock( $this->temp_id_locks[ $key ] );
+            unset( $this->temp_id_locks[ $key ] );
         }
 
         public function release_temp_id_locks(){

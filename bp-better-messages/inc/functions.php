@@ -289,6 +289,46 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             do_action( 'better_messages_thread_cleared', $thread_id );
         }
 
+        public function get_message_attachment_ids( $message_id ){
+            global $wpdb;
+
+            $message_id = (int) $message_id;
+            $listed     = $this->get_message_meta( $message_id, 'attachments', true );
+            $candidates = is_array( $listed ) ? array_keys( $listed ) : array();
+
+            foreach ( array( 'bpbm_voice_messages', 'bpbm_video_messages' ) as $meta_key ) {
+                $candidates[] = $this->get_message_meta( $message_id, $meta_key, true );
+            }
+
+            $candidates = array_values( array_unique( array_filter( array_map( 'intval', $candidates ), function ( $id ) {
+                return $id > 0;
+            } ) ) );
+
+            if ( $message_id <= 0 || empty( $candidates ) ) {
+                return array();
+            }
+
+            $placeholders = implode( ',', array_fill( 0, count( $candidates ), '%d' ) );
+
+            return array_map( 'intval', $wpdb->get_col( $wpdb->prepare(
+                "SELECT `posts`.`ID`
+                 FROM `{$wpdb->posts}` `posts`
+                 INNER JOIN `{$wpdb->postmeta}` `marker`
+                     ON `posts`.`ID` = `marker`.`post_id`
+                     AND `marker`.`meta_key` = 'bp-better-messages-attachment'
+                     AND `marker`.`meta_value` = '1'
+                 INNER JOIN `{$wpdb->postmeta}` `link`
+                     ON `posts`.`ID` = `link`.`post_id`
+                     AND `link`.`meta_key` = 'bp-better-messages-message-id'
+                     AND `link`.`meta_value` = %s
+                 WHERE `posts`.`ID` IN ({$placeholders})
+                 AND `posts`.`post_type` = 'attachment'
+                 AND `posts`.`post_status` IN ('inherit','private')
+                 GROUP BY `posts`.`ID`",
+                array_merge( array( (string) $message_id ), $candidates )
+            ) ) );
+        }
+
         public function delete_message( $message_id, $thread_id = false, $update_thread = true, $deleteMethod = null ){
             global $wpdb;
 
@@ -304,23 +344,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             do_action( 'better_messages_before_message_delete', $message_id, $thread_id, $deleteMethod );
 
-            $sql = $wpdb->prepare("SELECT {$wpdb->posts}.ID
-                    FROM {$wpdb->posts}
-                    INNER JOIN {$wpdb->postmeta}
-                    ON ( {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )
-                    INNER JOIN {$wpdb->postmeta} AS mt1
-                    ON ( {$wpdb->posts}.ID = mt1.post_id )
-                    WHERE 1=1
-                    AND ( ( {$wpdb->postmeta}.meta_key = 'bp-better-messages-attachment'
-                            AND {$wpdb->postmeta}.meta_value = '1' )
-                        AND ( mt1.meta_key = 'bp-better-messages-message-id'
-                            AND mt1.meta_value = %d ) )
-                    AND {$wpdb->posts}.post_type = 'attachment'
-                    AND (({$wpdb->posts}.post_status IN ('inherit','private')))
-                    GROUP BY {$wpdb->posts}.ID
-                    ORDER BY {$wpdb->posts}.post_date DESC", $message_id);
-
-            $attachments = $wpdb->get_col( $sql );
+            $attachments = $this->get_message_attachment_ids( $message_id );
 
             foreach( $attachments as $attachment_id ){
                 $message_refs = get_post_meta( $attachment_id, 'bp-better-messages-message-id' );
@@ -3504,6 +3528,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( count( $attachment_meta ) > 0 ) {
                     Better_Messages()->functions->update_message_meta($message->id, 'attachments', $attachment_meta);
                 }
+            }
+
+            if ( ! empty( $r['temp_id'] ) && ! empty( $r['thread_id'] ) ) {
+                Better_Messages_Rest_Api()->release_temp_id_lock( (int) $r['thread_id'], (int) $r['sender_id'], $r['temp_id'] );
             }
 
             if( $r['process_mentions'] ) {
