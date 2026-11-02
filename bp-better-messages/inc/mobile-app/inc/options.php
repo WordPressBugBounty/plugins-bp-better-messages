@@ -66,6 +66,7 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 'androidFirebaseDevAppId'   => '',
                 'androidFirebaseProdAppId'  => '',
                 'androidFirebaseServiceDev' => '',
+                'androidPlaySigningFingerprint' => '',
 
                 'iosAppTeamId'       => '',
                 'termsAndConditions' => '',
@@ -76,7 +77,19 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
 
                 'androidNotificationIcon' => '',
                 'loginLogo'          => '',
+                'loginLogoDark'      => '',
                 'loginLogoHeight' => '100',
+                'loginMethods'    => 'both',
+                'loginBackground'    => 'plain',
+                'loginGlowColor'     => '',
+                'loginGlowColorDark' => '',
+                'loginGlowStrength'  => '20',
+                'loginGlowSpread'    => '100',
+                'loginGlowPosition'  => 'both',
+                'signOutOnPasswordChange' => '1',
+                'appLock'         => 'choice',
+                'appLockAfter'    => '300',
+                'accountDeletion' => 'delete',
 
                 'iosCertificateDev'  => '',
                 'iosCertificateProd' => '',
@@ -133,6 +146,8 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
             } else {
                 $args['androidKeyStore'] = false;
             }
+
+            $args['androidUploadFingerprint'] = Better_Messages_Mobile_App_Android::instance()->get_upload_key_fingerprint();
 
             $androidFirebaseDev = get_option('better-messages-app-android-firebase-dev', false);
 
@@ -213,6 +228,7 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 'appIcon',
                 'appSplash',
                 'loginLogo',
+                'loginLogoDark',
                 'androidNotificationIcon'
             ];
 
@@ -223,6 +239,7 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
 
 
             $this->settings = wp_parse_args( $args, $this->defaults );
+            $this->settings = array_merge( $this->settings, $this->sanitize_login_background( $this->settings ) );
         }
 
         public function get_settings( ?WP_REST_Request $request = null ): array
@@ -231,6 +248,133 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
             return $this->settings;
         }
 
+        public function get_login_methods(): string
+        {
+            $settings = get_option( 'better-messages-app-settings', array() );
+            $methods  = isset( $settings['loginMethods'] ) ? (string) $settings['loginMethods'] : 'both';
+            $methods  = (string) apply_filters( 'better_messages_mobile_app_login_methods', $methods );
+
+            return in_array( $methods, array( 'both', 'website', 'password' ), true ) ? $methods : 'both';
+        }
+
+        public function sign_out_on_password_change(): bool
+        {
+            $settings = get_option( 'better-messages-app-settings', array() );
+            $enabled  = ! isset( $settings['signOutOnPasswordChange'] ) || (string) $settings['signOutOnPasswordChange'] !== '0';
+
+            return (bool) apply_filters( 'better_messages_mobile_app_sign_out_on_password_change', $enabled );
+        }
+
+
+        public function get_app_lock(): array
+        {
+            $settings = get_option( 'better-messages-app-settings', array() );
+
+            $lock = apply_filters( 'better_messages_mobile_app_lock', array(
+                'mode'  => isset( $settings['appLock'] ) ? (string) $settings['appLock'] : 'choice',
+                'after' => isset( $settings['appLockAfter'] ) ? (int) $settings['appLockAfter'] : 300,
+            ) );
+
+            $mode  = is_array( $lock ) && isset( $lock['mode'] ) ? (string) $lock['mode'] : 'choice';
+            $after = is_array( $lock ) && isset( $lock['after'] ) ? (int) $lock['after'] : 300;
+
+            return array(
+                'mode'  => in_array( $mode, array( 'off', 'choice', 'required' ), true ) ? $mode : 'choice',
+                'after' => max( 0, min( DAY_IN_SECONDS, $after ) ),
+            );
+        }
+
+        public function get_account_deletion(): string
+        {
+            $settings = get_option( 'better-messages-app-settings', array() );
+            $mode     = isset( $settings['accountDeletion'] ) ? (string) $settings['accountDeletion'] : 'delete';
+
+            if ( $this->account_deletion_off_in_buddypress() ) {
+                $mode = 'off';
+            }
+
+            $mode = (string) apply_filters( 'better_messages_mobile_app_account_deletion', $mode );
+
+            return in_array( $mode, array( 'delete', 'request', 'off' ), true ) ? $mode : 'delete';
+        }
+
+        public function account_deletion_off_in_buddypress(): bool
+        {
+            return function_exists( 'bp_disable_account_deletion' ) && bp_disable_account_deletion();
+        }
+
+        public function sanitize_login_background( array $settings ): array
+        {
+            $mode     = isset( $settings['loginBackground'] ) ? (string) $settings['loginBackground'] : 'plain';
+            $position = isset( $settings['loginGlowPosition'] ) ? (string) $settings['loginGlowPosition'] : 'both';
+
+            return array(
+                'loginBackground'    => in_array( $mode, array( 'plain', 'glow' ), true ) ? $mode : 'plain',
+                'loginGlowColor'     => $this->sanitize_login_color( isset( $settings['loginGlowColor'] ) ? $settings['loginGlowColor'] : '' ),
+                'loginGlowColorDark' => $this->sanitize_login_color( isset( $settings['loginGlowColorDark'] ) ? $settings['loginGlowColorDark'] : '' ),
+                'loginGlowStrength'  => (string) $this->sanitize_login_range( isset( $settings['loginGlowStrength'] ) ? $settings['loginGlowStrength'] : 20, 5, 60, 20 ),
+                'loginGlowSpread'    => (string) $this->sanitize_login_range( isset( $settings['loginGlowSpread'] ) ? $settings['loginGlowSpread'] : 100, 50, 200, 100 ),
+                'loginGlowPosition'  => in_array( $position, array( 'logo', 'top', 'both' ), true ) ? $position : 'both',
+            );
+        }
+
+        private function sanitize_login_color( $color ): string
+        {
+            $color = is_string( $color ) ? strtolower( trim( $color ) ) : '';
+
+            return preg_match( '/^#([0-9a-f]{3}|[0-9a-f]{6})$/', $color ) ? $color : '';
+        }
+
+        private function sanitize_login_range( $value, int $min, int $max, int $fallback ): int
+        {
+            if ( ! is_numeric( $value ) ) {
+                return $fallback;
+            }
+
+            return max( $min, min( $max, (int) round( (float) $value ) ) );
+        }
+
+        public function get_login_background(): array
+        {
+            $settings = get_option( 'better-messages-app-settings', array() );
+            $settings = $this->sanitize_login_background( is_array( $settings ) ? $settings : array() );
+            $settings = apply_filters( 'better_messages_mobile_app_login_background', $settings );
+            $settings = $this->sanitize_login_background( is_array( $settings ) ? $settings : array() );
+
+            return array(
+                'mode'      => $settings['loginBackground'],
+                'color'     => $settings['loginGlowColor'],
+                'colorDark' => $settings['loginGlowColorDark'],
+                'strength'  => (int) $settings['loginGlowStrength'],
+                'spread'    => (int) $settings['loginGlowSpread'],
+                'position'  => $settings['loginGlowPosition'],
+            );
+        }
+
+        public function get_app_preview_data(): array
+        {
+            $design = Better_Messages_Design::instance();
+            $file   = 'assets/css/app-preview.min.css';
+
+            if ( defined( 'BM_DEV' ) && file_exists( Better_Messages()->path . 'assets/css/app-preview.css' ) ) {
+                $file = 'assets/css/app-preview.css';
+            }
+
+            $version = Better_Messages()->version;
+
+            if ( file_exists( Better_Messages()->path . $file ) ) {
+                $version .= '.' . filemtime( Better_Messages()->path . $file );
+            }
+
+            return array(
+                'css'         => add_query_arg( 'ver', rawurlencode( $version ), Better_Messages()->url . $file ),
+                'tokens'      => $design->resolve_effective_vars( 'light' ),
+                'tokensDark'  => $design->resolve_effective_vars( 'dark' ),
+                'siteName'    => wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ),
+                'siteIcon'    => (string) get_site_icon_url( 192 ),
+                'canRegister' => (bool) get_option( 'users_can_register' ),
+            );
+        }
 
         public function get_page_data(): array
         {
@@ -266,6 +410,8 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 'iosConnected'     => $ios_connected,
                 'androidConnected' => $android_connected,
                 'nativeCallsAvailable' => $this->native_calls_available(),
+                'accountDeletionOffInBuddyPress' => $this->account_deletion_off_in_buddypress(),
+                'appPreview' => $this->get_app_preview_data(),
                 'requiredCapabilities' => array(
                     'app'       => array( 'PUSH_NOTIFICATIONS', 'USERNOTIFICATIONS_COMMUNICATION', 'USERNOTIFICATIONS_TIMESENSITIVE', 'ASSOCIATED_DOMAINS' ),
                     'broadcast' => array( 'APP_GROUPS' ),
@@ -292,6 +438,14 @@ if ( !class_exists( 'Better_Messages_Mobile_App_Options' ) ):
                 foreach( $settings as $key => $value ){
                     $_settings[$key] = $value;
                 }
+
+                if ( isset( $_settings['androidPlaySigningFingerprint'] ) ) {
+                    $_settings['androidPlaySigningFingerprint'] = Better_Messages_Mobile_App_Android::normalize_fingerprint( (string) $_settings['androidPlaySigningFingerprint'] );
+                }
+
+                unset( $_settings['androidUploadFingerprint'] );
+
+                $_settings = array_merge( $_settings, array_intersect_key( $this->sanitize_login_background( $_settings ), $_settings ) );
 
                 $this->update_settings( $_settings );
             }

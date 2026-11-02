@@ -162,6 +162,34 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                     ),
                 ),
             ) );
+
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/markUnread', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'mark_unread' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function($param, $request, $key) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ) );
+        }
+
+        public function mark_unread( WP_REST_Request $request ){
+            $user_id   = Better_Messages()->functions->get_current_user_id();
+            $thread_id = intval( $request->get_param('id') );
+
+            if( ! Better_Messages()->functions->mark_thread_unread( $thread_id, $user_id ) ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
+            return array( 'unread' => (int) Better_Messages()->functions->get_user_unread_for_thread( $user_id, $thread_id ) );
         }
 
         public function leave_thread( WP_REST_Request $request ){

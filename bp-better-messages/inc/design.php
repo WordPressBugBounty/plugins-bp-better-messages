@@ -976,7 +976,7 @@ class Better_Messages_Design {
             if ( isset( $bm->hooks ) && is_object( $bm->hooks ) && method_exists( $bm->hooks, 'mobile_popup_button' ) ) {
                 $bm->hooks->mobile_popup_button();
             }
-            $wp_scripts->do_items( array( 'better-messages' ) );
+            $wp_scripts->do_items( array_merge( array( 'better-messages' ), $this->preview_plugin_scripts( $surface, $scripts, $saved_scripts ) ) );
             echo $queued['footer'];
             $this->render_preview_listener();
             $body = ob_get_clean();
@@ -1002,7 +1002,50 @@ class Better_Messages_Design {
         );
     }
 
+    private function preview_plugin_scripts( $surface, $scripts, $page_scripts ) {
+        $handles = array();
+
+        foreach ( (array) apply_filters( 'better_messages_design_preview_scripts', array(), $surface ) as $handle ) {
+            $handle = is_string( $handle ) ? $handle : '';
+
+            if ( '' === $handle || 'better-messages' === $handle || in_array( $handle, $handles, true ) ) {
+                continue;
+            }
+
+            if ( $page_scripts instanceof WP_Scripts ) {
+                $this->copy_script_registration( $handle, $scripts, $page_scripts );
+            }
+
+            if ( isset( $scripts->registered[ $handle ] ) ) {
+                $handles[] = $handle;
+            }
+        }
+
+        return $handles;
+    }
+
+    private function copy_script_registration( $handle, $to, $from, $depth = 0 ) {
+        if ( $depth > 10 || isset( $to->registered[ $handle ] ) || ! isset( $from->registered[ $handle ] ) ) {
+            return;
+        }
+
+        $to->registered[ $handle ] = clone $from->registered[ $handle ];
+
+        foreach ( (array) $to->registered[ $handle ]->deps as $dep ) {
+            $this->copy_script_registration( $dep, $to, $from, $depth + 1 );
+        }
+    }
+
+    public function rest_preview_manifest() {
+        return rest_ensure_response( $this->preview_manifest() );
+    }
+
     public function rest_api_init() {
+        register_rest_route( 'better-messages/v1/admin', '/design/preview-manifest', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'rest_preview_manifest' ),
+            'permission_callback' => array( $this, 'permission_can_manage' ),
+        ) );
         register_rest_route( 'better-messages/v1/admin', '/design/save-overrides', array(
             'methods'             => 'POST',
             'callback'            => array( $this, 'rest_save_overrides' ),

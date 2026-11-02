@@ -7,7 +7,7 @@ if (!class_exists('Better_Messages_Mobile_App_Database')):
     class Better_Messages_Mobile_App_Database
     {
 
-        public $db_version = 0.3;
+        public $db_version = 0.4;
 
         public static function instance()
         {
@@ -71,6 +71,8 @@ if (!class_exists('Better_Messages_Mobile_App_Database')):
                     'app_name'          => "varchar(32) DEFAULT ''",
                     'app_version'       => "varchar(10) DEFAULT ''",
                     'app_id'            => "varchar(50) DEFAULT ''",
+                    'core_channel'      => "varchar(20) NOT NULL DEFAULT ''",
+                    'core_revision'     => "int(11) NOT NULL DEFAULT 0",
                     'push_token'        => "varchar(255) NOT NULL DEFAULT ''",
                     'push_token_voip'   => "varchar(255) NOT NULL DEFAULT ''",
                     'device_public_key' => "text NOT NULL",
@@ -122,7 +124,26 @@ if (!class_exists('Better_Messages_Mobile_App_Database')):
                 }
             }
 
+            if( $current_version < 0.4 ){
+                $columns = $wpdb->get_col( "SHOW COLUMNS FROM `{$table}`" );
+
+                if( is_array( $columns ) ) {
+                    if( ! in_array( 'core_channel', $columns, true ) ){
+                        $wpdb->query( "ALTER TABLE `{$table}` ADD COLUMN `core_channel` varchar(20) NOT NULL DEFAULT '' AFTER `app_id`" );
+                    }
+
+                    if( ! in_array( 'core_revision', $columns, true ) ){
+                        $wpdb->query( "ALTER TABLE `{$table}` ADD COLUMN `core_revision` int(11) NOT NULL DEFAULT 0 AFTER `core_channel`" );
+                    }
+                }
+            }
+
             update_option( 'better_messages_mobile_app_db_version', $this->db_version, false );
+        }
+
+        public function has_core_columns(): bool
+        {
+            return (float) get_option( 'better_messages_mobile_app_db_version', 0 ) >= 0.4;
         }
 
         public function add_tables( $tables )
@@ -176,6 +197,8 @@ if (!class_exists('Better_Messages_Mobile_App_Database')):
                   `app_name` varchar(32) DEFAULT '',
                   `app_version` varchar(10) DEFAULT '',
                   `app_id` varchar(50) DEFAULT '',
+                  `core_channel` varchar(20) NOT NULL DEFAULT '',
+                  `core_revision` int(11) NOT NULL DEFAULT 0,
                   `push_token` varchar(255) NOT NULL DEFAULT '',
                   `push_token_voip` varchar(255) NOT NULL DEFAULT '',
                   `device_public_key` text NOT NULL,

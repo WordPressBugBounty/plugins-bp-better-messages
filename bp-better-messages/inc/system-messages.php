@@ -31,6 +31,7 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
             add_action( 'better_messages_user_muted',               array( $this, 'on_user_muted' ),               10, 4 );
             add_action( 'better_messages_user_banned',              array( $this, 'on_user_banned' ),              10, 4 );
             add_action( 'better_messages_group_call_joined',        array( $this, 'on_group_call_joined' ),        10, 4 );
+            add_filter( 'better_messages_rest_message_meta',        array( $this, 'drop_missing_actor' ),          11, 4 );
         }
 
         public function suppress_user_left( $thread_id, $user_id )
@@ -150,7 +151,11 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
 
         private function row_users( $row )
         {
-            $data = Better_Messages()->functions->get_message_meta( (int) $row->id, 'system_data', true );
+            return $this->data_users( Better_Messages()->functions->get_message_meta( (int) $row->id, 'system_data', true ) );
+        }
+
+        private function data_users( $data )
+        {
             if ( ! is_array( $data ) ) {
                 return array();
             }
@@ -342,16 +347,7 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
                 }
             }
 
-            foreach ( $zone as $row ) {
-                if ( $this->row_event_type( $row ) !== $event_type ) {
-                    continue;
-                }
-                $users = $this->row_users( $row );
-                if ( $this->find_user_index( $users, $new_user_id ) !== -1 ) {
-                    return;
-                }
-                $users[] = $this->build_user_entry_from_event( $event_data );
-                $this->persist_users( $row, $thread_id, $users );
+            if ( $this->add_to_line( $thread_id, $event_type, $event_data, $zone ) ) {
                 return;
             }
 
@@ -388,16 +384,7 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
 
             $zone = $this->get_transient_zone( $thread_id );
 
-            foreach ( $zone as $row ) {
-                if ( $this->row_event_type( $row ) !== $event_type ) {
-                    continue;
-                }
-                $users = $this->row_users( $row );
-                if ( $this->find_user_index( $users, $new_user_id ) !== -1 ) {
-                    return;
-                }
-                $users[] = $this->build_user_entry_from_event( $event_data );
-                $this->persist_users( $row, $thread_id, $users );
+            if ( $this->add_to_line( $thread_id, $event_type, $event_data, $zone ) ) {
                 return;
             }
 
@@ -407,6 +394,40 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
 
             $event_data['users'] = array( $this->build_user_entry_from_event( $event_data ) );
             Better_Messages()->functions->send_system_message( $thread_id, $event_type, $event_data );
+        }
+
+        private function add_to_line( $thread_id, $event_type, $event_data, $zone )
+        {
+            $new_user_id = (int) ( $event_data['user_id'] ?? 0 );
+            $entry       = $this->build_user_entry_from_event( $event_data );
+            $by_actor    = in_array( $event_type, self::$actor_events, true ) && $this->shows_actor();
+            $line        = null;
+
+            foreach ( $zone as $row ) {
+                if ( $this->row_event_type( $row ) !== $event_type ) {
+                    continue;
+                }
+                $users = $this->row_users( $row );
+                if ( $this->find_user_index( $users, $new_user_id ) !== -1 ) {
+                    return true;
+                }
+                if ( ! $by_actor ) {
+                    $line = array( $row, $users );
+                    break;
+                }
+                if ( $line === null && $this->common_actor( $users ) === (int) ( $entry['actor_id'] ?? 0 ) ) {
+                    $line = array( $row, $users );
+                }
+            }
+
+            if ( $line === null ) {
+                return false;
+            }
+
+            list( $row, $users ) = $line;
+            $users[] = $entry;
+            $this->persist_users( $row, $thread_id, $users );
+            return true;
         }
 
         private function emit_subject_changed( $thread_id, $event_data, $zone )
@@ -464,6 +485,116 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
         public static function get_event_keys()
         {
             return array_keys( self::$event_setting_keys );
+        }
+
+        private static $actor_events = array( 'user_kicked', 'user_muted', 'user_banned' );
+
+        public function shows_actor()
+        {
+            return ( Better_Messages()->settings['systemMessagesShowActor'] ?? '0' ) === '1';
+        }
+
+        private function common_actor( $users )
+        {
+            $actor_id = 0;
+
+            foreach ( $users as $u ) {
+                $id = (int) ( $u['actor_id'] ?? 0 );
+                if ( $id === 0 || ( $actor_id !== 0 && $id !== $actor_id ) ) {
+                    return 0;
+                }
+                $actor_id = $id;
+            }
+
+            if ( $actor_id !== 0 && $this->find_user_index( $users, $actor_id ) !== -1 ) {
+                return 0;
+            }
+
+            return $actor_id;
+        }
+
+        public function line_actor( $type, $data )
+        {
+            if ( ! in_array( $type, self::$actor_events, true ) || ! $this->shows_actor() ) {
+                return 0;
+            }
+
+            $actor_id = $this->common_actor( $this->data_users( $data ) );
+
+            if ( $actor_id === 0 || ! Better_Messages()->functions->is_valid_user_id( $actor_id ) ) {
+                return 0;
+            }
+
+            return $actor_id;
+        }
+
+        public function moderation_text( $type, $data )
+        {
+            if ( ! in_array( $type, self::$actor_events, true ) ) {
+                return '';
+            }
+
+            $data = is_array( $data ) ? $data : array();
+            $name = isset( $data['user_name'] ) ? trim( wp_strip_all_tags( html_entity_decode( (string) $data['user_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) : '';
+            $name = $name !== '' ? $name : __( 'A user', 'bp-better-messages' );
+
+            $actor_id = $this->line_actor( $type, $data );
+
+            if ( $actor_id !== 0 ) {
+                $actor = Better_Messages()->functions->get_plain_name( $actor_id );
+
+                if ( $actor !== '' ) {
+                    switch ( $type ) {
+                        case 'user_kicked':
+                            return sprintf( __( '%1$s was removed from the conversation by %2$s', 'bp-better-messages' ), $name, $actor );
+                        case 'user_muted':
+                            return sprintf( __( '%1$s was muted by %2$s', 'bp-better-messages' ), $name, $actor );
+                        default:
+                            return sprintf( __( '%1$s was banned by %2$s', 'bp-better-messages' ), $name, $actor );
+                    }
+                }
+            }
+
+            switch ( $type ) {
+                case 'user_kicked':
+                    return sprintf( __( '%s was removed from the conversation', 'bp-better-messages' ), $name );
+                case 'user_muted':
+                    return sprintf( __( '%s was muted', 'bp-better-messages' ), $name );
+                default:
+                    return sprintf( __( '%s was banned', 'bp-better-messages' ), $name );
+            }
+        }
+
+        public function drop_missing_actor( $meta, $message_id, $thread_id, $message_content )
+        {
+            if ( ! is_array( $meta ) || ! isset( $meta['systemData'] ) || ! is_array( $meta['systemData'] ) || ! $this->shows_actor() ) {
+                return $meta;
+            }
+
+            if ( ! is_string( $message_content ) || ! preg_match( '/^<!-- BM-SYSTEM-MESSAGE:(\w+)/', $message_content, $m ) || ! in_array( $m[1], self::$actor_events, true ) ) {
+                return $meta;
+            }
+
+            $actor_id = $this->common_actor( $this->data_users( $meta['systemData'] ) );
+
+            if ( $actor_id === 0 || Better_Messages()->functions->is_valid_user_id( $actor_id ) ) {
+                return $meta;
+            }
+
+            $data = $meta['systemData'];
+            unset( $data['actor_id'], $data['actor_name'] );
+
+            if ( isset( $data['users'] ) && is_array( $data['users'] ) ) {
+                foreach ( $data['users'] as $i => $u ) {
+                    if ( is_array( $u ) ) {
+                        unset( $data['users'][ $i ]['actor_id'], $data['users'][ $i ]['actor_name'] );
+                    }
+                }
+            }
+
+            $meta['systemData'] = $data;
+
+            return $meta;
         }
 
         public function get_thread_payload( $thread_id, $type, $participants_count, $is_moderator )

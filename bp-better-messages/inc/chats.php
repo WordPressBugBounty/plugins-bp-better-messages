@@ -1516,6 +1516,68 @@ class Better_Messages_Chats
         );
     }
 
+    private function room_image_srcset( $image_id, $base_src ){
+        $sharp_side = 240;
+
+        $meta = wp_get_attachment_metadata( $image_id );
+
+        if( ! is_array( $meta ) || empty( $meta['width'] ) || empty( $meta['height'] ) ) {
+            return '';
+        }
+
+        $full_w = (int) $meta['width'];
+        $full_h = (int) $meta['height'];
+
+        $base_side = empty( $base_src[3] ) ? min( $full_w, $full_h ) : min( (int) $base_src[1], (int) $base_src[2] );
+
+        if( $base_side <= 0 || $base_side >= $sharp_side ) {
+            return '';
+        }
+
+        $sizes = ( isset( $meta['sizes'] ) && is_array( $meta['sizes'] ) ) ? $meta['sizes'] : array();
+        $sizes['full'] = array( 'width' => $full_w, 'height' => $full_h );
+
+        $registered = wp_get_registered_image_subsizes();
+        $candidates = array();
+
+        foreach( $sizes as $name => $size ){
+            if( ! is_array( $size ) || empty( $size['width'] ) || empty( $size['height'] ) ) continue;
+
+            $w    = (int) $size['width'];
+            $h    = (int) $size['height'];
+            $side = min( $w, $h );
+
+            if( $side <= $base_side ) continue;
+
+            $crop = isset( $registered[ $name ]['crop'] ) ? $registered[ $name ]['crop'] : false;
+            if( is_array( $crop ) && array_values( $crop ) !== array( 'center', 'center' ) ) continue;
+
+            if( abs( $w - $h ) > 1 && ! wp_image_matches_ratio( $w, $h, $full_w, $full_h ) ) continue;
+
+            if( ! isset( $candidates[ $side ] ) || $w * $h < $candidates[ $side ]['area'] ) {
+                $candidates[ $side ] = array( 'name' => $name, 'area' => $w * $h );
+            }
+        }
+
+        ksort( $candidates, SORT_NUMERIC );
+
+        $entries = array( str_replace( ' ', '%20', $base_src[0] ) . ' ' . $base_side . 'w' );
+        $seen    = array( $base_src[0] => true );
+
+        foreach( $candidates as $side => $candidate ){
+            $src = wp_get_attachment_image_src( $image_id, $candidate['name'] );
+
+            if( ! $src || isset( $seen[ $src[0] ] ) ) continue;
+
+            $seen[ $src[0] ] = true;
+            $entries[] = str_replace( ' ', '%20', $src[0] ) . ' ' . $side . 'w';
+
+            if( $side >= $sharp_side ) break;
+        }
+
+        return count( $entries ) > 1 ? implode( ', ', $entries ) : '';
+    }
+
     public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
         if( $thread_type !== 'chat-room'){
             return $thread_item;
@@ -1530,6 +1592,8 @@ class Better_Messages_Chats
 
         $is_participant = isset( $recipients[$user_id] );
 
+        $thread_item['imageSrcset'] = '';
+
         if( has_post_thumbnail( $chat_id ) ) {
             $image_id = get_post_thumbnail_id($chat_id);
 
@@ -1537,6 +1601,7 @@ class Better_Messages_Chats
                 $image_src = wp_get_attachment_image_src($image_id, [100, 100]);
                 if ($image_src) {
                     $thread_item['image'] = $image_src[0];
+                    $thread_item['imageSrcset'] = $this->room_image_srcset( (int) $image_id, $image_src );
                 }
             }
         }
@@ -1572,6 +1637,10 @@ class Better_Messages_Chats
             $thread_item['chatRoom']['guestAllowed'] = in_array( 'bm-guest', $settings['can_reply'] );
         }
 
+        $banned_until = ( $include_personal && (int) $user_id !== 0 && isset( Better_Messages()->moderation ) )
+            ? Better_Messages()->moderation->get_ban_expiration( (int) $thread_id, (int) $user_id )
+            : 0;
+
         if( $include_personal && $is_ephemeral ) {
             $is_moderator = user_can( $user_id, 'manage_options') || Better_Messages()->functions->is_thread_moderator( $thread_id, $user_id ) ;
 
@@ -1591,6 +1660,7 @@ class Better_Messages_Chats
             $thread_item['chatRoom']['isJoined'] = false;
             $thread_item['chatRoom']['canJoin']  = false;
             $thread_item['chatRoom']['canRead']  = $can_read;
+            $thread_item['chatRoom']['bannedUntil'] = $can_read ? 0 : $banned_until;
             $thread_item['chatRoom']['hideParticipants'] = ! $can_read || ( ! $is_moderator && $settings['hide_participants'] === '1' );
             $thread_item['chatRoom']['hideParticipantsCount'] = ! $can_read || ( ! $is_moderator && $settings['hide_participants_count'] === '1' );
 
@@ -1633,6 +1703,7 @@ class Better_Messages_Chats
             $thread_item['chatRoom']['autoJoin'] = $auto_join;
             $thread_item['chatRoom']['isJoined'] = $is_participant;
             $thread_item['chatRoom']['canJoin']  = $this->user_can_join($user_id, $chat_id);
+            $thread_item['chatRoom']['bannedUntil'] = $thread_item['chatRoom']['canJoin'] ? 0 : $banned_until;
             $thread_item['chatRoom']['hideParticipants'] = ( ! $is_moderator && $settings['hide_participants'] === '1' );
             $thread_item['chatRoom']['hideParticipantsCount'] = ( ! $is_moderator && $settings['hide_participants_count'] === '1' );
 

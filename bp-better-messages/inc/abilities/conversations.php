@@ -24,6 +24,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Conversations' ) ):
             $this->register_get_private_conversation();
             $this->register_delete_conversation();
             $this->register_mark_read();
+            $this->register_mark_unread();
             $this->register_change_subject();
             $this->register_make_moderator();
             $this->register_unmake_moderator();
@@ -517,6 +518,64 @@ if ( !class_exists( 'Better_Messages_Abilities_Conversations' ) ):
             }
 
             return array( 'marked' => true );
+        }
+
+        private function register_mark_unread()
+        {
+            wp_register_ability( 'better-messages/mark-unread', array(
+                'label'       => 'Mark Conversations Unread',
+                'description' => 'Marks read conversations as unread again. They show a dot in the conversations list, are not counted in unread totals, and are read again when opened. Conversations that already have unread messages stay as they are.',
+                'category'    => 'better-messages',
+                'input_schema' => array(
+                    'type'       => 'object',
+                    'properties' => array(
+                        'thread_ids' => array(
+                            'type'        => 'array',
+                            'items'       => array( 'type' => 'integer' ),
+                            'description' => 'Thread IDs to mark as unread.',
+                            'minItems'    => 1,
+                        ),
+                    ),
+                    'required' => array( 'thread_ids' ),
+                ),
+                'output_schema' => array(
+                    'type'       => 'object',
+                    'properties' => array(
+                        'marked' => array(
+                            'type'  => 'array',
+                            'items' => array( 'type' => 'integer' ),
+                        ),
+                    ),
+                ),
+                'execute_callback'    => array( $this, 'execute_mark_unread' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'manage_options' );
+                },
+                'meta' => array(
+                    'show_in_rest' => true,
+                    'mcp'          => array( 'public' => true ),
+                    'annotations'  => array(
+                        'readonly'    => false,
+                        'destructive' => false,
+                        'idempotent'  => true,
+                    ),
+                ),
+            ) );
+        }
+
+        public function execute_mark_unread( $input )
+        {
+            $user_id    = Better_Messages()->functions->get_current_user_id();
+            $thread_ids = array_map( 'intval', $input['thread_ids'] ?? array() );
+            $marked     = array();
+
+            foreach ( $thread_ids as $tid ) {
+                if ( Better_Messages()->functions->mark_thread_unread( $tid, $user_id, true ) ) {
+                    $marked[] = $tid;
+                }
+            }
+
+            return array( 'marked' => $marked );
         }
 
         private function register_change_subject()

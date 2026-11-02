@@ -34,6 +34,14 @@ if ( !class_exists( 'Better_Messages_Mobile_App' ) ):
 
         public $scripts;
 
+        public $web_signin;
+
+        public $sessions;
+
+        public $links;
+
+        public $account;
+
         public $path;
 
         public $devices_table;
@@ -115,6 +123,18 @@ if ( !class_exists( 'Better_Messages_Mobile_App' ) ):
 
             require_once($this->path . 'inc/auth.php');
             $this->auth = Better_Messages_Mobile_App_Auth();
+
+            require_once($this->path . 'inc/web-signin.php');
+            $this->web_signin = Better_Messages_Mobile_App_Web_Signin::instance();
+
+            require_once($this->path . 'inc/sessions.php');
+            $this->sessions = Better_Messages_Mobile_App_Sessions::instance();
+
+            require_once($this->path . 'inc/links.php');
+            $this->links = Better_Messages_Mobile_App_Links::instance();
+
+            require_once($this->path . 'inc/account.php');
+            $this->account = Better_Messages_Mobile_App_Account::instance();
 
             require_once ($this->path . 'inc/pushs.php');
             $this->pushs = Better_Messages_Mobile_App_Pushs();

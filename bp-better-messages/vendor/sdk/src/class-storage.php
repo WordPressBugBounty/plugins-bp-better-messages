@@ -47,6 +47,8 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
 
         private $direct = null;
 
+        private $cloud = null;
+
         private $admin = null;
 
         private $sweeper = null;
@@ -87,6 +89,16 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
             }
 
             return $this->direct;
+        }
+
+        public function cloud()
+        {
+            if ( null === $this->cloud ) {
+                require_once __DIR__ . '/class-storage-cloud.php';
+                $this->cloud = new WordPlus_SDK_Storage_Cloud( $this );
+            }
+
+            return $this->cloud;
         }
 
         public function admin()
@@ -1225,6 +1237,41 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
             $location = $this->get_location( (string) $row->location );
 
             return $location && self::is_public( $location ) ? $this->public_url( $location, (string) $row->object_key ) : null;
+        }
+
+        public function sealed_url( $row, $variant, $expires )
+        {
+            if ( ! $this->in_storage( $row ) ) {
+                return null;
+            }
+
+            $location = $this->get_location( (string) $row->location );
+
+            if ( ! $location ) {
+                return null;
+            }
+
+            $key     = (string) $row->object_key;
+            $expires = max( time() + 60, (int) $expires );
+            $start   = (int) ( floor( time() / 3600 ) * 3600 );
+
+            if ( 'bunny' === $location['preset'] ) {
+                return ! empty( $location['pull_zone_host'] ) && ! empty( $location['token_key'] ) ? self::pull_zone_url( $location, $key, $expires ) : null;
+            }
+
+            if ( 'r2' === $location['preset'] && ! empty( $location['worker_url'] ) && ! empty( $location['worker_secret'] ) ) {
+                $inline = 'download' !== $variant && self::inline_mime( self::stored_type( (string) $row->mime ) );
+
+                return self::worker_url( $location, $key, $expires, $inline ? 'inline' : 'attachment', (string) $row->name );
+            }
+
+            $query = array();
+
+            if ( 'download' === $variant && self::preset( $location['preset'] )['disposition'] ) {
+                $query['response-content-disposition'] = self::disposition( 'attachment', (string) $row->name );
+            }
+
+            return $this->client( $location )->presign( 'GET', $key, min( 604800, $expires - $start ), $query, array(), $start );
         }
 
         public function signed_url( $row, $variant = 'inline', $ttl = null, $window = null )

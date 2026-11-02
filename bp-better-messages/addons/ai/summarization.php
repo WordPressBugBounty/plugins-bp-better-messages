@@ -275,7 +275,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             }
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-            $api_key = ! empty( $bot_settings['apiKey'] ) ? $bot_settings['apiKey'] : Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
+            $api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
             if ( empty( $api_key ) ) {
                 delete_transient( $lock_key );
@@ -385,7 +385,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             }
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-            $api_key = ! empty( $bot_settings['apiKey'] ) ? $bot_settings['apiKey'] : Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
+            $api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
             if ( empty( $api_key ) ) {
                 delete_transient( $lock_key );
@@ -507,7 +507,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             $bot_user_id = -1 * absint( $bot_user->id );
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-            $api_key = ! empty( $bot_settings['apiKey'] ) ? $bot_settings['apiKey'] : Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
+            $api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
             if ( empty( $api_key ) ) {
                 return new \WP_Error( 'no_api_key', 'No API key configured for provider: ' . $provider_id );
@@ -564,7 +564,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 return new \WP_Error( 'invalid_provider', 'Provider not found: ' . $provider_id );
             }
 
-            $provider->set_api_key( $api_key );
+            $provider->set_bot( $bot_id );
+            $provider->set_bot_api_key( $bot_settings['apiKey'] ?? '' );
 
             $custom_max_tokens = $bot_settings['summarizationMaxTokens'] ?? '';
             if ( $custom_max_tokens !== '' && (int) $custom_max_tokens > 0 ) {
@@ -665,7 +666,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
             $bot_user_id = -1 * absint( $bot_user->id );
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-            $api_key = ! empty( $bot_settings['apiKey'] ) ? $bot_settings['apiKey'] : Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
+            $api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
             if ( empty( $api_key ) ) {
                 return new \WP_Error( 'no_api_key', 'No API key configured for provider: ' . $provider_id );
@@ -683,7 +684,8 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 return new \WP_Error( 'invalid_provider', 'Provider not found: ' . $provider_id );
             }
 
-            $provider->set_api_key( $api_key );
+            $provider->set_bot( $bot_id );
+            $provider->set_bot_api_key( $bot_settings['apiKey'] ?? '' );
 
             $custom_max_tokens = $bot_settings['digestMaxTokens'] ?? '';
             $max_tokens = ( $custom_max_tokens !== '' && (int) $custom_max_tokens > 0 ) ? (int) $custom_max_tokens : 32000;

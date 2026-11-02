@@ -955,7 +955,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                             'user_banned'   => __( '%s was banned', 'bp-better-messages' ),
                         );
 
-                        if ( isset( $simple_templates[ $sys_type ] ) ) {
+                        if ( Better_Messages()->system_messages->line_actor( $sys_type, $sys_data ) !== 0 ) {
+                            $content = '<em>' . esc_html( Better_Messages()->system_messages->moderation_text( $sys_type, $sys_data ) ) . '</em>';
+                        } elseif ( isset( $simple_templates[ $sys_type ] ) ) {
                             $content = '<em>' . sprintf( $simple_templates[ $sys_type ], $sys_name ) . '</em>';
                         } elseif ( $sys_type === 'subject_changed' ) {
                             $sys_subject = isset( $sys_data['new_subject'] ) ? esc_html( $sys_data['new_subject'] ) : '';
@@ -1463,7 +1465,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
                 Better_Messages_Options::instance()->update_settings( $merged );
             }
 
-            $response_settings = Better_Messages_Options::instance()->settings;
+            $response_settings = array_merge( Better_Messages_Options::instance()->settings, Better_Messages_Options::instance()->video_effects_settings(), Better_Messages_Options::instance()->recording_settings() );
             $response_settings['emailCustomHtml'] = Better_Messages_Options::instance()->get_email_custom_html();
 
             if ( $has_storage ) {

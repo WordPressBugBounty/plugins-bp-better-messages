@@ -535,6 +535,8 @@ if ( ! class_exists( 'WordPlus_SDK_Licence' ) ) {
 
             $this->store_answer( $answer, $extra );
 
+            do_action( 'wordplus_sdk_licence_activated', $this->store, $product->slug() );
+
             return $this->get();
         }
 

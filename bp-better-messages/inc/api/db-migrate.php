@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.94;
+        private $db_version = 2.97;
 
         public static function instance()
         {
@@ -446,7 +446,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                   `id` bigint(20) NOT NULL AUTO_INCREMENT,
                   `user_id` bigint(20) NOT NULL,
                   `thread_id` bigint(20) NOT NULL,
-                  `type` enum('ban','mute','bypass_moderation','force_moderation') NOT NULL,
+                  `type` enum('ban','mute','bypass_moderation','force_moderation','call_ban') NOT NULL,
                   `expiration` datetime NULL DEFAULT NULL,
                   `admin_id` bigint(20) NOT NULL,
                   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -457,7 +457,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
 
                 "CREATE TABLE `" . bm_get_table('guests') . "` (
                  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                 `secret` varchar(30) NOT NULL,
+                 `secret` varchar(60) NOT NULL,
                  `name` varchar(255) NOT NULL,
                  `email` varchar(100) DEFAULT NULL,
                  `ip` varchar(40) NOT NULL,
@@ -551,6 +551,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             dbDelta($sql);
 
             $this->update_collate();
+
+            $this->floor_guests_counter();
 
             Better_Messages_Users()->schedule_sync_all_users();
             Better_Messages_Capabilities()->register_capabilities();
@@ -1143,6 +1145,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     function (){
                         $this->migrate_mentions_table();
                     }
+                ],
+                '2.95' => [
+                    "ALTER TABLE `" . bm_get_table('moderation') ."` MODIFY COLUMN `type` enum('ban','mute','bypass_moderation','force_moderation','call_ban') NOT NULL;",
+                ],
+                '2.96' => [
+                    function (){
+                        $this->move_guests_to_registry();
+                    }
+                ],
+                '2.97' => [
+                    function (){
+                        $this->move_ai_keys_to_keychain();
+                    }
                 ]
             ];
 
@@ -1170,6 +1185,46 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             }
 
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function move_ai_keys_to_keychain(){
+            if ( class_exists( 'Better_Messages_AI' ) && method_exists( 'Better_Messages_AI', 'seal_typed_keys' ) ) {
+                Better_Messages_AI::seal_typed_keys();
+            }
+        }
+
+        public function move_guests_to_registry(){
+            global $wpdb;
+
+            $table  = bm_get_table('guests');
+            $column = $wpdb->get_row( "SHOW COLUMNS FROM `{$table}` LIKE 'secret'" );
+
+            if( $column && preg_match( '/varchar\((\d+)\)/i', (string) $column->Type, $width ) && (int) $width[1] < 60 ){
+                $wpdb->query( "ALTER TABLE `{$table}` MODIFY `secret` varchar(60) NOT NULL" );
+            }
+
+            $this->floor_guests_counter();
+
+            delete_option( Better_Messages_Guests::REGISTRY_OPTION );
+
+            if( function_exists( 'Better_Messages_Worker' ) ){
+                Better_Messages_Worker()->run_soon( 'better_messages_guests_registry_job' );
+            }
+        }
+
+        public function floor_guests_counter(){
+            global $wpdb;
+
+            $table = bm_get_table('guests');
+            $floor = (int) Better_Messages_Guests::COUNTER_FLOOR;
+
+            $wpdb->query( $wpdb->prepare(
+                "INSERT IGNORE INTO `{$table}` (`id`, `secret`, `name`, `email`, `ip`, `bot_id`, `meta`, `deleted_at`) VALUES (%d, '', '', '', '', 0, '', %s)",
+                $floor - 1,
+                current_time( 'mysql', true )
+            ) );
+
+            $wpdb->query( "ALTER TABLE `{$table}` AUTO_INCREMENT = {$floor}" );
         }
 
         public function migrate_mentions_table(){
@@ -1442,7 +1497,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
                         'user_id'    => "bigint(20) NOT NULL",
                         'thread_id'  => "bigint(20) NOT NULL",
-                        'type'       => "enum('ban','mute','bypass_moderation','force_moderation') NOT NULL",
+                        'type'       => "enum('ban','mute','bypass_moderation','force_moderation','call_ban') NOT NULL",
                         'expiration' => "datetime NULL DEFAULT NULL",
                         'admin_id'   => "bigint(20) NOT NULL",
                         'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -1456,7 +1511,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 'guests' => [
                     'columns' => [
                         'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
-                        'secret'     => "varchar(30) NOT NULL",
+                        'secret'     => "varchar(60) NOT NULL",
                         'name'       => "varchar(255) NOT NULL",
                         'email'      => "varchar(100) DEFAULT NULL",
                         'ip'         => "varchar(40) NOT NULL",

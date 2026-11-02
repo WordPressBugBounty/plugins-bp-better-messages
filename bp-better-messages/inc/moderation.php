@@ -7,6 +7,12 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
     {
         private $site_admin_ids = null;
 
+        private $messages_to_review = null;
+
+        private $restricted_batch = array();
+
+        private $own_batch = array( 'user' => 0, 'threads' => array() );
+
         public static function instance()
         {
 
@@ -25,6 +31,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             add_filter('better_messages_can_send_message', array( $this, 'can_send_reply' ), 20, 3 );
             add_filter('better_messages_chat_user_can_join', array( $this, 'restrict_join' ), 10, 4 );
             add_filter('better_messages_group_call_join_custom_error', array( $this, 'restrict_group_call_join' ), 10, 3 );
+            add_filter('better_messages_rest_thread_item', array( $this, 'thread_item_restrictions' ), 20, 5 );
             add_action('rest_api_init',  array( $this, 'rest_api_init' ) );
             add_action('better_messages_clean_expired_ban', array( $this, 'clean_expired_ban'), 10, 2 );
             add_action('better_messages_message_sent', array( $this, 'mark_user_as_approved_sender' ), 10, 1 );
@@ -37,6 +44,64 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             add_action( 'show_user_profile', array( $this, 'render_user_section' ) );
             add_action( 'edit_user_profile', array( $this, 'render_user_section' ) );
+
+            add_filter( 'bp_better_messages_script_variable', array( $this, 'review_script_variables' ), 1000 );
+        }
+
+        public function can_review_messages(): bool
+        {
+            return current_user_can( 'bm_can_administrate' )
+                && ! defined( 'BM_DISABLE_MESSAGES_VIEWER' )
+                && Better_Messages()->settings['messagesViewer'] !== '0';
+        }
+
+        public function get_messages_to_review(): ?array
+        {
+            if ( ! $this->can_review_messages() || $this->is_mobile_app_request() ) {
+                return null;
+            }
+
+            if ( $this->messages_to_review === null ) {
+                $this->messages_to_review = array(
+                    'reported' => function_exists( 'Better_Messages_Rest_Api_Admin' ) ? (int) Better_Messages_Rest_Api_Admin()->get_reported_count() : 0,
+                    'pending'  => Better_Messages()->functions->get_pending_messages_count(),
+                );
+            }
+
+            return $this->messages_to_review;
+        }
+
+        public function review_script_variables( $vars )
+        {
+            if ( ! empty( $vars['designPreview'] ) || ! empty( $vars['assistantMode'] ) ) {
+                return $vars;
+            }
+
+            $to_review = $this->get_messages_to_review();
+
+            if ( $to_review !== null ) {
+                $vars['toReview'] = array_merge( $to_review, array(
+                    'url' => admin_url( 'admin.php?page=better-messages-viewer' ),
+                ) );
+            }
+
+            return $vars;
+        }
+
+        public function messages_to_review_api( WP_REST_Request $request )
+        {
+            $to_review = $this->get_messages_to_review();
+
+            if ( $to_review === null ) {
+                return new WP_Error( 'rest_forbidden', _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ), array( 'status' => rest_authorization_required_code() ) );
+            }
+
+            return $to_review;
+        }
+
+        private function is_mobile_app_request(): bool
+        {
+            return isset( Better_Messages()->mobile_app->auth ) && Better_Messages()->mobile_app->auth->is_mobile_app();
         }
 
         public function render_user_section( $user )
@@ -674,13 +739,70 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $restrictions = $this->is_user_restricted( (int) $thread_id, (int) $user_id );
 
             if( isset( $restrictions['ban'] ) ){
-                $error = _x( 'You are not allowed to join group calls', 'Rest API Error', 'bp-better-messages' );
+                $error = sprintf( _x('You were banned in this conversation until %s', 'Message when user was banned in conversation', 'bp-better-messages'), $this->format_time( $restrictions['ban'] ) );
+            } else if( isset( $restrictions['call_ban'] ) ){
+                $error = sprintf( _x( 'A moderator removed you from the calls of this conversation until %s', 'Message when user was banned from group calls', 'bp-better-messages' ), $this->format_time( $restrictions['call_ban'] ) );
             }
 
             return $error;
         }
 
+        public function can_ban_in_chat( int $thread_id ){
+            return in_array( Better_Messages()->functions->get_thread_type( $thread_id ), array( 'thread', 'chat-room' ), true );
+        }
+
+        public function ban_user( int $thread_id, int $user_id, int $duration ){
+            $result = $this->restrict_user( 'ban', $user_id, $thread_id, $duration );
+
+            if( $result ){
+                if ( isset( Better_Messages()->system_messages ) ) {
+                    Better_Messages()->system_messages->suppress_user_left( $thread_id, $user_id );
+                }
+                Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
+            }
+
+            return $result;
+        }
+
+        public function call_ban_user( int $thread_id, int $user_id, int $duration, bool $chat_too ){
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( $user_id === 0 || $user_id === $current_user_id || ! Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id ) || ! $this->can_moderate_user( $thread_id, $user_id ) || $this->is_protected_user( $thread_id, $current_user_id, $user_id ) ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
+            $result = $this->restrict_user( 'call_ban', $user_id, $thread_id, $duration );
+
+            if( $chat_too && $this->can_ban_in_chat( $thread_id ) ){
+                $result = $this->ban_user( $thread_id, $user_id, $duration ) && $result;
+            }
+
+            return (bool) $result;
+        }
+
+        public function thread_item_restrictions( $thread_item, $thread_id, $thread_type, $include_personal, $user_id ){
+            if( ! $include_personal || $thread_type === 'chat-room' || isset( $thread_item['restricted'] ) ) return $thread_item;
+
+            if( $thread_type === 'thread' && (int) ( $thread_item['participantsCount'] ?? 0 ) <= 2 ) return $thread_item;
+
+            if( empty( $thread_item['permissions']['isModerator'] ) ) return $thread_item;
+
+            $thread_item['restricted'] = $this->get_restricted_users( (int) $thread_id );
+
+            return $thread_item;
+        }
+
         public function rest_api_init(){
+            register_rest_route( 'better-messages/v1', '/moderation/toReview', array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'messages_to_review_api' ),
+                'permission_callback' => array( $this, 'can_review_messages' ),
+            ) );
+
             register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/muteUser', array(
                 'methods' => 'POST',
                 'callback' => array( $this, 'mute_user_api' ),
@@ -733,6 +855,37 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                     ),
                 ),
             ) );
+
+            register_rest_route( 'better-messages/v1', '/thread/(?P<id>\d+)/callUnbanUser', array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'call_unban_user_api' ),
+                'permission_callback' => array( Better_Messages_Rest_Api(), 'check_thread_access' ),
+                'args' => array(
+                    'id' => array(
+                        'validate_callback' => function($param, $request, $key) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+            ) );
+        }
+
+        public function call_unban_user_api( WP_REST_Request $request ){
+            $thread_id       = intval( $request->get_param('id') );
+            $user_id         = intval( $request->get_param('user_id') );
+            $current_user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( ! Better_Messages()->functions->can_moderate_thread( $thread_id, $current_user_id ) ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Sorry, you are not allowed to do that', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => rest_authorization_required_code() )
+                );
+            }
+
+            $this->un_restrict_user( 'call_ban', $user_id, $thread_id );
+
+            return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
         }
 
         public function ban_user_api( WP_REST_Request $request ){
@@ -752,13 +905,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 );
             }
 
-            $result = $this->restrict_user( 'ban', $user_id, $thread_id, $duration );
+            $result = $this->ban_user( $thread_id, $user_id, $duration );
 
             if( $result ){
-                if ( isset( Better_Messages()->system_messages ) ) {
-                    Better_Messages()->system_messages->suppress_user_left( $thread_id, $user_id );
-                }
-                Better_Messages()->functions->remove_participant_from_thread( $thread_id, $user_id );
                 return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
             }
 
@@ -936,62 +1085,103 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
         }
 
+        public function expect_restricted_users( array $thread_ids, int $user_id = 0 ){
+            $this->restricted_batch = array_values( array_unique( array_filter( array_map( 'intval', $thread_ids ) ) ) );
+            $this->own_batch        = array( 'user' => $user_id, 'threads' => $user_id !== 0 ? $this->restricted_batch : array() );
+        }
+
         public function get_restricted_users( int $thread_id ){
             $key = $this->thread_cache_key( $thread_id );
 
             $restricted_users = wp_cache_get( $key, 'bm_messages' );
 
-            if( $restricted_users ){
-                return $restricted_users;
+            if( ! is_array( $restricted_users ) && count( $this->restricted_batch ) > 1 && in_array( $thread_id, $this->restricted_batch, true ) ){
+                $batch = $this->restricted_batch;
+                $this->restricted_batch = array();
+                $this->prime_restricted_users( $batch );
+                $restricted_users = wp_cache_get( $key, 'bm_messages' );
             }
 
+            if( ! is_array( $restricted_users ) ){
+                $restricted_users = $this->read_restricted_users( array( $thread_id ) )[ $thread_id ];
+                wp_cache_set( $key, $restricted_users, 'bm_messages' );
+            }
+
+            if( empty( $restricted_users ) ) return (object) [];
+
+            return $restricted_users;
+        }
+
+        public function prime_restricted_users( array $thread_ids ){
+            $pending = array();
+
+            foreach ( array_unique( array_map( 'intval', $thread_ids ) ) as $thread_id ) {
+                if ( $thread_id > 0 && ! is_array( wp_cache_get( $this->thread_cache_key( $thread_id ), 'bm_messages' ) ) ) {
+                    $pending[] = $thread_id;
+                }
+            }
+
+            if ( empty( $pending ) ) return;
+
+            foreach ( $this->read_restricted_users( $pending ) as $thread_id => $restricted ) {
+                wp_cache_set( $this->thread_cache_key( $thread_id ), $restricted, 'bm_messages' );
+            }
+        }
+
+        private function read_restricted_users( array $thread_ids ){
             global $wpdb;
 
-            $table = bm_get_table('moderation');
+            $thread_ids = array_values( array_unique( array_map( 'intval', $thread_ids ) ) );
+            $ephemeral  = array_values( array_filter( $thread_ids, array( $this, 'is_ephemeral_thread' ) ) );
 
-            $ephemeral = $this->is_ephemeral_thread( $thread_id ) ? 1 : 0;
+            $in           = implode( ',', $thread_ids );
+            $in_ephemeral = empty( $ephemeral ) ? '0' : implode( ',', $ephemeral );
 
-            $query = $wpdb->prepare("
-            SELECT user_id, type, CONVERT_TZ(expiration, @@session.time_zone, '+0:00') as expiration
-            FROM  {$table}
-            WHERE `thread_id` = %d
-            AND `expiration` > NOW()
+            $results = $wpdb->get_results( "
+            SELECT `moderation`.`thread_id`, `moderation`.`user_id`, `moderation`.`type`, CONVERT_TZ(`moderation`.`expiration`, @@session.time_zone, '+0:00') as expiration
+            FROM " . bm_get_table('moderation') . " `moderation`
+            WHERE `moderation`.`thread_id` IN ({$in})
+            AND `moderation`.`expiration` > NOW()
             AND (
-                `type` = 'ban'
-                OR ( `type` = 'mute' AND ( %d = 1 OR `user_id` IN ( SELECT user_id FROM " . bm_get_table('recipients') . " WHERE thread_id = %d AND is_deleted = 0 ) ) )
-            )", $thread_id, $ephemeral, $thread_id);
+                `moderation`.`type` IN ( 'ban', 'call_ban' )
+                OR ( `moderation`.`type` = 'mute' AND (
+                    `moderation`.`thread_id` IN ({$in_ephemeral})
+                    OR EXISTS ( SELECT 1 FROM " . bm_get_table('recipients') . " `recipients` WHERE `recipients`.`thread_id` = `moderation`.`thread_id` AND `recipients`.`user_id` = `moderation`.`user_id` AND `recipients`.`is_deleted` = 0 )
+                ) )
+            )" );
 
-            $results = $wpdb->get_results( $query );
+            $by_thread = array_fill_keys( $thread_ids, array() );
 
-            $result = [];
+            foreach( (array) $results as $item ){
+                $by_thread[ (int) $item->thread_id ][ $item->type ][ $item->user_id ] = strtotime( $item->expiration );
+            }
 
-            if( count( $results ) > 0 ){
-                foreach( $results as $item ){
-                    $type = $item->type;
-                    if( ! isset( $result[$type] ) ) $result[$type] = [];
-                    $result[$type][ $item->user_id ] = strtotime( $item->expiration );
+            foreach( $by_thread as $thread_id => $result ){
+                if( isset( $result['ban'] ) && isset( $result['mute'] ) ){
+                    foreach( $result['ban'] as $user_id => $until ){
+                        unset( $result['mute'][ $user_id ] );
+                    }
+
+                    if( empty( $result['mute'] ) ) unset( $result['mute'] );
+
+                    $by_thread[ $thread_id ] = $result;
                 }
             }
 
-            if( isset( $result['ban'] ) && isset( $result['mute'] ) ){
-                foreach( $result['ban'] as $key => $value ){
-                    if( isset( $result['mute'][$key] ) ) unset(  $result['mute'][$key] );
-                }
-
-                if( empty( $result['mute'] ) ) unset($result['mute']);
-            }
-
-            wp_cache_set( $key, $result, 'bm_messages' );
-
-            if( empty( $result ) ) return (object) [];
-
-            return $result;
+            return $by_thread;
         }
 
         public function is_user_restricted( int $thread_id, int $user_id ){
             $key = $this->user_thread_cache_key( $thread_id, $user_id );
 
             $restrictions = wp_cache_get( $key, 'bm_messages' );
+
+            if( ! is_array( $restrictions ) && $user_id === $this->own_batch['user'] && count( $this->own_batch['threads'] ) > 1 && in_array( $thread_id, $this->own_batch['threads'], true ) ){
+                $batch = $this->own_batch['threads'];
+                $this->own_batch = array( 'user' => 0, 'threads' => array() );
+                $this->prime_user_restrictions( $batch, $user_id );
+                $restrictions = wp_cache_get( $key, 'bm_messages' );
+            }
 
             if( is_array( $restrictions ) ){
                 return $restrictions;
@@ -1014,6 +1204,33 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             wp_cache_set($key, $array, 'bm_messages');
 
             return $array;
+        }
+
+        public function get_ban_expiration( int $thread_id, int $user_id ): int {
+            return $this->get_restriction_expiration( $thread_id, $user_id, 'ban' );
+        }
+
+        public function get_call_ban_expiration( int $thread_id, int $user_id ): int {
+            return $this->get_restriction_expiration( $thread_id, $user_id, 'call_ban' );
+        }
+
+        private function get_restriction_expiration( int $thread_id, int $user_id, string $type ): int {
+            $restrictions = $this->is_user_restricted( $thread_id, $user_id );
+
+            if( ! isset( $restrictions[ $type ] ) ) return 0;
+
+            global $wpdb;
+
+            $table = bm_get_table('moderation');
+
+            $until = (int) $wpdb->get_var( $wpdb->prepare( "SELECT UNIX_TIMESTAMP(`expiration`) FROM {$table} WHERE `thread_id` = %d AND `user_id` = %d AND `type` = %s AND `expiration` > NOW()", $thread_id, $user_id, $type ) );
+
+            if( $until <= 0 ){
+                $this->cache_delete( $thread_id, $user_id );
+                return 0;
+            }
+
+            return $until;
         }
 
         public function prime_user_restrictions( array $thread_ids, int $user_id ){

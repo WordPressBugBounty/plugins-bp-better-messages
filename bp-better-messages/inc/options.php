@@ -119,6 +119,7 @@ class Better_Messages_Options
             'systemMessagesUserCooldownSeconds'   => 0,
             'systemMessagesIgnoreInSort'          => '0',
             'systemMessagesTidyJoinLeave'         => '1',
+            'systemMessagesShowActor'             => '0',
             'miniThreadsEnable'           => '0',
             'miniFriendsEnable'           => '0',
             'miniAIBotsEnable'            => '0',
@@ -241,6 +242,7 @@ class Better_Messages_Options
             'groupCallAlertsCooldown'     => 30,
             'groupCallAlertsUserLimit'    => 3,
             'callsRevertIcons'            => '0',
+            'callsMutedHint'              => '1',
             'callRequestTimeLimit'        => '30',
             'callsLimitFriends'           => '0',
             'stopBPNotifications'         => '0',
@@ -314,6 +316,7 @@ class Better_Messages_Options
             'enableNiceLinks'             => '1',
             'userStatuses'                => '0',
             'accountRow'                  => '1',
+            'markUnread'                  => '1',
             'myProfileButton'             => '1',
             'titleNotifications'          => '1',
             'enableMiniCloseButton'       => '0',
@@ -331,6 +334,9 @@ class Better_Messages_Options
             'groupAudioCallsThreads'      => '0',
             'groupAudioCallsChats'        => '0',
             'groupCallsEncryption'        => '0',
+            'groupCallsPreJoin'           => '1',
+            'groupCallsMutedHint'         => '1',
+            'groupCallsAutoPip'           => '0',
             'allowUsersRestictNewThreads' => '0',
             'enableGroupsEmails'          => '1',
             'enableGroupsPushs'           => '0',
@@ -800,12 +806,16 @@ class Better_Messages_Options
 
         $notifications_count = 0;
 
-        if( class_exists('Better_Messages_User_Reports') ){
-            $reports_count = Better_Messages_User_Reports::instance()->get_reported_messages_count();
+        if( function_exists( 'Better_Messages_Rest_Api_Admin' ) ){
+            $reports_count = (int) Better_Messages_Rest_Api_Admin()->get_reported_count();
+        } else if( class_exists('Better_Messages_User_Reports') ){
+            $reports_count = (int) Better_Messages_User_Reports::instance()->get_reported_messages_count();
+        } else {
+            $reports_count = 0;
+        }
 
-            if( $reports_count > 0 ){
-                $notifications_count += $reports_count;
-            }
+        if( $reports_count > 0 ){
+            $notifications_count += $reports_count;
         }
 
         $pending_count = Better_Messages()->functions->get_pending_messages_count();
@@ -1088,6 +1098,8 @@ class Better_Messages_Options
         $settings_for_frontend = $this->settings;
         $settings_for_frontend['emailCustomHtml'] = $this->get_email_custom_html();
 
+        $settings_for_frontend = array_merge( $settings_for_frontend, $this->video_effects_settings(), $this->recording_settings() );
+
         $storage_data = null;
 
         if ( class_exists( 'Better_Messages_Storage_Admin' ) ) {
@@ -1104,6 +1116,8 @@ class Better_Messages_Options
 
         $settings_data = array(
             'storage'            => $storage_data,
+            'recording'          => $this->recording_init_data(),
+            'tabOffers'          => Better_Messages_Offers()->admin_offers(),
             'settings'           => $settings_for_frontend,
             'roles'              => $roles,
             'allRoles'           => $all_roles_list,
@@ -1175,7 +1189,10 @@ class Better_Messages_Options
             'adminUrl'           => admin_url(),
             'fileFormats'        => array_diff_key( wp_get_ext_types(), array( 'code' => true ) ),
             'currentUserEmail'   => wp_get_current_user()->user_email,
-            'phpVersionOk'       => version_compare( PHP_VERSION, '8.1', '>=' ),
+            'phpVersionOk'       => class_exists( 'Better_Messages_AI' ) && Better_Messages_AI::available(),
+            'aiStatus'           => class_exists( 'Better_Messages_AI' ) ? Better_Messages_AI::status() : array( 'available' => false, 'message' => '' ),
+            'aiKeys'             => (object) ( class_exists( 'Better_Messages_AI_Provider_Factory' ) ? Better_Messages_AI_Provider_Factory::present_keys() : array() ),
+            'aiPrices'           => function_exists( 'wordplus_ai' ) && wordplus_ai() ? wordplus_ai()->prices()->state() : null,
             'hasBpFriends'       => $has_bp_friends,
             'hasBpGroups'        => $has_bp_groups,
             'hasPeepSoFriends'   => $has_peepso_friends,
@@ -1252,8 +1269,10 @@ class Better_Messages_Options
     {
         wp_enqueue_media();
 
+        $ai_available = class_exists( 'Better_Messages_AI' ) && Better_Messages_AI::available();
+
         $providers = array();
-        if ( version_compare( phpversion(), '8.1', '>=' ) && class_exists('Better_Messages_AI_Provider_Factory') ) {
+        if ( $ai_available && class_exists('Better_Messages_AI_Provider_Factory') ) {
             $providers = Better_Messages_AI_Provider_Factory::get_providers_info();
         }
 
@@ -1263,23 +1282,21 @@ class Better_Messages_Options
 
         $has_voice_messages = class_exists('BP_Better_Messages_Voice_Messages') && Better_Messages()->functions->voice_messages_addon_licensed();
 
-        $voice_transcription_ready = version_compare( phpversion(), '8.1', '>=' )
-            && class_exists('Better_Messages_AI')
+        $voice_transcription_ready = $ai_available
             && Better_Messages()->ai->is_transcription_configured();
 
         $image_pricing = array();
-        if ( version_compare( phpversion(), '8.1', '>=' ) && class_exists('Better_Messages_AI') ) {
-            $image_pricing = Better_Messages()->ai->get_image_pricing();
-        }
-
         $model_pricing = array();
         $tool_pricing  = array();
-        if ( version_compare( phpversion(), '8.1', '>=' ) && class_exists('Better_Messages_AI') ) {
+        if ( $ai_available ) {
+            $image_pricing = Better_Messages()->ai->get_image_pricing();
             $model_pricing = Better_Messages()->ai->get_model_pricing_rules();
             $tool_pricing  = Better_Messages()->ai->get_tool_pricing();
         }
 
         $data = array(
+            'aiStatus'         => class_exists( 'Better_Messages_AI' ) ? Better_Messages_AI::status() : array( 'available' => false, 'message' => '' ),
+            'pricesUpdated'    => $ai_available ? wordplus_ai()->catalogue()->updated() : '',
             'providers'        => $providers,
             'voices'           => $voices,
             'hasVoiceMessages' => $has_voice_messages,
@@ -1326,17 +1343,27 @@ class Better_Messages_Options
 
         $default_settings = Better_Messages()->chats->get_chat_settings( 0 );
 
+        $is_websocket = Better_Messages()->settings['mechanism'] === 'websocket';
+
+        $live_stream = $is_websocket ? $this->live_stream_offer() : null;
+
+        if ( $live_stream && $live_stream['modal'] ) {
+            add_thickbox();
+            wp_enqueue_script( 'plugin-install' );
+        }
+
         $data = array(
             'pluginUrl'            => Better_Messages()->url,
             'pluginVersion'        => Better_Messages()->version,
             'roles'                => $roles,
-            'isWebSocket'          => Better_Messages()->settings['mechanism'] === 'websocket',
+            'isWebSocket'          => $is_websocket,
             'defaultSettings'      => $default_settings,
             'groupVideoCallsChats' => ( Better_Messages()->settings['groupCallsChats'] ?? '0' ) === '1',
             'groupAudioCallsChats' => ( Better_Messages()->settings['groupAudioCallsChats'] ?? '0' ) === '1',
             'callsSettingsUrl'     => admin_url( 'admin.php?page=better-messages#/group-calls' ),
             'mentionAllPermission' => Better_Messages()->settings['mentionAllPermission'] ?? 'moderators',
             'groupCallAlerts'      => ( Better_Messages()->settings['groupCallAlerts'] ?? '1' ) === '1',
+            'liveStream'           => $live_stream,
         );
 
         ?>
@@ -1348,9 +1375,60 @@ class Better_Messages_Options
         <?php
     }
 
+    private function live_stream_offer()
+    {
+        $nothing = array( 'action' => '', 'url' => '', 'modal' => false );
+
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $installed = false;
+
+        foreach ( get_plugins() as $file => $plugin ) {
+            if ( 'wordplus-stream.php' !== basename( $file ) || ! in_array( $plugin['TextDomain'] ?? '', array( 'wordplus-live-stream', 'wordplus-stream' ), true ) ) {
+                continue;
+            }
+
+            if ( is_plugin_active( $file ) ) {
+                return $nothing;
+            }
+
+            $installed = true;
+        }
+
+        if ( $installed ) {
+            if ( ! current_user_can( 'activate_plugins' ) ) {
+                return $nothing;
+            }
+
+            return array( 'action' => 'activate', 'url' => self_admin_url( 'plugins.php?plugin_status=inactive' ), 'modal' => false );
+        }
+
+        if ( ! current_user_can( 'install_plugins' ) ) {
+            return array( 'action' => 'get', 'url' => 'https://wordpress.org/plugins/wordplus-live-stream/', 'modal' => false );
+        }
+
+        if ( ! is_multisite() && version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
+            return array(
+                'action' => 'install',
+                'url'    => admin_url( 'plugin-install.php?tab=plugin-information&plugin=wordplus-live-stream&TB_iframe=true&width=772&height=700' ),
+                'modal'  => true,
+            );
+        }
+
+        $installer = 'update.php?action=install-plugin&plugin=wordplus-live-stream';
+
+        return array(
+            'action' => 'install',
+            'url'    => wp_nonce_url( is_multisite() ? network_admin_url( $installer ) : admin_url( $installer ), 'install-plugin_wordplus-live-stream' ),
+            'modal'  => false,
+        );
+    }
+
     public function viewer_page_new_html(){
         $can_administrate = current_user_can('bm_can_administrate');
-        $messages_enabled = $can_administrate && ! defined('BM_DISABLE_MESSAGES_VIEWER') && Better_Messages()->settings['messagesViewer'] !== '0';
+        $messages_enabled = Better_Messages()->moderation->can_review_messages();
         $reports_enabled = $can_administrate && class_exists('Better_Messages_User_Reports');
         $bulk_messaging_enabled = current_user_can('bm_can_bulk_message');
 
@@ -1458,8 +1536,175 @@ class Better_Messages_Options
         return wp_kses( $svg, $allowed_tags );
     }
 
+    public function video_effects_settings()
+    {
+        $video_effects = function_exists( 'wordplus_video_effects' ) ? wordplus_video_effects() : null;
+
+        if ( ! $video_effects ) {
+            return array();
+        }
+
+        return array(
+            'callBackgrounds'    => wp_list_pluck( $video_effects->pictures(), 'id' ),
+            'callOwnBackgrounds' => method_exists( $video_effects, 'own_pictures' ) && $video_effects->own_pictures() ? '1' : '0',
+        );
+    }
+
+    public function save_video_effects( $settings )
+    {
+        $video_effects = function_exists( 'wordplus_video_effects' ) ? wordplus_video_effects() : null;
+        $keys          = array( 'callBackgrounds', 'callOwnBackgrounds' );
+
+        if ( $video_effects && array_intersect( $keys, array_keys( $settings ) ) ) {
+            $video_effects->save(
+                array_key_exists( 'callBackgrounds', $settings ) ? (array) $settings['callBackgrounds'] : null,
+                null,
+                array_key_exists( 'callOwnBackgrounds', $settings ) ? $settings['callOwnBackgrounds'] === '1' : null
+            );
+        }
+
+        unset( $settings['callHighQualityEffects'] );
+
+        foreach ( $keys as $key ) {
+            unset( $settings[ $key ] );
+        }
+
+        return $settings;
+    }
+
+    const RECORDING_KEYS = array(
+        'recordingEnabled'     => 'enabled',
+        'recordingLayout'      => 'layout',
+        'recordingAudioLayout' => 'audio_layout',
+        'recordingSize'        => 'size',
+        'recordingTheme'       => 'theme',
+        'recordingLogo'        => 'logo',
+        'recordingLogoPosition' => 'logo_position',
+        'recordingLogoWidth'   => 'logo_width',
+        'recordingLogoX'       => 'logo_x',
+        'recordingLogoY'       => 'logo_y',
+        'recordingLogoOpacity' => 'logo_opacity',
+        'recordingNames'       => 'names',
+        'recordingMic'         => 'mic',
+        'recordingSpeaking'    => 'speaking',
+        'recordingCameraOff'   => 'camera_off',
+        'recordingTranscript'  => 'transcript',
+        'recordingLanguage'    => 'language',
+        'recordingLocation'    => 'location',
+        'recordingExtraAudio'  => 'extra_audio',
+        'recordingExtraScreen' => 'extra_screen',
+        'recordingKeepSources' => 'keep_sources',
+        'recordingKeepDays'    => 'keep_days',
+        'recordingTell'        => 'tell',
+        'recordingCard'        => 'card',
+        'recordingList'        => 'list',
+    );
+
+    public function recording_settings()
+    {
+        $recording = function_exists( 'wordplus_recording' ) ? wordplus_recording() : null;
+
+        if ( ! $recording ) {
+            return array();
+        }
+
+        $stored   = $recording->settings();
+        $settings = array();
+
+        foreach ( self::RECORDING_KEYS as $key => $sdk_key ) {
+            if ( ! array_key_exists( $sdk_key, $stored ) ) {
+                continue;
+            }
+
+            $value            = $stored[ $sdk_key ];
+            $settings[ $key ] = is_bool( $value ) ? ( $value ? '1' : '0' ) : (string) $value;
+        }
+
+        return $settings;
+    }
+
+    public function recording_init_data()
+    {
+        $recording = function_exists( 'wordplus_recording' ) ? wordplus_recording() : null;
+
+        if ( ! $recording || ! method_exists( $recording, 'admin_state' ) ) {
+            return null;
+        }
+
+        $state = $recording->admin_state();
+
+        return array(
+            'locations' => $state['locations'],
+            'storage'   => isset( $state['storage'] ) ? $state['storage'] : '',
+            'credits'   => $state['credits'],
+            'logo'      => $state['logo'],
+            'accent'    => class_exists( 'Better_Messages_Design' ) ? Better_Messages_Design::instance()->get_accent_color_hex( 'light' ) : '',
+            'languages' => isset( $state['languages'] ) ? $state['languages'] : array(),
+            'held'      => isset( $state['held'] ) ? (int) $state['held'] : 0,
+        );
+    }
+
+    public function save_recording( $settings )
+    {
+        $recording = function_exists( 'wordplus_recording' ) ? wordplus_recording() : null;
+        $changes   = array();
+
+        foreach ( self::RECORDING_KEYS as $key => $sdk_key ) {
+            if ( array_key_exists( $key, $settings ) ) {
+                $changes[ $sdk_key ] = $settings[ $key ];
+                unset( $settings[ $key ] );
+            }
+        }
+
+        if ( $recording && $changes ) {
+            $recording->save( $changes );
+        }
+
+        return $settings;
+    }
+
+    public function save_ai_keys( $settings )
+    {
+        $ai = function_exists( 'wordplus_ai' ) ? wordplus_ai() : null;
+
+        if ( ! $ai || ! class_exists( 'Better_Messages_AI' ) ) {
+            return $settings;
+        }
+
+        $stored = $this->get_stored_settings();
+
+        foreach ( Better_Messages_AI::KEY_SETTINGS as $key => $provider ) {
+            if ( ! array_key_exists( $key, $settings ) ) {
+                continue;
+            }
+
+            $typed = trim( (string) $settings[ $key ] );
+            $plain = isset( $stored[ $key ] ) ? trim( (string) $stored[ $key ] ) : '';
+
+            if ( $plain !== '' ) {
+                $ai->keys()->adopt( $provider, $plain, '', 'better-messages' );
+            }
+
+            if ( $typed !== '' && $typed !== $ai->keys()->get( $provider ) ) {
+                $ai->keys()->save( $provider, $typed, '', array( 'by' => 'better-messages' ) );
+
+                if ( class_exists( 'Better_Messages_AI_Provider_Factory' ) ) {
+                    Better_Messages_AI_Provider_Factory::create( $provider )->check_api_key();
+                }
+            }
+
+            $settings[ $key ] = '';
+        }
+
+        return $settings;
+    }
+
     public function update_settings( $settings )
     {
+        $settings = $this->save_video_effects( $settings );
+        $settings = $this->save_recording( $settings );
+        $settings = $this->save_ai_keys( $settings );
+
         $this->settings = $this->get_stored_settings();
 
         if( isset( $settings['emojiSettings'] ) && ! empty( trim($settings['emojiSettings']) ) ){
@@ -2058,6 +2303,9 @@ class Better_Messages_Options
         if ( !isset( $settings['callsRevertIcons'] ) ) {
             $settings['callsRevertIcons'] = '0';
         }
+        if ( !isset( $settings['callsMutedHint'] ) ) {
+            $settings['callsMutedHint'] = '1';
+        }
         if ( !isset( $settings['callRequestTimeLimit'] ) ) {
             $settings['callRequestTimeLimit'] = '30';
         }
@@ -2172,6 +2420,10 @@ class Better_Messages_Options
             $settings['accountRow'] = '0';
         }
 
+        if ( !isset( $settings['markUnread'] ) ) {
+            $settings['markUnread'] = '0';
+        }
+
         if ( !isset( $settings['myProfileButton'] ) ) {
             $settings['myProfileButton'] = '0';
         }
@@ -2214,6 +2466,18 @@ class Better_Messages_Options
 
         if( ! isset( $settings['groupCallsEncryption'] ) ){
             $settings['groupCallsEncryption'] = '0';
+        }
+
+        if( ! isset( $settings['groupCallsPreJoin'] ) ){
+            $settings['groupCallsPreJoin'] = '1';
+        }
+
+        if( ! isset( $settings['groupCallsMutedHint'] ) ){
+            $settings['groupCallsMutedHint'] = '1';
+        }
+
+        if( ! isset( $settings['groupCallsAutoPip'] ) ){
+            $settings['groupCallsAutoPip'] = '0';
         }
 
         if( ! isset( $settings['allowUsersRestictNewThreads'] ) ){
@@ -3028,8 +3292,10 @@ class Better_Messages_Options
         ];
 
         foreach ( $sounds_keys as $key ) {
-            if(  $this->settings[ $key . 'Id'] > 0 ){
-                $attachment_url = wp_get_attachment_url( $settings[$key . 'Id'] );
+            $sound_id = isset( $this->settings[ $key . 'Id' ] ) ? (int) $this->settings[ $key . 'Id' ] : 0;
+
+            if( $sound_id > 0 ){
+                $attachment_url = wp_get_attachment_url( $sound_id );
                 if( $attachment_url && str_ends_with( $attachment_url, '.mp3' ) ){
                     $this->settings[$key . 'Url'] = $attachment_url;
                 } else {

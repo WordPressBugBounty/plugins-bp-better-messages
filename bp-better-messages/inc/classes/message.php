@@ -155,7 +155,7 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                     $wpdb->query(
                         $wpdb->prepare(
                             "UPDATE " . bm_get_table('recipients') . "
-                            SET unread_count = unread_count + 1, is_deleted = 0, last_update = %d
+                            SET unread_count = GREATEST(unread_count, 0) + 1, is_deleted = 0, last_update = %d
                             WHERE thread_id = %d AND user_id != %d" . ( count( $unread_exclude ) > 0 ? " AND user_id NOT IN (" . implode( ',', $unread_exclude ) . ")" : "" ),
                             $time,
                             $this->thread_id,

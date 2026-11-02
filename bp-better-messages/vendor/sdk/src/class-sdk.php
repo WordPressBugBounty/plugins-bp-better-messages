@@ -28,6 +28,14 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         const STORAGE_JOB = 'wordplus_storage_job';
 
+        const VIDEO_EFFECTS_UPDATE = 'wordplus_video_effects_update';
+
+        const RECORDING_SYNC = 'wordplus_recording_sync';
+
+        const RECORDING_SWEEP = 'wordplus_recording_sweep';
+
+        private $recording = null;
+
         const EMOJI_CUT = 'wordplus_pickers_cut_emoji';
 
         private $storage = null;
@@ -38,9 +46,15 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         private $menus = null;
 
+        const CREDITS_CHECK = 'wordplus_credits_check';
+
+        private $credits = null;
+
         private $lightbox = null;
 
         private $emoji_guard = null;
+
+        private $video_effects = null;
 
         private $assets = null;
 
@@ -48,14 +62,19 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         const PARTS = array(
             'updater'     => array( 'src/class-updater.php' ),
+            'credits'     => array( 'src/class-credits.php' ),
             'push'        => array( 'src/class-push.php', 'src/class-push-table.php', 'src/class-push-progressify.php', 'push' ),
-            'storage'     => array( 'src/class-storage.php', 'src/class-storage-admin.php', 'src/class-storage-direct.php', 'src/class-storage-queue.php', 'src/class-storage-s3.php', 'src/class-storage-sweeper.php', 'storage' ),
+            'storage'     => array( 'src/class-storage.php', 'src/class-storage-admin.php', 'src/class-storage-cloud.php', 'src/class-storage-direct.php', 'src/class-storage-queue.php', 'src/class-storage-s3.php', 'src/class-storage-sweeper.php', 'storage' ),
             'pickers'     => array( 'src/class-pickers.php', 'src/pickers', 'pickers', 'stickers' ),
             'toasts'      => array( 'src/class-toasts.php', 'toasts' ),
             'tooltips'    => array( 'src/class-tooltips.php', 'tooltips' ),
             'menus'       => array( 'src/class-menus.php', 'menus' ),
             'lightbox'    => array( 'src/class-lightbox.php', 'lightbox' ),
             'emoji-guard' => array( 'src/class-emoji-guard.php', 'emoji-guard' ),
+            'video-effects' => array( 'src/class-video-effects.php', 'video-effects' ),
+            'recording'   => array( 'src/class-recording.php', 'src/class-recording-store.php', 'src/class-recording-cloud.php', 'src/class-recording-sync.php', 'src/class-recording-rest.php', 'src/class-recording-files.php', 'recording' ),
+            'websites'    => array( 'src/class-websites.php' ),
+            'ai'          => array( 'src/class-ai.php', 'src/ai', 'ai' ),
         );
 
         private $part_copies = array();
@@ -64,6 +83,8 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             'pickers' => array( 'wordplus_pickers' ),
             'storage' => array( 'wordplus_storage' ),
             'push'    => array( 'wordplus_push_keys', 'bp_better_messages_vapid_keys' ),
+            'video-effects' => array( 'wordplus_video_effects' ),
+            'recording'   => array( 'wordplus_recording' ),
         );
 
         const TRACKING_SYNC = 'wordplus_sdk_tracking_sync';
@@ -75,6 +96,18 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
         private $tracking = null;
 
         private $i18n = null;
+
+        private $visitors = null;
+
+        private $cors = null;
+
+        private $websites = null;
+
+        const WEBSITES_SYNC = 'wordplus_sdk_websites_sync';
+
+        const WEBSITES_SOON = 'wordplus_sdk_websites_soon';
+
+        private $ai = null;
 
         public static function instance()
         {
@@ -107,9 +140,25 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
             add_action( self::WAITING_EVENT, array( $sdk, 'check_waiting' ), 10, 2 );
 
+            add_action( self::WEBSITES_SYNC, array( $sdk, 'run_websites_sync' ) );
+            add_action( self::WEBSITES_SOON, array( $sdk, 'run_websites_sync' ) );
+            add_action( 'wordplus_sdk_licence_activated', array( $sdk, 'websites_activated' ) );
+
+            add_action( self::CREDITS_CHECK, array( $sdk, 'run_credits_check' ) );
+            add_action( 'admin_notices', array( $sdk, 'credits_notice' ) );
+
             add_action( self::STORAGE_JOB, array( $sdk, 'run_storage_job' ) );
 
             add_action( self::EMOJI_CUT, array( $sdk, 'run_emoji_cut' ) );
+
+            add_action( self::VIDEO_EFFECTS_UPDATE, array( $sdk, 'run_video_effects_update' ) );
+
+            add_action( self::RECORDING_SYNC, array( $sdk, 'run_recording_sync' ) );
+            add_action( self::RECORDING_SWEEP, array( $sdk, 'run_recording_sweep' ) );
+            add_action( 'wordplus_storage_cloud_finished', array( $sdk, 'recording_files_stored' ), 10, 4 );
+
+            add_action( 'wordplus_sdk_check_' . self::CLOUD, array( $sdk, 'run_ai_prices' ), 20 );
+            add_action( 'upgrader_process_complete', array( $sdk, 'video_effects_after_update' ) );
 
             if ( is_multisite() ) {
                 add_action( 'wp_uninitialize_site', array( $sdk, 'retire_storage_site' ), 1 );
@@ -524,8 +573,78 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
                 if ( $this->storage() ) {
                     $this->storage()->admin()->routes();
+
+                    if ( method_exists( $this->storage(), 'cloud' ) ) {
+                        $this->storage()->cloud()->routes();
+                    }
                 }
+
+                if ( $this->video_effects() ) {
+                    $this->video_effects()->routes();
+                }
+
+                if ( $this->recording() ) {
+                    $this->recording()->routes();
+                }
+
+                if ( $this->has_part( 'ai' ) ) {
+                    require_once $this->path( 'src/class-ai.php' );
+                    WordPlus_SDK_AI_Loader::routes( $this );
+                }
+
+                foreach ( $this->products as $product ) {
+                    if ( $product->get( 'visitors' ) ) {
+                        $this->visitors()->routes();
+                        break;
+                    }
+                }
+
+                $this->cors()->hook();
             }
+        }
+
+        public function cors()
+        {
+            if ( null === $this->cors ) {
+                require_once __DIR__ . '/class-cors.php';
+                $this->cors = new WordPlus_SDK_Cors( $this );
+            }
+
+            return $this->cors;
+        }
+
+        public function websites()
+        {
+            if ( null === $this->websites && $this->has_part( 'websites' ) ) {
+                require_once $this->path( 'src/class-websites.php' );
+                $this->websites = new WordPlus_SDK_Websites( $this );
+            }
+
+            return $this->websites;
+        }
+
+        public function run_websites_sync()
+        {
+            if ( $this->websites() ) {
+                $this->websites()->run();
+            }
+        }
+
+        public function websites_activated()
+        {
+            if ( $this->websites() ) {
+                $this->websites()->activated();
+            }
+        }
+
+        public function visitors()
+        {
+            if ( null === $this->visitors ) {
+                require_once __DIR__ . '/class-visitors.php';
+                $this->visitors = new WordPlus_SDK_Visitors( $this );
+            }
+
+            return $this->visitors;
         }
 
         public function page_options( array $parts )
@@ -559,6 +678,100 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             }
 
             return $this->storage;
+        }
+
+        public function video_effects()
+        {
+            if ( null === $this->video_effects && $this->has_part( 'video-effects' ) ) {
+                require_once $this->path( 'src/class-video-effects.php' );
+                $this->video_effects = new WordPlus_SDK_Video_Effects( $this );
+            }
+
+            return $this->video_effects;
+        }
+
+        public function run_video_effects_update()
+        {
+            if ( $this->video_effects() ) {
+                $this->video_effects()->update();
+            }
+        }
+
+        public function recording()
+        {
+            if ( null === $this->recording && $this->has_part( 'recording' ) ) {
+                require_once $this->path( 'src/class-recording.php' );
+                $this->recording = new WordPlus_SDK_Recording( $this );
+            }
+
+            return $this->recording;
+        }
+
+        public function ai()
+        {
+            if ( null === $this->ai ) {
+                $this->ai = false;
+
+                if ( $this->has_part( 'ai' ) ) {
+                    require_once $this->path( 'src/class-ai.php' );
+                    $this->ai = WordPlus_SDK_AI_Loader::load( $this );
+                    $this->ai = $this->ai ? $this->ai : false;
+                }
+            }
+
+            return $this->ai ? $this->ai : null;
+        }
+
+        public function ai_status()
+        {
+            if ( ! $this->has_part( 'ai' ) ) {
+                return array(
+                    'available' => false,
+                    'reason'    => 'missing',
+                    'php'       => PHP_VERSION,
+                    'needs'     => '',
+                    'message'   => _x( 'AI features are not part of this build of the plugin.', 'AI', 'wordplus-sdk' ),
+                );
+            }
+
+            require_once $this->path( 'src/class-ai.php' );
+
+            return WordPlus_SDK_AI_Loader::status();
+        }
+
+        public function run_ai_prices()
+        {
+            if ( $this->ai() ) {
+                $this->ai()->prices()->daily();
+            }
+        }
+
+        public function run_recording_sync()
+        {
+            if ( $this->recording() ) {
+                $this->recording()->sync()->run();
+            }
+        }
+
+        public function run_recording_sweep()
+        {
+            if ( $this->recording() ) {
+                $this->recording()->sync()->sweep();
+            }
+        }
+
+        public function recording_files_stored( $plugin, $ref, $files, $grant )
+        {
+            if ( is_array( $grant ) && isset( $grant['path'] ) && 0 === strpos( (string) $grant['path'], 'recordings/' ) && $this->recording() ) {
+                $this->recording()->files_stored( (string) $plugin, (int) $ref, is_array( $files ) ? $files : array(), $grant );
+            }
+        }
+
+        public function video_effects_after_update()
+        {
+            if ( $this->video_effects() ) {
+                $this->video_effects()->maybe_update();
+            }
         }
 
         public function toasts()
@@ -609,6 +822,30 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             }
 
             return $this->lightbox;
+        }
+
+        public function credits()
+        {
+            if ( null === $this->credits && $this->has_part( 'credits' ) ) {
+                require_once $this->path( 'src/class-credits.php' );
+                $this->credits = new WordPlus_SDK_Credits( $this );
+            }
+
+            return $this->credits;
+        }
+
+        public function run_credits_check()
+        {
+            if ( $this->credits() ) {
+                $this->credits()->check();
+            }
+        }
+
+        public function credits_notice()
+        {
+            if ( $this->has_part( 'credits' ) && get_option( 'wordplus_credits_spent' ) && $this->credits() ) {
+                $this->credits()->notice();
+            }
         }
 
         public function script_chain( array $handles )

@@ -732,16 +732,123 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
             }
 
             if ($platform === 'ios' && $type === 'development') {
-                return $this->get_ios_dev_build_info();
+                $result = $this->get_ios_dev_build_info();
             } else if ($platform === 'ios' && $type === 'production') {
-                return $this->get_ios_dist_build_info();
+                $result = $this->get_ios_dist_build_info();
             } else if ($platform === 'android' && $type === 'development') {
-                return $this->get_android_dev_build_info();
-            } else if ($platform === 'android' && $type === 'production') {
-                return $this->get_android_prod_build_info();
+                $result = $this->get_android_dev_build_info();
             } else {
-                return new WP_Error('not_implemented', 'This type of application is not implemented yet');
+                $result = $this->get_android_prod_build_info();
             }
+
+            if ( is_array( $result ) ) {
+                if ( $platform === 'ios' && Better_Messages()->mobile_app->links && isset( $result['build_info']['bundle']['id'], $result['build_info']['bundle']['identifier'] ) ) {
+                    Better_Messages()->mobile_app->links->remember_ios_identifier( (string) $result['build_info']['bundle']['id'], (string) $result['build_info']['bundle']['identifier'] );
+                }
+
+                $result['links'] = $this->check_link_files( $platform );
+            }
+
+            return $result;
+        }
+
+        public function get_links_host(): string
+        {
+            return strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+        }
+
+        public function get_links_prefix(): string
+        {
+            $path = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+
+            return trailingslashit( '/' . ltrim( $path, '/' ) ) . 'bm/open/';
+        }
+
+        public function check_link_files( string $platform ): array
+        {
+            $links = Better_Messages()->mobile_app->links;
+            $file  = $platform === 'ios' ? '/.well-known/apple-app-site-association' : '/.well-known/assetlinks.json';
+            $host  = (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+            $url   = 'https://' . $host . $file;
+
+            $result = array( 'url' => $url, 'ok' => false, 'message' => '' );
+
+            if ( ! $links ) {
+                return $result;
+            }
+
+            if ( $links->get_home_path() !== '/' ) {
+                $result['message'] = sprintf( _x( 'The site is not at the root of %s, so the app links file has to be served at %s by whatever answers there. Until it is, links open in the browser and website sign-in asks the member to continue.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $host, $url );
+                return $result;
+            }
+
+            $ours = $platform === 'ios' ? $links->get_apple_app_ids() : $links->get_android_statements();
+
+            if ( empty( $ours ) ) {
+                $result['message'] = $platform === 'ios'
+                    ? _x( 'The Team ID and the App IDs are needed before the site can name the app in its app links file.', 'WP Admin (Mobile App)', 'bp-better-messages' )
+                    : _x( 'The signing keystore and the Firebase app are needed before the site can name the app in its app links file.', 'WP Admin (Mobile App)', 'bp-better-messages' );
+                return $result;
+            }
+
+            $response = wp_remote_get( $url, array( 'timeout' => 10, 'redirection' => 0, 'headers' => array( 'Accept' => 'application/json' ) ) );
+
+            if ( is_wp_error( $response ) ) {
+                $result['message'] = sprintf( _x( 'The site could not fetch %1$s to check it: %2$s', 'WP Admin (Mobile App)', 'bp-better-messages' ), $url, $response->get_error_message() );
+                return $result;
+            }
+
+            $code = (int) wp_remote_retrieve_response_code( $response );
+            $data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+
+            $how = _x( 'The web server answers this address itself instead of passing it to WordPress. Ask the host to let requests for /.well-known/apple-app-site-association and /.well-known/assetlinks.json reach WordPress (on nginx, a location for /.well-known that falls through to index.php), and remove any file with that name from the .well-known folder.', 'WP Admin (Mobile App)', 'bp-better-messages' );
+
+            if ( $code >= 300 && $code < 400 ) {
+                $result['message'] = sprintf( _x( '%s redirects to another address, which Apple and Google do not follow.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $url ) . ' ' . $how;
+                return $result;
+            }
+
+            if ( $code !== 200 || ! is_array( $data ) ) {
+                $result['message'] = sprintf( _x( '%1$s answers %2$s instead of the app links file of this site.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $url, $code ) . ' ' . $how;
+                return $result;
+            }
+
+            $served = wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
+            $found  = true;
+
+            if ( $platform === 'ios' ) {
+                foreach ( $ours as $app_id ) {
+                    if ( strpos( $served, '"' . $app_id . '"' ) === false ) {
+                        $found = false;
+                    }
+                }
+            } else {
+                foreach ( $ours as $statement ) {
+                    if ( ! isset( $statement['target']['package_name'], $statement['target']['sha256_cert_fingerprints'] ) ) {
+                        continue;
+                    }
+
+                    if ( strpos( $served, '"' . $statement['target']['package_name'] . '"' ) === false ) {
+                        $found = false;
+                    }
+
+                    foreach ( $statement['target']['sha256_cert_fingerprints'] as $fingerprint ) {
+                        if ( strpos( $served, '"' . $fingerprint . '"' ) === false ) {
+                            $found = false;
+                        }
+                    }
+                }
+            }
+
+            if ( ! $found ) {
+                $result['message'] = sprintf( _x( '%s is served, but not with this app in it.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $url ) . ' ' . $how;
+                return $result;
+            }
+
+            $result['ok']      = true;
+            $result['message'] = sprintf( _x( '%s names this app.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $url );
+
+            return $result;
         }
 
         public function release_build( WP_REST_Request $request )
@@ -956,10 +1063,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('no_app_splash_color', 'The Application Splash Screen Color is not set');
             }
 
-            if( ! $settings['loginLogo'] ){
-                return new WP_Error('no_login_logo', 'The Application Login Logo is not set');
-            }
-
             if( ! $settings['androidNotificationIcon'] ){
                 return new WP_Error('no_android_notification_icon', 'The Android Notification Icon is not set');
             }
@@ -987,6 +1090,8 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 'site_id' => $fs_site->id,
                 'build_info' => [
                     'domain'                    => $domain,
+                    'links_host'                => $this->get_links_host(),
+                    'links_prefix'              => $this->get_links_prefix(),
                     'app_name'                  => $settings['androidAppNameProd'],
                     'app_icon'                  => $settings['appIcon'],
                     'app_splash'                => $settings['appSplash'],
@@ -1083,10 +1188,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('no_app_splash_color', 'The Application Splash Screen Color is not set');
             }
 
-            if( ! $settings['loginLogo'] ){
-                return new WP_Error('no_login_logo', 'The Application Login Logo is not set');
-            }
-
             if( ! $settings['androidNotificationIcon'] ){
                 return new WP_Error('no_android_notification_icon', 'The Android Notification Icon is not set');
             }
@@ -1105,6 +1206,8 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 'site_id' => $fs_site->id,
                 'build_info' => [
                     'domain'                    => $domain,
+                    'links_host'                => $this->get_links_host(),
+                    'links_prefix'              => $this->get_links_prefix(),
                     'app_name'                  => $settings['androidAppNameDev'],
                     'app_icon'                  => $settings['appIcon'],
                     'app_splash'                => $settings['appSplash'],
@@ -1298,10 +1401,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('no_app_splash_color', 'The Application Splash Screen Color is not set');
             }
 
-            if( ! $settings['loginLogo'] ){
-                return new WP_Error('no_login_logo', 'The Application Login Logo is not set');
-            }
-
             $api_url = esc_url_raw(get_rest_url(null, '/better-messages/v1/'));
 
             $credentials = get_option('better-messages-app-ios-auth', false);
@@ -1312,6 +1411,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 'site_id' => $fs_site->id,
                 'build_info' => [
                     'domain'              => $domain,
+                    'links_host'          => $this->get_links_host(),
                     'app_name'            => $settings['iosAppNameDev'],
                     'app_icon'            => $settings['appIcon'],
                     'app_splash'          => $settings['appSplash'],
@@ -1447,10 +1547,6 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 return new WP_Error('no_app_splash_color', 'The Application Splash Screen Color is not set');
             }
 
-            if( ! $settings['loginLogo'] ){
-                return new WP_Error('no_login_logo', 'The Application Login Logo is not set');
-            }
-
             $app_id = Better_Messages()->mobile_app->ios->get_app_id_from_bundle( $bundle['identifier'] );
 
             if( is_wp_error( $app_id ) ){
@@ -1499,6 +1595,7 @@ if ( ! class_exists('Better_Messages_Mobile_App_Builds') ) {
                 'site_id'  => $fs_site->id,
                 'build_info' => [
                     'domain'              => $domain,
+                    'links_host'          => $this->get_links_host(),
                     'app_name'            => $settings['iosAppName'],
                     'app_icon'            => $settings['appIcon'],
                     'app_splash'          => $settings['appSplash'],

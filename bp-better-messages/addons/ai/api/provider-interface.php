@@ -1,50 +1,162 @@
 <?php
 
-use BetterMessages\React\EventLoop\Loop;
-use BetterMessages\React\Http\Browser;
-use BetterMessages\React\Stream\ThroughStream;
-
 if( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
     abstract class Better_Messages_AI_Provider
     {
-        protected $api_key = '';
+        protected $api_key = null;
+
         protected $bot_api_key = '';
+
+        protected $bot_id = 0;
 
         abstract public function get_provider_id();
 
         abstract public function get_provider_name();
 
-        abstract public function check_api_key();
+        protected function build_request( $bot_id, $bot_user, $message, $ai_message_id, $stream )
+        {
+            return new \WP_Error( 'not_supported', 'This provider builds no request for the WordPlus SDK' );
+        }
 
-        abstract public function get_models();
+        public function is_sdk_provider()
+        {
+            return in_array( $this->get_provider_id(), Better_Messages_AI_Provider_Factory::PROVIDERS, true );
+        }
 
-        abstract public function get_supported_features();
+        public static function ai()
+        {
+            return function_exists( 'wordplus_ai' ) ? wordplus_ai() : null;
+        }
 
-        abstract public function getResponseGenerator( $bot_id, $bot_user, $message, $ai_message_id, $stream = true );
+        public static function owner( $bot_id )
+        {
+            return 'better-messages:bot:' . (int) $bot_id;
+        }
+
+        public function sdk()
+        {
+            $ai = self::ai();
+
+            if ( ! $ai ) {
+                return null;
+            }
+
+            return $ai->provider( $this->get_provider_id(), $this->api_key, $this->bot_id > 0 ? self::owner( $this->bot_id ) : '' );
+        }
 
         public function get_api_key()
         {
-            if ( ! empty( $this->bot_api_key ) ) {
-                return $this->bot_api_key;
+            if ( null !== $this->api_key ) {
+                return $this->api_key;
             }
-            return $this->api_key;
+
+            $ai = self::ai();
+
+            if ( $ai ) {
+                $key = $ai->keys()->get( $this->get_provider_id(), $this->bot_id > 0 ? self::owner( $this->bot_id ) : '' );
+
+                if ( '' !== $key ) {
+                    return $key;
+                }
+            }
+
+            return $this->is_sdk_provider() ? '' : (string) apply_filters( 'better_messages_ai_provider_global_key', '', $this->get_provider_id() );
         }
 
         public function set_api_key( $key )
         {
-            $this->api_key = $key;
+            $this->api_key = null === $key || '' === (string) $key ? null : (string) $key;
         }
 
         public function set_bot_api_key( $key )
         {
-            $this->bot_api_key = $key;
+            if ( ! empty( $key ) ) {
+                $this->bot_api_key = (string) $key;
+                $this->set_api_key( $key );
+            }
+        }
+
+        public function set_bot( $bot_id )
+        {
+            $this->bot_id = (int) $bot_id;
+        }
+
+        public function get_supported_features()
+        {
+            $ai = self::ai();
+
+            if ( ! $ai || ! $this->is_sdk_provider() ) {
+                return array();
+            }
+
+            return array_values( array_diff( $ai->provider( $this->get_provider_id(), '' )->features(), array( 'tools' ) ) );
         }
 
         public function supports( $feature )
         {
             return in_array( $feature, $this->get_supported_features() );
+        }
+
+        public function check_api_key()
+        {
+            $sdk   = $this->sdk();
+            $owner = $this->bot_id > 0 ? self::owner( $this->bot_id ) : '';
+
+            if ( ! $sdk || '' === $sdk->key() ) {
+                if ( '' === $owner ) {
+                    delete_option( 'better_messages_' . $this->get_provider_id() . '_error' );
+                }
+                return;
+            }
+
+            $result = $sdk->check();
+
+            if ( null === $this->api_key ) {
+                if ( is_wp_error( $result ) ) {
+                    self::ai()->keys()->mark( $this->get_provider_id(), false, WordPlus_SDK_AI_Http::kind_of( $result ), $result->get_error_message(), $owner );
+                } else {
+                    self::ai()->keys()->mark( $this->get_provider_id(), true, '', '', $owner );
+                }
+            }
+
+            if ( '' !== $owner ) {
+                return;
+            }
+
+            if ( is_wp_error( $result ) ) {
+                update_option( 'better_messages_' . $this->get_provider_id() . '_error', $result->get_error_message(), false );
+            } else {
+                delete_option( 'better_messages_' . $this->get_provider_id() . '_error' );
+            }
+        }
+
+        protected function models_options()
+        {
+            return array();
+        }
+
+        public function get_models()
+        {
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                return $this->no_sdk();
+            }
+
+            return $sdk->models( $this->models_options() );
+        }
+
+        public function get_models_fresh()
+        {
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                return $this->get_models();
+            }
+
+            return $sdk->models( array_merge( $this->models_options(), array( 'fresh' => true ) ) );
         }
 
         public function get_transcription_models()
@@ -64,17 +176,38 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
         public function generateSummary( $system_prompt, $user_content, $model = '', $max_tokens = 3000 )
         {
-            return new \WP_Error( 'not_supported', 'Summarization not supported by this provider' );
+            return $this->generateDigest( $system_prompt, $user_content, $model, $max_tokens );
         }
 
         public function generateDigest( $system_prompt, $user_content, $model = '', $max_tokens = 3000, $options = [] )
         {
-            return $this->generateSummary( $system_prompt, $user_content, $model, $max_tokens );
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                return $this->no_sdk();
+            }
+
+            return $sdk->complete( $system_prompt, $user_content, $model, $max_tokens, is_array( $options ) ? $options : array() );
         }
 
         public function cancel_response_api( $response_id )
         {
-            return true;
+            $sdk = $this->sdk();
+
+            return $sdk ? $sdk->cancel( $response_id ) : true;
+        }
+
+        protected static function unavailable()
+        {
+            $status = function_exists( 'wordplus_ai_status' ) ? wordplus_ai_status() : array();
+            $words  = ! empty( $status['message'] ) ? $status['message'] : 'AI features are not available on this site';
+
+            return new \WP_Error( 'ai_unavailable', $words );
+        }
+
+        protected function no_sdk()
+        {
+            return $this->is_sdk_provider() ? self::unavailable() : new \WP_Error( 'not_supported', 'Not supported by this provider' );
         }
 
         public function on_message_deleted( $message_id, $thread_id, $message )
@@ -91,42 +224,12 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
         protected function is_transient_error( $error_message )
         {
-            $transient_patterns = [
-                'high demand',
-                'rate limit',
-                'rate_limit',
-                'too many requests',
-                'overloaded',
-                'capacity',
-                'temporarily unavailable',
-                'server error',
-                'internal error',
-                'service unavailable',
-                'timeout',
-                'timed out',
-                'connection reset',
-                'connection refused',
-                '529',
-                '503',
-                '502',
-                '500',
-                '429',
-            ];
-
-            $lower = strtolower( $error_message );
-
-            foreach ( $transient_patterns as $pattern ) {
-                if ( strpos( $lower, $pattern ) !== false ) {
-                    return true;
-                }
-            }
-
-            return false;
+            return self::ai() && class_exists( 'WordPlus_SDK_AI_Http' ) ? WordPlus_SDK_AI_Http::transient( $error_message ) : false;
         }
 
-        protected function get_user_friendly_error( $error_message )
+        public function get_user_friendly_error( $error_message )
         {
-            $lower = strtolower( $error_message );
+            $lower = strtolower( (string) $error_message );
 
             if ( strpos( $lower, 'rate limit' ) !== false || strpos( $lower, 'rate_limit' ) !== false || strpos( $lower, 'too many requests' ) !== false || strpos( $lower, '429' ) !== false ) {
                 $friendly = __( 'The AI service is currently busy. Please try again in a moment.', 'bp-better-messages' );
@@ -243,6 +346,120 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             return $input;
         }
 
+        protected function attachment_part( $attachment_id, $bot_settings, array $context = array() )
+        {
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                return null;
+            }
+
+            $rules = $sdk->input_rules( isset( $bot_settings['model'] ) ? (string) $bot_settings['model'] : '', $context );
+            $input = $this->get_attachment_input( $attachment_id, $bot_settings, (array) $rules['images'], (array) $rules['links'], (int) $rules['link_max'] );
+
+            if ( ! $input ) {
+                return null;
+            }
+
+            $part = array(
+                'type' => $input['kind'] === 'image' ? 'image' : 'file',
+                'mime' => $input['mime'],
+                'name' => $input['name'],
+            );
+
+            if ( $input['url'] !== '' ) {
+                $part['url'] = $input['url'];
+            } else {
+                $part['data'] = $input['data'];
+            }
+
+            return $part;
+        }
+
+        protected function attachment_parts( $message_id, $bot_settings, array $context = array() )
+        {
+            $parts = array();
+
+            if ( empty( $bot_settings['images'] ) && empty( $bot_settings['files'] ) ) {
+                return $parts;
+            }
+
+            $attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
+
+            if ( empty( $attachments ) || ! is_array( $attachments ) ) {
+                return $parts;
+            }
+
+            foreach ( $attachments as $id => $url ) {
+                $part = $this->attachment_part( $id, $bot_settings, $context );
+
+                if ( $part ) {
+                    $parts[] = $part;
+                }
+            }
+
+            return $parts;
+        }
+
+        protected function sampling_request( $bot_settings )
+        {
+            $request = array();
+
+            if ( ! empty( $bot_settings['temperature'] ) && is_numeric( $bot_settings['temperature'] ) ) {
+                $request['temperature'] = floatval( $bot_settings['temperature'] );
+            }
+
+            if ( ! empty( $bot_settings['maxOutputTokens'] ) && intval( $bot_settings['maxOutputTokens'] ) > 0 ) {
+                $request['max_tokens'] = intval( $bot_settings['maxOutputTokens'] );
+            }
+
+            return $request;
+        }
+
+        protected function save_generated_image( $image, $ai_message_id, $bot_user, array $meta, array &$records )
+        {
+            if ( $ai_message_id <= 0 || empty( $image['data'] ) ) {
+                return array();
+            }
+
+            $format    = ! empty( $image['format'] ) ? (string) $image['format'] : 'png';
+            $name      = Better_Messages()->functions->random_string( 30 );
+            $temp_path = trailingslashit( sys_get_temp_dir() ) . $name;
+            $kept      = array();
+
+            try {
+                file_put_contents( $temp_path, base64_decode( (string) $image['data'] ) );
+
+                $file = [
+                    'name'     => $name . '.' . $format,
+                    'type'     => ! empty( $image['mime'] ) ? (string) $image['mime'] : 'image/' . $format,
+                    'tmp_name' => $temp_path,
+                    'error'    => 0,
+                    'size'     => filesize( $temp_path )
+                ];
+
+                $attachment_id = Better_Messages()->files->save_file( $file, $ai_message_id, absint( $bot_user->id ) * -1 );
+
+                if ( ! is_wp_error( $attachment_id ) ) {
+                    $kept['attachment_id'] = $attachment_id;
+
+                    foreach ( $meta as $key => $value ) {
+                        add_post_meta( $attachment_id, $key, $value, true );
+                    }
+
+                    $records[ $attachment_id ] = wp_get_attachment_url( $attachment_id );
+                    Better_Messages()->functions->update_message_meta( $ai_message_id, 'attachments', $records );
+                }
+            } catch ( \Throwable $e ) {
+            } finally {
+                if ( file_exists( $temp_path ) ) {
+                    @unlink( $temp_path );
+                }
+            }
+
+            return $kept;
+        }
+
         protected function prepare_voice_input( $bot_id, $message )
         {
             if ( ! isset( Better_Messages()->ai ) ) {
@@ -288,8 +505,13 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 } )();
             }
 
+            if ( $this->is_sdk_provider() ) {
+                return $this->getResponseGenerator( $bot_id, $bot_user, $message, $ai_message_id, $stream );
+            }
+
             $max_retries  = 3;
             $retry_delays = [ 5, 15, 30 ];
+            $first        = null;
 
             for ( $attempt = 0; $attempt <= $max_retries; $attempt++ ) {
                 if ( $attempt > 0 ) {
@@ -308,16 +530,8 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
                 $first = $gen->current();
 
-                if ( is_array( $first ) && $first[0] === 'error' ) {
-                    $is_transient = $this->is_transient_error( $first[1] );
-
-                    if ( defined( 'BM_DEBUG' ) ) {
-                        error_log( 'BM AI generator error [' . $this->get_provider_id() . '] attempt ' . ( $attempt + 1 ) . ': ' . $first[1] . ( $is_transient ? ' (transient)' : ' (permanent)' ) );
-                    }
-
-                    if ( $attempt < $max_retries && $is_transient ) {
-                        continue;
-                    }
+                if ( is_array( $first ) && $first[0] === 'error' && $attempt < $max_retries && $this->is_transient_error( $first[1] ) ) {
+                    continue;
                 }
 
                 return ( function () use ( $first, $gen ) {
@@ -335,6 +549,143 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             } )();
         }
 
+        public function getResponseGenerator( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
+        {
+            return $this->respond( $bot_id, $bot_user, $message, $ai_message_id, $stream );
+        }
+
+        protected function respond( $bot_id, $bot_user, $message, $ai_message_id, $stream = true )
+        {
+            $this->set_bot( $bot_id );
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                yield [ 'error', self::unavailable()->get_error_message() ];
+                return;
+            }
+
+            $request = $this->build_request( $bot_id, $bot_user, $message, $ai_message_id, $stream );
+
+            if ( is_wp_error( $request ) ) {
+                yield [ 'error', $request->get_error_message() ];
+                return;
+            }
+
+            yield from $sdk->respond( $request );
+        }
+
+        public function preview( $bot_id, $bot_user, $message, $ai_message_id = 0, $stream = true )
+        {
+            $this->set_bot( $bot_id );
+            $sdk = $this->sdk();
+
+            if ( ! $sdk ) {
+                return self::unavailable();
+            }
+
+            $request = $this->build_request( $bot_id, $bot_user, $message, $ai_message_id, $stream );
+
+            return is_wp_error( $request ) ? $request : $sdk->preview( $request );
+        }
+
+        protected function conversation( $bot_id, $bot_user, $message, $bot_settings )
+        {
+            $bot_user_id  = absint( $bot_user->id ) * -1;
+            $is_group     = $this->is_group_thread( $message->thread_id );
+            $sender_names = array();
+
+            if ( $is_group ) {
+                $context_limit = ! empty( $bot_settings['groupContextMessages'] ) ? intval( $bot_settings['groupContextMessages'] ) : 20;
+            } else {
+                $context_limit = ! empty( $bot_settings['contextMessages'] ) ? intval( $bot_settings['contextMessages'] ) : 0;
+            }
+
+            $summary_result  = $this->get_thread_messages_with_summary( $message->thread_id, $message->created_at, $context_limit, $bot_user_id, $bot_settings );
+            $thread_messages = $summary_result['messages'];
+            $summary_context = $summary_result['summary'];
+
+            if ( $is_group ) {
+                $sender_names = $this->resolve_sender_names( $thread_messages, $bot_user_id );
+            }
+
+            $this->enrich_with_reply_context( $thread_messages, $message, $sender_names );
+
+            $system = '';
+
+            if ( ! empty( $bot_settings['instruction'] ) ) {
+                $system = $this->get_bot_instruction( $bot_settings['instruction'], $bot_id, $message->sender_id, $message->thread_id, $message->id );
+            }
+
+            if ( $is_group ) {
+                $system .= $this->get_group_context_instruction( $sender_names, $bot_user_id, get_the_title( $bot_id ) );
+            }
+
+            if ( $summary_context ) {
+                $system .= "\n\nPrevious conversation summary:\n" . $summary_context;
+            }
+
+            return array(
+                'messages'     => $thread_messages,
+                'system'       => $system,
+                'summary'      => $summary_context,
+                'is_group'     => $is_group,
+                'sender_names' => $sender_names,
+                'bot_user_id'  => $bot_user_id,
+                'context'      => $context_limit,
+            );
+        }
+
+        protected function request_messages( array $conversation, $message, $bot_settings, $more = null, $empty = false )
+        {
+            $messages = array();
+
+            foreach ( $conversation['messages'] as $_message ) {
+                $is_error = Better_Messages()->functions->get_message_meta( $_message->id, 'ai_response_error' );
+                if ( $is_error ) continue;
+
+                $message_text = $this->get_context_text( $_message );
+
+                if ( trim( (string) $message_text ) === '' && (int) $_message->id !== (int) $message->id ) {
+                    $has_processable_attachments = false;
+                    if ( $bot_settings['images'] || $bot_settings['files'] ) {
+                        $check_attachments = Better_Messages()->functions->get_message_meta( $_message->id, 'attachments', true );
+                        $has_processable_attachments = ! empty( $check_attachments );
+                    }
+                    if ( ! $has_processable_attachments ) continue;
+                }
+
+                $role    = (int) $_message->sender_id === (int) $conversation['bot_user_id'] ? 'assistant' : 'user';
+                $content = array();
+
+                if ( $role === 'user' ) {
+                    if ( $conversation['is_group'] && trim( (string) $message_text ) !== '' ) {
+                        $message_text = $this->strip_mention_html( $message_text, $conversation['sender_names'] );
+                        $sid = (int) $_message->sender_id;
+                        $sender_label = isset( $conversation['sender_names'][ $sid ] ) ? $conversation['sender_names'][ $sid ] : 'User #' . abs( $sid );
+                        $message_text = '[' . $sender_label . ']: ' . $message_text;
+                    }
+
+                    $content = $this->attachment_parts( $_message->id, $bot_settings );
+                }
+
+                if ( $empty || trim( (string) $message_text ) !== '' ) {
+                    $content[] = array( 'type' => 'text', 'text' => (string) $message_text );
+                }
+
+                $entry = array( 'role' => $role, 'content' => $content );
+
+                if ( is_callable( $more ) ) {
+                    $entry = call_user_func( $more, $_message, $role, $entry );
+                }
+
+                if ( empty( $entry['content'] ) && empty( $entry['thoughts'] ) ) continue;
+
+                $messages[] = $entry;
+            }
+
+            return $messages;
+        }
+
         protected function get_bot_instruction( $instruction, $bot_id, $sender_id, $thread_id, $message_id )
         {
             $instruction = apply_filters( 'better_messages_ai_bot_instruction', $instruction, $bot_id, $sender_id, $thread_id, $message_id );
@@ -345,36 +696,6 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 '2.15.0',
                 'better_messages_ai_bot_instruction'
             );
-        }
-
-        protected function get_guzzle_client( $base_uri, $headers = [] )
-        {
-            $config = [
-                'base_uri' => $base_uri,
-                'headers'  => array_merge( [
-                    'Content-Type' => 'application/json',
-                ], $headers )
-            ];
-
-            return new \BetterMessages\GuzzleHttp\Client( $config );
-        }
-
-        protected function parse_guzzle_error( $e )
-        {
-            $error = $e->getMessage();
-
-            if ( method_exists( $e, 'getResponse' ) && $e->getResponse() ) {
-                $body = $e->getResponse()->getBody()->getContents();
-
-                try {
-                    $data = json_decode( $body, true );
-                    if ( isset( $data['error']['message'] ) ) {
-                        $error = $data['error']['message'];
-                    }
-                } catch ( \Exception $ignored ) {}
-            }
-
-            return $error;
         }
 
         protected function get_thread_messages( $thread_id, $up_to_created_at, $limit = 0, $exclude_welcome = false )
@@ -914,54 +1235,52 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 return;
             }
 
-            $loop    = Loop::get();
-            $browser = new Browser( $loop );
-            $stream  = new ThroughStream( function ( $data ) { return $data; } );
-
             $last_ping = time();
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_last_ping', $last_ping );
 
-            $parts         = [];
-            $pendingWrites = [];
-            $process       = null;
-            $provider      = $this;
-            $last_typing   = time();
+            $last_typing = time();
 
-            $streamWrite = function ( $data ) use ( $stream, &$pendingWrites, $recipient_user_id ) {
-                try {
-                    if ( ! is_object( $stream ) || ! method_exists( $stream, 'write' ) ) {
-                        return;
+            $options = array(
+                'on_tick'  => function () use ( &$last_ping, &$last_typing, $ai_message_id, $ai_thread_id, $ai_user_id ) {
+                    if ( time() - $last_ping >= 5 ) {
+                        $last_ping = time();
+                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_last_ping', $last_ping );
                     }
 
-                    if ( Better_Messages()->websocket && method_exists( Better_Messages()->websocket, 'seal_stream_chunk' ) ) {
-                        $data = Better_Messages()->websocket->seal_stream_chunk( $data, $recipient_user_id );
+                    if ( Better_Messages()->websocket && time() - $last_typing >= 2 ) {
+                        $last_typing = time();
+                        Better_Messages()->websocket->send_typing( $ai_thread_id, $ai_user_id );
                     }
+                },
+                'friendly' => array( $this, 'get_user_friendly_error' ),
+            );
 
-                    if ( ! empty( $pendingWrites ) && count( $stream->listeners( 'data' ) ) > 0 ) {
-                        foreach ( $pendingWrites as $buffered ) {
-                            $stream->write( $buffered );
-                        }
-                        $pendingWrites = [];
-                    }
+            if ( Better_Messages()->websocket && ! Better_Messages()->hooks->is_view_restricted( $recipient_user_id ) ) {
+                $websocket = Better_Messages()->websocket;
 
-                    if ( count( $stream->listeners( 'data' ) ) > 0 ) {
-                        $stream->write( $data );
-                    } else {
-                        $pendingWrites[] = $data;
-                    }
-                } catch ( \Throwable $e ) {}
-            };
+                $options['url']     = $websocket->api_server() . 'streamMessage';
+                $options['headers'] = [
+                    'x-site-id'            => $websocket->site_id,
+                    'x-secret-key'         => sha1( $websocket->site_id . $websocket->secret_key ),
+                    'x-message-id'         => $ai_message_id,
+                    'x-thread-id'          => $ai_thread_id,
+                    'x-recipient-user-id'  => $recipient_user_id,
+                    'x-sender-user-id'     => $ai_user_id,
+                ];
 
-            $fail = function ( $raw_error ) use ( $loop, $stream, $message_id, $ai_user_id, $ai_message_id, $ai_thread_id, $recipient_user_id, $provider, $streamWrite ) {
-                $user_error = $provider->get_user_friendly_error( $raw_error );
+                if ( method_exists( $websocket, 'seal_stream_chunk' ) ) {
+                    $options['seal'] = function ( $piece ) use ( $websocket, $recipient_user_id ) {
+                        return $websocket->seal_stream_chunk( $piece, $recipient_user_id );
+                    };
+                }
+            }
 
-                $streamWrite( $user_error );
+            $ai   = self::ai();
+            $done = $ai ? $ai->stream( $dataProvider, $options ) : array( 'status' => 'failed', 'text' => '', 'meta' => array(), 'error' => self::unavailable()->get_error_message() );
 
-                try {
-                    if ( is_object( $stream ) && method_exists( $stream, 'end' ) ) { $stream->end(); }
-                } catch ( \Throwable $e ) {}
-
-                $loop->stop();
+            if ( $done['status'] !== 'finished' ) {
+                $raw_error  = (string) $done['error'];
+                $user_error = $this->get_user_friendly_error( $raw_error );
 
                 $args = [
                     'sender_id'  => $ai_user_id,
@@ -981,104 +1300,36 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 Better_Messages()->functions->add_message_meta( $message_id, 'ai_response_error', $raw_error );
                 Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'failed' );
                 Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
-            };
 
-            $process = function () use ( &$process, &$last_ping, &$last_typing, $loop, $stream, $dataProvider, $message_id, $ai_user_id, $ai_message_id, $ai_thread_id, &$parts, &$pendingWrites, $recipient_user_id, $provider, $bot_id, $streamWrite, $fail ) {
-                if ( defined( 'BM_DEBUG' ) ) {
-                    file_put_contents( ABSPATH . 'ai-provider.log', time() . ' - tick' . "\n", FILE_APPEND | LOCK_EX );
-                }
-
-                if ( time() - $last_ping >= 5 ) {
-                    $last_ping = time();
-                    Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_last_ping', $last_ping );
-                }
-
-                if ( Better_Messages()->websocket && time() - $last_typing >= 2 ) {
-                    $last_typing = time();
-                    Better_Messages()->websocket->send_typing( $ai_thread_id, $ai_user_id );
-                }
-
-                if ( $dataProvider->valid() ) {
-                    $part = $dataProvider->current();
-
-                    if ( is_array( $part ) && $part[0] === 'error' ) {
-                        $fail( $part[1] );
-                        return;
-                    }
-
-                    if ( is_array( $part ) && $part[0] === 'finish' ) {
-                        try {
-                            if ( ! empty( $pendingWrites ) && is_object( $stream ) && method_exists( $stream, 'write' ) ) {
-                                foreach ( $pendingWrites as $buffered ) {
-                                    $stream->write( $buffered );
-                                }
-                                $pendingWrites = [];
-                            }
-                        } catch ( \Throwable $e ) {}
-
-                        $stream->end();
-                        $loop->stop();
-
-                        $raw_text = implode( '', $parts );
-
-                        $args = [
-                            'sender_id'  => $ai_user_id,
-                            'thread_id'  => $ai_thread_id,
-                            'message_id' => $ai_message_id,
-                            'content'    => '<!-- BM-AI -->' . $this->convert_mention_placeholders( htmlentities( $raw_text ) )
-                        ];
-
-                        Better_Messages()->functions->update_message( $args );
-
-                        $meta = $part[1];
-
-                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'completed' );
-                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_provider_meta', json_encode( $meta ) );
-                        Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_finish', time() );
-                        Better_Messages()->functions->delete_message_meta( $message_id, 'ai_waiting_for_response' );
-                        Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
-                        Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
-
-                        $cost_data = Better_Messages()->ai->calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $recipient_user_id, $ai_thread_id );
-
-                        do_action( 'better_messages_ai_response_completed', $ai_message_id, $message_id, $cost_data, $bot_id, $recipient_user_id );
-
-                        do_action( 'better_messages_thread_self_update', $ai_thread_id, $recipient_user_id );
-                        do_action( 'better_messages_thread_updated', $ai_thread_id, $recipient_user_id );
-
-                        $provider->on_response_completed( $ai_message_id, $message_id, $meta );
-
-                        return;
-                    }
-
-                    if ( is_string( $part ) ) {
-                        $parts[] = $part;
-                        $streamWrite( $part );
-                    }
-
-                    $dataProvider->next();
-
-                    $loop->futureTick( $process );
-                } else {
-                    $fail( 'response interrupted: the reply ended without a result' );
-                }
-            };
-
-            if ( Better_Messages()->websocket && ! Better_Messages()->hooks->is_view_restricted( $recipient_user_id ) ) {
-                $socket_server = Better_Messages()->websocket->api_server();
-                $bm_endpoint   = $socket_server . 'streamMessage';
-
-                $browser->post( $bm_endpoint, [
-                    'x-site-id'            => Better_Messages()->websocket->site_id,
-                    'x-secret-key'         => sha1( Better_Messages()->websocket->site_id . Better_Messages()->websocket->secret_key ),
-                    'x-message-id'         => $ai_message_id,
-                    'x-thread-id'          => $ai_thread_id,
-                    'x-recipient-user-id'  => $recipient_user_id,
-                    'x-sender-user-id'     => $ai_user_id,
-                ], $stream )->otherwise( function ( \Throwable $e ) {} );
+                return;
             }
 
-            $loop->futureTick( $process );
+            $args = [
+                'sender_id'  => $ai_user_id,
+                'thread_id'  => $ai_thread_id,
+                'message_id' => $ai_message_id,
+                'content'    => '<!-- BM-AI -->' . $this->convert_mention_placeholders( htmlentities( $done['text'] ) )
+            ];
+
+            Better_Messages()->functions->update_message( $args );
+
+            $meta = $done['meta'];
+
+            Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_status', 'completed' );
+            Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_provider_meta', json_encode( $meta ) );
+            Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_response_finish', time() );
+            Better_Messages()->functions->delete_message_meta( $message_id, 'ai_waiting_for_response' );
+            Better_Messages()->functions->delete_thread_meta( $ai_thread_id, 'ai_waiting_for_response' );
+            Better_Messages()->functions->delete_message_meta( $ai_message_id, 'ai_last_ping' );
+
+            $cost_data = Better_Messages()->ai->calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $recipient_user_id, $ai_thread_id );
+
+            do_action( 'better_messages_ai_response_completed', $ai_message_id, $message_id, $cost_data, $bot_id, $recipient_user_id );
+
+            do_action( 'better_messages_thread_self_update', $ai_thread_id, $recipient_user_id );
+            do_action( 'better_messages_thread_updated', $ai_thread_id, $recipient_user_id );
+
+            $this->on_response_completed( $ai_message_id, $message_id, $meta );
         }
     }
 }

@@ -690,6 +690,33 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
             return apply_filters( 'better_messages_user_email_scope', $scope, $user_id );
         }
 
+        public function can_have_group_conversations( $user_id )
+        {
+            global $wpdb;
+
+            $user_id = (int) $user_id;
+
+            if ( Better_Messages()->settings['disableGroupThreads'] !== '1' ) {
+                $can = true;
+            } else {
+                $recipients = bm_get_table( 'recipients' );
+                $threads    = bm_get_table( 'threads' );
+
+                $can = (bool) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT 1
+                    FROM `{$recipients}` `recipients`
+                    INNER JOIN `{$threads}` `threads` ON `threads`.`id` = `recipients`.`thread_id`
+                    WHERE `recipients`.`user_id` = %d
+                    AND `recipients`.`is_deleted` = 0
+                    AND ( `threads`.`type` <> 'thread' OR ( SELECT COUNT(*) FROM `{$recipients}` `others` WHERE `others`.`thread_id` = `recipients`.`thread_id` ) > 2 )
+                    LIMIT 1",
+                    $user_id
+                ) );
+            }
+
+            return (bool) apply_filters( 'better_messages_can_have_group_conversations', $can, $user_id );
+        }
+
         public function set_user_email_scope( $user_id, $scope )
         {
             $user_id = (int) $user_id;

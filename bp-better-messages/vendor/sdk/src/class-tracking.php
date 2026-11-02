@@ -784,7 +784,7 @@ if ( ! class_exists( 'WordPlus_SDK_Tracking' ) ) {
                     $first = $this->entry( $parent );
                     $this->opt_in( $product, $this->permissions( $parent ), isset( $first['source'] ) ? (string) $first['source'] : 'screen', isset( $first['profile'] ) ? (array) $first['profile'] : array(), 0, 0 );
                 }
-            } elseif ( '' === $state && ! $product->is_paid_build() && get_current_user_id() ) {
+            } elseif ( '' === $state && ! $product->is_paid_build() && false !== $product->get( 'optin_redirect', true ) && get_current_user_id() ) {
                 $entry             = $this->entry( $product, $network );
                 $entry['redirect'] = get_current_user_id();
                 $this->save( $product, $entry, $network );

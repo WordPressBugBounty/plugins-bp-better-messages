@@ -24,8 +24,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             add_filter('better_messages_get_user_roles', array($this, 'get_user_roles'), 10, 2 );
             add_filter( 'bp_better_messages_pre_format_message', array( $this, 'strip_ai_marker' ), 1, 4 );
 
-            if ( version_compare(phpversion(), '8.1', '>=') ) {
-                require_once "dependencies/autoload.php";
+            if ( self::available() ) {
                 require_once "api/provider-interface.php";
                 require_once "api/provider-factory.php";
                 if ( file_exists( __DIR__ . '/api/cloud-ai.php' ) ) {
@@ -43,8 +42,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 add_action( 'rest_api_init',  array( $this, 'rest_api_init' ) );
                 add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
 
-                add_action( 'bp_better_chat_settings_updated', array($this, 'check_if_api_key_valid'));
-
                 add_action( 'better_messages_message_sent', array( $this, 'on_message_sent'), 10, 1 );
                 add_action( 'better_messages_message_reply', array( $this, 'on_message_reply'), 10, 2 );
                 add_action( 'better_messages_before_message_delete', array( $this, 'before_delete_message' ), 10 , 3 );
@@ -61,11 +58,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 add_action('better_messages_ai_bot_ensure_completion', array( $this, 'ai_bot_ensure_completion'), 10, 2 );
                 add_action('better_messages_ai_ensure_completion_job', array( $this->api, 'ensureResponseCompletionJob' ) );
 
-                $moderationProvider = Better_Messages()->settings['aiModerationProvider'] ?? 'openai';
-                $moderationAvailable = ( $moderationProvider === 'bm' && Better_Messages()->functions->can_use_premium_code() )
-                    || ( $moderationProvider === 'openai' && ! empty( Better_Messages()->settings['openAiApiKey'] ) );
+                add_action( 'admin_init', array( $this, 'adopt_typed_keys' ) );
 
-                if( Better_Messages()->settings['aiModerationEnabled'] === '1' && $moderationAvailable ) {
+                $moderationProvider = Better_Messages()->settings['aiModerationProvider'] ?? 'openai';
+                $moderationEnabled  = Better_Messages()->settings['aiModerationEnabled'] === '1';
+                $moderationAvailable = $moderationEnabled && ( ( $moderationProvider === 'bm' && Better_Messages()->functions->can_use_premium_code() )
+                    || ( $moderationProvider === 'openai' && Better_Messages_AI_Provider_Factory::has_key( 'openai' ) ) );
+
+                if( $moderationEnabled && $moderationAvailable ) {
                     add_action( 'better_messages_before_message_send', array( $this, 'moderate_message_content' ), 15, 2 );
                     add_action( 'better_messages_before_new_thread', array( $this, 'moderate_message_content' ), 15, 2 );
                     add_action( 'better_messages_message_sent', array( $this, 'schedule_background_moderation' ), 10, 1 );
@@ -77,7 +77,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     }
                 }
 
-                list( $transcriptionProvider, $transcriptionAvailable ) = $this->is_transcription_available();
+                list( $transcriptionProvider, $transcriptionAvailable ) = class_exists( 'BP_Better_Messages_Voice_Messages' ) ? $this->is_transcription_available() : array( '', false );
 
                 if ( $transcriptionAvailable && class_exists( 'BP_Better_Messages_Voice_Messages' ) ) {
                     add_filter( 'better_messages_rest_message_meta', array( $this, 'voice_transcription_meta' ), 12, 4 );
@@ -108,6 +108,119 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function register_event()
         {
             Better_Messages_Worker()->add_task( 'better_messages_ai_ensure_completion_job', 5 * MINUTE_IN_SECONDS );
+        }
+
+        const KEY_SETTINGS = array(
+            'openAiApiKey'    => 'openai',
+            'anthropicApiKey' => 'anthropic',
+            'geminiApiKey'    => 'gemini',
+        );
+
+        public static function available()
+        {
+            if ( ! function_exists( 'wordplus_ai_status' ) ) {
+                return false;
+            }
+
+            $status = wordplus_ai_status();
+
+            return ! empty( $status['available'] );
+        }
+
+        public static function status()
+        {
+            if ( function_exists( 'wordplus_ai_status' ) ) {
+                return wordplus_ai_status();
+            }
+
+            return array( 'available' => false, 'reason' => 'missing', 'php' => PHP_VERSION, 'needs' => '', 'message' => '' );
+        }
+
+        public static function seal_typed_keys()
+        {
+            $ai = function_exists( 'wordplus_ai' ) ? wordplus_ai() : null;
+
+            if ( ! $ai ) {
+                return null;
+            }
+
+            $sealed = array( 'site' => array(), 'bots' => array() );
+            $stored = get_option( 'bp-better-chat-settings', array() );
+
+            if ( is_array( $stored ) ) {
+                $changed = false;
+
+                foreach ( self::KEY_SETTINGS as $setting => $provider ) {
+                    $typed = isset( $stored[ $setting ] ) ? trim( (string) $stored[ $setting ] ) : '';
+
+                    if ( $typed === '' ) {
+                        continue;
+                    }
+
+                    if ( $ai->keys()->adopt( $provider, $typed, '', 'better-messages' ) ) {
+                        $stored[ $setting ] = '';
+                        $sealed['site'][]   = $provider;
+                        $changed            = true;
+                    }
+                }
+
+                if ( $changed ) {
+                    update_option( 'bp-better-chat-settings', $stored );
+
+                    foreach ( array_keys( self::KEY_SETTINGS ) as $setting ) {
+                        if ( isset( Better_Messages()->settings[ $setting ] ) ) {
+                            Better_Messages()->settings[ $setting ] = '';
+                        }
+                    }
+                }
+            }
+
+            $bots = get_posts( array(
+                'post_type'        => 'bm-ai-chat-bot',
+                'post_status'      => array( 'publish', 'draft', 'pending', 'private', 'future', 'trash' ),
+                'numberposts'      => -1,
+                'fields'           => 'ids',
+                'suppress_filters' => true,
+            ) );
+
+            foreach ( $bots as $bot_id ) {
+                if ( self::seal_bot_key( (int) $bot_id ) ) {
+                    $sealed['bots'][] = (int) $bot_id;
+                }
+            }
+
+            return $sealed;
+        }
+
+        public static function seal_bot_key( $bot_id )
+        {
+            $ai       = function_exists( 'wordplus_ai' ) ? wordplus_ai() : null;
+            $settings = get_post_meta( $bot_id, 'bm-ai-chat-bot-settings', true );
+
+            if ( ! $ai || ! is_array( $settings ) || empty( $settings['apiKey'] ) || trim( (string) $settings['apiKey'] ) === '' ) {
+                return false;
+            }
+
+            $provider = ! empty( $settings['provider'] ) ? (string) $settings['provider'] : 'openai';
+
+            if ( ! $ai->keys()->adopt( $provider, $settings['apiKey'], Better_Messages_AI_Provider::owner( $bot_id ), 'better-messages' ) ) {
+                return false;
+            }
+
+            $settings['apiKey'] = '';
+            update_post_meta( $bot_id, 'bm-ai-chat-bot-settings', $settings );
+
+            return true;
+        }
+
+        public function adopt_typed_keys()
+        {
+            foreach ( array_keys( self::KEY_SETTINGS ) as $setting ) {
+                if ( ! empty( Better_Messages()->settings[ $setting ] ) ) {
+                    self::seal_typed_keys();
+                    return;
+                }
+            }
         }
 
         public function get_user_roles( $roles, $user_id )
@@ -175,7 +288,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                             $bot_settings = $this->get_bot_settings( $bot_id );
 
                             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-                            $has_api_key = ! empty( $bot_settings['apiKey'] ) || ! empty( Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id ) );
+                            $has_api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
                             if( $bot_settings['enabled'] !== '1' || empty( $bot_settings['model'] ) || ! $has_api_key ){
                                 $errors['bot_disabled'] = _x('The bot is currently disabled', 'AI Chat Bots', 'bp-better-messages');
@@ -394,6 +507,76 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             return false;
         }
 
+        public function bot_can_answer( $bot_id )
+        {
+            $bot_id = (int) $bot_id;
+
+            if ( $bot_id <= 0 || ! self::available() || ! class_exists( 'Better_Messages_AI_Provider_Factory' ) || ! $this->bot_exists( $bot_id ) ) {
+                return false;
+            }
+
+            $settings = $this->get_bot_settings( $bot_id );
+
+            if ( (string) $settings['enabled'] !== '1' || empty( $settings['model'] ) ) {
+                return false;
+            }
+
+            $provider_id = ! empty( $settings['provider'] ) ? $settings['provider'] : 'openai';
+
+            return ! empty( $settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
+        }
+
+        private $bot_users = null;
+
+        public function bot_users( $fresh = false )
+        {
+            if ( $fresh || null === $this->bot_users ) {
+                global $wpdb;
+
+                $rows = $wpdb->get_results( "SELECT `id`, `bot_id` FROM `" . bm_get_table( 'guests' ) . "` WHERE `bot_id` > 0 AND `deleted_at` IS NULL" );
+
+                $this->bot_users = array();
+
+                foreach ( (array) $rows as $row ) {
+                    $this->bot_users[ -1 * absint( $row->id ) ] = (int) $row->bot_id;
+                }
+            }
+
+            return $this->bot_users;
+        }
+
+        private function bots_answering()
+        {
+            $answering = array();
+
+            foreach ( $this->bot_users( true ) as $user_id => $bot_id ) {
+                $answering[ $user_id ] = $this->bot_can_answer( $bot_id );
+            }
+
+            return $answering;
+        }
+
+        private function bots_answering_changed( array $before )
+        {
+            foreach ( $this->bots_answering() as $user_id => $answers ) {
+                if ( ! isset( $before[ $user_id ] ) || $before[ $user_id ] !== $answers ) {
+                    $this->bot_user_changed( $user_id );
+                }
+            }
+        }
+
+        public function bot_user_changed( $user_id )
+        {
+            $user_id = (int) $user_id;
+
+            if ( $user_id >= 0 ) {
+                return;
+            }
+
+            Better_Messages()->users->update_last_changed( $user_id );
+            do_action( 'better_messages_user_updated', $user_id );
+        }
+
         public function is_bot_conversation( $bot_id, $thread_id )
         {
             $bot_thread_id = Better_Messages()->functions->get_thread_meta( $thread_id, 'ai_bot_thread' );
@@ -424,7 +607,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                                 $bot_settings = $this->get_bot_settings($bot_id);
 
                                 $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-                                $has_api_key = ! empty( $bot_settings['apiKey'] ) || ! empty( Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id ) );
+                                $has_api_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
                                 if ( $bot_settings['enabled'] !== '1' || empty( $bot_settings['model'] ) || ! $has_api_key ) {
                                     $allowed = false;
@@ -642,27 +825,14 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             delete_transient( 'bm_anthropic_models' );
             delete_transient( 'bm_gemini_models' );
 
-            if ( ! empty( Better_Messages()->settings['openAiApiKey'] ) ) {
-                $this->api->update_api_key();
-                $this->api->check_api_key();
-            } else {
-                delete_option( 'better_messages_openai_error' );
-            }
+            foreach ( Better_Messages_AI_Provider_Factory::PROVIDERS as $provider_id ) {
+                $provider = Better_Messages_AI_Provider_Factory::create( $provider_id );
 
-            if ( ! empty( Better_Messages()->settings['anthropicApiKey'] ) ) {
-                $provider = Better_Messages_AI_Provider_Factory::create( 'anthropic' );
-                $provider->set_api_key( Better_Messages()->settings['anthropicApiKey'] );
-                $provider->check_api_key();
-            } else {
-                delete_option( 'better_messages_anthropic_error' );
-            }
-
-            if ( ! empty( Better_Messages()->settings['geminiApiKey'] ) ) {
-                $provider = Better_Messages_AI_Provider_Factory::create( 'gemini' );
-                $provider->set_api_key( Better_Messages()->settings['geminiApiKey'] );
-                $provider->check_api_key();
-            } else {
-                delete_option( 'better_messages_gemini_error' );
+                if ( Better_Messages_AI_Provider_Factory::has_key( $provider_id ) ) {
+                    $provider->check_api_key();
+                } else {
+                    delete_option( 'better_messages_' . $provider_id . '_error' );
+                }
             }
         }
 
@@ -912,6 +1082,38 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'permission_callback' => array($this, 'user_is_admin'),
             ));
 
+            register_rest_route('better-messages/v1/admin/ai', '/keys', array(
+                array(
+                    'methods'             => 'GET',
+                    'callback'            => array( $this, 'rest_get_keys' ),
+                    'permission_callback' => array( $this, 'user_is_admin' ),
+                ),
+                array(
+                    'methods'             => 'POST',
+                    'callback'            => array( $this, 'rest_save_key' ),
+                    'permission_callback' => array( $this, 'user_is_admin' ),
+                ),
+            ));
+
+            register_rest_route('better-messages/v1/admin/ai', '/keys/remove', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_remove_key' ),
+                'permission_callback' => array( $this, 'user_is_admin' ),
+            ));
+
+            register_rest_route('better-messages/v1/admin/ai', '/prices', array(
+                array(
+                    'methods'             => 'GET',
+                    'callback'            => array( $this, 'rest_get_prices' ),
+                    'permission_callback' => array( $this, 'user_is_admin' ),
+                ),
+                array(
+                    'methods'             => 'POST',
+                    'callback'            => array( $this, 'rest_check_prices' ),
+                    'permission_callback' => array( $this, 'user_is_admin' ),
+                ),
+            ));
+
             register_rest_route('better-messages/v1/admin/ai', '/bots/(?P<id>\d+)/usage', array(
                 'methods' => 'GET',
                 'callback' => array( $this, 'rest_get_bot_usage'),
@@ -973,14 +1175,130 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $provider = Better_Messages_AI_Provider_Factory::create( 'openai' );
             }
 
-            $global_key = Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
-            $provider->set_api_key( $global_key );
+            $provider->set_bot( $bot_id );
 
             if ( ! empty( $settings['apiKey'] ) ) {
                 $provider->set_bot_api_key( $settings['apiKey'] );
+            } else if ( ! $provider->is_sdk_provider() ) {
+                $provider->set_api_key( $provider->get_api_key() );
             }
 
             return $provider;
+        }
+
+        public function rest_get_keys( WP_REST_Request $request )
+        {
+            $bot_id = (int) $request->get_param( 'botId' );
+
+            if ( $bot_id > 0 && ! $this->bot_exists( $bot_id ) ) {
+                return new WP_Error( 'not_found', 'Bot not found', array( 'status' => 404 ) );
+            }
+
+            return array(
+                'keys'   => (object) Better_Messages_AI_Provider_Factory::present_keys( $bot_id ),
+                'status' => self::status(),
+            );
+        }
+
+        public function rest_save_key( WP_REST_Request $request )
+        {
+            $provider_id = sanitize_text_field( (string) $request->get_param( 'provider' ) );
+            $key         = trim( sanitize_text_field( (string) $request->get_param( 'key' ) ) );
+            $bot_id      = (int) $request->get_param( 'botId' );
+            $ai          = Better_Messages_AI_Provider::ai();
+
+            if ( ! $ai ) {
+                return new WP_Error( 'ai_unavailable', self::status()['message'], array( 'status' => 400 ) );
+            }
+
+            if ( ! in_array( $provider_id, Better_Messages_AI_Provider_Factory::PROVIDERS, true ) ) {
+                return new WP_Error( 'invalid_provider', 'Unknown provider', array( 'status' => 400 ) );
+            }
+
+            if ( $key === '' ) {
+                return new WP_Error( 'no_api_key', _x( 'Please enter an API key first', 'Settings page', 'bp-better-messages' ), array( 'status' => 400 ) );
+            }
+
+            if ( $bot_id > 0 && ! $this->bot_exists( $bot_id ) ) {
+                return new WP_Error( 'not_found', 'Bot not found', array( 'status' => 404 ) );
+            }
+
+            $owner = $bot_id > 0 ? Better_Messages_AI_Provider::owner( $bot_id ) : '';
+
+            $answering = $this->bots_answering();
+
+            $ai->keys()->save( $provider_id, $key, $owner, array( 'by' => 'better-messages' ) );
+
+            if ( $owner === '' ) {
+                delete_transient( 'bm_' . $provider_id . '_models' );
+            }
+
+            $provider = Better_Messages_AI_Provider_Factory::create( $provider_id );
+            $provider->set_bot( $bot_id );
+            $provider->check_api_key();
+
+            $this->bots_answering_changed( $answering );
+
+            return array(
+                'keys'   => (object) Better_Messages_AI_Provider_Factory::present_keys( $bot_id ),
+                'status' => self::status(),
+            );
+        }
+
+        public function rest_remove_key( WP_REST_Request $request )
+        {
+            $provider_id = sanitize_text_field( (string) $request->get_param( 'provider' ) );
+            $bot_id      = (int) $request->get_param( 'botId' );
+            $ai          = Better_Messages_AI_Provider::ai();
+
+            if ( ! $ai ) {
+                return new WP_Error( 'ai_unavailable', self::status()['message'], array( 'status' => 400 ) );
+            }
+
+            if ( ! in_array( $provider_id, Better_Messages_AI_Provider_Factory::PROVIDERS, true ) ) {
+                return new WP_Error( 'invalid_provider', 'Unknown provider', array( 'status' => 400 ) );
+            }
+
+            if ( $bot_id > 0 && ! $this->bot_exists( $bot_id ) ) {
+                return new WP_Error( 'not_found', 'Bot not found', array( 'status' => 404 ) );
+            }
+
+            $answering = $this->bots_answering();
+
+            $ai->keys()->remove( $provider_id, $bot_id > 0 ? Better_Messages_AI_Provider::owner( $bot_id ) : '' );
+
+            if ( $bot_id <= 0 ) {
+                delete_option( 'better_messages_' . $provider_id . '_error' );
+            }
+
+            $this->bots_answering_changed( $answering );
+
+            return array(
+                'keys'   => (object) Better_Messages_AI_Provider_Factory::present_keys( $bot_id ),
+                'status' => self::status(),
+            );
+        }
+
+        public function rest_get_prices( WP_REST_Request $request )
+        {
+            $ai = Better_Messages_AI_Provider::ai();
+
+            if ( ! $ai ) {
+                return new WP_Error( 'ai_unavailable', self::status()['message'], array( 'status' => 400 ) );
+            }
+
+            return $ai->prices()->state();
+        }
+
+        public function rest_check_prices( WP_REST_Request $request )
+        {
+            $ai = Better_Messages_AI_Provider::ai();
+
+            if ( ! $ai ) {
+                return new WP_Error( 'ai_unavailable', self::status()['message'], array( 'status' => 400 ) );
+            }
+
+            return $ai->prices()->check();
         }
 
         public function handle_create_response( WP_REST_Request $request )
@@ -1128,23 +1446,27 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return $this->get_bot_provider( $bot_id );
             }
 
-            $provider = Better_Messages_AI_Provider_Factory::create( $provider_id );
-            $global_key = Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
-            $provider->set_api_key( $global_key );
-            return $provider;
+            return Better_Messages_AI_Provider_Factory::create( $provider_id );
         }
 
         public function handle_get_models( WP_REST_Request $request )
         {
             $provider_id = $request->get_param( 'provider' ) ?: 'openai';
             $api_key     = $request->get_param( 'apiKey' ) ?: '';
+            $bot_id      = (int) $request->get_param( 'botId' );
 
-            $provider   = Better_Messages_AI_Provider_Factory::create( $provider_id );
-            $global_key = Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
-            $provider->set_api_key( $global_key );
+            $provider = Better_Messages_AI_Provider_Factory::create( $provider_id );
+
+            if ( ! $provider ) {
+                return new WP_Error( 'invalid_provider', 'Unknown provider', array( 'status' => 400 ) );
+            }
+
+            if ( $bot_id > 0 && $this->bot_exists( $bot_id ) ) {
+                $provider->set_bot( $bot_id );
+            }
 
             if ( ! empty( $api_key ) ) {
-                $provider->set_bot_api_key( $api_key );
+                $provider->set_bot_api_key( sanitize_text_field( $api_key ) );
             }
 
             return $provider->get_models();
@@ -1154,9 +1476,11 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         {
             $provider_id = $request->get_param( 'provider' ) ?: 'openai';
 
-            $provider   = Better_Messages_AI_Provider_Factory::create( $provider_id );
-            $global_key = Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
-            $provider->set_api_key( $global_key );
+            $provider = Better_Messages_AI_Provider_Factory::create( $provider_id );
+
+            if ( ! $provider ) {
+                return new WP_Error( 'invalid_provider', 'Unknown provider', array( 'status' => 400 ) );
+            }
 
             return $provider->get_transcription_models();
         }
@@ -1342,6 +1666,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $params = $request->get_json_params();
 
+            $answered = $this->bot_can_answer( $bot_id );
+
             if ( isset( $params['name'] ) ) {
                 $name = sanitize_text_field( $params['name'] );
                 if ( ! empty( $name ) ) {
@@ -1404,11 +1730,37 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $merged = wp_parse_args( $new_settings, $old_settings );
                 $merged = wp_parse_args( $merged, $defaults );
 
+                $merged = $this->seal_typed_bot_key( $bot_id, $merged );
+
                 update_post_meta( $bot_id, 'bm-ai-chat-bot-settings', $merged );
+            }
+
+            $bot_user = $this->get_bot_user( $bot_id );
+
+            if ( $bot_user && $this->bot_can_answer( $bot_id ) !== $answered ) {
+                $this->bot_user_changed( -1 * absint( $bot_user->id ) );
             }
 
             $post = get_post( $bot_id );
             return $this->format_bot_for_rest( $post );
+        }
+
+        private function seal_typed_bot_key( $bot_id, array $settings )
+        {
+            $ai  = Better_Messages_AI_Provider::ai();
+            $key = isset( $settings['apiKey'] ) ? trim( (string) $settings['apiKey'] ) : '';
+
+            if ( ! $ai || $key === '' ) {
+                return $settings;
+            }
+
+            $provider_id = ! empty( $settings['provider'] ) ? (string) $settings['provider'] : 'openai';
+
+            if ( $ai->keys()->save( $provider_id, $key, Better_Messages_AI_Provider::owner( $bot_id ), array( 'by' => 'better-messages' ) ) ) {
+                $settings['apiKey'] = '';
+            }
+
+            return $settings;
         }
 
         public function rest_delete_bot( WP_REST_Request $request )
@@ -1430,6 +1782,15 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
 
             wp_delete_post( $bot_id, true );
+
+            $ai = Better_Messages_AI_Provider::ai();
+            if ( $ai ) {
+                $ai->keys()->forget_owner( Better_Messages_AI_Provider::owner( $bot_id ) );
+            }
+
+            if ( $bot_user ) {
+                $this->bot_user_changed( -1 * absint( $bot_user->id ) );
+            }
 
             return array( 'success' => true );
         }
@@ -1785,6 +2146,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         {
             $provider_id = sanitize_text_field( $request->get_param('provider') );
             $api_key     = sanitize_text_field( $request->get_param('apiKey') );
+            $bot_id      = (int) $request->get_param( 'botId' );
 
             if ( empty( $provider_id ) ) {
                 return new WP_Error( 'missing_provider', 'Provider is required', array( 'status' => 400 ) );
@@ -1799,23 +2161,26 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( ! empty( $api_key ) ) {
                 $provider->set_api_key( $api_key );
             } else {
-                $global_key = Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id );
-                if ( empty( $global_key ) ) {
+                if ( $bot_id > 0 && $this->bot_exists( $bot_id ) ) {
+                    $provider->set_bot( $bot_id );
+                }
+
+                if ( ! Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id ) ) {
                     return new WP_Error( 'no_api_key', 'No API key configured', array( 'status' => 400 ) );
                 }
-                $provider->set_api_key( $global_key );
             }
 
-            $cache_keys = array(
-                'openai'    => 'bm_openai_models',
-                'anthropic' => 'bm_anthropic_models',
-                'gemini'    => 'bm_gemini_models',
-            );
-            if ( isset( $cache_keys[ $provider_id ] ) ) {
-                delete_transient( $cache_keys[ $provider_id ] );
-            }
+            $models = $provider->get_models_fresh();
 
-            $models = $provider->get_models();
+            if ( empty( $api_key ) && Better_Messages_AI_Provider::ai() ) {
+                $owner = $bot_id > 0 && $this->bot_exists( $bot_id ) ? Better_Messages_AI_Provider::owner( $bot_id ) : '';
+
+                if ( is_wp_error( $models ) ) {
+                    Better_Messages_AI_Provider::ai()->keys()->mark( $provider_id, false, WordPlus_SDK_AI_Http::kind_of( $models ), $models->get_error_message(), $owner );
+                } else {
+                    Better_Messages_AI_Provider::ai()->keys()->mark( $provider_id, true, '', '', $owner );
+                }
+            }
 
             if ( is_wp_error( $models ) ) {
                 return new WP_REST_Response( array(
@@ -1939,46 +2304,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $bot_id
             ) );
 
-            $grand_input = 0;
-            $grand_output = 0;
-            $grand_thinking = 0;
-            $grand_cache_read = 0;
-            $grand_cache_write = 0;
-            $grand_images = 0;
-            $grand_image_cost = 0;
-            $grand_total_cost = 0;
-            $has_any_cost = false;
-
-            foreach ( $all_cost_rows as $cost_json ) {
-                $cost = json_decode( $cost_json, true );
-                if ( ! is_array( $cost ) ) continue;
-
-                $grand_input       += (int) ( $cost['inputTokens'] ?? 0 );
-                $grand_output      += (int) ( $cost['outputTokens'] ?? 0 );
-                $grand_thinking    += (int) ( $cost['thinkingTokens'] ?? 0 );
-                $grand_cache_read  += (int) ( $cost['cacheReadTokens'] ?? 0 );
-                $grand_cache_write += (int) ( $cost['cacheWriteTokens'] ?? 0 );
-                $grand_images      += (int) ( $cost['imagesCount'] ?? 0 );
-                $grand_image_cost  += (float) ( $cost['imageCost'] ?? 0 );
-                if ( isset( $cost['totalCost'] ) ) {
-                    $grand_total_cost += (float) $cost['totalCost'];
-                    $has_any_cost = true;
-                }
-            }
-
-            $totals = array(
-                'inputTokens'      => $grand_input,
-                'outputTokens'     => $grand_output,
-                'thinkingTokens'   => $grand_thinking,
-                'cacheReadTokens'  => $grand_cache_read,
-                'cacheWriteTokens' => $grand_cache_write,
-                'imagesCount'      => $grand_images,
-                'imageCost'        => round( $grand_image_cost, 6 ),
-            );
-
-            if ( $has_any_cost ) {
-                $totals['totalCost'] = round( $grand_total_cost, 6 );
-            }
+            $ai     = Better_Messages_AI_Provider::ai();
+            $totals = $ai ? $ai->totals( $all_cost_rows ) : $empty['totals'];
 
             $grand_points = (int) $wpdb->get_var( $wpdb->prepare(
                 "SELECT COALESCE(SUM(points_charged), 0) FROM {$ai_usage_table} WHERE bot_id = %d",
@@ -2069,516 +2396,110 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         private function parse_usage_tokens( $usage, $provider = '' )
         {
-            $result = array(
-                'inputTokens'      => 0,
-                'outputTokens'     => 0,
-                'thinkingTokens'   => 0,
-                'cacheReadTokens'  => 0,
-                'cacheWriteTokens' => 0,
+            $ai = Better_Messages_AI_Provider::ai();
+
+            return $ai ? $ai->usage( $usage, $provider ) : array(
+                'inputTokens'       => 0,
+                'outputTokens'      => 0,
+                'thinkingTokens'    => 0,
+                'cacheReadTokens'   => 0,
+                'cacheWriteTokens'  => 0,
                 'audioInputTokens'  => 0,
                 'audioOutputTokens' => 0,
             );
-
-            if ( isset( $usage['input_tokens'] ) ) {
-                $result['inputTokens']  = (int) $usage['input_tokens'];
-                $result['outputTokens'] = (int) ( $usage['output_tokens'] ?? 0 );
-
-                if ( isset( $usage['cache_read_input_tokens'] ) ) {
-                    $result['cacheReadTokens'] = (int) $usage['cache_read_input_tokens'];
-                }
-                if ( isset( $usage['cache_creation_input_tokens'] ) ) {
-                    $result['cacheWriteTokens'] = (int) $usage['cache_creation_input_tokens'];
-                }
-
-                if ( isset( $usage['input_tokens_details']['cached_tokens'] ) ) {
-                    $result['cacheReadTokens'] = (int) $usage['input_tokens_details']['cached_tokens'];
-                }
-
-                if ( isset( $usage['output_tokens_details']['reasoning_tokens'] ) ) {
-                    $result['thinkingTokens'] = (int) $usage['output_tokens_details']['reasoning_tokens'];
-                }
-
-                if ( isset( $usage['input_tokens_details']['audio_tokens'] ) ) {
-                    $result['audioInputTokens'] = (int) $usage['input_tokens_details']['audio_tokens'];
-                }
-                if ( isset( $usage['output_tokens_details']['audio_tokens'] ) ) {
-                    $result['audioOutputTokens'] = (int) $usage['output_tokens_details']['audio_tokens'];
-                }
-            } else if ( isset( $usage['promptTokenCount'] ) ) {
-                $result['inputTokens']  = (int) $usage['promptTokenCount'];
-                $result['outputTokens'] = (int) ( $usage['candidatesTokenCount'] ?? 0 );
-
-                if ( isset( $usage['thoughtsTokenCount'] ) ) {
-                    $thinking = (int) $usage['thoughtsTokenCount'];
-                    $result['thinkingTokens'] = $thinking;
-                    $result['outputTokens'] += $thinking;
-                }
-
-                if ( isset( $usage['cachedContentTokenCount'] ) ) {
-                    $result['cacheReadTokens'] = (int) $usage['cachedContentTokenCount'];
-                }
-            } else if ( isset( $usage['total_tokens'] ) ) {
-                $result['inputTokens']  = (int) ( $usage['prompt_tokens'] ?? 0 );
-                $result['outputTokens'] = (int) ( $usage['completion_tokens'] ?? 0 );
-
-                if ( isset( $usage['prompt_tokens_details']['cached_tokens'] ) ) {
-                    $result['cacheReadTokens'] = (int) $usage['prompt_tokens_details']['cached_tokens'];
-                }
-
-                if ( isset( $usage['completion_tokens_details']['reasoning_tokens'] ) ) {
-                    $result['thinkingTokens'] = (int) $usage['completion_tokens_details']['reasoning_tokens'];
-                }
-
-                if ( isset( $usage['prompt_tokens_details']['audio_tokens'] ) ) {
-                    $result['audioInputTokens'] = (int) $usage['prompt_tokens_details']['audio_tokens'];
-                }
-                if ( isset( $usage['completion_tokens_details']['audio_tokens'] ) ) {
-                    $result['audioOutputTokens'] = (int) $usage['completion_tokens_details']['audio_tokens'];
-                }
-            }
-
-            return $result;
         }
 
         public function get_tool_pricing()
         {
-            return array(
-                'web_search'       => 0.01,
-                'file_search'      => 0.0025,
-                'gemini_search_2x' => 0.035,
-                'gemini_search_3x' => 0.014,
-            );
+            $ai = Better_Messages_AI_Provider::ai();
+
+            return $ai ? $ai->catalogue()->tool_pricing() : array();
         }
 
         public function get_web_search_usage( $meta )
         {
-            $provider = isset( $meta['provider'] ) ? $meta['provider'] : '';
-            $model    = isset( $meta['model'] ) ? $meta['model'] : '';
+            $ai = Better_Messages_AI_Provider::ai();
 
-            $calls = isset( $meta['web_search_calls'] ) ? (int) $meta['web_search_calls'] : 0;
-
-            if ( $calls === 0 && $provider === 'anthropic' && isset( $meta['usage']['server_tool_use']['web_search_requests'] ) ) {
-                $calls = (int) $meta['usage']['server_tool_use']['web_search_requests'];
-            }
-
-            if ( $calls <= 0 ) {
-                return array( 'calls' => 0, 'cost' => 0 );
-            }
-
-            $tool_pricing = $this->get_tool_pricing();
-
-            if ( $provider === 'gemini' ) {
-                $price = preg_match( '/gemini-3/', $model ) ? $tool_pricing['gemini_search_3x'] : $tool_pricing['gemini_search_2x'];
-            } else if ( $provider === 'openai' || $provider === 'anthropic' ) {
-                $price = $tool_pricing['web_search'];
-            } else {
-                $price = 0;
-            }
-
-            return array( 'calls' => $calls, 'cost' => $calls * $price );
+            return $ai ? $ai->costs()->web_search( $meta ) : array( 'calls' => 0, 'cost' => 0 );
         }
 
         private function calc_image_cost( $images )
         {
-            if ( empty( $images ) || ! is_array( $images ) ) {
-                return 0;
-            }
+            $ai = Better_Messages_AI_Provider::ai();
 
-            $pricing = $this->get_image_pricing();
-
-            $total = 0;
-            foreach ( $images as $img ) {
-                $model   = isset( $img['model'] ) ? $img['model'] : 'gpt-image-1';
-                $quality = isset( $img['quality'] ) ? $img['quality'] : 'medium';
-                $size    = isset( $img['size'] ) ? $img['size'] : '1024x1024';
-
-                if ( $quality === 'auto' ) $quality = 'medium';
-                if ( $size === 'auto' )    $size = '1024x1024';
-
-                if ( ! isset( $pricing[ $model ] ) ) {
-                    $model = preg_replace( '/-(preview|latest)$/', '', $model );
-                }
-
-                if ( isset( $pricing[ $model ][ $quality ][ $size ] ) ) {
-                    $total += $pricing[ $model ][ $quality ][ $size ];
-                } else if ( isset( $pricing[ $model ]['default'][ $size ] ) ) {
-                    $total += $pricing[ $model ]['default'][ $size ];
-                } else if ( isset( $pricing[ $model ]['default'] ) ) {
-                    $sizes = $pricing[ $model ]['default'];
-                    $total += reset( $sizes );
-                } else if ( isset( $pricing[ $model ]['medium']['1024x1024'] ) ) {
-                    $total += $pricing[ $model ]['medium']['1024x1024'];
-                }
-            }
-
-            return round( $total, 6 );
+            return $ai ? $ai->costs()->images( $images ) : 0;
         }
 
         public function get_image_token_pricing()
         {
-            return array(
-                'gpt-image-1'      => array( 'textInput' => 5.00, 'imageInput' => 10.00, 'textOutput' => 0,     'imageOutput' => 40.00 ),
-                'gpt-image-1-mini' => array( 'textInput' => 2.00, 'imageInput' => 2.50,  'textOutput' => 0,     'imageOutput' => 8.00 ),
-                'gpt-image-1.5'    => array( 'textInput' => 5.00, 'imageInput' => 8.00,  'textOutput' => 10.00, 'imageOutput' => 32.00 ),
-                'gpt-image-2'      => array( 'textInput' => 5.00, 'imageInput' => 8.00,  'textOutput' => 0,     'imageOutput' => 30.00 ),
-            );
+            $ai = Better_Messages_AI_Provider::ai();
+
+            return $ai ? $ai->catalogue()->image_tokens() : array();
         }
 
         private function calc_image_token_cost( $generation )
         {
-            if ( ! is_array( $generation ) || empty( $generation['model'] ) || empty( $generation['usage'] ) || ! is_array( $generation['usage'] ) ) {
-                return null;
-            }
+            $ai = Better_Messages_AI_Provider::ai();
 
-            $pricing = $this->get_image_token_pricing();
-            $model   = (string) $generation['model'];
-
-            if ( ! isset( $pricing[ $model ] ) ) {
-                return null;
-            }
-
-            $prices = $pricing[ $model ];
-            $usage  = $generation['usage'];
-            $in     = isset( $usage['input_tokens_details'] ) && is_array( $usage['input_tokens_details'] ) ? $usage['input_tokens_details'] : null;
-            $out    = isset( $usage['output_tokens_details'] ) && is_array( $usage['output_tokens_details'] ) ? $usage['output_tokens_details'] : null;
-
-            $text_input   = $in ? (int) ( $in['text_tokens'] ?? 0 ) : (int) ( $usage['input_tokens'] ?? 0 );
-            $image_input  = $in ? (int) ( $in['image_tokens'] ?? 0 ) : 0;
-            $text_output  = $out ? (int) ( $out['text_tokens'] ?? 0 ) : 0;
-            $image_output = $out ? (int) ( $out['image_tokens'] ?? 0 ) : (int) ( $usage['output_tokens'] ?? 0 );
-
-            $cost = $text_input * $prices['textInput']
-                  + $image_input * $prices['imageInput']
-                  + $text_output * $prices['textOutput']
-                  + $image_output * $prices['imageOutput'];
-
-            return array(
-                'cost'         => round( $cost / 1000000, 6 ),
-                'inputTokens'  => $text_input + $image_input,
-                'outputTokens' => $text_output + $image_output,
-            );
+            return $ai ? $ai->costs()->image_tokens( $generation ) : null;
         }
 
         public function get_model_pricing_rules()
         {
-            $this->get_model_pricing( '', '' );
+            $ai = Better_Messages_AI_Provider::ai();
 
-            $result = array();
-            foreach ( array( 'anthropic', 'openai', 'gemini' ) as $provider ) {
-                $result[ $provider ] = array();
-            }
-
-            $rules = $this->get_pricing_rules_raw();
-
-            foreach ( $rules as $provider => $provider_rules ) {
-                $result[ $provider ] = array();
-                foreach ( $provider_rules as $rule ) {
-                    $pattern = trim( $rule[0], '/' );
-                    $result[ $provider ][] = array( $pattern, $rule[1] );
-                }
-            }
-
-            return $result;
+            return $ai ? $ai->catalogue()->pricing_rules() : array( 'anthropic' => array(), 'openai' => array(), 'gemini' => array() );
         }
 
         private function get_pricing_rules_raw()
         {
-            static $rules = null;
+            $raw = array();
 
-            if ( $rules === null ) {
-                $rules = array(
-                    'anthropic' => array(
-                        array( '/claude-(fable|mythos)-5-1/', array( 'input' => 10, 'output' => 50,   'cacheRead' => 0.25,  'cacheWrite' => 12.50 ) ),
-                        array( '/claude-(fable|mythos)-5/',   array( 'input' => 10, 'output' => 50,   'cacheRead' => 1,     'cacheWrite' => 12.50 ) ),
-                        array( '/claude-opus-5-5/',     array( 'input' => 4,     'output' => 20,   'cacheRead' => 0.20,  'cacheWrite' => 5 ) ),
-                        array( '/claude-opus-5/',       array( 'input' => 5,     'output' => 25,   'cacheRead' => 0.50,  'cacheWrite' => 6.25 ) ),
-                        array( '/claude-opus-4-[5-8]/', array( 'input' => 5,     'output' => 25,   'cacheRead' => 0.50,  'cacheWrite' => 6.25 ) ),
-                        array( '/claude-opus-4-1/',     array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
-                        array( '/claude-opus-4/',       array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
-                        array( '/claude-sonnet-5-5/',   array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.10,  'cacheWrite' => 2.50 ) ),
-                        array( '/claude-sonnet-5/',     array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.20,  'cacheWrite' => 2.50 ) ),
-                        array( '/claude-sonnet-4/',     array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
-                        array( '/claude-3-7-sonnet/',   array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
-                        array( '/claude-3-5-sonnet/',   array( 'input' => 3,     'output' => 15,   'cacheRead' => 0.30,  'cacheWrite' => 3.75 ) ),
-                        array( '/claude-haiku-5-5/',    array( 'input' => 0.10,  'output' => 0.50, 'cacheRead' => 0.01,  'cacheWrite' => 0.125 ) ),
-                        array( '/claude-haiku-4/',      array( 'input' => 1,     'output' => 5,    'cacheRead' => 0.10,  'cacheWrite' => 1.25 ) ),
-                        array( '/claude-3-5-haiku/',    array( 'input' => 0.80,  'output' => 4,    'cacheRead' => 0.08,  'cacheWrite' => 1 ) ),
-                        array( '/claude-3-opus/',       array( 'input' => 15,    'output' => 75,   'cacheRead' => 1.50,  'cacheWrite' => 18.75 ) ),
-                        array( '/claude-3-haiku/',      array( 'input' => 0.25,  'output' => 1.25, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
-                    ),
-                    'openai' => array(
-                        array( '/gpt-6-astra/',           array( 'input' => 10,    'output' => 50,   'cacheRead' => 1,     'cacheWrite' => 10 ) ),
-                        array( '/gpt-6\\.1-sol/',          array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.10,  'cacheWrite' => 2 ) ),
-                        array( '/gpt-6-sol/',             array( 'input' => 2,     'output' => 10,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
-                        array( '/gpt-6-luna/',            array( 'input' => 0.10,  'output' => 0.50, 'cacheRead' => 0.01,  'cacheWrite' => 0.10 ) ),
-                        array( '/gpt-5\\.6-luna/',         array( 'input' => 0.20,  'output' => 1.20, 'cacheRead' => 0.02,  'cacheWrite' => 0.20 ) ),
-                        array( '/gpt-5\\.6-sol/',          array( 'input' => 4,     'output' => 20,   'cacheRead' => 0.40,  'cacheWrite' => 4 ) ),
-                        array( '/gpt-5\\.6-terra/',        array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
-                        array( '/gpt-5\\.5-pro/',          array( 'input' => 30,    'output' => 180,  'cacheRead' => 30,    'cacheWrite' => 30 ) ),
-                        array( '/gpt-5\\.5/',              array( 'input' => 5,     'output' => 30,   'cacheRead' => 0.50,  'cacheWrite' => 5 ) ),
-                        array( '/gpt-5\\.4-pro/',          array( 'input' => 30,    'output' => 180,  'cacheRead' => 30,    'cacheWrite' => 30 ) ),
-                        array( '/gpt-5\\.4-mini/',         array( 'input' => 0.75,  'output' => 4.50, 'cacheRead' => 0.075, 'cacheWrite' => 0.75 ) ),
-                        array( '/gpt-5\\.4-nano/',         array( 'input' => 0.20,  'output' => 1.25, 'cacheRead' => 0.02,  'cacheWrite' => 0.20 ) ),
-                        array( '/gpt-5\\.4/',              array( 'input' => 2.50,  'output' => 15,   'cacheRead' => 0.25,  'cacheWrite' => 2.50 ) ),
-                        array( '/gpt-5\\.3/',              array( 'input' => 1.75,  'output' => 14,   'cacheRead' => 0.175, 'cacheWrite' => 1.75 ) ),
-                        array( '/gpt-5\\.2-pro/',          array( 'input' => 21,    'output' => 168,  'cacheRead' => 21,    'cacheWrite' => 21 ) ),
-                        array( '/gpt-5\\.2/',              array( 'input' => 1.75,  'output' => 14,   'cacheRead' => 0.175, 'cacheWrite' => 1.75 ) ),
-                        array( '/gpt-5\\.1-codex-mini/',   array( 'input' => 0.25,  'output' => 2,    'cacheRead' => 0.025, 'cacheWrite' => 0.25 ) ),
-                        array( '/gpt-5\\.1/',              array( 'input' => 1.25,  'output' => 10,   'cacheRead' => 0.125, 'cacheWrite' => 1.25 ) ),
-                        array( '/gpt-5-pro/',             array( 'input' => 15,    'output' => 120,  'cacheRead' => 15,    'cacheWrite' => 15 ) ),
-                        array( '/gpt-5-nano/',            array( 'input' => 0.05,  'output' => 0.40, 'cacheRead' => 0.005, 'cacheWrite' => 0.05 ) ),
-                        array( '/gpt-5-mini/',            array( 'input' => 0.25,  'output' => 2,    'cacheRead' => 0.025, 'cacheWrite' => 0.25 ) ),
-                        array( '/gpt-5-search/',          array( 'input' => 1.25,  'output' => 10,   'cacheRead' => 0.125, 'cacheWrite' => 1.25 ) ),
-                        array( '/gpt-5/',                 array( 'input' => 1.25,  'output' => 10,   'cacheRead' => 0.125, 'cacheWrite' => 1.25 ) ),
-                        array( '/gpt-4\\.1-nano/',         array( 'input' => 0.10,  'output' => 0.40, 'cacheRead' => 0.025, 'cacheWrite' => 0.10 ) ),
-                        array( '/gpt-4\\.1-mini/',         array( 'input' => 0.40,  'output' => 1.60, 'cacheRead' => 0.10,  'cacheWrite' => 0.40 ) ),
-                        array( '/gpt-4\\.1/',              array( 'input' => 2,     'output' => 8,    'cacheRead' => 0.50,  'cacheWrite' => 2 ) ),
-                        array( '/gpt-4o-mini-audio/',     array( 'input' => 0.15,  'output' => 0.60, 'cacheRead' => 0.15,  'cacheWrite' => 0.15, 'audioInput' => 10,   'audioOutput' => 20 ) ),
-                        array( '/gpt-4o-mini-realtime/',  array( 'input' => 0.60,  'output' => 2.40, 'cacheRead' => 0.30,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
-                        array( '/gpt-4o-mini/',           array( 'input' => 0.15,  'output' => 0.60, 'cacheRead' => 0.075, 'cacheWrite' => 0.15 ) ),
-                        array( '/gpt-4o-audio/',          array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 2.50,  'cacheWrite' => 2.50, 'audioInput' => 40,   'audioOutput' => 80 ) ),
-                        array( '/gpt-4o-realtime/',       array( 'input' => 5,     'output' => 20,   'cacheRead' => 2.50,  'cacheWrite' => 5,    'audioInput' => 40,   'audioOutput' => 80 ) ),
-                        array( '/gpt-4o/',                array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 1.25,  'cacheWrite' => 2.50 ) ),
-                        array( '/gpt-realtime-2\\.1-mini/', array( 'input' => 0.60, 'output' => 2.40, 'cacheRead' => 0.06,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
-                        array( '/gpt-realtime-2/',        array( 'input' => 4,     'output' => 24,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
-                        array( '/gpt-realtime-mini/',     array( 'input' => 0.60,  'output' => 2.40, 'cacheRead' => 0.06,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
-                        array( '/gpt-realtime-1\.5/',     array( 'input' => 4,     'output' => 16,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
-                        array( '/gpt-realtime/',          array( 'input' => 4,     'output' => 16,   'cacheRead' => 0.40,  'cacheWrite' => 4,    'audioInput' => 32,   'audioOutput' => 64 ) ),
-                        array( '/gpt-audio-mini/',        array( 'input' => 0.60,  'output' => 2.40, 'cacheRead' => 0.60,  'cacheWrite' => 0.60, 'audioInput' => 10,   'audioOutput' => 20 ) ),
-                        array( '/gpt-audio-1\.5/',        array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 2.50,  'cacheWrite' => 2.50, 'audioInput' => 32,   'audioOutput' => 64 ) ),
-                        array( '/gpt-audio/',             array( 'input' => 2.50,  'output' => 10,   'cacheRead' => 2.50,  'cacheWrite' => 2.50, 'audioInput' => 32,   'audioOutput' => 64 ) ),
-                        array( '/o1-pro/',                array( 'input' => 150,   'output' => 600,  'cacheRead' => 150,   'cacheWrite' => 150 ) ),
-                        array( '/o1-mini/',               array( 'input' => 1.10,  'output' => 4.40, 'cacheRead' => 0.55,  'cacheWrite' => 1.10 ) ),
-                        array( '/o1/',                    array( 'input' => 15,    'output' => 60,   'cacheRead' => 7.50,  'cacheWrite' => 15 ) ),
-                        array( '/o3-pro/',                array( 'input' => 20,    'output' => 80,   'cacheRead' => 20,    'cacheWrite' => 20 ) ),
-                        array( '/o3-deep-research/',      array( 'input' => 10,    'output' => 40,   'cacheRead' => 2.50,  'cacheWrite' => 10 ) ),
-                        array( '/o3-mini/',               array( 'input' => 1.10,  'output' => 4.40, 'cacheRead' => 0.55,  'cacheWrite' => 1.10 ) ),
-                        array( '/o3/',                    array( 'input' => 2,     'output' => 8,    'cacheRead' => 0.50,  'cacheWrite' => 2 ) ),
-                        array( '/o4-mini-deep-research/', array( 'input' => 2,     'output' => 8,    'cacheRead' => 0.50,  'cacheWrite' => 2 ) ),
-                        array( '/o4-mini/',               array( 'input' => 1.10,  'output' => 4.40, 'cacheRead' => 0.275, 'cacheWrite' => 1.10 ) ),
-                    ),
-                    'gemini' => array(
-                        array( '/gemini-3\\.[678]-flash/',       array( 'input' => 1.50,  'output' => 7.50, 'cacheRead' => 0.15,  'cacheWrite' => 1.50 ), '2027-01-01' ),
-                        array( '/gemini-3\\.[678]-flash/',       array( 'input' => 0.75,  'output' => 3.75, 'cacheRead' => 0.075, 'cacheWrite' => 0.75 ) ),
-                        array( '/gemini-3\\.5-flash-lite/',     array( 'input' => 0.30,  'output' => 2.50, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
-                        array( '/gemini-3\\.5-flash/',          array( 'input' => 1.50,  'output' => 9,    'cacheRead' => 0.15,  'cacheWrite' => 1.50 ) ),
-                        array( '/gemini-nano-banana/',          array( 'input' => 1.50,  'output' => 7.50, 'cacheRead' => 1.50,  'cacheWrite' => 1.50 ) ),
-                        array( '/gemini-omni/',                 array( 'input' => 1.50,  'output' => 9,    'cacheRead' => 1.50,  'cacheWrite' => 1.50 ) ),
-                        array( '/gemini-3\\.1-pro/',            array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
-                        array( '/gemini-3\\.1-flash-lite/',     array( 'input' => 0.25,  'output' => 1.50, 'cacheRead' => 0.025, 'cacheWrite' => 0.25 ) ),
-                        array( '/gemini-3\\.1-flash-image/',    array( 'input' => 0.50,  'output' => 3,    'cacheRead' => 0.50,  'cacheWrite' => 0.50 ) ),
-                        array( '/gemini-3\\.1-flash/',          array( 'input' => 0.25,  'output' => 1.50, 'cacheRead' => 0.025, 'cacheWrite' => 0.25 ) ),
-                        array( '/gemini-3-pro-image/',          array( 'input' => 2,     'output' => 12,   'cacheRead' => 2,     'cacheWrite' => 2 ) ),
-                        array( '/gemini-3-flash/',              array( 'input' => 0.50,  'output' => 3,    'cacheRead' => 0.05,  'cacheWrite' => 0.50 ) ),
-                        array( '/gemini-3-pro/',                array( 'input' => 2,     'output' => 12,   'cacheRead' => 0.20,  'cacheWrite' => 2 ) ),
-                        array( '/gemini-2\\.5-pro/',            array( 'input' => 1.25,  'output' => 10,   'cacheRead' => 0.125, 'cacheWrite' => 1.25 ) ),
-                        array( '/gemini-2\\.5-flash-lite/',     array( 'input' => 0.10,  'output' => 0.40, 'cacheRead' => 0.01,  'cacheWrite' => 0.10 ) ),
-                        array( '/gemini-2\\.5-flash-image/',    array( 'input' => 0.30,  'output' => 2.50, 'cacheRead' => 0.30,  'cacheWrite' => 0.30 ) ),
-                        array( '/gemini-2\\.5-flash/',          array( 'input' => 0.30,  'output' => 2.50, 'cacheRead' => 0.03,  'cacheWrite' => 0.30 ) ),
-                        array( '/gemini-2\\.0-flash-lite/',     array( 'input' => 0.075, 'output' => 0.30, 'cacheRead' => 0.075, 'cacheWrite' => 0.075 ) ),
-                        array( '/gemini-2\\.0-flash/',          array( 'input' => 0.10,  'output' => 0.40, 'cacheRead' => 0.025, 'cacheWrite' => 0.10 ) ),
-                    ),
-                );
+            foreach ( $this->get_model_pricing_rules() as $provider => $provider_rules ) {
+                $raw[ $provider ] = array();
 
-                $today = gmdate( 'Y-m-d' );
-
-                foreach ( $rules as $provider => $provider_rules ) {
-                    $rules[ $provider ] = array_values( array_filter( $provider_rules, function ( $rule ) use ( $today ) {
-                        return ! isset( $rule[2] ) || $rule[2] <= $today;
-                    } ) );
+                foreach ( $provider_rules as $rule ) {
+                    $raw[ $provider ][] = array( '/' . str_replace( '/', '\\/', $rule[0] ) . '/', $rule[1] );
                 }
             }
 
-            return $rules;
+            return $raw;
         }
 
         public function get_model_pricing( $model_id, $provider )
         {
-            $rules = $this->get_pricing_rules_raw();
+            $ai = Better_Messages_AI_Provider::ai();
 
-            if ( ! isset( $rules[ $provider ] ) ) {
-                return null;
-            }
-
-            foreach ( $rules[ $provider ] as $rule ) {
-                if ( preg_match( $rule[0], $model_id ) ) {
-                    return $rule[1];
-                }
-            }
-
-            return null;
+            return $ai ? $ai->catalogue()->price( (string) $provider, (string) $model_id ) : null;
         }
 
         public function get_image_pricing()
         {
-            return array(
-                    'gpt-image-1-mini' => array(
-                            'low'    => array( '1024x1024' => 0.005, '1024x1536' => 0.006, '1536x1024' => 0.006 ),
-                            'medium' => array( '1024x1024' => 0.011, '1024x1536' => 0.015, '1536x1024' => 0.015 ),
-                            'high'   => array( '1024x1024' => 0.036, '1024x1536' => 0.052, '1536x1024' => 0.052 ),
-                    ),
-                    'gpt-image-1' => array(
-                            'low'    => array( '1024x1024' => 0.011, '1024x1536' => 0.016, '1536x1024' => 0.016 ),
-                            'medium' => array( '1024x1024' => 0.042, '1024x1536' => 0.063, '1536x1024' => 0.063 ),
-                            'high'   => array( '1024x1024' => 0.167, '1024x1536' => 0.25,  '1536x1024' => 0.25 ),
-                    ),
-                    'gpt-image-1.5' => array(
-                            'low'    => array( '1024x1024' => 0.009, '1024x1536' => 0.013, '1536x1024' => 0.013 ),
-                            'medium' => array( '1024x1024' => 0.034, '1024x1536' => 0.05,  '1536x1024' => 0.05 ),
-                            'high'   => array( '1024x1024' => 0.133, '1024x1536' => 0.20,  '1536x1024' => 0.20 ),
-                    ),
-                    'gpt-image-2' => array(
-                            'low'    => array( '1024x1024' => 0.006, '1024x1536' => 0.005, '1536x1024' => 0.005 ),
-                            'medium' => array( '1024x1024' => 0.053, '1024x1536' => 0.041, '1536x1024' => 0.041 ),
-                            'high'   => array( '1024x1024' => 0.211, '1024x1536' => 0.165, '1536x1024' => 0.165 ),
-                    ),
-                    'gemini-nano-banana-2.1' => array(
-                            'default' => array( '1024x1024' => 0.0336, '2048x2048' => 0.0504, '4096x4096' => 0.113 ),
-                    ),
-                    'gemini-3.1-flash-lite-image' => array(
-                            'default' => array( '1024x1024' => 0.0336 ),
-                    ),
-                    'gemini-2.0-flash' => array(
-                            'default' => array( '1024x1024' => 0.039 ),
-                    ),
-                    'gemini-2.5-flash-image' => array(
-                            'default' => array( '1024x1024' => 0.039 ),
-                    ),
-                    'gemini-3.1-flash-image' => array(
-                            'default' => array( '512x512' => 0.045, '1024x1024' => 0.067, '2048x2048' => 0.101, '4096x4096' => 0.151 ),
-                    ),
-                    'gemini-3-pro-image' => array(
-                            'default' => array( '1024x1024' => 0.134, '2048x2048' => 0.134, '4096x4096' => 0.24 ),
-                    ),
-            );
+            $ai = Better_Messages_AI_Provider::ai();
+
+            return $ai ? $ai->catalogue()->images() : array();
         }
 
         public function calculate_and_store_cost( $ai_message_id, $meta, $bot_id, $user_id = 0, $thread_id = 0, $is_summary = false )
         {
-            $usage    = isset( $meta['usage'] ) ? $meta['usage'] : array();
-            $model    = isset( $meta['model'] ) ? $meta['model'] : '';
-            $provider = isset( $meta['provider'] ) ? $meta['provider'] : '';
+            $ai = Better_Messages_AI_Provider::ai();
 
-            $parsed = $this->parse_usage_tokens( $usage, $provider );
+            if ( ! $ai ) {
+                return null;
+            }
 
             $bot_settings = $this->get_bot_settings( $bot_id );
-            $custom_input  = floatval( $bot_settings['inputTokenPrice'] );
-            $custom_output = floatval( $bot_settings['outputTokenPrice'] );
-            $custom_cache_read  = floatval( $bot_settings['cacheReadTokenPrice'] );
-            $custom_cache_write = floatval( $bot_settings['cacheWriteTokenPrice'] );
 
-            $has_custom = $custom_input > 0 || $custom_output > 0;
+            $cost_data = $ai->cost( is_array( $meta ) ? $meta : array(), array(
+                'prices' => array(
+                    'input'      => floatval( $bot_settings['inputTokenPrice'] ),
+                    'output'     => floatval( $bot_settings['outputTokenPrice'] ),
+                    'cacheRead'  => floatval( $bot_settings['cacheReadTokenPrice'] ),
+                    'cacheWrite' => floatval( $bot_settings['cacheWriteTokenPrice'] ),
+                ),
+            ) );
 
-            if ( $has_custom ) {
-                $prices = array(
-                    'input'      => $custom_input,
-                    'output'     => $custom_output,
-                    'cacheRead'  => $custom_cache_read ?: $custom_input,
-                    'cacheWrite' => $custom_cache_write ?: $custom_input,
-                );
-            } else {
-                $prices = $this->get_model_pricing( $model, $provider );
-            }
-
-            $service_tier = isset( $meta['service_tier'] ) ? $meta['service_tier'] : '';
-            if ( $prices && ! $has_custom ) {
-                if ( $service_tier === 'flex' ) {
-                    $prices['input']      *= 0.5;
-                    $prices['output']     *= 0.5;
-                    $prices['cacheRead']  *= 0.5;
-                    $prices['cacheWrite'] *= 0.5;
-                } else if ( $service_tier === 'priority' ) {
-                    $prices['input']      *= 2;
-                    $prices['output']     *= 2;
-                    $prices['cacheRead']  *= 2;
-                    $prices['cacheWrite'] *= 2;
-                }
-            }
-
-            $images      = isset( $meta['images_generated'] ) ? $meta['images_generated'] : array();
-            $image_usage = $this->calc_image_token_cost( $meta['image_generation_usage'] ?? null );
-            if ( $image_usage !== null && $image_usage['outputTokens'] === 0 && ! empty( $images ) ) {
-                $image_usage = null;
-            }
-            $image_cost  = $image_usage !== null ? $image_usage['cost'] : $this->calc_image_cost( $images );
-
-            $tool_pricing      = $this->get_tool_pricing();
-            $file_search_calls = isset( $meta['file_search_calls'] ) ? (int) $meta['file_search_calls'] : 0;
-
-            $web_search       = $this->get_web_search_usage( $meta );
-            $web_search_calls = $web_search['calls'];
-            $web_search_cost  = $web_search['cost'];
-
-            $file_search_cost  = $file_search_calls * $tool_pricing['file_search'];
-            $tool_cost         = $web_search_cost + $file_search_cost;
-
-            $cost_data = array(
-                'inputTokens'      => $parsed['inputTokens'],
-                'outputTokens'     => $parsed['outputTokens'],
-                'thinkingTokens'   => $parsed['thinkingTokens'],
-                'cacheReadTokens'  => $parsed['cacheReadTokens'],
-                'cacheWriteTokens' => $parsed['cacheWriteTokens'],
-                'audioInputTokens'  => $parsed['audioInputTokens'],
-                'audioOutputTokens' => $parsed['audioOutputTokens'],
-                'imagesCount'      => count( $images ),
-                'imageCost'        => $image_cost,
-                'model'            => $model,
-                'provider'         => $provider,
-                'userId'           => (int) $user_id,
-            );
-
-            if ( $image_usage !== null ) {
-                $cost_data['imageInputTokens']  = $image_usage['inputTokens'];
-                $cost_data['imageOutputTokens'] = $image_usage['outputTokens'];
-            }
-
-            if ( $web_search_calls > 0 ) {
-                $cost_data['webSearchCalls'] = $web_search_calls;
-                $cost_data['webSearchCost']  = round( $web_search_cost, 6 );
-            }
-
-            if ( $file_search_calls > 0 ) {
-                $cost_data['fileSearchCalls'] = $file_search_calls;
-                $cost_data['fileSearchCost']  = round( $file_search_cost, 6 );
-            }
-
-            if ( $service_tier === 'flex' || $service_tier === 'priority' ) {
-                $cost_data['serviceTier'] = $service_tier;
-            }
-
-            if ( $prices ) {
-                $input_tokens   = $parsed['inputTokens'];
-                $cache_read     = $parsed['cacheReadTokens'];
-                $cache_write    = $parsed['cacheWriteTokens'];
-                $audio_input    = $parsed['audioInputTokens'];
-                $audio_output   = $parsed['audioOutputTokens'];
-                $regular_input  = max( 0, $input_tokens - $cache_read - $cache_write );
-
-                if ( ( $audio_input > 0 || $audio_output > 0 ) && isset( $prices['audioInput'] ) ) {
-                    $text_input  = max( 0, $regular_input - $audio_input );
-                    $text_output = max( 0, $parsed['outputTokens'] - $audio_output );
-
-                    $input_cost  = ( $text_input * $prices['input'] + $cache_read * $prices['cacheRead'] + $cache_write * $prices['cacheWrite'] + $audio_input * $prices['audioInput'] ) / 1000000;
-                    $output_cost = ( $text_output * $prices['output'] + $audio_output * $prices['audioOutput'] ) / 1000000;
-                } else {
-                    $input_cost  = ( $regular_input * $prices['input'] + $cache_read * $prices['cacheRead'] + $cache_write * $prices['cacheWrite'] ) / 1000000;
-                    $output_cost = ( $parsed['outputTokens'] * $prices['output'] ) / 1000000;
-                }
-                $total_cost  = $input_cost + $output_cost + $image_cost + $tool_cost;
-
-                $no_cache_cost = ( $input_tokens * $prices['input'] ) / 1000000;
-                $cache_savings = $no_cache_cost - $input_cost;
-
-                $cost_data['inputCost']    = round( $input_cost, 6 );
-                $cost_data['outputCost']   = round( $output_cost, 6 );
-                $cost_data['toolCost']     = round( $tool_cost, 6 );
-                $cost_data['totalCost']    = round( $total_cost, 6 );
-                $cost_data['cacheSavings'] = round( max( 0, $cache_savings ), 6 );
-                $cost_data['prices']       = $prices;
-            } else if ( $tool_cost > 0 || $image_cost > 0 ) {
-                $cost_data['toolCost']  = round( $tool_cost, 6 );
-                $cost_data['totalCost'] = round( $image_cost + $tool_cost, 6 );
-            }
+            $cost_data['userId'] = (int) $user_id;
 
             Better_Messages()->functions->update_message_meta( $ai_message_id, 'ai_cost', json_encode( $cost_data ) );
 
@@ -2629,6 +2550,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $avatar_id  = get_post_thumbnail_id( $post->ID );
             $avatar_url = $avatar_id ? wp_get_attachment_image_url( $avatar_id, 'thumbnail' ) : '';
 
+            $settings['apiKey'] = '';
+
             return array(
                 'id'         => $post->ID,
                 'name'       => $post->post_title,
@@ -2636,6 +2559,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 'avatarId'   => (int) $avatar_id,
                 'avatarUrl'  => $avatar_url ?: '',
                 'settings'   => $settings,
+                'ownKeys'    => (object) Better_Messages_AI_Provider_Factory::present_keys( $post->ID ),
             );
         }
 
@@ -2964,7 +2888,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         public function is_transcription_available() {
             $provider = Better_Messages()->settings['voiceTranscriptionProvider'] ?? 'openai';
             $available = ( $provider === 'bm' && Better_Messages()->functions->can_use_premium_code() )
-                || ( $provider === 'openai' && ! empty( Better_Messages()->settings['openAiApiKey'] ) );
+                || ( $provider === 'openai' && class_exists( 'Better_Messages_AI_Provider_Factory' ) && Better_Messages_AI_Provider_Factory::has_key( 'openai' ) );
             return array( $provider, $available );
         }
 
@@ -3996,11 +3920,20 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $voices = $this->get_voices();
             $bot_user_id = $bot ? absint($bot->id) * -1 : 0;
 
-            $any_key_exists = ! empty(Better_Messages()->settings['openAiApiKey'])
-                || ! empty(Better_Messages()->settings['anthropicApiKey'])
-                || ! empty(Better_Messages()->settings['geminiApiKey']);
+            $available = self::available();
+            $status    = self::status();
 
-            $providers = version_compare(phpversion(), '8.1', '>=') ? Better_Messages_AI_Provider_Factory::get_providers_info() : [];
+            $any_key_exists = false;
+
+            if ( $available ) {
+                foreach ( Better_Messages_AI_Provider_Factory::PROVIDERS as $provider_id ) {
+                    $any_key_exists = $any_key_exists || Better_Messages_AI_Provider_Factory::has_key( $provider_id );
+                }
+            }
+
+            $settings['apiKey'] = '';
+
+            $providers = $available ? Better_Messages_AI_Provider_Factory::get_providers_info() : [];
 
             $voice_messages_banner = '';
             if( ! class_exists('BP_Better_Messages_Voice_Messages') ){
@@ -4009,9 +3942,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $voice_messages_banner .= '</div>';
             }
 
-            if (version_compare(phpversion(), '8.1', '<')) { ?>
+            if ( ! $available ) { ?>
             <div class="bm-admin-error" style="font-size: 150%;margin: 10px 0">
-                <?php echo sprintf(esc_html_x('Website must to have PHP version %s or higher, currently PHP version %s is used.', 'Settings page', 'bp-better-messages'), '<strong>8.1</strong>', '<strong>' . phpversion() . '</strong>' ); ?>
+                <?php echo esc_html( $status['message'] ); ?>
             </div>
             <?php } else if ( ! $any_key_exists ){ ?>
                 <div class="bm-admin-error" style="font-size: 150%;margin: 10px 0">
@@ -4123,6 +4056,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $args = array();
             }
 
+            if ( ! empty( $args['apiKey'] ) && self::seal_bot_key( (int) $bot_id ) ) {
+                $args['apiKey'] = '';
+            }
+
             if( ! isset( $args['images'] ) && ! empty($args['model'] )  ){
                 $args['images'] = str_contains($args['model'], 'gpt-4-turbo') || str_contains($args['model'], 'gpt-4o') ? '1' : '0';
             }
@@ -4155,6 +4092,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             if( isset( $_POST['bm'] ) && is_array($_POST['bm']) ){
                 $old_settings = $this->get_bot_settings( $post->ID );
+                $answered     = $this->bot_can_answer( $post->ID );
 
                 $settings = (array) $_POST['bm'];
 
@@ -4199,9 +4137,17 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $settings = wp_parse_args( $settings, $defaults );
 
+                $settings = $this->seal_typed_bot_key( $post->ID, $settings );
+
                 update_post_meta( $post->ID, 'bm-ai-chat-bot-settings', $settings );
 
                 $this->create_or_update_bot_user( $post->ID, $post->post_title );
+
+                $bot_user = $this->get_bot_user( $post->ID );
+
+                if ( $bot_user && $this->bot_can_answer( $post->ID ) !== $answered ) {
+                    $this->bot_user_changed( -1 * absint( $bot_user->id ) );
+                }
             }
         }
 
@@ -4243,15 +4189,25 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             } else {
                 global $wpdb;
 
-                $result = $wpdb->insert( bm_get_table('guests'), [
+                $row = [
                     'ip'     => "ai-chat-bot-" . $bot_id,
                     'bot_id' => (int) $bot_id,
                     'name'   => $name,
                     'secret' => ''
-                ] );
+                ];
+
+                if( Better_Messages()->guests->takes_registry_ids() ) {
+                    $row['id'] = Better_Messages()->guests->registry_bot_id();
+
+                    if( ! $row['id'] ) {
+                        return;
+                    }
+                }
+
+                $result = $wpdb->insert( bm_get_table('guests'), $row );
 
                 if( $result ) {
-                    $bot_id = $wpdb->insert_id;
+                    $bot_id = isset( $row['id'] ) ? (int) $row['id'] : $wpdb->insert_id;
                     do_action('better_messages_guest_updated', absint($bot_id) * -1);
                     do_action('better_messages_user_updated', absint($bot_id) * -1);
                 }
@@ -4259,6 +4215,24 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
         }
 
         public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $current_user_id ){
+            if( $thread_type === 'chat-room' ){
+                if( isset( $thread_item['chatRoom'] ) && is_array( $thread_item['chatRoom'] ) && ! empty( $thread_item['participants'] ) && is_array( $thread_item['participants'] ) ){
+                    $bots = array();
+
+                    foreach( array_keys( $this->bot_users() ) as $bot_user_id ){
+                        if( in_array( (int) $bot_user_id, $thread_item['participants'], true ) ){
+                            $bots[] = (int) $bot_user_id;
+                        }
+                    }
+
+                    if( count( $bots ) > 0 ){
+                        $thread_item['chatRoom']['bots'] = $bots;
+                    }
+                }
+
+                return $thread_item;
+            }
+
             if( $thread_type !== 'thread'){
                 return $thread_item;
             }
@@ -4520,7 +4494,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $message->message = '<!-- BM-AI -->' . $message->message;
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
-            $has_key = ! empty( $bot_settings['apiKey'] ) || ! empty( Better_Messages_AI_Provider_Factory::get_global_api_key( $provider_id ) );
+            $has_key = ! empty( $bot_settings['apiKey'] ) || Better_Messages_AI_Provider_Factory::has_key( $provider_id, $bot_id );
 
             if ( $has_key && ! empty( $bot_settings['model'] ) ) {
                 if ( ! wp_get_scheduled_event( 'better_messages_ai_bot_ensure_completion', [ $bot_id, $message->id ] ) ) {

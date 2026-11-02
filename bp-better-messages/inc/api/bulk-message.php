@@ -1077,7 +1077,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $threads[] = [
                     'thread_id'  => (int) $entry->thread_id,
                     'user'       => $user,
-                    'is_read'    => $entry->unread_count !== null && (int) $entry->unread_count === 0,
+                    'is_read'    => $entry->unread_count !== null && (int) $entry->unread_count <= 0,
                     'url'        => $url,
                 ];
             }
@@ -1130,7 +1130,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                             INNER JOIN `{$threads_table}` AS `jt` ON `jt`.`thread_id` = `r`.`thread_id`
                             WHERE `jt`.`job_id` = %d
                             AND `r`.`user_id` != %d
-                            AND `r`.`unread_count` = 0",
+                            AND `r`.`unread_count` <= 0",
                             $job->id,
                             (int) $job->sender_id
                         ) );

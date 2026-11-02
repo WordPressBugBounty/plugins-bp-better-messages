@@ -4,17 +4,17 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 3.1.6
+Stable tag: 3.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Real-time messaging and chat rooms for WordPress ecosystem: private conversations, public and private chat rooms, video & audio calls, and more.
+Real-time private messaging, group chat, chat rooms, video and audio calls, AI chat bots and mobile apps for WordPress, BuddyPress and BuddyBoss.
 
 == Description ==
 
 **Better Messages** is the most feature-rich **realtime private messaging system for WordPress**, with native integrations for **BuddyPress, BuddyBoss Platform, Ultimate Member, PeepSo** and any other WordPress powered websites.
 
-Transform your WordPress site into a powerful communication platform with **private messaging**, **chat rooms**, **video and audio calls**, **group video chats**, **AI chat bots**, and **native mobile apps**.
+Transform your WordPress site into a powerful communication platform with **private messaging**, **chat rooms**, **video and audio calls**, **group video calls with recording**, **AI chat bots**, and **native mobile apps**.
 
 Whether you're building a private or public community, social network, intranet, chat-rooms site, marketplace, membership site, dating platform, or creator economy site – Better Messages provides enterprise-level messaging features with an easy-to-use interface.
 
@@ -76,7 +76,8 @@ Better Messages is widely used to power messaging for:
 * Edit sent messages (with edit indicator)
 * Delete messages
 * Forward messages to other conversations
-* Mute conversation notifications
+* Mark conversations as unread
+* Mute conversation notifications, for good or for a set time
 * Message draft autosave with recovery
 
 **AI & Automation:**
@@ -84,7 +85,7 @@ Better Messages is widely used to power messaging for:
 * AI Chat Bots powered by OpenAI, Anthropic (Claude) and Google Gemini
 * AI Chat Bots in group conversations with mention-based responses
 * Conversation summarization and scheduled digests with AI
-* Token usage tracking with cost estimation
+* Token usage and cost tracking, with a price list of the models kept up to date from WordPlus Cloud
 * Voice message transcription powered by Better Messages Cloud AI or OpenAI
 * Web Search capability for AI bots
 * File Search tool for AI bots
@@ -94,6 +95,8 @@ Better Messages is widely used to power messaging for:
 **Media & Content:**
 
 * File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
+* [Cloud Storage](https://www.better-messages.com/docs/cloud-storage/) for attachments in Cloudflare R2, Bunny.net Storage, Amazon S3 or any S3-compatible service, with files uploaded straight from the browser
+* Upload limits for each type of file
 * Client-side image and video optimization for cross-browser compatibility and saving storage space (format conversion, quality control, metadata stripping)
 * Photo cropping and editing before sending
 * Location messages with a map picker and nearby place suggestions
@@ -109,6 +112,7 @@ Better Messages is widely used to power messaging for:
 **Notifications:**
 
 * Email notifications for unread messages (customizable templates)
+* [Notification levels](https://www.better-messages.com/docs/features/notification-levels/) for group conversations and chat rooms: All messages, Mentions and replies, or Nothing, chosen by each member
 * Unsubscribe link support in emails
 * Sound notifications for new messages
 * On-site toast notifications anywhere on your website
@@ -127,11 +131,13 @@ Better Messages is widely used to power messaging for:
 * Block user feature
 * Role-based access control
 * User whitelist/blacklist for moderation
+* [Site moderators](https://www.better-messages.com/docs/features/site-moderators/): roles that open the Administration page, with a flag in the messenger while reports or held messages wait
+* Chat room moderators who mute, ban and remove members, with bans that say until when and system messages that can name the moderator
 
 **Engagement Features:**
 
 * Reactions to messages
-* Mentions (@username)
+* Mentions (@username), and @all to mention everyone in a group conversation or chat room
 * Mass messaging from WP Admin with scheduling, file attachments, and background processing
 * Suggested conversations for new users
 
@@ -149,11 +155,17 @@ Better Messages is widely used to power messaging for:
 
 * Modern, fully customizable design
 * Appearance tab — repaint every part of the messenger, reshape its corners and spacing and tune dark mode, with a live preview
+* [Custom tabs](https://www.better-messages.com/docs/features/custom-tabs/) on the widget bar, the side panel and the mobile tab bar: a link, a page or shortcode content, and new names for the built-in tabs
 * Custom notification sounds
 * RTL layout support
 * White label solution
 * Fully translatable
 * Auto-delete old messages option
+
+**Setup and help:**
+
+* Get started page that sets up the Messages page, chat with visitors, a chat room on its own page and the plugins on your site, one click each
+* Better Messages Assistant on the Support page, an AI assistant that answers from the documentation and your settings and prepares setting changes for you to review, free version included
 
 **Privacy & GDPR:**
 
@@ -184,6 +196,7 @@ Better Messages works on **any** WordPress site out of the box. If your site alr
 * [ProfileGrid](https://www.better-messages.com/docs/integrations/profile-grid/)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
 * [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
+* Block, Suspend, Report for BuddyPress — its blocks apply to conversations too
 
 **Learning Management Systems (LMS)** — course chat rooms, instructor messaging, and student-to-student conversations:
 
@@ -240,6 +253,15 @@ Better Messages works on **any** WordPress site out of the box. If your site alr
 * [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/) — web push notifications
 * [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) — install-to-home-screen prompts on the messenger
 
+**Multilingual sites** — the messenger follows the language of the page:
+
+* [GTranslate](https://www.better-messages.com/docs/integrations/gtranslate/)
+* [Weglot](https://www.better-messages.com/docs/integrations/weglot/)
+
+**Live streaming** (WebSocket version):
+
+* [Live Stream](https://www.better-messages.com/docs/websocket/live-streaming/) — a host streams from the browser or OBS into a chat room, which is the chat of the stream
+
 **Universal Shortcode Builder — add chat to anything else:**
 
 Don't see your plugin or theme in the list? Better Messages ships a visual [Shortcode Builder](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) at **WP Admin → Better Messages → Shortcodes** that lets you drop a Live Chat Button onto any custom post type, directory, marketplace listing, agent profile, or page builder block — **without writing PHP**. Point it at a sample post, choose how the target user is resolved (post author, postmeta-stored user ID, or a fixed inbox), set a thread strategy and label, and copy the generated shortcode. The same shortcode then works for every post of the same shape, with automatic per-post threading and an optional in-chat banner. Paste it into Gutenberg, Elementor, Bricks, Divi, or directly into a theme template.
@@ -250,9 +272,9 @@ Don't see your plugin or theme in the list? Better Messages ships a visual [Shor
 
 **WebSocket version:**
 
-WebSocket version is a paid option, you can get license key on our website.
+The WebSocket version is a paid subscription from [WordPlus Cloud](https://www.wordplus.cloud/), with a free trial.
 
-We use our dedicated servers to implement WebSocket communications between your site and users. Our servers are completely private and do not store or track any private data — all messages remain in your database.
+It connects your site and its members through dedicated realtime servers. Messages stay in your database: the servers pass them on encrypted and keep only the last few minutes of each conversation, also encrypted, so pages reload and reconnect at once.
 
 **Performance & Reliability:**
 
@@ -263,18 +285,26 @@ We use our dedicated servers to implement WebSocket communications between your 
 
 **Video & Audio Calls:**
 
-* HD Video Calls (1-to-1)
-* HD Audio Calls (1-to-1)
-* Group Video Chats (up to 32 participants)
-* Group Audio Chats (up to 50 participants)
-* Screen Sharing in calls and group chats
+* HD one-to-one video and audio calls
+* [Group video](https://www.better-messages.com/docs/websocket/group-video-chat/) and [group audio](https://www.better-messages.com/docs/websocket/group-audio-chat/) calls with no fixed size: each site includes 32 people on video or 50 on audio at once, and more join with WordPlus Cloud credits
+* Screen sharing in one-to-one and group calls
+* [Call recording](https://www.better-messages.com/docs/websocket/call-recording/) of group calls, with a transcript and captions
+* [Background blur, virtual backgrounds and AI Noise Removal](https://www.better-messages.com/docs/websocket/video-effects/)
+* Device settings with a camera preview and microphone and speaker tests
+* Host Controls: Mute Everyone, Lock Room, Broadcast Mode, End for Everyone, Spotlight for Everyone, and Remove and Ban from Calls
+* Raised hands, Participants, Auto, Speaker and Tiled layouts, picture in picture and keyboard shortcuts
+* Optional end-to-end encryption of group calls
+* Group call alerts by push, email and pop-up when a call starts
 
 **Mobile Apps:**
 
-* iOS Mobile App (build your own branded app)
-* Android Mobile App (build your own branded app)
-* Push notifications for calls and messages
-* VoIP notifications for incoming calls
+* iOS and Android apps under your own name and developer accounts, built from WP Admin
+* Push notifications for messages and calls, and VoIP notifications for incoming calls
+* Native call screens for one-to-one and group calls
+* [Website sign-in](https://www.better-messages.com/docs/mobile-app/sign-in/) through your site's login page, with its two-factor authentication and login plugins
+* [App lock](https://www.better-messages.com/docs/mobile-app/app-lock/) with Face ID, Touch ID or the fingerprint
+* Links that open the app, signed-in devices with sign-out, and Delete Account
+* A login screen in your brand, with a logo for dark mode
 
 **Realtime Features:**
 
@@ -288,7 +318,7 @@ We use our dedicated servers to implement WebSocket communications between your 
 
 **Better Messages Cloud AI:**
 
-* Automatic message translation in 1-to-1 conversations — 53 languages, auto-detection
+* Automatic message translation in private and group conversations — 53 languages, auto-detection
 * AI Content Moderation — 23 categories, custom rules, conversation context awareness
 * Voice message transcription — 99+ languages with auto-detection
 * No third-party API keys required — included with WebSocket license at no additional cost
@@ -305,9 +335,7 @@ We use our dedicated servers to implement WebSocket communications between your 
 * Priority email support
 * Regular updates and new features
 
-[Why WebSockets are a game-changer?](https://medium.com/@monica.lucarini28/is-websocket-a-game-changer-aeaef68d1fba)
-
-**[Get WebSocket version license key](https://www.wordplus.org/downloads/bp-better-messages/) | [Terms of Use](https://www.wordplus.org/end-user-license-agreement/)**
+**[WebSocket version pricing](https://www.better-messages.com/docs/pricing/) | [Terms of Use](https://www.wordplus.cloud/terms)**
 
 [Languages](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/)
 
@@ -319,11 +347,11 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 = Is Better Messages free? =
 
-Yes — install the free version from WordPress.org. It supports private and group conversations, chat rooms, file sharing, oEmbed previews, smart-batched email notifications, role-based access, guest chat, and the standard messenger feature set. The WebSocket version is paid and unlocks instant delivery, one-on-one and group voice / video calls, Better Messages Cloud AI (content moderation, message translation and voice message transcription with no API key of your own), web push, and end-to-end encryption.
+Yes — install the free version from WordPress.org. It supports private and group conversations, chat rooms, file sharing, oEmbed previews, smart-batched email notifications, role-based access, guest chat, and the standard messenger feature set. The WebSocket version is paid and unlocks instant delivery, one-on-one and group voice / video calls with backgrounds, noise removal and recording, Better Messages Cloud AI (content moderation, message translation and voice message transcription with no API key of your own), web push, end-to-end encryption, and your own iOS and Android apps.
 
 = Which WordPress plugins does Better Messages integrate with? =
 
-35+ native integrations across community platforms (BuddyPress, BuddyBoss Platform, PeepSo, Ultimate Member, FluentCommunity, SureDash, ProfileGrid, UsersWP, WP User Manager), LMS (LearnDash, LearnPress, Tutor LMS, MasterStudy LMS), e-commerce (WooCommerce — pre-sales and order support chat with contact buttons on product, cart, checkout, and order pages), multi-vendor marketplaces (Dokan, WCFM, WC Vendors, MultiVendorX), listings and directories (HivePress, Directorist, GeoDirectory, Classified Listing, Motors, WP Job Manager), real estate themes (Houzez, RealHomes), forums (wpForo, bbPress), gamification (GamiPress, MyCRED), automation (Uncanny Automator, AutomatorWP), page builders (Crocoblock JetEngine), and push / PWA (OneSignal, Progressify). If your plugin isn't listed, the built-in visual Shortcode Builder lets you add a Live Chat Button to any custom post type without writing PHP. See the [full list of integrations](https://www.better-messages.com/docs/category/integrations/).
+35+ native integrations across community platforms (BuddyPress, BuddyBoss Platform, PeepSo, Ultimate Member, FluentCommunity, SureDash, ProfileGrid, UsersWP, WP User Manager), LMS (LearnDash, LearnPress, Tutor LMS, MasterStudy LMS), e-commerce (WooCommerce — pre-sales and order support chat with contact buttons on product, cart, checkout, and order pages), multi-vendor marketplaces (Dokan, WCFM, WC Vendors, MultiVendorX), listings and directories (HivePress, Directorist, GeoDirectory, Classified Listing, Motors, WP Job Manager), real estate themes (Houzez, RealHomes), forums (wpForo, bbPress), gamification (GamiPress, MyCRED), automation (Uncanny Automator, AutomatorWP), page builders (Crocoblock JetEngine), push / PWA (FluentNotify, OneSignal, Progressify), and multilingual sites (GTranslate, Weglot). If your plugin isn't listed, the built-in visual Shortcode Builder lets you add a Live Chat Button to any custom post type without writing PHP. See the [full list of integrations](https://www.better-messages.com/docs/category/integrations/).
 
 = Does it support group conversations? =
 
@@ -335,11 +363,11 @@ Yes — Guest Chat lets unregistered visitors join chat rooms, message vendors o
 
 = Does it support voice and video calls on WordPress? =
 
-Yes (WebSocket version) — one-on-one and group voice / video calls live inside the messenger thread, not as a separate Zoom / Whereby integration. Hosted media relay is included with the WebSocket license, no separate Twilio account, no Daily / Whereby subscription, no Zoom developer plan. Calls are full-screen on mobile and picture-in-picture on desktop.
+Yes (WebSocket version) — one-on-one and group voice / video calls live inside the messenger thread, not as a separate Zoom / Whereby integration. Hosted media relay is included with the WebSocket license, no separate Twilio account, no Daily / Whereby subscription, no Zoom developer plan. Group calls have no fixed size: each site includes 32 people on video or 50 on audio at once across its group calls, and more join with WordPlus Cloud credits. Calls have device settings, background blur and virtual backgrounds, AI noise removal, screen sharing, host controls and picture in picture, and group calls can be recorded with a transcript.
 
 = Is Better Messages GDPR-compatible? =
 
-Yes. All message data is stored only in your WordPress database. The WebSocket cloud relay is blind to message content — it routes encrypted events but does not read, store, or inspect what passes through. Better Messages also integrates with WordPress's built-in Personal Data Export and Erasure tools. For sites with stricter data-sovereignty requirements (GDPR Article 9, HIPAA-adjacent, regulated-data workloads), a self-hosted plan is available — contact support.
+Yes. All message data is stored only in your WordPress database. The WebSocket cloud relay is blind to message content — it routes encrypted events and keeps only the last few minutes of each conversation, still encrypted, but cannot read or inspect what passes through. Better Messages also integrates with WordPress's built-in Personal Data Export and Erasure tools. Call recordings, when an administrator turns them on, are kept on your site or in your own cloud storage. For sites with stricter data-sovereignty requirements (GDPR Article 9, HIPAA-adjacent, regulated-data workloads), a self-hosted plan is available — contact support.
 
 = Does it have AI features? =
 
@@ -347,7 +375,7 @@ Yes. AI Chat Bots (OpenAI, Anthropic Claude, Google Gemini) work in the free ver
 
 = Does it have native iOS and Android apps? =
 
-Yes — Better Messages ships native iOS and Android mobile apps built on Capacitor, with push notifications, real-time delivery, voice / video calls, and full messenger feature parity with the web. White-label rebuild is available for sites that want their own branded app on the App Store / Play Store under their own developer accounts.
+Yes (WebSocket version) — Better Messages makes native iOS and Android apps for your site, on Capacitor, with push notifications, real-time delivery, native voice / video call screens, website sign-in with your two-factor authentication, an app lock with Face ID or the fingerprint, and the messenger's features. You build your branded app from WP Admin and publish it on the App Store / Play Store under your own developer accounts.
 
 = Can I translate the messenger interface to my language? =
 
@@ -373,7 +401,14 @@ The plugin connects to WordPlus Cloud, the plugin author's service that sells an
 * **Licence check.** Once a licence key is saved, the site sends the key, its address and the plugin version to WordPlus Cloud once a day to confirm the licence.
 * **Emoji and sticker downloads, only when an administrator asks.** "Download emoji images to your server", the emoji names in other languages and the sticker packs come from WordPlus Cloud's CDN (cdn.wordplus.cloud), or from WordPlus Cloud (api.wordplus.cloud) when the CDN fails, and the sticker settings ask it for the list of packs when they open. The administrator's browser loads the packs' cover pictures from the same addresses. These requests send the plugin's name and version, and WordPress adds the site's address to every request it makes.
 * **Usage data, only if you opt in.** After the plugin is first activated, it asks once whether to share usage data, and nothing is sent unless an administrator chooses Allow & Continue. Then the site sends the administrator's name and email address (to tell them about security and feature updates), the site's address, title, language and time zone, the WordPress, PHP and plugin versions and whether the plugin is active, and, unless switched off, which of the plugin's features and settings are in use (on/off values, numbers and short setting values, never your content, addresses or keys, and the size of the site's messaging only as a range) and the names and versions of its plugins and themes. With them goes how far the setup in Get started has come (which of its cards are done or dismissed), and when the free trial notice was shown and which of its buttons was clicked. It sends them once a day when something changed, and when the plugin is activated, deactivated or deleted. The newsletter is a separate choice, off unless switched on. Each choice can be changed, or the sharing stopped, from the Opt out link under the plugin on the Plugins screen. Opting out has WordPlus Cloud erase what was shared. A site that opted in through Freemius in an earlier version stays opted in, and its administrators are told once that its data goes to WordPlus Cloud now. Only the WebSocket version adds the features and settings in use to what such a site shares, unless switched off. The free version shares them only once an administrator switches them on. A site that skipped Freemius's opt-in is not asked again.
+* **AI model prices, only when an administrator asks, or with a licence.** The AI chat bots count what their answers cost by a price list of the AI models that comes with the plugin. **Check for new prices** in **Settings → Integrations → AI Services** asks WordPlus Cloud for a newer list, from its CDN (cdn.wordplus.cloud) or from WordPlus Cloud (api.wordplus.cloud) when the CDN fails, and a site with an active WebSocket licence asks once a day, after its licence check. The request sends the version of the WordPlus code in the plugin, and WordPress adds the address of the site to every request it makes. Only the list comes back, which the site reads as prices and nothing else.
 * **Deactivation feedback, only when you send it.** When the plugin is deactivated, it may ask why. The answer is sent to WordPlus Cloud only if the administrator submits it, without their email or the site's address unless they opted in to usage data and left "Anonymous feedback" unticked.
+
+The WebSocket version, which WordPlus Cloud sells and which is not on WordPress.org, also connects to WordPlus Cloud for these:
+
+* **Realtime delivery and calls.** Messages, typing, online statuses and call signals go through WordPlus Cloud's realtime servers (ws.wordplus.cloud, rest.wordplus.cloud), encrypted with keys only the site gives out, and calls through its call servers (*.rtc.wordplus.cloud). Better Messages Cloud AI, where an administrator switches it on, sends the message or voice message it moderates, translates or transcribes, and keeps nothing. The licence status at the top of the settings shows the WordPlus Cloud credits of the site's account, which group calls above the 32 people a site includes and call recordings use.
+* **Video effects, only when an administrator downloads them.** **Settings → Calls → Video Effects** downloads the background effects and AI Noise Removal from WordPlus Cloud's CDN (cdn.wordplus.cloud), or from WordPlus Cloud (api.wordplus.cloud) when the CDN fails, and reads its catalog of built-in backgrounds there, downloading the pictures an administrator picks. The administrator's browser loads the catalog's thumbnails from the same addresses. After an update of the plugin, a site that downloaded them gets the newer files the same way. Calls then load the effects and backgrounds from the site itself. WordPress adds the address of the site to every request it makes.
+* **Call recording, only when an administrator turns it on.** With **Record Group Calls** on, a moderator's Record has WordPlus Cloud's recorder join that group call: it receives the call's sound, video and shared screens, with the names and profile pictures of the people in it, makes the recording and, unless switched off, its transcript, and puts the files into the site's cloud storage, or keeps them until the site downloads them, for seven days at most. Each minute recorded takes a WordPlus Cloud credit.
 
 WordPlus Cloud: [terms of service](https://www.wordplus.cloud/terms), [privacy policy](https://www.wordplus.cloud/privacy).
 
@@ -413,87 +448,134 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 11. AI chat bots powered by OpenAI, Anthropic (Claude) and Google Gemini
 12. Appearance tab — repaint any part of the messenger and watch every change in the live preview
 13. Settings — email, browser push and on-site notifications, and 18 more tabs of options
-14. Group video calls for up to 32 participants, right beside the conversation (WebSocket version)
+14. Group video calls right beside the conversation, with no fixed number of participants (WebSocket version)
 15. One-to-one HD video and audio calls from any conversation (WebSocket version)
 
 == Changelog ==
 
-**Important — please read before updating to 3.0**
+**Noticed something wrong after updating?** Email [support@better-messages.com](mailto:support@better-messages.com) or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/).
 
-3.0 is a full redesign. Your conversations, settings and integrations carry across untouched — including the colors and sizes you set in the Customizer.
+= 3.2.0 =
 
-**Noticed something wrong after updating to 3.0? Please tell us.** A redesign this large can behave differently on a theme or plugin combination we have not seen. If anything looks broken, missing or out of place, email us at [support@better-messages.com](mailto:support@better-messages.com) — or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/) if you are can not contact email for some reason — and we will get it fixed. Please do not leave it unreported, every report speeds up a fix for everyone.
+**Video and group calls (WebSocket version)**
 
-**Thank you to everyone who sent feedback and bug reports on the 3.0 release.**
+* Added [call recording](https://www.better-messages.com/docs/websocket/call-recording/) to group calls: a moderator records from Host Controls, and the recording plays in a card in the conversation, with a searchable transcript and captions. **Settings → Group Calls → Recording → Record Group Calls** turns it on, off by default, and sets how people in the call are told, the layout, quality and logo, the files to keep, where they go and for how long. Recordings are listed under **Settings → Group Calls → Recordings**. Each minute recorded takes one WordPlus Cloud credit, and encrypted group calls cannot be recorded. In the mobile app, people in a recorded group call are told as the site chose, by REC beside the call controls, the notice or the question to stay or leave, with the microphone, camera and screen sharing held off until they agree where the site asks for that, and moderators start and stop a recording from Host Controls, or stop it with REC, asked first — apps need a new build
+* Added [group calls without a fixed size](https://www.better-messages.com/docs/websocket/group-video-chat/#how-many-people-can-join), where they stopped at 32 people on video and 50 on audio: a site includes 32 people on video or 50 on audio at once across all its group calls, and more join with WordPlus Cloud credits, a credit a minute for each person above on video and half on audio. The credits left, and what they pay for, show in the licence status at the top of the settings, and someone a full call turns away is told why, in the mobile app too — apps need a new build
+* Added [device settings](https://www.better-messages.com/docs/websocket/video-calls/#device-settings) to every call, in place of the device lists: a camera preview and a microphone test that only you see, a speaker test, the choice of each device, whether everyone sees and hears you, and Allow Access, with the steps to follow where the browser blocks a device
+* Added a [notice as a group call is joined](https://www.better-messages.com/docs/websocket/group-video-chat/#joining-a-group-chat): people now join with the camera and microphone off, and are told that the call controls turn them on, with a Preview of their camera. **Settings → Group Calls → Joining → Notice on Join** turns it off, and each person can choose Do Not Show Again and bring it back in the Calls section of their own settings
+* Added [background blur, virtual backgrounds and AI Noise Removal](https://www.better-messages.com/docs/websocket/video-effects/) to calls in the browser, chosen in the device settings and kept by each browser. Backgrounds use the same person detection on every device that can run it, a phone held upright too, and where a device cannot run it the device settings say so instead of drawing a worse background. Where a background slows the device, the call offers to turn it off, once a call. The device settings prepare the backgrounds the first time they open on a computer, so the first one chosen in a call goes on at once. AI Noise Removal takes out keyboard typing, fans and hiss, and the microphone test plays the same seconds back without and with it
+* Added **Settings → Calls → Video Effects**: the effects and AI Noise Removal are each downloaded to the site once from WordPlus Cloud, the built-in backgrounds are offered from WordPlus Cloud's catalog, each downloaded when it is ticked and none with the effects, pictures from the Media Library are offered too, and with [Personal Backgrounds](https://www.better-messages.com/docs/websocket/video-effects/#personal-backgrounds) on, people, guests too, can use a picture from their own device, which their browser keeps and never uploads
+* Added [keyboard shortcuts](https://www.better-messages.com/docs/websocket/video-calls/#keyboard-shortcuts) to calls: Alt (Option on a Mac) with A for the microphone, V the camera, Y a raised hand, S screen sharing, U Participants, C the device settings, H the chat, E Expand, F full screen, M Host Controls, O More, P picture in picture, I Add Person, J to answer, B to switch a phone's camera, R recording and Q to leave, the last two after asking, and Space held down to talk while muted. Each key is named in the tooltip of its button, and none works while typing in a field
+* Added [picture in picture](https://www.better-messages.com/docs/websocket/group-video-chat/#picture-in-picture) to group calls on computers: a window over other apps at the shape of what it shows, the person in the spotlight or pinned, a shared screen or whoever speaks, with Mute, Camera and Leave in Chrome and Edge. Group audio calls offer it while someone shares a screen. **Settings → Group Calls → During the Call → Open Picture in Picture When Leaving the Tab** opens it by itself, off by default
+* Added [Participants](https://www.better-messages.com/docs/websocket/group-video-chat/#participants) to group video calls that cannot show everyone at once: everyone in the call with their microphone, camera, raised hand and connection, a search, Add Person, and for moderators Mute Everyone, Lower All Hands and the actions for each person, beside the tiles on a wide screen and over the call on a narrow one
+* Added [Spotlight for Everyone](https://www.better-messages.com/docs/websocket/group-video-chat/#spotlight-and-pin) to group video calls: a moderator puts up to four people on the main tiles for everyone, in place of Pin Participant, and anyone can pin a person on their own screen with Pin for Me, which waits while a spotlight is on
+* Added a [choice of layout](https://www.better-messages.com/docs/websocket/group-video-chat/#layouts) to group video calls, in More: Auto, Speaker with a shared screen or whoever speaks large, and Tiled with equal tiles, and Hide People Without Video, who still show while they speak, and Hide Self View, kept by each browser, with a button to show everyone again where they leave no one on the screen
+* Added [Remove and Ban from Calls](https://www.better-messages.com/docs/websocket/group-video-chat/#remove-and-ban-from-calls) to the menu of each person in a group call: a moderator keeps them out of that conversation's calls for minutes, hours or days, and in group conversations and chat rooms can ban them from the chat too. The group call banner tells them until when in place of Join, a join is refused in the same words, and both bans show in the member list, where they are lifted
+* Added [Ask to Turn On Camera and Ask to Turn On Microphone](https://www.better-messages.com/docs/websocket/group-video-chat/#ask-to-turn-on-camera-or-microphone) to the menu of a person in a group call, one ask for both when both are off: the person turns it on with one tap over the call controls, is shown how to allow it where the browser blocks it, and the moderator is told the answer
+* Added [End for Everyone](https://www.better-messages.com/docs/websocket/group-video-chat/#end-for-everyone) to Host Controls: once confirmed, everyone leaves the call, the moderator too, the others are told a moderator ended it, and the room forgets its lock, mute and mode
+* Added [toasts for moderators](https://www.better-messages.com/docs/websocket/group-video-chat/#join-alerts-and-raised-hands) when someone raises a hand, with a short sound, and when someone joins once Join Alerts is on, both switched in Host Controls on that device, with none for a hand raised again within a minute or someone back within two minutes
+* Added a [hint for people who talk while muted](https://www.better-messages.com/docs/websocket/video-calls/#talking-while-muted), with an Unmute button. Once they mute, the microphone stays open to notice it, while joining muted opens nothing. **Settings → Calls → Private Calls → Talking While Muted** turns it off for one-to-one calls and **Settings → Group Calls → During the Call → Talking While Muted** for group calls
+* Improved the [moderator controls](https://www.better-messages.com/docs/websocket/group-video-chat/#host-controls) of group calls: Mute Everyone, Lock Room and Broadcast Mode are switches in one Host Controls panel, and the ⋯ on a tile opens what can be done for that person, each action named for what it does, such as Stop Camera and Microphone, Allow Microphone or Keep Microphone Off for someone who has it off already. A microphone a moderator muted shows a silenced icon on every tile and on the controls of the muted person, who is told so, until the moderator allows it again
+* Improved group calls: someone a moderator stopped shows as a viewer to everyone and can raise a hand to ask to speak again, and a moderator can mute a single microphone in group audio calls too
+* Improved calls when someone's video or sound stops arriving: within seconds their tile says ["Video interrupted"](https://www.better-messages.com/docs/websocket/video-calls/#video-interrupted-and-reconnecting) over their blurred last picture, or their avatar where no picture came, and "Reconnecting..." when their sound stopped too, where their picture froze until they left, in the browser and in the mobile app — apps need a new build
+* Improved big group calls: a browser receives the video of the people on its screen only, while everyone is still heard, and the tiles and Participants stay quick with hundreds of people
+* Improved the call controls: fewer buttons in the row, with More holding the layout and Picture in Picture in one menu, a control standing as its own button where it would be all More holds, and the other buttons folding into More on a narrow screen
+* Improved group video calls on phones and tablets in the browser: pages of six tiles on a phone and sixteen on a tablet swipe sideways with dots, your own tile is among the others, every camera is shown whole unless its shape all but matches its tile, and the menus open from the bottom
+* Improved group video calls on a computer: the grid weighs every picture at its own shape, so four people in a tall call stand two by two instead of in a column of strips
+* Improved group video calls: tiles move smoothly to their new places when the layout changes or someone is spotlighted, with the picture of whoever moves still playing, names stay on their tiles, with a tooltip only where a tile cuts a name short, and the menu of a person stays at their tile as it moves
+* Improved [screen sharing in group audio calls](https://www.better-messages.com/docs/websocket/group-audio-chat/#sharing-a-screen-in-an-audio-call): the shared screen stands in a card of its own shape, as large as the call allows, with the name of who shares under it, so a 4:3 window or a phone's screen has no wide bands around it
+* Improved calls: Expand fills the browser window first, also on iPhone, and Full Screen from there takes the whole screen
+* Improved calls on phones: the Show Chat button in the controls shows and hides the chat, as on a computer, in place of the small handle under them
+* Improved the sound of one-to-one calls on a connection that loses packets: the microphone is sent with redundant audio, as in group calls, so a lost packet is played from the next one, in the browser and in the mobile app — apps need a new build
+* Improved the video of one-to-one calls in the browser: the picture is held a moment before it plays, longer while it keeps freezing on an uneven connection and shorter once it plays smoothly, with the sound kept in step
+* Improved one-to-one calls when one side's connection stalls for a while, as on a weak mobile network, or changes while the call rings: the call waits for it and stays direct between the two, where it moved to the call server, in the browser and in the mobile app — apps need a new build
+* Improved the Live stream row of the chat room editor: [Live Stream](https://www.better-messages.com/docs/websocket/live-streaming/) is now a free plugin on WordPress.org, and the row installs it from there in WordPress's own plugin details dialog, or activates it where it is installed but inactive. An administrator who may not install plugins gets a link to its page on WordPress.org
 
-= 3.1.6 =
-* Added `data-thread-id` and `data-thread-type` to the open conversation (`.bm-thread-col`), and `data-open-thread-id` and `data-open-thread-type` to the card around it and to mini chat windows, so custom CSS can style one conversation, or every chat room, its background and info panel included
-* Added **Settings → Integrations → FluentCommunity → Messages Icon** for the Messages button in the portal header and bottom menu, **Position in the Header** to put it at the start of the header icons or next to the profile picture, and **Messages Button on Phones** to show it on phones in the header, the bottom menu or both
-* Improved video in calls on the cloud call servers from Windows and Linux computers: the camera is tested as it turns on, with a spinner on its button, and goes out at up to 1080p in the codec the computer handles best: its hardware H.264 on Windows where it keeps up, else VP9
-* Improved calls on the cloud call servers when a camera struggles during the call: it steps down from 1080p to 720p, or switches to a lighter codec while everyone sees "Optimizing video quality..." on its tile, in the browser and in the mobile app
-* Improved screen sharing in calls on the cloud call servers from Windows and Linux computers, which now share in VP9 as smoothly as a Mac shares in H.264, where the hardware H.264 encoder of some Windows computers held a shared screen to a few frames a second
-* Improved the CPU use of calls on the cloud call servers with many cameras, as the statistics of each connection are read once instead of once for every video
-* Fixed voice and video messages recorded in Chrome failing to upload on sites whose PHP memory limit is unlimited, where they stayed at "Waiting to send"
-* Fixed a message the site keeps failing to take holding back every message sent after it, also each time it was sent again by itself
-* Fixed text messages waiting for a file, voice or video message that is still uploading, or for a message stuck in another conversation
-* Fixed **Send now** on a waiting message trying an older failing message first instead of sending the message it was pressed on
-* Fixed uploads that failed halfway staying in the Media Library instead of being removed with the other unused uploads
-* Fixed each new page or tab fetching the encryption keys again when another open tab of the site had already fetched them
-* Fixed the unread count sitting low in its circle in the collapsed conversations list on FluentCommunity and on themes with a tall line height
-* Fixed the counts in search results sitting low in their circles, and the date and New messages labels of a conversation growing taller, on FluentCommunity and on themes with a tall line height
-* Fixed deleting a message taking seconds on sites with many files, as it looked through every file sent in the messenger instead of the files of that message
-* Fixed a message sent again after a lost connection waiting until the first send had finished all its work, instead of being answered as soon as the message was saved
-* Fixed a camera paused by its device during a call on the cloud call servers, such as Safari on an iPad sent to the background, showing the others its last picture frozen instead of the avatar until it came back
-* Fixed the messenger never finishing its load, even after a reload, when the browser database opened but stopped answering, as in Safari after a Mac woke from sleep: it moves to a fresh database, and every reload after that loads at once
-* Fixed browser database timeouts the messenger works around reaching error tracking tools by the thousand as uncaught errors
-* Other minor bugfixes and improvements
+**Mobile apps (WebSocket version)**
 
-= 3.1.5 =
-* Added [custom tabs](https://www.better-messages.com/docs/features/custom-tabs/) on the mini widgets bar, the side panel and the mobile tab bar, from **Settings → Appearance**: a link, a page shown inside the messenger, or content with shortcodes rendered for each member, hidden per role and bar
-* Added [renaming of the built-in tabs](https://www.better-messages.com/docs/features/custom-tabs/#renaming-the-built-in-tabs), one name for all three bars
-* Added the [`better_messages_navigation_tabs`](https://www.better-messages.com/hooks/js-filters/#better_messages_navigation_tabs) JavaScript filter and the [`better_messages_custom_tabs`](https://www.better-messages.com/hooks/php-filters/#better_messages_custom_tabs) PHP filter, to add, remove, reorder and rename the tabs of every bar from code — see [Custom navigation tabs](https://www.better-messages.com/docs/development/guides/custom-tabs/)
-* Fixed the Courses widget icon picked in Appearance showing in the preview but not on the site, and its Show Search Box switch doing nothing
-* Fixed the collapsed side panel showing the stock icons instead of the widget icons picked in Appearance
-* Fixed the side panel showing the wrong number of tabs for a moment while the messenger loads
-* Fixed the Restricted Roles of voice and video messages not applying in New Conversation, where restricted members and guests still had the mic and the camera: the site now also refuses their recordings
-* Fixed **Unique Guest Names** letting a guest sign up or rename with the username or display name of a member, an administrator too
-* Fixed **Restrict Message Viewing** letting restricted members read some messages: new messages, edits and AI replies as they arrived, ephemeral chat rooms, conversations they were added to, AI translations and transcripts, search results, and messages stored before the restriction
-* Improved the sound of calls on the cloud call servers over unstable connections, as each audio packet now carries a copy of the one before it
-* Improved video in calls on computers whose hardware video encoder drops camera frames: this is now detected, and the camera is encoded in software from its next start
-* Tested up to WordPress 7.2
-* Other minor bugfixes and improvements
+* Added [website sign-in](https://www.better-messages.com/docs/mobile-app/sign-in/) to the mobile app: members log in on the site's own login page, with its two-factor authentication and other login plugins, and **Mobile App → General → Sign-in methods** can make it the only way in — apps need a new build
+* Added an [app lock](https://www.better-messages.com/docs/mobile-app/app-lock/): Face ID, Touch ID or the fingerprint, with the phone's passcode as the fallback, when the app opens and when it comes back from the background, with the conversations hidden in the app switcher. Each member chooses it in the app's settings, or **Mobile App → General → App lock** requires it — apps need a new build
+* Added [links that open the app](https://www.better-messages.com/docs/mobile-app/app-links/): a site address under /bm/open/ opens a conversation, a private conversation with a member or the messages in the app, and the messenger in the browser where the app is not installed. The site serves the app link files of iOS and Android, which also lets website sign-in return to the app over the site's own address — apps need a new build
+* Added [signed-in devices](https://www.better-messages.com/docs/mobile-app/signed-in-devices/) to the settings of the messenger: members see their phones and sign out one or all the others. The Devices list of the Mobile App page gets Sign out and the app version of each phone, and phones are signed out at once when the member is deleted, banned or changes the password, as **Mobile App → General → Sign out on password change** sets
+* Added [Delete Account](https://www.better-messages.com/docs/mobile-app/delete-account/) to the mobile app on every site, where only BuddyPress sites had it: the account is deleted at once or the administrator gets a request, as **Mobile App → General → Account deletion** sets
+* Improved the Devices list of the Mobile App page: the phones used last come first, as in a member's own list, where they came in no useful order
+* Added to the [calls of the mobile app](https://www.better-messages.com/docs/mobile-app/calls/), as on the website: call recording, [Spotlight for Everyone and Pin for Me](https://www.better-messages.com/docs/mobile-app/calls/#spotlight-and-pin-for-me), device settings, the notice as a group call is joined, the toasts for moderators with Join Alerts, End for Everyone, Ask to Turn On Camera and Microphone with the card that answers it, and the Show Chat button in the controls — apps need a new build
+* Improved the [login screen](https://www.better-messages.com/docs/mobile-app/login-screen/) of the mobile app: a new design with the logo, the site icon or the site's name, fields that offer saved passwords and errors shown on the screen. **Mobile App → General → Login screen** adds a logo for dark mode, an optional soft glow with its color, strength and spread, and a preview of the login, splash and lock screens. A build no longer needs a login logo, as the screen shows the site icon or the site's name without one
+* Improved [password sign-in](https://www.better-messages.com/docs/mobile-app/sign-in/#password-sign-in) in the mobile app: failed attempts are limited for each account and address and reported to security plugins such as Wordfence, and members the site keeps out of the messenger cannot sign in
+* Improved the [moderator controls of group calls in the mobile app](https://www.better-messages.com/docs/mobile-app/calls/#host-controls-for-moderators), as on the website: Mute Everyone mutes microphones only, a microphone a moderator muted shows a silenced icon and stays muted until the moderator allows it, and the ⋯ on a tile opens the menu of that person, with each action named for what it does — apps need a new build
+* Improved [group calls in the mobile app](https://www.better-messages.com/docs/mobile-app/calls/#joining-a-group-call), as on the website: joining shows the call grid with your own tile and a spinner until it connects, where it looked like a one-to-one call with "Connecting..." over it, the tiles end above the controls instead of under them, and the controls have the website's size and spacing — apps need a new build
 
-= 3.1.4 =
-* Added **Better Messages → Settings → Get started**, the page a new site opens on: one click each sets up the Messages page, chat with visitors, a chat room on its own page and the plugins on the site
-* Added Get started cards for the look, file sharing, email notifications, reports and blocking, and restrictions, each one dismissible, with the Messages page required until it exists
-* Added a new **Better Messages → Upgrade** page: what the WebSocket version adds beside its price, monthly or yearly with the yearly saving shown, reviews from buyers, every feature side by side with the free version, and answers to the questions asked before buying
-* Added the offer of the free WebSocket trial back, as before 3.1: a notice on the Dashboard and the Plugins screen once members are messaging, and, from then on, **Better Messages → Start trial** while the site can still take it, with a subscription at once still one click away
-* Fixed files sent from a private window in Safari staying at 0% and never being sent, in plain and end-to-end encrypted conversations
-* Fixed typed messages showing as sent, and live for the others, but never being saved when the browser could not keep them in its local database
-* Fixed video in calls running at 15 or 20 frames per second from webcams that give Full HD only at a lower frame rate, as many do: such a camera now opens at a smaller size at 30 frames per second
-* Fixed an AI chat bot reply that could stay a pulsing dot for many minutes when the response ended without finishing, as on OpenAI with image generation off and web search on: it now says the response was interrupted
-* Fixed an AI chat bot answer that is only a generated image still showing as typing in the conversations list after it arrived
-* Fixed AI chat bot image costs counting less than OpenAI bills: an image made with OpenAI is now priced from the tokens OpenAI reports, the prompt and the pictures being edited included, so the usage figures and points pricing follow the real cost
-* Fixed a message the site kept failing holding back every message sent after it, which looked sent but never arrived: it now shows Message not sent with Retry, and the others go out
-* Fixed messages showing as sent when the site answered with something other than Better Messages, such as a firewall check page: they now show Message not sent with Retry
-* Fixed messages sent just before closing the tab staying unsent until the site was opened again in the same browser: they now go out as the tab closes
-* Fixed a message being lost, though the others may have seen it arrive, when the tab was closed or the phone locked right after pressing Send: it now goes out as the tab closes, or from the next page opened on the site
-* Fixed messages waiting to be sent being lost when the browser lost them from its local database or was slow to save them, as on a device that is nearly full
-* Fixed messages waiting to be sent being deleted when Browser Database Encryption was switched on or off
-* Fixed attachments being left out when sending from New Conversation into a conversation that already exists
-* Improved AI chat bots on OpenAI: the limits of images, web searches and file searches per response are enforced by OpenAI as one total when each tool in use has a limit, not only asked for in the instructions
-* Improved calls on the cloud call servers: a video the server pauses for a weak connection shows "Paused: weak connection" instead of freezing without a word, and a group call says when every video is paused
-* Improved lip sync in group calls: each voice keeps to its own camera, measured from what the browser plays in Chrome, Edge and other Chromium browsers, Bluetooth headphones included, and the sound of a shared screen, such as a video playing in a tab, keeps to the screen
-* Security improvement: an error message carried in a link is shown as plain text, so a crafted link can no longer run script on the site, and every notice keeps only safe markup
-* Improved the notice for a missing Messages page: one click on any admin screen creates the page, in place of an error that sent you to the settings
-* Improved the deactivation survey: an admin who just installed the plugin is asked what they were trying to do, in a question above the answer box
-* Improved the settings on phones and short screens: the header no longer covers the page title, and the side menu has a thin scrollbar
-* Improved the usage data, for sites that share it: it also says how far the site got in Get started, which cards are done, dismissed or not set up, and when the trial notice was shown and which of its buttons was clicked
+**Messaging, moderation and chat rooms**
+
+* Added [Mark as unread](https://www.better-messages.com/docs/features/mark-as-unread/) to the conversation menu: a conversation that was read shows a dot in the list, with no number and not counted in the unread counters, until it is opened again or a new message arrives. **Settings → Messaging → Conversation Features → Mark as Unread** turns it off
+* Added a [flag beside Settings in the messenger](https://www.better-messages.com/docs/features/site-moderators/#administration-flag) for everyone who can open the Administration page, administrators and the roles in **Settings → Moderation → Roles That Can Access Administration**: it shows the number of reported messages and messages waiting for approval while there are any, and opens the Administration page on them
+* Added [Show who did it](https://www.better-messages.com/docs/features/system-messages/#show-who-did-it) to **Settings → Messaging → System Messages**, off by default: the lines that say someone was removed, muted or banned name the moderator, such as "Anna was muted by John", in the conversation, the Administration page and emails, lines written before it was turned on too. Emails, which left these lines empty, now write them either way
+* Added a Group Chat switch to the Settings tab of each [LearnDash group](https://www.better-messages.com/docs/integrations/learndash/#choosing-the-groups-that-have-a-chat), so LearnDash Group Chat can be on for chosen groups only. A group with no choice saved follows the [better_messages_learndash_group_chat_enabled](https://www.better-messages.com/hooks/php-filters/#better_messages_learndash_group_chat_enabled) filter, on by default
+* Improved chat rooms for members and guests a moderator [banned](https://www.better-messages.com/docs/features/chat-rooms/#banned-members): they read that they are banned and until when, in their own time zone, where they read "You are not allowed to join this chat room", which stays for the roles a room keeps out. A room left open past the end of the ban offers the join again
+* Added AI bots to the [online list of chat rooms](https://www.better-messages.com/docs/features/chat-rooms/#ai-bots-in-the-online-list): a bot that is a member of the room is listed while it can answer, and leaves the list once it is switched off or deleted. Every member list marks a bot with a bot icon next to its name
+* Improved the [picture of a chat room](https://www.better-messages.com/docs/features/chat-rooms/#room-picture) in the conversation header and the info panel: it is sharp on high-density screens, phones and the mobile app included, from the larger sizes WordPress already keeps, so existing rooms are sharp too without a new upload
+* Improved the settings of a [hidden chat room](https://www.better-messages.com/docs/features/chat-rooms/#hide-a-room-from-the-conversation-list): the locked Notifications section names the **Hide chat from conversation list** switch that unlocks it
+* Improved the conversation header: a conversation whose info panel would show nothing but its name and picture, such as a chat room that hides its members, has no Info panel button, and its title opens nothing
+* Improved the [picker button](https://www.better-messages.com/docs/features/stickers/#the-picker-button) of the reply box on phones, and on sites with the emoji picker off: it shows a sticker or a GIF badge for what it opens, where a smile opened only stickers or GIFs
+* Improved [guests](https://www.better-messages.com/docs/features/guest-access/#guests-shared-across-wordplus-plugins) on sites with more than one WordPlus plugin: one browser is the same visitor to each of them and two visitors never get the same id, while the guests a site has keep their ids and conversations
+* Improved the [Cloudflare R2](https://www.better-messages.com/docs/cloud-storage/cloudflare-r2/#choose-how-files-open) dialog of Cloud Storage: it says the Cloudflare Worker is optional, as files open only for people allowed to see them without it too
+
+**AI chat bots**
+
+* Improved the [costs of AI bots](https://www.better-messages.com/docs/features/ai-chat-bots/#costs-and-the-price-list), counted by a price list of the models checked against the pricing pages of OpenAI, Anthropic and Google on October 31, 2026: Claude Haiku 5.5 is priced at its long prompt prices above 100,000 prompt tokens, cache reads and writes are counted, and the cached input of Claude models is counted once, where it was taken away twice, so Claude answers with a cache cost a little more than before, as Anthropic bills them. Costs already stored stay as they were. **Settings → Integrations → AI Services → Check for new prices** gets a newer list from WordPlus Cloud
+* Improved the [AI keys](https://www.better-messages.com/docs/features/ai-chat-bots/#api-keys) of OpenAI, Anthropic and Gemini, and of each bot: they are sealed in a keychain all WordPlus plugins on the site share and no longer kept in the settings, which show a saved key by its last four characters, with Replace, Remove and Test API Key. A site that goes back to 3.1 finds them empty and must save them again
+* Fixed [Extended Thinking](https://www.better-messages.com/docs/features/ai-chat-bots/#extended-thinking) in AI bots on Claude 4.7 and later, which refuse a thinking budget: these models now use adaptive thinking at an effort, with no thinking budget or temperature sent
+
+**For developers**
+
+* Added hooks for plugins that bring a tab of their own to the messenger, described in [Custom navigation tabs](https://www.better-messages.com/docs/development/guides/custom-tabs/): a tab added in PHP and drawn by the plugin's script, told when it is in front and opened from the plugin's own buttons, its unread messages added to the total in the title and the counters, the sound of a new message, a tab visitors open before they sign in, and the tab offered to the administrator in **Appearance**, **Integrations** and **Get started**, turned on there with one button and shown in the Appearance preview
+* Added filters and actions for website sign-in, the app lock, app links, signed-in devices and Delete Account of the mobile app, listed under Mobile App in the [PHP filters](https://www.better-messages.com/hooks/php-filters/#mobile-app) and [PHP actions](https://www.better-messages.com/hooks/php-actions/#mobile-app)
+* Added the [Mark conversation as unread](https://www.better-messages.com/rest-api/mark-conversation-as-unread/) REST route, `POST thread/{id}/markUnread`, and the [`better_messages_thread_marked_unread`](https://www.better-messages.com/hooks/php-actions/#better_messages_thread_marked_unread) action
+
+**Fixes**
+
+* Fixed Mute All turning off every camera: Mute Everyone now mutes microphones only, and people who join while it is on come in muted
+* Fixed one-to-one calls that never connected when one side received the call's signals seconds late, in the browser and in the mobile app — apps need a new build
+* Fixed the video of a one-to-one call with someone on Firefox stopping for good when the connection was being restored just as the other side changed its video, in the browser and in the mobile app — apps need a new build
+* Fixed one-to-one calls from Firefox being measured as relayed through the TURN server, with a round trip of over a second, when they went directly between the two
+* Fixed a one-to-one call that could not get its room from the call server stopping with a server error and no message: the call now ends at once with "The call could not be started. Please try again.", and the other person is not rung
+* Fixed the realtime connection, and with it calls, for users in mainland China. The fix is on the realtime server, so every version has it already
+* Fixed a server error when someone no longer in a conversation tried to join its group call: they are told why, and when a ban from the conversation ends
+* Fixed someone a moderator removed from a group call in the browser, with a ban from the chat too or without, seeing the call close with nothing said, as if it had dropped: they read "A moderator removed you from the call."
+* Fixed a group call closing in the browser, with Join Video Chat shown while the person was still in the call, when someone in the call came with missing or broken call details
+* Fixed the camera or microphone button of a call in the browser staying on, with nothing sent, when the device stopped, a switch could not open the new one or the call server refused it after a second try: the button turns off and says why
+* Fixed the banner of a running group call saying "1 participants are in group video chat" for one person, and the same for audio chats
+* Fixed the small tiles under the large one in a group video call stretching across the whole call in a taller window, with the picture small in the middle of a wide dark tile. Every tile keeps the shape of its picture now, and the large tiles and the others stand together in the middle of the call, beside a tall picture and on phones too
+* Fixed the proposal to turn on push notifications covering the controls of a call, and on phones the conversation header and the group call banner: it waits until they are gone, and stands at the bottom on a phone
+* Fixed a button of the call controls showing its tooltip over the menu it opened, such as More
+* Fixed the tiles of a call showing through the More menu, the other menus of the call and the notice over the controls
+* Fixed the More menu of the call controls jumping sideways just after it opened
+* Fixed a confirmation asked again just after the previous one closed, such as Leave asked twice quickly, doing nothing when confirmed
+* Fixed a focus outline drawn around the whole window of a one-to-one call on themes that outline every focused element
+* Fixed an empty strip over the call, and a blurred first row, when the chat is shown beside a call in the iOS app — apps need a new build
+* Fixed the first letter of a name showing over the picture of a person in group calls in the Android app — apps need a new build
+* Fixed avatars made as SVG pictures, such as letter avatars, missing from the calls of the mobile app, where a group call showed an empty space with the online dot beside it. A person with no picture now shows their initials in a circle — apps need a new build
+* Fixed the online dot showing on everyone in a group call, and on the other person once a one-to-one call is answered, where everyone is plainly there: it shows only while a call rings, in the browser and in the mobile app — apps need a new build
+* Fixed the reply box of the mobile app on iPhone jumping up and back down as the keyboard finished opening
+* Fixed "Sorry, you are not allowed to do that" when the mobile app starts, on hosts that drop the Authorization header
+* Fixed **Settings → Attachments → Hide from Media Library** letting chat uploads into the Media Library on sites with SureMembers, or another plugin that filters the Media Library its own way
+* Fixed moving files from one cloud storage to another of a different account, such as from Cloudflare R2 to Amazon S3, stopping at the first file when the move runs in the background
+* Fixed the email notification choice for group conversations and chat rooms showing to members on sites that have neither, where it changed nothing
+* Fixed the widget bar opening on the conversation list under a bar without Conversations, such as the preview of the free version after Users was switched on
+* Fixed the count beside Better Messages and Administration in the wp-admin menu counting only the messages members reported: it counts those AI moderation flagged and those waiting for approval too, as the Administration page does
+* Fixed dates and numbers in wp-admin, such as on the Administration page, in the AI bots' usage and the Mobile App builds, following the browser's language instead of the site's or the one the administrator chose
+* Fixed importing a settings file without the sound settings resetting the custom notification and call sounds to the defaults
+* Improved the conversation lists of moderators: the muted and banned members of the group conversations they moderate are read in one database query, where each conversation asked on its own
+* Fixed a PHP error when a missed call was reported after its conversation was erased while it rang, and two PHP warnings when a reaction, a file or a system message was saved for a message already deleted
+* Fixed the zip of the WebSocket version carrying the HEIC decoder twice: it is about 1 MB smaller
 * Other minor bugfixes and improvements
 
 [See the full changelog](https://www.better-messages.com/changelog/) for every earlier version.
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+Upgraded video and group calls, with recording, backgrounds and no fixed size, and new mobile app features, which need a new build of the app. The AI keys move to a keychain the WordPlus plugins share, so a site that goes back to 3.1 must enter them again.
 
 = 3.1.0 =
 The Freemius SDK is removed. A site that shared usage data through Freemius shares it with WordPlus Cloud now, and a WebSocket licence saved on the site moves there by itself on the first page load after the update.

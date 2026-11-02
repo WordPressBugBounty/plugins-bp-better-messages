@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "updated": "2026-10-31",
+  "currency": "USD",
+  "per": 1000000,
+  "providers": {
+    "anthropic": {
+      "checked": "2026-10-31",
+      "sources": [
+        "https://platform.claude.com/docs/en/about-claude/pricing",
+        "https://platform.claude.com/docs/en/build-with-claude/thinking-troubleshooting",
+        "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+        "https://platform.claude.com/docs/en/api/migration-2026-10-21"
+      ],
+      "defaults": { "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high"] },
+      "tiers": {
+        "fast": ["claude-haiku-5-5", "claude-haiku-4-5"],
+        "capable": ["claude-sonnet-5-5", "claude-sonnet-5", "claude-sonnet-4-6"]
+      },
+      "models": {
+        "claude-fable-5-1": { "label": "Claude Fable 5.1", "price": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-mythos-5-1": { "label": "Claude Mythos 5.1", "price": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-fable-5": { "label": "Claude Fable 5", "price": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-mythos-5": { "label": "Claude Mythos 5", "price": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-opus-5-5": { "label": "Claude Opus 5.5", "price": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-opus-5": { "label": "Claude Opus 5", "price": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-opus-4-8": { "label": "Claude Opus 4.8", "price": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-opus-4-7": { "label": "Claude Opus 4.7", "price": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-opus-4-6": { "label": "Claude Opus 4.6", "price": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }, "thinking": "both", "sampling": "any", "effort": ["low", "medium", "high", "max"] },
+        "claude-opus-4-5": { "label": "Claude Opus 4.5", "price": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }, "thinking": "budget", "sampling": "any", "effort": ["low", "medium", "high"] },
+        "claude-opus-4-1": { "label": "Claude Opus 4.1", "price": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite": 18.75 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-opus-4": { "label": "Claude Opus 4", "price": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite": 18.75 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-sonnet-5-5": { "label": "Claude Sonnet 5.5", "price": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-sonnet-5": { "label": "Claude Sonnet 5", "price": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-sonnet-4-6": { "label": "Claude Sonnet 4.6", "price": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }, "thinking": "both", "sampling": "any", "effort": ["low", "medium", "high", "max"] },
+        "claude-sonnet-4-5": { "label": "Claude Sonnet 4.5", "price": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-sonnet-4": { "label": "Claude Sonnet 4", "price": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-3-7-sonnet": { "label": "Claude Sonnet 3.7", "price": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }, "thinking": "budget", "sampling": "any", "effort": [], "unlisted": "2026-10-31" },
+        "claude-3-5-sonnet": { "label": "Claude Sonnet 3.5", "price": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }, "thinking": "none", "sampling": "any", "effort": [], "unlisted": "2026-10-31" },
+        "claude-haiku-5-5": { "label": "Claude Haiku 5.5", "price": { "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite": 0.125 }, "long": { "over": 100000, "input": 0.5, "output": 2.5, "cacheRead": 0.05, "cacheWrite": 0.625 }, "thinking": "adaptive", "sampling": "default", "effort": ["low", "medium", "high", "xhigh", "max"] },
+        "claude-haiku-4-5": { "label": "Claude Haiku 4.5", "price": { "input": 1, "output": 5, "cacheRead": 0.1, "cacheWrite": 1.25 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-haiku-4": { "label": "Claude Haiku 4", "price": { "input": 1, "output": 5, "cacheRead": 0.1, "cacheWrite": 1.25 }, "thinking": "budget", "sampling": "any", "effort": [] },
+        "claude-3-5-haiku": { "label": "Claude Haiku 3.5", "price": { "input": 0.8, "output": 4, "cacheRead": 0.08, "cacheWrite": 1 }, "thinking": "none", "sampling": "any", "effort": [] },
+        "claude-3-opus": { "label": "Claude Opus 3", "price": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite": 18.75 }, "thinking": "none", "sampling": "any", "effort": [], "unlisted": "2026-10-31" },
+        "claude-3-haiku": { "label": "Claude Haiku 3", "price": { "input": 0.25, "output": 1.25, "cacheRead": 0.03, "cacheWrite": 0.3 }, "thinking": "none", "sampling": "any", "effort": [], "unlisted": "2026-10-31" }
+      }
+    },
+    "openai": {
+      "checked": "2026-10-31",
+      "sources": [
+        "https://developers.openai.com/api/docs/pricing",
+        "https://developers.openai.com/api/docs/guides/prompt-caching",
+        "https://developers.openai.com/api/docs/guides/image-generation",
+        "https://developers.openai.com/api/docs/guides/latest-model"
+      ],
+      "defaults": { "thinking": "none", "sampling": "any", "effort": ["low", "medium", "high"] },
+      "serviceTiers": { "flex": 0.5, "priority": 2, "fast": 2 },
+      "tiers": {
+        "fast": ["gpt-6-luna", "gpt-5.6-luna", "gpt-5.4-mini", "gpt-5-mini", "gpt-4.1-mini"],
+        "capable": ["gpt-6.1-sol", "gpt-6-sol", "gpt-5.6-sol", "gpt-5.5", "gpt-5.4", "gpt-5.1", "gpt-5", "gpt-4.1"]
+      },
+      "models": {
+        "gpt-6-astra": { "price": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5 }, "long": { "over": 272000, "input": 20, "output": 75, "cacheRead": 2, "cacheWrite": 25 }, "sampling": "none" },
+        "gpt-6.1-sol": { "price": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5 }, "long": { "over": 272000, "input": 4, "output": 15, "cacheRead": 0.2, "cacheWrite": 5 }, "sampling": "none" },
+        "gpt-6.1-terra": { "price": { "input": 1, "output": 5, "cacheRead": 0.05, "cacheWrite": 1.25 }, "long": { "over": 272000, "input": 2, "output": 7.5, "cacheRead": 0.1, "cacheWrite": 2.5 } },
+        "gpt-6-sol": { "price": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5 }, "long": { "over": 272000, "input": 4, "output": 15, "cacheRead": 0.4, "cacheWrite": 5 } },
+        "gpt-6-luna": { "price": { "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite": 0.125 }, "long": { "over": 272000, "input": 0.2, "output": 0.75, "cacheRead": 0.02, "cacheWrite": 0.25 } },
+        "gpt-5.6-luna": { "price": { "input": 0.2, "output": 1.2, "cacheRead": 0.02, "cacheWrite": 0.25 }, "long": { "over": 272000, "input": 0.4, "output": 1.8, "cacheRead": 0.04, "cacheWrite": 0.5 } },
+        "gpt-5.6-sol": { "price": { "input": 4, "output": 20, "cacheRead": 0.4, "cacheWrite": 5 }, "long": { "over": 272000, "input": 8, "output": 30, "cacheRead": 0.8, "cacheWrite": 10 } },
+        "gpt-5.6-terra": { "price": { "input": 2, "output": 12, "cacheRead": 0.2, "cacheWrite": 2.5 }, "long": { "over": 272000, "input": 4, "output": 18, "cacheRead": 0.4, "cacheWrite": 5 } },
+        "gpt-5.5-pro": { "price": { "input": 30, "output": 180, "cacheRead": 30, "cacheWrite": 30 }, "long": { "over": 272000, "input": 60, "output": 270, "cacheRead": 60, "cacheWrite": 60 } },
+        "gpt-5.5": { "price": { "input": 5, "output": 30, "cacheRead": 0.5, "cacheWrite": 5 }, "long": { "over": 272000, "input": 10, "output": 45, "cacheRead": 1, "cacheWrite": 10 }, "serviceTiers": { "priority": 2.5, "fast": 2.5 } },
+        "gpt-5.4-pro": { "price": { "input": 30, "output": 180, "cacheRead": 30, "cacheWrite": 30 }, "long": { "over": 272000, "input": 60, "output": 270, "cacheRead": 60, "cacheWrite": 60 } },
+        "gpt-5.4-mini": { "price": { "input": 0.75, "output": 4.5, "cacheRead": 0.075, "cacheWrite": 0.75 } },
+        "gpt-5.4-nano": { "price": { "input": 0.2, "output": 1.25, "cacheRead": 0.02, "cacheWrite": 0.2 } },
+        "gpt-5.4": { "price": { "input": 2.5, "output": 15, "cacheRead": 0.25, "cacheWrite": 2.5 }, "long": { "over": 272000, "input": 5, "output": 22.5, "cacheRead": 0.5, "cacheWrite": 5 } },
+        "gpt-5.3": { "price": { "input": 1.75, "output": 14, "cacheRead": 0.175, "cacheWrite": 1.75 }, "unlisted": "2026-10-31" },
+        "gpt-5.2-pro": { "price": { "input": 21, "output": 168, "cacheRead": 21, "cacheWrite": 21 } },
+        "gpt-5.2": { "price": { "input": 1.75, "output": 14, "cacheRead": 0.175, "cacheWrite": 1.75 } },
+        "gpt-5.1-codex-mini": { "price": { "input": 0.25, "output": 2, "cacheRead": 0.025, "cacheWrite": 0.25 } },
+        "gpt-5.1": { "price": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite": 1.25 } },
+        "gpt-5-pro": { "price": { "input": 15, "output": 120, "cacheRead": 15, "cacheWrite": 15 } },
+        "gpt-5-nano": { "price": { "input": 0.05, "output": 0.4, "cacheRead": 0.005, "cacheWrite": 0.05 } },
+        "gpt-5-mini": { "price": { "input": 0.25, "output": 2, "cacheRead": 0.025, "cacheWrite": 0.25 } },
+        "gpt-5-search": { "price": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite": 1.25 }, "unlisted": "2026-10-31" },
+        "gpt-5": { "price": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite": 1.25 } },
+        "gpt-4.1-nano": { "price": { "input": 0.1, "output": 0.4, "cacheRead": 0.025, "cacheWrite": 0.1 } },
+        "gpt-4.1-mini": { "price": { "input": 0.4, "output": 1.6, "cacheRead": 0.1, "cacheWrite": 0.4 } },
+        "gpt-4.1": { "price": { "input": 2, "output": 8, "cacheRead": 0.5, "cacheWrite": 2 } },
+        "gpt-4o-mini-audio": { "price": { "input": 0.15, "output": 0.6, "cacheRead": 0.15, "cacheWrite": 0.15, "audioInput": 10, "audioOutput": 20 }, "unlisted": "2026-10-31" },
+        "gpt-4o-mini-realtime": { "price": { "input": 0.6, "output": 2.4, "cacheRead": 0.3, "cacheWrite": 0.6, "audioInput": 10, "audioOutput": 20 }, "unlisted": "2026-10-31" },
+        "gpt-4o-mini": { "price": { "input": 0.15, "output": 0.6, "cacheRead": 0.075, "cacheWrite": 0.15 } },
+        "gpt-4o-audio": { "price": { "input": 2.5, "output": 10, "cacheRead": 2.5, "cacheWrite": 2.5, "audioInput": 40, "audioOutput": 80 }, "unlisted": "2026-10-31" },
+        "gpt-4o-realtime": { "price": { "input": 5, "output": 20, "cacheRead": 2.5, "cacheWrite": 5, "audioInput": 40, "audioOutput": 80 }, "unlisted": "2026-10-31" },
+        "gpt-4o": { "price": { "input": 2.5, "output": 10, "cacheRead": 1.25, "cacheWrite": 2.5 }, "serviceTiers": { "priority": 1.7, "fast": 1.7 } },
+        "gpt-realtime-2.1-mini": { "price": { "input": 0.6, "output": 2.4, "cacheRead": 0.06, "cacheWrite": 0.6, "audioInput": 10, "audioOutput": 20 } },
+        "gpt-realtime-2.1": { "price": { "input": 4, "output": 24, "cacheRead": 0.4, "cacheWrite": 4, "audioInput": 32, "audioOutput": 64 } },
+        "gpt-realtime-2": { "price": { "input": 4, "output": 24, "cacheRead": 0.4, "cacheWrite": 4, "audioInput": 32, "audioOutput": 64 } },
+        "gpt-realtime-mini": { "price": { "input": 0.6, "output": 2.4, "cacheRead": 0.06, "cacheWrite": 0.6, "audioInput": 10, "audioOutput": 20 } },
+        "gpt-realtime-1.5": { "price": { "input": 4, "output": 16, "cacheRead": 0.4, "cacheWrite": 4, "audioInput": 32, "audioOutput": 64 } },
+        "gpt-realtime": { "price": { "input": 4, "output": 16, "cacheRead": 0.4, "cacheWrite": 4, "audioInput": 32, "audioOutput": 64 } },
+        "gpt-audio-mini": { "price": { "input": 0.6, "output": 2.4, "cacheRead": 0.6, "cacheWrite": 0.6, "audioInput": 10, "audioOutput": 20 } },
+        "gpt-audio-1.5": { "price": { "input": 2.5, "output": 10, "cacheRead": 2.5, "cacheWrite": 2.5, "audioInput": 32, "audioOutput": 64 } },
+        "gpt-audio": { "price": { "input": 2.5, "output": 10, "cacheRead": 2.5, "cacheWrite": 2.5, "audioInput": 32, "audioOutput": 64 } },
+        "o1-pro": { "price": { "input": 150, "output": 600, "cacheRead": 150, "cacheWrite": 150 } },
+        "o1-mini": { "price": { "input": 1.1, "output": 4.4, "cacheRead": 0.55, "cacheWrite": 1.1 } },
+        "o1": { "price": { "input": 15, "output": 60, "cacheRead": 7.5, "cacheWrite": 15 } },
+        "o3-pro": { "price": { "input": 20, "output": 80, "cacheRead": 20, "cacheWrite": 20 } },
+        "o3-deep-research": { "price": { "input": 10, "output": 40, "cacheRead": 2.5, "cacheWrite": 10 } },
+        "o3-mini": { "price": { "input": 1.1, "output": 4.4, "cacheRead": 0.55, "cacheWrite": 1.1 } },
+        "o3": { "price": { "input": 2, "output": 8, "cacheRead": 0.5, "cacheWrite": 2 } },
+        "o4-mini-deep-research": { "price": { "input": 2, "output": 8, "cacheRead": 0.5, "cacheWrite": 2 } },
+        "o4-mini": { "price": { "input": 1.1, "output": 4.4, "cacheRead": 0.275, "cacheWrite": 1.1 } }
+      }
+    },
+    "gemini": {
+      "checked": "2026-10-31",
+      "sources": [
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://ai.google.dev/gemini-api/docs/models",
+        "https://ai.google.dev/gemini-api/docs/generate-content/thinking"
+      ],
+      "defaults": { "thinking": "none", "sampling": "any", "effort": [] },
+      "tiers": {
+        "fast": ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3-flash", "gemini-2.5-flash"],
+        "capable": ["gemini-3.1-pro", "gemini-3-pro", "gemini-2.5-pro"]
+      },
+      "models": {
+        "gemini-4-argon": { "price": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2 }, "changes": [{ "from": "2026-12-01", "price": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 4 } }], "thinking": "level", "levels": ["low", "medium", "high"] },
+        "gemini-3.8-flash": { "price": { "input": 0.75, "output": 3.75, "cacheRead": 0.075, "cacheWrite": 0.75 }, "changes": [{ "from": "2027-01-01", "price": { "input": 1.5, "output": 7.5, "cacheRead": 0.15, "cacheWrite": 1.5 } }], "thinking": "level", "levels": ["low", "medium", "high"] },
+        "gemini-3.7-flash": { "price": { "input": 0.75, "output": 3.75, "cacheRead": 0.075, "cacheWrite": 0.75 }, "changes": [{ "from": "2027-01-01", "price": { "input": 1.5, "output": 7.5, "cacheRead": 0.15, "cacheWrite": 1.5 } }], "thinking": "level", "levels": ["low", "medium", "high"], "unlisted": "2026-10-31" },
+        "gemini-3.6-flash": { "price": { "input": 0.75, "output": 3.75, "cacheRead": 0.075, "cacheWrite": 0.75 }, "changes": [{ "from": "2027-01-01", "price": { "input": 1.5, "output": 7.5, "cacheRead": 0.15, "cacheWrite": 1.5 } }], "thinking": "level", "levels": ["minimal", "low", "medium", "high"] },
+        "gemini-3.5-flash-lite": { "price": { "input": 0.3, "output": 2.5, "cacheRead": 0.03, "cacheWrite": 0.3 }, "thinking": "level", "levels": ["minimal", "low", "medium", "high"] },
+        "gemini-3.5-flash": { "price": { "input": 1.5, "output": 9, "cacheRead": 0.15, "cacheWrite": 1.5 }, "thinking": "level", "levels": ["minimal", "low", "medium", "high"], "unlisted": "2026-10-31" },
+        "gemini-nano-banana-2.1": { "price": { "input": 1.5, "output": 7.5, "cacheRead": 1.5, "cacheWrite": 1.5 }, "thinking": "none" },
+        "gemini-nano-banana": { "price": { "input": 1.5, "output": 7.5, "cacheRead": 1.5, "cacheWrite": 1.5 }, "thinking": "none" },
+        "gemini-omni": { "price": { "input": 1.5, "output": 9, "cacheRead": 1.5, "cacheWrite": 1.5 }, "thinking": "none" },
+        "gemini-3.1-pro": { "price": { "input": 2, "output": 12, "cacheRead": 0.2, "cacheWrite": 2 }, "long": { "over": 200000, "input": 4, "output": 18, "cacheRead": 0.4, "cacheWrite": 4 }, "thinking": "level", "levels": ["low", "high"] },
+        "gemini-3.1-flash-lite-image": { "thinking": "level", "levels": ["minimal", "high"] },
+        "gemini-3.1-flash-lite": { "price": { "input": 0.25, "output": 1.5, "cacheRead": 0.025, "cacheWrite": 0.25 }, "thinking": "level", "levels": ["minimal", "low", "medium", "high"] },
+        "gemini-3.1-flash-image": { "price": { "input": 0.5, "output": 3, "cacheRead": 0.5, "cacheWrite": 0.5 }, "thinking": "none" },
+        "gemini-3.1-flash": { "price": { "input": 0.25, "output": 1.5, "cacheRead": 0.025, "cacheWrite": 0.25 }, "thinking": "level", "levels": ["minimal", "low", "medium", "high"], "unlisted": "2026-10-31" },
+        "gemini-3-pro-image": { "price": { "input": 2, "output": 12, "cacheRead": 2, "cacheWrite": 2 }, "thinking": "none" },
+        "gemini-3-flash": { "price": { "input": 0.5, "output": 3, "cacheRead": 0.05, "cacheWrite": 0.5 }, "thinking": "level", "levels": ["minimal", "low", "medium", "high"] },
+        "gemini-3-pro": { "price": { "input": 2, "output": 12, "cacheRead": 0.2, "cacheWrite": 2 }, "thinking": "level", "levels": ["low", "high"], "unlisted": "2026-10-31" },
+        "gemini-2.5-pro": { "price": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite": 1.25 }, "long": { "over": 200000, "input": 2.5, "output": 15, "cacheRead": 0.25, "cacheWrite": 2.5 }, "thinking": "budget", "budget": [128, 32768] },
+        "gemini-2.5-flash-lite": { "price": { "input": 0.1, "output": 0.4, "cacheRead": 0.01, "cacheWrite": 0.1 }, "thinking": "budget", "budget": [512, 24576] },
+        "gemini-2.5-flash-image": { "price": { "input": 0.3, "output": 2.5, "cacheRead": 0.3, "cacheWrite": 0.3 }, "thinking": "none" },
+        "gemini-2.5-flash": { "price": { "input": 0.3, "output": 2.5, "cacheRead": 0.03, "cacheWrite": 0.3 }, "thinking": "budget", "budget": [0, 24576] },
+        "gemini-2.0-flash-lite": { "price": { "input": 0.075, "output": 0.3, "cacheRead": 0.075, "cacheWrite": 0.075 }, "thinking": "none", "unlisted": "2026-10-31" },
+        "gemini-2.0-flash": { "price": { "input": 0.1, "output": 0.4, "cacheRead": 0.025, "cacheWrite": 0.1 }, "thinking": "none", "unlisted": "2026-10-31" }
+      }
+    }
+  },
+  "tools": {
+    "web_search": {
+      "openai": { "*": 0.01 },
+      "anthropic": { "*": 0.01 },
+      "gemini": { "*": 0.014, "gemini-2": 0.035, "gemini-1": 0.035 }
+    },
+    "file_search": {
+      "openai": { "*": 0.0025 }
+    }
+  },
+  "images": {
+    "gpt-image-1-mini": {
+      "low": { "1024x1024": 0.005, "1024x1536": 0.006, "1536x1024": 0.006 },
+      "medium": { "1024x1024": 0.011, "1024x1536": 0.015, "1536x1024": 0.015 },
+      "high": { "1024x1024": 0.036, "1024x1536": 0.052, "1536x1024": 0.052 }
+    },
+    "gpt-image-1": {
+      "low": { "1024x1024": 0.011, "1024x1536": 0.016, "1536x1024": 0.016 },
+      "medium": { "1024x1024": 0.042, "1024x1536": 0.063, "1536x1024": 0.063 },
+      "high": { "1024x1024": 0.167, "1024x1536": 0.25, "1536x1024": 0.25 }
+    },
+    "gpt-image-1.5": {
+      "low": { "1024x1024": 0.009, "1024x1536": 0.013, "1536x1024": 0.013 },
+      "medium": { "1024x1024": 0.034, "1024x1536": 0.05, "1536x1024": 0.05 },
+      "high": { "1024x1024": 0.133, "1024x1536": 0.2, "1536x1024": 0.2 }
+    },
+    "gpt-image-2": {
+      "low": { "1024x1024": 0.006, "1024x1536": 0.005, "1536x1024": 0.005 },
+      "medium": { "1024x1024": 0.053, "1024x1536": 0.041, "1536x1024": 0.041 },
+      "high": { "1024x1024": 0.211, "1024x1536": 0.165, "1536x1024": 0.165 }
+    },
+    "gemini-nano-banana-2.1": { "default": { "1024x1024": 0.0336, "2048x2048": 0.0504, "4096x4096": 0.113 } },
+    "gemini-3.1-flash-lite-image": { "default": { "1024x1024": 0.0336 } },
+    "gemini-2.0-flash": { "default": { "1024x1024": 0.039 } },
+    "gemini-2.5-flash-image": { "default": { "1024x1024": 0.039 } },
+    "gemini-3.1-flash-image": { "default": { "512x512": 0.045, "1024x1024": 0.067, "2048x2048": 0.101, "4096x4096": 0.151 } },
+    "gemini-3-pro-image": { "default": { "1024x1024": 0.134, "2048x2048": 0.134, "4096x4096": 0.24 } }
+  },
+  "imageTokens": {
+    "gpt-image-1": { "textInput": 5, "imageInput": 10, "textOutput": 0, "imageOutput": 40 },
+    "gpt-image-1-mini": { "textInput": 2, "imageInput": 2.5, "textOutput": 0, "imageOutput": 8 },
+    "gpt-image-1.5": { "textInput": 5, "imageInput": 8, "textOutput": 10, "imageOutput": 32 },
+    "gpt-image-2": { "textInput": 5, "imageInput": 8, "textOutput": 0, "imageOutput": 30 }
+  }
+}

@@ -9,7 +9,9 @@ if ( ! class_exists( 'Better_Messages_Navigation' ) ) {
 
         const BARS = array( 'mini', 'side', 'mobile' );
 
-        const TYPES = array( 'link', 'page', 'content' );
+        const TYPES = array( 'link', 'page', 'content', 'custom' );
+
+        const ADMIN_TYPES = array( 'link', 'page', 'content' );
 
         const BUILT_IN = array( 'messages', 'friends', 'groups', 'courses', 'ai-bots', 'chat-rooms', 'users' );
 
@@ -112,13 +114,13 @@ if ( ! class_exists( 'Better_Messages_Navigation' ) ) {
                 }
 
                 $bars = array_values( array_intersect( self::BARS, (array) ( $tab['bars'] ?? array() ) ) );
-                $url  = self::sanitize_url( (string) ( $tab['url'] ?? '' ), $tab['type'] );
+                $url  = $tab['type'] === 'custom' ? '' : self::sanitize_url( (string) ( $tab['url'] ?? '' ), $tab['type'] );
 
-                if ( empty( $bars ) || ( $tab['type'] !== 'content' && $url === '' ) ) {
+                if ( empty( $bars ) || ( in_array( $tab['type'], array( 'link', 'page' ), true ) && $url === '' ) ) {
                     continue;
                 }
 
-                $published[] = array(
+                $item = array(
                     'key'       => (string) $tab['key'],
                     'label'     => (string) $tab['label'],
                     'icon'      => (string) ( $tab['icon'] ?? '' ),
@@ -127,6 +129,12 @@ if ( ! class_exists( 'Better_Messages_Navigation' ) ) {
                     'newWindow' => ! empty( $tab['newWindow'] ),
                     'bars'      => $bars,
                 );
+
+                if ( isset( $tab['guestWall'] ) && $tab['guestWall'] === false ) {
+                    $item['guestWall'] = false;
+                }
+
+                $published[] = $item;
             }
 
             if ( ! empty( $published ) ) {
@@ -242,7 +250,7 @@ if ( ! class_exists( 'Better_Messages_Navigation' ) ) {
                     continue;
                 }
 
-                $type = in_array( $tab['type'] ?? '', self::TYPES, true ) ? $tab['type'] : 'link';
+                $type = in_array( $tab['type'] ?? '', self::ADMIN_TYPES, true ) ? $tab['type'] : 'link';
                 $url  = '';
 
                 if ( $type !== 'content' ) {

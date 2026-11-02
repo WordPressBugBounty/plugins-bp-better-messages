@@ -137,6 +137,161 @@ if (!class_exists('Better_Messages_Mobile_App_Android')):
             }
         }
 
+        public static function normalize_fingerprint( string $value ): string
+        {
+            $hex = strtoupper( preg_replace( '/[^A-Fa-f0-9]/', '', $value ) );
+
+            if ( strlen( $hex ) !== 64 ) {
+                return '';
+            }
+
+            return implode( ':', str_split( $hex, 2 ) );
+        }
+
+        public function get_link_fingerprints(): array
+        {
+            $settings     = get_option( 'better-messages-app-settings', array() );
+            $fingerprints = array();
+
+            $upload = $this->get_upload_key_fingerprint();
+
+            if ( $upload !== '' ) {
+                $fingerprints[] = $upload;
+            }
+
+            $play = isset( $settings['androidPlaySigningFingerprint'] ) ? self::normalize_fingerprint( (string) $settings['androidPlaySigningFingerprint'] ) : '';
+
+            if ( $play !== '' ) {
+                $fingerprints[] = $play;
+            }
+
+            return array_values( array_unique( $fingerprints ) );
+        }
+
+        public function get_upload_key_fingerprint(): string
+        {
+            $stored = get_option( 'better-messages-app-android-keystore', false );
+
+            if ( ! is_array( $stored ) || empty( $stored['keystore'] ) ) {
+                return '';
+            }
+
+            $cache = get_option( 'better-messages-app-android-keystore-fingerprint', array() );
+            $hash  = md5( (string) $stored['keystore'] );
+
+            if ( is_array( $cache ) && isset( $cache['hash'], $cache['fingerprint'] ) && $cache['hash'] === $hash ) {
+                return (string) $cache['fingerprint'];
+            }
+
+            $data  = base64_decode( (string) $stored['keystore'], true );
+            $info  = isset( $stored['info'] ) && is_array( $stored['info'] ) ? $stored['info'] : array();
+            $alias = isset( $info['keyAlias'] ) ? (string) $info['keyAlias'] : '';
+            $der   = '';
+
+            if ( is_string( $data ) && $data !== '' ) {
+                $der = $this->certificate_from_jks( $data, $alias );
+
+                if ( $der === '' && function_exists( 'openssl_pkcs12_read' ) && isset( $info['keyStorePassword'] ) ) {
+                    $certs = array();
+
+                    if ( @openssl_pkcs12_read( $data, $certs, (string) $info['keyStorePassword'] ) && ! empty( $certs['cert'] ) && function_exists( 'openssl_x509_fingerprint' ) ) {
+                        $fingerprint = openssl_x509_fingerprint( $certs['cert'], 'sha256' );
+                        $result      = is_string( $fingerprint ) ? self::normalize_fingerprint( $fingerprint ) : '';
+
+                        update_option( 'better-messages-app-android-keystore-fingerprint', array( 'hash' => $hash, 'fingerprint' => $result ), false );
+
+                        return $result;
+                    }
+                }
+            }
+
+            $result = $der !== '' ? self::normalize_fingerprint( hash( 'sha256', $der ) ) : '';
+
+            update_option( 'better-messages-app-android-keystore-fingerprint', array( 'hash' => $hash, 'fingerprint' => $result ), false );
+
+            return $result;
+        }
+
+        private function certificate_from_jks( string $data, string $alias ): string
+        {
+            $length = strlen( $data );
+
+            if ( $length < 12 || substr( $data, 0, 4 ) !== "\xFE\xED\xFE\xED" ) {
+                return '';
+            }
+
+            $version = unpack( 'N', substr( $data, 4, 4 ) )[1];
+            $count   = unpack( 'N', substr( $data, 8, 4 ) )[1];
+            $offset  = 12;
+            $first   = '';
+
+            $read_int = function ( $size ) use ( $data, $length, &$offset ) {
+                if ( $offset + $size > $length ) {
+                    throw new Exception( 'jks' );
+                }
+
+                $value   = $size === 2 ? unpack( 'n', substr( $data, $offset, 2 ) )[1] : unpack( 'N', substr( $data, $offset, 4 ) )[1];
+                $offset += $size;
+
+                return $value;
+            };
+
+            $read_bytes = function ( $size ) use ( $data, $length, &$offset ) {
+                if ( $size < 0 || $offset + $size > $length ) {
+                    throw new Exception( 'jks' );
+                }
+
+                $value   = substr( $data, $offset, $size );
+                $offset += $size;
+
+                return $value;
+            };
+
+            try {
+                for ( $i = 0; $i < $count && $i < 64; $i++ ) {
+                    $tag         = $read_int( 4 );
+                    $entry_alias = $read_bytes( $read_int( 2 ) );
+                    $read_bytes( 8 );
+
+                    if ( $tag === 1 ) {
+                        $read_bytes( $read_int( 4 ) );
+                        $chain = $read_int( 4 );
+                        $certs = array();
+
+                        for ( $c = 0; $c < $chain && $c < 16; $c++ ) {
+                            if ( $version === 2 ) {
+                                $read_bytes( $read_int( 2 ) );
+                            }
+
+                            $certs[] = $read_bytes( $read_int( 4 ) );
+                        }
+
+                        if ( count( $certs ) > 0 ) {
+                            if ( $alias !== '' && strtolower( $entry_alias ) === strtolower( $alias ) ) {
+                                return $certs[0];
+                            }
+
+                            if ( $first === '' ) {
+                                $first = $certs[0];
+                            }
+                        }
+                    } elseif ( $tag === 2 ) {
+                        if ( $version === 2 ) {
+                            $read_bytes( $read_int( 2 ) );
+                        }
+
+                        $read_bytes( $read_int( 4 ) );
+                    } else {
+                        break;
+                    }
+                }
+            } catch ( Exception $exception ) {
+                return $first;
+            }
+
+            return $first;
+        }
+
         public function upload_key_store( WP_REST_Request $request )
         {
             $files    = $request->get_file_params();

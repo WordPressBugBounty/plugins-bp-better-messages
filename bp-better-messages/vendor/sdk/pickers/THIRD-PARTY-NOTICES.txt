@@ -1,0 +1,118 @@
+Third-party software in the WordPlus SDK's pickers: pickers.min.js, and the emoji datasets in data/emoji/
+
+- emoji-mart 5.6.0 (MIT), Missive: its picker, ported to React and changed (pickers/src/emoji-mart), in pickers.min.js
+- @emoji-mart/data (MIT), Missive: the emoji datasets data/emoji/apple.json, google.json, twitter.json and facebook.json
+- emoji-datasource (MIT), Cal Henderson: the emoji, their names and their places in the image sheets, which the datasets carry
+- react-icons (MIT), kamijin_fanta: the components of three icons, VscClose, VscHistory and VscSearch, in pickers.min.js
+- Codicons (CC BY 4.0), Microsoft Corporation: those three icons, the close, history and search icons
+
+================================================================================
+emoji-mart 5.6.0 (MIT)
+================================================================================
+
+MIT License
+
+Copyright (c) Missive.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+pickers/src/emoji-mart/helpers/native-support.ts is based on is-emoji-supported
+(https://github.com/koala-interactive/is-emoji-supported, MIT), as emoji-mart's own is.
+
+================================================================================
+@emoji-mart/data (MIT)
+================================================================================
+
+MIT License
+
+Copyright (c) Missive.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+emoji-datasource (MIT)
+================================================================================
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Cal Henderson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+The emoji images are not in the SDK: browsers load them from the emoji-datasource-<set> packages on jsDelivr, or a
+site downloads them there on an administrator's request.
+
+================================================================================
+react-icons (MIT)
+================================================================================
+
+Copyright 2018 kamijin_fanta <kamijin@live.jp>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+================================================================================
+Codicons (CC BY 4.0)
+================================================================================
+
+The close, history and search icons of pickers/src/icons.tsx are Codicons, the icons of Visual Studio Code,
+by Microsoft Corporation: https://github.com/microsoft/vscode-codicons
+
+Copyright (c) Microsoft Corporation.
+
+They are licensed under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+They are used as react-icons publishes them (VscClose, VscHistory and VscSearch), their paths unchanged, drawn as
+React components. They are provided as is, without warranties of any kind, as Section 5 of that licence says.

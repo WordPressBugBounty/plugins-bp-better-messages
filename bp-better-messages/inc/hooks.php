@@ -25,12 +25,12 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter( 'cron_schedules', array( $this, 'cron_intervals' ) );
 
-            add_action('pre_get_posts', array($this, 'exclude_attachments_global'));
+            add_action('pre_get_posts', array($this, 'exclude_attachments_global'), PHP_INT_MAX );
 
             add_filter('rest_attachment_query', array($this, 'exclude_attachments_rest'));
 
             if( Better_Messages()->settings['attachmentsHide'] === '1' ) {
-                add_action('ajax_query_attachments_args', array($this, 'exclude_attachments'));
+                add_action('ajax_query_attachments_args', array($this, 'exclude_attachments'), PHP_INT_MAX );
             }
 
             add_action( 'wp_head', array( $this, 'themes_adaptation' ) );
@@ -470,6 +470,27 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     return $call_type === 'audio'
                         ? sprintf(__('%s started an audio call', 'bp-better-messages'), $name)
                         : sprintf(__('%s started a video call', 'bp-better-messages'), $name);
+                case 'call_recording':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $title   = is_array($data) && isset($data['type']) && 'audio' === $data['type'] ? _x('Audio call recording', 'Call recording', 'bp-better-messages') : _x('Video call recording', 'Call recording', 'bp-better-messages');
+                    $seconds = is_array($data) && isset($data['seconds']) ? max( 0, (int) $data['seconds'] ) : 0;
+                    if ( $seconds === 0 ) {
+                        return $title;
+                    }
+                    $length = $seconds >= 3600 ? sprintf( '%d:%02d:%02d', intdiv( $seconds, 3600 ), intdiv( $seconds % 3600, 60 ), $seconds % 60 ) : sprintf( '%d:%02d', intdiv( $seconds, 60 ), $seconds % 60 );
+                    return $title . ' · ' . $length;
+                case 'call_recording_started':
+                case 'call_recording_stopped':
+                    $data = Better_Messages()->functions->get_message_meta($message_id, 'system_data', true);
+                    $name = is_array($data) && ! empty($data['user_name']) ? wp_strip_all_tags($data['user_name']) : '';
+                    if ( $type === 'call_recording_started' ) {
+                        return sprintf(_x('%s started recording', 'Call recording', 'bp-better-messages'), $name !== '' ? $name : __('A user', 'bp-better-messages'));
+                    }
+                    return $name !== '' ? sprintf(_x('%s stopped recording', 'Call recording', 'bp-better-messages'), $name) : _x('Recording stopped', 'Call recording', 'bp-better-messages');
+                case 'user_kicked':
+                case 'user_muted':
+                case 'user_banned':
+                    return Better_Messages()->system_messages->moderation_text($type, Better_Messages()->functions->get_message_meta($message_id, 'system_data', true));
                 default:
                     return '';
             }
@@ -1621,6 +1642,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             } else {
                 $count = Better_Messages()->functions->get_total_threads_for_user( $user_id,  'unread' );
             }
+
+            $count = max( 0, (int) apply_filters( 'better_messages_total_unread', (int) $count, $user_id ) );
 
             $class = ($count === 0) ? 'no-count' : '';
 

@@ -91,7 +91,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             } else {
                 $_errors = [];
                 global $bp_better_messages_restrict_send_message;
-                if( count($bp_better_messages_restrict_send_message) > 0 ){
+                if( is_array( $bp_better_messages_restrict_send_message ) && count($bp_better_messages_restrict_send_message) > 0 ){
                     foreach( $bp_better_messages_restrict_send_message as $error ){
                         $_errors[] = $error;
                     }
@@ -373,7 +373,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $time = Better_Messages()->functions->get_microtime();
 
                 $sql = $wpdb->prepare("UPDATE `" . bm_get_table('recipients') . "`
-                SET unread_count = GREATEST(unread_count - 1, 0), 
+                SET unread_count = IF(unread_count < 0, unread_count, GREATEST(unread_count - 1, 0)),
                     last_update = %d
                 WHERE `thread_id` = %d
                 AND `last_read` < ( SELECT date_sent FROM `" . bm_get_table('messages') . "` WHERE `id` = %d )", $time, $thread_id, $message_id );
@@ -422,8 +422,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $time = Better_Messages()->functions->get_microtime();
 
-            $sql = $wpdb->prepare("UPDATE " . bm_get_table('recipients') . " 
-                SET unread_count = GREATEST(unread_count - %d, 0), 
+            $sql = $wpdb->prepare("UPDATE " . bm_get_table('recipients') . "
+                SET unread_count = IF(unread_count < 0, unread_count, GREATEST(unread_count - %d, 0)),
                 last_update = %d
                 WHERE `thread_id` = %d
                 AND `user_id` IN (" . implode(',', $user_ids ) . ")
@@ -2612,7 +2612,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     'role_hashes' => $role_hashes,
                 ];
 
-                $hash = md5( json_encode( $plaintext ) );
+                $bot = ! empty( $user_data['is_bot'] ) ? [ 'is_bot' => 1, 'botActive' => (int) ( $user_data['botActive'] ?? 0 ) ] : [];
+
+                $hash = md5( json_encode( $plaintext + $bot ) );
 
                 $encrypted = [
                     'user_id'  => (int) $user_id,
@@ -2620,7 +2622,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     'avatar'   => $user_data['avatar'],
                     'url'      => $user_data['url'] ? $user_data['url'] : '',
                     'verified' => (int) ( $user_data['verified'] ?? 0 ),
-                ];
+                ] + $bot;
             }
 
             if ( isset( $user_data['status'] ) ) {
@@ -2866,7 +2868,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             } else {
                 if( ! $this->is_websocket_build() ){
                     $url = Better_Messages_License::ACCOUNT_URL;
-                    $string = sprintf(__('<a href="%s" target="_blank">Download</a> and install Premium version of plugin to use this feature', 'bp-better-messages'), $url);
+                    $string = sprintf(__('<a href="%s" target="_blank">Download</a> and install the WebSocket version of the plugin to use this feature', 'bp-better-messages'), $url);
                     echo '<span style="display: block;margin: 10px 0;max-width: 200px;padding: 10px;color: #721c24;background-color: #f8d7da;border: 1px solid #f5c6cb;">' . $string . '</span>';
                 }
             }
@@ -3000,7 +3002,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $current_unread = (int) $wpdb->get_var( $wpdb->prepare("SELECT unread_count FROM " . bm_get_table('recipients') . " WHERE user_id = %d AND thread_id = %d", $user_id, $thread_id) );
 
             $mysql_time = bp_core_current_time();
-            if( $current_unread > 0 ){
+            if( $current_unread !== 0 ){
                 $time = Better_Messages()->functions->get_microtime();
                 $wpdb->query( $wpdb->prepare( "UPDATE " . bm_get_table('recipients'). " SET unread_count = 0, last_update = %d, last_read = %s, last_delivered = %s WHERE user_id = %d AND thread_id = %d", $time, $mysql_time, $mysql_time, $user_id, $thread_id ) );
             } else {
@@ -3011,9 +3013,33 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
             wp_cache_delete( $user_id, 'bp_messages_unread_count' );
 
+            if( $current_unread < 0 ){
+                do_action( 'better_messages_set_user_thread_unread_count', $user_id, $thread_id, 0 );
+            }
+
             $this->clean_thread_notifications( $thread_id, $user_id );
 
             do_action('better_messages_mark_thread_read', $thread_id, $user_id );
+
+            return true;
+        }
+
+        public function mark_thread_unread( $thread_id, $user_id, $only_read = false ){
+            if( ( Better_Messages()->settings['markUnread'] ?? '1' ) !== '1' ){
+                return false;
+            }
+
+            if( Better_Messages_Chats()->is_ephemeral_thread( $thread_id ) || ! $this->is_thread_participant( $user_id, $thread_id ) ){
+                return false;
+            }
+
+            if( $only_read && (int) $this->get_user_unread_for_thread( $user_id, $thread_id ) > 0 ){
+                return false;
+            }
+
+            $this->set_user_unread_count_for_thread( $user_id, $thread_id, -1 );
+
+            do_action( 'better_messages_thread_marked_unread', $thread_id, $user_id );
 
             return true;
         }
@@ -3653,6 +3679,10 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $message = new BM_Messages_Message( $r['message_id'] );
 
+            if( empty( $message->id ) ){
+                return false;
+            }
+
             if( (int) $r['sender_id'] !== (int) $message->sender_id ) {
                 return false;
             }
@@ -3748,16 +3778,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function get_user_unread_count( $user_id )
         {
             global $wpdb;
-            return (int) $wpdb->get_var($wpdb->prepare( "SELECT SUM(unread_count) FROM  " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 ", $user_id ));
+            return (int) $wpdb->get_var($wpdb->prepare( "SELECT SUM(unread_count) FROM  " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 AND unread_count > 0 ", $user_id ));
         }
 
         public function set_user_unread_count_for_thread( $user_id, $thread_id, $unread_count = 0 )
         {
-            if( $unread_count < 0 ) $unread_count = 0;
+            if( $unread_count < -1 ) $unread_count = -1;
 
             global $wpdb;
 
             $wpdb->query( $wpdb->prepare( "UPDATE " . bm_get_table('recipients') . " SET unread_count = %d WHERE user_id = %d AND thread_id = %d", $unread_count, $user_id, $thread_id ) );
+
+            wp_cache_delete( 'thread_recipients_' . $thread_id, 'bp_messages' );
+            wp_cache_delete( 'bm_thread_recipients_' . $thread_id, 'bm_messages' );
+            wp_cache_delete( $user_id, 'bp_messages_unread_count' );
 
             do_action('better_messages_set_user_thread_unread_count', $user_id, $thread_id, $unread_count );
 
@@ -4118,9 +4152,9 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $exclude_sender = $type_sql = '';
 
             if ( $type === 'unread' ) {
-                $type_sql = 'AND unread_count != 0';
+                $type_sql = 'AND unread_count > 0';
             } elseif ( $type === 'read' ) {
-                $type_sql = 'AND unread_count = 0';
+                $type_sql = 'AND unread_count <= 0';
             }
 
             return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(thread_id) FROM " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 {$exclude_sender} {$type_sql}", $user_id ) );

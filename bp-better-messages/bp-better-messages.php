@@ -4,7 +4,7 @@
     Plugin Name: Better Messages
     Plugin URI: https://www.wordplus.org
     Description: Realtime private messaging system for WordPress
-    Version: 3.1.6
+    Version: 3.2.0
     Author: WordPlus
     Author URI: https://www.wordplus.org
     Requires PHP: 7.4
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'Better_Messages' ) ) {
     class Better_Messages
     {
-        public  $version = '3.1.6';
+        public  $version = '3.2.0';
 
         public  $db_version = '3.0.0';
 
@@ -190,6 +190,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             require_once __DIR__ . '/inc/chats.php';
             require_once __DIR__ . '/inc/mini-list.php';
             require_once __DIR__ . '/inc/navigation.php';
+            require_once __DIR__ . '/inc/offers.php';
             require_once __DIR__ . '/inc/user-config.php';
             require_once __DIR__ . '/inc/shortcodes.php';
             require_once __DIR__ . '/inc/rest-api.php';
@@ -276,6 +277,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             $this->blocks       = Better_Messages_Blocks();
             $this->privacy      = Better_Messages_Privacy();
             Better_Messages_Get_Started();
+            Better_Messages_Offers();
 
             if ( function_exists( 'Better_Messages_Abilities' ) ) {
                 $this->abilities = Better_Messages_Abilities();
@@ -319,6 +321,11 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                 ) {
                     $this->group_calls = Better_Messages_Calls_Group();
                 }
+            }
+
+            if ( function_exists( 'Better_Messages_Calls_Group' ) && file_exists( $this->path . 'addons/calls-recording.php' ) ) {
+                require_once $this->path . 'addons/calls-recording.php';
+                Better_Messages_Calls_Recording();
             }
 
             if ( file_exists($this->path . 'inc/mobile-app/mobile-app.php') ) {
@@ -369,7 +376,17 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                     $parts[] = 'push';
                 }
 
+                if ( $this->realtime ) {
+                    $parts[] = 'video-effects';
+                    $parts[] = 'recording';
+                }
+
                 $options = array_merge( $options, WordPlus_SDK::instance()->page_options( $parts ) );
+            }
+
+            if ( function_exists( 'wordplus_ai_status' ) && version_compare( PHP_VERSION, '8.1', '>=' )
+                && ( $this->settings['aiModerationEnabled'] === '1' || $this->settings['voiceTranscriptionProvider'] === 'openai' ) ) {
+                $options[] = 'wordplus_ai_keys';
             }
 
             wp_prime_option_caches( $options );
@@ -423,6 +440,15 @@ if ( ! class_exists( 'Better_Messages' ) ) {
 
             if ( $current_screen->id === 'toplevel_page_better-messages' && class_exists( 'Better_Messages_Stickers_Manager' ) ) {
                 Better_Messages_Stickers_Manager::instance()->enqueue_panel();
+            }
+
+            if ( $current_screen->id === 'toplevel_page_better-messages' && function_exists( 'wordplus_video_effects' ) && wordplus_video_effects() ) {
+                wordplus_video_effects()->enqueue();
+            }
+
+            if ( $current_screen->id === 'toplevel_page_better-messages' && function_exists( 'Better_Messages_Calls_Recording' ) && Better_Messages_Calls_Recording::available() ) {
+                Better_Messages_Calls_Recording()->register();
+                wordplus_recording()->enqueue();
             }
 
             switch ( $current_screen->id ){
@@ -799,7 +825,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             'notificationSoundUrl', 'sentSoundUrl', 'callSoundUrl', 'dialingSoundUrl', 'groupCallSoundUrl',
             'sprite', 'emojiDataUrl', 'emojiHash',
             'loginUrl', 'registerUrl', 'adminUrl',
-            'total_unread', 'enableSound', 'enableSentSound', 'onSiteNotification', 'disableEnter',
+            'total_unread', 'enableSound', 'enableSentSound', 'onSiteNotification', 'disableEnter', 'callJoinNotice', 'callRecordingNotice',
             'realtime', 'friends', 'groups', 'courses', 'guests',
             'me', 'ukey',
             'translationLanguage',
@@ -813,7 +839,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
             'suggestedConversations',
             'voiceMaxDuration',
             'unreadCounter',
-            'ws', 'socket_server', 'api_server', 'realtimeWorker', 'rtcClient', 'rtcWorker', 'turn_server', 'video_server', 'site_id', 'secret_key',
+            'ws', 'socket_server', 'api_server', 'realtimeWorker', 'rtcClient', 'rtcWorker', 'realtimeEffects', 'realtimeNoise', 'callBackgrounds', 'callBuiltInBackgrounds', 'callOwnBackgrounds', 'recordingPlayer', 'recordingHls', 'recordingStrings', 'turn_server', 'video_server', 'site_id', 'secret_key',
             'callRequestTimeLimit', 'fast', 'le', 'encryption', 'rkeys',
             'vapidPublicKey', 'PNworker', 'PNsdk',
             'badWords',
@@ -954,6 +980,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                 'sidebarHideBreakpoint' => (int) $this->settings['sidebarHideBreakpoint'],
                 'favorite'              => ( $this->settings['disableFavoriteMessages'] == '1' ? '0' : '1' ),
                 'unreadFilter'          => ( $this->settings['enableUnreadFilter'] == '1' ? '1' : '0' ),
+                'markUnread'            => ( $this->settings['markUnread'] == '1' ? '1' : '0' ),
                 'fullScreen'            => ( $this->settings['desktopFullScreen'] == '1' ? '1' : '0' ),
                 'accountRow'            => ( $this->settings['accountRow'] == '1' ? '1' : '0' ),
                 'myProfile'             => ( $this->settings['myProfileButton'] == '1' ? '1' : '0' ),
@@ -961,6 +988,7 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                 'selfReplies'           => ( $this->settings['enableSelfReplies'] == '1' ? '1' : '0' ),
                 'privateReplies'        => ( $this->settings['privateReplies'] == '1' ? '1' : '0' ),
                 'forwardMessages'       => ( $this->settings['enableForwardMessages'] == '1' ? '1' : '0' ),
+                'systemMessagesShowActor' => ( ( $this->settings['systemMessagesShowActor'] ?? '0' ) === '1' ? '1' : '0' ),
                 'editMessageTimeLimit'  => (int) $this->settings['editMessageTimeLimit'],
                 'deleteMethod'          => ( $this->settings['deleteMethod'] === 'replace' ? 'replace' : 'delete' ),
                 'maximumMessageLength'  => (int) $this->settings['maximumMessageLength'],
@@ -1270,6 +1298,22 @@ if ( ! class_exists( 'Better_Messages' ) ) {
                     $script_variables['realtimeWorker'] = function_exists( 'wordplus_realtime_worker_url' ) ? wordplus_realtime_worker_url() : '';
                     $script_variables['rtcClient']      = function_exists( 'wordplus_realtime_rooms_url' ) ? wordplus_realtime_rooms_url() : '';
                     $script_variables['rtcWorker']      = function_exists( 'wordplus_realtime_rooms_worker_url' ) ? wordplus_realtime_rooms_worker_url() : '';
+                    $video_effects = function_exists( 'wordplus_video_effects' ) && wordplus_video_effects() ? wordplus_video_effects()->page_data() : null;
+                    $script_variables['realtimeEffects'] = $video_effects ? $video_effects['url'] : '';
+                    $script_variables['realtimeNoise'] = $video_effects && ! empty( $video_effects['noiseUrl'] ) ? $video_effects['noiseUrl'] : '';
+                    if ( $script_variables['realtimeEffects'] !== '' ) {
+                        $script_variables['callBackgrounds']        = $video_effects['pictures'];
+                        $script_variables['callBuiltInBackgrounds'] = $video_effects['builtIn'];
+                        $script_variables['callOwnBackgrounds']     = ! empty( $video_effects['ownPictures'] ) ? '1' : '0';
+                    }
+                    if ( function_exists( 'Better_Messages_Calls_Recording' ) && Better_Messages_Calls_Recording::available() ) {
+                        $recording = wordplus_recording()->page_data();
+                        $script_variables['recordingPlayer'] = $recording['playerUrl'];
+                        $script_variables['recordingHls']    = $recording['hlsUrl'];
+                        if ( ! empty( $recording['strings'] ) ) {
+                            $script_variables['recordingStrings'] = $recording['strings'];
+                        }
+                    }
                     if ( apply_filters( 'better_messages_presence_all', false ) ) {
                         $script_variables['presenceAll'] = '1';
                     }
@@ -1284,8 +1328,14 @@ if ( ! class_exists( 'Better_Messages' ) ) {
 
                     $script_variables['callRequestTimeLimit'] = $this->settings['callRequestTimeLimit'];
                     $script_variables['callsRevertIcons']     = ( $this->settings['callsRevertIcons'] === '1' ? '0' : '1' );
+                    $script_variables['callsMutedHint']       = ( ( $this->settings['callsMutedHint'] ?? '1' ) === '1' ? '1' : '0' );
                     $script_variables['callsEnabled']         = ( $this->settings['audioCalls'] === '1' || $this->settings['videoCalls'] === '1' ? '1' : '0' );
                     $script_variables['groupCallsEncryption'] = ( ( $this->settings['groupCallsEncryption'] ?? '0' ) === '1' ? '1' : '0' );
+                    $script_variables['groupCallsPreJoin']    = ( ( $this->settings['groupCallsPreJoin'] ?? '1' ) === '1' ? '1' : '0' );
+                    $script_variables['callJoinNotice']       = ( get_current_user_id() > 0 && get_user_meta( get_current_user_id(), 'bm_call_join_notice', true ) === 'no' ) ? '0' : '1';
+                    $script_variables['callRecordingNotice']  = ( get_current_user_id() > 0 && get_user_meta( get_current_user_id(), 'bm_call_recording_notice', true ) === 'no' ) ? '0' : '1';
+                    $script_variables['groupCallsMutedHint']  = ( ( $this->settings['groupCallsMutedHint'] ?? '1' ) === '1' ? '1' : '0' );
+                    $script_variables['groupCallsAutoPip']    = ( ( $this->settings['groupCallsAutoPip'] ?? '0' ) === '1' ? '1' : '0' );
                     $script_variables['fast']                 = apply_filters('bp_better_messages_fast', '1');
 
                     if ( $this->settings['enablePushNotifications'] === '1' ) {
@@ -1512,6 +1562,12 @@ if ( ! class_exists( 'Better_Messages' ) ) {
     require_once trailingslashit(dirname(__FILE__))     . 'addons/automatorwp/automatorwp.php';
 
     add_action( 'plugins_loaded', 'Better_Messages_Init', 20 );
+
+    if ( isset( $_SERVER['REQUEST_URI'] ) && preg_match( '#/(apple-app-site-association|assetlinks\.json)#', (string) $_SERVER['REQUEST_URI'] ) && file_exists( __DIR__ . '/inc/mobile-app/inc/links.php' ) ) {
+        require_once __DIR__ . '/inc/mobile-app/inc/links.php';
+        Better_Messages_Mobile_App_Links::capture();
+    }
+
     require_once trailingslashit( dirname(__FILE__) ) . 'inc/admin-error-display.php';
     require_once trailingslashit( dirname(__FILE__) ) . 'inc/install.php';
     register_activation_hook( __FILE__, 'better_messages_activation' );

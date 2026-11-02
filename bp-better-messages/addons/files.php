@@ -2704,7 +2704,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
         }
 
         public static function get_libheif_wasm_url() {
-            $is_dev = defined( 'BM_DEV' );
+            $is_dev = defined( 'BM_DEV' ) && file_exists( Better_Messages()->path . 'assets/js/modules/transcode/libheif.wasm' );
             $suffix  = $is_dev ? '' : '.min';
             $filename = 'libheif' . $suffix . '.wasm';
 

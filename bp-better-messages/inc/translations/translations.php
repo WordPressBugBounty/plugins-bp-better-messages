@@ -21,8 +21,6 @@ class Better_Messages_Translations {
         $upload = wp_upload_dir();
         $this->upload_dir = $upload['basedir'] . '/better-messages/i18n/';
         $this->upload_url = $upload['baseurl'] . '/better-messages/i18n/';
-
-        add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'inject_translation_updates' ) );
     }
 
     private function in_script_locale( $script_handle, $resolver ) {
@@ -78,76 +76,6 @@ class Better_Messages_Translations {
 
         $this->inline_fallback[ $script_handle ] = $translations;
         return false;
-    }
-
-    public function inject_translation_updates( $transient ) {
-        if ( ! is_object( $transient ) ) {
-            return $transient;
-        }
-
-        if ( ! empty( $transient->translations ) ) {
-            foreach ( $transient->translations as $tr ) {
-                if ( isset( $tr['slug'] ) && $tr['slug'] === 'bp-better-messages' ) {
-                    return $transient;
-                }
-            }
-        }
-
-        if ( ! function_exists( 'translations_api' ) ) {
-            $file = ABSPATH . 'wp-admin/includes/translation-install.php';
-            if ( ! file_exists( $file ) ) {
-                return $transient;
-            }
-            require_once $file;
-        }
-
-        $api = translations_api( 'plugins', array(
-            'slug'    => 'bp-better-messages',
-            'version' => Better_Messages()->version,
-        ) );
-
-        if ( is_wp_error( $api ) || empty( $api['translations'] ) ) {
-            return $transient;
-        }
-
-        $site_locales = get_available_languages();
-        $site_locales[] = determine_locale();
-        $site_locales = array_unique( $site_locales );
-
-        $installed = wp_get_installed_translations( 'plugins' );
-        $installed_locales = isset( $installed['bp-better-messages'] ) ? $installed['bp-better-messages'] : array();
-
-        if ( ! isset( $transient->translations ) ) {
-            $transient->translations = array();
-        }
-
-        foreach ( $api['translations'] as $translation ) {
-            $language = $translation['language'];
-
-            if ( ! in_array( $language, $site_locales, true ) ) {
-                continue;
-            }
-
-            if ( isset( $installed_locales[ $language ] ) ) {
-                $local  = strtotime( $installed_locales[ $language ]['PO-Revision-Date'] );
-                $remote = strtotime( $translation['updated'] );
-                if ( $local >= $remote ) {
-                    continue;
-                }
-            }
-
-            $transient->translations[] = array(
-                'type'       => 'plugin',
-                'slug'       => 'bp-better-messages',
-                'language'   => $language,
-                'version'    => $translation['version'],
-                'updated'    => $translation['updated'],
-                'package'    => $translation['package'],
-                'autoupdate' => true,
-            );
-        }
-
-        return $transient;
     }
 
     public function get_php_translation_file_url( $script_handle ) {
@@ -348,3 +276,8 @@ function Better_Messages_Translations() {
 }
 
 Better_Messages_Translations();
+
+if ( file_exists( __DIR__ . '/translation-updates.php' ) ) {
+    require_once __DIR__ . '/translation-updates.php';
+    Better_Messages_Translation_Updates();
+}

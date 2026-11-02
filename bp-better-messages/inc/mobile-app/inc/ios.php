@@ -368,7 +368,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
             $response = json_decode( $response['body'], true );
 
-            if( $response['data'] ){
+            if( is_array( $response ) && ! empty( $response['data'][0] ) ){
                 $bundleData = $response['data'][0];
 
                 $capabilitiesUrl = 'https://api.appstoreconnect.apple.com/v1/bundleIds/' . $bundleData['id'] . '/bundleIdCapabilities';
@@ -386,7 +386,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
 
                 $capabilities = array_map(function($capability) {
                     return $capability['attributes']['capabilityType'];
-                }, $capabilitiesResponse['data']);
+                }, is_array( $capabilitiesResponse ) && isset( $capabilitiesResponse['data'] ) && is_array( $capabilitiesResponse['data'] ) ? $capabilitiesResponse['data'] : array());
 
                 return [
                     'id' => $bundleData['id'],

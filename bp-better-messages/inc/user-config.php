@@ -38,6 +38,45 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
             return $this->get_user_settings();
         }
 
+        public function has_call_join_notice(){
+            if( ! function_exists( 'Better_Messages_Calls_Group' ) ) {
+                return false;
+            }
+
+            $settings = Better_Messages()->settings;
+
+            if( ( $settings['groupCallsPreJoin'] ?? '1' ) !== '1' ) {
+                return false;
+            }
+
+            return $this->has_group_calls();
+        }
+
+        public function has_call_recording_notice(){
+            if( ! function_exists( 'Better_Messages_Calls_Group' ) || ! function_exists( 'wordplus_recording' ) ) {
+                return false;
+            }
+
+            $recording = wordplus_recording()->settings();
+
+            if( empty( $recording['enabled'] ) || ( $recording['tell'] ?? '' ) !== 'notice' ) {
+                return false;
+            }
+
+            return $this->has_group_calls();
+        }
+
+        private function has_group_calls(){
+            $settings = Better_Messages()->settings;
+
+            return ( $settings['groupCallsThreads'] ?? '0' ) === '1'
+                || ( $settings['groupAudioCallsThreads'] ?? '0' ) === '1'
+                || ( $settings['groupCallsChats'] ?? '0' ) === '1'
+                || ( $settings['groupAudioCallsChats'] ?? '0' ) === '1'
+                || ( $settings['groupCallsGroups'] ?? '0' ) === '1'
+                || ( $settings['groupAudioCallsGroups'] ?? '0' ) === '1';
+        }
+
         public function get_who_can_start_options(){
             $options = [
                 'everyone' => _x('Everyone', 'User settings', 'bp-better-messages'),
@@ -164,35 +203,42 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
 
             $notifications_interval = (int) Better_Messages()->settings['notificationsInterval'];
             if( $user_id > 0 && $notifications_interval > 0 ) {
-                $email_scope = Better_Messages()->notification_levels->get_user_email_scope( $user_id );
+                $email_scope  = Better_Messages()->notification_levels->get_user_email_scope( $user_id );
+                $offer_direct = Better_Messages()->notification_levels->can_have_group_conversations( $user_id );
+
+                $email_options = [
+                    [
+                        'id'      => 'email_scope_all',
+                        'label'   => _x('All my notifications', 'User settings', 'bp-better-messages'),
+                        'value'   => 'all',
+                        'checked' => $email_scope === 'all' || ( $email_scope === 'direct' && ! $offer_direct ),
+                        'desc'    => _x('An email about the unread messages of every conversation that notifies you, while you are offline.', 'User settings', 'bp-better-messages')
+                    ]
+                ];
+
+                if( $offer_direct ) {
+                    $email_options[] = [
+                        'id'      => 'email_scope_direct',
+                        'label'   => _x('Only one-to-one conversations, mentions and replies', 'User settings', 'bp-better-messages'),
+                        'value'   => 'direct',
+                        'checked' => $email_scope === 'direct',
+                        'desc'    => _x('Group conversations and chat rooms email you only when someone mentions you or replies to your message.', 'User settings', 'bp-better-messages')
+                    ];
+                }
+
+                $email_options[] = [
+                    'id'      => 'email_scope_off',
+                    'label'   => _x('Off', 'User settings', 'bp-better-messages'),
+                    'value'   => 'off',
+                    'checked' => $email_scope === 'off',
+                    'desc'    => _x('No emails about new messages.', 'User settings', 'bp-better-messages')
+                ];
 
                 $settings[] = [
                     'id'      => 'email_scope',
                     'title'   => _x('Email notifications', 'User settings', 'bp-better-messages'),
                     'type'    => 'radio',
-                    'options' => [
-                        [
-                            'id'      => 'email_scope_all',
-                            'label'   => _x('All my notifications', 'User settings', 'bp-better-messages'),
-                            'value'   => 'all',
-                            'checked' => $email_scope === 'all',
-                            'desc'    => _x('An email about the unread messages of every conversation that notifies you, while you are offline.', 'User settings', 'bp-better-messages')
-                        ],
-                        [
-                            'id'      => 'email_scope_direct',
-                            'label'   => _x('Only one-to-one conversations, mentions and replies', 'User settings', 'bp-better-messages'),
-                            'value'   => 'direct',
-                            'checked' => $email_scope === 'direct',
-                            'desc'    => _x('Group conversations and chat rooms email you only when someone mentions you or replies to your message.', 'User settings', 'bp-better-messages')
-                        ],
-                        [
-                            'id'      => 'email_scope_off',
-                            'label'   => _x('Off', 'User settings', 'bp-better-messages'),
-                            'value'   => 'off',
-                            'checked' => $email_scope === 'off',
-                            'desc'    => _x('No emails about new messages.', 'User settings', 'bp-better-messages')
-                        ]
-                    ]
+                    'options' => $email_options
                 ];
             }
 
@@ -243,6 +289,37 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
+            $calls_options = [];
+
+            if( $user_id !== 0 && $this->has_call_join_notice() ) {
+                $calls_options[] = [
+                    'id' => 'call_join_notice',
+                    'label' => _x('Show the reminder when joining a call with the microphone and camera off', 'User settings', 'bp-better-messages'),
+                    'value' => 'yes',
+                    'checked' => Better_Messages()->functions->get_user_meta( $user_id, 'bm_call_join_notice', true ) !== 'no',
+                    'desc' => _x('A note over the call controls says they are off and how to turn them on.', 'User settings', 'bp-better-messages')
+                ];
+            }
+
+            if( $user_id !== 0 && $this->has_call_recording_notice() ) {
+                $calls_options[] = [
+                    'id' => 'call_recording_notice',
+                    'label' => _x('Show a notice when a call I am in is recorded', 'User settings', 'bp-better-messages'),
+                    'value' => 'yes',
+                    'checked' => Better_Messages()->functions->get_user_meta( $user_id, 'bm_call_recording_notice', true ) !== 'no',
+                    'desc' => _x('Off, the REC mark beside the call controls still shows while a call is recorded.', 'User settings', 'bp-better-messages')
+                ];
+            }
+
+            if( count( $calls_options ) > 0 ) {
+                $settings[] = [
+                    'id' => 'calls',
+                    'title' => _x('Calls', 'User settings', 'bp-better-messages'),
+                    'type' => 'checkboxes',
+                    'options' => $calls_options
+                ];
+            }
+
             return apply_filters('better_messages_user_config', $settings, $user_id);
         }
 
@@ -287,6 +364,16 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 case 'sound_notifications':
                     $new_value = ( $value === 'false' ) ? 'no' : 'yes';
                     Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_disable_sound_notification', $new_value );
+                    break;
+                case 'call_join_notice':
+                    if( $user_id !== 0 ){
+                        Better_Messages()->functions->update_user_meta( $user_id, 'bm_call_join_notice', ( $value === 'false' ) ? 'no' : 'yes' );
+                    }
+                    break;
+                case 'call_recording_notice':
+                    if( $user_id !== 0 ){
+                        Better_Messages()->functions->update_user_meta( $user_id, 'bm_call_recording_notice', ( $value === 'false' ) ? 'no' : 'yes' );
+                    }
                     break;
                 case 'online_status':
                     Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_online_status', $value );

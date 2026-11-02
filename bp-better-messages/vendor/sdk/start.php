@@ -5,7 +5,7 @@ if ( ! isset( $GLOBALS['wordplus_sdk_copies'] ) || ! is_array( $GLOBALS['wordplu
     $GLOBALS['wordplus_sdk_copies'] = array();
 }
 
-$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.3';
+$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.5';
 
 if ( is_readable( __DIR__ . '/realtime/realtime.php' ) ) {
     require_once __DIR__ . '/realtime/realtime.php';
@@ -107,6 +107,16 @@ if ( ! function_exists( 'wordplus_storage' ) ) {
     }
 }
 
+if ( ! function_exists( 'wordplus_visitors' ) ) {
+    function wordplus_visitors() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'visitors' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->visitors();
+    }
+}
+
 if ( ! function_exists( 'wordplus_toasts' ) ) {
     function wordplus_toasts() {
         if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'toasts' ) || '' === WordPlus_SDK::instance()->path() ) {
@@ -114,6 +124,16 @@ if ( ! function_exists( 'wordplus_toasts' ) ) {
         }
 
         return WordPlus_SDK::instance()->toasts();
+    }
+}
+
+if ( ! function_exists( 'wordplus_credits' ) ) {
+    function wordplus_credits() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'credits' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->credits();
     }
 }
 
@@ -154,5 +174,71 @@ if ( ! function_exists( 'wordplus_lightbox' ) ) {
         }
 
         return WordPlus_SDK::instance()->lightbox();
+    }
+}
+
+if ( ! function_exists( 'wordplus_video_effects' ) ) {
+    function wordplus_video_effects() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'video_effects' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->video_effects();
+    }
+}
+
+if ( ! function_exists( 'wordplus_recording' ) ) {
+    function wordplus_recording() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'recording' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->recording();
+    }
+}
+
+if ( ! function_exists( 'wordplus_cors' ) ) {
+    function wordplus_cors() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'cors' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->cors();
+    }
+}
+
+if ( ! function_exists( 'wordplus_websites' ) ) {
+    function wordplus_websites() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'websites' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->websites();
+    }
+}
+
+if ( ! function_exists( 'wordplus_ai' ) ) {
+    function wordplus_ai() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'ai' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->ai();
+    }
+}
+
+if ( ! function_exists( 'wordplus_ai_status' ) ) {
+    function wordplus_ai_status() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'ai_status' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return array(
+                'available' => false,
+                'reason'    => 'missing',
+                'php'       => PHP_VERSION,
+                'needs'     => '',
+                'message'   => '',
+            );
+        }
+
+        return WordPlus_SDK::instance()->ai_status();
     }
 }

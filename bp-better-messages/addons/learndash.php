@@ -36,6 +36,9 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             if ( Better_Messages()->settings['learnDashGroupChat'] === '1' ) {
                 add_action( 'ld_added_group_access', array( $this, 'on_user_added_to_group' ), 10, 2 );
                 add_action( 'ld_removed_group_access', array( $this, 'on_user_removed_from_group' ), 10, 2 );
+
+                add_filter( 'learndash_post_settings_metaboxes_init_groups', array( $this, 'group_settings_metabox' ), 60 );
+                add_filter( 'learndash_header_tab_menu', array( $this, 'group_settings_tab' ), 10, 3 );
             }
 
             if (
@@ -285,6 +288,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
 
             $group_id = (int) $group_id;
             if ( ! $group_id ) return;
+            if ( ! $this->is_group_chat_enabled( $group_id ) ) return;
 
             $thread_id = $this->get_group_thread_id( $group_id );
             if ( ! $thread_id ) return;
@@ -305,6 +309,69 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             $this->sync_thread_members( $thread_id );
         }
 
+        public function is_group_chat_enabled( $group_id )
+        {
+            if ( Better_Messages()->settings['learnDashGroupChat'] !== '1' ) return false;
+
+            $group_id = (int) $group_id;
+            if ( ! $group_id ) return false;
+
+            $enabled = get_post_meta( $group_id, 'better_messages_group_chat', true );
+
+            if ( $enabled !== 'yes' && $enabled !== 'no' ) {
+                $enabled = apply_filters( 'better_messages_learndash_group_chat_enabled', 'yes', $group_id );
+            }
+
+            return $enabled === 'yes';
+        }
+
+        public function set_group_chat_enabled( $group_id, $enabled )
+        {
+            $group_id = (int) $group_id;
+            if ( ! $group_id ) return;
+
+            update_post_meta( $group_id, 'better_messages_group_chat', $enabled ? 'yes' : 'no' );
+
+            $create    = $enabled && get_post_status( $group_id ) === 'publish';
+            $thread_id = $this->get_group_thread_id( $group_id, $create );
+
+            if ( $thread_id ) {
+                $this->sync_thread_members( $thread_id );
+            }
+        }
+
+        public function group_settings_metabox( $metaboxes = array() )
+        {
+            if ( ! class_exists( 'LearnDash_Settings_Metabox' ) ) return $metaboxes;
+
+            require_once Better_Messages()->path . 'addons/learndash-group-chat-settings.php';
+
+            if ( ! isset( $metaboxes['Better_Messages_LearnDash_Group_Chat_Settings'] ) ) {
+                $metaboxes['Better_Messages_LearnDash_Group_Chat_Settings'] = Better_Messages_LearnDash_Group_Chat_Settings::add_metabox_instance();
+            }
+
+            return $metaboxes;
+        }
+
+        public function group_settings_tab( $tabs, $menu_tab_key = '', $screen_post_type = '' )
+        {
+            if ( $screen_post_type !== 'groups' || ! is_array( $tabs ) ) return $tabs;
+
+            foreach ( $tabs as $index => $tab ) {
+                if ( ! isset( $tab['id'] ) || $tab['id'] !== 'groups-settings' ) continue;
+
+                $metaboxes = isset( $tab['metaboxes'] ) && is_array( $tab['metaboxes'] ) ? $tab['metaboxes'] : array();
+
+                if ( ! in_array( 'better-messages-learndash-group-chat', $metaboxes, true ) ) {
+                    $metaboxes[] = 'better-messages-learndash-group-chat';
+                }
+
+                $tabs[ $index ]['metaboxes'] = $metaboxes;
+            }
+
+            return $tabs;
+        }
+
         public function sync_thread_members( $thread_id )
         {
             $thread_id = (int) $thread_id;
@@ -319,7 +386,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             if ( $course_id ) {
                 $members = $this->get_course_members( $course_id );
             } elseif ( $group_id ) {
-                $members = $this->get_group_members( $group_id );
+                $members = $this->is_group_chat_enabled( $group_id ) ? $this->get_group_members( $group_id ) : array();
             } else {
                 return false;
             }
@@ -414,7 +481,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             }
 
             if ( Better_Messages()->settings['learnDashGroupChat'] === '1' ) {
-                foreach ( $this->get_user_groups( $user_id ) as $group_id ) {
+                foreach ( $this->get_user_chat_groups( $user_id ) as $group_id ) {
                     $thread_id = $this->get_group_thread_id( $group_id, false );
                     if ( ! $thread_id ) continue;
 
@@ -441,7 +508,7 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
             if ( Better_Messages()->settings['learnDashCourseGroupChat'] === '1'
                 && count( $this->get_user_courses( $user_id ) ) > 0 ) return true;
             if ( Better_Messages()->settings['learnDashGroupChat'] === '1'
-                && count( $this->get_user_groups( $user_id ) ) > 0 ) return true;
+                && count( $this->get_user_chat_groups( $user_id ) ) > 0 ) return true;
             return $has;
         }
 
@@ -478,6 +545,8 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
 
                 if ( $ld_groups ) {
                     foreach ( $ld_groups as $group_id ) {
+                        if ( ! $this->is_group_chat_enabled( $group_id ) ) continue;
+
                         $thread_id = $this->get_group_thread_id( $group_id, false );
                         if ( ! $thread_id ) continue;
 
@@ -540,6 +609,8 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
 
             $group_id = $this->get_thread_group_id( $thread_id );
             if ( $group_id ) {
+                if ( ! $this->is_group_chat_enabled( $group_id ) ) return false;
+
                 if ( learndash_is_user_in_group( $user_id, $group_id ) ) return true;
 
                 $leaders = learndash_get_groups_administrators( $group_id );
@@ -904,6 +975,11 @@ if ( ! class_exists( 'Better_Messages_LearnDash' ) ) {
                 is_array( $member_groups ) ? array_map( 'intval', $member_groups ) : array(),
                 is_array( $leader_groups ) ? array_map( 'intval', $leader_groups ) : array()
             ) ) );
+        }
+
+        private function get_user_chat_groups( $user_id )
+        {
+            return array_values( array_filter( $this->get_user_groups( $user_id ), array( $this, 'is_group_chat_enabled' ) ) );
         }
     }
 }

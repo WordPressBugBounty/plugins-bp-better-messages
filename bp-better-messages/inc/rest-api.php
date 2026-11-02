@@ -645,6 +645,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                 }
             }
 
+            $to_review = Better_Messages()->moderation->get_messages_to_review();
+
+            if ( $to_review !== null ) {
+                $return['toReview'] = $to_review;
+            }
+
             return apply_filters( 'better_messages_rest_api_update_data', $return, $current_user_id, $lastClient );
         }
 
@@ -1929,7 +1935,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     {$exclude_sql}
                     recipients.`user_id` = %d
                     AND recipients.`is_deleted` = 0
-                    AND recipients.`unread_count` > 0
+                    AND recipients.`unread_count` != 0
                     AND `threadsmeta`.`meta_value` IS NULL
                     AND (`messages`.`id` IS NOT NULL OR `threads`.`type` IN ('chat-room', 'group'))
                     " . Better_Messages()->functions->threads_order_sql() . "
@@ -2418,6 +2424,16 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
             $prevent_voice_messages = Better_Messages()->functions->user_has_role( $current_user_id, (array) Better_Messages()->settings['restrictVoiceMessages'] );
             $prevent_video_messages = Better_Messages()->functions->user_has_role( $current_user_id, (array) Better_Messages()->settings['restrictVideoMessages'] );
 
+            if( $personal_data ){
+                $restricted_batch = array();
+
+                foreach ( $get_threads as $thread ){
+                    if( $thread->type !== 'chat-room' ) $restricted_batch[] = (int) $thread->thread_id;
+                }
+
+                Better_Messages()->moderation->expect_restricted_users( $restricted_batch, (int) $current_user_id );
+            }
+
             foreach ( $get_threads as $thread ){
                 wp_cache_set('thread_' . $thread->thread_id, (object) [
                     'id'      => $thread->thread_id,
@@ -2580,6 +2596,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
                     $users    = array_merge( $users, $get_messages['users'] );
                     $added_users = array_merge( $added_users, array_column($users, 'user_id') );
                 }
+            }
+
+            if( $personal_data ){
+                Better_Messages()->moderation->expect_restricted_users( array() );
             }
 
             if( $fetch_users ) {

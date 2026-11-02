@@ -10,6 +10,14 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
         private $guest_authorization_failed = false;
         private $guest_authorization_failed_reason = '';
 
+        const REGISTRY_DB_VERSION = 2.96;
+
+        const REGISTRY_OPTION = 'better_messages_guests_registry';
+
+        const ADOPT_BATCH = 5000;
+
+        const COUNTER_FLOOR = 2000000000;
+
         public static function instance()
         {
 
@@ -36,6 +44,9 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
             add_filter('better_messages_guest_display_name', array( $this, 'guest_display_name' ), 10, 2 );
 
             add_filter( 'better_messages_user_config', array( $this, 'user_config'), 10 );
+
+            add_action( 'init', array( $this, 'registry_tasks' ) );
+            add_action( 'better_messages_guests_registry_job', array( $this, 'adopt_into_registry' ) );
         }
 
         public function guest_display_name( $retval, $user_id )
@@ -298,6 +309,7 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
                 if( $bot_id > 0 ){
                     $item['is_bot'] = 1;
+                    $item['botActive'] = function_exists( 'Better_Messages_AI' ) && Better_Messages_AI()->bot_can_answer( $bot_id ) ? 1 : 0;
 
                     if( has_post_thumbnail( $bot_id ) ) {
                         $image_id = get_post_thumbnail_id($bot_id);
@@ -317,6 +329,8 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 }
             } else {
                 $item['name'] = __('Deleted Guest', 'bp-better-messages');
+                $item['is_bot']    = 0;
+                $item['botActive'] = 0;
             }
 
             return $item;
@@ -396,7 +410,9 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 'secret' => $guest_user->secret,
                 'name'   => $guest_user->name,
                 'email'  => $guest_user->email,
-                'user'   => $user_item
+                'user'   => $user_item,
+                'cjn'    => ( Better_Messages()->functions->get_user_meta( $user_id, 'bm_call_join_notice', true ) === 'no' ) ? '0' : '1',
+                'crn'    => ( Better_Messages()->functions->get_user_meta( $user_id, 'bm_call_recording_notice', true ) === 'no' ) ? '0' : '1'
             ];
 
             if ( Better_Messages()->websocket ) {
@@ -466,6 +482,12 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
                 );
             }
 
+            $returning = $this->returning_guest();
+
+            if( $returning ){
+                return $this->registration_answer( (int) $returning->id, (string) $returning->secret, (string) $returning->name, (string) $returning->email );
+            }
+
             $name = false;
 
             if( $registerData ){
@@ -498,43 +520,222 @@ if ( !class_exists( 'Better_Messages_Guests' ) ):
 
             $email = '';
 
-            $result = $wpdb->insert( $this->table, [
+            $row = [
                 'secret' => $secret,
                 'name'   => sanitize_user($name),
                 'email'  => $email,
                 'ip'     => $this->get_client_ip(),
-            ] );
+            ];
+
+            if( $this->takes_registry_ids() ){
+                $credentials = $this->registry_credentials();
+
+                if( is_wp_error( $credentials ) ){
+                    return $credentials;
+                }
+
+                $row['id']     = $credentials['id'];
+                $row['secret'] = $secret = $credentials['secret'];
+            }
+
+            $result = $wpdb->insert( $this->table, $row );
 
             if( $result ) {
-                $guest_id = $wpdb->insert_id;
+                $guest_id = isset( $row['id'] ) ? (int) $row['id'] : $wpdb->insert_id;
 
                 do_action( 'better_messages_guest_registered', $guest_id );
 
-                $user_item = Better_Messages()->functions->rest_user_item( -$guest_id );
-
-                $return = [
-                    'id'     => $guest_id,
-                    'secret' => $secret,
-                    'name'   => $name,
-                    'email'  => $email,
-                    'user'   => $user_item
-                ];
-
-                if ( Better_Messages()->websocket ) {
-                    $ws_profile = Better_Messages()->functions->build_ws_profile( -$guest_id, $user_item );
-                    $return['pd']  = $ws_profile['pd'];
-                    $return['pdh'] = $ws_profile['pdh'];
-                    $return['pds'] = $ws_profile['pds'];
-                    $return['role_hashes']     = $ws_profile['role_hashes'];
-                    $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
-                    $return['gk'] = Better_Messages_WebSocket()->user_socket_key( -$guest_id );
-                    $return['ak'] = Better_Messages_WebSocket()->user_socket_key( 0 );
-                }
-
-                return $return;
+                return $this->registration_answer( $guest_id, $secret, $name, $email );
             }
 
             return false;
+        }
+
+        private function registration_answer( int $guest_id, string $secret, string $name, string $email ){
+            $user_item = Better_Messages()->functions->rest_user_item( -$guest_id );
+
+            $return = [
+                'id'     => $guest_id,
+                'secret' => $secret,
+                'name'   => $name,
+                'email'  => $email,
+                'user'   => $user_item,
+                'cjn'    => ( Better_Messages()->functions->get_user_meta( -$guest_id, 'bm_call_join_notice', true ) === 'no' ) ? '0' : '1',
+                'crn'    => ( Better_Messages()->functions->get_user_meta( -$guest_id, 'bm_call_recording_notice', true ) === 'no' ) ? '0' : '1'
+            ];
+
+            if ( Better_Messages()->websocket ) {
+                $ws_profile = Better_Messages()->functions->build_ws_profile( -$guest_id, $user_item );
+                $return['pd']  = $ws_profile['pd'];
+                $return['pdh'] = $ws_profile['pdh'];
+                $return['pds'] = $ws_profile['pds'];
+                $return['role_hashes']     = $ws_profile['role_hashes'];
+                $return['role_hashes_sig'] = $ws_profile['role_hashes_sig'];
+                $return['gk'] = Better_Messages_WebSocket()->user_socket_key( -$guest_id );
+                $return['ak'] = Better_Messages_WebSocket()->user_socket_key( 0 );
+            }
+
+            return $return;
+        }
+
+        private function returning_guest(){
+            $registry = $this->takes_registry_ids() ? $this->registry() : null;
+            $known    = $registry ? (int) $registry->current() : 0;
+
+            if( $known >= 0 ){
+                return null;
+            }
+
+            $token = (string) $registry->token();
+            $dot   = strpos( $token, '.' );
+            $guest = $this->get_guest_user( $known );
+
+            if( false === $dot || ! $guest || $this->guest_bot_id( $guest ) > 0 || '' === (string) $guest->secret ){
+                return null;
+            }
+
+            return hash_equals( (string) $guest->secret, substr( $token, $dot + 1 ) ) ? $guest : null;
+        }
+
+        public function takes_registry_ids(){
+            return (float) get_option( 'better_messages_2_db_version', 0 ) >= self::REGISTRY_DB_VERSION;
+        }
+
+        public function registry(){
+            $visitors = function_exists( 'wordplus_visitors' ) ? wordplus_visitors() : null;
+
+            return ( $visitors && method_exists( $visitors, 'adopt_many' ) ) ? $visitors : null;
+        }
+
+        private function registry_credentials(){
+            $registry = $this->registry();
+            $failed   = new WP_Error( 'guest_registry', _x( 'Something went wrong', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 503 ) );
+
+            if( ! $registry ){
+                return $failed;
+            }
+
+            $known = (int) $registry->current();
+            $token = '';
+
+            if( $known < 0 && ! $this->is_guest_exists( $known ) ){
+                $token = (string) $registry->token();
+            } else {
+                for( $attempt = 0; $attempt < 3 && '' === $token; $attempt++ ){
+                    $made = $registry->create();
+
+                    if( is_wp_error( $made ) ){
+                        return $failed;
+                    }
+
+                    if( ! $this->is_guest_exists( (int) $made['id'] ) ){
+                        $known = (int) $made['id'];
+                        $token = (string) $made['token'];
+                    } else {
+                        $this->skip_taken_numbers( $registry, (int) $made['id'] );
+                    }
+                }
+            }
+
+            $dot = strpos( $token, '.' );
+
+            if( $known >= 0 || false === $dot ){
+                return $failed;
+            }
+
+            return array( 'id' => abs( $known ), 'secret' => substr( $token, $dot + 1 ) );
+        }
+
+        public function registry_bot_id(){
+            $registry = $this->registry();
+
+            for( $attempt = 0; $registry && $attempt < 3; $attempt++ ){
+                $made = $registry->create( 'bot' );
+
+                if( ! is_array( $made ) || (int) $made['id'] >= 0 ){
+                    return 0;
+                }
+
+                if( ! $this->is_guest_exists( (int) $made['id'] ) ){
+                    return abs( (int) $made['id'] );
+                }
+
+                $this->skip_taken_numbers( $registry, (int) $made['id'] );
+            }
+
+            return 0;
+        }
+
+        private function skip_taken_numbers( $registry, $taken_id ){
+            global $wpdb;
+
+            if( ! method_exists( $registry, 'skip_past' ) ){
+                return;
+            }
+
+            $highest = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT MAX(`id`) FROM `{$this->table}` WHERE `id` >= %d AND `id` < %d",
+                abs( (int) $taken_id ),
+                self::COUNTER_FLOOR - 1
+            ) );
+
+            if( $highest > 0 ){
+                $registry->skip_past( $highest );
+            }
+        }
+
+        public function adopt_into_registry(){
+            $done_to = get_option( self::REGISTRY_OPTION, '0' );
+
+            if( 'done' === $done_to || ! $this->takes_registry_ids() ){
+                return;
+            }
+
+            $registry = $this->registry();
+
+            if( ! $registry ){
+                return;
+            }
+
+            global $wpdb;
+
+            $rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT `id`, `secret`, `bot_id` FROM `{$this->table}` WHERE `id` > %d AND `id` < %d AND `deleted_at` IS NULL ORDER BY `id` ASC LIMIT %d",
+                (int) $done_to,
+                (int) WordPlus_SDK_Visitors::START,
+                self::ADOPT_BATCH
+            ) );
+
+            if( empty( $rows ) ){
+                update_option( self::REGISTRY_OPTION, 'done', false );
+                return;
+            }
+
+            $guests = array();
+
+            foreach( $rows as $row ){
+                $guests[] = array(
+                    'id'     => (int) $row->id,
+                    'secret' => (string) $row->secret,
+                    'kind'   => (int) $row->bot_id > 0 ? 'bot' : 'visitor',
+                );
+            }
+
+            $registry->adopt_many( $guests );
+
+            if( count( $rows ) < self::ADOPT_BATCH ){
+                update_option( self::REGISTRY_OPTION, 'done', false );
+                return;
+            }
+
+            update_option( self::REGISTRY_OPTION, (string) (int) end( $rows )->id, false );
+            Better_Messages_Worker()->run_soon( 'better_messages_guests_registry_job' );
+        }
+
+        public function registry_tasks(){
+            if( function_exists( 'Better_Messages_Worker' ) ){
+                Better_Messages_Worker()->add_task( 'better_messages_guests_registry_job', 5 * MINUTE_IN_SECONDS );
+            }
         }
 
         public function load_scripts()

@@ -596,6 +596,10 @@ if ( ! class_exists( 'WordPlus_SDK_Storage_Queue' ) ) {
             } elseif ( self::same_account( $source, $destination ) ) {
                 $put = $client->copy_object( $source['bucket'], $source_key, $key );
             } else {
+                if ( ! function_exists( 'wp_tempnam' ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/file.php';
+                }
+
                 $temp = wp_tempnam( 'wordplus-move' );
                 $got  = $storage->client( $source )->download( $source_key, $temp );
 
