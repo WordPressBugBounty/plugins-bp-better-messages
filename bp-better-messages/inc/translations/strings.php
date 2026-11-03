@@ -1045,6 +1045,7 @@ function _bm_js_translation_strings() {
     _x('Microphone is off', 'Call Devices', 'bp-better-messages');
     _x('Turn them on with the buttons below when you are ready.', 'Call Devices', 'bp-better-messages');
     _x('Turn it on with the button below when you are ready.', 'Call Devices', 'bp-better-messages');
+    _x('Do Not Show Again', 'Call Devices', 'bp-better-messages');
     _x('Test Microphone', 'Call Devices', 'bp-better-messages');
     _x('Dismiss', 'Call Controls', 'bp-better-messages');
     _x('Front Camera', 'Media Inputs', 'bp-better-messages');
@@ -1249,7 +1250,6 @@ function _bm_js_translation_strings() {
     _x('Collapse', 'Call Controls', 'bp-better-messages');
     _x('Full Screen', 'Call Controls', 'bp-better-messages');
     _x('Expand', 'Call Controls', 'bp-better-messages');
-    _x('Do Not Show Again', 'Call Devices', 'bp-better-messages');
     _x('Your background is slowing this device', 'Call Effects', 'bp-better-messages');
     _x('If your video stutters or your device gets warm, turn the background off.', 'Call Effects', 'bp-better-messages');
     _x('Turn Off', 'Call Effects', 'bp-better-messages');

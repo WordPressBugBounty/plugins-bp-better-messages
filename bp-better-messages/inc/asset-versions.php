@@ -81,7 +81,7 @@ if ( ! class_exists( 'Better_Messages_Asset_Versions' ) ):
 
         private function find_asset( $handle, $is_style )
         {
-            if ( ! is_string( $handle ) || $handle === '' ) {
+            if ( ! is_string( $handle ) || $handle === '' || ! isset( $GLOBALS[ $is_style ? 'wp_styles' : 'wp_scripts' ] ) ) {
                 return null;
             }
 

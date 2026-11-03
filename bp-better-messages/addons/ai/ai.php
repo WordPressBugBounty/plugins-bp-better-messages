@@ -23,6 +23,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             add_filter( 'better_messages_rest_thread_item', array( $this, 'rest_thread_item'), 20, 5 );
             add_filter('better_messages_get_user_roles', array($this, 'get_user_roles'), 10, 2 );
             add_filter( 'bp_better_messages_pre_format_message', array( $this, 'strip_ai_marker' ), 1, 4 );
+            add_filter( 'better_messages_get_chat_rooms', array( $this, 'chat_rooms_bots' ), 10, 2 );
 
             if ( self::available() ) {
                 require_once "api/provider-interface.php";
@@ -543,6 +544,49 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
 
             return $this->bot_users;
+        }
+
+        public function chat_rooms_bots( $rooms, $user_id = 0 )
+        {
+            if ( ! is_array( $rooms ) ) {
+                return $rooms;
+            }
+
+            $bot_user_ids = null;
+
+            foreach ( $rooms as &$room ) {
+                if ( ! is_array( $room ) ) {
+                    continue;
+                }
+
+                $room['bots'] = array();
+
+                if ( empty( $room['participants'] ) || ! is_array( $room['participants'] ) ) {
+                    continue;
+                }
+
+                if ( null === $bot_user_ids ) {
+                    $bot_user_ids = array_keys( $this->bot_users() );
+                }
+
+                foreach ( $bot_user_ids as $bot_user_id ) {
+                    $bot_user_id = (int) $bot_user_id;
+
+                    foreach ( $room['participants'] as $entry ) {
+                        $in = is_array( $entry )
+                            ? ( count( $entry ) === 2 && $bot_user_id >= (int) $entry[0] && $bot_user_id <= (int) $entry[1] )
+                            : ( (int) $entry === $bot_user_id );
+
+                        if ( $in ) {
+                            $room['bots'][] = $bot_user_id;
+                            break;
+                        }
+                    }
+                }
+            }
+            unset( $room );
+
+            return $rooms;
         }
 
         private function bots_answering()
@@ -4216,18 +4260,18 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function rest_thread_item( $thread_item, $thread_id, $thread_type, $include_personal, $current_user_id ){
             if( $thread_type === 'chat-room' ){
-                if( isset( $thread_item['chatRoom'] ) && is_array( $thread_item['chatRoom'] ) && ! empty( $thread_item['participants'] ) && is_array( $thread_item['participants'] ) ){
+                if( isset( $thread_item['chatRoom'] ) && is_array( $thread_item['chatRoom'] ) ){
                     $bots = array();
 
-                    foreach( array_keys( $this->bot_users() ) as $bot_user_id ){
-                        if( in_array( (int) $bot_user_id, $thread_item['participants'], true ) ){
-                            $bots[] = (int) $bot_user_id;
+                    if( ! empty( $thread_item['participants'] ) && is_array( $thread_item['participants'] ) ){
+                        foreach( array_keys( $this->bot_users() ) as $bot_user_id ){
+                            if( in_array( (int) $bot_user_id, $thread_item['participants'], true ) ){
+                                $bots[] = (int) $bot_user_id;
+                            }
                         }
                     }
 
-                    if( count( $bots ) > 0 ){
-                        $thread_item['chatRoom']['bots'] = $bots;
-                    }
+                    $thread_item['chatRoom']['bots'] = $bots;
                 }
 
                 return $thread_item;

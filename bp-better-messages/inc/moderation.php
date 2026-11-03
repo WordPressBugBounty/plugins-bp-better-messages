@@ -929,13 +929,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 );
             }
 
-            $result = $this->un_restrict_user( 'ban', $user_id, $thread_id );
+            $this->un_restrict_user( 'ban', $user_id, $thread_id );
 
-            if( $result ){
-                return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
-            }
-
-            return false;
+            return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
         }
 
         public function mute_user_api( WP_REST_Request $request ){
@@ -980,13 +976,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 );
             }
 
-            $result = $this->un_restrict_user( 'mute', $user_id, $thread_id );
+            $this->un_restrict_user( 'mute', $user_id, $thread_id );
 
-            if( $result ){
-                return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
-            }
-
-            return false;
+            return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
         }
 
         public function can_send_reply( $allowed, $user_id, $thread_id ){
@@ -1103,8 +1095,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             }
 
             if( ! is_array( $restricted_users ) ){
-                $restricted_users = $this->read_restricted_users( array( $thread_id ) )[ $thread_id ];
-                wp_cache_set( $key, $restricted_users, 'bm_messages' );
+                $restricted_users = $this->read_restricted_users( array( $thread_id ), $lives )[ $thread_id ];
+                wp_cache_set( $key, $restricted_users, 'bm_messages', $lives[ $thread_id ] );
             }
 
             if( empty( $restricted_users ) ) return (object) [];
@@ -1123,12 +1115,18 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             if ( empty( $pending ) ) return;
 
-            foreach ( $this->read_restricted_users( $pending ) as $thread_id => $restricted ) {
-                wp_cache_set( $this->thread_cache_key( $thread_id ), $restricted, 'bm_messages' );
+            foreach ( $this->read_restricted_users( $pending, $lives ) as $thread_id => $restricted ) {
+                wp_cache_set( $this->thread_cache_key( $thread_id ), $restricted, 'bm_messages', $lives[ $thread_id ] );
             }
         }
 
-        private function read_restricted_users( array $thread_ids ){
+        private function cache_life( array $seconds_left ): int {
+            if( empty( $seconds_left ) ) return 0;
+
+            return max( 1, (int) min( $seconds_left ) );
+        }
+
+        private function read_restricted_users( array $thread_ids, &$lives = null ){
             global $wpdb;
 
             $thread_ids = array_values( array_unique( array_map( 'intval', $thread_ids ) ) );
@@ -1138,7 +1136,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $in_ephemeral = empty( $ephemeral ) ? '0' : implode( ',', $ephemeral );
 
             $results = $wpdb->get_results( "
-            SELECT `moderation`.`thread_id`, `moderation`.`user_id`, `moderation`.`type`, CONVERT_TZ(`moderation`.`expiration`, @@session.time_zone, '+0:00') as expiration
+            SELECT `moderation`.`thread_id`, `moderation`.`user_id`, `moderation`.`type`, CONVERT_TZ(`moderation`.`expiration`, @@session.time_zone, '+0:00') as expiration, TIMESTAMPDIFF(SECOND, NOW(), `moderation`.`expiration`) as seconds_left
             FROM " . bm_get_table('moderation') . " `moderation`
             WHERE `moderation`.`thread_id` IN ({$in})
             AND `moderation`.`expiration` > NOW()
@@ -1151,10 +1149,14 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             )" );
 
             $by_thread = array_fill_keys( $thread_ids, array() );
+            $left      = array_fill_keys( $thread_ids, array() );
 
             foreach( (array) $results as $item ){
                 $by_thread[ (int) $item->thread_id ][ $item->type ][ $item->user_id ] = strtotime( $item->expiration );
+                $left[ (int) $item->thread_id ][] = (int) $item->seconds_left;
             }
+
+            $lives = array_map( array( $this, 'cache_life' ), $left );
 
             foreach( $by_thread as $thread_id => $result ){
                 if( isset( $result['ban'] ) && isset( $result['mute'] ) ){
@@ -1190,18 +1192,20 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             global $wpdb;
 
             $table = bm_get_table('moderation');
-            $query = $wpdb->prepare("SELECT type, expiration FROM {$table} WHERE `thread_id` = %d AND `user_id` = %d AND `expiration` > NOW()", $thread_id, $user_id);
+            $query = $wpdb->prepare("SELECT type, expiration, TIMESTAMPDIFF(SECOND, NOW(), expiration) AS seconds_left FROM {$table} WHERE `thread_id` = %d AND `user_id` = %d AND `expiration` > NOW()", $thread_id, $user_id);
 
             $array = [];
+            $left  = [];
             $results = $wpdb->get_results( $query );
 
             if( count( $results ) > 0 ){
                 foreach ( $results as $result ){
                     $array[$result->type] = $result->expiration;
+                    $left[] = (int) $result->seconds_left;
                 }
             }
 
-            wp_cache_set($key, $array, 'bm_messages');
+            wp_cache_set($key, $array, 'bm_messages', $this->cache_life( $left ));
 
             return $array;
         }
@@ -1255,7 +1259,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $params[] = $user_id;
 
             $results = $wpdb->get_results( $wpdb->prepare(
-                "SELECT `thread_id`, `type`, `expiration`
+                "SELECT `thread_id`, `type`, `expiration`, TIMESTAMPDIFF(SECOND, NOW(), `expiration`) AS seconds_left
                  FROM `" . bm_get_table( 'moderation' ) . "`
                  WHERE `thread_id` IN ({$placeholders})
                  AND `user_id` = %d
@@ -1264,15 +1268,18 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             ) );
 
             $grouped = array();
+            $left    = array();
             foreach ( $results as $result ) {
                 $grouped[ (int) $result->thread_id ][ $result->type ] = $result->expiration;
+                $left[ (int) $result->thread_id ][] = (int) $result->seconds_left;
             }
 
             foreach ( $pending as $thread_id ) {
                 wp_cache_set(
                     $this->user_thread_cache_key( $thread_id, $user_id ),
                     isset( $grouped[ $thread_id ] ) ? $grouped[ $thread_id ] : array(),
-                    'bm_messages'
+                    'bm_messages',
+                    $this->cache_life( isset( $left[ $thread_id ] ) ? $left[ $thread_id ] : array() )
                 );
             }
         }

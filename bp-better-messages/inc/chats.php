@@ -1517,7 +1517,7 @@ class Better_Messages_Chats
     }
 
     private function room_image_srcset( $image_id, $base_src ){
-        $sharp_side = 240;
+        $sharp_side = 600;
 
         $meta = wp_get_attachment_metadata( $image_id );
 

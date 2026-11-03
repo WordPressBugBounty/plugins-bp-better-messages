@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Messages 3.2.0\n"
+"Project-Id-Version: Better Messages 3.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-messages-dev\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-02T17:48:05+00:00\n"
+"POT-Creation-Date: 2026-11-02T21:42:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bp-better-messages\n"
@@ -43,41 +43,41 @@ msgstr ""
 msgid "WordPlus"
 msgstr ""
 
-#: addons/ai/ai.php:328
-#: addons/ai/ai.php:663
+#: addons/ai/ai.php:329
+#: addons/ai/ai.php:713
 msgctxt "AI Chat Bots"
 msgid "The bot is currently disabled"
 msgstr ""
 
-#: addons/ai/ai.php:674
+#: addons/ai/ai.php:724
 #: inc/translations/strings.php:829
 msgctxt "AI Chat Bots"
 msgid "Please wait until response is completed"
 msgstr ""
 
-#: addons/ai/ai.php:732
-#: addons/ai/ai.php:776
+#: addons/ai/ai.php:782
+#: addons/ai/ai.php:826
 msgctxt "AI Chat Bots"
 msgid "Insufficient points balance to use this bot"
 msgstr ""
 
-#: addons/ai/ai.php:1295
+#: addons/ai/ai.php:1345
 #: inc/translations/strings.php:1972
 msgctxt "Settings page"
 msgid "Please enter an API key first"
 msgstr ""
 
-#: addons/ai/ai.php:1498
-#: addons/ai/ai.php:1522
+#: addons/ai/ai.php:1548
+#: addons/ai/ai.php:1572
 msgid "Bot not found."
 msgstr ""
 
-#: addons/ai/ai.php:1750
+#: addons/ai/ai.php:1800
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Bot name is required"
 msgstr ""
 
-#: addons/ai/ai.php:2987
+#: addons/ai/ai.php:3037
 #: addons/buddyboss.php:467
 #: inc/translations/strings.php:4699
 #: inc/websocket.php:1793
@@ -86,7 +86,7 @@ msgstr ""
 msgid "New message from %s"
 msgstr ""
 
-#: addons/ai/ai.php:2988
+#: addons/ai/ai.php:3038
 #: addons/buddyboss.php:468
 #: inc/translations/strings.php:4700
 #: inc/websocket.php:1794
@@ -95,93 +95,93 @@ msgstr ""
 msgid "You have new message from %s"
 msgstr ""
 
-#: addons/ai/ai.php:3343
+#: addons/ai/ai.php:3393
 msgctxt "Rest API Error"
 msgid "Transcription is already in progress"
 msgstr ""
 
-#: addons/ai/ai.php:3702
+#: addons/ai/ai.php:3752
 msgctxt "Message translation"
 msgid "Translation is not available in this conversation"
 msgstr ""
 
-#: addons/ai/ai.php:3711
+#: addons/ai/ai.php:3761
 #: inc/rest-api.php:2999
 msgctxt "Rest API Error"
 msgid "Sorry, you are not allowed to access this conversation"
 msgstr ""
 
-#: addons/ai/ai.php:4008
+#: addons/ai/ai.php:4058
 msgctxt "User settings"
 msgid "Message Translation"
 msgstr ""
 
-#: addons/ai/ai.php:4014
+#: addons/ai/ai.php:4064
 msgctxt "User settings"
 msgid "Translate messages to"
 msgstr ""
 
-#: addons/ai/ai.php:4017
+#: addons/ai/ai.php:4067
 msgctxt "User settings"
 msgid "Turn translation on in a conversation to see its incoming messages in this language"
 msgstr ""
 
-#: addons/ai/ai.php:4184
+#: addons/ai/ai.php:4234
 #: inc/translations/strings.php:1450
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "AI Chat Bots"
 msgstr ""
 
-#: addons/ai/ai.php:4185
+#: addons/ai/ai.php:4235
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "AI Chat Bot"
 msgstr ""
 
-#: addons/ai/ai.php:4186
-#: addons/ai/ai.php:4187
+#: addons/ai/ai.php:4236
+#: addons/ai/ai.php:4237
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Create new AI Chat Bot"
 msgstr ""
 
-#: addons/ai/ai.php:4188
+#: addons/ai/ai.php:4238
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Edit AI Chat Bot"
 msgstr ""
 
-#: addons/ai/ai.php:4189
+#: addons/ai/ai.php:4239
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "New AI Chat Bot"
 msgstr ""
 
-#: addons/ai/ai.php:4190
+#: addons/ai/ai.php:4240
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "AI Chat Bot Avatar"
 msgstr ""
 
-#: addons/ai/ai.php:4191
+#: addons/ai/ai.php:4241
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Set AI Chat Bot avatar"
 msgstr ""
 
-#: addons/ai/ai.php:4192
+#: addons/ai/ai.php:4242
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Remove AI Chat Bot avatar"
 msgstr ""
 
-#: addons/ai/ai.php:4193
+#: addons/ai/ai.php:4243
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "Use as AI Chat Bot avatar"
 msgstr ""
 
-#: addons/ai/ai.php:4217
+#: addons/ai/ai.php:4267
 msgctxt "Chat rooms settings page"
 msgid "Settings"
 msgstr ""
 
-#: addons/ai/ai.php:4230
+#: addons/ai/ai.php:4280
 #: addons/stickers/stickers.php:90
 #: inc/api/admin.php:1670
-#: inc/chats.php:2329
+#: inc/chats.php:2331
 #: inc/options.php:951
 #: inc/options.php:961
 #: inc/options.php:1409
@@ -189,88 +189,88 @@ msgctxt "Settings page"
 msgid "Guests"
 msgstr ""
 
-#: addons/ai/ai.php:4260
+#: addons/ai/ai.php:4310
 #, php-format
 msgctxt "Settings page"
 msgid "<a href=\"%s\" target=\"_blank\">Voice and Video Messages</a> add-on is required to use audio models."
 msgstr ""
 
-#: addons/ai/ai.php:4270
+#: addons/ai/ai.php:4320
 #, php-format
 msgctxt "Settings page"
 msgid "Website must have at least one valid API Key configured. Setup keys at <a href=\"%s\">settings page</a>."
 msgstr ""
 
-#: addons/ai/ai.php:4281
-#: inc/chats.php:2339
+#: addons/ai/ai.php:4331
+#: inc/chats.php:2341
 #: inc/translations/strings.php:1373
 msgctxt "WP Admin"
 msgid "Loading"
 msgstr ""
 
-#: addons/ai/ai.php:4319
+#: addons/ai/ai.php:4369
 msgctxt "AI Chat Bots (WP Admin)"
 msgid "You are a helpful assistant"
 msgstr ""
 
-#: addons/ai/ai.php:5387
+#: addons/ai/ai.php:5439
 #, php-format
 msgctxt "AI Moderation"
 msgid "[%s] AI Flagged Message"
 msgstr ""
 
-#: addons/ai/ai.php:5393
+#: addons/ai/ai.php:5445
 msgctxt "AI Moderation"
 msgid "Encrypted message"
 msgstr ""
 
-#: addons/ai/ai.php:5398
+#: addons/ai/ai.php:5450
 #, php-format
 msgctxt "AI Moderation"
 msgid "Sender: %s (ID: %d)"
 msgstr ""
 
-#: addons/ai/ai.php:5399
+#: addons/ai/ai.php:5451
 #, php-format
 msgctxt "AI Moderation"
 msgid "Conversation: #%d"
 msgstr ""
 
-#: addons/ai/ai.php:5400
+#: addons/ai/ai.php:5452
 #, php-format
 msgctxt "AI Moderation"
 msgid "Flagged Categories: %s"
 msgstr ""
 
-#: addons/ai/ai.php:5402
+#: addons/ai/ai.php:5454
 #, php-format
 msgctxt "AI Moderation"
 msgid "Reason: %s"
 msgstr ""
 
-#: addons/ai/ai.php:5404
+#: addons/ai/ai.php:5456
 #, php-format
 msgctxt "AI Moderation"
 msgid "Message: %s"
 msgstr ""
 
-#: addons/ai/ai.php:5408
+#: addons/ai/ai.php:5460
 msgctxt "AI Moderation"
 msgid "Attachments:"
 msgstr ""
 
-#: addons/ai/ai.php:5420
+#: addons/ai/ai.php:5472
 msgctxt "AI Moderation"
 msgid "Note: This message was sent to the recipient but flagged for review."
 msgstr ""
 
-#: addons/ai/ai.php:5421
+#: addons/ai/ai.php:5473
 #, php-format
 msgctxt "AI Moderation"
 msgid "Review in moderation panel: %s"
 msgstr ""
 
-#: addons/ai/ai.php:5445
+#: addons/ai/ai.php:5497
 msgctxt "Rest API Error"
 msgid "This message is not a voice message"
 msgstr ""
@@ -637,7 +637,7 @@ msgstr ""
 
 #: addons/calls-group.php:665
 #: addons/calls-group.php:676
-#: inc/translations/strings.php:1129
+#: inc/translations/strings.php:1130
 #: inc/translations/strings.php:4745
 msgid "The call server could not do this. Please try again."
 msgstr ""
@@ -1703,8 +1703,8 @@ msgstr ""
 #: inc/api/conversations.php:302
 #: inc/api/conversations.php:533
 #: inc/api/conversations.php:592
-#: inc/chats.php:1912
-#: inc/chats.php:1938
+#: inc/chats.php:1914
+#: inc/chats.php:1940
 #: inc/guests.php:383
 #: inc/guests.php:393
 #: inc/guests.php:500
@@ -1717,8 +1717,8 @@ msgstr ""
 #: inc/moderation.php:1026
 #: inc/moderation.php:1048
 #: inc/moderation.php:1072
-#: inc/moderation.php:1098
-#: inc/moderation.php:1123
+#: inc/moderation.php:1097
+#: inc/moderation.php:1122
 #: inc/rest-api.php:1270
 #: inc/rest-api.php:1284
 #: inc/rest-api.php:1310
@@ -2337,14 +2337,14 @@ msgstr ""
 
 #: inc/api/admin.php:949
 #: inc/hooks.php:481
-#: inc/translations/strings.php:1227
+#: inc/translations/strings.php:1228
 #, php-format,js-format
 msgid "%s joined the conversation"
 msgstr ""
 
 #: inc/api/admin.php:950
 #: inc/hooks.php:485
-#: inc/translations/strings.php:1228
+#: inc/translations/strings.php:1229
 #, php-format,js-format
 msgid "%s left the conversation"
 msgstr ""
@@ -2845,99 +2845,99 @@ msgstr ""
 msgid "Chat room has no thread"
 msgstr ""
 
-#: inc/chats.php:1978
+#: inc/chats.php:1980
 msgctxt "Chat Rooms"
 msgid "Chat Rooms"
 msgstr ""
 
-#: inc/chats.php:1979
+#: inc/chats.php:1981
 msgctxt "Chat Rooms"
 msgid "Chat Room"
 msgstr ""
 
-#: inc/chats.php:1980
-#: inc/chats.php:1981
+#: inc/chats.php:1982
+#: inc/chats.php:1983
 msgctxt "Chat Rooms"
 msgid "Create new Chat Room"
 msgstr ""
 
-#: inc/chats.php:1982
+#: inc/chats.php:1984
 msgctxt "Chat Rooms"
 msgid "Edit Chat Room"
 msgstr ""
 
-#: inc/chats.php:1983
+#: inc/chats.php:1985
 msgctxt "Chat Rooms"
 msgid "New Chat Room"
 msgstr ""
 
-#: inc/chats.php:1984
+#: inc/chats.php:1986
 msgctxt "Chat Rooms"
 msgid "Chat Thumbnail"
 msgstr ""
 
-#: inc/chats.php:1985
+#: inc/chats.php:1987
 msgctxt "Chat Rooms"
 msgid "Set chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:1986
+#: inc/chats.php:1988
 msgctxt "Chat Rooms"
 msgid "Remove chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:1987
+#: inc/chats.php:1989
 msgctxt "Chat Rooms"
 msgid "Use as chat thumbnail"
 msgstr ""
 
-#: inc/chats.php:2008
+#: inc/chats.php:2010
 msgid "Loading"
 msgstr ""
 
-#: inc/chats.php:2050
-#: inc/chats.php:2224
+#: inc/chats.php:2052
+#: inc/chats.php:2226
 msgctxt "Chat rooms settings page"
 msgid "You need to join this chat room to send messages"
 msgstr ""
 
-#: inc/chats.php:2051
-#: inc/chats.php:2230
+#: inc/chats.php:2053
+#: inc/chats.php:2232
 msgctxt "Chat rooms settings page"
 msgid "Join chat room"
 msgstr ""
 
-#: inc/chats.php:2052
-#: inc/chats.php:2254
+#: inc/chats.php:2054
+#: inc/chats.php:2256
 msgctxt "Chat rooms settings page"
 msgid "You are not allowed to join this chat room"
 msgstr ""
 
-#: inc/chats.php:2053
-#: inc/chats.php:2260
+#: inc/chats.php:2055
+#: inc/chats.php:2262
 msgctxt "Chat rooms settings page"
 msgid "You are not allowed to reply in this chat room"
 msgstr ""
 
-#: inc/chats.php:2054
-#: inc/chats.php:2248
+#: inc/chats.php:2056
+#: inc/chats.php:2250
 msgctxt "Chat rooms settings page"
 msgid "You need to login to website to send messages"
 msgstr ""
 
-#: inc/chats.php:2055
-#: inc/chats.php:2236
+#: inc/chats.php:2057
+#: inc/chats.php:2238
 msgctxt "Chat rooms settings page"
 msgid "Login"
 msgstr ""
 
-#: inc/chats.php:2056
-#: inc/chats.php:2242
+#: inc/chats.php:2058
+#: inc/chats.php:2244
 msgctxt "Chat rooms settings page"
 msgid "Chat as Guest"
 msgstr ""
 
-#: inc/chats.php:2057
+#: inc/chats.php:2059
 msgctxt "Chat rooms settings page"
 msgid "This chat room is currently closed"
 msgstr ""
@@ -5273,21 +5273,21 @@ msgid "Video call recording"
 msgstr ""
 
 #: inc/hooks.php:514
-#: inc/translations/strings.php:1217
+#: inc/translations/strings.php:1218
 #, php-format,js-format
 msgctxt "Call recording"
 msgid "%s started recording"
 msgstr ""
 
 #: inc/hooks.php:516
-#: inc/translations/strings.php:1218
+#: inc/translations/strings.php:1219
 #, php-format,js-format
 msgctxt "Call recording"
 msgid "%s stopped recording"
 msgstr ""
 
 #: inc/hooks.php:516
-#: inc/translations/strings.php:1219
+#: inc/translations/strings.php:1220
 msgctxt "Call recording"
 msgid "Recording stopped"
 msgstr ""
@@ -6014,7 +6014,7 @@ msgid "Sign in to the app"
 msgstr ""
 
 #: inc/moderation.php:887
-#: inc/moderation.php:1149
+#: inc/moderation.php:1145
 #, php-format
 msgctxt "Message when user was banned in conversation"
 msgid "You were banned in this conversation until %s"
@@ -6027,92 +6027,92 @@ msgctxt "Message when user was banned from group calls"
 msgid "A moderator removed you from the calls of this conversation until %s"
 msgstr ""
 
-#: inc/moderation.php:1161
+#: inc/moderation.php:1157
 #, php-format
 msgctxt "Message when user was muted in conversation"
 msgid "You were muted in this conversation until %s"
 msgstr ""
 
-#: inc/moderation.php:1699
+#: inc/moderation.php:1717
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] New message pending moderation"
 msgstr ""
 
-#: inc/moderation.php:1709
+#: inc/moderation.php:1727
 msgctxt "Moderation email"
 msgid "Pre-moderation rules"
 msgstr ""
 
-#: inc/moderation.php:1712
+#: inc/moderation.php:1730
 msgctxt "Moderation email"
 msgid "AI Content Moderation"
 msgstr ""
 
-#: inc/moderation.php:1714
+#: inc/moderation.php:1732
 msgctxt "Moderation email"
 msgid "First-time sender"
 msgstr ""
 
-#: inc/moderation.php:1718
+#: inc/moderation.php:1736
 msgctxt "Moderation email"
 msgid "User is blacklisted"
 msgstr ""
 
-#: inc/moderation.php:1723
+#: inc/moderation.php:1741
 #, php-format
 msgctxt "Moderation email"
 msgid "Sender: %s (ID: %d)"
 msgstr ""
 
-#: inc/moderation.php:1724
+#: inc/moderation.php:1742
 #, php-format
 msgctxt "Moderation email"
 msgid "Conversation: #%d"
 msgstr ""
 
-#: inc/moderation.php:1725
+#: inc/moderation.php:1743
 #, php-format
 msgctxt "Moderation email"
 msgid "Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1729
+#: inc/moderation.php:1747
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Flagged Categories: %s"
 msgstr ""
 
-#: inc/moderation.php:1731
+#: inc/moderation.php:1749
 #, php-format
 msgctxt "Moderation email"
 msgid "AI Reason: %s"
 msgstr ""
 
-#: inc/moderation.php:1735
+#: inc/moderation.php:1753
 #, php-format
 msgctxt "Moderation email"
 msgid "Message: %s"
 msgstr ""
 
-#: inc/moderation.php:1739
+#: inc/moderation.php:1757
 msgctxt "Moderation email"
 msgid "Attachments:"
 msgstr ""
 
-#: inc/moderation.php:1751
+#: inc/moderation.php:1769
 #, php-format
 msgctxt "Moderation email"
 msgid "Review in moderation panel: %s"
 msgstr ""
 
-#: inc/moderation.php:1799
+#: inc/moderation.php:1817
 #, php-format
 msgctxt "Moderation email subject"
 msgid "[%s] Message reported"
 msgstr ""
 
-#: inc/moderation.php:1810
+#: inc/moderation.php:1828
 #, php-format
 msgctxt "Moderation email body"
 msgid ""
@@ -6456,19 +6456,19 @@ msgid "Documents and other files"
 msgstr ""
 
 #: inc/system-messages.php:569
-#: inc/translations/strings.php:1225
+#: inc/translations/strings.php:1226
 #, php-format,js-format
 msgid "%1$s was removed from the conversation by %2$s"
 msgstr ""
 
 #: inc/system-messages.php:571
-#: inc/translations/strings.php:1221
+#: inc/translations/strings.php:1222
 #, php-format,js-format
 msgid "%1$s was muted by %2$s"
 msgstr ""
 
 #: inc/system-messages.php:573
-#: inc/translations/strings.php:1223
+#: inc/translations/strings.php:1224
 #, php-format,js-format
 msgid "%1$s was banned by %2$s"
 msgstr ""
@@ -11634,674 +11634,679 @@ msgstr ""
 
 #: inc/translations/strings.php:1050
 msgctxt "Call Devices"
-msgid "Test Microphone"
+msgid "Do Not Show Again"
 msgstr ""
 
 #: inc/translations/strings.php:1051
+msgctxt "Call Devices"
+msgid "Test Microphone"
+msgstr ""
+
+#: inc/translations/strings.php:1052
 msgctxt "Call Controls"
 msgid "Dismiss"
 msgstr ""
 
-#: inc/translations/strings.php:1052
+#: inc/translations/strings.php:1053
 msgctxt "Media Inputs"
 msgid "Front Camera"
 msgstr ""
 
-#: inc/translations/strings.php:1053
+#: inc/translations/strings.php:1054
 msgctxt "Media Inputs"
 msgid "Back Camera"
 msgstr ""
 
-#: inc/translations/strings.php:1054
+#: inc/translations/strings.php:1055
 msgctxt "Media Inputs"
 msgid "Phone Microphone"
-msgstr ""
-
-#: inc/translations/strings.php:1055
-#, php-format,js-format
-msgctxt "Call Moderation"
-msgid "%s raised a hand"
 msgstr ""
 
 #: inc/translations/strings.php:1056
 #, php-format,js-format
 msgctxt "Call Moderation"
-msgid "%s joined"
+msgid "%s raised a hand"
 msgstr ""
 
 #: inc/translations/strings.php:1057
 #, php-format,js-format
 msgctxt "Call Moderation"
-msgid "%1$s and %2$s joined"
+msgid "%s joined"
 msgstr ""
 
 #: inc/translations/strings.php:1058
+#, php-format,js-format
 msgctxt "Call Moderation"
-msgid "Sound for Raised Hands"
+msgid "%1$s and %2$s joined"
 msgstr ""
 
 #: inc/translations/strings.php:1059
 msgctxt "Call Moderation"
-msgid "A short sound when someone raises a hand, on this device."
+msgid "Sound for Raised Hands"
 msgstr ""
 
 #: inc/translations/strings.php:1060
 msgctxt "Call Moderation"
-msgid "Join Alerts"
+msgid "A short sound when someone raises a hand, on this device."
 msgstr ""
 
 #: inc/translations/strings.php:1061
 msgctxt "Call Moderation"
-msgid "A toast when someone joins the call, on this device."
+msgid "Join Alerts"
 msgstr ""
 
 #: inc/translations/strings.php:1062
 msgctxt "Call Moderation"
-msgid "End for Everyone"
+msgid "A toast when someone joins the call, on this device."
 msgstr ""
 
 #: inc/translations/strings.php:1063
 msgctxt "Call Moderation"
-msgid "Everyone leaves the call, you too."
+msgid "End for Everyone"
 msgstr ""
 
 #: inc/translations/strings.php:1064
 msgctxt "Call Moderation"
-msgid "End the call for everyone?"
+msgid "Everyone leaves the call, you too."
 msgstr ""
 
 #: inc/translations/strings.php:1065
 msgctxt "Call Moderation"
-msgid "The call could not be ended for everyone."
+msgid "End the call for everyone?"
 msgstr ""
 
 #: inc/translations/strings.php:1066
+msgctxt "Call Moderation"
+msgid "The call could not be ended for everyone."
+msgstr ""
+
+#: inc/translations/strings.php:1067
 msgctxt "Call recording mark"
 msgid "REC"
 msgstr ""
 
-#: inc/translations/strings.php:1067
+#: inc/translations/strings.php:1068
 msgctxt "Call recording"
 msgid "This call is being recorded."
 msgstr ""
 
-#: inc/translations/strings.php:1068
+#: inc/translations/strings.php:1069
 #, php-format,js-format
 msgctxt "Call recording"
 msgid "Recording, %s. Stop recording"
 msgstr ""
 
-#: inc/translations/strings.php:1069
+#: inc/translations/strings.php:1070
 msgctxt "Call recording"
 msgid "Stop"
 msgstr ""
 
-#: inc/translations/strings.php:1070
+#: inc/translations/strings.php:1071
 msgctxt "Call recording"
 msgid "Starting recording…"
 msgstr ""
 
-#: inc/translations/strings.php:1071
+#: inc/translations/strings.php:1072
 msgctxt "Call recording"
 msgid "Saving recording…"
 msgstr ""
 
-#: inc/translations/strings.php:1072
+#: inc/translations/strings.php:1073
 msgctxt "Call recording"
 msgid "This call is being recorded"
-msgstr ""
-
-#: inc/translations/strings.php:1073
-#, php-format,js-format
-msgctxt "Call recording"
-msgid "%s started recording this call"
 msgstr ""
 
 #: inc/translations/strings.php:1074
 #, php-format,js-format
 msgctxt "Call recording"
-msgid "%s started recording."
+msgid "%s started recording this call"
 msgstr ""
 
 #: inc/translations/strings.php:1075
+#, php-format,js-format
 msgctxt "Call recording"
-msgid "Moderators can watch it afterwards."
+msgid "%s started recording."
 msgstr ""
 
 #: inc/translations/strings.php:1076
 msgctxt "Call recording"
-msgid "Everyone in the conversation can watch it afterwards."
+msgid "Moderators can watch it afterwards."
 msgstr ""
 
 #: inc/translations/strings.php:1077
 msgctxt "Call recording"
-msgid "The people who were in the call can watch it afterwards."
+msgid "Everyone in the conversation can watch it afterwards."
 msgstr ""
 
 #: inc/translations/strings.php:1078
 msgctxt "Call recording"
-msgid "A transcript is made too."
+msgid "The people who were in the call can watch it afterwards."
 msgstr ""
 
 #: inc/translations/strings.php:1079
 msgctxt "Call recording"
-msgid "Got It"
+msgid "A transcript is made too."
 msgstr ""
 
 #: inc/translations/strings.php:1080
 msgctxt "Call recording"
-msgid "Do Not Show Again"
+msgid "Got It"
 msgstr ""
 
 #: inc/translations/strings.php:1081
+msgctxt "Call recording"
+msgid "Do Not Show Again"
+msgstr ""
+
+#: inc/translations/strings.php:1082
 #, php-format,js-format
 msgctxt "Call recording"
 msgid "%s started recording. Your microphone and camera stay off until you agree to be recorded."
 msgstr ""
 
-#: inc/translations/strings.php:1082
+#: inc/translations/strings.php:1083
 msgctxt "Call recording"
 msgid "Your microphone and camera stay off until you agree to be recorded."
 msgstr ""
 
-#: inc/translations/strings.php:1083
+#: inc/translations/strings.php:1084
 #, php-format,js-format
 msgctxt "Call recording"
 msgid "%s started recording. If you stay in the call, you agree to be recorded."
 msgstr ""
 
-#: inc/translations/strings.php:1084
+#: inc/translations/strings.php:1085
 msgctxt "Call recording"
 msgid "If you stay in the call, you agree to be recorded."
 msgstr ""
 
-#: inc/translations/strings.php:1085
+#: inc/translations/strings.php:1086
 msgctxt "Call recording"
 msgid "Leave Call"
 msgstr ""
 
-#: inc/translations/strings.php:1086
+#: inc/translations/strings.php:1087
 msgctxt "Call recording"
 msgid "I Agree"
 msgstr ""
 
-#: inc/translations/strings.php:1087
+#: inc/translations/strings.php:1088
 msgctxt "Call recording"
 msgid "Stay in Call"
 msgstr ""
 
-#: inc/translations/strings.php:1088
+#: inc/translations/strings.php:1089
 msgctxt "Call recording"
 msgid "Start Recording"
 msgstr ""
 
-#: inc/translations/strings.php:1089
+#: inc/translations/strings.php:1090
 msgctxt "Call recording"
 msgid "Stop Recording"
 msgstr ""
 
-#: inc/translations/strings.php:1090
+#: inc/translations/strings.php:1091
 msgctxt "Call recording"
 msgid "Start recording?"
 msgstr ""
 
-#: inc/translations/strings.php:1091
+#: inc/translations/strings.php:1092
 msgctxt "Call recording"
 msgid "Stop recording?"
 msgstr ""
 
-#: inc/translations/strings.php:1092
+#: inc/translations/strings.php:1093
 msgctxt "Call recording"
 msgid "Cancel"
 msgstr ""
 
-#: inc/translations/strings.php:1093
+#: inc/translations/strings.php:1094
 msgctxt "Call recording"
 msgid "Asks you first. Nobody else in the call is told."
 msgstr ""
 
-#: inc/translations/strings.php:1094
+#: inc/translations/strings.php:1095
 msgctxt "Call recording"
 msgid "Asks you first. Everyone in the call is then asked to stay or leave."
 msgstr ""
 
-#: inc/translations/strings.php:1095
+#: inc/translations/strings.php:1096
 msgctxt "Call recording"
 msgid "Asks you first. Everyone in the call then keeps the microphone and camera off until they agree."
 msgstr ""
 
-#: inc/translations/strings.php:1096
+#: inc/translations/strings.php:1097
 msgctxt "Call recording"
 msgid "Asks you first. Everyone in the call then sees REC beside the call controls."
 msgstr ""
 
-#: inc/translations/strings.php:1097
+#: inc/translations/strings.php:1098
 msgctxt "Call recording"
 msgid "Asks you first. Everyone in the call then sees a notice."
 msgstr ""
 
-#: inc/translations/strings.php:1098
+#: inc/translations/strings.php:1099
 msgctxt "Call recording"
 msgid "Asks you first. It is ready to watch a few minutes later."
 msgstr ""
 
-#: inc/translations/strings.php:1099
+#: inc/translations/strings.php:1100
 msgctxt "Call recording"
 msgid "Nobody else in the call is told: only moderators see REC, and nothing about it is posted in the conversation."
 msgstr ""
 
-#: inc/translations/strings.php:1100
+#: inc/translations/strings.php:1101
 msgctxt "Call recording"
 msgid "Everyone in the call is asked to stay or leave, and so is anyone who joins later."
 msgstr ""
 
-#: inc/translations/strings.php:1101
+#: inc/translations/strings.php:1102
 msgctxt "Call recording"
 msgid "Everyone else in the call keeps the microphone and camera off until they agree to be recorded, and so does anyone who joins later."
 msgstr ""
 
-#: inc/translations/strings.php:1102
+#: inc/translations/strings.php:1103
 msgctxt "Call recording"
 msgid "Everyone in the call sees REC beside the call controls while it records, with no notice."
 msgstr ""
 
-#: inc/translations/strings.php:1103
+#: inc/translations/strings.php:1104
 msgctxt "Call recording"
 msgid "Everyone in the call sees a notice that it is recorded, and so does anyone who joins later."
 msgstr ""
 
-#: inc/translations/strings.php:1104
+#: inc/translations/strings.php:1105
 msgctxt "Call recording"
 msgid "It stops when the call ends, or when you press REC beside the call controls."
 msgstr ""
 
-#: inc/translations/strings.php:1105
+#: inc/translations/strings.php:1106
 msgctxt "Call recording"
 msgid "Picture"
 msgstr ""
 
-#: inc/translations/strings.php:1106
+#: inc/translations/strings.php:1107
 msgctxt "Call recording"
 msgid "Gallery layout"
 msgstr ""
 
-#: inc/translations/strings.php:1107
+#: inc/translations/strings.php:1108
 msgctxt "Call recording"
 msgid "As in the call"
 msgstr ""
 
-#: inc/translations/strings.php:1108
+#: inc/translations/strings.php:1109
 msgctxt "Call recording"
 msgid "Speaker only"
 msgstr ""
 
-#: inc/translations/strings.php:1109
+#: inc/translations/strings.php:1110
 msgctxt "Call recording"
 msgid "Speaker layout"
 msgstr ""
 
-#: inc/translations/strings.php:1110
+#: inc/translations/strings.php:1111
 msgctxt "Call recording"
 msgid "Transcript"
 msgstr ""
 
-#: inc/translations/strings.php:1111
+#: inc/translations/strings.php:1112
 msgctxt "Call recording: the transcript"
 msgid "Off"
 msgstr ""
 
-#: inc/translations/strings.php:1112
+#: inc/translations/strings.php:1113
 msgctxt "Call recording: the language of a transcript"
 msgid "Automatic"
 msgstr ""
 
-#: inc/translations/strings.php:1113
+#: inc/translations/strings.php:1114
 msgctxt "Call recording"
 msgid "Who can watch"
 msgstr ""
 
-#: inc/translations/strings.php:1114
+#: inc/translations/strings.php:1115
 msgctxt "Call recording"
 msgid "Moderators"
 msgstr ""
 
-#: inc/translations/strings.php:1115
+#: inc/translations/strings.php:1116
 msgctxt "Call recording"
 msgid "Everyone in the conversation"
 msgstr ""
 
-#: inc/translations/strings.php:1116
+#: inc/translations/strings.php:1117
 msgctxt "Call recording"
 msgid "Site administrators"
 msgstr ""
 
-#: inc/translations/strings.php:1117
+#: inc/translations/strings.php:1118
 msgctxt "Call recording"
 msgid "The people who were in the call"
 msgstr ""
 
-#: inc/translations/strings.php:1118
+#: inc/translations/strings.php:1119
 msgctxt "Call recording"
 msgid "Kept"
 msgstr ""
 
-#: inc/translations/strings.php:1119
+#: inc/translations/strings.php:1120
 msgctxt "Call recording"
 msgid "Until deleted"
 msgstr ""
 
-#: inc/translations/strings.php:1120
+#: inc/translations/strings.php:1121
 msgctxt "Call recording"
 msgid "Moderators can watch it in a few minutes."
 msgstr ""
 
-#: inc/translations/strings.php:1121
+#: inc/translations/strings.php:1122
 msgctxt "Call recording"
 msgid "Everyone in the conversation can watch it in a few minutes."
 msgstr ""
 
-#: inc/translations/strings.php:1122
+#: inc/translations/strings.php:1123
 msgctxt "Call recording"
 msgid "Site administrators can watch it in a few minutes."
 msgstr ""
 
-#: inc/translations/strings.php:1123
+#: inc/translations/strings.php:1124
 msgctxt "Call recording"
 msgid "The people who were in the call can watch it in a few minutes."
 msgstr ""
 
-#: inc/translations/strings.php:1124
+#: inc/translations/strings.php:1125
 msgctxt "Call recording"
 msgid "It is ready to watch a few minutes after it stops."
 msgstr ""
 
-#: inc/translations/strings.php:1125
+#: inc/translations/strings.php:1126
 msgctxt "Call recording"
 msgid "The recording could not be stopped."
 msgstr ""
 
-#: inc/translations/strings.php:1126
+#: inc/translations/strings.php:1127
 msgctxt "Call Screen"
 msgid "Calls"
 msgstr ""
 
-#: inc/translations/strings.php:1127
+#: inc/translations/strings.php:1128
 msgctxt "Call Screen"
 msgid "Ongoing Call"
 msgstr ""
 
-#: inc/translations/strings.php:1128
+#: inc/translations/strings.php:1129
 msgctxt "Call Screen"
 msgid "That conversation could not be found"
 msgstr ""
 
-#: inc/translations/strings.php:1130
+#: inc/translations/strings.php:1131
 msgid "Statistics"
 msgstr ""
 
-#: inc/translations/strings.php:1131
+#: inc/translations/strings.php:1132
 msgid "Downloaded"
 msgstr ""
 
-#: inc/translations/strings.php:1132
-msgid "Uploaded"
-msgstr ""
-
 #: inc/translations/strings.php:1133
-msgctxt "Mobile App"
-msgid "A new version of the application has been downloaded."
+msgid "Uploaded"
 msgstr ""
 
 #: inc/translations/strings.php:1134
 msgctxt "Mobile App"
-msgid "Update now"
+msgid "A new version of the application has been downloaded."
 msgstr ""
 
 #: inc/translations/strings.php:1135
+msgctxt "Mobile App"
+msgid "Update now"
+msgstr ""
+
+#: inc/translations/strings.php:1136
 #, php-format,js-format
 msgctxt "Mobile App"
 msgid "A new version of the app is available in %s."
 msgstr ""
 
-#: inc/translations/strings.php:1136
+#: inc/translations/strings.php:1137
 msgctxt "Mobile App"
 msgid "Update"
 msgstr ""
 
-#: inc/translations/strings.php:1137
+#: inc/translations/strings.php:1138
 msgctxt "Outbox"
 msgid "The site did not answer. It will be sent again once the connection is back."
 msgstr ""
 
-#: inc/translations/strings.php:1138
+#: inc/translations/strings.php:1139
 msgctxt "Outbox"
 msgid "The site could not take the message. It will be sent again by itself."
 msgstr ""
 
-#: inc/translations/strings.php:1139
+#: inc/translations/strings.php:1140
 msgctxt "Outbox"
 msgid "This GIF cannot be sent to an encrypted conversation"
 msgstr ""
 
-#: inc/translations/strings.php:1140
+#: inc/translations/strings.php:1141
 msgctxt "Emoji Picker"
 msgid "Search"
 msgstr ""
 
-#: inc/translations/strings.php:1141
+#: inc/translations/strings.php:1142
 msgctxt "Emoji Picker"
 msgid "Oh no!"
 msgstr ""
 
-#: inc/translations/strings.php:1142
+#: inc/translations/strings.php:1143
 msgctxt "Emoji Picker"
 msgid "That emoji couldn't be found"
 msgstr ""
 
-#: inc/translations/strings.php:1143
+#: inc/translations/strings.php:1144
 msgctxt "Emoji Picker"
 msgid "Pick an emoji…"
 msgstr ""
 
-#: inc/translations/strings.php:1144
+#: inc/translations/strings.php:1145
 msgctxt "Emoji Picker"
 msgid "Activity"
 msgstr ""
 
-#: inc/translations/strings.php:1145
+#: inc/translations/strings.php:1146
 msgctxt "Emoji Picker"
 msgid "Flags"
 msgstr ""
 
-#: inc/translations/strings.php:1146
+#: inc/translations/strings.php:1147
 msgctxt "Emoji Picker"
 msgid "Food & Drink"
 msgstr ""
 
-#: inc/translations/strings.php:1147
+#: inc/translations/strings.php:1148
 msgctxt "Emoji Picker"
 msgid "Frequently used"
 msgstr ""
 
-#: inc/translations/strings.php:1148
+#: inc/translations/strings.php:1149
 msgctxt "Emoji Picker"
 msgid "Animals & Nature"
 msgstr ""
 
-#: inc/translations/strings.php:1149
+#: inc/translations/strings.php:1150
 msgctxt "Emoji Picker"
 msgid "Objects"
 msgstr ""
 
-#: inc/translations/strings.php:1150
+#: inc/translations/strings.php:1151
 msgctxt "Emoji Picker"
 msgid "Smileys & People"
 msgstr ""
 
-#: inc/translations/strings.php:1151
+#: inc/translations/strings.php:1152
 msgctxt "Emoji Picker"
 msgid "Travel & Places"
 msgstr ""
 
-#: inc/translations/strings.php:1152
+#: inc/translations/strings.php:1153
 msgctxt "Emoji Picker"
 msgid "Search Results"
 msgstr ""
 
-#: inc/translations/strings.php:1153
+#: inc/translations/strings.php:1154
 msgctxt "Emoji Picker"
 msgid "Symbols"
 msgstr ""
 
-#: inc/translations/strings.php:1154
+#: inc/translations/strings.php:1155
 msgctxt "Emoji Picker"
 msgid "Choose default skin tone"
 msgstr ""
 
-#: inc/translations/strings.php:1155
+#: inc/translations/strings.php:1156
 msgctxt "Emoji Picker"
 msgid "Default"
 msgstr ""
 
-#: inc/translations/strings.php:1156
+#: inc/translations/strings.php:1157
 msgctxt "Emoji Picker"
 msgid "Light"
 msgstr ""
 
-#: inc/translations/strings.php:1157
+#: inc/translations/strings.php:1158
 msgctxt "Emoji Picker"
 msgid "Medium-Light"
 msgstr ""
 
-#: inc/translations/strings.php:1158
+#: inc/translations/strings.php:1159
 msgctxt "Emoji Picker"
 msgid "Medium"
 msgstr ""
 
-#: inc/translations/strings.php:1159
+#: inc/translations/strings.php:1160
 msgctxt "Emoji Picker"
 msgid "Medium-Dark"
 msgstr ""
 
-#: inc/translations/strings.php:1160
+#: inc/translations/strings.php:1161
 msgctxt "Emoji Picker"
 msgid "Dark"
 msgstr ""
 
-#: inc/translations/strings.php:1161
+#: inc/translations/strings.php:1162
 msgctxt "Emoji popover aria label"
 msgid "Pick emoji, sticker, or GIF"
 msgstr ""
 
-#: inc/translations/strings.php:1162
+#: inc/translations/strings.php:1163
 msgctxt "Picker popover tab"
 msgid "Emoji"
 msgstr ""
 
-#: inc/translations/strings.php:1163
+#: inc/translations/strings.php:1164
 #, php-format,js-format
 msgctxt "Media picker"
 msgid "Search %s…"
 msgstr ""
 
-#: inc/translations/strings.php:1164
+#: inc/translations/strings.php:1165
 msgctxt "Media picker"
 msgid "No GIFs found for that search."
 msgstr ""
 
-#: inc/translations/strings.php:1165
+#: inc/translations/strings.php:1166
 msgctxt "Media picker"
 msgid "No trending GIFs right now."
 msgstr ""
 
-#: inc/translations/strings.php:1166
+#: inc/translations/strings.php:1167
 #, php-format,js-format
 msgctxt "Media picker"
 msgid "Powered by %s"
 msgstr ""
 
-#: inc/translations/strings.php:1167
+#: inc/translations/strings.php:1168
 msgctxt "Media picker"
 msgid "Search stickers…"
 msgstr ""
 
-#: inc/translations/strings.php:1168
+#: inc/translations/strings.php:1169
 msgctxt "Media picker"
 msgid "Latest"
 msgstr ""
 
-#: inc/translations/strings.php:1169
+#: inc/translations/strings.php:1170
 msgctxt "Media picker"
 msgid "Search"
 msgstr ""
 
-#: inc/translations/strings.php:1170
+#: inc/translations/strings.php:1171
 msgctxt "Media picker"
 msgid "No stickers found."
 msgstr ""
 
-#: inc/translations/strings.php:1171
+#: inc/translations/strings.php:1172
 msgctxt "Media picker"
 msgid "Type to search stickers."
 msgstr ""
 
-#: inc/translations/strings.php:1172
+#: inc/translations/strings.php:1173
 msgctxt "Media picker"
 msgid "Recently sent stickers will appear here."
 msgstr ""
 
-#: inc/translations/strings.php:1173
+#: inc/translations/strings.php:1174
 msgctxt "Media picker"
 msgid "This pack is empty."
 msgstr ""
 
-#: inc/translations/strings.php:1174
+#: inc/translations/strings.php:1175
 msgctxt "Design preview"
 msgid "New message"
 msgstr ""
 
-#: inc/translations/strings.php:1175
+#: inc/translations/strings.php:1176
 msgctxt "Design preview"
 msgid "Sounds good — see you there"
 msgstr ""
 
-#: inc/translations/strings.php:1176
+#: inc/translations/strings.php:1177
 msgctxt "Group call alert"
 msgid "The call has ended"
 msgstr ""
 
-#: inc/translations/strings.php:1177
+#: inc/translations/strings.php:1178
 #, php-format,js-format
 msgctxt "Group call alert"
 msgid "%s in the call"
 msgstr ""
 
-#: inc/translations/strings.php:1178
+#: inc/translations/strings.php:1179
 msgctxt "Group call alert"
 msgid "Join video call"
 msgstr ""
 
-#: inc/translations/strings.php:1179
+#: inc/translations/strings.php:1180
 msgctxt "Group call alert"
 msgid "Join audio call"
 msgstr ""
 
-#: inc/translations/strings.php:1180
+#: inc/translations/strings.php:1181
 msgctxt "Push Request Proposal"
 msgid "Enable browser push notifications to receive private messages when you are offline?"
 msgstr ""
 
-#: inc/translations/strings.php:1181
+#: inc/translations/strings.php:1182
 msgctxt "Push Request Proposal"
 msgid "Enable"
 msgstr ""
 
-#: inc/translations/strings.php:1182
+#: inc/translations/strings.php:1183
 msgctxt "Push Request Proposal"
 msgid "Dismiss"
 msgstr ""
 
-#: inc/translations/strings.php:1183
+#: inc/translations/strings.php:1184
 #, php-format,js-format
 msgctxt "Onsite notifications"
 msgid "Close all notifications, %s more hidden"
@@ -12309,335 +12314,330 @@ msgid_plural "Close all notifications, %s more hidden"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/translations/strings.php:1184
+#: inc/translations/strings.php:1185
 msgctxt "Onsite notifications"
 msgid "Close all notifications"
 msgstr ""
 
-#: inc/translations/strings.php:1185
+#: inc/translations/strings.php:1186
 msgctxt "Rest API Error"
 msgid "Cannot reach the site. Check your connection and try again."
 msgstr ""
 
-#: inc/translations/strings.php:1186
+#: inc/translations/strings.php:1187
 msgctxt "Rest API Error"
 msgid "Authorization failed. Please check if you are still authorized at this website."
 msgstr ""
 
-#: inc/translations/strings.php:1187
+#: inc/translations/strings.php:1188
 msgctxt "Conversation menu"
 msgid "Mark as unread"
 msgstr ""
 
-#: inc/translations/strings.php:1188
+#: inc/translations/strings.php:1189
 #, php-format,js-format
 msgctxt "Notification level"
 msgid "Notifications: %s"
 msgstr ""
 
-#: inc/translations/strings.php:1189
+#: inc/translations/strings.php:1190
 msgctxt "Message translation"
 msgid "Stop translating"
 msgstr ""
 
-#: inc/translations/strings.php:1190
+#: inc/translations/strings.php:1191
 msgctxt "Message context menu"
 msgid "Private Message"
 msgstr ""
 
-#: inc/translations/strings.php:1191
+#: inc/translations/strings.php:1192
 msgctxt "Message context menu"
 msgid "Unpin Message"
 msgstr ""
 
-#: inc/translations/strings.php:1192
+#: inc/translations/strings.php:1193
 msgctxt "Message context menu"
 msgid "Pin Message"
 msgstr ""
 
-#: inc/translations/strings.php:1193
+#: inc/translations/strings.php:1194
 msgctxt "Mark message as favorite"
 msgid "Mark as Favorited"
 msgstr ""
 
-#: inc/translations/strings.php:1194
+#: inc/translations/strings.php:1195
 msgctxt "Message context menu"
 msgid "Forward"
 msgstr ""
 
-#: inc/translations/strings.php:1195
+#: inc/translations/strings.php:1196
 msgctxt "Message context menu"
 msgid "Report"
 msgstr ""
 
-#: inc/translations/strings.php:1196
+#: inc/translations/strings.php:1197
 msgctxt "Messages stack date (today)"
 msgid "Today"
 msgstr ""
 
-#: inc/translations/strings.php:1197
+#: inc/translations/strings.php:1198
 msgctxt "Messages stack date (yesterday)"
 msgid "Yesterday"
 msgstr ""
 
-#: inc/translations/strings.php:1198
+#: inc/translations/strings.php:1199
 msgctxt "Messages stack date (previous years) https://moment.github.io/luxon/#/formatting?id=table-of-tokens"
 msgid "MMMM d, y"
 msgstr ""
 
-#: inc/translations/strings.php:1199
+#: inc/translations/strings.php:1200
 msgctxt "Messages stack date (current year) https://moment.github.io/luxon/#/formatting?id=table-of-tokens"
 msgid "MMMM d"
 msgstr ""
 
-#: inc/translations/strings.php:1200
+#: inc/translations/strings.php:1201
 msgctxt "Notification level"
 msgid "All messages"
 msgstr ""
 
-#: inc/translations/strings.php:1201
+#: inc/translations/strings.php:1202
 msgctxt "Notification level"
 msgid "Mentions and replies"
 msgstr ""
 
-#: inc/translations/strings.php:1202
+#: inc/translations/strings.php:1203
 msgctxt "Notification level"
 msgid "Nothing"
 msgstr ""
 
-#: inc/translations/strings.php:1203
+#: inc/translations/strings.php:1204
 msgctxt "Notification level"
 msgid "Every new message notifies you."
 msgstr ""
 
-#: inc/translations/strings.php:1204
+#: inc/translations/strings.php:1205
 msgctxt "Notification level"
 msgid "Only messages that mention you or reply to you, and @all."
 msgstr ""
 
-#: inc/translations/strings.php:1205
+#: inc/translations/strings.php:1206
 msgctxt "Notification level"
 msgid "No notifications from this conversation."
 msgstr ""
 
-#: inc/translations/strings.php:1206
+#: inc/translations/strings.php:1207
 #, php-format,js-format
 msgctxt "Notification level"
 msgid "Default (%s)"
 msgstr ""
 
-#: inc/translations/strings.php:1207
+#: inc/translations/strings.php:1208
 msgctxt "Mention chip"
 msgid "You were mentioned or replied to in this conversation"
 msgstr ""
 
-#: inc/translations/strings.php:1208
+#: inc/translations/strings.php:1209
 msgctxt "Mention chip"
 msgid "Someone replied to you in this conversation"
 msgstr ""
 
-#: inc/translations/strings.php:1209
+#: inc/translations/strings.php:1210
 #, php-format,js-format
 msgctxt "Notification level"
 msgid "Muted until %s"
 msgstr ""
 
-#: inc/translations/strings.php:1210
+#: inc/translations/strings.php:1211
 msgctxt "Mute duration"
 msgid "7 days"
 msgstr ""
 
-#: inc/translations/strings.php:1211
+#: inc/translations/strings.php:1212
 #, php-format,js-format
 msgctxt "Mute duration"
 msgid "%s days"
 msgstr ""
 
-#: inc/translations/strings.php:1212
+#: inc/translations/strings.php:1213
 msgctxt "Mute duration"
 msgid "1 day"
 msgstr ""
 
-#: inc/translations/strings.php:1213
+#: inc/translations/strings.php:1214
 msgctxt "Mute duration"
 msgid "1 hour"
-msgstr ""
-
-#: inc/translations/strings.php:1214
-#, php-format,js-format
-msgctxt "Mute duration"
-msgid "%s hours"
 msgstr ""
 
 #: inc/translations/strings.php:1215
 #, php-format,js-format
 msgctxt "Mute duration"
-msgid "%s minutes"
+msgid "%s hours"
 msgstr ""
 
 #: inc/translations/strings.php:1216
+#, php-format,js-format
+msgctxt "Mute duration"
+msgid "%s minutes"
+msgstr ""
+
+#: inc/translations/strings.php:1217
 #, php-format,js-format
 msgctxt "Username Tooltip"
 msgid "Go to <strong>%s</strong> profile"
 msgstr ""
 
-#: inc/translations/strings.php:1220
+#: inc/translations/strings.php:1221
 msgctxt "System message fallback"
 msgid "Conversation updated"
 msgstr ""
 
-#: inc/translations/strings.php:1222
+#: inc/translations/strings.php:1223
 #, php-format,js-format
 msgid "%1$s were muted by %2$s"
 msgstr ""
 
-#: inc/translations/strings.php:1224
+#: inc/translations/strings.php:1225
 #, php-format,js-format
 msgid "%1$s were banned by %2$s"
 msgstr ""
 
-#: inc/translations/strings.php:1226
+#: inc/translations/strings.php:1227
 #, php-format,js-format
 msgid "%1$s were removed from the conversation by %2$s"
 msgstr ""
 
-#: inc/translations/strings.php:1229
+#: inc/translations/strings.php:1230
 msgctxt "Call Screen"
 msgid "Add Person"
 msgstr ""
 
-#: inc/translations/strings.php:1230
+#: inc/translations/strings.php:1231
 msgctxt "Call Screen"
 msgid "Loading..."
 msgstr ""
 
-#: inc/translations/strings.php:1231
+#: inc/translations/strings.php:1232
 msgctxt "Call Screen"
 msgid "There is no one else to add"
 msgstr ""
 
-#: inc/translations/strings.php:1232
+#: inc/translations/strings.php:1233
 msgctxt "Call Ask"
 msgid "Your browser blocks the camera for this site"
 msgstr ""
 
-#: inc/translations/strings.php:1233
+#: inc/translations/strings.php:1234
 msgctxt "Call Ask"
 msgid "Your browser blocks the microphone for this site"
 msgstr ""
 
-#: inc/translations/strings.php:1234
+#: inc/translations/strings.php:1235
 msgctxt "Call Ask"
 msgid "Another app is using your camera"
 msgstr ""
 
-#: inc/translations/strings.php:1235
+#: inc/translations/strings.php:1236
 msgctxt "Call Ask"
 msgid "Another app is using your microphone"
 msgstr ""
 
-#: inc/translations/strings.php:1236
+#: inc/translations/strings.php:1237
 msgctxt "Call Ask"
 msgid "Close the other app that uses it, then press Try Again."
-msgstr ""
-
-#: inc/translations/strings.php:1237
-#, php-format,js-format
-msgctxt "Call Ask"
-msgid "Tap aA in the address bar, choose Website Settings, set %s to Allow, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1238
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Open the Settings app, find this browser, turn %s on, then come back and press Try Again."
+msgid "Tap aA in the address bar, choose Website Settings, set %s to Allow, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1239
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Tap the icon to the left of the web address, choose Permissions, allow %s, then press Try Again."
+msgid "Open the Settings app, find this browser, turn %s on, then come back and press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1240
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Click the crossed out icon in the address bar, clear the block on %s, then press Try Again."
+msgid "Tap the icon to the left of the web address, choose Permissions, allow %s, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1241
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "In the Safari menu, choose Settings for This Website, set %s to Allow, then press Try Again."
+msgid "Click the crossed out icon in the address bar, clear the block on %s, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1242
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Click the icon to the left of the web address, set %s to Allow, then press Try Again."
+msgid "In the Safari menu, choose Settings for This Website, set %s to Allow, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1243
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Open the settings of this site in your browser, allow %s, then press Try Again."
+msgid "Click the icon to the left of the web address, set %s to Allow, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1244
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Still blocked? Open System Settings, Privacy & Security, %s, and turn it on for this browser."
+msgid "Open the settings of this site in your browser, allow %s, then press Try Again."
 msgstr ""
 
 #: inc/translations/strings.php:1245
 #, php-format,js-format
 msgctxt "Call Ask"
-msgid "Still blocked? Open Settings, Privacy & security, %s, and let this browser use it."
+msgid "Still blocked? Open System Settings, Privacy & Security, %s, and turn it on for this browser."
 msgstr ""
 
 #: inc/translations/strings.php:1246
+#, php-format,js-format
+msgctxt "Call Ask"
+msgid "Still blocked? Open Settings, Privacy & security, %s, and let this browser use it."
+msgstr ""
+
+#: inc/translations/strings.php:1247
 msgctxt "Call Controls"
 msgid "More"
 msgstr ""
 
-#: inc/translations/strings.php:1247
+#: inc/translations/strings.php:1248
 msgctxt "Call Shortcuts"
 msgid "Leave the call?"
 msgstr ""
 
-#: inc/translations/strings.php:1248
+#: inc/translations/strings.php:1249
 msgctxt "Call Shortcuts"
 msgid "Leave"
 msgstr ""
 
-#: inc/translations/strings.php:1249
+#: inc/translations/strings.php:1250
 msgctxt "Call Shortcuts"
 msgid "hold Space to talk"
 msgstr ""
 
-#: inc/translations/strings.php:1250
+#: inc/translations/strings.php:1251
 msgctxt "Group Video Chat"
 msgid "Exit Full Screen Mode"
 msgstr ""
 
-#: inc/translations/strings.php:1251
+#: inc/translations/strings.php:1252
 msgctxt "Call Controls"
 msgid "Collapse"
 msgstr ""
 
-#: inc/translations/strings.php:1252
+#: inc/translations/strings.php:1253
 msgctxt "Call Controls"
 msgid "Full Screen"
 msgstr ""
 
-#: inc/translations/strings.php:1253
+#: inc/translations/strings.php:1254
 msgctxt "Call Controls"
 msgid "Expand"
-msgstr ""
-
-#: inc/translations/strings.php:1254
-msgctxt "Call Devices"
-msgid "Do Not Show Again"
 msgstr ""
 
 #: inc/translations/strings.php:1255

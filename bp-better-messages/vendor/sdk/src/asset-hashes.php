@@ -32,7 +32,7 @@ return array(
 	'tracking/survey.min.css' => 'e97075bd31',
 	'tracking/survey.min.js' => '4a25a40c64',
 	'ui/ui.min.css' => 'cf39afbf81',
-	'ui/ui.min.js' => 'b57fa74d97',
+	'ui/ui.min.js' => '5dcafa7852',
 	'video-effects/video-effects-admin.min.css' => '7268e62d2d',
 	'video-effects/video-effects-admin.min.js' => '5068cea4ac',
 	'visitors/visitor.min.js' => '703a055a0f',

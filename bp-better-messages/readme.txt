@@ -4,7 +4,7 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -36,24 +36,20 @@ Whether you're building a private or public community, social network, intranet,
 
 **Popular use cases:**
 
-Better Messages is widely used to power messaging for:
-
-* **Private communities** — paid and members-only community platforms, mastermind groups, alumni networks, course cohorts, coaching circles, role-restricted messaging, group chats, AI Chat Bots for onboarding and FAQs, end-to-end encryption for sensitive conversations
-* **Public communities and social networks** — open social platforms, hobby and interest communities, BuddyPress / BuddyBoss / PeepSo / FluentCommunity-powered sites, private messaging, group conversations, chat rooms, mini chat widgets that follow users across the site
-* **Intranet and corporate websites** — internal employee communication, team and department channels, role-restricted access by WordPress role, file sharing, voice and video calls for remote teams, self-hosted plan for sites with data-sovereignty requirements
-* **Chat rooms websites** — sites built around real-time chat rooms as the primary feature, public and private rooms, topic-based discussion, guest access for unregistered visitors, AJAX or WebSocket delivery
-* **Dating and matchmaking sites** — private 1-on-1 chat, photo and video attachments, voice and video calls, profile-to-profile chat buttons on member directories, guest chat for browsing visitors, end-to-end encryption for private conversations
-* **Creator economy and fan platforms** — **paid messaging** with per-message and per-call billing via [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) or [MyCRED](https://www.better-messages.com/docs/integrations/mycred/), private video calls, mass messaging to fans, always-on mini chat widgets
-* **Premium and monetized DM platforms** — charge per direct message or per call with per-role pricing, balance display, role-restricted messaging, AI Content Moderation to filter spam and scam attempts
-* **Coaching and mentorship platforms** — client-to-coach DMs, scheduled video calls, voice messages, file sharing, course chat rooms via LMS integrations
-* **Online stores ([WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/))** — pre-sales chat on product pages, post-purchase order support, cart-context-aware messages, embedded inbox in My Account
-* **Multi-vendor marketplaces and classifieds** — buyer-to-seller chat on every listing, per-listing threads, guest chat for unregistered visitors
-* **Online courses (LMS)** — course chat rooms, instructor-to-student DMs, group conversations for cohort-based courses
-* **Forums and Q&A communities** — Private Message link on every reply, follow-up chat for thread participants
-* **Real estate and listings sites** — agent inquiry messaging, property-context chat threads, guest chat for browsing visitors
-* **Live events and webinars** — event lobby chat rooms, guest access for non-registered attendees, group voice and video calls for AMAs, pinned messages with event agendas
-* **Booking and appointment platforms** — guest-to-host messaging on listings and bookings, file sharing for documents, voice and video calls before check-in
-* **Crypto and Web3 communities** — token-gated chat rooms via membership plugin and WordPress roles, AMA group calls, AI knowledge bots for whitepaper questions, mobile apps for on-the-go engagement
+* **Private communities** — members-only platforms, cohorts and coaching circles, role-restricted messaging, AI Chat Bots, end-to-end encryption
+* **Public communities and social networks** — BuddyPress, BuddyBoss, PeepSo and FluentCommunity sites, group conversations, chat rooms, mini chat widgets
+* **Intranet and corporate websites** — team channels, access by WordPress role, file sharing, calls for remote teams
+* **Chat rooms websites** — public and private topic rooms, guest access for unregistered visitors
+* **Dating and matchmaking sites** — private 1-on-1 chat, photos and videos, calls, chat buttons on member directories
+* **Creator economy and paid DMs** — **paid messaging** per message or call via [GamiPress](https://www.better-messages.com/docs/integrations/gamipress/) or [MyCRED](https://www.better-messages.com/docs/integrations/mycred/), mass messaging to fans
+* **Coaching and mentorship platforms** — client-to-coach DMs, video calls, voice messages, file sharing
+* **Online stores ([WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/))** — pre-sales chat on product pages, order support, inbox in My Account
+* **Marketplaces, classifieds and real estate** — buyer-to-seller and agent chat on every listing, guest chat for visitors
+* **Online courses (LMS)** — course chat rooms, instructor-to-student DMs
+* **Forums and Q&A communities** — Private Message link on every reply
+* **Live events and webinars** — event lobby chat rooms, guest access, group calls for AMAs
+* **Booking and appointment platforms** — guest-to-host messaging on listings and bookings
+* **Crypto and Web3 communities** — token-gated chat rooms, AMA group calls, AI knowledge bots
 
 "**Better Messages**" plugin is formerly called "**BP Better Messages**".
 
@@ -97,7 +93,7 @@ Better Messages is widely used to power messaging for:
 * File sharing with resumable uploads and ability to protect files from direct access (images, videos, documents)
 * [Cloud Storage](https://www.better-messages.com/docs/cloud-storage/) for attachments in Cloudflare R2, Bunny.net Storage, Amazon S3 or any S3-compatible service, with files uploaded straight from the browser
 * Upload limits for each type of file
-* Client-side image and video optimization for cross-browser compatibility and saving storage space (format conversion, quality control, metadata stripping)
+* Image and video optimization in the browser: format conversion, quality control, metadata stripping
 * Photo cropping and editing before sending
 * Location messages with a map picker and nearby place suggestions
 * Voice messages and video messages (available as addon)
@@ -119,12 +115,9 @@ Better Messages is widely used to power messaging for:
 
 **Moderation & Security:**
 
-* AI Content Moderation with two providers:
-  * **Better Messages Moderation AI** — included with WebSocket license at no additional cost, no third-party API keys required. Powered by Better Messages Cloud with extended categories, custom rules, and conversation context awareness
-  * **OpenAI Moderation API** — free to use, requires an OpenAI API key
-* Custom moderation rules — define your own rules in plain text
-* Conversation context awareness — detect patterns split across multiple messages
-* Choose between "Flag Only" (recommended) or "Hold for Review" moderation actions
+* AI Content Moderation by **Better Messages Moderation AI** (included with the WebSocket license, no API keys) or the free **OpenAI Moderation API**
+* Custom moderation rules in plain text, and conversation context awareness that catches patterns split across messages
+* "Flag Only" (recommended) or "Hold for Review" moderation actions
 * Pre-Moderated Messages - review messages before delivery
 * Report messages feature
 * Bad words filter with customizable blacklist
@@ -171,19 +164,19 @@ Better Messages is widely used to power messaging for:
 
 * Dedicated Privacy & GDPR settings page
 * All message data stored on your own server
-* AI moderation (when enabled) sends message content for analysis — Better Messages Cloud does not store any data, review OpenAI's data policy if using OpenAI provider
-* WordPress personal data export and erasure support (Tools → Export/Erase Personal Data)
-* Suggested privacy policy text that adapts based on enabled features
+* AI moderation, when enabled, sends message content for analysis — Better Messages Cloud stores none of it
+* WordPress personal data export and erasure support
+* Suggested privacy policy text that follows the enabled features
 * Self-hosted emoji images option — no external CDN requests
 * Privacy-friendly video embeds — YouTube, Vimeo load only after user clicks
 * No cookies set, no analytics or tracking scripts
 * [Privacy & GDPR documentation](https://www.better-messages.com/docs/features/privacy-gdpr/)
 
-**This is not a complete list of features** - Better Messages has many more small features and options that are not listed here. We are constantly adding new features and improvements based on user feedback.
+**This is not a complete list of features** — many smaller features and options are not listed, and new ones come with every release.
 
 **Compatible plugins & themes — 35+ native integrations:**
 
-Better Messages works on **any** WordPress site out of the box. If your site already runs a community plugin, an LMS, a marketplace, or a directory, Better Messages plugs into it directly — inheriting members, profiles, groups, courses, listings, and posts so chat surfaces appear in the right places without setup.
+Better Messages works on **any** WordPress site out of the box, and plugs straight into the community, LMS, marketplace and directory plugins below, with their members, groups, courses and listings.
 
 **Community & Membership Platforms** — replaces the built-in messenger and inherits members, profiles, friends, and groups:
 
@@ -208,7 +201,7 @@ Better Messages works on **any** WordPress site out of the box. If your site alr
 
 **E-commerce — WooCommerce** — pre-sales and order support chat for online stores:
 
-* [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/) — Contact buttons on **product**, **cart**, **checkout**, and **order** pages. Cart contents are auto-posted into the conversation as a rich message so your support agent immediately sees what the customer is looking at, order pages post a structured order context card. Plain product URLs pasted into any chat are expanded into rich product cards. Embedded inbox lives inside WooCommerce **My Account**. **HPOS-compatible**, block-theme-compatible, works with **guest checkout**. Available on **both the free and WebSocket versions** — the WebSocket version opens chats as a popup mini-widget overlay instead of navigating away.
+* [WooCommerce](https://www.better-messages.com/docs/integrations/woocommerce/) — Contact buttons on **product**, **cart**, **checkout** and **order** pages that post the cart or the order into the conversation as a card, product links shown as product cards, and the inbox inside **My Account**. **HPOS-compatible**, works with **guest checkout**, in **both the free and WebSocket versions**.
 
 **Marketplaces & Multi-Vendor** — buyer-to-vendor chat on top of WooCommerce, with per-vendor opt-in and contact buttons on vendor stores, product pages, and order details:
 
@@ -264,11 +257,11 @@ Better Messages works on **any** WordPress site out of the box. If your site alr
 
 **Universal Shortcode Builder — add chat to anything else:**
 
-Don't see your plugin or theme in the list? Better Messages ships a visual [Shortcode Builder](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) at **WP Admin → Better Messages → Shortcodes** that lets you drop a Live Chat Button onto any custom post type, directory, marketplace listing, agent profile, or page builder block — **without writing PHP**. Point it at a sample post, choose how the target user is resolved (post author, postmeta-stored user ID, or a fixed inbox), set a thread strategy and label, and copy the generated shortcode. The same shortcode then works for every post of the same shape, with automatic per-post threading and an optional in-chat banner. Paste it into Gutenberg, Elementor, Bricks, Divi, or directly into a theme template.
+Don't see your plugin or theme in the list? The [Shortcode Builder](https://www.better-messages.com/docs/shortcodes/better_messages_live_chat_button/) at **WP Admin → Better Messages → Shortcodes** adds a Live Chat Button to any custom post type, listing, profile or page builder block **without writing PHP**: point it at a sample post, choose who receives the messages (the post author, a user ID from post meta or a fixed inbox) and paste the shortcode into Gutenberg, Elementor, Bricks, Divi or a theme template. Every post gets a conversation of its own.
 
 [Full list of integrations](https://www.better-messages.com/docs/category/integrations/)
 
-**Feel free to report any incompatibility or request more integrations — that is very important and helps improve Better Messages!**
+**Report any incompatibility or request an integration — it helps improve Better Messages!**
 
 **WebSocket version:**
 
@@ -337,11 +330,7 @@ It connects your site and its members through dedicated realtime servers. Messag
 
 **[WebSocket version pricing](https://www.better-messages.com/docs/pricing/) | [Terms of Use](https://www.wordplus.cloud/terms)**
 
-[Languages](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/)
-
-RTL layout is built into the plugin.
-
-You can translate plugin to your language with LocoTranslate or [participate in plugin translation](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/).
+Translate the plugin to your language with Loco Translate or [participate in plugin translation](https://translate.wordpress.org/projects/wp-plugins/bp-better-messages/).
 
 == Frequently Asked Questions ==
 
@@ -455,7 +444,7 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 
 **Noticed something wrong after updating?** Email [support@better-messages.com](mailto:support@better-messages.com) or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/).
 
-= 3.2.0 =
+= 3.2.0 - 3.2.1 =
 
 **Video and group calls (WebSocket version)**
 
@@ -512,8 +501,8 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 * Added [Show who did it](https://www.better-messages.com/docs/features/system-messages/#show-who-did-it) to **Settings → Messaging → System Messages**, off by default: the lines that say someone was removed, muted or banned name the moderator, such as "Anna was muted by John", in the conversation, the Administration page and emails, lines written before it was turned on too. Emails, which left these lines empty, now write them either way
 * Added a Group Chat switch to the Settings tab of each [LearnDash group](https://www.better-messages.com/docs/integrations/learndash/#choosing-the-groups-that-have-a-chat), so LearnDash Group Chat can be on for chosen groups only. A group with no choice saved follows the [better_messages_learndash_group_chat_enabled](https://www.better-messages.com/hooks/php-filters/#better_messages_learndash_group_chat_enabled) filter, on by default
 * Improved chat rooms for members and guests a moderator [banned](https://www.better-messages.com/docs/features/chat-rooms/#banned-members): they read that they are banned and until when, in their own time zone, where they read "You are not allowed to join this chat room", which stays for the roles a room keeps out. A room left open past the end of the ban offers the join again
-* Added AI bots to the [online list of chat rooms](https://www.better-messages.com/docs/features/chat-rooms/#ai-bots-in-the-online-list): a bot that is a member of the room is listed while it can answer, and leaves the list once it is switched off or deleted. Every member list marks a bot with a bot icon next to its name
-* Improved the [picture of a chat room](https://www.better-messages.com/docs/features/chat-rooms/#room-picture) in the conversation header and the info panel: it is sharp on high-density screens, phones and the mobile app included, from the larger sizes WordPress already keeps, so existing rooms are sharp too without a new upload
+* Added AI bots to the [online list of chat rooms](https://www.better-messages.com/docs/features/chat-rooms/#ai-bots-in-the-online-list): a bot that is a member of the room is listed and counted in the room's online count while it can answer, in the Chat Rooms list and the conversation header too, and leaves the list once it is switched off or deleted. Every member list marks a bot with a bot icon next to its name
+* Improved the [picture of a chat room](https://www.better-messages.com/docs/features/chat-rooms/#room-picture) in the conversation header and the info panel: it is sharp on high-density screens, phones and the mobile app included, and where a page draws it bigger than the messenger asks, from the larger sizes WordPress already keeps, so existing rooms are sharp too without a new upload
 * Improved the settings of a [hidden chat room](https://www.better-messages.com/docs/features/chat-rooms/#hide-a-room-from-the-conversation-list): the locked Notifications section names the **Hide chat from conversation list** switch that unlocks it
 * Improved the conversation header: a conversation whose info panel would show nothing but its name and picture, such as a chat room that hides its members, has no Info panel button, and its title opens nothing
 * Improved the [picker button](https://www.better-messages.com/docs/features/stickers/#the-picker-button) of the reply box on phones, and on sites with the emoji picker off: it shows a sticker or a GIF badge for what it opens, where a smile opened only stickers or GIFs
@@ -534,6 +523,8 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 
 **Fixes**
 
+* Fixed sites hosted on WordPress.com going down with a critical error ("Allowed memory size … exhausted") on every page since November 2, 2026
+* Fixed a ban or a mute that had ended still showing in the online list and member list of a chat room for its moderators, with Unban user or Unmute user doing nothing, and on sites with a persistent object cache still holding the member until the clean-up ran
 * Fixed Mute All turning off every camera: Mute Everyone now mutes microphones only, and people who join while it is on come in muted
 * Fixed one-to-one calls that never connected when one side received the call's signals seconds late, in the browser and in the mobile app — apps need a new build
 * Fixed the video of a one-to-one call with someone on Firefox stopping for good when the connection was being restored just as the other side changed its video, in the browser and in the mobile app — apps need a new build
