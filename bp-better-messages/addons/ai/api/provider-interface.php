@@ -987,7 +987,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             };
 
             $text = preg_replace_callback(
-                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+|all)&quot;&gt;(@[^&]*)&lt;\/span&gt;/',
+                '/' . Better_Messages_Mentions::stored_span_pattern( '(-?\d+|all)' ) . '&gt;(@[^&]*)&lt;\/span&gt;/',
                 $callback,
                 $text
             );

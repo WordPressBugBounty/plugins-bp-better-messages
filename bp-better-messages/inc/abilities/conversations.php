@@ -102,7 +102,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Conversations' ) ):
                     $last_messages = Better_Messages()->functions->get_messages( $tid, false, 'last_messages', 1 );
                     if ( ! empty( $last_messages ) && is_array( $last_messages ) ) {
                         $msg = $last_messages[0];
-                        $last_message = wp_strip_all_tags( $msg->message );
+                        $last_message = wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $msg->message ) );
                         if ( strlen( $last_message ) > 100 ) {
                             $last_message = mb_substr( $last_message, 0, 100 ) . '...';
                         }
@@ -232,7 +232,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Conversations' ) ):
                         'message_id'  => intval( $msg->id ),
                         'sender_id'   => intval( $msg->sender_id ),
                         'sender_name' => Better_Messages()->functions->get_name( $msg->sender_id ),
-                        'content'     => wp_strip_all_tags( $msg->message ),
+                        'content'     => wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $msg->message ) ),
                         'created_at'  => date( 'c', (int) ( (int) $msg->created_at / 10 / 1000 ) ),
                     );
                 }

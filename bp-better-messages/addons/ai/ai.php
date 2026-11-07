@@ -609,7 +609,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             }
         }
 
-        public function bot_user_changed( $user_id )
+        public function bot_user_changed( $user_id, $bot_id = null )
         {
             $user_id = (int) $user_id;
 
@@ -617,8 +617,26 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
+            if ( null === $bot_id ) {
+                $bot_users = $this->bot_users( true );
+                $bot_id    = isset( $bot_users[ $user_id ] ) ? $bot_users[ $user_id ] : 0;
+            }
+
+            $this->forget_bot_user_cache( $bot_id, $user_id );
+
             Better_Messages()->users->update_last_changed( $user_id );
             do_action( 'better_messages_user_updated', $user_id );
+        }
+
+        public function forget_bot_user_cache( $bot_id, $guest_id = 0 )
+        {
+            if ( (int) $bot_id > 0 ) {
+                wp_cache_delete( 'bot_user_' . (int) $bot_id, 'bm_messages' );
+            }
+
+            if ( (int) $guest_id !== 0 ) {
+                wp_cache_delete( 'guest_user_' . absint( $guest_id ), 'bm_messages' );
+            }
         }
 
         public function is_bot_conversation( $bot_id, $thread_id )
@@ -1710,8 +1728,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $params = $request->get_json_params();
 
-            $answered = $this->bot_can_answer( $bot_id );
-
             if ( isset( $params['name'] ) ) {
                 $name = sanitize_text_field( $params['name'] );
                 if ( ! empty( $name ) ) {
@@ -1781,7 +1797,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             $bot_user = $this->get_bot_user( $bot_id );
 
-            if ( $bot_user && $this->bot_can_answer( $bot_id ) !== $answered ) {
+            if ( $bot_user ) {
                 $this->bot_user_changed( -1 * absint( $bot_user->id ) );
             }
 
@@ -4136,7 +4152,6 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
             if( isset( $_POST['bm'] ) && is_array($_POST['bm']) ){
                 $old_settings = $this->get_bot_settings( $post->ID );
-                $answered     = $this->bot_can_answer( $post->ID );
 
                 $settings = (array) $_POST['bm'];
 
@@ -4189,7 +4204,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
                 $bot_user = $this->get_bot_user( $post->ID );
 
-                if ( $bot_user && $this->bot_can_answer( $post->ID ) !== $answered ) {
+                if ( $bot_user ) {
                     $this->bot_user_changed( -1 * absint( $bot_user->id ) );
                 }
             }
@@ -4220,6 +4235,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         public function create_or_update_bot_user( $bot_id, $name )
         {
+            $this->forget_bot_user_cache( $bot_id );
+
             $bot = $this->get_bot_user( $bot_id );
 
             if( $bot ){
@@ -4227,6 +4244,8 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     global $wpdb;
 
                     $wpdb->update( bm_get_table('guests'), ['name' => $name], ['id' => $bot->id] );
+                    $this->forget_bot_user_cache( $bot_id, $bot->id );
+                    Better_Messages()->users->update_last_changed( absint($bot->id) * -1 );
                     do_action( 'better_messages_guest_updated', absint($bot->id) * -1 );
                     do_action( 'better_messages_user_updated', absint($bot->id) * -1 );
                 }
@@ -4422,18 +4441,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
 
         private function check_mention_trigger( $message, $sender_id )
         {
-            $content = $message->message;
+            $tokens = Better_Messages()->mentions->parse_tokens( $message->message );
 
-            $mention_match = '&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;';
-            preg_match_all( '/' . preg_quote( $mention_match, '/' ) . '(-?\d+)&quot;/', $content, $matches );
-
-            if ( empty( $matches[1] ) ) {
-                return;
-            }
-
-            $mentioned_ids = array_unique( array_map( 'intval', $matches[1] ) );
-
-            foreach ( $mentioned_ids as $mentioned_user_id ) {
+            foreach ( $tokens['ids'] as $mentioned_user_id ) {
                 if ( $mentioned_user_id >= 0 ) {
                     continue;
                 }
@@ -4505,16 +4515,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 return;
             }
 
-            $content = $message->message;
-            $mention_match = '&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;';
-            preg_match_all( '/' . preg_quote( $mention_match, '/' ) . '(-?\d+)&quot;/', $content, $matches );
+            $tokens = Better_Messages()->mentions->parse_tokens( $message->message );
 
-            if ( ! empty( $matches[1] ) ) {
-                $mentioned_ids = array_unique( array_map( 'intval', $matches[1] ) );
-                $bot_user_id = $replied_sender_id;
-                if ( in_array( $bot_user_id, $mentioned_ids ) ) {
-                    return;
-                }
+            if ( in_array( $replied_sender_id, $tokens['ids'] ) ) {
+                return;
             }
 
             $this->trigger_bot_response( $bot_id, $message, $sender_id );
@@ -5028,7 +5032,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( is_string( $message->message ) && class_exists( 'Better_Messages_E2E_Encryption' ) && strpos( $message->message, Better_Messages_E2E_Encryption::E2E_PREFIX ) === 0 ) {
                 $message_preview = _x( 'Encrypted message', 'AI Moderation', 'bp-better-messages' );
             } else {
-                $message_preview = wp_trim_words( strip_tags( $message->message ), 50 );
+                $message_preview = wp_trim_words( strip_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ), 50 );
             }
 
             $body  = sprintf( _x( 'Sender: %s (ID: %d)', 'AI Moderation', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
@@ -5056,11 +5060,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $body .= "\n" . _x( 'Note: This message was sent to the recipient but flagged for review.', 'AI Moderation', 'bp-better-messages' ) . "\n\n";
             $body .= sprintf( _x( 'Review in moderation panel: %s', 'AI Moderation', 'bp-better-messages' ), $admin_url );
 
-            foreach( $email_list as $email ) {
-                if( is_email( $email ) ) {
-                    wp_mail( $email, $subject, $body );
-                }
-            }
+            Better_Messages()->moderation->send_plain_email( array_filter( $email_list, 'is_email' ), $subject, $body );
         }
 
         public function transcribe_voice_message( WP_REST_Request $request )

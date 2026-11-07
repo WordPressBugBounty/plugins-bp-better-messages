@@ -342,14 +342,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
-            $added = false;
+            $added   = false;
+            $refused = false;
 
             foreach( $user_ids as $user_id ){
                 $is_participant = Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true );
 
                 if( ! $is_participant ) {
                     $add = Better_Messages()->functions->add_participant_to_thread( $thread_id, $user_id );
-                    if( $add ) $added = true;
+                    if( $add ) {
+                        $added = true;
+                    } else {
+                        $refused = true;
+                    }
                 } else if( count( $user_ids ) === 1 ){
                     return new WP_Error(
                         'rest_forbidden',
@@ -362,7 +367,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             if( ! $added ){
                 return new WP_Error(
                     'rest_forbidden',
-                    _x( 'All selected users are already participating in this conversation', 'Rest API Error', 'bp-better-messages' ),
+                    $refused
+                        ? _x( 'Sorry, you are not allowed to add participants to this conversation', 'Rest API Error', 'bp-better-messages' )
+                        : _x( 'All selected users are already participating in this conversation', 'Rest API Error', 'bp-better-messages' ),
                     array( 'status' => rest_authorization_required_code() )
                 );
             }

@@ -74,7 +74,7 @@ class Better_Messages_Privacy {
             $data = array(
                 array(
                     'name'  => __( 'Message', 'bp-better-messages' ),
-                    'value' => wp_strip_all_tags( $message->message ),
+                    'value' => wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ),
                 ),
                 array(
                     'name'  => __( 'Date Sent', 'bp-better-messages' ),

@@ -37,6 +37,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( Better_Messages()->settings['chatPage'] !== '0' || (int) Better_Messages()->settings['guestChatPage'] > 0 ){
                 add_filter( 'the_content', array( $this, 'chat_page' ), 12 );
+                add_action( 'awb_remove_third_party_the_content_changes', array( $this, 'pause_chat_page_for_avada_section' ) );
+                add_action( 'awb_readd_third_party_the_content_changes', array( $this, 'resume_chat_page_after_avada_section' ) );
             }
 
             add_action( 'admin_notices', array( $this, 'admin_notice') );
@@ -2315,6 +2317,20 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
 
             return $content;
+        }
+
+        public function pause_chat_page_for_avada_section(){
+            if( ! function_exists( 'Fusion_Template_Builder' ) ) return;
+
+            $builder = Fusion_Template_Builder();
+
+            if( ! method_exists( $builder, 'get_current_override_name' ) || $builder->get_current_override_name() === 'content' ) return;
+
+            remove_filter( 'the_content', array( $this, 'chat_page' ), 12 );
+        }
+
+        public function resume_chat_page_after_avada_section(){
+            add_filter( 'the_content', array( $this, 'chat_page' ), 12 );
         }
 
         public function exclude_attachments_global( $query ){

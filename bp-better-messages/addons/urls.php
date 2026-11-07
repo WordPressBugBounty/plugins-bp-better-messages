@@ -85,6 +85,7 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
 
             $links = array();
             $wrap_token = function( $url ) use ( &$links ) {
+                $url = $this->encode_for_message( $url );
                 return '<' . array_push( $links, '<a target="_blank" href="' . $url . '">' . $url . '</a>' ) . '>';
             };
 
@@ -251,6 +252,11 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
         }
 
 
+        public function encode_for_message( $text )
+        {
+            return htmlspecialchars( (string) $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', true );
+        }
+
         public function render_nice_link( $message_id, $url, $info )
         {
             if ( $info == '404' || empty( $info[ 'title' ] ) ) {
@@ -258,12 +264,12 @@ if ( !class_exists( 'Better_Messages_Urls' ) ):
             }
             ob_start();
             ?>
-            <a href="<?php echo $url; ?>" target="_blank" class="url-wrap">
+            <a href="<?php echo $this->encode_for_message( $url ); ?>" target="_blank" class="url-wrap">
                 <?php
 ?>
                 <span class="url-description">
-                    <span class="url-title"><?php echo esc_attr( $info[ 'title' ] ); ?></span>
-                    <span class="url-site"><?php echo esc_attr( $info[ 'site' ] ); ?></span>
+                    <span class="url-title"><?php echo $this->encode_for_message( $info[ 'title' ] ); ?></span>
+                    <span class="url-site"><?php echo $this->encode_for_message( $info[ 'site' ] ); ?></span>
                 </span>
             </a>
             <?php

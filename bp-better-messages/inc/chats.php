@@ -289,6 +289,8 @@ class Better_Messages_Chats
     }
 
     public function rest_get_user_facing_chat_rooms( WP_REST_Request $request ) {
+        Better_Messages_Rest_Api()->is_user_authorized( $request );
+
         $user_id = Better_Messages()->functions->get_current_user_id();
 
         $display_mode  = isset( Better_Messages()->settings['widgetChatRoomsDisplayMode'] )

@@ -199,28 +199,23 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 $subject = $tokens['subject'];
 
                 if( $subject === '' ){
-                    $email_subject   = $email->get_subject();
-                    $email_plaintext = $email->get_content_plaintext();
-                    $email_html      = $email->get_content_html();
-
-                    $to_remove = [ '&quot;{{subject}}&quot;', '"{{subject}}"', '{{subject}}' ];
-
-                    foreach ( $to_remove as $str ){
-                        $email_subject   = trim(str_replace( $str, '', $email_subject ) );
-                        $email_plaintext = trim(str_replace( $str, '', $email_plaintext ) );
-                        $email_html      = trim(str_replace( $str, '', $email_html ) );
-                    }
-
-
-                    if(substr($email_subject, -1, 1) === ':'){
-                        $email_subject = substr($email_subject, 0, strlen($email_subject) - 1);
-                    }
-
-                    $email->set_subject( $email_subject );
-                    $email->set_content_plaintext( $email_plaintext );
-                    $email->set_content_html( $email_html );
+                    $email->set_subject( trim( $this->without_subject_placeholder( $email->get_subject() ) ) );
+                    $email->set_content_plaintext( trim( $this->without_subject_placeholder( $email->get_content_plaintext() ) ) );
+                    $email->set_content_html( trim( $this->without_subject_placeholder( $email->get_content_html() ) ) );
                 }
             }
+        }
+
+        private function without_subject_placeholder( $text )
+        {
+            $text  = (string) $text;
+            $space = '[ \t\x{00A0}]*';
+            $token = '\{\{\{?subject\}\}\}?';
+            $quote = '(?:&(?:quot|ldquo|rdquo|bdquo|laquo|raquo|#0*34|#0*171|#0*187|#822[0-2]|#x0*22);|["\x{201C}\x{201D}\x{201E}\x{00AB}\x{00BB}\x{300C}\x{300D}\x{300E}\x{300F}\x{FF02}])';
+
+            $result = preg_replace( '/' . $space . '[:\x{FF1A}]?' . $space . '(?:(?<!=)' . $quote . $space . $token . $space . $quote . '|' . $token . ')/u', '', $text );
+
+            return $result === null ? $text : $result;
         }
 
         public function email_candidate_where(){
@@ -493,7 +488,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     $_message = nl2br( Better_Messages()->functions->markdown_to_plain_text( stripslashes( $message->message ) ) );
                                     $_message = str_replace(['<p>', '</p>'], ['<br>', ''], $_message );
                                     $_message = Better_Messages()->functions->format_message( $_message, $message->id, 'email', $user_id );
-                                    $_message = htmlspecialchars_decode(Better_Messages()->functions->strip_all_tags($_message, '<br>'));
+                                    $_message = htmlspecialchars_decode(Better_Messages()->functions->strip_all_tags(Better_Messages_Mentions::mentions_as_names($_message), '<br>'));
 
                                     if ($last_sender_id == 0 || $last_sender_id != $message->sender_id) {
                                         $messageHtml .= '<tr><td colspan="2"><b>' . $author . '</b></td></tr>';
@@ -1060,6 +1055,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
         public function render_custom_email_template( $data ) {
             $template = Better_Messages_Options()->get_email_custom_html();
             $settings = Better_Messages()->settings;
+
+            if ( $data['subject'] === '' ) {
+                $template = $this->without_subject_placeholder( $template );
+            }
 
             $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
             $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';

@@ -2585,6 +2585,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api' ) ):
 
                 $thread_item = apply_filters('better_messages_rest_thread_item', $thread_item, $thread_item['thread_id'], $thread_item['type'], $personal_data, $current_user_id );
 
+                if( isset( $thread_item['chatRoom']['bots'] ) && is_array( $thread_item['chatRoom']['bots'] ) ){
+                    foreach ( $thread_item['chatRoom']['bots'] as $bot_user_id ){
+                        $user_ids[] = (int) $bot_user_id;
+                    }
+                }
+
                 $threads[] = $thread_item;
 
                 if( $fetch_messages ) {

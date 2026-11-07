@@ -630,6 +630,11 @@ if ( ! class_exists( 'Better_Messages_System_Messages' ) ):
                 return false;
             }
 
+            return (bool) apply_filters( 'better_messages_system_message_should_emit', $this->event_enabled( $thread_id, $event_type ), $thread_id, $event_type );
+        }
+
+        private function event_enabled( $thread_id, $event_type )
+        {
             if ( ! $this->is_enabled_for_thread( $thread_id ) ) {
                 return false;
             }

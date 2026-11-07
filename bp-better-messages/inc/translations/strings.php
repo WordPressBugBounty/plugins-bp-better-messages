@@ -336,6 +336,7 @@ function _bm_js_translation_strings() {
     _x('Missed video call', 'Conversations list item', 'bp-better-messages');
     _x('Missed voice call', 'Conversations list item', 'bp-better-messages');
     _x('Message hidden', 'Messages from blocked user', 'bp-better-messages');
+    _x('You: %s', 'Conversations list item', 'bp-better-messages');
     _x('typing', 'Typing indicator (private conversation)', 'bp-better-messages');
     _x('(empty message)', 'Conversations list item', 'bp-better-messages');
     __('Sticker', 'bp-better-messages');
@@ -398,6 +399,7 @@ function _bm_js_translation_strings() {
     _x('Minimize', 'Mini Chats', 'bp-better-messages');
     _x('Open', 'Mini Chats', 'bp-better-messages');
     _x('Start a new conversation', 'New threads screen', 'bp-better-messages');
+    _x('Messages', 'Mini Widgets - Head', 'bp-better-messages');
     _x('Start a new conversation', 'Mini Widgets', 'bp-better-messages');
     _x('Remove', 'Mini Widgets', 'bp-better-messages');
     _x('Lock with Face ID', 'Mobile App', 'bp-better-messages');
@@ -504,6 +506,11 @@ function _bm_js_translation_strings() {
     _x('Logout', 'Mobile App', 'bp-better-messages');
     _x('Reloading', 'Mobile App', 'bp-better-messages');
     _x('Reload application', 'Mobile App', 'bp-better-messages');
+    _x('Restart', 'Mobile app error screen', 'bp-better-messages');
+    _x('Downloading scripts from server...', 'Mobile app error screen', 'bp-better-messages');
+    _x('Scripts downloaded. Reloading...', 'Mobile app error screen', 'bp-better-messages');
+    _x('Error while downloading scripts. Reloading...', 'Mobile app error screen', 'bp-better-messages');
+    _x('Application error', 'Mobile app error screen', 'bp-better-messages');
     _x('Start typing to search members', 'Add Participants Panel', 'bp-better-messages');
     _x('Search by name to add members to this conversation.', 'Add Participants Panel', 'bp-better-messages');
     _x('Adding...', 'Add Participants Panel', 'bp-better-messages');
@@ -602,6 +609,7 @@ function _bm_js_translation_strings() {
     _nx('%d message will be sent once you are back online', '%d messages will be sent once you are back online', 1, 'Outbox', 'bp-better-messages');
     _x('Message not sent', 'Outbox', 'bp-better-messages');
     _x('The server did not accept this message', 'Outbox', 'bp-better-messages');
+    _x('Refresh page', 'Session ended', 'bp-better-messages');
     _x('Retry', 'Outbox', 'bp-better-messages');
     _x('Messages you send now will go out once you are back online', 'Outbox', 'bp-better-messages');
     _x('You are offline', 'Outbox', 'bp-better-messages');
@@ -667,6 +675,8 @@ function _bm_js_translation_strings() {
     _x('Being prepared. It can be watched in a few minutes.', 'Call recording', 'bp-better-messages');
     _x('Delete Recording', 'Call recording', 'bp-better-messages');
     _nx('%s message to review', '%s messages to review', 1, 'Messages to review button', 'bp-better-messages');
+    _x('Your session has ended', 'Session ended', 'bp-better-messages');
+    _x('Close', 'Session ended', 'bp-better-messages');
     _x('Unknown device', 'User settings screen', 'bp-better-messages');
     _x('Last active %s', 'User settings screen', 'bp-better-messages');
     _x('Sign out %s? The app on that device will ask to sign in again.', 'User settings screen', 'bp-better-messages');
@@ -781,6 +791,7 @@ function _bm_js_translation_strings() {
     _x('Message unpinned', 'Messages pinning', 'bp-better-messages');
     _x('Are you sure you want to leave this conversation?', 'Leave conversation action', 'bp-better-messages');
     _x('Still too large after optimizing: %1$s MB. The limit for this type of file is %2$s MB.', 'File Uploader', 'bp-better-messages');
+    _x('File encryption failed — please reload the page and try again', 'File Uploader', 'bp-better-messages');
     _x('Copy message text', 'Message context menu', 'bp-better-messages');
     _x('Text copied to clipboard', 'Message context menu', 'bp-better-messages');
     _x('Send now', 'Outbox', 'bp-better-messages');
@@ -840,6 +851,8 @@ function _bm_js_translation_strings() {
     _x('This website could not set up Web Push notifications in your browser. Please contact the website administrator.', 'Push Notifications', 'bp-better-messages');
     _x('Successfully unsubscribed from Web Push notifications', 'Push Notifications', 'bp-better-messages');
     _x('Encrypted message', 'Push notification', 'bp-better-messages');
+    _x('The request was made but no response was received', 'Request error', 'bp-better-messages');
+    _x('An unknown error occurred', 'Request error', 'bp-better-messages');
     __('Continue with account', 'bp-better-messages');
     _x('Close', 'Guest chat', 'bp-better-messages');
     __('A user', 'bp-better-messages');
@@ -868,7 +881,6 @@ function _bm_js_translation_strings() {
     __('%s started a group video call', 'bp-better-messages');
     __('%s started a group audio call', 'bp-better-messages');
     __('Chat history was cleared automatically', 'bp-better-messages');
-    _x('Messages', 'Mini Widgets - Head', 'bp-better-messages');
     _x('Messages', 'Mobile view tabs', 'bp-better-messages');
     _x('Friends', 'Mini Widgets - Head', 'bp-better-messages');
     _x('Friends', 'Mobile view tabs', 'bp-better-messages');
@@ -1122,6 +1134,14 @@ function _bm_js_translation_strings() {
     _x('The people who were in the call can watch it in a few minutes.', 'Call recording', 'bp-better-messages');
     _x('It is ready to watch a few minutes after it stops.', 'Call recording', 'bp-better-messages');
     _x('The recording could not be stopped.', 'Call recording', 'bp-better-messages');
+    _x('Add Person', 'Call Screen', 'bp-better-messages');
+    _x('Loading...', 'Call Screen', 'bp-better-messages');
+    _x('There is no one else to add', 'Call Screen', 'bp-better-messages');
+    _x('Answered', 'Call Screen', 'bp-better-messages');
+    _x('Declined', 'Call Screen', 'bp-better-messages');
+    _x('Busy', 'Call Screen', 'bp-better-messages');
+    _x('No answer', 'Call Screen', 'bp-better-messages');
+    _x('Cancelled', 'Call Screen', 'bp-better-messages');
     _x('Calls', 'Call Screen', 'bp-better-messages');
     _x('Ongoing Call', 'Call Screen', 'bp-better-messages');
     _x('That conversation could not be found', 'Call Screen', 'bp-better-messages');
@@ -1129,6 +1149,10 @@ function _bm_js_translation_strings() {
     __('Statistics', 'bp-better-messages');
     __('Downloaded', 'bp-better-messages');
     __('Uploaded', 'bp-better-messages');
+    _x('Messages', 'Android notification channel', 'bp-better-messages');
+    _x('Notifications for new messages', 'Android notification channel', 'bp-better-messages');
+    _x('Calls', 'Android notification channel', 'bp-better-messages');
+    _x('Notifications for incoming calls', 'Android notification channel', 'bp-better-messages');
     _x('A new version of the application has been downloaded.', 'Mobile App', 'bp-better-messages');
     _x('Update now', 'Mobile App', 'bp-better-messages');
     _x('A new version of the app is available in %s.', 'Mobile App', 'bp-better-messages');
@@ -1170,6 +1194,8 @@ function _bm_js_translation_strings() {
     _x('Type to search stickers.', 'Media picker', 'bp-better-messages');
     _x('Recently sent stickers will appear here.', 'Media picker', 'bp-better-messages');
     _x('This pack is empty.', 'Media picker', 'bp-better-messages');
+    _x('You may have been logged out of this website. Refresh the page to continue messaging.', 'Session ended', 'bp-better-messages');
+    _x('You may have been logged out of this website. This message will be sent once you refresh the page and are logged in again.', 'Session ended', 'bp-better-messages');
     _x('New message', 'Design preview', 'bp-better-messages');
     _x('Sounds good — see you there', 'Design preview', 'bp-better-messages');
     _x('The call has ended', 'Group call alert', 'bp-better-messages');
@@ -1182,7 +1208,6 @@ function _bm_js_translation_strings() {
     _nx('Close all notifications, %s more hidden', 'Close all notifications, %s more hidden', 1, 'Onsite notifications', 'bp-better-messages');
     _x('Close all notifications', 'Onsite notifications', 'bp-better-messages');
     _x('Cannot reach the site. Check your connection and try again.', 'Rest API Error', 'bp-better-messages');
-    _x('Authorization failed. Please check if you are still authorized at this website.', 'Rest API Error', 'bp-better-messages');
     _x('Mark as unread', 'Conversation menu', 'bp-better-messages');
     _x('Notifications: %s', 'Notification level', 'bp-better-messages');
     _x('Stop translating', 'Message translation', 'bp-better-messages');
@@ -1225,9 +1250,9 @@ function _bm_js_translation_strings() {
     __('%1$s were removed from the conversation by %2$s', 'bp-better-messages');
     __('%s joined the conversation', 'bp-better-messages');
     __('%s left the conversation', 'bp-better-messages');
-    _x('Add Person', 'Call Screen', 'bp-better-messages');
-    _x('Loading...', 'Call Screen', 'bp-better-messages');
-    _x('There is no one else to add', 'Call Screen', 'bp-better-messages');
+    _x('all', 'Mention of everyone in a conversation, after the @', 'bp-better-messages');
+    _nx('%1$s & %2$s more', '%1$s & %2$s more', 1, 'Conversation name of a group without a subject', 'bp-better-messages');
+    _x('%1$s & %2$s', 'Conversation name of a group without a subject', 'bp-better-messages');
     _x('Your browser blocks the camera for this site', 'Call Ask', 'bp-better-messages');
     _x('Your browser blocks the microphone for this site', 'Call Ask', 'bp-better-messages');
     _x('Another app is using your camera', 'Call Ask', 'bp-better-messages');
@@ -1264,6 +1289,11 @@ function _bm_js_translation_strings() {
     _x('Preparing backgrounds…', 'Call Effects', 'bp-better-messages');
     _x('This browser does not keep your pictures, so they last for this call only.', 'Call Effects', 'bp-better-messages');
     _x('Backgrounds are not available on this device.', 'Call Effects', 'bp-better-messages');
+    _x('Your device is blurring your background itself with Portrait, so Blur here is paused. It comes back on by itself when you turn Portrait off in Control Center.', 'Call Effects', 'bp-better-messages');
+    _x('Your device is blurring your background itself with Portrait. Turn Portrait off in Control Center to show your room.', 'Call Effects', 'bp-better-messages');
+    _x('Blur here pauses by itself while Portrait is on. Browsers are not told when Background is on, so choose None here when you use it.', 'Call Effects', 'bp-better-messages');
+    _x('This browser cannot tell when either is on, so choose None here once you turn one on.', 'Call Effects', 'bp-better-messages');
+    _x('Your device can blur or replace your background itself: turn on Portrait or Background in Control Center, under Video Effects. It often looks cleaner and is lighter on this device.', 'Call Effects', 'bp-better-messages');
     _x('Effect Settings', 'Call Effects', 'bp-better-messages');
     _x('Outline', 'Call Effects', 'bp-better-messages');
     _x('Tighter', 'Call Effects', 'bp-better-messages');
@@ -1364,6 +1394,8 @@ function _bm_js_translation_strings() {
     _x('Turn sound on', 'Call Screen', 'bp-better-messages');
     __('Removed from conversation', 'bp-better-messages');
     _x('You cannot make this call', 'Call Screen', 'bp-better-messages');
+    _x('Could not start recording', 'Call recording', 'bp-better-messages');
+    _x('Could not stop recording', 'Call recording', 'bp-better-messages');
     _x('You were removed from this call', 'Call Screen', 'bp-better-messages');
     _x('The user is busy in another call', 'Private Call Screen', 'bp-better-messages');
     _x('The user did not answer', 'Private Call Screen', 'bp-better-messages');
@@ -2839,12 +2871,14 @@ function _bm_js_translation_strings() {
     _x('Missed Call Timeout', 'Settings page', 'bp-better-messages');
     _x('Time before an unanswered call is marked as missed', 'Settings page', 'bp-better-messages');
     _x('seconds', 'Settings page', 'bp-better-messages');
+    _x('Audio Effects', 'Settings page', 'bp-better-messages');
+    _x('For audio and video calls, private and group alike. People turn them on for their own microphone in the call device settings.', 'Settings page', 'bp-better-messages');
+    _x('AI Noise Removal', 'Settings page', 'bp-better-messages');
+    _x('Takes keyboard typing, fans and other sounds around the voice out of the microphone. It is not part of the plugin: it is downloaded to this site once, from WordPlus Cloud, apart from the video effects.', 'Settings page', 'bp-better-messages');
     _x('Video Effects', 'Settings page', 'bp-better-messages');
-    _x('For private and group calls. People choose what is behind them in a call in its device settings: none, blur or a picture, and turn on AI Noise Removal there.', 'Settings page', 'bp-better-messages');
+    _x('For private and group calls. People choose what is behind them in a call in its device settings: none, blur or a picture.', 'Settings page', 'bp-better-messages');
     _x('Effects Download', 'Settings page', 'bp-better-messages');
     _x('The effects are not part of the plugin. They are downloaded to this site once, from WordPlus Cloud.', 'Settings page', 'bp-better-messages');
-    _x('AI Noise Removal', 'Settings page', 'bp-better-messages');
-    _x('Takes keyboard typing, fans and other sounds around the voice out of the microphone of everyone who turns it on in the call device settings. It is a download of its own from WordPlus Cloud, apart from the effects above.', 'Settings page', 'bp-better-messages');
     _x('Built-in Backgrounds', 'Settings page', 'bp-better-messages');
     _x('Pictures from WordPlus Cloud that calls offer. Tick the ones you want: each is downloaded to this site, and one you untick is deleted from it.', 'Settings page', 'bp-better-messages');
     _x('Site Backgrounds', 'Settings page', 'bp-better-messages');
@@ -3128,7 +3162,9 @@ function _bm_js_translation_strings() {
     _x('Notice on Join', 'Settings page', 'bp-better-messages');
     _x('People join a group video or audio chat with the camera and microphone off. This tells them so as they join and that the call controls turn them on, with a Preview button that shows their camera only to them, or tests their microphone on an audio chat. When off, nothing is said and the device settings open from the settings button in the call', 'Settings page', 'bp-better-messages');
     _x('During the Call', 'Settings page', 'bp-better-messages');
-    _x('Background blur, backgrounds and AI Noise Removal work in group calls too. They are set up once for every call, in Calls.', 'Settings page', 'bp-better-messages');
+    _x('Audio and Video Effects', 'Settings page', 'bp-better-messages');
+    _x('AI Noise Removal, background blur and backgrounds work in group calls too. They are set up once for every call, in Calls.', 'Settings page', 'bp-better-messages');
+    _x('Audio Effects Settings', 'Settings page', 'bp-better-messages');
     _x('Video Effects Settings', 'Settings page', 'bp-better-messages');
     _x('Open Picture in Picture When Leaving the Tab', 'Settings page', 'bp-better-messages');
     _x('The browser opens the call in a small window when someone switches to another tab or app, in browsers that support it. With this off, Picture in Picture still opens from the call controls.', 'Settings page', 'bp-better-messages');

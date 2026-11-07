@@ -1266,7 +1266,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
             " );
         }
 
-        private function get_reported_candidate_ids()
+        public function get_reported_candidate_ids()
         {
             global $wpdb;
 
@@ -1906,7 +1906,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Admin' ) ):
 
         private function readable_mentions( $content ){
             $readable = preg_replace(
-                '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(-?\d+|all)&quot;&gt;((?:(?!&lt;).)*?)&lt;\/span&gt;/s',
+                '/' . Better_Messages_Mentions::stored_span_pattern( '(-?\d+|all)' ) . '&gt;((?:(?!&lt;).)*?)&lt;\/span&gt;/s',
                 '<span class="bm-mention" data-user-id="$1">$2</span>',
                 (string) $content
             );

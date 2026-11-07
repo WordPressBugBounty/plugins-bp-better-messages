@@ -34,6 +34,8 @@ if ( !class_exists( 'Better_Messages_Mobile_App' ) ):
 
         public $scripts;
 
+        public $bootstrap;
+
         public $web_signin;
 
         public $sessions;
@@ -120,6 +122,9 @@ if ( !class_exists( 'Better_Messages_Mobile_App' ) ):
 
             require_once ($this->path . 'inc/scripts.php');
             $this->scripts = Better_Messages_Mobile_App_Scripts();
+
+            require_once($this->path . 'inc/bootstrap.php');
+            $this->bootstrap = Better_Messages_Mobile_App_Bootstrap::instance();
 
             require_once($this->path . 'inc/auth.php');
             $this->auth = Better_Messages_Mobile_App_Auth();

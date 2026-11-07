@@ -3351,6 +3351,7 @@ class Better_Messages_Options
                 ) );
             };
             add_filter( 'safe_style_css', $allow_all_css );
+            add_filter( 'wp_kses_force_legacy_parser', '__return_true', 20 );
 
             $allowed_html = array_merge(
                 wp_kses_allowed_html('post'),
@@ -3376,6 +3377,7 @@ class Better_Messages_Options
             $this->settings['emailCustomHtml'] = wp_kses( wp_unslash( $this->settings['emailCustomHtml'] ), $allowed_html );
 
             remove_filter( 'safe_style_css', $allow_all_css );
+            remove_filter( 'wp_kses_force_legacy_parser', '__return_true', 20 );
         }
 
         $this->settings['bpProfileSlug'] = preg_replace('/\s+/', '', trim( $this->settings['bpProfileSlug'] ) );

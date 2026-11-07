@@ -8,6 +8,8 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Prices' ) ) {
 
         const URL = 'https://api.wordplus.cloud/api/v1/assets/ai/catalogue.json';
 
+        const EVERY = 7 * DAY_IN_SECONDS;
+
         private $ai;
 
         private $fetched = null;
@@ -43,7 +45,12 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Prices' ) ) {
 
         public function daily()
         {
-            $sdk = WordPlus_SDK::instance();
+            $sdk    = WordPlus_SDK::instance();
+            $stored = $this->stored();
+
+            if ( empty( $stored['error'] ) && isset( $stored['checked'] ) && (int) $stored['checked'] > time() - self::EVERY ) {
+                return null;
+            }
 
             foreach ( $sdk->products_on( WordPlus_SDK::CLOUD ) as $product ) {
                 if ( $sdk->licence( $product )->is_active() ) {

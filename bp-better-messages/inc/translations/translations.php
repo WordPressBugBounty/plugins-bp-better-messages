@@ -78,6 +78,17 @@ class Better_Messages_Translations {
         return false;
     }
 
+    public function app_strings( $locale ) {
+        $switched = $locale !== determine_locale() && switch_to_locale( $locale );
+        $strings  = $this->build_translations_from_php( 'better-messages-app' );
+
+        if ( $switched ) {
+            restore_previous_locale();
+        }
+
+        return $strings;
+    }
+
     public function get_php_translation_file_url( $script_handle ) {
         return $this->in_script_locale( $script_handle, array( $this, 'resolve_php_translation_file_url' ) );
     }

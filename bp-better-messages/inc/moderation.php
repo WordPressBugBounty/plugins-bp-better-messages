@@ -9,6 +9,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
         private $messages_to_review = null;
 
+        private $review_signal_queued = false;
+
+        private $ids_under_review = null;
+
         private $restricted_batch = array();
 
         private $own_batch = array( 'user' => 0, 'threads' => array() );
@@ -46,6 +50,13 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             add_action( 'edit_user_profile', array( $this, 'render_user_section' ) );
 
             add_filter( 'bp_better_messages_script_variable', array( $this, 'review_script_variables' ), 1000 );
+
+            foreach( array( 'added_bm_message_meta', 'updated_bm_message_meta', 'deleted_bm_message_meta' ) as $hook ){
+                add_action( $hook, array( $this, 'review_meta_changed' ), 10, 4 );
+            }
+
+            add_action( 'better_messages_message_pending', array( $this, 'review_queue_changed' ), 20, 0 );
+            add_action( 'better_messages_before_message_delete', array( $this, 'review_message_deleting' ), 10, 1 );
         }
 
         public function can_review_messages(): bool
@@ -102,6 +113,99 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
         private function is_mobile_app_request(): bool
         {
             return isset( Better_Messages()->mobile_app->auth ) && Better_Messages()->mobile_app->auth->is_mobile_app();
+        }
+
+        private function review_signal_available(): bool
+        {
+            return Better_Messages()->realtime
+                && isset( Better_Messages()->websocket )
+                && is_object( Better_Messages()->websocket )
+                && method_exists( Better_Messages()->websocket, 'send_realtime_event' )
+                && ! defined( 'BM_DISABLE_MESSAGES_VIEWER' )
+                && Better_Messages()->settings['messagesViewer'] !== '0';
+        }
+
+        public function review_queue_changed(): void
+        {
+            if ( $this->review_signal_queued || ! $this->review_signal_available() ) {
+                return;
+            }
+
+            $this->review_signal_queued = true;
+
+            add_action( 'shutdown', array( $this, 'send_review_signal' ) );
+        }
+
+        public function review_meta_changed( $meta_ids, $message_id, $meta_key, $meta_value ): void
+        {
+            if ( 'user_reports' === $meta_key ) {
+                $this->review_queue_changed();
+            } elseif ( 'ai_moderation_flagged' === $meta_key && ( 'deleted_bm_message_meta' === current_action() || '1' === (string) $meta_value ) ) {
+                $this->review_queue_changed();
+            }
+        }
+
+        public function review_message_deleting( $message_id ): void
+        {
+            if ( $this->review_signal_queued || ! $this->review_signal_available() ) {
+                return;
+            }
+
+            if ( isset( $this->get_ids_under_review()[ (int) $message_id ] ) ) {
+                $this->review_queue_changed();
+            }
+        }
+
+        private function get_ids_under_review(): array
+        {
+            global $wpdb;
+
+            if ( $this->ids_under_review === null ) {
+                $candidates = function_exists( 'Better_Messages_Rest_Api_Admin' ) ? Better_Messages_Rest_Api_Admin()->get_reported_candidate_ids() : array( 'all_ids' => array() );
+                $held       = $wpdb->get_col( "SELECT `id` FROM `" . bm_get_table( 'messages' ) . "` WHERE `is_pending` = 1" );
+
+                $this->ids_under_review = array_fill_keys( array_map( 'intval', array_merge( $candidates['all_ids'], $held ) ), true );
+            }
+
+            return $this->ids_under_review;
+        }
+
+        public function send_review_signal(): void
+        {
+            if ( ! $this->review_signal_available() ) {
+                return;
+            }
+
+            $user_ids = $this->get_reviewer_ids();
+
+            if ( empty( $user_ids ) ) {
+                return;
+            }
+
+            Better_Messages()->websocket->send_realtime_event( $user_ids, array( 'type' => 'review_queue' ) );
+        }
+
+        private function get_reviewer_ids(): array
+        {
+            global $wpdb;
+
+            $max = (int) apply_filters( 'better_messages_review_signal_max_users', 50 );
+            $ids = array_values( array_filter( array_map( 'intval', $this->get_site_admin_ids() ) ) );
+
+            if ( $max <= 0 || empty( $ids ) ) {
+                return array();
+            }
+
+            if ( count( $ids ) <= $max ) {
+                return $ids;
+            }
+
+            $active = array_map( 'intval', $wpdb->get_col( $wpdb->prepare(
+                "SELECT `ID` FROM `" . bm_get_table( 'users' ) . "` WHERE `ID` IN (" . implode( ',', $ids ) . ") ORDER BY `last_activity` DESC LIMIT %d",
+                $max
+            ) ) );
+
+            return array_slice( array_values( array_unique( array_merge( $active, $ids ) ) ), 0, $max );
         }
 
         public function render_user_section( $user )
@@ -1403,6 +1507,10 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             do_action( 'better_messages_thread_updated', $message->thread_id );
 
+            if( (int) $message->is_pending === 1 ){
+                $this->review_queue_changed();
+            }
+
             return true;
         }
 
@@ -1474,6 +1582,24 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $valid_emails;
         }
 
+        public function send_plain_email( $emails, $subject, $body )
+        {
+            $subject = html_entity_decode( (string) $subject, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+            $body    = html_entity_decode( (string) $body, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+            $plain_text = function() {
+                return 'text/plain';
+            };
+
+            add_filter( 'wp_mail_content_type', $plain_text, PHP_INT_MAX );
+
+            foreach( $emails as $email ){
+                wp_mail( $email, $subject, $body );
+            }
+
+            remove_filter( 'wp_mail_content_type', $plain_text, PHP_INT_MAX );
+        }
+
         public function notify_pending_message( $message )
         {
             if( ! isset( $message->sender_id ) || ! isset( $message->thread_id ) ){
@@ -1498,7 +1624,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             );
 
             $message_content = apply_filters( 'better_messages_moderation_message_content',
-                wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' ),
+                wp_trim_words( wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ), 50, '...' ),
                 $message
             );
 
@@ -1545,9 +1671,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             $email_body .= "\n" . sprintf( _x( 'Review in moderation panel: %s', 'Moderation email', 'bp-better-messages' ), $moderation_url );
 
-            foreach( $emails as $email ){
-                wp_mail( $email, $subject, $email_body );
-            }
+            $this->send_plain_email( $emails, $subject, $email_body );
         }
 
         public function notify_reported_message( $message_id, $thread_id, $reporter_user_id, $category, $description, $reports )
@@ -1586,7 +1710,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             );
 
             $message_content = apply_filters( 'better_messages_moderation_message_content',
-                wp_trim_words( wp_strip_all_tags( $message->message ), 50, '...' ),
+                wp_trim_words( wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ), 50, '...' ),
                 $message
             );
             $report_count = count( $reports );
@@ -1603,9 +1727,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 $moderation_url
             );
 
-            foreach( $emails as $email ){
-                wp_mail( $email, $subject, $email_body );
-            }
+            $this->send_plain_email( $emails, $subject, $email_body );
         }
 
     }

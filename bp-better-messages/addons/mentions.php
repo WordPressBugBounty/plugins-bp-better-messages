@@ -13,6 +13,8 @@ if ( !class_exists( 'Better_Messages_Mentions' ) ) {
 
         const MAX_PER_THREAD = 50;
 
+        const STORED_QUOTE = '(?:&quot;|")';
+
         private $targets = array();
 
         public static function instance()
@@ -89,16 +91,28 @@ if ( !class_exists( 'Better_Messages_Mentions' ) ) {
             return Better_Messages()->functions->can_moderate_thread( $thread_id, $user_id );
         }
 
+        public static function stored_span_pattern( $user_id_pattern )
+        {
+            $quote = self::STORED_QUOTE;
+
+            return "&lt;span class={$quote}bm-mention{$quote} data-user-id={$quote}{$user_id_pattern}{$quote}";
+        }
+
+        public static function mentions_as_names( $content )
+        {
+            return preg_replace( '/' . self::stored_span_pattern( '[^&"]*' ) . '&gt;(.*?)&lt;\/span&gt;/s', '$1', (string) $content );
+        }
+
         public static function strip_mention_all( $content )
         {
-            $content = preg_replace( '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;all&quot;&gt;(.*?)&lt;\/span&gt;/s', '$1', (string) $content );
+            $content = preg_replace( '/' . self::stored_span_pattern( 'all' ) . '&gt;(.*?)&lt;\/span&gt;/s', '$1', (string) $content );
 
-            return str_replace( 'data-user-id=&quot;all&quot;', '', $content );
+            return str_replace( array( 'data-user-id=&quot;all&quot;', 'data-user-id="all"' ), '', $content );
         }
 
         private function contains_mention_all( $content )
         {
-            return is_string( $content ) && strpos( $content, 'data-user-id=&quot;all&quot;' ) !== false;
+            return is_string( $content ) && ( strpos( $content, 'data-user-id=&quot;all&quot;' ) !== false || strpos( $content, 'data-user-id="all"' ) !== false );
         }
 
         public function enforce_mention_all_on_send( $message )
@@ -144,7 +158,7 @@ if ( !class_exists( 'Better_Messages_Mentions' ) ) {
                 return self::strip_mention_all( $content );
             }
 
-            if ( strpos( (string) $message->message, 'data-user-id=&quot;all&quot;' ) === false && ! $this->can_mention_all( (int) $message->thread_id, (int) $message->sender_id ) ) {
+            if ( ! $this->contains_mention_all( (string) $message->message ) && ! $this->can_mention_all( (int) $message->thread_id, (int) $message->sender_id ) ) {
                 return self::strip_mention_all( $content );
             }
 
@@ -153,7 +167,7 @@ if ( !class_exists( 'Better_Messages_Mentions' ) ) {
 
         public static function token_pattern()
         {
-            return '/&lt;span class=&quot;bm-mention&quot; data-user-id=&quot;(all|-?[0-9]{1,19})&quot;/';
+            return '/' . self::stored_span_pattern( '(all|-?[0-9]{1,19})' ) . '/';
         }
 
         public static function types_sql( $types )

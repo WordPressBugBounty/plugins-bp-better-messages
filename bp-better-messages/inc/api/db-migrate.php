@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.97;
+        private $db_version = 2.98;
 
         public static function instance()
         {
@@ -1158,6 +1158,11 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     function (){
                         $this->move_ai_keys_to_keychain();
                     }
+                ],
+                '2.98' => [
+                    function (){
+                        $this->refresh_ai_bots();
+                    }
                 ]
             ];
 
@@ -1190,6 +1195,18 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
         public function move_ai_keys_to_keychain(){
             if ( class_exists( 'Better_Messages_AI' ) && method_exists( 'Better_Messages_AI', 'seal_typed_keys' ) ) {
                 Better_Messages_AI::seal_typed_keys();
+            }
+        }
+
+        public function refresh_ai_bots(){
+            if ( ! function_exists( 'Better_Messages_AI' ) || ! method_exists( 'Better_Messages_AI', 'bot_user_changed' ) ) {
+                return;
+            }
+
+            $ai = Better_Messages_AI();
+
+            foreach ( $ai->bot_users( true ) as $user_id => $bot_id ) {
+                $ai->bot_user_changed( $user_id, $bot_id );
             }
         }
 

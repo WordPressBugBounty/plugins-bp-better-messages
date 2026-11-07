@@ -537,7 +537,7 @@ if ( ! class_exists( 'Better_Messages_WooCommerce' ) ) {
                         return $matches[0];
                     }
 
-                    $post_id = url_to_postid( $url );
+                    $post_id = url_to_postid( html_entity_decode( $url, ENT_QUOTES ) );
                     if ( ! $post_id || get_post_type( $post_id ) !== 'product' ) {
                         return $matches[0];
                     }

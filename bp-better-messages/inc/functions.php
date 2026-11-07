@@ -1507,10 +1507,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             global $wpdb;
 
-            $userIsParticipant = $this->is_user_participant( $thread_id, $user_id );
+            $added = $this->with_lock( 'thread_participants|' . $thread_id, function () use ( $wpdb, $thread_id, $user_id, $context ) {
+                if( $this->is_user_participant( $thread_id, $user_id ) ) {
+                    return false;
+                }
 
-            if( ! $userIsParticipant ) {
-                $return = $wpdb->insert(
+                if( ! apply_filters( 'better_messages_can_add_participant', true, $thread_id, $user_id, $context ) ) {
+                    return false;
+                }
+
+                return (bool) $wpdb->insert(
                     bm_get_table('recipients'),
                     array(
                         'user_id' => $user_id,
@@ -1519,13 +1525,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                         'is_deleted' => 0
                     )
                 );
+            } );
 
-                if( $return ) {
-                    do_action('better_messages_thread_updated', $thread_id);
-                    do_action('better_messages_info_changed', $thread_id, [ $user_id ] );
-                    do_action('better_messages_participant_added', $thread_id, $user_id, $context );
-                    return true;
-                }
+            if( $added ) {
+                do_action('better_messages_thread_updated', $thread_id);
+                do_action('better_messages_info_changed', $thread_id, [ $user_id ] );
+                do_action('better_messages_participant_added', $thread_id, $user_id, $context );
+                return true;
             }
 
             return false;
@@ -1542,14 +1548,24 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             global $wpdb;
 
-            $result = $wpdb->delete(
-                bm_get_table('recipients'),
-                array(
-                    'user_id' => $user_id,
-                    'thread_id' => $thread_id
-                ),
-                array( '%d', '%d' )
-            );
+            $result = $this->with_lock( 'thread_participants|' . $thread_id, function () use ( $wpdb, $thread_id, $user_id ) {
+                for ( $try = 1; ; $try++ ) {
+                    $deleted = $wpdb->delete(
+                        bm_get_table('recipients'),
+                        array(
+                            'user_id' => $user_id,
+                            'thread_id' => $thread_id
+                        ),
+                        array( '%d', '%d' )
+                    );
+
+                    if ( $deleted !== false || $try >= 3 || stripos( $wpdb->last_error, 'deadlock' ) === false ) {
+                        return $deleted;
+                    }
+
+                    usleep( 50000 );
+                }
+            } );
 
             if( $result ) {
                 do_action('better_messages_thread_updated', $thread_id);
@@ -2957,7 +2973,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $text = __( 'No Subject', 'buddypress' );
             }
 
-            if( trim( $subject ) === $text ){
+            if( trim( $subject ) === $text || ! preg_match( '/[^\p{Z}\p{C}]/u', (string) $subject ) ){
                 return '';
             } else {
                 return $subject;

@@ -186,7 +186,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Messaging' ) ):
                         'message_id'  => intval( $msg->id ),
                         'sender_id'   => intval( $msg->sender_id ),
                         'sender_name' => Better_Messages()->functions->get_name( $msg->sender_id ),
-                        'content'     => wp_strip_all_tags( $msg->message ),
+                        'content'     => wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $msg->message ) ),
                         'created_at'  => date( 'c', (int) ( (int) $msg->created_at / 10 / 1000 ) ),
                     );
                 }
@@ -261,7 +261,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Messaging' ) ):
                     'message_id'  => $mid,
                     'count'       => intval( $item['count'] ),
                     'sender_name' => $msg ? Better_Messages()->functions->get_name( $msg->sender_id ) : '',
-                    'content'     => $msg ? wp_strip_all_tags( $msg->message ) : '',
+                    'content'     => $msg ? wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $msg->message ) ) : '',
                     'created_at'  => $msg ? date( 'c', (int) ( (int) $msg->created_at / 10 / 1000 ) ) : '',
                 );
             }, $results );
