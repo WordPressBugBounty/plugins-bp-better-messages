@@ -498,7 +498,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             global $wpdb;
             $thread_id      = intval($request->get_param('id'));
             $search_request = sanitize_text_field( $request->get_param('search' ) );
-            $search         = '%' . $search_request . '%';
+            $search_like    = $wpdb->esc_like( $search_request );
+            $search         = '%' . $search_like . '%';
 
             $query = $wpdb->prepare("
                 SELECT `user_index`.`ID`
@@ -510,9 +511,13 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                     AND `recipients`.`is_deleted` = 0)
                 WHERE `user_index`.`display_name` LIKE %s
                    OR `user_index`.`user_nicename` LIKE %s
-                ORDER BY `user_index`.`display_name` ASC
+                ORDER BY CASE
+                    WHEN `user_index`.`display_name` LIKE %s THEN 0
+                    WHEN `user_index`.`display_name` LIKE %s THEN 1
+                    ELSE 2
+                END ASC, `user_index`.`display_name` ASC
                 LIMIT 0, 50
-            ", $thread_id, Better_Messages()->functions->get_current_user_id(), $search, $search );
+            ", $thread_id, Better_Messages()->functions->get_current_user_id(), $search, $search, $search_like . '%', '% ' . $search_like . '%' );
 
             $user_ids = $wpdb->get_col( $query );
 

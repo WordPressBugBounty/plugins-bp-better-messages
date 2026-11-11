@@ -134,9 +134,14 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
             Better_Messages()->load_scripts();
             wp_styles()->all_deps([ 'better-messages' ]);
 
-            $base_url = site_url( '' );
+            $base_url  = site_url( '' );
+            $in_portal = doing_action( 'fluent_community/portal_head' );
 
             foreach( wp_styles()->to_do as $handle ) {
+                if ( $in_portal ) {
+                    wp_styles()->done[] = $handle;
+                }
+
                 $_style = wp_styles()->registered[$handle];
                 $src = $_style->src;
 
@@ -288,9 +293,14 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             wp_scripts()->all_deps(['better-messages']);
 
-            $base_url = site_url( '' );
+            $base_url  = site_url( '' );
+            $in_portal = doing_action( 'fluent_community/before_js_loaded' );
 
             foreach( wp_scripts()->to_do as $handle ){
+                if ( $in_portal ) {
+                    wp_scripts()->done[] = $handle;
+                }
+
                 $_script = wp_scripts()->registered[$handle];
 
                 $src = $_script->src;
@@ -344,6 +354,10 @@ if ( ! class_exists( 'Better_Messages_Fluent_Community' ) ) {
 
             echo '<script type="text/javascript">var BM_Fluent_Community=' . wp_json_encode( $vars ) . ';</script>';
             echo '<script type="text/javascript" src="' . $src . '"></script>';
+
+            if ( $in_portal ) {
+                do_action( 'better_messages_scripts_printed', 'fluent-community' );
+            }
         }
 
         public function message_page_url( $url, $user_id ){

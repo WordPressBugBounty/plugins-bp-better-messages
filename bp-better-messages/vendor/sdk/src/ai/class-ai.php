@@ -10,7 +10,7 @@ if ( ! class_exists( 'WordPlus_SDK_AI' ) ) {
 
     final class WordPlus_SDK_AI
     {
-        const API = 1;
+        const API = 2;
 
         const PROVIDERS = array(
             'openai'    => 'WordPlus_SDK_AI_OpenAI',
@@ -80,6 +80,36 @@ if ( ! class_exists( 'WordPlus_SDK_AI' ) ) {
             $other = apply_filters( 'wordplus_ai_provider', null, (string) $id, $key, $this );
 
             return $other instanceof WordPlus_SDK_AI_Provider ? $other : null;
+        }
+
+        private function mcp_classes()
+        {
+            $this->libraries();
+            require_once __DIR__ . '/class-mcp-address.php';
+            require_once __DIR__ . '/class-mcp-sink.php';
+            require_once __DIR__ . '/class-mcp.php';
+            require_once __DIR__ . '/class-mcp-oauth.php';
+        }
+
+        public function mcp( $url, array $auth = array() )
+        {
+            $this->mcp_classes();
+
+            return new WordPlus_SDK_AI_MCP( $this, $url, $auth );
+        }
+
+        public function mcp_oauth( $url, $owner, $network = '' )
+        {
+            $this->mcp_classes();
+
+            return new WordPlus_SDK_AI_MCP_OAuth( $this, $url, $owner, $network );
+        }
+
+        public function mcp_address( $url, $network = '' )
+        {
+            $this->mcp_classes();
+
+            return WordPlus_SDK_AI_MCP_Address::read( $url, $network );
         }
 
         public function shipped()

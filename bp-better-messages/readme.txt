@@ -4,11 +4,11 @@ Tags: BuddyPress, chat room, video chat, group chat, private message
 Requires at least: 5.9.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Real-time messaging and chat rooms for WordPress ecosystem: private conversations, public and private chat rooms, video & audio calls, and more.
+Real-time private messaging, group chat, chat rooms, video and audio calls, AI chat bots and mobile apps for WordPress, BuddyPress and BuddyBoss.
 
 == Description ==
 
@@ -443,6 +443,30 @@ Besides WordPlus Cloud, the plugin uses these services, each as described:
 == Changelog ==
 
 **Noticed something wrong after updating?** Email [support@better-messages.com](mailto:support@better-messages.com) or open a topic on the [support forum](https://wordpress.org/support/plugin/bp-better-messages/).
+
+= 3.2.3 =
+* Added [`get_chat_online_users`](https://www.better-messages.com/hooks/php-functions/#get_chat_online_users) in PHP and [`BetterMessages.getRoomOnlineUsers()`](https://www.better-messages.com/hooks/js-functions/#getRoomOnlineUsers) in JavaScript (WebSocket version): custom code can now read who is in a presence-based chat room, which keeps no members to match against the online users of the site
+* Added the [`better_messages_scripts_printed`](https://www.better-messages.com/hooks/php-actions/#better_messages_scripts_printed) action: a plugin that adds to the messenger can print its scripts inside the portal of FluentCommunity, which runs no footer of WordPress
+* Improved the admin pages: Settings, Chat Rooms, AI Chat Bots and the Mobile App page now use the WordPlus admin design shared by every WordPlus plugin. Chat Rooms and AI Chat Bots open as a list with a page for each, and confirmations ask inside the page instead of in a browser pop-up
+* Improved the sound of group calls on a poor connection: while someone is talking their sound comes first, so the camera sends a smaller picture, a step at a time, before the sound breaks up, and grows back as the connection recovers. Sound lost on the way to the call server is sent again (the mobile app with its next build), and a jammed upload shows as a warning mark on the connection badge
+* Improved group calls on a very slow upload: with small video tiles and in encrypted calls the microphone now gives way too, so the picture freezes less and the sound holds up better (the mobile app with its next build)
+* Improved video in group calls from computers whose graphics card drops the camera's frames: the camera now moves to another codec within 30 seconds, and VP9 is no longer judged too heavy for a computer that sends it without trouble
+* Improved video in one-to-one calls: on a direct connection the camera now sends as much as the connection carries, up to 10 Mbps where it was held at 4, for a sharper picture on a good connection (the mobile app with its next build)
+* Fixed the microphone taking long to turn on in a call with AI Noise Removal on: it now turns on at once while the noise removal loads, and the browser keeps its files for later visits
+* Fixed the microphone turning on by itself when joining a group call, on some Android phones (with the next app build)
+* Fixed the camera or microphone turning off when a slow computer reconnected to a group call, and a dead second camera that could stay in the call afterwards
+* Fixed the camera in some one-to-one calls sending smaller and softer than the connection allowed for the whole call, when it was sent in H.265 (Safari on a Mac, Chrome on Android)
+* Fixed holding Space in a call leaving the microphone on after letting go, when the microphone button had just been clicked or the microphone was slow to open
+* Fixed **Mark as unread** being undone within seconds when a conversation was marked right after it was opened (WebSocket version)
+* Fixed blocking or unblocking someone while the conversation was still loading, which left the message field, or the notice that replies are blocked, in place until a reload
+* Fixed the mention list putting names that only contain the typed text below the ones that start with it, so Enter could pick the wrong person
+* Fixed long names running out past the edge of the mention list: the list now widens to fit them as far as the window allows
+* Fixed a message's menu, and its reactions, not opening in a chat room shown beside a WordPlus Live Stream player in full screen
+* Fixed a live stream not showing in a chat room opened inside the portal of FluentCommunity (with WordPlus Live Stream 0.2.2)
+* Fixed presence-based chat rooms never showing how many people are in them in the Chat Rooms list (WebSocket version)
+* Fixed the title of a course, product or listing card above a conversation turning purple once its link was opened, on FluentCommunity and on other pages whose theme does not color links
+* Updated the WordPlus SDK to 1.0.8, the version WordPlus Live Stream 0.2.2 carries
+* Other minor bugfixes and improvements
 
 = 3.2.2 =
 * Added the [`better_messages_can_add_participant`](https://www.better-messages.com/hooks/php-filters/#better_messages_can_add_participant) filter: it can refuse someone before they join an existing conversation, on every route that adds a person to one and before anything is published

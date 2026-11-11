@@ -206,9 +206,15 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Gemini' ) ) {
             return array( 'contents' => $contents );
         }
 
+        const STRING_FORMATS = array( 'enum', 'date-time' );
+
         private static function gemini_schema( array $schema )
         {
             $out = array_intersect_key( $schema, array_flip( self::SCHEMA_KEYS ) );
+
+            if ( isset( $out['format'], $out['type'] ) && 'string' === $out['type'] && ! in_array( $out['format'], self::STRING_FORMATS, true ) ) {
+                unset( $out['format'] );
+            }
 
             if ( isset( $out['properties'] ) && ( is_array( $out['properties'] ) || $out['properties'] instanceof \stdClass ) ) {
                 $properties = array();

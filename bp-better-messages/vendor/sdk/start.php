@@ -5,7 +5,7 @@ if ( ! isset( $GLOBALS['wordplus_sdk_copies'] ) || ! is_array( $GLOBALS['wordplu
     $GLOBALS['wordplus_sdk_copies'] = array();
 }
 
-$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.7';
+$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.8';
 
 if ( is_readable( __DIR__ . '/realtime/realtime.php' ) ) {
     require_once __DIR__ . '/realtime/realtime.php';
@@ -75,6 +75,16 @@ if ( ! function_exists( 'wordplus_sdk_register' ) ) {
     }
 
     add_action( 'plugins_loaded', 'wordplus_sdk_boot', PHP_INT_MIN );
+}
+
+if ( ! function_exists( 'wordplus_app' ) ) {
+    function wordplus_app() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'app' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->app();
+    }
 }
 
 if ( ! function_exists( 'wordplus_push' ) ) {

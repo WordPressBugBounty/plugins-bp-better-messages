@@ -113,6 +113,58 @@ class Better_Messages_Chats
         return $this->is_ephemeral_chat( $chat_id );
     }
 
+    public function get_chat_online_users( $chat_id )
+    {
+        $chat_id = (int) $chat_id;
+
+        if ( ! Better_Messages()->websocket || ! $this->is_chat_room( $chat_id ) ) {
+            return array();
+        }
+
+        $thread_id = (int) $this->get_chat_thread_id( $chat_id );
+
+        if ( $thread_id <= 0 ) {
+            return array();
+        }
+
+        $members   = Better_Messages()->functions->get_recipients_ids( $thread_id );
+        $ephemeral = $this->is_ephemeral_chat( $chat_id );
+        $connected = array();
+        $online    = array();
+
+        if ( $ephemeral ) {
+            $rooms  = Better_Messages()->websocket->get_room_online_users( array( $thread_id ) );
+            $online = isset( $rooms[ $thread_id ] ) ? $rooms[ $thread_id ] : array();
+        } else if ( count( $members ) > 0 ) {
+            $connected = Better_Messages()->websocket->get_online_users();
+        }
+
+        foreach ( $members as $user_id ) {
+            $user_id = (int) $user_id;
+
+            if ( in_array( $user_id, $online, true ) ) {
+                continue;
+            }
+
+            if ( isset( $connected[ $user_id ] ) || $this->is_answering_bot( $user_id ) ) {
+                $online[] = $user_id;
+            }
+        }
+
+        return $online;
+    }
+
+    private function is_answering_bot( $user_id )
+    {
+        if ( $user_id >= 0 || ! function_exists( 'Better_Messages_AI' ) ) {
+            return false;
+        }
+
+        $bot_id = (int) Better_Messages()->guests->get_bot_id( $user_id );
+
+        return $bot_id > 0 && Better_Messages_AI()->bot_can_answer( $bot_id );
+    }
+
     function before_message_send( &$args, &$errors ){
         $thread_id = $args['thread_id'];
         $type = Better_Messages()->functions->get_thread_type( $thread_id );

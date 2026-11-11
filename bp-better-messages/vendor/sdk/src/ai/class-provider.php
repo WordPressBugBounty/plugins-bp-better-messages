@@ -210,6 +210,7 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Provider' ) ) {
             }
 
             $usage = null;
+            $each  = array();
             $meta  = array();
             $tools = ! empty( $request['tools'] );
 
@@ -231,8 +232,9 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Provider' ) ) {
                     return;
                 }
 
-                $meta  = $turn['meta'];
-                $usage = null === $usage ? ( isset( $meta['usage'] ) ? $meta['usage'] : array() ) : self::sum( $usage, isset( $meta['usage'] ) ? $meta['usage'] : array() );
+                $meta   = $turn['meta'];
+                $each[] = isset( $meta['usage'] ) ? $meta['usage'] : array();
+                $usage  = null === $usage ? ( isset( $meta['usage'] ) ? $meta['usage'] : array() ) : self::sum( $usage, isset( $meta['usage'] ) ? $meta['usage'] : array() );
 
                 if ( ! $tools || empty( $turn['calls'] ) ) {
                     break;
@@ -257,6 +259,7 @@ if ( ! class_exists( 'WordPlus_SDK_AI_Provider' ) ) {
             }
             if ( $tools && $round > 1 ) {
                 $meta['rounds'] = min( $round, self::ROUNDS );
+                $meta['each_round'] = $each;
             }
 
             yield array( 'finish', $meta );

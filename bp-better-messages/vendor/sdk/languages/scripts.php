@@ -6,7 +6,7 @@ return array(
 	'hashes'  => array(
 		'ar' => array(
 			'wordplus-sdk-pages' => '1a788ccea65a47f2',
-			'wordplus-ui' => '9ea7f06bc2275407',
+			'wordplus-ui' => '3ad0bbfdc60b23f5',
 			'wordplus-sdk-survey' => '6b6dd8b0cc117111',
 			'wordplus-toasts' => 'f0d30076a21d4487',
 			'wordplus-storage-admin' => '722369a3be15de8e',
@@ -18,7 +18,7 @@ return array(
 		),
 		'bg_BG' => array(
 			'wordplus-sdk-pages' => '51464996d9d43acd',
-			'wordplus-ui' => '5a1820efd05f02ec',
+			'wordplus-ui' => 'bf17a99584ece4a2',
 			'wordplus-sdk-survey' => 'd652f178c9ecd88f',
 			'wordplus-toasts' => 'b67315b938db97c7',
 			'wordplus-storage-admin' => 'c60765353221a7c8',
@@ -30,7 +30,7 @@ return array(
 		),
 		'cs_CZ' => array(
 			'wordplus-sdk-pages' => '7863e3cad6cba21b',
-			'wordplus-ui' => 'd7d9e5f193535b5d',
+			'wordplus-ui' => '970503e05eaeed0c',
 			'wordplus-sdk-survey' => 'fb53b50044eea291',
 			'wordplus-toasts' => '6284550db5948c54',
 			'wordplus-storage-admin' => 'a17e3d98baffb131',
@@ -42,7 +42,7 @@ return array(
 		),
 		'da_DK' => array(
 			'wordplus-sdk-pages' => '49df08effb27de1f',
-			'wordplus-ui' => '391367be5a4d9e0f',
+			'wordplus-ui' => 'f9c69dfa54581916',
 			'wordplus-sdk-survey' => '8b1dc86dbb4d1194',
 			'wordplus-toasts' => 'de8c595bb2c23d5a',
 			'wordplus-storage-admin' => 'b8ca519c2ee6d8c0',
@@ -54,7 +54,7 @@ return array(
 		),
 		'de_DE' => array(
 			'wordplus-sdk-pages' => '69ef066e8388aaaf',
-			'wordplus-ui' => '84a65266138e1460',
+			'wordplus-ui' => 'e4baec50ff2636c9',
 			'wordplus-sdk-survey' => '25306f48f3acf63d',
 			'wordplus-toasts' => '8b9e6621b9502efb',
 			'wordplus-storage-admin' => 'a1ec9f99f6b7c646',
@@ -66,7 +66,7 @@ return array(
 		),
 		'el' => array(
 			'wordplus-sdk-pages' => '94ace800d6cf662c',
-			'wordplus-ui' => '3d95e363f11366d7',
+			'wordplus-ui' => 'eff5211cc296ac8f',
 			'wordplus-sdk-survey' => '38b45516adaf3756',
 			'wordplus-toasts' => 'd1a7e85ab248f743',
 			'wordplus-storage-admin' => 'cafe4f6147519ff9',
@@ -78,7 +78,7 @@ return array(
 		),
 		'es_ES' => array(
 			'wordplus-sdk-pages' => 'c77b205539ea462c',
-			'wordplus-ui' => '53c548bc12591725',
+			'wordplus-ui' => '80033943fcae9a3c',
 			'wordplus-sdk-survey' => '3ee43b53a21fb563',
 			'wordplus-toasts' => 'ab063ac67fd58233',
 			'wordplus-storage-admin' => 'c706bdf0969686d8',
@@ -90,7 +90,7 @@ return array(
 		),
 		'et' => array(
 			'wordplus-sdk-pages' => '9d14c3beb67d67e4',
-			'wordplus-ui' => 'f61d2a711a472d7d',
+			'wordplus-ui' => '611d46d15ca6ac4d',
 			'wordplus-sdk-survey' => '58345391fa9a4c3b',
 			'wordplus-toasts' => '21e8cd50048f5daf',
 			'wordplus-storage-admin' => '407803edf81c18b3',
@@ -102,7 +102,7 @@ return array(
 		),
 		'fa_IR' => array(
 			'wordplus-sdk-pages' => '378f32f8e3deaecb',
-			'wordplus-ui' => '7508522660c07487',
+			'wordplus-ui' => '00dd8ca66be50c26',
 			'wordplus-sdk-survey' => '9948ae7148e6e52c',
 			'wordplus-toasts' => '7b670db40c29e7cc',
 			'wordplus-storage-admin' => '7b3db3bfde434618',
@@ -114,7 +114,7 @@ return array(
 		),
 		'fi' => array(
 			'wordplus-sdk-pages' => '1be03572a97d4b7e',
-			'wordplus-ui' => '1e59429216dbf954',
+			'wordplus-ui' => 'b86f53e8ba16474f',
 			'wordplus-sdk-survey' => '0688adeb8a356f9f',
 			'wordplus-toasts' => '09143b6656552453',
 			'wordplus-storage-admin' => '8380ec30cb82210e',
@@ -126,7 +126,7 @@ return array(
 		),
 		'fr_FR' => array(
 			'wordplus-sdk-pages' => 'ccc57927e0da6576',
-			'wordplus-ui' => '92b979b4a3329079',
+			'wordplus-ui' => '13359d20d2b67e6e',
 			'wordplus-sdk-survey' => 'd4450b7bc8d6dd29',
 			'wordplus-toasts' => '7217475bd95772df',
 			'wordplus-storage-admin' => '12d61d4ceff28fde',
@@ -138,7 +138,7 @@ return array(
 		),
 		'he_IL' => array(
 			'wordplus-sdk-pages' => '5d198f941a45b2d1',
-			'wordplus-ui' => '336eeee704a5fd8a',
+			'wordplus-ui' => 'd86f466098da331f',
 			'wordplus-sdk-survey' => '09e89428045ad685',
 			'wordplus-toasts' => '37a2bac85a5ca13f',
 			'wordplus-storage-admin' => 'ba29a2f0ec492709',
@@ -150,7 +150,7 @@ return array(
 		),
 		'hu_HU' => array(
 			'wordplus-sdk-pages' => 'd8023835cda94095',
-			'wordplus-ui' => '72bfec366d83247f',
+			'wordplus-ui' => 'df6e1c676399b2e6',
 			'wordplus-sdk-survey' => '7348275809d286bd',
 			'wordplus-toasts' => '898e9883d17a0522',
 			'wordplus-storage-admin' => 'c0a33ab95136441c',
@@ -162,7 +162,7 @@ return array(
 		),
 		'it_IT' => array(
 			'wordplus-sdk-pages' => '7a0b467d74a74dbb',
-			'wordplus-ui' => '5486360332335503',
+			'wordplus-ui' => '6287b865ba5ae196',
 			'wordplus-sdk-survey' => 'd8b1db536e9c44ec',
 			'wordplus-toasts' => '4a366beca81caf76',
 			'wordplus-storage-admin' => '683475f87c2b1c8f',
@@ -174,7 +174,7 @@ return array(
 		),
 		'ja' => array(
 			'wordplus-sdk-pages' => '5536cae82deca9de',
-			'wordplus-ui' => 'd15336ba8db5925a',
+			'wordplus-ui' => '00f1af446f156403',
 			'wordplus-sdk-survey' => '729bf65697d14b57',
 			'wordplus-toasts' => '9f4ef347ad04dc7e',
 			'wordplus-storage-admin' => '6a8c793dc141f55d',
@@ -186,7 +186,7 @@ return array(
 		),
 		'lt_LT' => array(
 			'wordplus-sdk-pages' => 'c852fa96f714348c',
-			'wordplus-ui' => '6b913afd31d12d0a',
+			'wordplus-ui' => 'c051ce0aef29cb65',
 			'wordplus-sdk-survey' => 'c55cda0ba3b5bb42',
 			'wordplus-toasts' => '0d54a3710b47c14a',
 			'wordplus-storage-admin' => 'f5315bd3f3ccad55',
@@ -198,7 +198,7 @@ return array(
 		),
 		'lv' => array(
 			'wordplus-sdk-pages' => 'b757b0747fcb8f4b',
-			'wordplus-ui' => '9072b7169bf827b3',
+			'wordplus-ui' => '37204dbd50b27703',
 			'wordplus-sdk-survey' => '0cf8f97482bd45a0',
 			'wordplus-toasts' => 'cdc8d22ce6db90aa',
 			'wordplus-storage-admin' => 'a27c9594fac81b7a',
@@ -210,7 +210,7 @@ return array(
 		),
 		'nl_NL' => array(
 			'wordplus-sdk-pages' => 'e2793eba0753ab34',
-			'wordplus-ui' => 'ea7f02ee95c170d5',
+			'wordplus-ui' => 'b67ff77023cd52bb',
 			'wordplus-sdk-survey' => '8b2cb9808a942bdb',
 			'wordplus-toasts' => '4ef61a8356ae42b0',
 			'wordplus-storage-admin' => '2b7011baf583ad26',
@@ -222,7 +222,7 @@ return array(
 		),
 		'pl_PL' => array(
 			'wordplus-sdk-pages' => '33f20685e064dcc7',
-			'wordplus-ui' => '7a468231fcb8b1d1',
+			'wordplus-ui' => '173bda9a82fd8664',
 			'wordplus-sdk-survey' => '9c83b784c1ff7c8e',
 			'wordplus-toasts' => '6b8d111cdde4b4ec',
 			'wordplus-storage-admin' => '12f32310b3046861',
@@ -234,7 +234,7 @@ return array(
 		),
 		'pt_BR' => array(
 			'wordplus-sdk-pages' => 'e7e5d8fa33cc2062',
-			'wordplus-ui' => '78941fa1c06b0de1',
+			'wordplus-ui' => '2673581bdc88ee9c',
 			'wordplus-sdk-survey' => 'f0c461200d007ca2',
 			'wordplus-toasts' => 'ed539a4b2b0081fb',
 			'wordplus-storage-admin' => '3c053a6cceb7d01e',
@@ -246,7 +246,7 @@ return array(
 		),
 		'pt_PT' => array(
 			'wordplus-sdk-pages' => '48e000b36a1928fa',
-			'wordplus-ui' => 'a8c8379eace49ccb',
+			'wordplus-ui' => '1b36c9b09ab23e9d',
 			'wordplus-sdk-survey' => '28757659465a2523',
 			'wordplus-toasts' => 'ac1b22745d604301',
 			'wordplus-storage-admin' => '578a1513ead618ba',
@@ -258,7 +258,7 @@ return array(
 		),
 		'ro_RO' => array(
 			'wordplus-sdk-pages' => 'f336c69b51cd9177',
-			'wordplus-ui' => '32137364d8eeda38',
+			'wordplus-ui' => '31b7013b9fb96f51',
 			'wordplus-sdk-survey' => '6cbb2dd470a937c6',
 			'wordplus-toasts' => 'bfbb2ff3e96dc80b',
 			'wordplus-storage-admin' => '15e2cf2d06e3ddc0',
@@ -270,7 +270,7 @@ return array(
 		),
 		'ru_RU' => array(
 			'wordplus-sdk-pages' => 'f56ba23e278f81d1',
-			'wordplus-ui' => '1c347a8d69454e0d',
+			'wordplus-ui' => 'fdebe4632942cdc0',
 			'wordplus-sdk-survey' => '91b619305a0207f9',
 			'wordplus-toasts' => '19b07d5a26f8c537',
 			'wordplus-storage-admin' => 'c41c89043554b482',
@@ -282,7 +282,7 @@ return array(
 		),
 		'sk_SK' => array(
 			'wordplus-sdk-pages' => 'dab39f7173495baa',
-			'wordplus-ui' => 'f7d75db91a724828',
+			'wordplus-ui' => 'afcca5237acb3141',
 			'wordplus-sdk-survey' => '3795a1432b873e2e',
 			'wordplus-toasts' => '40f9ba947cdabca4',
 			'wordplus-storage-admin' => 'a03a1618131a3b7e',
@@ -294,7 +294,7 @@ return array(
 		),
 		'sv_SE' => array(
 			'wordplus-sdk-pages' => '63b4204234083760',
-			'wordplus-ui' => 'dc47e44cae6878a6',
+			'wordplus-ui' => '17f7609c149a6481',
 			'wordplus-sdk-survey' => '8935d03d84372ed0',
 			'wordplus-toasts' => '06f97ba0d84f9dfa',
 			'wordplus-storage-admin' => '7c8bdf3c05a31e5c',
@@ -306,7 +306,7 @@ return array(
 		),
 		'tr_TR' => array(
 			'wordplus-sdk-pages' => '5d7a8959d56490af',
-			'wordplus-ui' => '76eab4efa4d90cdd',
+			'wordplus-ui' => '45009507f2291515',
 			'wordplus-sdk-survey' => 'c5192aa4d3f798a4',
 			'wordplus-toasts' => 'c5343a9ddb659c47',
 			'wordplus-storage-admin' => '2215fb77d4ee0eb7',
@@ -318,7 +318,7 @@ return array(
 		),
 		'uk' => array(
 			'wordplus-sdk-pages' => 'db8eca5dd1af64ea',
-			'wordplus-ui' => '9b718fa49d32170d',
+			'wordplus-ui' => 'fb054e7dd7dc2fbd',
 			'wordplus-sdk-survey' => '0035c9f2d8d7f8a3',
 			'wordplus-toasts' => '702ed1cc96bf7428',
 			'wordplus-storage-admin' => '0e40f6d2216e9f28',
@@ -330,7 +330,7 @@ return array(
 		),
 		'vi' => array(
 			'wordplus-sdk-pages' => '4d9ecdb81028a69e',
-			'wordplus-ui' => 'f5674e8aebc455db',
+			'wordplus-ui' => '9a52d70a03041d0b',
 			'wordplus-sdk-survey' => '02f01312e5f8ace5',
 			'wordplus-toasts' => '560d686ff7f19bb6',
 			'wordplus-storage-admin' => '8bf7c27712556ffb',
@@ -342,7 +342,7 @@ return array(
 		),
 		'zh_CN' => array(
 			'wordplus-sdk-pages' => 'ef01ae9d91420930',
-			'wordplus-ui' => '0da5e23e0568d065',
+			'wordplus-ui' => '5897b6d908685705',
 			'wordplus-sdk-survey' => '73f610e0201419d7',
 			'wordplus-toasts' => '080c323d6f30309b',
 			'wordplus-storage-admin' => '429cb3f4f0b01ea1',
@@ -684,10 +684,19 @@ return array(
 			array( 'Choose a photo', 'Media picker' ),
 			array( 'Remove the photo', 'Media picker' ),
 			array( 'A photo', 'Media picker' ),
+			array( 'Remove', 'Admin chip' ),
 			array( 'Close', 'Dialog' ),
 			array( 'Cancel', 'Dialog' ),
-			array( 'Change icon', 'Icon picker' ),
+			array( 'Type %s to confirm', 'Dialog' ),
+			array( 'Pick a colour', 'Admin field' ),
+			array( 'Clear', 'Admin field' ),
+			array( 'Auto', 'Admin field' ),
+			array( 'Reset', 'Admin field' ),
+			array( 'A colour is # and six letters or digits, such as #2271B1.', 'Admin field' ),
+			array( 'Copied', 'Admin field' ),
+			array( 'Copy', 'Admin field' ),
 			array( 'Custom SVG', 'Icon picker' ),
+			array( 'Change icon', 'Icon picker' ),
 			array( 'Select icon', 'Icon picker' ),
 			array( 'Remove icon', 'Icon picker' ),
 			array( 'Preset icons', 'Icon picker' ),
@@ -700,6 +709,7 @@ return array(
 			array( 'Preview', 'Icon picker' ),
 			array( 'That isn’t an SVG an icon can be made of.', 'Icon picker' ),
 			array( 'Apply icon', 'Icon picker' ),
+			array( 'Confirm', 'Dialog' ),
 		),
 		'wordplus-sdk-survey' => array(
 			array( 'I found a better plugin', 'Deactivation survey' ),

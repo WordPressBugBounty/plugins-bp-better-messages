@@ -1386,6 +1386,8 @@ function _bm_frontend_translations_map() {
         array( '_x', 'Say hi', 'Empty conversation' ),
         array( '_x', 'No messages here yet — start the conversation from the composer below', 'Empty conversation' ),
         array( '__', 'Message is pinned' ),
+        array( '_x', 'Your upload is jammed', 'Call Notice' ),
+        array( '_x', 'Others may see your video freeze or hear your sound break up. Pausing other uploads on your network can help: a backup, cloud sync or another device.', 'Call Notice' ),
         array( '_x', 'Online', 'Chat Room Screen' ),
         array( '_x', 'No users online', 'Chat Room Screen' ),
         array( '_x', 'Offline', 'User presence label' ),

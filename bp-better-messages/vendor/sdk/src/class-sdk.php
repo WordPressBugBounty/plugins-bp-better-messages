@@ -24,6 +24,8 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         private $push = null;
 
+        private $app = null;
+
         private $pickers = null;
 
         const STORAGE_JOB = 'wordplus_storage_job';
@@ -64,6 +66,7 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             'updater'     => array( 'src/class-updater.php' ),
             'credits'     => array( 'src/class-credits.php' ),
             'push'        => array( 'src/class-push.php', 'src/class-push-table.php', 'src/class-push-progressify.php', 'push' ),
+            'app'         => array( 'src/class-app.php', 'src/class-app-devices.php' ),
             'storage'     => array( 'src/class-storage.php', 'src/class-storage-admin.php', 'src/class-storage-cloud.php', 'src/class-storage-direct.php', 'src/class-storage-queue.php', 'src/class-storage-s3.php', 'src/class-storage-sweeper.php', 'storage' ),
             'pickers'     => array( 'src/class-pickers.php', 'src/pickers', 'pickers', 'stickers' ),
             'toasts'      => array( 'src/class-toasts.php', 'toasts' ),
@@ -134,6 +137,12 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             add_action( 'parse_request', array( $sdk, 'maybe_serve_push_worker' ) );
 
             add_action( 'deleted_user', array( $sdk, 'push_deleted_user' ) );
+
+            add_filter( 'determine_current_user', array( $sdk, 'app_user' ), 30 );
+            add_filter( 'query_vars', array( $sdk, 'app_query_vars' ) );
+            add_action( 'parse_request', array( $sdk, 'maybe_serve_app' ) );
+            add_action( 'after_password_reset', array( $sdk, 'app_password_reset' ) );
+            add_action( 'profile_update', array( $sdk, 'app_profile_update' ), 10, 2 );
 
             add_action( self::TRACKING_SYNC, array( $sdk, 'run_tracking_sync' ) );
             add_action( self::TRACKING_SOON, array( $sdk, 'run_tracking_sync' ) );
@@ -567,6 +576,10 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
                     $this->push()->routes();
                 }
 
+                if ( $this->app() ) {
+                    $this->app()->routes();
+                }
+
                 if ( $this->pickers() ) {
                     $this->pickers()->routes();
                 }
@@ -987,6 +1000,62 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
         {
             if ( $this->push() ) {
                 $this->push()->store()->remove_user( (int) $user_id );
+            }
+
+            if ( $this->app() ) {
+                $this->app()->sign_out_user( (int) $user_id, 'user' );
+            }
+        }
+
+        public function app()
+        {
+            if ( null === $this->app && $this->has_part( 'app' ) ) {
+                require_once $this->path( 'src/class-app.php' );
+                $this->app = new WordPlus_SDK_App( $this );
+            }
+
+            return $this->app;
+        }
+
+        public function app_user( $user_id )
+        {
+            if ( ! isset( $_SERVER['HTTP_X_WORDPLUS_APP'] ) || ! $this->app() ) {
+                return $user_id;
+            }
+
+            return $this->app()->user( $user_id );
+        }
+
+        public function app_query_vars( $vars )
+        {
+            $vars[] = 'wordplus-app-signin';
+            $vars[] = 'wordplus-app-session';
+
+            return $vars;
+        }
+
+        public function maybe_serve_app( $wp )
+        {
+            $vars = is_object( $wp ) ? (array) $wp->query_vars : array();
+
+            if ( ( ! empty( $vars['wordplus-app-signin'] ) || ! empty( $vars['wordplus-app-session'] ) || isset( $_COOKIE['wordplus_app_signin'] ) ) && $this->app() ) {
+                $this->app()->maybe_serve( $wp );
+            }
+        }
+
+        public function app_password_reset( $user )
+        {
+            if ( is_object( $user ) && $this->app() ) {
+                $this->app()->sign_out_user( (int) $user->ID, 'password' );
+            }
+        }
+
+        public function app_profile_update( $user_id, $old = null )
+        {
+            $user = is_object( $old ) ? get_userdata( (int) $user_id ) : false;
+
+            if ( $user && (string) $old->user_pass !== (string) $user->user_pass && $this->app() ) {
+                $this->app()->sign_out_user( (int) $user_id, 'password' );
             }
         }
 
