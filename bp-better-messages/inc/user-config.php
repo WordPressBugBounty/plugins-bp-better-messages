@@ -150,7 +150,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
 
             $settings = [];
 
-            if( Better_Messages()->settings['allowUsersRestictNewThreads'] === '1' ) {
+            if( $user_id > 0 && Better_Messages()->settings['allowUsersRestictNewThreads'] === '1' ) {
                 $options = $this->get_who_can_start_options();
                 $current = $this->get_who_can_start_value( Better_Messages()->functions->get_current_user_id() );
 
@@ -173,7 +173,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 && Better_Messages()->settings['allowEnterToSendControl'] === '1' ) {
+            if( $user_id !== 0 && Better_Messages()->settings['allowEnterToSendControl'] === '1' ) {
                 $enter_to_send = Better_Messages()->functions->is_enter_to_send_enabled( $user_id );
 
                 $settings[] = [
@@ -194,6 +194,32 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                             'value' => 'shift_enter',
                             'checked' => ! $enter_to_send,
                             'desc' => _x('Enter starts a new line. Best if you often write longer messages over several lines.', 'User settings', 'bp-better-messages')
+                        ]
+                    ]
+                ];
+            }
+
+            if( $user_id !== 0 && Better_Messages()->requests->members_choose() ) {
+                $requests_choice = Better_Messages()->requests->member_choice( $user_id );
+
+                $settings[] = [
+                    'id'      => 'message_requests',
+                    'title'   => _x('Messages from people you have not talked to', 'User settings', 'bp-better-messages'),
+                    'type'    => 'radio',
+                    'options' => [
+                        [
+                            'id'      => 'message_requests_requests',
+                            'label'   => _x('Keep them in Message requests', 'User settings', 'bp-better-messages'),
+                            'value'   => 'requests',
+                            'checked' => $requests_choice === 'requests',
+                            'desc'    => _x('No notification until you accept them, and they do not know you saw them', 'User settings', 'bp-better-messages')
+                        ],
+                        [
+                            'id'      => 'message_requests_deliver',
+                            'label'   => _x('Deliver them as usual', 'User settings', 'bp-better-messages'),
+                            'value'   => 'deliver',
+                            'checked' => $requests_choice === 'deliver',
+                            'desc'    => _x('They notify you like any other conversation', 'User settings', 'bp-better-messages')
                         ]
                     ]
                 ];
@@ -242,7 +268,24 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 && Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' ) {
+            if( $user_id < 0 && Better_Messages()->guests->email_mailable( Better_Messages()->guests->get_guest_user( $user_id ) ) ) {
+                $settings[] = [
+                    'id'      => 'guest_email',
+                    'title'   => _x('Email notifications', 'User settings', 'bp-better-messages'),
+                    'type'    => 'checkboxes',
+                    'options' => [
+                        [
+                            'id'      => 'email_unread',
+                            'label'   => _x('Email me about unread messages', 'Profile dialog', 'bp-better-messages'),
+                            'value'   => 'yes',
+                            'checked' => Better_Messages()->functions->get_user_meta( $user_id, 'bm_email_unread', true ) !== 'no',
+                            'desc'    => _x('Get an email about unread messages while you are away.', 'User settings', 'bp-better-messages')
+                        ]
+                    ]
+                ];
+            }
+
+            if( $user_id !== 0 && Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' ) {
                 $notifications_options[] = [
                     'id' => 'onsite_notifications',
                     'label' => _x('Show a popup when a new message arrives', 'User settings', 'bp-better-messages'),
@@ -252,7 +295,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['notificationSound'] > 0 ) {
+            if( $user_id !== 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['notificationSound'] > 0 ) {
                 $notifications_options[] = [
                     'id' => 'sound_notifications',
                     'label' => _x('Disable new message sound notification', 'User settings', 'bp-better-messages'),
@@ -262,7 +305,7 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                 ];
             }
 
-            if( $user_id > 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['sentSound'] > 0 ) {
+            if( $user_id !== 0 && Better_Messages()->settings['allowSoundDisable'] === '1' && (int) Better_Messages()->settings['sentSound'] > 0 ) {
                 $notifications_options[] = [
                     'id' => 'sent_sound_notifications',
                     'label' => _x('Disable sound when sending a message', 'User settings', 'bp-better-messages'),
@@ -345,6 +388,16 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                         Better_Messages()->notification_levels->set_user_email_scope( $user_id, $value );
                     }
                     break;
+                case 'email_unread':
+                    if( $user_id < 0 && Better_Messages()->guests->email_mailable( Better_Messages()->guests->get_guest_user( $user_id ) ) ){
+                        Better_Messages()->functions->update_user_meta( $user_id, 'bm_email_unread', ( $value === 'false' ) ? 'no' : 'yes' );
+                    }
+                    break;
+                case 'message_requests':
+                    if( $user_id !== 0 && Better_Messages()->requests->members_choose() ){
+                        Better_Messages()->requests->set_member_choice( $user_id, (string) $value );
+                    }
+                    break;
                 case 'who_can_start_conversations':
                     Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_who_can_start_conversations', $value );
                     break;
@@ -381,6 +434,21 @@ if ( !class_exists( 'Better_Messages_User_Config' ) ):
                     if( class_exists('Better_Messages_WebSocket') ){
                         $message = Better_Messages()->functions->rest_user_item( $user_id );
                     }
+                    break;
+                case 'invisible':
+                    if( ! class_exists( 'Better_Messages_Invisible' ) || ! Better_Messages_Invisible()->can_use( $user_id ) ){
+                        return new WP_Error( 'better_messages_invisible_not_allowed', _x( 'You cannot appear offline on this site', 'Invisible mode', 'bp-better-messages' ), [ 'status' => 403 ] );
+                    }
+
+                    $on = $value !== 'false' && $value !== '0' && $value !== '';
+
+                    if( ! Better_Messages_Invisible()->set( $user_id, $on ) ){
+                        return new WP_Error( 'better_messages_invisible_failed', _x( 'Your online status could not be changed. Please try again later.', 'Invisible mode', 'bp-better-messages' ), [ 'status' => 503 ] );
+                    }
+
+                    $message = $on
+                        ? _x( 'You appear offline now', 'Invisible mode', 'bp-better-messages' )
+                        : _x( 'You appear online again', 'Invisible mode', 'bp-better-messages' );
                     break;
             }
 

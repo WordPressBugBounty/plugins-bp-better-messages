@@ -87,6 +87,8 @@ if ( ! class_exists( 'WordPlus_SDK_Visitors' ) ) {
 
             if ( time() - (int) $row['seen_at'] >= self::SEEN_EVERY ) {
                 $this->store()->seen( (int) $row['number'] );
+
+                do_action( 'wordplus_visitor_seen', $this->current );
             }
 
             if ( is_user_logged_in() && 0 === (int) $row['user_id'] ) {

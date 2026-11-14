@@ -183,7 +183,7 @@ if ( ! class_exists( 'Better_Messages_Navigation' ) ) {
             $key     = (string) $request->get_param( 'key' );
             $user_id = Better_Messages()->functions->get_current_user_id();
 
-            if ( $user_id <= 0 && ! Better_Messages()->guests->guest_access_enabled() ) {
+            if ( 0 === (int) $user_id && ! Better_Messages()->guests->guest_access_enabled() ) {
                 return new WP_Error( 'rest_forbidden', _x( 'This tab is not available', 'Navigation tabs', 'bp-better-messages' ), array( 'status' => rest_authorization_required_code() ) );
             }
 

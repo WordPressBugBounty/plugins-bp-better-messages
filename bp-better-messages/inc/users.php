@@ -119,14 +119,14 @@ class Better_Messages_Users
         INSERT INTO `{$this->roles_table}` (user_id, role)
         SELECT (-1 * id) as user_id, 'bm-guest' as role
         FROM `" . bm_get_table('guests') . "` 
-        WHERE `ip` NOT LIKE 'ai-chat-bot%'
+        WHERE `bot_id` = 0
         ON DUPLICATE KEY UPDATE role=role;");
 
         $wpdb->query("
         INSERT INTO `{$this->roles_table}` (user_id, role)
         SELECT (-1 * id) as user_id, 'bm-bot' as role
-        FROM `" . bm_get_table('guests') . "` 
-        WHERE `ip` LIKE 'ai-chat-bot%'
+        FROM `" . bm_get_table('guests') . "`
+        WHERE `bot_id` > 0
         ON DUPLICATE KEY UPDATE role=role;");
 
         $wpdb->query( "DELETE FROM `{$this->users_table}` WHERE ID < 0 AND ID NOT IN (SELECT (-1 * id) FROM `" . bm_get_table('guests' ) . "` WHERE `deleted_at` IS NULL )" );
@@ -272,6 +272,8 @@ class Better_Messages_Users
 
     public function update_last_activity( $user_id, $time = null ){
         global $wpdb;
+
+        if( ! apply_filters( 'better_messages_update_last_activity', true, (int) $user_id ) ) return;
 
         if( is_numeric( $time ) ) $time = gmdate( 'Y-m-d H:i:s', $time );
 

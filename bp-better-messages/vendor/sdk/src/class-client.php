@@ -125,6 +125,37 @@ if ( ! class_exists( 'WordPlus_SDK_Client' ) ) {
             return false === filter_var( $value, FILTER_VALIDATE_IP ) ? '' : $value;
         }
 
+        public static function from_cloudflare( $server = null )
+        {
+            $server = is_array( $server ) ? $server : self::server();
+            $client = self::address( isset( $server['REMOTE_ADDR'] ) ? $server['REMOTE_ADDR'] : '' );
+
+            if ( '' === $client || ! apply_filters( 'wordplus_trust_cloudflare', true ) ) {
+                return false;
+            }
+
+            $proxies = array_filter( array_map( 'strval', (array) apply_filters( 'wordplus_trusted_proxies', array() ) ) );
+            $hops    = self::forwarded( $server );
+
+            for ( $hop = 0; $hop <= self::MAX_HOPS; $hop++ ) {
+                if ( self::in_any( $client, self::CLOUDFLARE ) ) {
+                    return true;
+                }
+
+                if ( ! ( self::local( $client ) || self::in_any( $client, $proxies ) ) || array() === $hops ) {
+                    return false;
+                }
+
+                $client = (string) array_shift( $hops );
+
+                if ( '' === $client ) {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
         private static function local( $ip )
         {
             return false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );

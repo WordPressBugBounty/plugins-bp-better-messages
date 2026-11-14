@@ -326,7 +326,11 @@ if ( !class_exists( 'Better_Messages_BuddyPress' ) ) {
 
                     $args['recipients'] = $bm_recipients;
 
-                    Better_Messages()->functions->new_message($args);
+                    $limit = Better_Messages()->functions->get_max_participants( (int) $message->sender_id );
+
+                    if( $limit === 0 || count( Better_Messages()->functions->new_participant_ids( $bm_recipients, array( (int) $message->sender_id ) ) ) + 1 <= $limit ) {
+                        Better_Messages()->functions->new_message($args);
+                    }
                     $message->recipients = [];
                 }
 

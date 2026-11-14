@@ -165,6 +165,14 @@ class Better_Messages_Translations {
                 if ( $translated !== $msgid ) {
                     $translations[ $key ] = $translated;
                 }
+            } elseif ( $type === '_n' ) {
+                $singular = $def[1];
+                $plural   = $def[2];
+
+                $forms = $this->get_all_plural_forms( $singular, $plural, null, $domain, $plural_samples );
+                if ( $forms !== false ) {
+                    $translations[ $singular ] = $forms;
+                }
             } elseif ( $type === '_nx' ) {
                 $singular = $def[1];
                 $plural   = $def[2];
@@ -228,7 +236,7 @@ class Better_Messages_Translations {
         $translated = false;
 
         foreach ( $samples as $index => $n ) {
-            $text = _nx( $singular, $plural, $n, $context, $domain );
+            $text = null === $context ? _n( $singular, $plural, $n, $domain ) : _nx( $singular, $plural, $n, $context, $domain );
 
             if ( $text !== ( $n === 1 ? $singular : $plural ) ) {
                 $translated = true;

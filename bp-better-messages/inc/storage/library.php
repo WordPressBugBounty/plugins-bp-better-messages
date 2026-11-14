@@ -146,7 +146,10 @@ if ( ! class_exists( 'Better_Messages_Storage_Library' ) ):
             $search = trim( (string) $request->get_param( 'search' ) );
 
             if ( $search !== '' ) {
-                $where[] = $wpdb->prepare( 'f.`name` LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' );
+                $named = $wpdb->prepare( "( f.`name` NOT LIKE 'wpe1.%%' AND f.`name` LIKE %s )", '%' . $wpdb->esc_like( $search ) . '%' );
+                $found = Better_Messages()->encryption->files()->find_file_names( $search );
+
+                $where[] = empty( $found ) ? $named : '( ' . $named . ' OR f.`attachment_id` IN (' . implode( ',', $found ) . ') )';
             }
 
             $thread = (int) $request->get_param( 'thread' );
@@ -180,19 +183,18 @@ if ( ! class_exists( 'Better_Messages_Storage_Library' ) ):
 
         private function admin_token()
         {
-            $user_id = get_current_user_id();
-            $b64     = function ( $data ) {
-                return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' );
-            };
-            $payload = $b64( wp_json_encode( array( 'uid' => $user_id, 'iat' => (int) ( floor( time() / 43200 ) * 43200 ) ) ) );
-            $key     = hash_hmac( 'sha256', Better_Messages()->functions->get_user_secret_key( $user_id ), wp_salt( 'auth' ) );
-
-            return $payload . '.' . $b64( hash_hmac( 'sha256', $payload, $key, true ) );
+            return Better_Messages_Files()->access_token( get_current_user_id() );
         }
 
         public function file_urls( $attachment_id, $token )
         {
             $storage = $this->storage();
+
+            if ( Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) && function_exists( 'Better_Messages_Files' ) ) {
+                $url = add_query_arg( 'token', rawurlencode( $token ), Better_Messages_Files()->get_proxy_url( $attachment_id ) );
+
+                return array( 'view' => $url, 'download' => $url );
+            }
 
             if ( $storage->is_cloud_file( $attachment_id ) ) {
                 $view     = $storage->signed_url( $attachment_id, 'inline', 604800 );
@@ -331,9 +333,9 @@ if ( ! class_exists( 'Better_Messages_Storage_Library' ) ):
 
                 $files[] = array(
                     'id'         => $attachment_id,
-                    'name'       => (string) $row->name,
+                    'name'       => (string) Better_Messages()->encryption->files()->open_file_name( $attachment_id, (string) $row->name ),
                     'mime'       => (string) $row->mime,
-                    'size'       => $state === 'stored' && $row->o_size !== null ? (int) $row->o_size : (int) $row->size,
+                    'size'       => Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) && null !== Better_Messages()->encryption->files()->plain_size( $attachment_id ) ? (int) Better_Messages()->encryption->files()->plain_size( $attachment_id ) : ( $state === 'stored' && $row->o_size !== null ? (int) $row->o_size : (int) $row->size ),
                     'kind'       => (string) $row->kind,
                     'state'      => $state,
                     'error'      => (string) $row->o_error,

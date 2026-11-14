@@ -187,6 +187,7 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
             if( $can_block ) {
                 $blocked_users[ $blocked_id ] = time();
                 Better_Messages()->functions->update_user_meta( $user_id, 'bm_blocked_users', $blocked_users );
+                do_action( 'better_messages_user_blocked', (int) $user_id, (int) $blocked_id );
                 return true;
             } else {
                 return false;
@@ -226,20 +227,12 @@ if ( !class_exists( 'Better_Messages_Block_Users' ) ){
                     $can_block = false;
                 }
 
-                if( count(Better_Messages()->settings['restrictBlockUsers']) > 0 ){
-                    foreach( Better_Messages()->settings['restrictBlockUsers'] as $blockedRole ){
-                        if( in_array( $blockedRole, $blocker_user_roles ) ){
-                            $can_block = false;
-                        }
-                    }
+                if( Better_Messages()->functions->role_list_restricts( 'restrictBlockUsers', $user_id ) ){
+                    $can_block = false;
                 }
 
-                if( count(Better_Messages()->settings['restrictBlockUsersImmun']) > 0 ){
-                    foreach( Better_Messages()->settings['restrictBlockUsersImmun'] as $blockedRole ){
-                        if( in_array( $blockedRole, $blocked_user_roles ) ){
-                            $can_block = false;
-                        }
-                    }
+                if( Better_Messages()->functions->role_list_restricts( 'restrictBlockUsersImmun', $blocked_id ) ){
+                    $can_block = false;
                 }
 
                 if (in_array('administrator', $blocker_user_roles)) {

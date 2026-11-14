@@ -10,6 +10,10 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
         const MENTIONS = 2;
         const ALL      = 3;
 
+        const REQUEST  = 4;
+
+        const DECLINED = 5;
+
         const NOTIFY_TYPES   = array( 'mention', 'reply', 'everyone' );
         const PERSONAL_TYPES = array( 'mention', 'reply' );
 
@@ -168,6 +172,9 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
                     break;
                 case 'course':
                     $level = self::sanitize_level( isset( $settings['notifyLevelCourses'] ) ? $settings['notifyLevelCourses'] : 'all' );
+                    break;
+                case 'booking':
+                    $level = self::sanitize_level( isset( $settings['notifyLevelBookings'] ) ? $settings['notifyLevelBookings'] : 'all' );
                     break;
                 default:
                     if ( $this->is_one_to_one( $thread_id ) ) {
@@ -584,6 +591,10 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
                 return new WP_Error( 'not_participant', _x( 'You are not a participant of this conversation', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 403 ) );
             }
 
+            if ( $stored === self::REQUEST || $stored === self::DECLINED ) {
+                return new WP_Error( 'message_request', _x( 'Accept the message request to change its notifications', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 403 ) );
+            }
+
             if ( $this->is_thread_locked( $thread_id ) ) {
                 return new WP_Error( 'notifications_locked', _x( 'Notifications of this conversation can not be changed', 'Rest API Error', 'bp-better-messages' ), array( 'status' => 403 ) );
             }
@@ -661,6 +672,11 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
             $payload['notificationLevel']      = is_null( $stored ) ? 'default' : self::int_to_choice( $stored );
             $payload['notificationMutedUntil'] = ( $snooze && (int) $stored === self::NONE ) ? (int) $snooze['until'] : null;
             $payload['isMuted']                = is_null( $stored ) ? false : ( $this->resolve_level( $stored, $thread_id ) === 'none' );
+            $payload['isRequest']              = ! is_null( $stored ) && (int) $stored === self::REQUEST;
+
+            if ( $payload['isRequest'] ) {
+                $payload['requestFrom'] = (int) Better_Messages()->functions->get_thread_meta( $thread_id, 'bm_request_from' );
+            }
 
             return $payload;
         }
@@ -669,7 +685,7 @@ if ( ! class_exists( 'Better_Messages_Notification_Levels' ) ):
         {
             $user_id = (int) $user_id;
 
-            if ( $user_id <= 0 ) {
+            if ( $user_id === 0 || ( $user_id < 0 && ! apply_filters( 'better_messages_guest_gets_emails', false, $user_id ) ) ) {
                 return 'off';
             }
 

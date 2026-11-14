@@ -342,6 +342,76 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
+            $lock = Better_Messages()->functions->lock( 'thread_participants|' . $thread_id );
+
+            if( $lock === false ){
+                return new WP_Error(
+                    'rest_forbidden',
+                    _x( 'Please try again in a moment.', 'Rest API Error', 'bp-better-messages' ),
+                    array( 'status' => 409 )
+                );
+            }
+
+            try {
+                return $this->add_participants( $thread_id, $user_ids );
+            } finally {
+                Better_Messages()->functions->unlock( $lock );
+            }
+        }
+
+        private function add_participants( $thread_id, $user_ids ){
+            global $wpdb;
+
+            $actor_id = Better_Messages()->functions->get_current_user_id();
+            $new_ids  = array();
+
+            foreach( Better_Messages()->functions->new_participant_ids( $user_ids ) as $user_id ){
+                if( ! Better_Messages()->functions->is_thread_participant( $user_id, $thread_id, true ) ){
+                    $new_ids[] = $user_id;
+                }
+            }
+
+            $limit = Better_Messages()->functions->get_max_participants( $actor_id, $thread_id );
+
+            if( ! empty( $new_ids ) && $limit > 0 && Better_Messages()->functions->get_thread_type( $thread_id ) === 'thread' ){
+                $current = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `" . bm_get_table('recipients') . "` WHERE `thread_id` = %d", $thread_id ) );
+                $room    = max( 0, $limit - $current );
+
+                if( count( $new_ids ) > $room ){
+                    return new WP_Error(
+                        'max_participants',
+                        $room === 0
+                            ? _x( 'This conversation already has the most participants it can have.', 'Rest API Error', 'bp-better-messages' )
+                            : sprintf(
+                                _nx( 'This conversation can have up to %1$s participants. There is room for %2$s more person.', 'This conversation can have up to %1$s participants. There is room for %2$s more people.', $room, 'Rest API Error', 'bp-better-messages' ),
+                                number_format_i18n( $limit ),
+                                number_format_i18n( $room )
+                            ),
+                        array( 'status' => 403 )
+                    );
+                }
+            }
+
+            if( ! empty( $new_ids ) ){
+                $add_args = array(
+                    'thread_id' => $thread_id,
+                    'sender_id' => $actor_id,
+                    'user_ids'  => $new_ids,
+                );
+
+                $add_errors = array();
+
+                Better_Messages()->functions->before_add_participants_filter( $add_args, $add_errors );
+
+                if( ! empty( $add_errors ) ){
+                    return new WP_Error(
+                        'participants_refused',
+                        wp_strip_all_tags( (string) reset( $add_errors ) ),
+                        array( 'status' => 403 )
+                    );
+                }
+            }
+
             $added   = false;
             $refused = false;
 
@@ -545,6 +615,24 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
                 );
             }
 
+            $subject_args = array(
+                'sender_id' => Better_Messages()->functions->get_current_user_id(),
+                'thread_id' => $thread_id,
+                'subject'   => $subject,
+            );
+
+            $subject_errors = array();
+
+            Better_Messages()->functions->before_subject_change_filter( $subject_args, $subject_errors );
+
+            if( ! empty( $subject_errors ) ){
+                return new WP_Error(
+                    'subject_refused',
+                    wp_strip_all_tags( (string) reset( $subject_errors ) ),
+                    array( 'status' => 400 )
+                );
+            }
+
             Better_Messages()->functions->change_thread_subject( $thread_id, $subject );
 
             return Better_Messages()->api->get_threads( [ $thread_id ], false, false );
@@ -579,6 +667,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Conversations' ) ):
             ", $thread_id, '%' . $wpdb->esc_like( $search ) . '%' ) );
 
             $message_ids = array_map( 'intval', $message_ids );
+
+            if ( Better_Messages()->encryption->searching() ) {
+                $message_ids = array_unique( array_merge( $message_ids, array_keys( Better_Messages()->encryption->find_messages( $search, array( $thread_id ), 20, 'AND `sender_id` != 0' ) ) ) );
+                rsort( $message_ids );
+                $message_ids = array_slice( $message_ids, 0, 20 );
+            }
 
             $return = array( 'results' => $message_ids );
 

@@ -3,7 +3,12 @@
 defined( 'ABSPATH' ) || exit;
 
 return array(
+	'captcha/captcha-admin.min.js' => '53382e17ec',
+	'captcha/captcha.min.js' => '8b1f735404',
 	'emoji-guard/emoji-guard.min.js' => '4c85b3ea60',
+	'encryption/encryption-admin.min.css' => '4c1e67b16a',
+	'encryption/encryption-admin.min.js' => 'bd9d58ffb2',
+	'geo/geo-admin.min.js' => '22070b0868',
 	'lightbox/lightbox-loader.min.js' => '6c9da6b66b',
 	'lightbox/lightbox.min.css' => 'fe9504b502',
 	'lightbox/lightbox.min.js' => '96e6403337',
@@ -14,6 +19,8 @@ return array(
 	'pickers/pickers-loader.min.js' => 'aa9cbb0250',
 	'pickers/pickers.min.css' => '1ee8a08d5c',
 	'pickers/pickers.min.js' => '2120b2bbca',
+	'profiles/profiles.min.css' => '8a784bb87e',
+	'profiles/profiles.min.js' => '4b13d87fbc',
 	'push/push-worker.min.js' => 'fb28f0d627',
 	'push/push.min.js' => 'f7191645de',
 	'recording/hls.light.min.js' => '0251332c00',
@@ -31,9 +38,9 @@ return array(
 	'tooltips/tooltips.min.js' => '9b02711c42',
 	'tracking/survey.min.css' => 'e97075bd31',
 	'tracking/survey.min.js' => '4a25a40c64',
-	'ui/ui.min.css' => 'a7b01949a6',
-	'ui/ui.min.js' => '14437637ce',
+	'ui/ui.min.css' => 'd70bd34939',
+	'ui/ui.min.js' => '07766b8a3f',
 	'video-effects/video-effects-admin.min.css' => '7268e62d2d',
-	'video-effects/video-effects-admin.min.js' => '957c57c37b',
+	'video-effects/video-effects-admin.min.js' => 'a8f02115df',
 	'visitors/visitor.min.js' => '703a055a0f',
 );

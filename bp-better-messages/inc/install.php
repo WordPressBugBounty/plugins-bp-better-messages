@@ -88,6 +88,26 @@ function better_messages_unschedule_cron()
 	wp_clear_scheduled_hook( 'better_messages_worker_job' );
 	wp_clear_scheduled_hook( 'better_messages_worker_job', array( 'soon' ) );
 	delete_option( 'better_messages_worker_migrated' );
+
+	$own = array( 'better-messages' );
+
+	if ( class_exists( 'Better_Messages_Legacy_Voice_Addon' ) && Better_Messages_Legacy_Voice_Addon::adopted() ) {
+		$own[] = Better_Messages_Legacy_Voice_Addon::SLUG;
+	}
+
+	if ( class_exists( 'WordPlus_SDK' ) && method_exists( 'WordPlus_SDK', 'products' ) && array() === array_diff( array_keys( (array) WordPlus_SDK::instance()->products() ), $own ) ) {
+		wp_clear_scheduled_hook( 'wordplus_geo_daily' );
+		wp_clear_scheduled_hook( 'wordplus_spam_prune' );
+	}
+}
+
+add_action( 'better_messages_activation', 'better_messages_schedule_sdk_cron' );
+
+function better_messages_schedule_sdk_cron()
+{
+	if ( function_exists( 'wordplus_geo' ) && wordplus_geo() && method_exists( wordplus_geo(), 'schedule' ) ) {
+		wordplus_geo()->schedule();
+	}
 }
 
 

@@ -5,6 +5,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
     class Better_Messages_Functions
     {
+        private $held_locks = array();
+
         public static function instance()
         {
             static $instance = null;
@@ -29,6 +31,57 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function before_message_send_filter( &$args, &$errors ){
             do_action_ref_array( 'bp_better_messages_before_message_send', array( &$args, &$errors ));
             do_action_ref_array( 'better_messages_before_message_send', array( &$args, &$errors ));
+        }
+
+        public function before_message_edit_filter( &$args, &$errors ){
+            do_action_ref_array( 'better_messages_before_message_edit', array( &$args, &$errors ));
+        }
+
+        public function before_subject_change_filter( &$args, &$errors ){
+            do_action_ref_array( 'better_messages_before_subject_change', array( &$args, &$errors ));
+        }
+
+        public function before_add_participants_filter( &$args, &$errors ){
+            do_action_ref_array( 'better_messages_before_add_participants', array( &$args, &$errors ));
+        }
+
+        public function get_max_participants( $user_id, $thread_id = 0 ){
+            $setting = (int) Better_Messages()->settings['maxParticipants'];
+
+            if( $setting <= 0 ){
+                return 0;
+            }
+
+            $user_id = (int) $user_id;
+
+            if( $user_id > 0 && user_can( $user_id, 'bm_can_administrate' ) ){
+                return 0;
+            }
+
+            $limit = (int) apply_filters( 'better_messages_max_participants', max( 2, $setting ), $user_id, (int) $thread_id );
+
+            return $limit > 0 ? max( 2, $limit ) : 0;
+        }
+
+        public function new_participant_ids( $user_ids, $exclude = array() ){
+            $exclude = array_map( 'intval', (array) $exclude );
+            $ids     = array();
+
+            foreach( (array) $user_ids as $user_id ){
+                if( ! is_scalar( $user_id ) ){
+                    continue;
+                }
+
+                $user_id = (int) $user_id;
+
+                if( $user_id === 0 || in_array( $user_id, $exclude, true ) ){
+                    continue;
+                }
+
+                $ids[ $user_id ] = $user_id;
+            }
+
+            return array_values( $ids );
         }
 
         public function create_conversation_link( int $user_id, string $subject = '', string $message = '', bool $fast_start = false, bool $scrollToContainer = true ): string
@@ -105,14 +158,15 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
 
-        public function can_start_conversation($starter_id, array $recipients = [], $uniqueKey = null ): array
+        public function can_start_conversation($starter_id, array $recipients = [], $uniqueKey = null, $creating = false ): array
         {
             $args = array(
                 'sender_id'     => $starter_id,
                 'new_thread'    => true,
                 'error_type'    => 'wp_error',
                 'append_thread' => false,
-                'recipients'    => $recipients
+                'recipients'    => $recipients,
+                'action'        => $creating ? 'start' : 'probe'
             );
 
             if( $uniqueKey ){
@@ -193,7 +247,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 return apply_filters( 'better_messages_can_invite', false, $user_id, $thread_id );
             }
 
-            if( $type === 'group' || $type === 'course' ) return false;
+            if( $type === 'group' || $type === 'course' || $type === 'booking' ) return false;
             if( $user_id <= 0 ) return false;
 
             $participants = $this->get_participants( $thread_id );
@@ -224,7 +278,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         {
             $type = $this->get_thread_type( $thread_id );
             if( $type === 'chat-room' ) return false;
-            if( $type === 'group' || $type === 'course' ) return false;
+            if( $type === 'group' || $type === 'course' || $type === 'booking' ) return false;
 
             if( Better_Messages()->settings['allowGroupLeave'] === '1' ) {
                 $participants = $this->get_participants( $thread_id );
@@ -289,6 +343,27 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             do_action( 'better_messages_thread_cleared', $thread_id );
         }
 
+        public function delete_message_files( $message_id, $attachment_ids ){
+            foreach( (array) $attachment_ids as $attachment_id ){
+                $attachment_id = (int) $attachment_id;
+
+                if ( $attachment_id <= 0 ) {
+                    continue;
+                }
+
+                $message_refs = get_post_meta( $attachment_id, 'bp-better-messages-message-id' );
+                if( count( $message_refs ) > 1 ) {
+                    delete_post_meta( $attachment_id, 'bp-better-messages-message-id', $message_id );
+                } else {
+                    $file_path = get_attached_file( $attachment_id );
+                    wp_delete_attachment( $attachment_id, true );
+                    if ( $file_path ) {
+                        Better_Messages()->files->cleanup_empty_directories( $file_path );
+                    }
+                }
+            }
+        }
+
         public function get_message_attachment_ids( $message_id ){
             global $wpdb;
 
@@ -346,18 +421,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $attachments = $this->get_message_attachment_ids( $message_id );
 
-            foreach( $attachments as $attachment_id ){
-                $message_refs = get_post_meta( $attachment_id, 'bp-better-messages-message-id' );
-                if( count( $message_refs ) > 1 ) {
-                    delete_post_meta( $attachment_id, 'bp-better-messages-message-id', $message_id );
-                } else {
-                    $file_path = get_attached_file( $attachment_id );
-                    wp_delete_attachment( $attachment_id, true );
-                    if ( $file_path ) {
-                        Better_Messages()->files->cleanup_empty_directories( $file_path );
-                    }
-                }
+            if ( $deleteMethod !== 'replace' ) {
+                $attachments = array_values( array_unique( array_merge( $attachments, Better_Messages()->moderation->review_copy_files( $message_id ) ) ) );
             }
+
+            $this->delete_message_files( $message_id, $attachments );
 
             if( $deleteMethod === 'replace' ) {
                 Better_Messages()->functions->update_message([
@@ -553,19 +621,23 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 LIMIT 0, 1
             ", $thread_id ) );
 
+            $subject = Better_Messages()->encryption->open_subject( $subject, $thread_id );
+
             return $this->clean_no_subject( wp_unslash( esc_attr( $subject )) );
         }
 
         public function change_thread_subject($thread_id, $new_subject){
             global $wpdb;
 
-            $old_subject = $wpdb->get_var( $wpdb->prepare( "SELECT subject FROM " . bm_get_table('threads') . " WHERE id = %d LIMIT 1", $thread_id ) );
+            $old_subject = Better_Messages()->encryption->open_subject( $wpdb->get_var( $wpdb->prepare( "SELECT subject FROM " . bm_get_table('threads') . " WHERE id = %d LIMIT 1", $thread_id ) ), $thread_id );
 
             $wpdb->update(
                 bm_get_table('threads'),
-                array( 'subject' => $new_subject ),
+                array( 'subject' => Better_Messages()->encryption->seal_subject( $new_subject, $thread_id ) ),
                 array( 'id' => $thread_id ), array( '%s' ), array( '%d' )
             );
+
+            Better_Messages()->encryption->index_subject( $thread_id, $new_subject );
 
             do_action( 'better_messages_thread_updated', $thread_id );
             do_action( 'better_messages_info_changed', $thread_id );
@@ -604,11 +676,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function get_message( $message_id ){
             global $wpdb;
 
-            return $wpdb->get_row( $wpdb->prepare( "
+            return Better_Messages()->encryption->open_row( $wpdb->get_row( $wpdb->prepare( "
             SELECT *
             FROM  " . bm_get_table('messages') . "
             WHERE `id` = %d
-            ", $message_id ) );
+            ", $message_id ) ) );
         }
 
         public function get_valid_reply_to( $value, $thread_id, $new_thread = false ){
@@ -678,7 +750,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                     break;
             }
 
-            return $wpdb->get_results( $query );
+            return Better_Messages()->encryption->open_rows( $wpdb->get_results( $query ) );
         }
 
         public function is_message_starred( $message_id, $user_id ){
@@ -969,6 +1041,11 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             global $processedUrls;
 
             if ( !isset( $processedUrls ) ) $processedUrls = array();
+
+            if ( Better_Messages_Encryption::is_sealed( $message ) ) {
+                $stored  = $message_id ? $this->get_message( $message_id ) : null;
+                $message = $stored && ! Better_Messages_Encryption::is_sealed( $stored->message ) ? $stored->message : Better_Messages_Encryption::unreadable();
+            }
 
             $message = apply_filters( 'bp_better_messages_pre_format_message', $message, $message_id, $context, $user_id );
 
@@ -1714,7 +1791,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 }
             }
 
-            $can_start = $this->can_start_conversation( $from, [ $to ], $uniqueKey );
+            $creating  = $create && ( ! $uniqueKey || ! $this->find_unique_conversation_id( [ $from, $to ], $uniqueKey ) );
+            $can_start = $this->can_start_conversation( $from, [ $to ], $uniqueKey, $creating );
 
             if( $can_start['result'] === 'new_thread' && $create ){
                 if( ! $uniqueKey ){
@@ -1758,11 +1836,18 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             global $wpdb;
 
-            if( ! $wpdb->insert( bm_get_table('threads'), [ 'type' => 'thread', 'subject' => trim($subject) ], [ '%s', '%s' ] ) ){
+            $seal_subject = Better_Messages()->encryption->on() && '' !== trim( $subject );
+
+            if( ! $wpdb->insert( bm_get_table('threads'), [ 'type' => 'thread', 'subject' => $seal_subject ? '' : trim($subject) ], [ '%s', '%s' ] ) ){
                 return false;
             }
 
             $new_thread_id = (int) $wpdb->insert_id;
+
+            if ( $seal_subject ) {
+                $wpdb->update( bm_get_table('threads'), [ 'subject' => Better_Messages()->encryption->seal_subject( trim( $subject ), $new_thread_id ) ], [ 'id' => $new_thread_id ], [ '%s' ], [ '%d' ] );
+                Better_Messages()->encryption->index_subject( $new_thread_id, trim( $subject ) );
+            }
 
             $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('threadsmeta') . " WHERE `bm_thread_id` = %d", $new_thread_id));
             $wpdb->query($wpdb->prepare("DELETE FROM " . bm_get_table('recipients') . " WHERE `thread_id` = %d", $new_thread_id));
@@ -1790,6 +1875,27 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             return $this->with_lock( 'unique_conversation|' . $unique_key . '|' . implode( '|', $members ), function () use ( $user_ids, $unique_key, $subject ) {
                 return $this->find_or_create_unique_conversation( $user_ids, $unique_key, $subject );
             } );
+        }
+
+        public function find_unique_conversation_id( array $user_ids, string $unique_key ){
+            global $wpdb;
+
+            $user_ids = array_unique( array_map( 'intval', $user_ids ) );
+            $where    = [];
+            $args     = [ $unique_key . '|%' ];
+
+            foreach( $user_ids as $user_id ){
+                $where[] = "AND `meta_value` LIKE '%s'";
+                $args[]  = '%|' . $user_id . '|%';
+            }
+
+            return (int) $wpdb->get_var( $wpdb->prepare( "
+                SELECT `bm_thread_id`
+                FROM " . bm_get_table('threadsmeta') . "
+                WHERE `meta_key` = 'unique_tag'
+                AND `meta_value` LIKE %s
+                " . implode( ' ', $where ) . "
+                LIMIT 0, 1", $args ) );
         }
 
         private function find_or_create_unique_conversation( array $user_ids, string $unique_key, string $subject ){
@@ -2077,6 +2183,43 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
         }
 
+        public function hold_lock( $key, $timeout = 10 ) {
+            if ( isset( $this->held_locks[ $key ] ) ) {
+                return true;
+            }
+
+            $lock = $this->lock( $key, $timeout );
+
+            if ( ! is_string( $lock ) ) {
+                return $lock;
+            }
+
+            if ( empty( $this->held_locks ) ) {
+                add_action( 'shutdown', array( $this, 'release_held_locks' ), 0 );
+            }
+
+            $this->held_locks[ $key ] = $lock;
+
+            return true;
+        }
+
+        public function release_lock( $key ) {
+            if ( ! isset( $this->held_locks[ $key ] ) ) {
+                return;
+            }
+
+            $this->unlock( $this->held_locks[ $key ] );
+            unset( $this->held_locks[ $key ] );
+        }
+
+        public function release_held_locks() {
+            foreach ( $this->held_locks as $lock ) {
+                $this->unlock( $lock );
+            }
+
+            $this->held_locks = array();
+        }
+
         public function claim_transient( $transient, $expiration ) {
             return $this->with_lock( 'transient|' . $transient, function () use ( $transient, $expiration ) {
                 if ( get_transient( $transient ) ) {
@@ -2157,7 +2300,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $sql = $wpdb->prepare("SELECT thread_id
             FROM `" . bm_get_table('recipients') . "`
-            WHERE `is_muted` = 1 AND `user_id` = %d", $user_id);
+            WHERE `is_muted` IN (1, 4, 5) AND `user_id` = %d", $user_id);
 
             $results = $wpdb->get_col( $sql );
 
@@ -2176,17 +2319,20 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
 
             $thread = wp_cache_get( 'thread_' . $thread_id, 'bm_messages' );
 
-            if( $thread ){
-                return $thread;
+            if( ! $thread ){
+                $thread = $wpdb->get_row( $wpdb->prepare("SELECT * FROM " . bm_get_table('threads') . " WHERE id = %d", $thread_id ) );
+
+                if( ! $thread ) {
+                    $thread = false;
+                }
+
+                wp_cache_set('thread_' . $thread_id, $thread, 'bm_messages');
             }
 
-            $thread = $wpdb->get_row( $wpdb->prepare("SELECT * FROM " . bm_get_table('threads') . " WHERE id = %d", $thread_id ) );
-
-            if( ! $thread ) {
-                $thread = false;
+            if ( $thread && isset( $thread->subject ) && Better_Messages_Encryption::is_sealed( $thread->subject ) ) {
+                $thread          = clone $thread;
+                $thread->subject = Better_Messages()->encryption->open_subject( $thread->subject, $thread_id );
             }
-
-            wp_cache_set('thread_' . $thread_id, $thread, 'bm_messages');
 
             return $thread;
         }
@@ -2219,6 +2365,8 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 if( $is_valid_course ){
                     $thread_type = 'course';
                 }
+            } else if( $thread->type === 'booking' ) {
+                $thread_type = 'booking';
             } else {
                 $chat_id = Better_Messages()->functions->get_thread_meta($thread_id, 'chat_id');
 
@@ -2235,7 +2383,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         }
 
         public function is_group_like_thread_type( $type ){
-            return $type === 'group' || $type === 'course';
+            return $type === 'group' || $type === 'course' || $type === 'booking';
         }
 
         public function get_thread_title( int $thread_id ){
@@ -2350,9 +2498,22 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 . ' )';
 
             if ( $mode === 'roles' ) {
-                $roles = isset( Better_Messages()->settings['widgetUsersRoles'] ) && is_array( Better_Messages()->settings['widgetUsersRoles'] )
-                    ? array_values( array_filter( array_map( 'strval', Better_Messages()->settings['widgetUsersRoles'] ) ) )
-                    : array();
+                $roles = $this->role_list_roles( 'widgetUsersRoles' );
+
+                if ( $this->role_list_mode( 'widgetUsersRoles' ) === 'restrict' ) {
+                    if ( empty( $roles ) ) return true;
+
+                    $placeholders = implode( ',', array_fill( 0, count( $roles ), '%s' ) );
+                    $sql = "SELECT 1 FROM `{$users_table}` bm_u
+                            LEFT JOIN `{$wpdb->users}` wp_u ON wp_u.`ID` = bm_u.`ID`
+                            LEFT JOIN `{$guests_table}` bm_g ON bm_g.`id` = -bm_u.`ID`
+                            WHERE {$existence_sql}
+                            AND NOT EXISTS ( SELECT 1 FROM `{$roles_table}` bm_rx WHERE bm_rx.`user_id` = bm_u.`ID` AND bm_rx.`role` IN ({$placeholders}) ){$exclude_self_sql}
+                            LIMIT 1";
+                    $found = $wpdb->get_var( $wpdb->prepare( $sql, $roles ) );
+                    return ! empty( $found );
+                }
+
                 if ( empty( $roles ) ) return false;
 
                 $placeholders = implode( ',', array_fill( 0, count( $roles ), '%s' ) );
@@ -3015,7 +3176,13 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
                 $user_id = Better_Messages()->functions->get_current_user_id();
             }
 
-            $current_unread = (int) $wpdb->get_var( $wpdb->prepare("SELECT unread_count FROM " . bm_get_table('recipients') . " WHERE user_id = %d AND thread_id = %d", $user_id, $thread_id) );
+            $row = $wpdb->get_row( $wpdb->prepare("SELECT unread_count, is_muted FROM " . bm_get_table('recipients') . " WHERE user_id = %d AND thread_id = %d", $user_id, $thread_id) );
+
+            if( $row && (int) $row->is_muted === Better_Messages_Message_Requests::REQUEST ){
+                return false;
+            }
+
+            $current_unread = $row ? (int) $row->unread_count : 0;
 
             $mysql_time = bp_core_current_time();
             if( $current_unread !== 0 ){
@@ -3708,7 +3875,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             $message->message = apply_filters( 'better_messages_message_content_before_save', $r['content'], $message->id );
 
             $wpdb->update(bm_get_table('messages'), [
-                'message' => $message->message
+                'message' => Better_Messages()->encryption->seal_message( $message->message, $message->thread_id )
             ], [
                 'id' => $message->id
             ], ['%s'], ['%d']);
@@ -3794,7 +3961,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function get_user_unread_count( $user_id )
         {
             global $wpdb;
-            return (int) $wpdb->get_var($wpdb->prepare( "SELECT SUM(unread_count) FROM  " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 AND unread_count > 0 ", $user_id ));
+            return (int) $wpdb->get_var($wpdb->prepare( "SELECT SUM(unread_count) FROM  " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0 AND unread_count > 0 AND is_muted NOT IN (4, 5) ", $user_id ));
         }
 
         public function set_user_unread_count_for_thread( $user_id, $thread_id, $unread_count = 0 )
@@ -3930,6 +4097,100 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
             }
 
             return $has_role;
+        }
+
+        public function role_lists(){
+            $lists = array(
+                'restrictNewThreads'      => 'restrict',
+                'restrictNewReplies'      => 'restrict',
+                'restrictViewMessages'    => 'restrict',
+                'restrictMobilePopup'     => 'restrict',
+                'restrictBlockUsers'      => 'restrict',
+                'restrictBlockUsersImmun' => 'restrict',
+                'restrictCalls'           => 'restrict',
+                'restrictGroupCallsStart' => 'restrict',
+                'restrictGroupCallsJoin'  => 'restrict',
+                'restrictVoiceMessages'   => 'restrict',
+                'restrictVideoMessages'   => 'restrict',
+                'locationRestrictRoles'   => 'restrict',
+                'pollsRestrictRoles'      => 'restrict',
+            );
+
+            foreach ( array( 'Mini', 'Side', 'Mobile' ) as $context ) {
+                foreach ( array( 'Threads', 'Friends', 'Groups', 'AIBots', 'ChatRooms', 'Users', 'Courses' ) as $widget ) {
+                    $lists[ 'restrictView' . $context . $widget ] = 'restrict';
+                }
+            }
+
+            $lists['invisibleModeRoles'] = 'allow';
+            $lists['aiTranslationRoles'] = 'allow';
+            $lists['widgetUsersRoles']   = 'allow';
+
+            return $lists;
+        }
+
+        public function role_list_roles( $key ){
+            $roles = Better_Messages()->settings[ $key ] ?? array();
+
+            return is_array( $roles ) ? array_values( array_filter( array_map( 'strval', $roles ) ) ) : array();
+        }
+
+        public function role_list_mode( $key ){
+            $lists = $this->role_lists();
+
+            if ( ! isset( $lists[ $key ] ) ) {
+                return 'restrict';
+            }
+
+            $modes = Better_Messages()->settings['roleListModes'] ?? array();
+
+            if ( is_array( $modes ) && isset( $modes[ $key ] ) && in_array( $modes[ $key ], array( 'restrict', 'allow' ), true ) ) {
+                return $modes[ $key ];
+            }
+
+            if ( $key === 'aiTranslationRoles' ) {
+                return empty( $this->role_list_roles( $key ) ) ? 'restrict' : 'allow';
+            }
+
+            return $lists[ $key ];
+        }
+
+        public function role_list_active( $key ){
+            return $this->role_list_mode( $key ) === 'allow' || ! empty( $this->role_list_roles( $key ) );
+        }
+
+        public function role_list_allows( $key, $user_id ){
+            $user_id    = (int) $user_id;
+            $mode       = $this->role_list_mode( $key );
+            $roles      = $this->role_list_roles( $key );
+            $user_roles = array_map( 'strval', (array) $this->get_user_roles( $user_id ) );
+            $has_role   = count( array_intersect( $user_roles, $roles ) ) > 0;
+
+            if ( $key === 'aiTranslationRoles' && $user_id > 0 && ( in_array( 'administrator', $user_roles, true ) || user_can( $user_id, 'manage_options' ) ) ) {
+                return true;
+            }
+
+            if ( $mode !== 'allow' ) {
+                return ! $has_role;
+            }
+
+            if ( $has_role ) {
+                return true;
+            }
+
+            if ( in_array( $key, array( 'invisibleModeRoles', 'aiTranslationRoles', 'widgetUsersRoles' ), true ) ) {
+                return false;
+            }
+
+            if ( count( array_intersect( $user_roles, array( 'administrator', 'bm-bot' ) ) ) > 0 ) {
+                return true;
+            }
+
+            return $user_id > 0 && user_can( $user_id, 'manage_options' );
+        }
+
+        public function role_list_restricts( $key, $user_id ){
+            return ! $this->role_list_allows( $key, $user_id );
         }
 
         public function get_microtime(){
@@ -4697,7 +4958,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function is_onsite_notification_enabled( $user_id ){
             $enabled = ( Better_Messages()->settings['disableOnSiteNotification'] !== '1' );
 
-            if( Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' && $user_id > 0 ){
+            if( Better_Messages()->settings['allowOnSiteNotificationControl'] === '1' && (int) $user_id !== 0 ){
                 $choice = $this->get_user_meta( $user_id, 'bm_onsite_notification', true );
 
                 if( $choice === 'yes' ){
@@ -4713,7 +4974,7 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         public function is_enter_to_send_enabled( $user_id ){
             $enabled = ( Better_Messages()->settings['disableEnterForDesktop'] !== '1' );
 
-            if( Better_Messages()->settings['allowEnterToSendControl'] === '1' && $user_id > 0 ){
+            if( Better_Messages()->settings['allowEnterToSendControl'] === '1' && (int) $user_id !== 0 ){
                 $choice = $this->get_user_meta( $user_id, 'bm_enter_to_send', true );
 
                 if( $choice === 'yes' ){
@@ -4794,9 +5055,16 @@ if ( !class_exists( 'Better_Messages_Functions' ) ):
         {
             $key = '';
             $keys = array_merge(range(0, 9), range('a', 'z'));
+            $max  = count( $keys ) - 1;
 
             for ($i = 0; $i < $length; $i++) {
-                $key .= $keys[array_rand($keys)];
+                try {
+                    $index = random_int( 0, $max );
+                } catch ( Exception $e ) {
+                    $index = wp_rand( 0, $max );
+                }
+
+                $key .= $keys[ $index ];
             }
 
             return $key;

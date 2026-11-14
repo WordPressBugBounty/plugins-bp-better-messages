@@ -321,7 +321,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 $where[] = "`user_index`.`last_activity` < " . $wpdb->prepare('%s', $time);
                 $where[] = "AND `recipients`.`unread_count` > 0";
                 $where[] = "AND `recipients`.`is_deleted` = 0";
-                $where[] = "AND `recipients`.`user_id` > 0";
+                $where[] = "AND " . apply_filters( 'better_messages_email_recipients_where', "`recipients`.`user_id` > 0" );
                 $where[] = "AND " . $this->email_candidate_where();
 
                 $group_by[] = "`user_index`.`ID`";
@@ -431,6 +431,11 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                             $messages = array_reverse( $wpdb->get_results( $query ) );
 
+                            foreach ( $messages as $stored ) {
+                                $stored->message = Better_Messages()->encryption->open_message( $stored->message, $thread->thread_id );
+                                $stored->subject = Better_Messages()->encryption->open_subject( $stored->subject, $thread->thread_id );
+                            }
+
                             if ( empty( $messages ) ) {
                                 $this->update_last_email( $user_id, $thread_id, $last_date );
                                 continue;
@@ -459,6 +464,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                             if( $email_overwritten === false ) {
                                 $messageRaw = '';
                                 $messageHtml = '<table style="margin:1rem 0!important;width:100%;table-layout: auto !important;"><tbody>';
+                                $email_blocks = array();
                                 $last_sender_id = 0;
                                 $last_message_id = 0;
 
@@ -466,6 +472,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     if ( (int) $message->sender_id === 0 ) {
                                         $_message = Better_Messages()->functions->format_message( $message->message, (int) $message->id, 'email', $user_id );
                                         $messageHtml .= '<tr><td colspan="2" style="text-align:center;color:#888;font-style:italic;padding:4px 0;">' . esc_html($_message) . '</td></tr>';
+                                        $email_blocks[] = array( 'type' => 'system', 'text' => $this->email_plain_text( $_message ) );
                                         $messageRaw .= $_message . "\n\n";
                                         $last_sender_id = 0;
                                         $last_message_id = (int) $message->id;
@@ -495,8 +502,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         $messageRaw .= "$author\n";
                                     }
 
-                                    $_message_raw = str_replace(["<br>", "<br/>", '<br />'], "\n", $_message );
+                                    $_message_raw = preg_replace( '#<br\s*/?>\r?\n?#i', "\n", $_message );
                                     $messageRaw .= "$time\n$_message_raw\n\n";
+
+                                    $email_blocks = $this->email_message_block( $email_blocks, $bm_user, (int) $message->sender_id, (int) $last_sender_id, $time, $_message_raw );
 
                                     $messageHtml .= '<tr>';
                                     $messageHtml .= '<td style="padding-right: 10px;">' . $_message . '</td>';
@@ -520,7 +529,19 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                     }
                                 }
 
-                                $use_buddypress_email = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
+                                $withheld = $this->email_with_counts( $this->email_withhold( array(
+                                    'subject'       => $subject,
+                                    'blocks'        => $email_blocks,
+                                    'messages_html' => $messageHtml,
+                                    'messages_raw'  => $messageRaw,
+                                ), $this->email_content_level() ), $this->email_counts( $user_id ) );
+
+                                $subject      = $withheld['subject'];
+                                $email_blocks = $withheld['blocks'];
+                                $messageHtml  = $withheld['messages_html'];
+                                $messageRaw   = $withheld['messages_raw'];
+
+                                $use_buddypress_email = $user_id > 0 && function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
                                 $sender = false;
 
@@ -557,8 +578,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                             apply_filters('bp_better_messages_notification_tokens', array(
                                                 'messages.html' => $messageHtml,
                                                 'messages.raw' => $messageRaw,
-                                                'sender.name' => trim( wp_strip_all_tags( Better_Messages()->functions->rest_user_item( $email_sender_id, false )['name'] ) ),
+                                                'sender.name' => isset( $withheld['content_level'] ) && $withheld['content_level'] === 'notice' ? '' : trim( wp_strip_all_tags( Better_Messages()->functions->rest_user_item( $email_sender_id, false )['name'] ) ),
                                                 'thread.id' => $thread_id,
+                                                'unread.count' => $withheld['counts']['unread'],
+                                                'missed_calls.count' => $withheld['counts']['missed_calls'],
                                                 'thread.url' => sanitize_url( Better_Messages()->functions->add_hash_arg( 'conversation/' . $thread_id, [], Better_Messages()->functions->get_link($user_id) ) ),
                                                 'subject' => $subject,
                                                 'unsubscribe' => sanitize_url(bp_email_get_unsubscribe_link(array(
@@ -574,8 +597,14 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                                     bp_send_email('messages-unread-group', $ud, $args);
                                 } else {
-                                    $user = get_userdata($user_id);
-                                    $thread_url    = sanitize_url( Better_Messages()->functions->add_hash_arg('conversation/' . $thread_id, [], Better_Messages()->functions->get_link($user_id) ) );
+                                    $user = $this->email_recipient( $user_id );
+
+                                    if ( ! $user ) {
+                                        $this->update_last_email( $user_id, $thread_id, $last_date );
+                                        continue;
+                                    }
+
+                                    $thread_url    = sanitize_url( apply_filters( 'better_messages_email_thread_url', Better_Messages()->functions->add_hash_arg('conversation/' . $thread_id, [], Better_Messages()->functions->get_link($user_id) ), $user_id, $thread_id ) );
 
                                     if( $subject !== '' ) {
                                         $email_subject = sprintf(_x('You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages'), $subject);
@@ -583,20 +612,15 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                                         $email_subject = _x('You have unread messages', 'Email notification header for non BuddyPress websites', 'bp-better-messages');
                                     }
 
-                                    $template_data = array(
+                                    $template_data = array_merge( $withheld, array(
                                         'user_name'       => $user->display_name,
-                                        'subject'         => $subject,
                                         'email_subject'   => $email_subject,
-                                        'messages_html'   => $messageHtml,
+                                        'unread_footer'   => true,
                                         'thread_url'      => $thread_url,
                                         'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $user_id ) : '',
-                                    );
+                                    ) );
 
-                                    $content = $this->get_email_template( $template_data );
-
-                                    add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
-                                    wp_mail( $user->user_email, $email_subject, $content );
-                                    remove_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+                                    $this->send_email( $user->user_email, $email_subject, $this->email_content( $template_data ) );
                                 }
                             } else {
                                 $last_sender_id = 0;
@@ -611,7 +635,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
 
                             do_action('better_messages_send_unread_notification', $user_id, $thread_id );
 
-                            if (function_exists('bp_notifications_add_notification')) {
+                            if ( $user_id > 0 && function_exists('bp_notifications_add_notification') ) {
                                 if( Better_Messages()->settings['stopBPNotifications'] === '0' ) {
                                     if( $type === 'thread' ) {
                                         $notification_id = bp_notifications_add_notification(array(
@@ -642,6 +666,29 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 $this->is_sending_notifications = false;
                 $this->sending_thread_id = false;
             }
+        }
+
+        private function email_recipient( $user_id ) {
+            if ( (int) $user_id > 0 ) {
+                $user = get_userdata( (int) $user_id );
+
+                return $user ? $user : null;
+            }
+
+            $guest = Better_Messages()->guests->get_guest_user( (int) $user_id );
+
+            if ( ! $guest || empty( $guest->email ) || ! Better_Messages()->guests->email_mailable( $guest ) ) {
+                return null;
+            }
+
+            if ( Better_Messages()->functions->get_user_meta( (int) $user_id, 'bm_email_unread', true ) === 'no' ) {
+                return null;
+            }
+
+            return (object) array(
+                'display_name' => (string) $guest->name,
+                'user_email'   => (string) $guest->email,
+            );
         }
 
         public function is_sending_notifications(): bool
@@ -727,6 +774,18 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 ),
             ) );
 
+            register_rest_route( 'better-messages/v1', '/previewEmail', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_preview_email' ),
+                'permission_callback' => array( $this, 'can_manage_settings' ),
+            ) );
+
+            register_rest_route( 'better-messages/v1', '/emailDefaultTemplate', array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_email_default_template' ),
+                'permission_callback' => array( $this, 'can_manage_settings' ),
+            ) );
+
             register_rest_route( 'better-messages/v1', '/unsubscribe', array(
                 'methods'             => 'GET',
                 'callback'            => array( $this, 'rest_unsubscribe' ),
@@ -735,7 +794,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                     'user_id' => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => 'intval',
                     ),
                     'token' => array(
                         'required'          => true,
@@ -761,21 +820,23 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 );
             }
 
-            $current_user = wp_get_current_user();
-            $subject      = __( 'Test Conversation', 'bp-better-messages' );
-            $email_subject = sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), $subject );
+            $current_user  = wp_get_current_user();
+            $template_data = $this->test_email_data( $current_user, Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $current_user->ID ) : '' );
+            $withheld      = isset( $template_data['content_level'] );
 
             $use_buddypress = function_exists( 'bp_send_email' ) && Better_Messages()->settings['emailTemplateSource'] === 'buddypress';
 
             if ( $use_buddypress ) {
                 $args = array(
                     'tokens' => array(
-                        'messages.html' => $this->get_test_messages_html(),
-                        'messages.raw'  => __( 'Hello! This is a test message to preview how your emails will look.', 'bp-better-messages' ),
-                        'sender.name'   => $current_user->display_name,
-                        'thread.id'     => 0,
+                        'messages.html'      => $template_data['messages_html'],
+                        'messages.raw'       => $template_data['messages_raw'],
+                        'sender.name'        => $withheld && $template_data['content_level'] === 'notice' ? '' : $current_user->display_name,
+                        'thread.id'          => 0,
+                        'unread.count'       => $template_data['counts']['unread'],
+                        'missed_calls.count' => $template_data['counts']['missed_calls'],
                         'thread.url'    => home_url(),
-                        'subject'       => $subject,
+                        'subject'       => $template_data['subject'],
                         'unsubscribe'   => '#',
                     ),
                 );
@@ -787,20 +848,7 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                     $sent = false;
                 }
             } else {
-                $template_data = array(
-                    'user_name'       => $current_user->display_name,
-                    'subject'         => $subject,
-                    'email_subject'   => $email_subject,
-                    'messages_html'   => $this->get_test_messages_html(),
-                    'thread_url'      => home_url(),
-                    'unsubscribe_url' => Better_Messages()->settings['emailUnsubscribeLink'] === '1' ? $this->get_unsubscribe_url( $current_user->ID ) : '',
-                );
-
-                $content = $this->get_email_template( $template_data );
-
-                add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
-                $sent = wp_mail( $email, $email_subject, $content );
-                remove_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+                $sent = $this->send_email( $email, $template_data['email_subject'], $this->email_content( $template_data ) );
             }
 
             if ( $sent ) {
@@ -819,6 +867,137 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                     array( 'status' => 500 )
                 );
             }
+        }
+
+        public function rest_preview_email( WP_REST_Request $request ) {
+            $settings = $this->email_draft_settings( $request->get_param( 'settings' ) );
+            $data     = $this->test_email_data( wp_get_current_user(), $settings['emailUnsubscribeLink'] === '1' ? home_url( '#unsubscribe' ) : '', $settings );
+            $template = $request->get_param( 'html' );
+
+            if ( $settings['emailTemplateMode'] === 'custom' && is_string( $template ) && trim( $template ) !== '' ) {
+                $html = $this->render_custom_email_template( $data, $settings, $template );
+            } else {
+                $html = $this->email_content( $data, array_merge( $settings, array( 'emailTemplateMode' => 'simple' ) ) )['html'];
+            }
+
+            return new WP_REST_Response( array( 'html' => $html ), 200 );
+        }
+
+        public function rest_email_default_template( WP_REST_Request $request ) {
+            return new WP_REST_Response( array( 'html' => $this->default_custom_template( $this->email_draft_settings( $request->get_param( 'settings' ) ) ) ), 200 );
+        }
+
+        private function email_draft_settings( $draft ) {
+            $settings = Better_Messages()->settings;
+
+            if ( ! is_array( $draft ) ) {
+                return $settings;
+            }
+
+            if ( isset( $draft['emailTemplateMode'] ) && in_array( $draft['emailTemplateMode'], array( 'simple', 'custom' ), true ) ) {
+                $settings['emailTemplateMode'] = $draft['emailTemplateMode'];
+            }
+
+            foreach ( array( 'emailPrimaryColor', 'emailBackgroundColor', 'emailContentBgColor', 'emailTextColor' ) as $key ) {
+                if ( isset( $draft[ $key ] ) && is_string( $draft[ $key ] ) && ( $draft[ $key ] === '' || $this->email_hex( $draft[ $key ] ) !== '' ) ) {
+                    $settings[ $key ] = $draft[ $key ];
+                }
+            }
+
+            foreach ( array( 'emailHeaderText', 'emailFooterText', 'emailButtonText' ) as $key ) {
+                if ( isset( $draft[ $key ] ) && is_string( $draft[ $key ] ) ) {
+                    $settings[ $key ] = sanitize_text_field( $draft[ $key ] );
+                }
+            }
+
+            if ( isset( $draft['emailLogoUrl'] ) && is_string( $draft['emailLogoUrl'] ) ) {
+                $settings['emailLogoUrl'] = esc_url_raw( $draft['emailLogoUrl'] );
+                $settings['emailLogoId']  = isset( $draft['emailLogoId'] ) ? absint( $draft['emailLogoId'] ) : 0;
+            }
+
+            if ( isset( $draft['emailUnsubscribeLink'] ) ) {
+                $settings['emailUnsubscribeLink'] = in_array( $draft['emailUnsubscribeLink'], array( '1', 1, true ), true ) ? '1' : '0';
+            }
+
+            if ( isset( $draft['emailContent'] ) && in_array( $draft['emailContent'], array( 'full', 'senders', 'notice' ), true ) ) {
+                $settings['emailContent'] = $draft['emailContent'];
+            }
+
+            return $settings;
+        }
+
+        public function send_email( $to, $subject, array $content ) {
+            $text = isset( $content['text'] ) ? (string) $content['text'] : '';
+
+            $plain_part = function ( $phpmailer ) use ( $text ) {
+                if ( $text !== '' && isset( $phpmailer->ContentType ) && $phpmailer->ContentType === 'text/html' ) {
+                    $phpmailer->AltBody = $text;
+                }
+            };
+
+            add_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+            add_action( 'phpmailer_init', $plain_part );
+
+            $sent = wp_mail( $to, $subject, $content['html'] );
+
+            remove_action( 'phpmailer_init', $plain_part );
+            remove_filter( 'wp_mail_content_type', array( $this, 'email_content_type' ) );
+
+            return $sent;
+        }
+
+        public function moderator_email( array $to, $subject, array $layout ) {
+            $email = function_exists( 'wordplus_email' ) ? wordplus_email() : null;
+
+            if ( ! $email || empty( $to ) ) {
+                return false;
+            }
+
+            $settings = Better_Messages()->settings;
+            $site     = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+            $colors   = $this->email_colors( $settings );
+
+            $content = $email->render( array_merge( array(
+                'title'  => (string) $subject,
+                'brand'  => array(
+                    'name'       => $site,
+                    'url'        => home_url(),
+                    'logo'       => ! empty( $settings['emailLogoUrl'] ) ? (string) $settings['emailLogoUrl'] : '',
+                    'logo_width' => $this->email_logo_width( $settings ),
+                ),
+                'footer' => array(
+                    array( 'text' => sprintf( _x( 'You are receiving this email because your address is in the Notification Emails of Better Messages on %s', 'Moderation email', 'bp-better-messages' ), $site ) ),
+                ),
+                'colors' => $colors,
+                'dark'   => $colors['dark'],
+            ), $layout ) );
+
+            $sent = true;
+
+            foreach ( $to as $address ) {
+                $sent = $this->send_email( $address, $subject, $content ) && $sent;
+            }
+
+            return $sent;
+        }
+
+        public function moderator_message_block( $message, array $extra = array() ) {
+            $sender_id = (int) $message->sender_id;
+            $bm_user   = Better_Messages()->functions->rest_user_item( $sender_id, false );
+            $text      = html_entity_decode( (string) apply_filters( 'better_messages_moderation_message_content',
+                wp_trim_words( wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ), 50, '...' ),
+                $message
+            ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+            $lines = array_values( array_filter( array_merge( array( $text ), $extra ), 'strlen' ) );
+
+            return array(
+                'type'   => 'message',
+                'name'   => $this->email_plain_text( is_array( $bm_user ) && isset( $bm_user['name'] ) ? $bm_user['name'] : '' ),
+                'avatar' => $this->email_avatar( is_array( $bm_user ) && isset( $bm_user['avatar'] ) ? $bm_user['avatar'] : '' ),
+                'time'   => wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) floor( (int) $message->created_at / 10000 ) ),
+                'lines'  => $lines ? $lines : array( '…' ),
+            );
         }
 
         public function rest_unsubscribe( WP_REST_Request $request ) {
@@ -913,18 +1092,525 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return $messages_html;
         }
 
+        private function test_email_data( $user, $unsubscribe_url, $settings = null ) {
+            $subject     = __( 'Test Conversation', 'bp-better-messages' );
+            $time_format = get_option( 'time_format' );
+
+            return $this->email_with_counts( $this->email_withhold( array(
+                'user_name'       => $user->display_name,
+                'subject'         => $subject,
+                'email_subject'   => sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), $subject ),
+                'messages_html'   => $this->get_test_messages_html(),
+                'messages_raw'    => __( 'Hello! This is a test message to preview how your emails will look.', 'bp-better-messages' ),
+                'blocks'          => array(
+                    array(
+                        'type'   => 'message',
+                        'name'   => 'Jane Smith',
+                        'avatar' => '',
+                        'time'   => wp_date( $time_format, time() - 5 * MINUTE_IN_SECONDS ),
+                        'lines'  => array( __( 'Hello! This is a sample message to test how your email notifications will look.', 'bp-better-messages' ) ),
+                    ),
+                    array(
+                        'type'   => 'message',
+                        'name'   => 'John Doe',
+                        'avatar' => '',
+                        'time'   => wp_date( $time_format, time() - 2 * MINUTE_IN_SECONDS ),
+                        'lines'  => array( __( 'Thanks for the message! Here is another sample to show how multiple messages appear in the email.', 'bp-better-messages' ) ),
+                    ),
+                ),
+                'unread_footer'   => true,
+                'thread_url'      => home_url(),
+                'unsubscribe_url' => $unsubscribe_url,
+            ), $this->email_content_level( $settings ) ), array( 'unread' => 5, 'missed_calls' => empty( Better_Messages()->calls ) ? 0 : 1 ) );
+        }
+
         public function get_email_template( $data ) {
-            $settings = Better_Messages()->settings;
-            $mode = isset( $settings['emailTemplateMode'] ) ? $settings['emailTemplateMode'] : 'simple';
+            return $this->email_content( $data )['html'];
+        }
+
+        public function email_content( $data, $settings = null ) {
+            $settings = null === $settings ? Better_Messages()->settings : $settings;
+            $mode     = isset( $settings['emailTemplateMode'] ) ? $settings['emailTemplateMode'] : 'simple';
 
             if ( $mode === 'custom' && ! empty( Better_Messages_Options()->get_email_custom_html() ) ) {
-                return $this->render_custom_email_template( $data );
+                return array( 'html' => $this->render_custom_email_template( $data, $settings ), 'text' => '' );
             }
 
-            return $this->render_simple_email_template( $data );
+            $email = function_exists( 'wordplus_email' ) ? wordplus_email() : null;
+
+            if ( ! $email ) {
+                return array( 'html' => $this->render_classic_email_template( $data ), 'text' => '' );
+            }
+
+            return $email->render( $this->email_layout( $data, $settings ) );
         }
 
         public function render_simple_email_template( $data ) {
+            $email = function_exists( 'wordplus_email' ) ? wordplus_email() : null;
+
+            if ( ! $email ) {
+                return $this->render_classic_email_template( $data );
+            }
+
+            return $email->render( $this->email_layout( $data, Better_Messages()->settings ) )['html'];
+        }
+
+        private function email_layout( $data, $settings ) {
+            $site   = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+            $colors = $this->email_colors( $settings );
+            $blocks = $this->email_blocks( $data );
+            $intro  = $this->email_intro( $data, $blocks );
+            $stats  = $this->email_stats_block( $data );
+
+            if ( $stats ) {
+                $blocks[] = $stats;
+            }
+
+            if ( ! empty( $data['button_text'] ) ) {
+                $button_text = (string) $data['button_text'];
+            } else {
+                $button_text = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
+            }
+
+            $footer = array();
+
+            if ( ! empty( $data['unread_footer'] ) ) {
+                $footer[] = array( 'text' => sprintf( _x( 'You are receiving this email because you have unread messages on %s', 'Email footer', 'bp-better-messages' ), $site ) );
+            }
+
+            $links = array( array( 'label' => $this->email_footer_text( $settings ), 'url' => home_url() ) );
+
+            if ( ! empty( $data['unsubscribe_url'] ) ) {
+                $links[] = array( 'label' => _x( 'Unsubscribe', 'Email footer', 'bp-better-messages' ), 'url' => $data['unsubscribe_url'] );
+            }
+
+            $footer[] = array( 'links' => $links );
+
+            if ( ! empty( $data['footer_html'] ) ) {
+                $footer[] = array( 'html' => $data['footer_html'] );
+            }
+
+            return array(
+                'title'      => isset( $data['email_subject'] ) ? (string) $data['email_subject'] : '',
+                'preheader'  => isset( $data['preheader'] ) ? (string) $data['preheader'] : $this->email_preheader( $blocks ),
+                'brand'      => array(
+                    'name'       => $site,
+                    'url'        => home_url(),
+                    'logo'       => ! empty( $settings['emailLogoUrl'] ) ? (string) $settings['emailLogoUrl'] : '',
+                    'logo_width' => $this->email_logo_width( $settings ),
+                ),
+                'greeting'   => $this->email_header_text( $data, $settings ),
+                'heading'    => $intro[0],
+                'subheading' => $intro[1],
+                'blocks'     => $blocks,
+                'button'     => array( 'label' => $button_text, 'url' => isset( $data['thread_url'] ) ? (string) $data['thread_url'] : '' ),
+                'footer'     => $footer,
+                'colors'     => $colors,
+                'dark'       => $colors['dark'],
+            );
+        }
+
+        private function email_logo_width( $settings ) {
+            if ( empty( $settings['emailLogoUrl'] ) || empty( $settings['emailLogoId'] ) ) {
+                return 0;
+            }
+
+            $image = wp_get_attachment_image_src( (int) $settings['emailLogoId'], 'full' );
+
+            return is_array( $image ) && ! empty( $image[1] ) && $image[0] === $settings['emailLogoUrl'] ? (int) $image[1] : 0;
+        }
+
+        private function email_blocks( $data ) {
+            if ( isset( $data['blocks'] ) && is_array( $data['blocks'] ) && ( ! empty( $data['blocks'] ) || isset( $data['content_level'] ) ) ) {
+                return $data['blocks'];
+            }
+
+            if ( isset( $data['text'] ) && $data['text'] !== '' ) {
+                return array( array( 'type' => 'text', 'text' => (string) $data['text'] ) );
+            }
+
+            if ( ! empty( $data['messages_html'] ) ) {
+                return array( array( 'type' => 'html', 'html' => (string) $data['messages_html'] ) );
+            }
+
+            return array();
+        }
+
+        private function email_intro( $data, $blocks ) {
+            if ( isset( $data['heading'] ) ) {
+                return array( (string) $data['heading'], isset( $data['subheading'] ) ? (string) $data['subheading'] : '' );
+            }
+
+            $count = 0;
+            $names = array();
+
+            foreach ( $blocks as $block ) {
+                if ( isset( $block['type'] ) && $block['type'] === 'message' ) {
+                    $count += count( $block['lines'] );
+
+                    if ( ! in_array( (string) $block['name'], $names, true ) ) {
+                        $names[] = (string) $block['name'];
+                    }
+                }
+            }
+
+            if ( $count === 0 ) {
+                return array( isset( $data['email_subject'] ) ? (string) $data['email_subject'] : '', '' );
+            }
+
+            $number  = number_format_i18n( $count );
+            $subject = isset( $data['subject'] ) ? (string) $data['subject'] : '';
+            /* translators: %s: the names of who wrote the messages, as "Jane Smith and Mark Lee" */
+            $from    = sprintf( _x( 'From %s', 'Email notification', 'bp-better-messages' ), $this->email_names( $names ) );
+
+            if ( $subject !== '' ) {
+                /* translators: 1: the number of messages, 2: the subject of the conversation */
+                return array( sprintf( _n( '%1$s new message in “%2$s”', '%1$s new messages in “%2$s”', $count, 'bp-better-messages' ), $number, $subject ), $from );
+            }
+
+            if ( count( $names ) === 1 ) {
+                /* translators: 1: the number of messages, 2: the name of who wrote them */
+                return array( sprintf( _n( '%1$s new message from %2$s', '%1$s new messages from %2$s', $count, 'bp-better-messages' ), $number, $names[0] ), '' );
+            }
+
+            /* translators: %s: the number of messages */
+            return array( sprintf( _n( '%s new message', '%s new messages', $count, 'bp-better-messages' ), $number ), $from );
+        }
+
+        private function email_names( $names ) {
+            if ( count( $names ) > 3 ) {
+                $rest  = count( $names ) - 2;
+                $names = array_slice( $names, 0, 2 );
+                /* translators: %s: how many more people wrote */
+                $names[] = sprintf( _n( '%s other', '%s others', $rest, 'bp-better-messages' ), number_format_i18n( $rest ) );
+            }
+
+            return wp_sprintf( '%l', $names );
+        }
+
+        private function email_preheader( $blocks ) {
+            foreach ( $blocks as $block ) {
+                $type = isset( $block['type'] ) ? $block['type'] : '';
+
+                if ( $type === 'message' && ! empty( $block['lines'] ) ) {
+                    $line = $block['name'] . ': ' . reset( $block['lines'] );
+                } elseif ( $type === 'text' ) {
+                    $line = (string) $block['text'];
+                } else {
+                    continue;
+                }
+
+                $line = trim( preg_replace( '/\s+/u', ' ', $line ) );
+
+                return function_exists( 'mb_strimwidth' ) ? mb_strimwidth( $line, 0, 140, '…', 'UTF-8' ) : substr( $line, 0, 140 );
+            }
+
+            return '';
+        }
+
+        private function email_header_text( $data, $settings ) {
+            $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
+            $user_name   = isset( $data['user_name'] ) ? (string) $data['user_name'] : '';
+
+            if ( empty( $header_text ) ) {
+                return sprintf( __( 'Hi %s,', 'bp-better-messages' ), $user_name );
+            }
+
+            return str_replace( '{{user_name}}', $user_name, $header_text );
+        }
+
+        private function email_footer_text( $settings ) {
+            $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
+
+            if ( empty( $footer_text ) ) {
+                return wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+            }
+
+            return str_replace(
+                array( '{{site_name}}', '{{site_url}}' ),
+                array( get_bloginfo( 'name' ), home_url() ),
+                $footer_text
+            );
+        }
+
+        const EMAIL_COLORS = array(
+            'emailBackgroundColor' => '#f4f4f5',
+            'emailContentBgColor'  => '#ffffff',
+            'emailTextColor'       => '#18181b',
+        );
+
+        public function email_accent_color() {
+            if ( class_exists( 'Better_Messages_Design' ) ) {
+                return Better_Messages_Design::instance()->get_accent_color_hex();
+            }
+
+            return '#2563eb';
+        }
+
+        private function email_colors( $settings ) {
+            $accent = isset( $settings['emailPrimaryColor'] ) ? $this->email_hex( $settings['emailPrimaryColor'] ) : '';
+            $chosen = array();
+            $dark   = true;
+
+            foreach ( self::EMAIL_COLORS as $key => $default ) {
+                $hex            = isset( $settings[ $key ] ) ? $this->email_hex( $settings[ $key ] ) : '';
+                $chosen[ $key ] = $hex === '' ? $default : $hex;
+
+                if ( $chosen[ $key ] !== $default ) {
+                    $dark = false;
+                }
+            }
+
+            return array(
+                'accent' => $accent === '' ? $this->email_accent_color() : $accent,
+                'page'   => $chosen['emailBackgroundColor'],
+                'card'   => $chosen['emailContentBgColor'],
+                'text'   => $chosen['emailTextColor'],
+                'dark'   => $dark,
+            );
+        }
+
+        private function email_hex( $color ) {
+            $color = strtolower( trim( (string) $color ) );
+
+            if ( preg_match( '/^#([0-9a-f])([0-9a-f])([0-9a-f])$/', $color, $short ) ) {
+                return '#' . $short[1] . $short[1] . $short[2] . $short[2] . $short[3] . $short[3];
+            }
+
+            return preg_match( '/^#[0-9a-f]{6}$/', $color ) ? $color : '';
+        }
+
+        private function email_message_block( array $blocks, $bm_user, $sender_id, $last_sender_id, $time, $text ) {
+            $text = trim( (string) $text );
+
+            if ( $text === '' ) {
+                return $blocks;
+            }
+
+            $last = count( $blocks ) - 1;
+
+            if ( $last >= 0 && $last_sender_id === $sender_id && $blocks[ $last ]['type'] === 'message' ) {
+                $blocks[ $last ]['lines'][] = $text;
+
+                return $blocks;
+            }
+
+            $blocks[] = array(
+                'type'   => 'message',
+                'sender' => (int) $sender_id,
+                'name'   => $this->email_plain_text( is_array( $bm_user ) && isset( $bm_user['name'] ) ? $bm_user['name'] : '' ),
+                'avatar' => $this->email_avatar( is_array( $bm_user ) && isset( $bm_user['avatar'] ) ? $bm_user['avatar'] : '' ),
+                'time'   => (string) $time,
+                'lines'  => array( $text ),
+            );
+
+            return $blocks;
+        }
+
+        public function email_counts( $user_id ) {
+            global $wpdb;
+
+            $recipients = bm_get_table( 'recipients' );
+            $unread     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(unread_count) FROM `{$recipients}` WHERE user_id = %d AND is_deleted = 0 AND unread_count > 0 AND is_muted NOT IN (4, 5)", $user_id ) );
+            $missed     = 0;
+
+            if ( $unread > 0 ) {
+                $missed = (int) $wpdb->get_var( $wpdb->prepare( "
+                    SELECT COUNT(*)
+                    FROM `{$recipients}` `recipients`
+                    INNER JOIN `" . bm_get_table( 'messages' ) . "` `messages`
+                        ON `messages`.`thread_id` = `recipients`.`thread_id`
+                        AND `messages`.`date_sent` > `recipients`.`last_read`
+                        AND `messages`.`sender_id` != `recipients`.`user_id`
+                    INNER JOIN `" . bm_get_table( 'meta' ) . "` `meta`
+                        ON `meta`.`bm_message_id` = `messages`.`id`
+                        AND `meta`.`meta_key` = 'bpbm_missed_call'
+                        AND `meta`.`meta_value` = '1'
+                    WHERE `recipients`.`user_id` = %d
+                    AND `recipients`.`is_deleted` = 0
+                    AND `recipients`.`unread_count` > 0", $user_id ) );
+            }
+
+            $missed = min( $missed, $unread );
+
+            return array( 'unread' => $unread - $missed, 'missed_calls' => $missed );
+        }
+
+        private function email_with_counts( array $data, array $counts ) {
+            $data['counts'] = array(
+                'unread'       => isset( $counts['unread'] ) ? max( 0, (int) $counts['unread'] ) : 0,
+                'missed_calls' => isset( $counts['missed_calls'] ) ? max( 0, (int) $counts['missed_calls'] ) : 0,
+            );
+
+            $parts = array();
+
+            if ( $data['counts']['unread'] > 0 ) {
+                /* translators: %s: the number of unread messages */
+                $parts[] = sprintf( _n( '%s unread message', '%s unread messages', $data['counts']['unread'], 'bp-better-messages' ), number_format_i18n( $data['counts']['unread'] ) );
+            }
+
+            if ( $data['counts']['missed_calls'] > 0 ) {
+                /* translators: %s: the number of missed calls */
+                $parts[] = sprintf( _n( '%s missed call', '%s missed calls', $data['counts']['missed_calls'], 'bp-better-messages' ), number_format_i18n( $data['counts']['missed_calls'] ) );
+            }
+
+            if ( empty( $parts ) ) {
+                return $data;
+            }
+
+            /* translators: %s: the unread messages and missed calls, as "12 unread messages and 2 missed calls" */
+            $line = sprintf( _x( 'In all your conversations: %s', 'Email notification', 'bp-better-messages' ), wp_sprintf( '%l', $parts ) );
+
+            $data['messages_html'] = ( isset( $data['messages_html'] ) ? (string) $data['messages_html'] : '' ) . '<p style="margin:1rem 0;">' . esc_html( $line ) . '</p>';
+            $data['messages_raw']  = ( isset( $data['messages_raw'] ) && trim( (string) $data['messages_raw'] ) !== '' ? rtrim( (string) $data['messages_raw'] ) . "\n\n" : '' ) . $line;
+
+            return $data;
+        }
+
+        private function email_stats_block( $data ) {
+            if ( empty( $data['counts'] ) ) {
+                return null;
+            }
+
+            $items = array();
+
+            if ( $data['counts']['unread'] > 0 ) {
+                $items[] = array( 'value' => number_format_i18n( $data['counts']['unread'] ), 'label' => _n( 'Unread message', 'Unread messages', $data['counts']['unread'], 'bp-better-messages' ) );
+            }
+
+            if ( $data['counts']['missed_calls'] > 0 ) {
+                $items[] = array( 'value' => number_format_i18n( $data['counts']['missed_calls'] ), 'label' => _n( 'Missed call', 'Missed calls', $data['counts']['missed_calls'], 'bp-better-messages' ) );
+            }
+
+            if ( empty( $items ) ) {
+                return null;
+            }
+
+            return array( 'type' => 'stats', 'title' => _x( 'In all your conversations', 'Email notification', 'bp-better-messages' ), 'items' => $items );
+        }
+
+        public function email_content_level( $settings = null ) {
+            $settings = null === $settings ? Better_Messages()->settings : $settings;
+            $level    = isset( $settings['emailContent'] ) ? (string) $settings['emailContent'] : 'full';
+
+            return in_array( $level, array( 'full', 'senders', 'notice' ), true ) ? $level : 'full';
+        }
+
+        private function email_withhold( array $data, $level ) {
+            if ( $level !== 'senders' && $level !== 'notice' ) {
+                return $data;
+            }
+
+            $data['content_level'] = $level;
+
+            if ( $level === 'notice' ) {
+                /* translators: %s: the name of the site */
+                $line = sprintf( _x( 'You have new messages on %s', 'Email notification', 'bp-better-messages' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+
+                return array_merge( $data, array(
+                    'subject'       => '',
+                    'email_subject' => _x( 'You have unread messages', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ),
+                    'heading'       => $line,
+                    'subheading'    => '',
+                    'preheader'     => $line,
+                    'blocks'        => array(),
+                    'messages_html' => '<p style="margin:1rem 0;">' . esc_html( $line ) . '</p>',
+                    'messages_raw'  => $line,
+                ) );
+            }
+
+            $people = array();
+            $count  = 0;
+
+            foreach ( isset( $data['blocks'] ) && is_array( $data['blocks'] ) ? $data['blocks'] : array() as $block ) {
+                if ( ! isset( $block['type'] ) || $block['type'] !== 'message' ) {
+                    continue;
+                }
+
+                $key    = isset( $block['sender'] ) ? 'id' . (int) $block['sender'] : 'name' . $block['name'];
+                $count += count( $block['lines'] );
+
+                if ( ! isset( $people[ $key ] ) ) {
+                    $people[ $key ] = array( 'name' => (string) $block['name'], 'avatar' => isset( $block['avatar'] ) ? (string) $block['avatar'] : '' );
+                }
+            }
+
+            if ( empty( $people ) ) {
+                return $this->email_withhold( $data, 'notice' );
+            }
+
+            $subject = isset( $data['subject'] ) ? (string) $data['subject'] : '';
+            /* translators: %s: the names of who wrote the messages, as "Jane Smith and Mark Lee" */
+            $line    = sprintf( _n( 'You have a new message from %s', 'You have new messages from %s', $count, 'bp-better-messages' ), $this->email_names( wp_list_pluck( $people, 'name' ) ) );
+
+            return array_merge( $data, array(
+                'heading'       => $line,
+                /* translators: %s: the subject of the conversation */
+                'subheading'    => $subject !== '' ? sprintf( _x( 'In “%s”', 'Email notification', 'bp-better-messages' ), $subject ) : '',
+                'preheader'     => $line,
+                'blocks'        => array( array( 'type' => 'faces', 'people' => array_values( $people ) ) ),
+                'messages_html' => '<p style="margin:1rem 0;">' . esc_html( $line ) . '</p>',
+                'messages_raw'  => $line,
+            ) );
+        }
+
+        private function email_plain_text( $value ) {
+            return trim( preg_replace( '/\s+/u', ' ', wp_specialchars_decode( wp_strip_all_tags( stripslashes( (string) $value ) ), ENT_QUOTES ) ) );
+        }
+
+        private function email_avatar( $url ) {
+            $url = trim( (string) $url );
+
+            if ( strpos( $url, '//' ) === 0 ) {
+                $url = 'https:' . $url;
+            }
+
+            if ( ! preg_match( '#^https?://#i', $url ) ) {
+                return '';
+            }
+
+            $path = (string) wp_parse_url( $url, PHP_URL_PATH );
+
+            if ( preg_match( '/\.svg$/i', $path ) || substr( $path, -strlen( '/assets/images/avatar.png' ) ) === '/assets/images/avatar.png' ) {
+                return '';
+            }
+
+            return $url;
+        }
+
+        public function default_custom_template( $settings = null ) {
+            $settings = null === $settings ? Better_Messages()->settings : $settings;
+            $email    = function_exists( 'wordplus_email' ) ? wordplus_email() : null;
+
+            if ( ! $email ) {
+                return '';
+            }
+
+            $slot = 'https://bm-template.invalid/';
+
+            $layout = $this->email_layout( array(
+                'email_subject' => '{{email_subject}}',
+                'preheader'     => '{{preheader}}',
+                'heading'       => '{{heading}}',
+                'subheading'    => '{{subheading}}',
+                'blocks'        => array( array( 'type' => 'html', 'html' => 'BM-TEMPLATE-MESSAGES' ), array( 'type' => 'html', 'html' => 'BM-TEMPLATE-STATS' ) ),
+                'thread_url'    => $slot . 'thread_url',
+                'unread_footer' => true,
+                'footer_html'   => 'BM-TEMPLATE-UNSUBSCRIBE',
+            ), array_merge( $settings, array(
+                'emailHeaderText' => '{{header_text}}',
+                'emailFooterText' => '{{footer_text}}',
+                'emailButtonText' => '{{button_text}}',
+            ) ) );
+
+            return str_replace(
+                array( '<div style="margin:0 0 24px;">BM-TEMPLATE-MESSAGES</div>', '<div style="margin:0 0 24px;">BM-TEMPLATE-STATS</div>', esc_url( $slot . 'thread_url' ), 'BM-TEMPLATE-UNSUBSCRIBE', 'href="' . esc_url( home_url() ) . '"' ),
+                array( '{{messages_chat_html}}', '{{stats_html}}', '{{thread_url}}', '{{unsubscribe_link}}', 'href="{{site_url}}"' ),
+                $email->render( $layout )['html']
+            );
+        }
+
+        private function render_classic_email_template( $data ) {
             $settings = Better_Messages()->settings;
 
             $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
@@ -935,6 +1621,10 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
             $footer_text = ! empty( $settings['emailFooterText'] ) ? $settings['emailFooterText'] : '';
             $button_text = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
+
+            if ( ! empty( $data['button_text'] ) ) {
+                $button_text = (string) $data['button_text'];
+            }
 
             if ( empty( $header_text ) ) {
                 $header_text = sprintf( __( 'Hi %s,', 'bp-better-messages' ), $data['user_name'] );
@@ -1052,19 +1742,31 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
             return ob_get_clean();
         }
 
-        public function render_custom_email_template( $data ) {
-            $template = Better_Messages_Options()->get_email_custom_html();
-            $settings = Better_Messages()->settings;
+        public function render_custom_email_template( $data, $settings = null, $template = null ) {
+            $template = null === $template ? Better_Messages_Options()->get_email_custom_html() : (string) $template;
+            $settings = null === $settings ? Better_Messages()->settings : $settings;
 
             if ( $data['subject'] === '' ) {
                 $template = $this->without_subject_placeholder( $template );
             }
 
-            $primary_color    = ! empty( $settings['emailPrimaryColor'] ) ? $settings['emailPrimaryColor'] : '#21759b';
-            $background_color = ! empty( $settings['emailBackgroundColor'] ) ? $settings['emailBackgroundColor'] : '#f6f6f6';
-            $content_bg_color = ! empty( $settings['emailContentBgColor'] ) ? $settings['emailContentBgColor'] : '#ffffff';
-            $text_color       = ! empty( $settings['emailTextColor'] ) ? $settings['emailTextColor'] : '#333333';
+            $colors           = $this->email_colors( $settings );
+            $primary_color    = $colors['accent'];
+            $background_color = $colors['page'];
+            $content_bg_color = $colors['card'];
+            $text_color       = $colors['text'];
             $button_text      = ! empty( $settings['emailButtonText'] ) ? $settings['emailButtonText'] : __( 'View Conversation', 'bp-better-messages' );
+
+            $blocks  = $this->email_blocks( $data );
+            $intro   = $this->email_intro( $data, $blocks );
+            $stats   = $this->email_stats_block( $data );
+            $email   = function_exists( 'wordplus_email' ) ? wordplus_email() : null;
+            $palette = array( 'accent' => $primary_color, 'page' => $background_color, 'card' => $content_bg_color, 'text' => $text_color );
+
+            $unsubscribe_link = '';
+            if ( ! empty( $data['unsubscribe_url'] ) ) {
+                $unsubscribe_link = '<a href="' . esc_url( $data['unsubscribe_url'] ) . '" style="color: inherit; text-decoration: underline;">' . esc_html_x( 'Unsubscribe', 'Email footer', 'bp-better-messages' ) . '</a>';
+            }
 
             $header_text = ! empty( $settings['emailHeaderText'] ) ? $settings['emailHeaderText'] : '';
             if ( empty( $header_text ) ) {
@@ -1112,6 +1814,14 @@ if ( !class_exists( 'Better_Messages_Notifications' ) ):
                 '{{footer_text}}'      => $footer_text,
                 '{{logo_html}}'        => $logo_html,
                 '{{unsubscribe_html}}' => $unsubscribe_html,
+                '{{unsubscribe_link}}' => $unsubscribe_link,
+                '{{messages_chat_html}}' => $email ? $email->blocks_html( $blocks, $palette ) : ( isset( $data['messages_html'] ) ? $data['messages_html'] : '' ),
+                '{{stats_html}}'       => $email && $stats ? $email->blocks_html( array( $stats ), $palette ) : '',
+                '{{unread_count}}'     => isset( $data['counts'] ) ? number_format_i18n( $data['counts']['unread'] ) : '0',
+                '{{missed_calls_count}}' => isset( $data['counts'] ) ? number_format_i18n( $data['counts']['missed_calls'] ) : '0',
+                '{{heading}}'          => esc_html( $intro[0] ),
+                '{{subheading}}'       => esc_html( $intro[1] ),
+                '{{preheader}}'        => esc_html( isset( $data['preheader'] ) ? (string) $data['preheader'] : $this->email_preheader( $blocks ) ),
             );
 
             return str_replace( array_keys( $replacements ), array_values( $replacements ), $template );

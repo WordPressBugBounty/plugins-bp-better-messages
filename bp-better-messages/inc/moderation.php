@@ -5,6 +5,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
     class Better_Messages_Moderation
     {
+        const HELD_DIGEST = 'better_messages_held_digest';
+
         private $site_admin_ids = null;
 
         private $messages_to_review = null;
@@ -40,6 +42,8 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             add_action('better_messages_clean_expired_ban', array( $this, 'clean_expired_ban'), 10, 2 );
             add_action('better_messages_message_sent', array( $this, 'mark_user_as_approved_sender' ), 10, 1 );
             add_action('better_messages_message_pending', array( $this, 'notify_pending_message' ), 10, 1 );
+            add_action('init', array( $this, 'schedule_held_digest' ), 20 );
+            add_action('better_messages_held_digest', array( $this, 'send_held_digest' ), 10, 0 );
             add_action('better_messages_message_reported', array( $this, 'notify_reported_message' ), 10, 6 );
 
             foreach( array( 'set_user_role', 'add_user_role', 'remove_user_role', 'deleted_user', 'granted_super_admin', 'revoked_super_admin', 'bp_better_chat_settings_updated' ) as $hook ){
@@ -48,6 +52,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
             add_action( 'show_user_profile', array( $this, 'render_user_section' ) );
             add_action( 'edit_user_profile', array( $this, 'render_user_section' ) );
+            add_filter( 'wordplus_addresses_profile_box', array( $this, 'addresses_in_user_section' ) );
 
             add_filter( 'bp_better_messages_script_variable', array( $this, 'review_script_variables' ), 1000 );
 
@@ -143,6 +148,119 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             } elseif ( 'ai_moderation_flagged' === $meta_key && ( 'deleted_bm_message_meta' === current_action() || '1' === (string) $meta_value ) ) {
                 $this->review_queue_changed();
             }
+
+            if ( ( 'user_reports' === $meta_key && 'deleted_bm_message_meta' === current_action() ) || ( 'ai_moderation_flagged' === $meta_key && ( 'deleted_bm_message_meta' === current_action() || '1' !== (string) $meta_value ) ) ) {
+                $this->settle_review_copy( (int) $message_id );
+            }
+        }
+
+        const REVIEW_COPY = 'bm_review_copy';
+
+        public function waits_for_review( int $message_id ): bool
+        {
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if ( ! $message ) {
+                return false;
+            }
+
+            if ( (int) $message->is_pending === 1 ) {
+                return true;
+            }
+
+            if ( '1' === (string) Better_Messages()->functions->get_message_meta( $message_id, 'ai_moderation_flagged', true ) ) {
+                return true;
+            }
+
+            $reports = Better_Messages()->functions->get_message_meta( $message_id, 'user_reports', true );
+
+            return is_array( $reports ) && count( $reports ) > 0;
+        }
+
+        public function keep_for_review( $message, int $deleted_by ): bool
+        {
+            $message_id = (int) $message->id;
+
+            if ( (int) $message->sender_id === 0 || ! $this->waits_for_review( $message_id ) ) {
+                return false;
+            }
+
+            if ( $this->review_copy( $message_id ) ) {
+                return true;
+            }
+
+            $files       = array();
+            $attachments = Better_Messages()->functions->get_message_meta( $message_id, 'attachments', true );
+
+            if ( is_array( $attachments ) ) {
+                $files = array_keys( $attachments );
+            }
+
+            foreach ( array( 'bpbm_voice_messages', 'bpbm_video_messages' ) as $meta_key ) {
+                $files[] = Better_Messages()->functions->get_message_meta( $message_id, $meta_key, true );
+            }
+
+            $files = array_values( array_unique( array_filter( array_map( 'intval', $files ), function ( $id ) {
+                return $id > 0;
+            } ) ) );
+
+            Better_Messages()->functions->update_message_meta( $message_id, self::REVIEW_COPY, array(
+                'message' => (string) $message->message,
+                'files'   => $files,
+                'by'      => $deleted_by,
+                'at'      => time(),
+            ) );
+
+            foreach ( array( 'attachments', 'bpbm_voice_messages', 'bpbm_video_messages' ) as $meta_key ) {
+                Better_Messages()->functions->delete_message_meta( $message_id, $meta_key );
+            }
+
+            return true;
+        }
+
+        public function hide_kept_message( int $message_id, int $thread_id ): void
+        {
+            global $wpdb;
+
+            $message = Better_Messages()->functions->get_message( $message_id );
+
+            if ( $message && (int) $message->is_pending === 1 ) {
+                $wpdb->update( bm_get_table( 'messages' ), array(
+                    'message' => Better_Messages()->encryption->seal_message( '<!-- BM-DELETED-MESSAGE -->', $thread_id ),
+                ), array( 'id' => $message_id ), array( '%s' ), array( '%d' ) );
+
+                Better_Messages()->functions->update_message_update_time( $message_id );
+
+                return;
+            }
+
+            Better_Messages()->functions->delete_message( $message_id, $thread_id, true, 'replace' );
+        }
+
+        public function review_copy( int $message_id ): ?array
+        {
+            $copy = Better_Messages()->functions->get_message_meta( $message_id, self::REVIEW_COPY, true );
+
+            return is_array( $copy ) && isset( $copy['message'] ) ? $copy : null;
+        }
+
+        public function review_copy_files( int $message_id ): array
+        {
+            $copy = $this->review_copy( $message_id );
+
+            return $copy ? array_map( 'intval', (array) ( $copy['files'] ?? array() ) ) : array();
+        }
+
+        public function settle_review_copy( int $message_id ): void
+        {
+            $copy = $this->review_copy( $message_id );
+
+            if ( ! $copy || $this->waits_for_review( $message_id ) ) {
+                return;
+            }
+
+            Better_Messages()->functions->delete_message_files( $message_id, (array) ( $copy['files'] ?? array() ) );
+            Better_Messages()->functions->delete_message_meta( $message_id, self::REVIEW_COPY );
         }
 
         public function review_message_deleting( $message_id ): void
@@ -224,6 +342,11 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 </div>
             </div>
             <?php
+        }
+
+        public function addresses_in_user_section( $draws )
+        {
+            return current_user_can( 'bm_can_administrate' ) ? false : $draws;
         }
 
         public function is_moderation_enabled( $user_id, ?int $thread_id = null, $is_new_conversation = false )
@@ -361,6 +484,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                         END as priority
                     FROM {$table}
                     WHERE `user_id` = %d
+                    AND `type` IN ('bypass_moderation', 'force_moderation')
                     AND (`thread_id` = 0 OR `thread_id` IS NULL)
                     AND (`expiration` IS NULL OR `expiration` > NOW())
                     ORDER BY priority ASC
@@ -609,7 +733,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $is_blacklisted;
         }
 
-        public function blacklist_user( int $user_id, ?int $thread_id = null, ?int $duration = null ): bool
+        public function blacklist_user( int $user_id, ?int $thread_id = null, ?int $duration = null, ?int $admin_id = null ): bool
         {
             global $wpdb;
 
@@ -617,7 +741,9 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 return false;
             }
 
-            $admin_id = Better_Messages()->functions->get_current_user_id();
+            if( $admin_id === null ){
+                $admin_id = Better_Messages()->functions->get_current_user_id();
+            }
             $table = bm_get_table('moderation');
 
             if( $thread_id === null ){
@@ -1465,6 +1591,14 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
                 return false;
             }
 
+            if( $this->review_copy( $message_id ) ){
+                return false;
+            }
+
+            if( Better_Messages()->anti_spam->restore_message( $message_id ) ){
+                return true;
+            }
+
             if( $approver_user_id === null ){
                 $approver_user_id = Better_Messages()->functions->get_current_user_id();
             }
@@ -1567,7 +1701,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             return $deleted_count;
         }
 
-        private function get_notification_emails()
+        public function get_notification_emails()
         {
             $emails_raw = Better_Messages()->settings['messagesModerationNotificationEmails'];
 
@@ -1602,76 +1736,188 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
 
         public function notify_pending_message( $message )
         {
-            if( ! isset( $message->sender_id ) || ! isset( $message->thread_id ) ){
+            if( ! isset( $message->id ) || ! isset( $message->sender_id ) || ! isset( $message->thread_id ) ){
                 return;
             }
 
-            $emails = $this->get_notification_emails();
-
-            if( empty( $emails ) ){
+            if( empty( $this->get_notification_emails() ) ){
                 return;
             }
 
-            $sender_id = $message->sender_id;
-            $sender_name = Better_Messages()->functions->get_plain_name( $sender_id );
+            $digest = $this->held_digest();
 
-            $thread_id = $message->thread_id;
-            $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
-
-            $subject = sprintf(
-                _x( '[%s] New message pending moderation', 'Moderation email subject', 'bp-better-messages' ),
-                get_bloginfo( 'name' )
+            $digest['held'][] = array(
+                'id'  => (int) $message->id,
+                'why' => $this->pending_reasons( $message ),
             );
 
-            $message_content = apply_filters( 'better_messages_moderation_message_content',
-                wp_trim_words( wp_strip_all_tags( Better_Messages_Mentions::mentions_as_names( $message->message ) ), 50, '...' ),
-                $message
+            $digest['held'] = array_slice( $digest['held'], -100 );
+
+            update_option( self::HELD_DIGEST, $digest, false );
+
+            $this->send_held_digest( $message );
+        }
+
+        public function schedule_held_digest()
+        {
+            if ( function_exists( 'Better_Messages_Worker' ) ) {
+                Better_Messages_Worker()->add_task( 'better_messages_held_digest', 5 * MINUTE_IN_SECONDS );
+            }
+        }
+
+        private function held_digest()
+        {
+            $digest = get_option( self::HELD_DIGEST, array() );
+
+            return array(
+                'held' => isset( $digest['held'] ) && is_array( $digest['held'] ) ? array_values( $digest['held'] ) : array(),
+                'sent' => isset( $digest['sent'] ) ? (int) $digest['sent'] : 0,
             );
+        }
 
-            $reason = _x( 'Pre-moderation rules', 'Moderation email', 'bp-better-messages' );
+        public function held_digest_interval()
+        {
+            return max( 0, (int) apply_filters( 'better_messages_held_digest_interval', max( 0, (int) ( Better_Messages()->settings['spamDigestHours'] ?? 3 ) ) * HOUR_IN_SECONDS ) );
+        }
 
-            if( ! empty( $message->ai_moderation_result ) ) {
-                $reason = _x( 'AI Content Moderation', 'Moderation email', 'bp-better-messages' );
-            } else if( Better_Messages()->settings['messagesModerateFirstTimeSenders'] === '1' && $this->is_first_time_sender( $sender_id ) ) {
-                $reason = _x( 'First-time sender', 'Moderation email', 'bp-better-messages' );
-            } else {
-                $moderation_status = $this->get_user_moderation_status( $sender_id, $thread_id );
-                if( $moderation_status === true ) {
-                    $reason = _x( 'User is blacklisted', 'Moderation email', 'bp-better-messages' );
+        public function send_held_digest( $fresh = null )
+        {
+            $digest = $this->held_digest();
+
+            if ( empty( $digest['held'] ) || time() - $digest['sent'] < $this->held_digest_interval() ) {
+                return false;
+            }
+
+            $emails   = $this->get_notification_emails();
+            $held     = array();
+            $fresh_id = is_object( $fresh ) && isset( $fresh->id ) ? (int) $fresh->id : 0;
+
+            foreach ( $digest['held'] as $item ) {
+                $id = isset( $item['id'] ) ? (int) $item['id'] : 0;
+
+                if ( $id !== 0 && $id === $fresh_id ) {
+                    $held[ $id ] = array( 'message' => $fresh, 'why' => isset( $item['why'] ) ? (array) $item['why'] : array() );
+                    continue;
+                }
+
+                $message = $id !== 0 ? Better_Messages()->functions->get_message( $id ) : null;
+
+                if ( $message && (int) $message->is_pending === 1 ) {
+                    $held[ (int) $message->id ] = array( 'message' => $message, 'why' => isset( $item['why'] ) ? (array) $item['why'] : array() );
                 }
             }
 
-            $email_body  = sprintf( _x( 'Sender: %s (ID: %d)', 'Moderation email', 'bp-better-messages' ), $sender_name, $sender_id ) . "\n";
-            $email_body .= sprintf( _x( 'Conversation: #%d', 'Moderation email', 'bp-better-messages' ), $thread_id ) . "\n";
-            $email_body .= sprintf( _x( 'Reason: %s', 'Moderation email', 'bp-better-messages' ), $reason ) . "\n";
+            if ( empty( $emails ) || empty( $held ) ) {
+                update_option( self::HELD_DIGEST, array( 'held' => array(), 'sent' => $digest['sent'] ), false );
+                return false;
+            }
 
-            if( ! empty( $message->ai_moderation_result ) && ! empty( $message->ai_moderation_result['flagged_categories'] ) ) {
-                $categories = implode( ', ', $message->ai_moderation_result['flagged_categories'] );
-                $email_body .= sprintf( _x( 'AI Flagged Categories: %s', 'Moderation email', 'bp-better-messages' ), $categories ) . "\n";
+            update_option( self::HELD_DIGEST, array( 'held' => array(), 'sent' => time() ), false );
+
+            $count   = count( $held );
+            $heading = sprintf( _nx( '%d message is waiting for approval', '%d messages are waiting for approval', $count, 'Moderation email', 'bp-better-messages' ), $count );
+            $subject = html_entity_decode( sprintf( '[%s] %s', get_bloginfo( 'name' ), $heading ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+            $blocks  = array();
+
+            foreach ( array_slice( $held, 0, 20 ) as $item ) {
+                $blocks[] = Better_Messages()->notifications->moderator_message_block( $item['message'], $this->attachment_lines( $item['message'] ) );
+
+                $blocks[] = array(
+                    'type' => 'system',
+                    'text' => implode( ' · ', array_merge(
+                        array( sprintf( _x( 'Conversation #%d', 'Moderation email', 'bp-better-messages' ), (int) $item['message']->thread_id ) ),
+                        $item['why']
+                    ) ),
+                );
+            }
+
+            if ( $count > 20 ) {
+                $blocks[] = array( 'type' => 'text', 'text' => sprintf( _x( 'And %d more in Administration', 'Moderation email', 'bp-better-messages' ), $count - 20 ) );
+            }
+
+            return Better_Messages()->notifications->moderator_email( $emails, $subject, array(
+                'preheader' => _x( 'Held for a moderator, and not delivered until approved', 'Moderation email', 'bp-better-messages' ),
+                'heading'   => $heading,
+                'subheading'=> _x( 'They are not delivered until a moderator approves them', 'Moderation email', 'bp-better-messages' ),
+                'blocks'    => $blocks,
+                'button'    => array( 'label' => _x( 'Review messages', 'Moderation email', 'bp-better-messages' ), 'url' => admin_url( 'admin.php?page=better-messages-viewer#/review?reason=held' ) ),
+            ) );
+        }
+
+        private function pending_reasons( $message )
+        {
+            $sender_id = (int) $message->sender_id;
+            $why       = array();
+            $spam      = Better_Messages()->anti_spam;
+
+            foreach ( $spam->message_rules( (int) $message->id ) as $rule ) {
+                $why[] = $spam->rule_words( $rule );
+            }
+
+            if ( ! empty( $message->ai_moderation_result ) ) {
+                $why[] = _x( 'AI Content Moderation', 'Moderation email', 'bp-better-messages' );
+
+                if ( ! empty( $message->ai_moderation_result['flagged_categories'] ) ) {
+                    $why[] = sprintf( _x( 'AI Flagged Categories: %s', 'Moderation email', 'bp-better-messages' ), implode( ', ', (array) $message->ai_moderation_result['flagged_categories'] ) );
+                }
+
                 if ( ! empty( $message->ai_moderation_result['reason'] ) ) {
-                    $email_body .= sprintf( _x( 'AI Reason: %s', 'Moderation email', 'bp-better-messages' ), $message->ai_moderation_result['reason'] ) . "\n";
+                    $why[] = sprintf( _x( 'AI Reason: %s', 'Moderation email', 'bp-better-messages' ), $message->ai_moderation_result['reason'] );
                 }
             }
 
-            $email_body .= "\n" . sprintf( _x( 'Message: %s', 'Moderation email', 'bp-better-messages' ), $message_content ) . "\n";
+            $review = empty( $why ) && $spam->is_under_review( $sender_id ) ? $spam->review_rules( $sender_id ) : array();
 
-            $attachments = Better_Messages()->functions->get_message_meta( $message->id, 'attachments', true );
-            if ( is_array( $attachments ) && ! empty( $attachments ) ) {
-                $email_body .= _x( 'Attachments:', 'Moderation email', 'bp-better-messages' ) . "\n";
-                foreach ( array_keys( $attachments ) as $att_id ) {
-                    $url = Better_Messages_Storage()->get_file_url( $att_id, 'email' );
-                    if ( ! $url ) {
-                        $url = wp_get_attachment_url( $att_id );
-                    }
-                    if ( $url ) {
-                        $email_body .= '  - ' . $url . "\n";
-                    }
+            if ( $review ) {
+                $why[] = _x( 'The account is under review', 'Moderation email', 'bp-better-messages' );
+
+                foreach ( $review as $rule ) {
+                    $why[] = $spam->rule_words( $rule );
                 }
             }
 
-            $email_body .= "\n" . sprintf( _x( 'Review in moderation panel: %s', 'Moderation email', 'bp-better-messages' ), $moderation_url );
+            if ( empty( $why ) && Better_Messages()->settings['messagesModerateFirstTimeSenders'] === '1' && $this->is_first_time_sender( $sender_id ) ) {
+                $why[] = _x( 'First-time sender', 'Moderation email', 'bp-better-messages' );
+            }
 
-            $this->send_plain_email( $emails, $subject, $email_body );
+            if ( empty( $why ) && $this->get_user_moderation_status( $sender_id, (int) $message->thread_id ) === true ) {
+                $why[] = _x( 'User is blacklisted', 'Moderation email', 'bp-better-messages' );
+            }
+
+            if ( empty( $why ) ) {
+                $why[] = _x( 'Pre-moderation rules', 'Moderation email', 'bp-better-messages' );
+            }
+
+            return array_values( array_unique( $why ) );
+        }
+
+        private function attachment_lines( $message )
+        {
+            $lines       = array();
+            $attachments = Better_Messages()->functions->get_message_meta( (int) $message->id, 'attachments', true );
+
+            if ( ! is_array( $attachments ) ) {
+                return $lines;
+            }
+
+            foreach ( array_keys( $attachments ) as $att_id ) {
+                if ( Better_Messages()->encryption->files()->is_encrypted( $att_id ) ) {
+                    $lines[] = Better_Messages_Storage()->original_name( $att_id );
+                    continue;
+                }
+
+                $url = Better_Messages_Storage()->get_file_url( $att_id, 'email' );
+
+                if ( ! $url ) {
+                    $url = wp_get_attachment_url( $att_id );
+                }
+
+                if ( $url ) {
+                    $lines[] = $url;
+                }
+            }
+
+            return $lines;
         }
 
         public function notify_reported_message( $message_id, $thread_id, $reporter_user_id, $category, $description, $reports )
@@ -1692,7 +1938,7 @@ if ( !class_exists( 'Better_Messages_Moderation' ) ):
             $sender_id = $message->sender_id;
             $sender_name = Better_Messages()->functions->get_plain_name( $sender_id );
 
-            $moderation_url = admin_url( 'admin.php?page=better-messages-viewer' );
+            $moderation_url = admin_url( 'admin.php?page=better-messages-viewer#/review?reason=reported' );
 
             $category_label = $category;
 

@@ -46,7 +46,7 @@ if ( !class_exists( 'Better_Messages_Bulk_Sender' ) ):
                 $now, $now
             ) );
 
-            $job = $wpdb->get_row( "SELECT * FROM `{$table}` WHERE `status` = 'processing' ORDER BY `id` ASC LIMIT 1" );
+            $job = Better_Messages()->encryption->open_bulk_row( $wpdb->get_row( "SELECT * FROM `{$table}` WHERE `status` = 'processing' ORDER BY `id` ASC LIMIT 1" ), true );
 
             if ( ! $job ) {
                 delete_transient( 'better_messages_bulk_processing_lock' );

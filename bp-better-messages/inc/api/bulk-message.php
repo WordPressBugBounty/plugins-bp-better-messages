@@ -247,7 +247,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $insert_data['scheduled_at'] = $scheduled_at_value;
             }
 
-            $wpdb->insert( $table, $insert_data );
+            $wpdb->insert( $table, Better_Messages()->encryption->seal_bulk_row( $insert_data ) );
 
             $job_id = $wpdb->insert_id;
 
@@ -281,9 +281,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $table         = bm_get_table('bulk_jobs');
             $threads_table = bm_get_table('bulk_job_threads');
 
-            $parent_job = $wpdb->get_row( $wpdb->prepare(
+            $parent_job = Better_Messages()->encryption->open_bulk_row( $wpdb->get_row( $wpdb->prepare(
                 "SELECT * FROM `{$table}` WHERE `id` = %d", $parent_job_id
-            ) );
+            ) ) );
 
             if ( ! $parent_job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
@@ -330,7 +330,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 }
             }
 
-            $wpdb->insert( $table, [
+            $wpdb->insert( $table, Better_Messages()->encryption->seal_bulk_row( [
                 'sender_id'       => (int) $parent_job->sender_id,
                 'subject'         => $parent_job->subject,
                 'message'         => $content,
@@ -346,7 +346,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 'error_count'     => 0,
                 'current_page'    => 1,
                 'created_at'      => current_time('mysql'),
-            ] );
+            ] ) );
 
             $job_id = $wpdb->insert_id;
 
@@ -372,9 +372,9 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $table         = bm_get_table('bulk_jobs');
             $threads_table = bm_get_table('bulk_job_threads');
 
-            $parent_job = $wpdb->get_row( $wpdb->prepare(
+            $parent_job = Better_Messages()->encryption->open_bulk_row( $wpdb->get_row( $wpdb->prepare(
                 "SELECT * FROM `{$table}` WHERE `id` = %d", $parent_job_id
-            ) );
+            ) ) );
 
             if ( ! $parent_job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
@@ -523,9 +523,15 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
                 $_FILES['file']['name'] = Better_Messages_Files()->limit_filename_bytes( sanitize_file_name( $_FILES['file']['name'] ) );
             }
 
-            $attachment_id = class_exists( 'Better_Messages_Files' )
-                ? Better_Messages_Files()->media_handle( 'file' )
-                : media_handle_upload( 'file', 0, array( 'post_status' => 'private' ) );
+            Better_Messages()->encryption->files()->bulk_upload( true );
+
+            try {
+                $attachment_id = class_exists( 'Better_Messages_Files' )
+                    ? Better_Messages_Files()->media_handle( 'file' )
+                    : media_handle_upload( 'file', 0, array( 'post_status' => 'private' ) );
+            } finally {
+                Better_Messages()->encryption->files()->bulk_upload( false );
+            }
 
             if ( is_wp_error( $attachment_id ) ) {
                 return $attachment_id;
@@ -541,13 +547,19 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             }
 
             $file_path = get_attached_file( $attachment_id );
+            $size      = $file_path && file_exists( $file_path ) ? (int) filesize( $file_path ) : 0;
+
+            Better_Messages()->encryption->files()->encrypt_attachment( $attachment_id, 'bulk' );
+
+            $encrypted = Better_Messages()->encryption->files()->is_encrypted( $attachment_id );
 
             return [
-                'id'   => (int) $attachment_id,
-                'url'  => wp_get_attachment_url( $attachment_id ),
-                'name' => $file_path ? basename( $file_path ) : '',
-                'size' => $file_path && file_exists( $file_path ) ? (int) filesize( $file_path ) : 0,
-                'type' => (string) get_post_mime_type( $attachment_id ),
+                'id'        => (int) $attachment_id,
+                'url'       => $encrypted ? '' : wp_get_attachment_url( $attachment_id ),
+                'name'      => $file_path ? basename( $file_path ) : '',
+                'size'      => $size,
+                'type'      => (string) get_post_mime_type( $attachment_id ),
+                'encrypted' => $encrypted,
             ];
         }
 
@@ -558,7 +570,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
             $table = bm_get_table( 'bulk_jobs' );
             $threads_table = bm_get_table( 'bulk_job_threads' );
 
-            $job = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `{$table}` WHERE `id` = %d", $job_id ) );
+            $job = Better_Messages()->encryption->open_bulk_row( $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `{$table}` WHERE `id` = %d", $job_id ) ) );
             if ( ! $job ) {
                 return new WP_Error( 'not_found', __('Job not found', 'bp-better-messages'), [ 'status' => 404 ] );
             }
@@ -1117,6 +1129,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_Bulk_Message' ) ):
 
             if ( $jobs ) {
                 foreach ( $jobs as $job ) {
+                    $job = Better_Messages()->encryption->open_bulk_row( $job );
                     $thread_count = (int) $wpdb->get_var( $wpdb->prepare(
                         "SELECT COUNT(*) FROM `{$threads_table}` WHERE `job_id` = %d",
                         $job->id

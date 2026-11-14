@@ -36,8 +36,6 @@ if ( ! class_exists( 'Better_Messages_Rest_Users' ) ):
                 return false;
             }
 
-            $roles = Better_Messages()->functions->get_user_roles( $user_id );
-
             $surfaces = array(
                 'miniUsersEnable'     => 'restrictViewMiniUsers',
                 'combinedUsersEnable' => 'restrictViewSideUsers',
@@ -49,11 +47,7 @@ if ( ! class_exists( 'Better_Messages_Rest_Users' ) ):
                     continue;
                 }
 
-                $restricted = isset( Better_Messages()->settings[ $restrict_key ] ) && is_array( Better_Messages()->settings[ $restrict_key ] )
-                    ? Better_Messages()->settings[ $restrict_key ]
-                    : array();
-
-                if ( count( array_intersect( $restricted, $roles ) ) === 0 ) {
+                if ( Better_Messages()->functions->role_list_allows( $restrict_key, $user_id ) ) {
                     return true;
                 }
             }
@@ -114,7 +108,13 @@ if ( ! class_exists( 'Better_Messages_Rest_Users' ) ):
 
             $specific_order_ids = array();
 
-            if ( $mode === 'roles' ) {
+            if ( $mode === 'roles' && Better_Messages()->functions->role_list_mode( 'widgetUsersRoles' ) === 'restrict' ) {
+                if ( ! empty( $roles ) ) {
+                    $placeholders  = implode( ',', array_fill( 0, count( $roles ), '%s' ) );
+                    $where_parts[] = "NOT EXISTS ( SELECT 1 FROM `{$roles_table}` bm_rx WHERE bm_rx.`user_id` = bm_u.`ID` AND bm_rx.`role` IN ({$placeholders}) )";
+                    foreach ( $roles as $r ) $params[] = $r;
+                }
+            } elseif ( $mode === 'roles' ) {
                 if ( empty( $roles ) ) {
                     return array( 'users' => array(), 'page' => $page, 'pages' => 0, 'total' => 0 );
                 }

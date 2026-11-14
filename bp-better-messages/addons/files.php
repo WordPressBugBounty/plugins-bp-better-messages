@@ -268,7 +268,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
 
             $proxy_route = $this->uploads_available() && Better_Messages()->settings['attachmentsProxy'] === '1';
 
-            if ( $proxy_route || ( Better_Messages()->storage && Better_Messages()->storage->resolver_needed() ) ) {
+            if ( $proxy_route || ( Better_Messages()->storage && Better_Messages()->storage->resolver_needed() ) || Better_Messages()->encryption->ever_used() ) {
                 register_rest_route( 'better-messages/v1', '/file/(?P<id>\d+)', array(
                     'methods'             => 'GET',
                     'callback'            => array( $this, 'serve_proxy_file' ),
@@ -442,6 +442,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 $link = $in_storage ? Better_Messages()->storage->file_link( (int) $attachment_id ) : null;
                 if ( $link ) {
                     $file['link'] = $link;
+                }
+
+                if ( Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) ) {
+                    $file = Better_Messages()->encryption->files()->describe( $file, (int) $attachment_id );
                 }
 
                 $files[] = $file;
@@ -632,7 +636,15 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                     return true;
                 }
 
-                $content = str_replace( $message_attachments[$attachment_id], '', $message->message );
+                $opened = Better_Messages()->encryption->open_or_null( $message->message, $message->thread_id );
+
+                if( null === $opened ){
+                    unset($message_attachments[$attachment_id]);
+                    Better_Messages()->functions->update_message_meta($message_id, 'attachments', $message_attachments);
+                    return true;
+                }
+
+                $content = str_replace( $message_attachments[$attachment_id], '', $opened );
                 $other_files = count( $message_attachments ) > 1;
 
                 if( empty( trim( $content ) ) || ( ! $other_files && trim( str_replace( '<!-- BM-ONLY-FILES -->', '', $content ) ) === '' ) ){
@@ -641,7 +653,7 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
                 } else {
                     unset($message_attachments[$attachment_id]);
                     Better_Messages()->functions->update_message_meta($message_id, 'attachments', $message_attachments);
-                    $wpdb->update($table, array('message' => $content), array('id' => $message_id));
+                    $wpdb->update($table, array('message' => Better_Messages()->encryption->seal_message( $content, $message->thread_id )), array('id' => $message_id));
                 }
             }
 
@@ -1496,6 +1508,13 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             return false;
         }
 
+        public function access_token( int $user_id ): string {
+            $payload = $this->base64url_encode( wp_json_encode( array( 'uid' => $user_id, 'iat' => (int) ( floor( time() / 43200 ) * 43200 ) ) ) );
+            $key     = hash_hmac( 'sha256', Better_Messages()->functions->get_user_secret_key( $user_id ), wp_salt( 'auth' ) );
+
+            return $payload . '.' . $this->base64url_encode( hash_hmac( 'sha256', $payload, $key, true ) );
+        }
+
         public function get_proxy_url( int $attachment_id ): string {
             return get_rest_url( null, 'better-messages/v1/file/' . $attachment_id );
         }
@@ -1618,6 +1637,10 @@ if ( !class_exists( 'Better_Messages_Files' ) ):
             $access_error = $this->access_error( $attachment_id, (int) $user_id );
             if ( $access_error ) {
                 return $access_error;
+            }
+
+            if ( Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) ) {
+                return Better_Messages()->encryption->files()->serve( $attachment_id, $request );
             }
 
             if ( Better_Messages()->storage && Better_Messages()->storage->is_cloud_file( $attachment_id ) ) {

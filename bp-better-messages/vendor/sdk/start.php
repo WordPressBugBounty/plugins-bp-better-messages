@@ -5,7 +5,7 @@ if ( ! isset( $GLOBALS['wordplus_sdk_copies'] ) || ! is_array( $GLOBALS['wordplu
     $GLOBALS['wordplus_sdk_copies'] = array();
 }
 
-$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.0.8';
+$GLOBALS['wordplus_sdk_copies'][ __DIR__ ] = '1.1.0';
 
 if ( is_readable( __DIR__ . '/realtime/realtime.php' ) ) {
     require_once __DIR__ . '/realtime/realtime.php';
@@ -127,6 +127,16 @@ if ( ! function_exists( 'wordplus_visitors' ) ) {
     }
 }
 
+if ( ! function_exists( 'wordplus_email' ) ) {
+    function wordplus_email() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'email' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->email();
+    }
+}
+
 if ( ! function_exists( 'wordplus_toasts' ) ) {
     function wordplus_toasts() {
         if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'toasts' ) || '' === WordPlus_SDK::instance()->path() ) {
@@ -174,6 +184,66 @@ if ( ! function_exists( 'wordplus_menus' ) ) {
         }
 
         return WordPlus_SDK::instance()->menus();
+    }
+}
+
+if ( ! function_exists( 'wordplus_captcha' ) ) {
+    function wordplus_captcha() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'captcha' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->captcha();
+    }
+}
+
+if ( ! function_exists( 'wordplus_geo' ) ) {
+    function wordplus_geo() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'geo' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->geo();
+    }
+}
+
+if ( ! function_exists( 'wordplus_addresses' ) ) {
+    function wordplus_addresses() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'addresses' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->addresses();
+    }
+}
+
+if ( ! function_exists( 'wordplus_profiles' ) ) {
+    function wordplus_profiles() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'profiles' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->profiles();
+    }
+}
+
+if ( ! function_exists( 'wordplus_visitor_move' ) ) {
+    function wordplus_visitor_move() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'visitor_move' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->visitor_move();
+    }
+}
+
+if ( ! function_exists( 'wordplus_bookings' ) ) {
+    function wordplus_bookings() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'bookings' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->bookings();
     }
 }
 
@@ -250,5 +320,35 @@ if ( ! function_exists( 'wordplus_ai_status' ) ) {
         }
 
         return WordPlus_SDK::instance()->ai_status();
+    }
+}
+
+if ( ! function_exists( 'wordplus_encryption' ) ) {
+    function wordplus_encryption() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'encryption' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->encryption();
+    }
+}
+
+if ( ! function_exists( 'wordplus_polls' ) ) {
+    function wordplus_polls() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'polls' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->polls();
+    }
+}
+
+if ( ! function_exists( 'wordplus_spam' ) ) {
+    function wordplus_spam() {
+        if ( ! class_exists( 'WordPlus_SDK' ) || ! method_exists( 'WordPlus_SDK', 'spam' ) || '' === WordPlus_SDK::instance()->path() ) {
+            return null;
+        }
+
+        return WordPlus_SDK::instance()->spam();
     }
 }

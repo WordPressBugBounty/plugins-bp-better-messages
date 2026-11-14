@@ -4,7 +4,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
     class Better_Messages_Rest_Api_DB_Migrate
     {
 
-        private $db_version = 2.98;
+        private $db_version = 3.03;
 
         public static function instance()
         {
@@ -130,7 +130,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     `thread_id` bigint(20) NOT NULL DEFAULT 0,
                     `message_id` bigint(20) NOT NULL DEFAULT 0,
                     `uploader_id` bigint(20) NOT NULL DEFAULT 0,
-                    `name` varchar(255) NOT NULL DEFAULT '',
+                    `name` varchar(1024) NOT NULL DEFAULT '',
                     `mime` varchar(100) NOT NULL DEFAULT '',
                     `size` bigint(20) unsigned NOT NULL DEFAULT 0,
                     `kind` varchar(10) NOT NULL DEFAULT 'file',
@@ -437,8 +437,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
 
                 "CREATE TABLE `" . bm_get_table('threads') ."` (
                       `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                      `subject` varchar(255) NOT NULL,
-                      `type` enum('thread','group','chat-room','course') NOT NULL DEFAULT 'thread',
+                      `subject` varchar(1024) NOT NULL,
+                      `type` enum('thread','group','chat-room','course','booking') NOT NULL DEFAULT 'thread',
                       PRIMARY KEY (`id`)
                     ) ENGINE=InnoDB;",
 
@@ -446,7 +446,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                   `id` bigint(20) NOT NULL AUTO_INCREMENT,
                   `user_id` bigint(20) NOT NULL,
                   `thread_id` bigint(20) NOT NULL,
-                  `type` enum('ban','mute','bypass_moderation','force_moderation','call_ban') NOT NULL,
+                  `type` enum('ban','mute','bypass_moderation','force_moderation','call_ban','suspend') NOT NULL,
                   `expiration` datetime NULL DEFAULT NULL,
                   `admin_id` bigint(20) NOT NULL,
                   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -459,15 +459,21 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                  `id` bigint(20) NOT NULL AUTO_INCREMENT,
                  `secret` varchar(60) NOT NULL,
                  `name` varchar(255) NOT NULL,
-                 `email` varchar(100) DEFAULT NULL,
-                 `ip` varchar(40) NOT NULL,
+                 `email` varchar(512) DEFAULT NULL,
+                 `email_hash` char(32) DEFAULT NULL,
+                 `ip` varchar(255) NOT NULL,
+                 `ip_hash` char(32) DEFAULT NULL,
                  `bot_id` bigint(20) NOT NULL DEFAULT 0,
+                 `blog_id` bigint(20) NOT NULL DEFAULT 0,
                  `meta` longtext NOT NULL,
                  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                  `deleted_at` datetime DEFAULT NULL,
                  PRIMARY KEY (`id`),
-                 KEY `bot_id_index` (`bot_id`)
+                 KEY `bot_id_index` (`bot_id`),
+                 KEY `email_index` (`email`(100)),
+                 KEY `email_hash_index` (`email_hash`),
+                 KEY `ip_hash_index` (`ip_hash`)
                 ) ENGINE=InnoDB;",
 
                 "CREATE TABLE `" . bm_get_table('roles') . "` (
@@ -494,7 +500,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 "CREATE TABLE `" . bm_get_table('bulk_jobs') . "` (
                     `id` bigint(20) NOT NULL AUTO_INCREMENT,
                     `sender_id` bigint(20) NOT NULL,
-                    `subject` varchar(255) NOT NULL DEFAULT '',
+                    `subject` varchar(1024) NOT NULL DEFAULT '',
                     `message` longtext NOT NULL,
                     `selectors` longtext NOT NULL,
                     `attachment_ids` text NOT NULL DEFAULT '',
@@ -557,7 +563,71 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             Better_Messages_Users()->schedule_sync_all_users();
             Better_Messages_Capabilities()->register_capabilities();
 
+            $this->keep_new_defaults_off();
+            $this->seed_spam_level();
+
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function keep_new_defaults_off(){
+            $settings = get_option( 'bp-better-chat-settings', false );
+
+            if( false === $settings ){
+                return false;
+            }
+
+            $changed = false;
+
+            if( is_array( $settings ) ){
+                foreach( array( 'profileName', 'profilePhoto' ) as $key ){
+                    if( ! isset( $settings[ $key ] ) ){
+                        $settings[ $key ] = '0';
+                        Better_Messages()->settings[ $key ] = '0';
+                        $changed = true;
+                    }
+                }
+
+                if( $changed ){
+                    update_option( 'bp-better-chat-settings', $settings );
+                }
+            }
+
+            if( function_exists( 'wordplus_geo' ) && wordplus_geo() && method_exists( wordplus_geo(), 'settle' ) && wordplus_geo()->settle( array( 'keep' => false ) ) ){
+                $changed = true;
+            }
+
+            return $changed;
+        }
+
+        public function keep_held_emails_per_message(){
+            $settings = get_option( 'bp-better-chat-settings', false );
+
+            if( ! is_array( $settings ) || isset( $settings['spamDigestHours'] ) ){
+                return false;
+            }
+
+            $settings['spamDigestHours'] = 0;
+            update_option( 'bp-better-chat-settings', $settings );
+            Better_Messages()->settings['spamDigestHours'] = 0;
+
+            return true;
+        }
+
+        public function seed_spam_level(){
+            if( false !== get_option( 'bp-better-chat-settings', false ) ){
+                return false;
+            }
+
+            update_option( 'bp-better-chat-settings', array( 'spamLevel' => 'balanced', 'profileName' => '1', 'profilePhoto' => '1' ) );
+            Better_Messages()->settings['spamLevel'] = 'balanced';
+            Better_Messages()->settings['profileName'] = '1';
+            Better_Messages()->settings['profilePhoto'] = '1';
+
+            if( function_exists( 'wordplus_geo' ) && wordplus_geo() && method_exists( wordplus_geo(), 'settle' ) ){
+                wordplus_geo()->settle( array( 'keep' => true, 'days' => 90 ) );
+            }
+
+            return true;
         }
 
         public function upgrade( $current_version ){
@@ -1163,6 +1233,26 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     function (){
                         $this->refresh_ai_bots();
                     }
+                ],
+                '2.99' => [
+                    "ALTER TABLE `" . bm_get_table('threads') . "` MODIFY `type` enum('thread','group','chat-room','course','booking') NOT NULL DEFAULT 'thread';"
+                ],
+                '3.0' => [
+                    function (){
+                        $this->guests_blog_and_email();
+                    }
+                ],
+                '3.01' => [
+                    function (){
+                        $this->widen_for_encryption();
+                    }
+                ],
+                '3.02' => [
+                    "ALTER TABLE `" . bm_get_table('moderation') ."` MODIFY COLUMN `type` enum('ban','mute','bypass_moderation','force_moderation','call_ban','suspend') NOT NULL;",
+                    array( $this, 'keep_held_emails_per_message' )
+                ],
+                '3.03' => [
+                    array( $this, 'keep_new_defaults_off' )
                 ]
             ];
 
@@ -1190,6 +1280,61 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
             }
 
             update_option( 'better_messages_2_db_version', $this->db_version, false );
+        }
+
+        public function guests_blog_and_email(){
+            global $wpdb;
+
+            $table = bm_get_table('guests');
+
+            if( empty( $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'blog_id'" ) ) ){
+                $wpdb->query( "ALTER TABLE `{$table}` ADD `blog_id` bigint(20) NOT NULL DEFAULT 0 AFTER `bot_id`" );
+            }
+
+            if( empty( $wpdb->get_results( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'email_index'" ) ) ){
+                $wpdb->query( "ALTER TABLE `{$table}` ADD KEY `email_index` (`email`(100))" );
+            }
+
+            $ip = $wpdb->get_row( "SHOW COLUMNS FROM `{$table}` LIKE 'ip'" );
+
+            if( $ip && preg_match( '/varchar\((\d+)\)/i', (string) $ip->Type, $width ) && (int) $width[1] < 45 ){
+                $wpdb->query( "ALTER TABLE `{$table}` MODIFY `ip` varchar(45) NOT NULL" );
+            }
+        }
+
+        public function widen_for_encryption(){
+            global $wpdb;
+
+            $guests = bm_get_table( 'guests' );
+            $have   = array_map( 'strtolower', (array) $wpdb->get_col( "SHOW COLUMNS FROM `{$guests}`" ) );
+
+            $wpdb->query( "ALTER TABLE `" . bm_get_table( 'threads' ) . "` MODIFY COLUMN `subject` varchar(1024) NOT NULL" );
+            $wpdb->query( "ALTER TABLE `" . bm_get_table( 'files' ) . "` MODIFY COLUMN `name` varchar(1024) NOT NULL DEFAULT ''" );
+            $wpdb->query( "ALTER TABLE `" . bm_get_table( 'bulk_jobs' ) . "` MODIFY COLUMN `subject` varchar(1024) NOT NULL DEFAULT ''" );
+
+            $changes = array(
+                "MODIFY COLUMN `email` varchar(512) DEFAULT NULL",
+                "MODIFY COLUMN `ip` varchar(255) NOT NULL",
+            );
+
+            $email_index = $wpdb->get_row( "SHOW INDEX FROM `{$guests}` WHERE Key_name = 'email_index'" );
+
+            if ( $email_index && null === $email_index->Sub_part ) {
+                array_unshift( $changes, "DROP INDEX `email_index`" );
+                $changes[] = "ADD KEY `email_index` (`email`(100))";
+            }
+
+            if ( ! in_array( 'email_hash', $have, true ) ) {
+                $changes[] = "ADD COLUMN `email_hash` char(32) DEFAULT NULL AFTER `email`";
+                $changes[] = "ADD KEY `email_hash_index` (`email_hash`)";
+            }
+
+            if ( ! in_array( 'ip_hash', $have, true ) ) {
+                $changes[] = "ADD COLUMN `ip_hash` char(32) DEFAULT NULL AFTER `ip`";
+                $changes[] = "ADD KEY `ip_hash_index` (`ip_hash`)";
+            }
+
+            $wpdb->query( "ALTER TABLE `{$guests}` " . implode( ', ', $changes ) );
         }
 
         public function move_ai_keys_to_keychain(){
@@ -1504,8 +1649,8 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                 'threads' => [
                     'columns' => [
                         'id'      => "bigint(20) NOT NULL AUTO_INCREMENT",
-                        'subject' => "varchar(255) NOT NULL",
-                        'type'    => "enum('thread','group','chat-room','course') NOT NULL DEFAULT 'thread'",
+                        'subject' => "varchar(1024) NOT NULL",
+                        'type'    => "enum('thread','group','chat-room','course','booking') NOT NULL DEFAULT 'thread'",
                     ],
                     'primary_key' => 'id',
                 ],
@@ -1514,7 +1659,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
                         'user_id'    => "bigint(20) NOT NULL",
                         'thread_id'  => "bigint(20) NOT NULL",
-                        'type'       => "enum('ban','mute','bypass_moderation','force_moderation','call_ban') NOT NULL",
+                        'type'       => "enum('ban','mute','bypass_moderation','force_moderation','call_ban','suspend') NOT NULL",
                         'expiration' => "datetime NULL DEFAULT NULL",
                         'admin_id'   => "bigint(20) NOT NULL",
                         'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -1530,9 +1675,12 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'id'         => "bigint(20) NOT NULL AUTO_INCREMENT",
                         'secret'     => "varchar(60) NOT NULL",
                         'name'       => "varchar(255) NOT NULL",
-                        'email'      => "varchar(100) DEFAULT NULL",
-                        'ip'         => "varchar(40) NOT NULL",
+                        'email'      => "varchar(512) DEFAULT NULL",
+                        'email_hash' => "char(32) DEFAULT NULL",
+                        'ip'         => "varchar(255) NOT NULL",
+                        'ip_hash'    => "char(32) DEFAULT NULL",
                         'bot_id'     => "bigint(20) NOT NULL DEFAULT 0",
+                        'blog_id'    => "bigint(20) NOT NULL DEFAULT 0",
                         'meta'       => "longtext NOT NULL",
                         'created_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
                         'updated_at' => "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
@@ -1540,7 +1688,10 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     ],
                     'primary_key' => 'id',
                     'keys' => [
-                        'bot_id_index' => 'bot_id',
+                        'bot_id_index'     => 'bot_id',
+                        'email_index'      => 'email(100)',
+                        'email_hash_index' => 'email_hash',
+                        'ip_hash_index'    => 'ip_hash',
                     ],
                 ],
                 'roles' => [
@@ -1577,7 +1728,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                     'columns' => [
                         'id'                  => "bigint(20) NOT NULL AUTO_INCREMENT",
                         'sender_id'           => "bigint(20) NOT NULL",
-                        'subject'             => "varchar(255) NOT NULL DEFAULT ''",
+                        'subject'             => "varchar(1024) NOT NULL DEFAULT ''",
                         'message'             => "longtext NOT NULL",
                         'selectors'           => "longtext NOT NULL",
                         'attachment_ids'      => "text NOT NULL DEFAULT ''",
@@ -1645,7 +1796,7 @@ if ( !class_exists( 'Better_Messages_Rest_Api_DB_Migrate' ) ):
                         'thread_id'     => "bigint(20) NOT NULL DEFAULT 0",
                         'message_id'    => "bigint(20) NOT NULL DEFAULT 0",
                         'uploader_id'   => "bigint(20) NOT NULL DEFAULT 0",
-                        'name'          => "varchar(255) NOT NULL DEFAULT ''",
+                        'name'          => "varchar(1024) NOT NULL DEFAULT ''",
                         'mime'          => "varchar(100) NOT NULL DEFAULT ''",
                         'size'          => "bigint(20) unsigned NOT NULL DEFAULT 0",
                         'kind'          => "varchar(10) NOT NULL DEFAULT 'file'",

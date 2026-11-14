@@ -290,6 +290,15 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
 
         public function content_type( $attachment_id )
         {
+            if ( Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) ) {
+                return 'application/octet-stream';
+            }
+
+            return $this->readable_type( $attachment_id );
+        }
+
+        public function readable_type( $attachment_id )
+        {
             if ( $this->is_e2e_file( $attachment_id ) ) {
                 return 'application/octet-stream';
             }
@@ -334,7 +343,7 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
             return array(
                 'path'    => (string) get_post_meta( $attachment_id, '_wp_attached_file', true ),
                 'key'     => $this->relative_path( $attachment_id ),
-                'name'    => $this->original_name( $attachment_id ),
+                'name'    => Better_Messages()->encryption->files()->is_encrypted( $attachment_id ) ? '' : $this->original_name( $attachment_id ),
                 'type'    => $this->content_type( $attachment_id ),
                 'size'    => $size,
                 'user'    => (int) get_post_meta( $attachment_id, 'bp-better-messages-uploader-user-id', true ),
@@ -475,7 +484,7 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
                 (int) get_post_meta( $attachment_id, 'bp-better-messages-thread-id', true ),
                 $message_id,
                 (int) get_post_meta( $attachment_id, 'bp-better-messages-uploader-user-id', true ),
-                mb_substr( $this->original_name( $attachment_id ), 0, 255 ),
+                Better_Messages()->encryption->files()->seal_file_name( $attachment_id, mb_substr( $this->original_name( $attachment_id ), 0, 255 ) ),
                 $post ? mb_substr( (string) $post->post_mime_type, 0, 100 ) : '',
                 $object ? (int) $object->size : 0,
                 $this->file_kind( $attachment_id, $message_id ),
@@ -848,6 +857,11 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
 
         public function get_local_copy( $attachment_id, $max_bytes = 0 )
         {
+            return Better_Messages()->encryption->files()->local_copy( $attachment_id, $this->get_stored_copy( $attachment_id, $max_bytes ) );
+        }
+
+        public function get_stored_copy( $attachment_id, $max_bytes = 0 )
+        {
             $object = $this->object( $attachment_id );
 
             if ( $object && $this->sdk()->in_storage( $object ) ) {
@@ -1134,7 +1148,7 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
             $keys = array(
                 '_wp_attached_file', '_wp_attachment_metadata', 'bp-better-messages-thread-id', 'bp-better-messages-message-id',
                 'bp-better-messages-uploader-user-id', 'bp-better-messages-original-name', 'bm-e2e-original-mime',
-                'bp-better-messages-bulk-job-id', self::META_LOCATION, self::META_KEY, self::META_SIZE,
+                'bp-better-messages-bulk-job-id', self::META_LOCATION, self::META_KEY, self::META_SIZE, Better_Messages_Encryption_Files::KEY_META,
             );
 
             $meta = array();
@@ -1183,7 +1197,8 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
                     }
                 }
 
-                $name = isset( $m['bp-better-messages-original-name'] ) && $m['bp-better-messages-original-name'] !== '' ? (string) $m['bp-better-messages-original-name'] : wp_basename( $file );
+                $name = isset( $m['bp-better-messages-original-name'] ) && $m['bp-better-messages-original-name'] !== '' ? (string) Better_Messages()->encryption->files()->open_name( $id, (string) $m['bp-better-messages-original-name'] ) : wp_basename( $file );
+                $kept = ! empty( $m[ Better_Messages_Encryption_Files::KEY_META ] );
                 $e2e  = ! empty( $m['bm-e2e-original-mime'] ) || strtolower( pathinfo( $file, PATHINFO_EXTENSION ) ) === 'enc';
 
                 if ( $e2e ) {
@@ -1204,8 +1219,8 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
                     'ref'        => $id,
                     'path'       => $file,
                     'key'        => strpos( $file, $base ) === 0 ? substr( $file, strlen( $base ) ) : ltrim( $file, '/' ),
-                    'name'       => $name,
-                    'type'       => $e2e ? 'application/octet-stream' : self::stored_type( $mime ),
+                    'name'       => $kept ? '' : $name,
+                    'type'       => $e2e || $kept ? 'application/octet-stream' : self::stored_type( $mime ),
                     'size'       => $size,
                     'user'       => isset( $m['bp-better-messages-uploader-user-id'] ) ? (int) $m['bp-better-messages-uploader-user-id'] : 0,
                     'created'    => $created,
@@ -1220,7 +1235,7 @@ if ( ! class_exists( 'Better_Messages_Storage' ) ):
                     isset( $m['bp-better-messages-thread-id'] ) ? (int) $m['bp-better-messages-thread-id'] : 0,
                     isset( $m['bp-better-messages-message-id'] ) ? (int) $m['bp-better-messages-message-id'] : 0,
                     isset( $m['bp-better-messages-uploader-user-id'] ) ? (int) $m['bp-better-messages-uploader-user-id'] : 0,
-                    mb_substr( $name, 0, 255 ),
+                    Better_Messages()->encryption->files()->seal_file_name( $id, mb_substr( $name, 0, 255 ) ),
                     mb_substr( $mime, 0, 100 ),
                     $size,
                     $kind,

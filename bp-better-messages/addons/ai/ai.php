@@ -1394,7 +1394,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                     LIMIT 0, 1
                     ", $thread_id );
 
-                $message = $wpdb->get_row( $query, ARRAY_A );
+                $message = Better_Messages()->encryption->open_row( $wpdb->get_row( $query, ARRAY_A ) );
 
                 if ( $message && str_starts_with( $message['message'], '<!-- BM-AI -->' ) ) {
                     $message_id  = $message['id'];
@@ -2100,7 +2100,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 $label = '';
                 if ( $thread_type === 'chat-room' && isset( $chat_labels[ $thread_id ] ) ) {
                     $label = $chat_labels[ $thread_id ];
-                } else if ( $thread_type === 'group' || $thread_type === 'course' ) {
+                } else if ( $thread_type === 'group' || $thread_type === 'course' || $thread_type === 'booking' ) {
                     $label = Better_Messages()->functions->get_thread_title( $thread_id );
                 }
 
@@ -3345,15 +3345,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( $user_id <= 0 ) return false;
             if ( Better_Messages()->hooks->is_view_restricted( $user_id ) ) return false;
 
-            $allowed = (array) ( Better_Messages()->settings['aiTranslationRoles'] ?? [] );
-            if ( empty( $allowed ) ) return true;
             if ( user_can( $user_id, 'manage_options' ) ) return true;
 
-            foreach ( Better_Messages()->functions->get_user_roles( $user_id ) as $role ) {
-                if ( in_array( $role, $allowed, true ) ) return true;
-            }
-
-            return false;
+            return Better_Messages()->functions->role_list_allows( 'aiTranslationRoles', $user_id );
         }
 
         public function thread_translation_allowed( $thread_id ) {
@@ -3362,7 +3356,7 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             $type      = Better_Messages()->functions->get_thread_type( $thread_id );
 
             if ( $type === 'chat-room' ) return $settings['aiTranslationChatRooms'] === '1';
-            if ( $type === 'group' || $type === 'course' ) return $settings['aiTranslationGroups'] === '1';
+            if ( $type === 'group' || $type === 'course' || $type === 'booking' ) return $settings['aiTranslationGroups'] === '1';
 
             $recipients = Better_Messages()->functions->get_recipients( $thread_id );
 
@@ -4537,8 +4531,19 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             do_action( 'better_messages_thread_self_update', $message->thread_id, $sender_id );
             do_action( 'better_messages_thread_updated', $message->thread_id, $sender_id );
 
-            $table = bm_get_table('messages');
-            $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET `message` = CONCAT(%s, `message`) WHERE `id` = %d;", '<!-- BM-AI -->', $message->id ) );
+            $table  = bm_get_table('messages');
+            $stored = $wpdb->get_row( $wpdb->prepare( "SELECT `thread_id`, `message` FROM `{$table}` WHERE `id` = %d", $message->id ) );
+
+            if ( $stored && ( Better_Messages()->encryption->on() || Better_Messages_Encryption::is_sealed( $stored->message ) ) ) {
+                $opened = Better_Messages()->encryption->open_or_null( $stored->message, $stored->thread_id );
+
+                if ( null !== $opened ) {
+                    $wpdb->update( $table, [ 'message' => Better_Messages()->encryption->seal_message( '<!-- BM-AI -->' . $opened, $stored->thread_id ) ], [ 'id' => (int) $message->id ], [ '%s' ], [ '%d' ] );
+                }
+            } else {
+                $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET `message` = CONCAT(%s, `message`) WHERE `id` = %d;", '<!-- BM-AI -->', $message->id ) );
+            }
+
             $message->message = '<!-- BM-AI -->' . $message->message;
 
             $provider_id = ! empty( $bot_settings['provider'] ) ? $bot_settings['provider'] : 'openai';
@@ -4732,7 +4737,9 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
                 if ( is_wp_error( $result ) ) {
                     $error_code = $result->get_error_code();
                     if ( in_array( $error_code, [ 'cloud_ai_timeout', 'cloud_ai_unavailable', 'http_request_failed' ] ) ) {
-                        $args['is_pending'] = 2;
+                        if ( (int) ( $args['is_pending'] ?? 0 ) !== 1 ) {
+                            $args['is_pending'] = 2;
+                        }
                         $args['ai_moderation_deferred'] = true;
                         $args['ai_moderation_provider'] = 'bm';
                     }
@@ -5047,6 +5054,10 @@ if ( !class_exists( 'Better_Messages_AI' ) ) {
             if ( is_array( $attachments ) && ! empty( $attachments ) ) {
                 $body .= _x( 'Attachments:', 'AI Moderation', 'bp-better-messages' ) . "\n";
                 foreach ( array_keys( $attachments ) as $att_id ) {
+                    if ( Better_Messages()->encryption->files()->is_encrypted( $att_id ) ) {
+                        $body .= '  - ' . Better_Messages_Storage()->original_name( $att_id ) . "\n";
+                        continue;
+                    }
                     $url = Better_Messages_Storage()->get_file_url( $att_id, 'email' );
                     if ( ! $url ) {
                         $url = wp_get_attachment_url( $att_id );

@@ -291,7 +291,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
         protected function get_attachment_input( $attachment_id, $bot_settings, array $image_types, array $link_types = array(), $link_max_bytes = 0 )
         {
             $storage = Better_Messages_Storage();
-            $mime    = $storage->content_type( $attachment_id );
+            $mime    = $storage->readable_type( $attachment_id );
 
             if ( $bot_settings['images'] && in_array( $mime, $image_types, true ) ) {
                 $kind = 'image';
@@ -317,6 +317,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
             );
 
             if ( $storage->is_cloud_file( $attachment_id )
+                && ! Better_Messages()->encryption->files()->is_encrypted( $attachment_id )
                 && in_array( $mime, $link_types, true )
                 && ( $link_max_bytes <= 0 || $size <= $link_max_bytes )
                 && apply_filters( 'better_messages_ai_file_links', true, $attachment_id, $this->get_provider_id() ) ) {
@@ -722,10 +723,10 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                     $thread_id, $up_to_created_at, $limit
                 ) );
 
-                return array_reverse( $results );
+                return array_reverse( Better_Messages()->encryption->open_thread_rows( $results, $thread_id ) );
             }
 
-            return $wpdb->get_results( $wpdb->prepare(
+            return Better_Messages()->encryption->open_thread_rows( $wpdb->get_results( $wpdb->prepare(
                 "SELECT m.id, m.sender_id, m.message
                 FROM `" . bm_get_table('messages') . "` m
                 $exclude_join
@@ -734,7 +735,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 $exclude_where
                 ORDER BY m.created_at ASC",
                 $thread_id, $up_to_created_at
-            ) );
+            ) ), $thread_id );
         }
 
         protected function get_thread_messages_with_summary( $thread_id, $up_to_created_at, $limit, $bot_user_id, $bot_settings )
@@ -757,7 +758,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
                 ) );
 
                 if ( $last_summary ) {
-                    $summary_text = $last_summary->message;
+                    $summary_text = Better_Messages()->encryption->open_message( $last_summary->message, $thread_id );
                     $summary_text = preg_replace( '/<!--(.|\s)*?-->/', '', $summary_text );
                     $summary_text = wp_strip_all_tags( $this->decode_entities_deep( $summary_text ) );
 
@@ -782,7 +783,7 @@ if ( ! class_exists( 'Better_Messages_AI_Provider' ) ) {
 
                     return array(
                         'summary'  => $summary_text,
-                        'messages' => $messages_after
+                        'messages' => Better_Messages()->encryption->open_thread_rows( $messages_after, $thread_id )
                     );
                 }
             }

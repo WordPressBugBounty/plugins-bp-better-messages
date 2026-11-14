@@ -6,6 +6,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
     class Better_Messages_Hooks
     {
 
+        private $bad_words_patterns = null;
+
+        private $bad_words_list = null;
+
         public static function instance()
         {
 
@@ -57,17 +61,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_filter( 'better_messages_can_send_message', array( $this, 'disable_archived_reply' ), 10, 3);
 
-            if( isset(Better_Messages()->settings['restrictNewReplies'])
-                && is_array(Better_Messages()->settings['restrictNewReplies'])
-                && count(Better_Messages()->settings['restrictNewReplies']) > 0
-            ) {
+            if( Better_Messages()->functions->role_list_active( 'restrictNewReplies' ) ) {
                 add_filter( 'better_messages_can_send_message', array( $this, 'disable_message_for_blocked_restricted_role' ), 10, 3);
             }
 
-            if( isset(Better_Messages()->settings['restrictNewThreads'])
-                && is_array(Better_Messages()->settings['restrictNewThreads'])
-                && count(Better_Messages()->settings['restrictNewThreads']) > 0
-            ) {
+            if( Better_Messages()->functions->role_list_active( 'restrictNewThreads' ) ) {
                 add_action( 'better_messages_before_new_thread', array( $this, 'disable_thread_for_blocked_restricted_role' ), 10, 2);
 
                 if( Better_Messages()->settings['restrictNewThreadsRemoveNewThreadButton'] === '1' ){
@@ -75,16 +73,13 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 }
             }
 
-            if( isset(Better_Messages()->settings['restrictViewMessages'])
-                && is_array(Better_Messages()->settings['restrictViewMessages'])
-                && count(Better_Messages()->settings['restrictViewMessages']) > 0
-            ) {
+            if( Better_Messages()->functions->role_list_active( 'restrictViewMessages' ) ) {
                 add_filter( 'bp_better_messages_after_format_message', array( $this, 'hide_message_for_restricted_role' ), 10, 4 );
                 add_filter( 'better_messages_rest_message_meta', array( $this, 'hide_text_meta_for_restricted_role' ), 100, 4 );
                 add_filter( 'bp_better_messages_fast', array( $this, 'disable_fast_mode' ), 10, 1 );
             }
 
-            if( ! empty( Better_Messages()->settings['restrictVoiceMessages'] ) || ! empty( Better_Messages()->settings['restrictVideoMessages'] ) ) {
+            if( Better_Messages()->functions->role_list_active( 'restrictVoiceMessages' ) || Better_Messages()->functions->role_list_active( 'restrictVideoMessages' ) ) {
                 add_action( 'better_messages_before_message_send', array( $this, 'disable_restricted_voice_video_messages' ), 10, 2 );
                 add_action( 'better_messages_before_new_thread', array( $this, 'disable_restricted_voice_video_messages' ), 10, 2 );
                 add_filter( 'bp_better_messages_script_variable', array( $this, 'restricted_voice_video_script_variables' ), 10, 1 );
@@ -118,6 +113,10 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( Better_Messages()->settings['disableGroupThreads'] == '1' ) {
                 add_action( 'better_messages_before_new_thread', array( $this, 'disable_group_threads' ), 10, 2 );
+            }
+
+            if( (int) Better_Messages()->settings['maxParticipants'] > 0 ) {
+                add_action( 'better_messages_before_new_thread', array( $this, 'limit_new_thread_participants' ), 10, 2 );
             }
 
             if( Better_Messages()->settings['mechanism'] == 'websocket' && Better_Messages()->settings['messagesStatus'] == '0'){
@@ -178,6 +177,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             add_action( 'better_messages_before_message_send',  array( $this, 'new_replies_rate_limit' ), 10, 2 );
             add_filter( 'better_messages_can_send_message', array( $this, 'disable_message_for_new_replies_rate_limited' ), 10, 3 );
+            add_action( 'better_messages_message_sent', array( $this, 'release_rate_limit_locks' ), 1 );
+            add_action( 'better_messages_message_pending', array( $this, 'release_rate_limit_locks' ), 1 );
 
             if( Better_Messages()->settings['enableReplies'] === '1' ) {
                 add_filter('bp_better_messages_after_format_message', array($this, 'reply_message_formatting'), 101, 4);
@@ -186,6 +187,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! empty( Better_Messages()->settings['badWordsList'] ) ){
                 add_action( 'better_messages_before_new_thread',  array( $this, 'disable_new_thread_with_bad_word' ), 10, 2 );
                 add_action( 'better_messages_before_message_send', array( $this, 'disable_reply_with_bad_word' ), 10, 2 );
+                add_action( 'better_messages_before_message_edit', array( $this, 'disable_reply_with_bad_word' ), 10, 2 );
+                add_action( 'better_messages_before_subject_change', array( $this, 'disable_subject_with_bad_word' ), 10, 2 );
             }
 
             if( class_exists('WooCommerce') && Better_Messages()->settings['chatPage'] === 'woocommerce' ) {
@@ -341,6 +344,11 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 Better_Messages_TutorLMS::instance();
             }
 
+            if( defined('AMELIA_VERSION') || defined('LATEPOINT_VERSION') || defined('FLUENT_BOOKING_VERSION') || defined('SSA_PLUGIN_BASENAME') ){
+                require_once Better_Messages()->path . 'addons/bookings.php';
+                Better_Messages_Bookings::instance();
+            }
+
             if( defined('LEARNDASH_VERSION') ){
                 require_once Better_Messages()->path . 'addons/learndash.php';
                 Better_Messages_LearnDash::instance();
@@ -494,7 +502,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 case 'user_banned':
                     return Better_Messages()->system_messages->moderation_text($type, Better_Messages()->functions->get_message_meta($message_id, 'system_data', true));
                 default:
-                    return '';
+                    return (string) apply_filters( 'better_messages_system_message_text', '', $type, Better_Messages()->functions->get_message_meta($message_id, 'system_data', true) );
             }
         }
 
@@ -536,7 +544,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( count( $messages ) > 0 ) {
                 foreach ($messages as $message) {
-                    Better_Messages()->functions->delete_message($message->id, $message->thread_id, false, 'replace');
+                    $method = Better_Messages()->moderation->waits_for_review( (int) $message->id ) ? 'delete' : 'replace';
+                    Better_Messages()->functions->delete_message($message->id, $message->thread_id, false, $method);
                     $thread_ids[] = $message->thread_id;
                 }
 
@@ -621,7 +630,6 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function script_variables( $script_variables ){
             $user_id = Better_Messages()->functions->get_current_user_id();
-            $roles = Better_Messages()->functions->get_user_roles( $user_id );
 
             $restrict_map = array(
                 array( 'miniMessages',      'restrictViewMiniThreads' ),
@@ -652,16 +660,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                     continue;
                 }
 
-                $restricted_roles = isset( Better_Messages()->settings[ $setting_key ] ) ? Better_Messages()->settings[ $setting_key ] : array();
-                if ( ! is_array( $restricted_roles ) || count( $restricted_roles ) === 0 ) {
-                    continue;
-                }
-
-                foreach ( $restricted_roles as $restricted_role ) {
-                    if ( in_array( $restricted_role, $roles, true ) ) {
-                        $script_variables[ $var_key ] = '0';
-                        break;
-                    }
+                if ( Better_Messages()->functions->role_list_restricts( $setting_key, $user_id ) ) {
+                    $script_variables[ $var_key ] = '0';
                 }
             }
 
@@ -865,7 +865,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function redirect_unlogged()
         {
-            if( Better_Messages()->guests->guest_access_enabled() ) return;
+            if( Better_Messages()->guests->page_access() ) return;
 
             $page_id = Better_Messages()->settings['chatPage'];
 
@@ -1174,7 +1174,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! $reply_message_id ) return $message;
 
             global $wpdb;
-            $reply_message = $wpdb->get_row($wpdb->prepare("SELECT sender_id, message FROM " . bm_get_table('messages') . " WHERE `id` = %d", $reply_message_id));
+            $reply_message = Better_Messages()->encryption->open_row( $wpdb->get_row($wpdb->prepare("SELECT sender_id, thread_id, message FROM " . bm_get_table('messages') . " WHERE `id` = %d", $reply_message_id)) );
             if( ! $reply_message ) return $message;
 
             $sender_id       = $reply_message->sender_id;
@@ -1201,6 +1201,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         public function new_thread_record_last_thread_time($sent, $bpbm_last_message_id){
             $user_id = Better_Messages()->functions->get_current_user_id();
             Better_Messages()->functions->update_user_meta( $user_id, 'bpbm_last_thread_created', time() );
+            Better_Messages()->functions->release_lock( 'new_thread_rate_limit|' . (int) $user_id );
+        }
+
+        public function release_rate_limit_locks( $message ){
+            if ( ! is_object( $message ) || empty( $message->sender_id ) ) {
+                return;
+            }
+
+            Better_Messages()->functions->release_lock( 'reply_rate_limit|' . (int) $message->sender_id );
+            Better_Messages()->functions->release_lock( 'new_thread_rate_limit|' . (int) $message->sender_id );
         }
 
         public function new_replies_rate_limit( &$args, &$errors ){
@@ -1211,6 +1221,24 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             $user_roles = Better_Messages()->functions->get_user_roles( $sender_id );
 
             if( count( $user_roles ) === 0 ){
+                return;
+            }
+
+            $limited = false;
+
+            foreach( $user_roles as $user_role ){
+                if( isset( $rate_limit_reply[ $user_role ] ) && (int) $rate_limit_reply[ $user_role ]['value'] > 0 ){
+                    $limited = true;
+                    break;
+                }
+            }
+
+            if( ! $limited ){
+                return;
+            }
+
+            if( Better_Messages()->functions->hold_lock( 'reply_rate_limit|' . (int) $sender_id ) === false ){
+                $errors['restrictRateLimitReply'] = _x( 'Please try again in a moment.', 'Rest API Error', 'bp-better-messages' );
                 return;
             }
 
@@ -1251,51 +1279,133 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function disable_new_thread_with_bad_word( &$args, &$errors ){
-            if( Better_Messages()->settings['badWordsSkipAdmins'] === '1' && current_user_can('manage_options') ){
+            if( $this->skips_bad_words() ){
                 return;
             }
 
-            $words_list = array_map('trim', explode("\n", Better_Messages()->settings['badWordsList']));
+            $content = isset( $args['content'] ) ? $this->bad_words_text( $args['content'] ) : '';
+            $subject = isset( $args['subject'] ) ? $this->bad_words_text( $args['subject'] ) : '';
 
-            $contains_word = false;
-
-            if( isset( $args['content'] ) ) {
-                $message = strip_tags($args['content']);
-
-                foreach ($words_list as $word) {
-                    if ( preg_match('/\b' . $word . '\b/iu', $message ) ) {
-                        $contains_word = true;
-                        break;
-                    }
-                }
-            }
-
-            if( $contains_word ) {
+            if( $this->contains_bad_word( $content ) || $this->contains_bad_word( $subject ) ) {
                 $errors['restrictBadWord'] = Better_Messages()->settings['restrictBadWordsList'];
             }
         }
 
         public function disable_reply_with_bad_word( &$args, &$errors ){
-            if( Better_Messages()->settings['badWordsSkipAdmins'] === '1' && current_user_can('manage_options') ){
+            if( $this->skips_bad_words() ){
                 return;
             }
 
-            $words_list = array_map('trim', explode("\n", Better_Messages()->settings['badWordsList']));
+            $content = isset( $args['content'] ) ? $this->bad_words_text( $args['content'] ) : '';
 
-            $contains_word = false;
+            if( $this->contains_bad_word( $content ) ) {
+                $errors['restrictBadWord'] = Better_Messages()->settings['restrictBadWordsList'];
+            }
+        }
 
-            $message = strip_tags($args['content']);
+        public function disable_subject_with_bad_word( &$args, &$errors ){
+            if( $this->skips_bad_words() ){
+                return;
+            }
 
-            foreach ($words_list as $word) {
-                if ( preg_match('/\b' . $word . '\b/iu', $message ) ) {
-                    $contains_word = true;
-                    break;
+            if( isset( $args['subject'] ) && $this->contains_bad_word( $this->bad_words_text( $args['subject'] ) ) ) {
+                $errors['restrictBadWord'] = Better_Messages()->settings['restrictBadWordsList'];
+            }
+        }
+
+        private function skips_bad_words(){
+            return Better_Messages()->settings['badWordsSkipAdmins'] === '1' && current_user_can('manage_options');
+        }
+
+        private function bad_words_text( $content ){
+            $content = (string) $content;
+
+            if( class_exists( 'Better_Messages_E2E_Encryption' ) && Better_Messages_E2E_Encryption::is_valid_e2e_ciphertext( $content ) ){
+                return '';
+            }
+
+            return html_entity_decode( wp_strip_all_tags( $content ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        }
+
+        public function contains_bad_word( $text ){
+            $text = $this->normalize_bad_words_text( (string) $text );
+
+            if( $text === '' ){
+                return false;
+            }
+
+            foreach( $this->bad_words_patterns() as $pattern ){
+                if( preg_match( $pattern, $text ) === 1 ){
+                    return true;
                 }
             }
 
-            if( $contains_word ) {
-                $errors['restrictBadWord'] = Better_Messages()->settings['restrictBadWordsList'];
+            return false;
+        }
+
+        private function normalize_bad_words_text( $text ){
+            if( class_exists( 'Normalizer' ) ){
+                $normalized = Normalizer::normalize( $text, Normalizer::FORM_KC );
+
+                if( is_string( $normalized ) ){
+                    $text = $normalized;
+                }
             }
+
+            $stripped = preg_replace( '/[\x{00AD}\x{200B}-\x{200F}\x{2060}-\x{2064}\x{FEFF}]/u', '', $text );
+
+            if( is_string( $stripped ) ){
+                $text = $stripped;
+            }
+
+            $collapsed = preg_replace( '/\s+/u', ' ', $text );
+
+            return trim( is_string( $collapsed ) ? $collapsed : $text );
+        }
+
+        private function bad_words_patterns(){
+            $list = (string) Better_Messages()->settings['badWordsList'];
+
+            if( $this->bad_words_patterns !== null && $this->bad_words_list === $list ){
+                return $this->bad_words_patterns;
+            }
+
+            $letter   = '[\p{L}\p{N}_]';
+            $unspaced = '/^[\p{Han}\p{Hiragana}\p{Katakana}\p{Thai}\p{Lao}\p{Khmer}\p{Myanmar}]$/u';
+            $pieces   = array();
+
+            foreach( explode( "\n", $list ) as $word ){
+                $word = $this->normalize_bad_words_text( $word );
+
+                if( $word === '' ){
+                    continue;
+                }
+
+                $piece = preg_quote( $word, '/' );
+                $first = mb_substr( $word, 0, 1 );
+                $last  = mb_substr( $word, -1 );
+
+                if( preg_match( '/^' . $letter . '$/u', $first ) === 1 && preg_match( $unspaced, $first ) !== 1 ){
+                    $piece = '(?<!' . $letter . ')' . $piece;
+                }
+
+                if( preg_match( '/^' . $letter . '$/u', $last ) === 1 && preg_match( $unspaced, $last ) !== 1 ){
+                    $piece .= '(?!' . $letter . ')';
+                }
+
+                $pieces[] = $piece;
+            }
+
+            $patterns = array();
+
+            foreach( array_chunk( $pieces, 200 ) as $chunk ){
+                $patterns[] = '/' . implode( '|', $chunk ) . '/iu';
+            }
+
+            $this->bad_words_list     = $list;
+            $this->bad_words_patterns = $patterns;
+
+            return $patterns;
         }
 
         public function disable_message_for_new_replies_rate_limited( $allowed, $user_id, $thread_id ){
@@ -1356,6 +1466,16 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( current_user_can('manage_options' ) ) return false;
 
             $user_id = Better_Messages()->functions->get_current_user_id();
+            $probe   = isset( $args['action'] ) && $args['action'] === 'probe';
+
+            if( ! $probe && (int) $user_id !== 0 && Better_Messages()->functions->hold_lock( 'new_thread_rate_limit|' . (int) $user_id ) === false ){
+                $errors['restrictNewThreadsRateLimit'] = _x( 'Please try again in a moment.', 'Rest API Error', 'bp-better-messages' );
+                return;
+            }
+
+            if( $user_id > 0 ){
+                wp_cache_delete( $user_id, 'user_meta' );
+            }
 
             $last_thread_created = (int) Better_Messages()->functions->get_user_meta( $user_id, 'bpbm_last_thread_created', true );
 
@@ -1606,7 +1726,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( is_user_logged_in() ) {
                 Better_Messages()->users->update_last_activity( $user_id );
 
-                if( function_exists('bp_update_user_last_activity') ) {
+                if( function_exists('bp_update_user_last_activity') && apply_filters( 'better_messages_update_last_activity', true, (int) $user_id ) ) {
                     bp_update_user_last_activity($user_id);
                 }
             }
@@ -1622,20 +1742,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             if( ! $preview && Better_Messages()->settings['mobilePopup'] == '0' ) return '';
 
             $user_id = Better_Messages()->functions->get_current_user_id();
-            $restricted_roles = Better_Messages()->settings['restrictMobilePopup'];
-
-            if( ! $preview && count($restricted_roles) > 0 ) {
-                $roles = Better_Messages()->functions->get_user_roles( $user_id );
-
-                $is_restricted = false;
-
-                foreach ($restricted_roles as $restricted_role) {
-                    if (in_array($restricted_role, $roles)) {
-                        $is_restricted = true;
-                    }
-                }
-
-                if( $is_restricted ) return '';
+            if( ! $preview && Better_Messages()->functions->role_list_restricts( 'restrictMobilePopup', $user_id ) ) {
+                return '';
             }
 
 
@@ -1865,19 +1973,28 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
             }
         }
 
-        public function disable_message_for_blocked_restricted_role( $allowed, $user_id, $thread_id ){
-            $user_id = Better_Messages()->functions->get_current_user_id();
-            $restricted_roles = (array)  Better_Messages()->settings['restrictNewReplies'];
-            $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
+        public function limit_new_thread_participants( &$args, &$errors ){
+            $sender_id = isset( $args['sender_id'] ) ? (int) $args['sender_id'] : (int) Better_Messages()->functions->get_current_user_id();
+            $limit     = Better_Messages()->functions->get_max_participants( $sender_id );
 
-            $is_restricted = false;
-            foreach( $user_roles as $user_role ){
-                if( in_array( $user_role, $restricted_roles ) ){
-                    $is_restricted = true;
-                }
+            if( $limit === 0 ){
+                return;
             }
 
-            if( $is_restricted ) {
+            $count = count( Better_Messages()->functions->new_participant_ids( isset( $args['recipients'] ) ? $args['recipients'] : array(), array( $sender_id ) ) ) + 1;
+
+            if( $count > $limit ){
+                $errors['maxParticipants'] = sprintf(
+                    _x( 'A conversation can have up to %s participants, including you.', 'Error message when a new conversation has too many participants', 'bp-better-messages' ),
+                    number_format_i18n( $limit )
+                );
+            }
+        }
+
+        public function disable_message_for_blocked_restricted_role( $allowed, $user_id, $thread_id ){
+            $user_id = Better_Messages()->functions->get_current_user_id();
+
+            if( Better_Messages()->functions->role_list_restricts( 'restrictNewReplies', $user_id ) ) {
                 $allowed = false;
                 global $bp_better_messages_restrict_send_message;
                 $bp_better_messages_restrict_send_message['role_reply_restricted'] = Better_Messages()->settings['restrictNewRepliesMessage'];
@@ -1899,19 +2016,17 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
         }
 
         public function is_view_restricted( $user_id ){
-            $restricted_roles = (array) Better_Messages()->settings['restrictViewMessages'];
-
-            if( empty( $restricted_roles ) || ! Better_Messages()->functions->is_valid_user_id( $user_id ) ){
+            if( ! Better_Messages()->functions->role_list_active( 'restrictViewMessages' ) || ! Better_Messages()->functions->is_valid_user_id( $user_id ) ){
                 return false;
             }
 
-            return count( array_intersect( Better_Messages()->functions->get_user_roles( $user_id ), $restricted_roles ) ) > 0;
+            return Better_Messages()->functions->role_list_restricts( 'restrictViewMessages', $user_id );
         }
 
         public function hide_text_meta( $meta ){
             $meta = (array) $meta;
 
-            foreach( array( 'translation', 'translations', 'translationSkipped', 'translationsSkipped', 'translationPending', 'translationsPending', 'transcription', 'transcribing' ) as $key ){
+            foreach( array( 'translation', 'translations', 'translationSkipped', 'translationsSkipped', 'translationPending', 'translationsPending', 'transcription', 'transcribing', 'poll' ) as $key ){
                 unset( $meta[ $key ] );
             }
 
@@ -1935,17 +2050,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( $user_id > 0 && user_can( $user_id, 'manage_options' ) ) return $vars;
 
-            $restricted_roles = (array)  Better_Messages()->settings['restrictNewThreads'];
-            $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
-
-            $is_restricted = false;
-            foreach( $user_roles as $user_role ){
-                if( in_array( $user_role, $restricted_roles ) ){
-                    $is_restricted = true;
-                }
-            }
-
-            if( $is_restricted ) {
+            if( Better_Messages()->functions->role_list_restricts( 'restrictNewThreads', $user_id ) ) {
                 $vars['newThread'] = '0';
             }
 
@@ -1965,17 +2070,8 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
         public function disable_thread_for_blocked_restricted_role( &$args, &$errors ){
             $user_id          = Better_Messages()->functions->get_current_user_id();
-            $restricted_roles = (array)  Better_Messages()->settings['restrictNewThreads'];
-            $user_roles       = Better_Messages()->functions->get_user_roles( $user_id );
 
-            $is_restricted = false;
-            foreach( $user_roles as $user_role ){
-                if( in_array( $user_role, $restricted_roles ) ){
-                    $is_restricted = true;
-                }
-            }
-
-            if( $is_restricted ) {
+            if( Better_Messages()->functions->role_list_restricts( 'restrictNewThreads', $user_id ) ) {
                 $errors['restrictNewThreadsMessage'] = Better_Messages()->settings['restrictNewThreadsMessage'];
             }
         }
@@ -1985,23 +2081,23 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             $user_id = isset( $args['sender_id'] ) ? (int) $args['sender_id'] : Better_Messages()->functions->get_current_user_id();
 
-            if( ! empty( $args['meta_data']['bpbm_voice_messages'] ) && Better_Messages()->functions->user_has_role( $user_id, (array) Better_Messages()->settings['restrictVoiceMessages'] ) ) {
+            if( ! empty( $args['meta_data']['bpbm_voice_messages'] ) && Better_Messages()->functions->role_list_restricts( 'restrictVoiceMessages', $user_id ) ) {
                 $errors['restrictVoiceMessages'] = _x( 'Sorry, you are not allowed to send voice messages', 'Rest API Error', 'bp-better-messages' );
             }
 
-            if( ! empty( $args['meta_data']['bpbm_video_messages'] ) && Better_Messages()->functions->user_has_role( $user_id, (array) Better_Messages()->settings['restrictVideoMessages'] ) ) {
+            if( ! empty( $args['meta_data']['bpbm_video_messages'] ) && Better_Messages()->functions->role_list_restricts( 'restrictVideoMessages', $user_id ) ) {
                 $errors['restrictVideoMessages'] = _x( 'Sorry, you are not allowed to send video messages', 'Rest API Error', 'bp-better-messages' );
             }
         }
 
         public function restricted_voice_video_script_variables( $vars ){
-            $roles = Better_Messages()->functions->get_user_roles( Better_Messages()->functions->get_current_user_id() );
+            $user_id = Better_Messages()->functions->get_current_user_id();
 
-            if( count( array_intersect( $roles, (array) Better_Messages()->settings['restrictVoiceMessages'] ) ) > 0 ) {
+            if( Better_Messages()->functions->role_list_restricts( 'restrictVoiceMessages', $user_id ) ) {
                 $vars['preventVoiceMessages'] = '1';
             }
 
-            if( count( array_intersect( $roles, (array) Better_Messages()->settings['restrictVideoMessages'] ) ) > 0 ) {
+            if( Better_Messages()->functions->role_list_restricts( 'restrictVideoMessages', $user_id ) ) {
                 $vars['preventVideoMessages'] = '1';
             }
 
@@ -2292,7 +2388,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
 
             if( ! in_array( $page_id, $candidate_ids, true ) ) return $content;
 
-            if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ){
+            if( ! is_user_logged_in() && ! Better_Messages()->guests->page_access() ){
                 $messages_content = Better_Messages()->functions->render_login_form();
 
                 if( strpos($content, '[bp-better-messages]') !== FALSE ){
@@ -2308,7 +2404,7 @@ if ( !class_exists( 'Better_Messages_Hooks' ) ):
                 if( ! $hasaccess ) return $content;
             }
 
-            $messages_content = Better_Messages()->functions->get_page();
+            $messages_content = Better_Messages()->guests->embedded_for_visitors( Better_Messages()->functions->get_page() );
 
             if( strpos($content, '[bp-better-messages]') !== FALSE || strpos($content, 'wp-block-better-messages-user-inbox') !== FALSE ){
                 $content = str_replace( '[bp-better-messages]', $messages_content, $content );

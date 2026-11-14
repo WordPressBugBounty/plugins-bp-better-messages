@@ -47,7 +47,13 @@ if ( ! class_exists( 'Better_Messages_Storage_Direct_Upload' ) ):
                 return $groups;
             }
 
+            $sealing = Better_Messages()->encryption->on();
+
             foreach ( Better_Messages_Storage::groups() as $group ) {
+                if ( $sealing && 'encrypted' !== $group ) {
+                    continue;
+                }
+
                 if ( $this->enabled_for( $this->storage()->route( $group ) ) ) {
                     $groups[] = $group;
                 }
@@ -198,6 +204,10 @@ if ( ! class_exists( 'Better_Messages_Storage_Direct_Upload' ) ):
             }
 
             $location = $storage->route( Better_Messages_Storage::file_group( $is_e2e ? 'e2e' : 'file', $mime ) );
+
+            if ( ! $is_e2e && Better_Messages()->encryption->on() ) {
+                return array( 'method' => 'server' );
+            }
 
             if ( ! $this->enabled_for( $location ) || ! $this->direct()->ready( $location ) ) {
                 return array( 'method' => 'server' );

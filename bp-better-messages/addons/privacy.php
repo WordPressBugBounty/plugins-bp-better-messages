@@ -51,11 +51,15 @@ class Better_Messages_Privacy {
         $user_id = $user->ID;
         $export_items = array();
 
+        if ( 1 === (int) $page ) {
+            $export_items = $this->address_items( $user_id );
+        }
+
         $messages_table = bm_get_table( 'messages' );
         $threads_table  = bm_get_table( 'threads' );
 
         if ( ! $messages_table || ! $threads_table ) {
-            return array( 'data' => array(), 'done' => true );
+            return array( 'data' => $export_items, 'done' => true );
         }
 
         $offset = ( $page - 1 ) * $per_page;
@@ -69,6 +73,11 @@ class Better_Messages_Privacy {
              LIMIT %d OFFSET %d",
             $user_id, $per_page, $offset
         ) );
+
+        foreach ( $messages as $stored ) {
+            $stored->message = Better_Messages()->encryption->open_message( $stored->message, $stored->thread_id );
+            $stored->subject = Better_Messages()->encryption->open_subject( $stored->subject, $stored->thread_id );
+        }
 
         foreach ( $messages as $message ) {
             $data = array(
@@ -105,6 +114,64 @@ class Better_Messages_Privacy {
         );
     }
 
+    private function address_items( $user_id ) {
+        $addresses = function_exists( 'wordplus_addresses' ) ? wordplus_addresses() : null;
+
+        if ( ! $addresses ) {
+            return array();
+        }
+
+        $items = array();
+
+        foreach ( $addresses->of( (int) $user_id, WordPlus_SDK_Addresses::KEEP ) as $row ) {
+            $data = array(
+                array(
+                    'name'  => __( 'IP address', 'bp-better-messages' ),
+                    'value' => $row['ip'],
+                ),
+            );
+
+            if ( '' !== $row['country'] ) {
+                $data[] = array( 'name' => __( 'Country', 'bp-better-messages' ), 'value' => $row['country'] );
+            }
+
+            if ( '' !== $row['region'] ) {
+                $data[] = array( 'name' => __( 'Region', 'bp-better-messages' ), 'value' => $row['region'] );
+            }
+
+            if ( '' !== $row['city'] ) {
+                $data[] = array( 'name' => __( 'City', 'bp-better-messages' ), 'value' => $row['city'] );
+            }
+
+            $data[] = array( 'name' => __( 'First seen', 'bp-better-messages' ), 'value' => gmdate( 'Y-m-d H:i:s', $row['first_seen'] ) . ' UTC' );
+            $data[] = array( 'name' => __( 'Last seen', 'bp-better-messages' ), 'value' => gmdate( 'Y-m-d H:i:s', $row['last_seen'] ) . ' UTC' );
+
+            $items[] = array(
+                'group_id'    => 'better-messages-addresses',
+                'group_label' => __( 'Addresses', 'bp-better-messages' ),
+                'item_id'     => 'address-' . (int) $user_id . '-' . md5( $row['ip'] ),
+                'data'        => $data,
+            );
+        }
+
+        return $items;
+    }
+
+    private function erase_addresses( $user_id ) {
+        $addresses = function_exists( 'wordplus_addresses' ) ? wordplus_addresses() : null;
+
+        if ( ! $addresses ) {
+            return false;
+        }
+
+        $had = count( $addresses->of( (int) $user_id, 1 ) ) > 0 || '' !== (string) get_user_meta( (int) $user_id, WordPlus_SDK_Addresses::META, true );
+
+        $addresses->forget( (int) $user_id );
+        delete_user_meta( (int) $user_id, WordPlus_SDK_Addresses::META );
+
+        return $had;
+    }
+
     public function erase_personal_data( $email_address, $page = 1 ) {
         global $wpdb;
 
@@ -123,11 +190,13 @@ class Better_Messages_Privacy {
         $user_id = $user->ID;
         $messages_table = bm_get_table( 'messages' );
 
+        $addresses_removed = 1 === (int) $page ? $this->erase_addresses( $user_id ) : false;
+
         if ( ! $messages_table ) {
             return array(
-                'items_removed'  => false,
+                'items_removed'  => $addresses_removed,
                 'items_retained' => false,
-                'messages'       => array(),
+                'messages'       => $addresses_removed ? array( __( 'Addresses have been removed.', 'bp-better-messages' ) ) : array(),
                 'done'           => true,
             );
         }
@@ -200,8 +269,12 @@ class Better_Messages_Privacy {
             $messages[] = __( 'Conversation participation records are retained so other participants\' conversation history remains intact.', 'bp-better-messages' );
         }
 
+        if ( $addresses_removed ) {
+            $messages[] = __( 'Addresses have been removed.', 'bp-better-messages' );
+        }
+
         return array(
-            'items_removed'  => $items_removed,
+            'items_removed'  => $items_removed || $addresses_removed,
             'items_retained' => $done,
             'messages'       => $messages,
             'done'           => $done,
@@ -242,7 +315,26 @@ class Better_Messages_Privacy {
             $sections[] = sprintf(
                 '<h4>%s</h4><p>%s</p>',
                 __( 'Guest users', 'bp-better-messages' ),
-                __( 'If you use the messaging feature as a guest (without an account), your display name, email address (if provided), and IP address are stored to identify you within the conversation.', 'bp-better-messages' )
+                __( 'If you use the messaging feature as a guest (without an account), your display name, your photo and email address (if you give them), and IP address are stored to identify you within the conversation. If you provide an email address, it is used to send you a confirmation link and, once confirmed, to notify you about unread messages and to let you sign in again.', 'bp-better-messages' )
+            );
+        }
+
+        $sections[] = sprintf(
+            '<h4>%s</h4><p>%s</p>',
+            __( 'Cookies', 'bp-better-messages' ),
+            __( 'No analytics or tracking cookies are set. When a guest or a customer without an account opens a link from an email of this site, a cookie keeps them signed in on that browser for 30 days, or until they sign out. During the website sign-in of the mobile app a cookie holds the sign-in request for up to 10 minutes.', 'bp-better-messages' )
+        );
+
+        $geo = function_exists( 'wordplus_geo' ) ? wordplus_geo() : null;
+
+        if ( $geo && $geo->keeps_addresses() ) {
+            $sections[] = sprintf(
+                '<h4>%s</h4><p>%s</p>',
+                __( 'Addresses and locations', 'bp-better-messages' ),
+                sprintf(
+                    __( 'The addresses you connect from (IP addresses), with the country and city they belong to, are kept for %d days to protect the site from abuse. Locations are determined on this site and no IP address is sent to an external service. Only administrators can see them.', 'bp-better-messages' ),
+                    $geo->days()
+                )
             );
         }
 
@@ -268,6 +360,15 @@ class Better_Messages_Privacy {
 
         if ( ! empty( Better_Messages()->settings['giphyApiKey'] ) ) {
             $third_party_items[] = __( 'GIF images are loaded directly from Giphy\'s servers (media.giphy.com) when displayed in messages, which may receive your IP address.', 'bp-better-messages' );
+        }
+
+        $captcha = Better_Messages()->guests->captcha_asked() ? wordplus_captcha()->provider() : null;
+
+        if ( $captcha && 'work' !== $captcha->kind() ) {
+            $third_party_items[] = sprintf(
+                __( 'The sign-up form of guests is protected by %s, which receives your IP address and information about your browser to tell people from bots.', 'bp-better-messages' ),
+                esc_html( $captcha->name() )
+            );
         }
 
         if ( ! empty( Better_Messages()->settings['stipopApiKey'] ) ) {

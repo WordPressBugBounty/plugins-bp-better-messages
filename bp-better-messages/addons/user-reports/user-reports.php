@@ -174,6 +174,10 @@ if ( ! class_exists( 'Better_Messages_User_Reports' ) ){
 
             $description = $request->get_param('description');
 
+            if ( Better_Messages()->encryption->unreadable_meta( (int) $message_id, 'user_reports' ) ) {
+                return new WP_Error( 'better_messages_encryption_unreadable', _x( 'This message cannot be reported while the encryption key of this site is missing', 'User Reports', 'bp-better-messages' ), array( 'status' => 409 ) );
+            }
+
             $reports     = $this->get_message_reports( $message_id );
 
             if( isset( $reports[$current_user_id] ) ){

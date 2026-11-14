@@ -953,6 +953,99 @@ if ( ! class_exists( 'WordPlus_SDK_Storage' ) ) {
             return true;
         }
 
+        public function rewrite( $row, callable $transform, $mime = null, $grace = null, $basename = null )
+        {
+            global $wpdb;
+
+            if ( ! $this->in_storage( $row ) ) {
+                return new WP_Error( 'wordplus_storage_not_stored', 'The file is not in a storage' );
+            }
+
+            $location = $this->row_location( $row );
+
+            if ( ! $location ) {
+                return new WP_Error( 'wordplus_storage_no_location', 'The storage the file is in no longer exists' );
+            }
+
+            if ( ! function_exists( 'wp_tempnam' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+
+            $client = $this->client( $location );
+            $old    = (string) $row->object_key;
+            $temp   = wp_tempnam( 'wordplus-rewrite' );
+            $got    = $client->download( $old, $temp );
+
+            if ( empty( $got['ok'] ) ) {
+                wp_delete_file( $temp );
+
+                return new WP_Error( 'wordplus_storage_download', $client->last_error ? $client->last_error : 'The file could not be downloaded' );
+            }
+
+            $done = call_user_func( $transform, $temp );
+
+            if ( true !== $done ) {
+                wp_delete_file( $temp );
+
+                return is_wp_error( $done ) ? $done : new WP_Error( 'wordplus_storage_transform', 'The file could not be rewritten' );
+            }
+
+            clearstatcache( true, $temp );
+
+            $size   = (int) filesize( $temp );
+            $key    = self::rewritten_key( $old, $basename );
+            $target = clone $row;
+
+            if ( null !== $mime ) {
+                $target->mime = self::stored_type( (string) $mime );
+            }
+
+            $put = $client->put_file( $key, $temp, $this->upload_headers( $location, $target ) );
+
+            wp_delete_file( $temp );
+
+            if ( empty( $put['ok'] ) ) {
+                return new WP_Error( 'wordplus_storage_upload', $client->last_error ? $client->last_error : 'The file could not be uploaded' );
+            }
+
+            $head = $client->head( $key );
+
+            if ( empty( $head['ok'] ) || (int) $head['size'] !== $size ) {
+                $client->delete( $key );
+
+                return new WP_Error( 'wordplus_storage_size', 'The uploaded file has a different size' );
+            }
+
+            $switched = $wpdb->query( $wpdb->prepare(
+                "UPDATE {$wpdb->wordplus_storage_objects} SET object_key = %s, size = %d, mime = %s, updated_at = %d WHERE id = %d AND state = 'stored' AND object_key = %s",
+                $key, $size, (string) $target->mime, time(), (int) $row->id, $old
+            ) );
+
+            $this->reset_caches();
+
+            if ( 1 !== (int) $switched ) {
+                $client->delete( $key );
+
+                return new WP_Error( 'wordplus_storage_changed', 'The file changed while it was rewritten' );
+            }
+
+            $this->queue()->schedule_source_deletion( (string) $row->location, $old, null === $grace ? WordPlus_SDK_Storage_Queue::CLOUD_GRACE : (int) $grace );
+
+            return array( 'key' => $key, 'size' => $size );
+        }
+
+        public static function rewritten_key( $key, $basename = null )
+        {
+            $key   = (string) $key;
+            $slash = strrpos( $key, '/' );
+            $dir   = false === $slash ? '' : substr( $key, 0, $slash );
+            $base  = null !== $basename && '' !== (string) $basename ? wp_basename( (string) $basename ) : ( false === $slash ? $key : substr( $key, $slash + 1 ) );
+            $dir   = preg_replace( '#(^|/)v[0-9a-f]{8}$#', '', $dir );
+            $tag   = 'v' . substr( bin2hex( random_bytes( 4 ) ), 0, 8 );
+
+            return ( '' === $dir ? '' : $dir . '/' ) . $tag . '/' . $base;
+        }
+
         public function forget( $row )
         {
             if ( ! $row ) {

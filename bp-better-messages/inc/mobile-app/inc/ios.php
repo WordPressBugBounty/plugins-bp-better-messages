@@ -197,6 +197,47 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
             return $wpError;
         }
 
+        public function api_error( $response )
+        {
+            if ( is_wp_error( $response ) ) {
+                return new WP_Error( 'request_failed', sprintf( _x( 'The site could not reach Apple: %s', 'WP Admin (Mobile App)', 'bp-better-messages' ), $response->get_error_message() ) );
+            }
+
+            $status = (int) wp_remote_retrieve_response_code( $response );
+
+            if ( $status >= 200 && $status < 300 ) {
+                return false;
+            }
+
+            $body  = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+            $error = is_array( $body ) && isset( $body['errors'][0] ) && is_array( $body['errors'][0] ) ? $body['errors'][0] : array();
+
+            $reason = array();
+
+            foreach ( array( 'title', 'detail' ) as $key ) {
+                if ( isset( $error[ $key ] ) && is_string( $error[ $key ] ) && trim( $error[ $key ] ) !== '' ) {
+                    $reason[] = rtrim( trim( $error[ $key ] ), '.' ) . '.';
+                }
+            }
+
+            $reason = implode( ' ', array_unique( $reason ) );
+            $code   = isset( $error['code'] ) && is_string( $error['code'] ) ? $error['code'] : '';
+
+            if ( preg_match( '/agreement/i', $code . ' ' . $reason ) ) {
+                return new WP_Error( 'apple_agreement', _x( 'Apple refuses this request until the account holder accepts an updated agreement. Sign in to developer.apple.com/account and to App Store Connect as the account holder, accept the agreements shown there, then try again.', 'WP Admin (Mobile App)', 'bp-better-messages' ) );
+            }
+
+            if ( $status === 401 ) {
+                return new WP_Error( 'unauthorized', _x( 'Apple did not accept the App Store Connect API key. Check that the Issuer ID and the Key ID belong to that key and that it is still active in App Store Connect, under Users and Access → Integrations → Team Keys.', 'WP Admin (Mobile App)', 'bp-better-messages' ) );
+            }
+
+            if ( $reason === '' ) {
+                return new WP_Error( 'apple_error', sprintf( _x( 'Apple answered HTTP %d without a reason.', 'WP Admin (Mobile App)', 'bp-better-messages' ), $status ) );
+            }
+
+            return new WP_Error( 'apple_error', sprintf( _x( 'Apple answered HTTP %1$d: %2$s', 'WP Admin (Mobile App)', 'bp-better-messages' ), $status, $reason ) );
+        }
+
         public function get_app_id_from_bundle( $bundleId )
         {
             $jwt = $this->get_jwt();
@@ -209,8 +250,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body'], true);
@@ -245,8 +288,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body'], true);
@@ -280,8 +325,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body'], true);
@@ -323,8 +370,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode( $response['body'], true );
@@ -362,8 +411,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error( Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode( $response['body'], true );
@@ -378,8 +429,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                     ),
                 ]);
 
-                if( is_wp_error(Better_Messages()->functions->is_response_good($capabilitiesResponse)) ) {
-                    return Better_Messages()->functions->is_response_good($capabilitiesResponse);
+                $apple_error = $this->api_error( $capabilitiesResponse );
+
+                if( $apple_error ){
+                    return $apple_error;
                 }
 
                 $capabilitiesResponse = json_decode( $capabilitiesResponse['body'], true );
@@ -396,7 +449,7 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                     'capabilities' => $capabilities,
                 ];
             } else {
-                return new WP_Error('bundle_not_found', 'The requested bundle was not found.');
+                return new WP_Error('bundle_not_found', _x( 'An App ID selected in the iOS tab is not in the Apple Developer account any more. Choose the App IDs again in the iOS tab, then try again.', 'WP Admin (Mobile App)', 'bp-better-messages' ));
             }
         }
 
@@ -417,8 +470,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode( $response['body'], true );
@@ -495,8 +550,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 'body' => json_encode($data)
             ]);
 
-            if (is_wp_error($response)) {
-                return new WP_Error('request_failed', 'The network request failed.');
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body'], true);
@@ -516,6 +573,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                     'Authorization' => 'Bearer ' . $jwt,
                 ),
             ]);
+
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
+            }
 
             $response = json_decode($response['body'], true);
             $data = isset( $response['data'] ) ? $response['data'] : [];
@@ -658,6 +721,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
+            }
+
             $response = json_decode($response['body']);
             $data = $response->data;
 
@@ -719,6 +788,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 )
             ]);
 
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
+            }
+
             $response = json_decode($response['body']);
             $data = $response->data;
 
@@ -768,8 +843,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 )
             ]);
 
-            if( is_wp_error( Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body']);
@@ -809,6 +886,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                     'Content-Type' => 'application/json'
                 )
             ]);
+
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
+            }
 
             $response = json_decode($response['body']);
             $data = $response->data;
@@ -899,8 +982,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ]),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             $response = json_decode($response['body']);
@@ -1139,6 +1224,12 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 'body'        => json_encode($args),
             ]);
 
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
+            }
+
             $response = json_decode($response['body']);
             $item = $response->data;
             $profile = [
@@ -1179,8 +1270,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             if( $response['response'] ){
@@ -1229,8 +1322,10 @@ if (!class_exists('Better_Messages_Mobile_App_IOS')):
                 ),
             ]);
 
-            if( is_wp_error(Better_Messages()->functions->is_response_good($response)) ) {
-                return Better_Messages()->functions->is_response_good($response);
+            $apple_error = $this->api_error( $response );
+
+            if( $apple_error ){
+                return $apple_error;
             }
 
             if( $response['response'] ){

@@ -30,6 +30,8 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         const STORAGE_JOB = 'wordplus_storage_job';
 
+        const ENCRYPTION_JOB = 'wordplus_encryption_job';
+
         const VIDEO_EFFECTS_UPDATE = 'wordplus_video_effects_update';
 
         const RECORDING_SYNC = 'wordplus_recording_sync';
@@ -37,6 +39,8 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
         const RECORDING_SWEEP = 'wordplus_recording_sweep';
 
         private $recording = null;
+
+        private $encryption = null;
 
         const EMOJI_CUT = 'wordplus_pickers_cut_emoji';
 
@@ -77,8 +81,17 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             'video-effects' => array( 'src/class-video-effects.php', 'video-effects' ),
             'recording'   => array( 'src/class-recording.php', 'src/class-recording-store.php', 'src/class-recording-cloud.php', 'src/class-recording-sync.php', 'src/class-recording-rest.php', 'src/class-recording-files.php', 'recording' ),
             'websites'    => array( 'src/class-websites.php' ),
+            'bookings'    => array( 'src/class-bookings.php', 'src/bookings' ),
             'ai'          => array( 'src/class-ai.php', 'src/ai', 'ai' ),
+            'captcha'     => array( 'src/class-captcha.php', 'src/captcha', 'captcha' ),
+            'geo'         => array( 'src/class-geo.php', 'src/class-addresses.php', 'src/geo', 'geo' ),
+            'profiles'    => array( 'src/class-profiles.php', 'src/profiles', 'profiles' ),
+            'encryption'  => array( 'src/class-encryption.php', 'src/class-encryption-config.php', 'src/class-encryption-index.php', 'src/class-encryption-job.php', 'src/class-encryption-admin.php', 'src/class-encryption-files.php', 'encryption' ),
+            'polls'       => array( 'src/class-polls.php', 'src/class-polls-table.php', 'src/class-polls-rest.php' ),
+            'spam'        => array( 'src/class-spam.php', 'src/class-spam-table.php' ),
         );
+
+        const GEO_DAILY = 'wordplus_geo_daily';
 
         private $part_copies = array();
 
@@ -102,9 +115,27 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
         private $visitors = null;
 
+        private $email = null;
+
         private $cors = null;
 
         private $websites = null;
+
+        private $bookings = null;
+
+        private $captcha = null;
+
+        private $geo = null;
+
+        private $addresses = null;
+
+        private $profiles = null;
+
+        private $polls = null;
+
+        private $spam = null;
+
+        private $visitor_move = null;
 
         const WEBSITES_SYNC = 'wordplus_sdk_websites_sync';
 
@@ -158,6 +189,13 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
             add_action( self::STORAGE_JOB, array( $sdk, 'run_storage_job' ) );
 
+            add_action( 'wordplus_spam_prune', array( $sdk, 'run_spam_prune' ) );
+
+            add_action( self::ENCRYPTION_JOB, array( $sdk, 'run_encryption_job' ) );
+            add_action( 'admin_notices', array( $sdk, 'encryption_notice' ) );
+            add_action( 'network_admin_notices', array( $sdk, 'encryption_notice' ) );
+            add_filter( 'site_status_tests', array( $sdk, 'encryption_health' ) );
+
             add_action( self::EMOJI_CUT, array( $sdk, 'run_emoji_cut' ) );
 
             add_action( self::VIDEO_EFFECTS_UPDATE, array( $sdk, 'run_video_effects_update' ) );
@@ -168,6 +206,29 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
 
             add_action( 'wordplus_sdk_check_' . self::CLOUD, array( $sdk, 'run_ai_prices' ), 20 );
             add_action( 'upgrader_process_complete', array( $sdk, 'video_effects_after_update' ) );
+
+            add_action( self::GEO_DAILY, array( $sdk, 'run_geo_daily' ) );
+            add_filter( 'rest_request_before_callbacks', array( $sdk, 'addresses_rest' ), 10, 1 );
+            add_action( 'wp_login', array( $sdk, 'addresses_login' ), 10, 2 );
+            add_action( 'deleted_user', array( $sdk, 'addresses_deleted_user' ) );
+            add_action( 'wordplus_visitor_seen', array( $sdk, 'addresses_visitor_seen' ) );
+
+            add_filter( 'wordplus_encryption_shared_collections', array( $sdk, 'addresses_encryption_collection' ) );
+            add_action( 'wordplus_encryption_turned_on', array( $sdk, 'addresses_encryption_on' ) );
+
+            add_filter( 'pre_get_avatar_data', array( $sdk, 'profile_avatar_data' ), 20, 2 );
+            add_action( 'delete_user', array( $sdk, 'profile_deleted_user' ) );
+            add_action( 'wpmu_delete_user', array( $sdk, 'profile_deleted_network_user' ) );
+
+            if ( is_admin() ) {
+                add_filter( 'user_profile_picture_description', array( $sdk, 'profile_picture_description' ), 10, 2 );
+                add_action( 'admin_post_wordplus_profile_remove_photo', array( $sdk, 'profile_admin_remove_photo' ) );
+                add_filter( 'manage_users_columns', array( $sdk, 'addresses_users_columns' ) );
+                add_filter( 'manage_users_custom_column', array( $sdk, 'addresses_users_column' ), 10, 3 );
+                add_action( 'personal_options', array( $sdk, 'addresses_profile_summary' ) );
+                add_action( 'show_user_profile', array( $sdk, 'addresses_profile_box' ), 1 );
+                add_action( 'edit_user_profile', array( $sdk, 'addresses_profile_box' ), 1 );
+            }
 
             if ( is_multisite() ) {
                 add_action( 'wp_uninitialize_site', array( $sdk, 'retire_storage_site' ), 1 );
@@ -600,6 +661,24 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
                     $this->recording()->routes();
                 }
 
+                if ( $this->captcha() ) {
+                    $this->captcha()->routes();
+                }
+
+                if ( $this->geo() ) {
+                    $this->geo()->routes();
+                    $this->addresses()->routes();
+                }
+
+                if ( $this->profiles() ) {
+                    $this->profiles()->routes();
+                    $this->visitor_move()->routes();
+                }
+
+                if ( $this->encryption() ) {
+                    $this->encryption()->admin()->routes();
+                }
+
                 if ( $this->has_part( 'ai' ) ) {
                     require_once $this->path( 'src/class-ai.php' );
                     WordPlus_SDK_AI_Loader::routes( $this );
@@ -660,6 +739,221 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             return $this->visitors;
         }
 
+        public function email()
+        {
+            if ( null === $this->email ) {
+                require_once __DIR__ . '/class-email.php';
+                $this->email = new WordPlus_SDK_Email();
+            }
+
+            return $this->email;
+        }
+
+        public function bookings()
+        {
+            if ( null === $this->bookings && $this->has_part( 'bookings' ) ) {
+                require_once $this->path( 'src/class-bookings.php' );
+                $this->bookings = new WordPlus_SDK_Bookings( $this );
+            }
+
+            return $this->bookings;
+        }
+
+        public function captcha()
+        {
+            if ( null === $this->captcha && $this->has_part( 'captcha' ) ) {
+                require_once $this->path( 'src/class-captcha.php' );
+                $this->captcha = new WordPlus_SDK_Captcha( $this );
+            }
+
+            return $this->captcha;
+        }
+
+        public function geo()
+        {
+            if ( null === $this->geo && $this->has_part( 'geo' ) ) {
+                require_once $this->path( 'src/class-geo.php' );
+                $this->geo = new WordPlus_SDK_Geo( $this );
+            }
+
+            return $this->geo;
+        }
+
+        public function addresses()
+        {
+            if ( null === $this->addresses && $this->has_part( 'geo' ) ) {
+                require_once $this->path( 'src/class-geo.php' );
+                require_once $this->path( 'src/class-addresses.php' );
+                $this->addresses = new WordPlus_SDK_Addresses( $this );
+            }
+
+            return $this->addresses;
+        }
+
+        public function profiles()
+        {
+            if ( null === $this->profiles && $this->has_part( 'profiles' ) ) {
+                require_once $this->path( 'src/class-profiles.php' );
+                $this->profiles = new WordPlus_SDK_Profiles( $this );
+            }
+
+            return $this->profiles;
+        }
+
+        public function polls()
+        {
+            if ( null === $this->polls && $this->has_part( 'polls' ) ) {
+                require_once $this->path( 'src/class-polls.php' );
+                $this->polls = new WordPlus_SDK_Polls( $this );
+            }
+
+            return $this->polls;
+        }
+
+        public function spam()
+        {
+            if ( null === $this->spam && $this->has_part( 'spam' ) ) {
+                require_once $this->path( 'src/class-spam.php' );
+                $this->spam = new WordPlus_SDK_Spam( $this );
+            }
+
+            return $this->spam;
+        }
+
+        public function run_spam_prune()
+        {
+            if ( $this->spam() ) {
+                $this->spam()->prune();
+            }
+        }
+
+        public function visitor_move()
+        {
+            if ( null === $this->visitor_move && $this->has_part( 'profiles' ) ) {
+                require_once $this->path( 'src/profiles/class-visitor-move.php' );
+                $this->visitor_move = new WordPlus_SDK_Visitor_Move( $this );
+            }
+
+            return $this->visitor_move;
+        }
+
+        public function profile_avatar_data( $args, $id_or_email = null )
+        {
+            $loaded = function_exists( 'wp_load_alloptions' ) ? wp_load_alloptions() : array();
+
+            if ( empty( $loaded['wordplus_profiles_photos'] ) || empty( $this->products ) || ! $this->profiles() ) {
+                return $args;
+            }
+
+            return $this->profiles()->avatar_data( $args, $id_or_email );
+        }
+
+        public function profile_deleted_user( $user_id )
+        {
+            if ( ! is_multisite() && $this->profiles() ) {
+                $this->profiles()->forget( (int) $user_id );
+            }
+        }
+
+        public function profile_deleted_network_user( $user_id )
+        {
+            if ( $this->profiles() ) {
+                $this->profiles()->forget( (int) $user_id );
+            }
+        }
+
+        public function profile_picture_description( $description, $user = null )
+        {
+            return $this->profiles() ? $this->profiles()->picture_description( $description, $user ) : $description;
+        }
+
+        public function profile_admin_remove_photo()
+        {
+            if ( $this->profiles() ) {
+                $this->profiles()->admin_remove_photo();
+            }
+        }
+
+        public function run_geo_daily()
+        {
+            if ( $this->geo() ) {
+                $this->geo()->daily();
+            }
+        }
+
+        public function addresses_rest( $response = null )
+        {
+            if ( empty( $this->products ) || get_current_user_id() <= 0 || ! $this->addresses() ) {
+                return $response;
+            }
+
+            return $this->addresses()->rest_request( $response );
+        }
+
+        public function addresses_login( $login, $user = null )
+        {
+            if ( ! empty( $this->products ) && $this->addresses() ) {
+                $this->addresses()->signed_in( $login, $user );
+            }
+        }
+
+        public function addresses_deleted_user( $user_id )
+        {
+            if ( $this->addresses() ) {
+                $this->addresses()->forget( (int) $user_id );
+            }
+        }
+
+        public function addresses_visitor_seen( $visitor_id )
+        {
+            if ( ! empty( $this->products ) && $this->addresses() ) {
+                $this->addresses()->seen( (int) $visitor_id );
+            }
+        }
+
+        public function addresses_encryption_collection( $collections )
+        {
+            $collections = is_array( $collections ) ? $collections : array();
+            $own         = $this->addresses() ? $this->addresses()->encryption_collection() : null;
+
+            if ( null !== $own ) {
+                $collections['addresses'] = $own;
+            }
+
+            return $collections;
+        }
+
+        public function addresses_encryption_on()
+        {
+            if ( $this->addresses() ) {
+                $this->addresses()->forget_marks();
+            }
+        }
+
+        public function addresses_users_columns( $columns )
+        {
+            return $this->addresses() ? $this->addresses()->users_columns( $columns ) : $columns;
+        }
+
+        public function addresses_users_column( $output, $column, $user_id )
+        {
+            return $this->addresses() ? $this->addresses()->users_column( $output, $column, $user_id ) : $output;
+        }
+
+        public function addresses_profile_box( $user )
+        {
+            if ( $this->addresses() ) {
+                $this->addresses()->profile_box( $user );
+            }
+        }
+
+        public function addresses_profile_summary( $user )
+        {
+            if ( $this->addresses() ) {
+                $this->addresses()->profile_summary( $user );
+            }
+        }
+
         public function page_options( array $parts )
         {
             $options = array();
@@ -718,6 +1012,78 @@ if ( ! class_exists( 'WordPlus_SDK' ) ) {
             }
 
             return $this->recording;
+        }
+
+        public function encryption()
+        {
+            if ( null === $this->encryption && $this->has_part( 'encryption' ) ) {
+                require_once $this->path( 'src/class-encryption.php' );
+                $this->encryption = new WordPlus_SDK_Encryption( $this );
+            }
+
+            return $this->encryption;
+        }
+
+        public function run_encryption_job()
+        {
+            if ( $this->encryption() ) {
+                $this->encryption()->job()->run();
+            }
+        }
+
+        public function encryption_in_use()
+        {
+            $state = get_site_option( 'wordplus_encryption', array() );
+
+            return is_array( $state ) && ! empty( $state['keys'] );
+        }
+
+        public function encryption_notice()
+        {
+            if ( ! $this->encryption_in_use() ) {
+                return;
+            }
+
+            if ( $this->encryption() ) {
+                $this->encryption()->admin()->notice();
+
+                return;
+            }
+
+            if ( current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+                printf(
+                    '<div class="notice notice-error"><p><strong>%1$s</strong></p><p>%2$s</p></div>',
+                    esc_html( _x( 'Encrypted data on this site cannot be read', 'Encryption', 'wordplus-sdk' ) ),
+                    esc_html( _x( 'Data on this site was encrypted with the WordPlus encryption key, but none of the active plugins here can read it: their build has no encryption. It shows as unreadable until a build with encryption is active again.', 'Encryption', 'wordplus-sdk' ) )
+                );
+            }
+        }
+
+        public function encryption_health( $tests )
+        {
+            if ( ! is_array( $tests ) || ! $this->encryption_in_use() ) {
+                return $tests;
+            }
+
+            if ( $this->encryption() ) {
+                return $this->encryption()->admin()->health_tests( $tests );
+            }
+
+            $tests['direct']['wordplus_encryption_key'] = array(
+                'label' => _x( 'WordPlus encryption key', 'Encryption', 'wordplus-sdk' ),
+                'test'  => function () {
+                    return array(
+                        'test'        => 'wordplus_encryption_key',
+                        'status'      => 'critical',
+                        'badge'       => array( 'label' => _x( 'Security', 'Encryption', 'wordplus-sdk' ), 'color' => 'red' ),
+                        'label'       => _x( 'Encrypted data on this site cannot be read', 'Encryption', 'wordplus-sdk' ),
+                        'description' => '<p>' . esc_html( _x( 'Data on this site was encrypted with the WordPlus encryption key, but none of the active plugins here can read it: their build has no encryption. It shows as unreadable until a build with encryption is active again.', 'Encryption', 'wordplus-sdk' ) ) . '</p>',
+                        'actions'     => '',
+                    );
+                },
+            );
+
+            return $tests;
         }
 
         public function ai()

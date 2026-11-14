@@ -79,7 +79,7 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 $this->id        = (int) $message->id;
                 $this->thread_id = (int) $message->thread_id;
                 $this->sender_id = (int) $message->sender_id;
-                $this->message   = $message->message;
+                $this->message   = Better_Messages()->encryption->open_message( $message->message, $this->thread_id );
                 $this->date_sent = $message->date_sent;
                 $this->created_at = $message->created_at;
                 $this->updated_at = $message->updated_at;
@@ -113,15 +113,24 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
             $new_thread = false;
 
             if ( empty( $this->thread_id ) ) {
-                if( ! $wpdb->insert( bm_get_table('threads'), [ 'subject' => $this->subject ], [ '%s' ] ) ){
+                $seal_subject = Better_Messages()->encryption->on() && '' !== (string) $this->subject;
+
+                if( ! $wpdb->insert( bm_get_table('threads'), [ 'subject' => $seal_subject ? '' : $this->subject ], [ '%s' ] ) ){
                     return false;
                 }
 
                 $this->thread_id = $wpdb->insert_id;
                 $new_thread      = true;
+
+                if ( $seal_subject ) {
+                    $wpdb->update( bm_get_table('threads'), [ 'subject' => Better_Messages()->encryption->seal_subject( $this->subject, $this->thread_id ) ], [ 'id' => $this->thread_id ], [ '%s' ], [ '%d' ] );
+                    Better_Messages()->encryption->index_subject( $this->thread_id, $this->subject );
+                }
             }
 
-            if ( ! $wpdb->query( $wpdb->prepare( "INSERT INTO " . bm_get_table('messages') . " ( thread_id, sender_id, message, date_sent, created_at, updated_at, temp_id, is_pending ) VALUES ( %d, %d, %s, %s, %d, %d, %s, %d )", $this->thread_id, $this->sender_id, $this->message, $this->date_sent, $this->created_at, $this->updated_at, $this->temp_id, $this->is_pending ) ) ) {
+            $stored_message = Better_Messages()->encryption->seal_message( $this->message, $this->thread_id );
+
+            if ( ! $wpdb->query( $wpdb->prepare( "INSERT INTO " . bm_get_table('messages') . " ( thread_id, sender_id, message, date_sent, created_at, updated_at, temp_id, is_pending ) VALUES ( %d, %d, %s, %s, %d, %d, %s, %d )", $this->thread_id, $this->sender_id, $stored_message, $this->date_sent, $this->created_at, $this->updated_at, $this->temp_id, $this->is_pending ) ) ) {
                 return false;
             }
 
@@ -149,14 +158,19 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                     VALUES ( %d, %d, %d )", $this->sender_id, $this->thread_id, $time ) );
                 }
             } else {
+                $from_requester = (int) $this->sender_id !== 0 && count( (array) $this->recipients ) === 1 && Better_Messages()->requests->requester( $this->thread_id ) === (int) $this->sender_id;
+
+                $declined_sql = $from_requester ? "" : " AND is_muted <> " . Better_Messages_Message_Requests::DECLINED;
+                $revive_sql   = $from_requester ? ", is_muted = IF( is_muted = " . Better_Messages_Message_Requests::DECLINED . ", " . Better_Messages_Message_Requests::REQUEST . ", is_muted )" : "";
+
                 if( $this->count_unread ) {
                     $unread_exclude = array_values( array_filter( array_map( 'intval', (array) $this->unread_exclude ) ) );
 
                     $wpdb->query(
                         $wpdb->prepare(
                             "UPDATE " . bm_get_table('recipients') . "
-                            SET unread_count = GREATEST(unread_count, 0) + 1, is_deleted = 0, last_update = %d
-                            WHERE thread_id = %d AND user_id != %d" . ( count( $unread_exclude ) > 0 ? " AND user_id NOT IN (" . implode( ',', $unread_exclude ) . ")" : "" ),
+                            SET unread_count = GREATEST(unread_count, 0) + 1, is_deleted = 0, last_update = %d" . $revive_sql . "
+                            WHERE thread_id = %d AND user_id != %d" . $declined_sql . ( count( $unread_exclude ) > 0 ? " AND user_id NOT IN (" . implode( ',', $unread_exclude ) . ")" : "" ),
                             $time,
                             $this->thread_id,
                             $this->sender_id
@@ -167,8 +181,8 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                         $wpdb->query(
                             $wpdb->prepare(
                                 "UPDATE " . bm_get_table('recipients') . "
-                                SET is_deleted = 0, last_update = %d
-                                WHERE thread_id = %d AND user_id IN (" . implode( ',', $unread_exclude ) . ")",
+                                SET is_deleted = 0, last_update = %d" . $revive_sql . "
+                                WHERE thread_id = %d AND user_id IN (" . implode( ',', $unread_exclude ) . ")" . $declined_sql,
                                 $time,
                                 $this->thread_id
                             )
@@ -177,14 +191,18 @@ if( ! class_exists( 'BM_Messages_Message' ) ):
                 } else {
                     $wpdb->query(
                         $wpdb->prepare(
-                            "UPDATE " . bm_get_table('recipients') . " 
-                            SET is_deleted = 0, last_update = %d
-                            WHERE thread_id = %d AND user_id != %d",
+                            "UPDATE " . bm_get_table('recipients') . "
+                            SET is_deleted = 0, last_update = %d" . $revive_sql . "
+                            WHERE thread_id = %d AND user_id != %d" . $declined_sql,
                             $time,
                             $this->thread_id,
                             $this->sender_id
                         )
                     );
+                }
+
+                if( $from_requester ){
+                    Better_Messages()->requests->forget_levels( $this->thread_id );
                 }
             }
 

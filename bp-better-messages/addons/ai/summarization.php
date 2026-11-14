@@ -529,7 +529,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 ? $wpdb->prepare( " AND created_at > %d", $last_summary_created_at )
                 : '';
 
-            $thread_messages = $wpdb->get_results( $wpdb->prepare(
+            $thread_messages = Better_Messages()->encryption->open_thread_rows( $wpdb->get_results( $wpdb->prepare(
                 "SELECT id, sender_id, message
                 FROM `{$messages_table}`
                 WHERE thread_id = %d
@@ -537,7 +537,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 {$where_after}
                 ORDER BY `created_at` ASC",
                 $thread_id, $now
-            ) );
+            ) ), $thread_id );
 
             if ( empty( $thread_messages ) ) {
                 return new \WP_Error( 'no_messages', 'No messages to summarize' );
@@ -779,7 +779,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
         {
             global $wpdb;
 
-            $rows = $wpdb->get_results( $wpdb->prepare(
+            $rows = Better_Messages()->encryption->open_thread_rows( $wpdb->get_results( $wpdb->prepare(
                 "SELECT m.message, m.created_at
                 FROM `" . bm_get_table( 'messages' ) . "` m
                 INNER JOIN `" . bm_get_table( 'meta' ) . "` mt ON mt.bm_message_id = m.id
@@ -788,7 +788,7 @@ if ( ! class_exists( 'Better_Messages_AI_Summarization' ) ) {
                 ORDER BY m.created_at DESC
                 LIMIT %d",
                 $thread_id, $limit
-            ) );
+            ) ), $thread_id );
 
             if ( empty( $rows ) ) {
                 return array();

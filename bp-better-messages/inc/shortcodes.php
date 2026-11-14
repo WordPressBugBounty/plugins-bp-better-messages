@@ -413,7 +413,7 @@ class Better_Messages_Shortcodes
     }
 
     public function better_messages_single_conversation( $args ){
-        if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ) {
+        if( ! is_user_logged_in() && ! Better_Messages()->guests->page_access() ) {
             return Better_Messages()->functions->render_login_form();
         }
 
@@ -421,7 +421,7 @@ class Better_Messages_Shortcodes
         $thread = Better_Messages()->functions->get_thread( $thread_id );
 
         if( $thread ) {
-            return Better_Messages()->functions->get_conversation_layout($thread_id);
+            return Better_Messages()->guests->embedded_for_visitors( Better_Messages()->functions->get_conversation_layout($thread_id) );
         } else {
             return '<p>' . __('Conversation not exists', 'bp-better-messages') .  '</p>';
         }
@@ -429,7 +429,7 @@ class Better_Messages_Shortcodes
 
     public function better_messages_user_conversation( $args )
     {
-        if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ) {
+        if( ! is_user_logged_in() && ! Better_Messages()->guests->page_access() ) {
             return Better_Messages()->functions->render_login_form();
         }
 
@@ -440,16 +440,16 @@ class Better_Messages_Shortcodes
         }
 
         $initialHeight = Better_Messages()->functions->initial_container_height();
-        return '<div class="bm-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>';
+        return Better_Messages()->guests->embedded_for_visitors( '<div class="bm-single-thread-wrap" style="height: ' . esc_attr( $initialHeight ) . '" data-user-id="' . $user_id . '">' . Better_Messages()->functions->container_placeholder() . '</div>' );
     }
 
     public function bp_better_messages( $args ){
         ob_start();
 
-        if( ! is_user_logged_in() && ! Better_Messages()->guests->guest_access_enabled() ){
+        if( ! is_user_logged_in() && ! Better_Messages()->guests->page_access() ){
             echo Better_Messages()->functions->render_login_form();
         } else {
-            echo Better_Messages()->functions->get_page( $args );
+            echo Better_Messages()->guests->embedded_for_visitors( Better_Messages()->functions->get_page( $args ) );
         }
 
         return ob_get_clean();

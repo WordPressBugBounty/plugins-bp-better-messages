@@ -34,17 +34,7 @@ if ( ! class_exists( 'Better_Messages_Location' ) ) {
                 $user_id = Better_Messages()->functions->get_current_user_id();
             }
 
-            $allowed    = true;
-            $restricted = (array) Better_Messages()->settings['locationRestrictRoles'];
-
-            if ( ! empty( $restricted ) ) {
-                foreach ( Better_Messages()->functions->get_user_roles( $user_id ) as $role ) {
-                    if ( in_array( $role, $restricted, true ) ) {
-                        $allowed = false;
-                        break;
-                    }
-                }
-            }
+            $allowed = Better_Messages()->functions->role_list_allows( 'locationRestrictRoles', $user_id );
 
             return apply_filters( 'better_messages_user_can_share_location', $allowed, $user_id );
         }

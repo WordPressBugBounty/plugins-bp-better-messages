@@ -101,7 +101,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
                 AND `message` != '<!-- BBPM START THREAD -->'"
             );
 
-            $rows = $wpdb->get_results( $wpdb->prepare(
+            $rows = Better_Messages()->encryption->open_rows( $wpdb->get_results( $wpdb->prepare(
                 "SELECT id, thread_id, sender_id, message, created_at
                 FROM `{$messages_table}`
                 WHERE `is_pending` = 1
@@ -110,7 +110,7 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
                 ORDER BY `created_at` DESC
                 LIMIT %d, %d",
                 $offset, $per_page
-            ) );
+            ) ) );
 
             $messages = array();
             foreach ( $rows as $msg ) {
@@ -246,8 +246,8 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
         private function register_blacklist_user()
         {
             wp_register_ability( 'better-messages/blacklist-user', array(
-                'label'       => 'Blacklist User',
-                'description' => 'Adds a user to the messaging blacklist. Their messages will require moderation.',
+                'label'       => 'Put User Under Review',
+                'description' => 'Puts a user under review (the blacklist). Their messages wait for approval while pre-moderation is on or Spam Protection is at Balanced, Strict or Custom.',
                 'category'    => 'better-messages',
                 'input_schema' => array(
                     'type'       => 'object',
@@ -297,8 +297,8 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
         private function register_unblacklist_user()
         {
             wp_register_ability( 'better-messages/unblacklist-user', array(
-                'label'       => 'Remove User from Blacklist',
-                'description' => 'Removes a user from the messaging blacklist.',
+                'label'       => 'Release User from Review',
+                'description' => 'Releases a user from review (removes them from the blacklist).',
                 'category'    => 'better-messages',
                 'input_schema' => array(
                     'type'       => 'object',
@@ -348,8 +348,8 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
         private function register_whitelist_user()
         {
             wp_register_ability( 'better-messages/whitelist-user', array(
-                'label'       => 'Whitelist User',
-                'description' => 'Adds a user to the messaging whitelist. Their messages will skip moderation.',
+                'label'       => 'Trust User',
+                'description' => 'Trusts a user (the whitelist). Their messages skip pre-moderation, Spam Protection, message requests and AI moderation.',
                 'category'    => 'better-messages',
                 'input_schema' => array(
                     'type'       => 'object',
@@ -399,8 +399,8 @@ if ( !class_exists( 'Better_Messages_Abilities_Moderation' ) ):
         private function register_unwhitelist_user()
         {
             wp_register_ability( 'better-messages/unwhitelist-user', array(
-                'label'       => 'Remove User from Whitelist',
-                'description' => 'Removes a user from the messaging whitelist.',
+                'label'       => 'Stop Trusting User',
+                'description' => 'Stops trusting a user (removes them from the whitelist).',
                 'category'    => 'better-messages',
                 'input_schema' => array(
                     'type'       => 'object',

@@ -193,7 +193,60 @@ if ( !class_exists( 'Better_Messages_Search' ) ):
                 return $item; },
             $messages );
 
+            if ( Better_Messages()->encryption->searching() ) {
+                $messages = $this->add_sealed_results( $messages, $search, $user_id );
+            }
+
             return apply_filters( 'better_messages_search_messages_results', $messages, $search, $user_id );
+        }
+
+        private function add_sealed_results( array $messages, $search, $user_id ){
+            global $wpdb;
+
+            $thread_ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT thread_id FROM " . bm_get_table('recipients') . " WHERE user_id = %d AND is_deleted = 0", $user_id ) ) );
+
+            if ( empty( $thread_ids ) ) {
+                return $messages;
+            }
+
+            $threads = array();
+
+            foreach ( $messages as $item ) {
+                $threads[ $item['thread_id'] ] = $item;
+            }
+
+            foreach ( Better_Messages()->encryption->find_messages( $search, $thread_ids, 200 ) as $message_id => $thread_id ) {
+                if ( ! isset( $threads[ $thread_id ] ) ) {
+                    $threads[ $thread_id ] = array( 'thread_id' => $thread_id, 'count' => 0, 'message_id' => $message_id );
+                }
+
+                $threads[ $thread_id ]['count']++;
+                $threads[ $thread_id ]['message_id'] = max( $threads[ $thread_id ]['message_id'], $message_id );
+            }
+
+            $named = array_values( array_intersect( Better_Messages()->encryption->find_subjects( $search, 100 ), $thread_ids ) );
+
+            if ( ! empty( $named ) ) {
+                $totals = $wpdb->get_results( "SELECT thread_id, COUNT(*) as count, MAX(id) as message_id FROM " . bm_get_table('messages') . " WHERE thread_id IN (" . implode( ',', array_map( 'intval', $named ) ) . ") GROUP BY thread_id", ARRAY_A );
+
+                foreach ( $totals as $total ) {
+                    $thread_id = (int) $total['thread_id'];
+
+                    if ( ! isset( $threads[ $thread_id ] ) ) {
+                        $threads[ $thread_id ] = array( 'thread_id' => $thread_id, 'count' => (int) $total['count'], 'message_id' => (int) $total['message_id'] );
+                    } else {
+                        $threads[ $thread_id ]['count'] = max( $threads[ $thread_id ]['count'], (int) $total['count'] );
+                    }
+                }
+            }
+
+            $threads = array_values( $threads );
+
+            usort( $threads, function ( $a, $b ) {
+                return $b['message_id'] - $a['message_id'];
+            } );
+
+            return array_slice( $threads, 0, 10 );
         }
 
     }

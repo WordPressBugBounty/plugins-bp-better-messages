@@ -27,6 +27,134 @@ if ( ! class_exists( 'Better_Messages_Asset_Versions' ) ):
             add_filter( 'style_loader_src', array( $this, 'versioned_src' ), PHP_INT_MAX, 2 );
             add_filter( 'script_loader_tag', array( $this, 'versioned_tag' ), PHP_INT_MAX, 3 );
             add_filter( 'style_loader_tag', array( $this, 'versioned_tag' ), PHP_INT_MAX, 3 );
+            add_filter( 'litespeed_optm_cssjs', array( $this, 'litespeed_original_script' ), 10, 3 );
+            add_filter( 'rocket_exclude_js', array( $this, 'rocket_keep_bundle_files' ) );
+            add_filter( 'rocket_excluded_inline_js_content', array( $this, 'rocket_keep_bundle_inline' ) );
+        }
+
+        public function rocket_keep_bundle_files( $excluded )
+        {
+            if ( ! is_array( $excluded ) ) {
+                return $excluded;
+            }
+
+            foreach ( $this->bundle_dependencies() as $dependency ) {
+                $path = is_string( $dependency->src ) ? $this->url_path( $dependency->src ) : '';
+
+                if ( $path !== '' ) {
+                    $excluded[] = preg_quote( $path );
+                }
+            }
+
+            return $excluded;
+        }
+
+        public function rocket_keep_bundle_inline( $excluded )
+        {
+            if ( ! is_array( $excluded ) ) {
+                return $excluded;
+            }
+
+            $scripts = wp_scripts();
+
+            foreach ( $this->bundle_dependencies() as $dependency ) {
+                $inline = array_merge(
+                    (array) $scripts->get_data( $dependency->handle, 'before' ),
+                    (array) $scripts->get_data( $dependency->handle, 'after' ),
+                    array( $scripts->get_data( $dependency->handle, 'data' ) )
+                );
+
+                foreach ( $inline as $code ) {
+                    if ( is_string( $code ) && trim( $code ) !== '' ) {
+                        $excluded[] = trim( $code );
+                    }
+                }
+            }
+
+            return $excluded;
+        }
+
+        private function bundle_dependencies()
+        {
+            if ( ! isset( $GLOBALS['wp_scripts'] ) || ! wp_script_is( 'better-messages', 'done' ) ) {
+                return array();
+            }
+
+            $scripts = wp_scripts();
+            $found   = array();
+            $pending = array( 'better-messages' );
+
+            while ( $pending ) {
+                $handle = array_pop( $pending );
+
+                if ( isset( $found[ $handle ] ) || ! isset( $scripts->registered[ $handle ] ) ) {
+                    continue;
+                }
+
+                $found[ $handle ] = $scripts->registered[ $handle ];
+
+                foreach ( (array) $scripts->registered[ $handle ]->deps as $dependency ) {
+                    $pending[] = $dependency;
+                }
+            }
+
+            return $found;
+        }
+
+        public function litespeed_original_script( $content, $file_type = '', $src = '' )
+        {
+            if ( $file_type !== 'js' || ! is_string( $content ) ) {
+                return $content;
+            }
+
+            $file = $this->own_script_file( $src );
+
+            if ( $file === null ) {
+                return $content;
+            }
+
+            $original = file_get_contents( $file );
+
+            if ( ! is_string( $original ) || trim( $original ) === '' ) {
+                return $content;
+            }
+
+            $original = trim( str_replace( "\r\n", "\n", $original ) ) . "\n;";
+
+            if ( strpos( $content, 'DOMContentLiteSpeedLoaded' ) !== false ) {
+                $original = str_replace( 'DOMContentLoaded', 'DOMContentLiteSpeedLoaded', $original );
+            }
+
+            return $original;
+        }
+
+        private function own_script_file( $src )
+        {
+            if ( ! is_string( $src ) || ! preg_match( '#^(?:https?:)?/[^\s<>"\']*$#i', $src ) ) {
+                return null;
+            }
+
+            $path = $this->url_path( $src );
+            $base = $this->url_path( Better_Messages()->url );
+
+            if ( $base === '' || substr( $path, -3 ) !== '.js' || strpos( $path, $base ) !== 0 ) {
+                return null;
+            }
+
+            $relative = rawurldecode( substr( $path, strlen( $base ) ) );
+
+            if ( $relative === '' || strpos( $relative, '..' ) !== false ) {
+                return null;
+            }
+
+            $file = realpath( Better_Messages()->path . $relative );
+            $root = realpath( Better_Messages()->path );
+
+            if ( $file === false || $root === false || strpos( $file, rtrim( $root, '/\\' ) . DIRECTORY_SEPARATOR ) !== 0 || ! is_readable( $file ) ) {
+                return null;
+            }
+
+            return $file;
         }
 
         public function versioned_src( $src, $handle )
@@ -73,6 +201,14 @@ if ( ! class_exists( 'Better_Messages_Asset_Versions' ) ):
 
                 if ( $versioned !== $url && $tags->set_attribute( $attribute, $versioned ) ) {
                     $changed = true;
+                }
+
+                if ( ! $is_style ) {
+                    foreach ( array( 'data-no-minify', 'data-wpacu-skip' ) as $skip ) {
+                        if ( $tags->get_attribute( $skip ) === null && $tags->set_attribute( $skip, '1' ) ) {
+                            $changed = true;
+                        }
+                    }
                 }
             }
 

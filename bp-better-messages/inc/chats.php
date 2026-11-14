@@ -2501,7 +2501,19 @@ class Better_Messages_Chats
             if ( in_array( $role, $settings['can_join'] ) ) return true;
         }
 
-        return $this->user_can_reply( $user_id, $chat_id );
+        if ( $this->user_can_reply( $user_id, $chat_id ) ) return true;
+
+        if ( $user_id < 0 && Better_Messages()->guests->awaits_confirmation( $user_id ) ) {
+            $post = get_post( $chat_id );
+
+            if ( $post && $post->post_status === 'draft' ) return false;
+
+            foreach ( $user_roles as $role ) {
+                if ( in_array( $role, $settings['can_reply'] ) ) return true;
+            }
+        }
+
+        return false;
     }
 
     public function is_user_banned_in_thread( $thread_id, $user_id ){

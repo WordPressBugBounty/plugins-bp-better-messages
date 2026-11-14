@@ -80,6 +80,13 @@ class Better_Messages_Options
             'locationBubbleMap'           => '1',
             'locationBubbleZoom'          => 15,
             'locationOpenIn'              => 'osm',
+            'pollsEnable'                 => '1',
+            'pollsPrivate'                => '0',
+            'pollsGroupThreads'           => '1',
+            'pollsChatRooms'              => '1',
+            'pollsGroups'                 => '1',
+            'pollsCourses'                => '1',
+            'pollsRestrictRoles'          => [],
             'miniChatsEnable'             => '0',
             'miniWidgetsStyle'            => 'classic',
             'miniWidgetsAnimation'        => '1',
@@ -237,6 +244,7 @@ class Better_Messages_Options
             'notifyLevelGroups'           => 'all',
             'notifyLevelCourses'          => 'all',
             'emailScopeDefault'           => 'all',
+            'emailContent'                => 'full',
             'mentionAllPermission'        => 'moderators',
             'groupCallAlerts'             => '1',
             'groupCallAlertsCooldown'     => 30,
@@ -260,6 +268,7 @@ class Better_Messages_Options
             'miniChatVideoCall'           => '0',
             'miniChatGroupAudioCall'      => '0',
             'miniChatGroupVideoCall'      => '0',
+            'miniChatMaximize'            => '0',
             'disableUsersSearch'          => '0',
             'fixedHeaderHeight'           => '0',
             'mobilePopupLocationBottom'   => 20,
@@ -313,6 +322,19 @@ class Better_Messages_Options
             'allowEditMessages'           => '0',
             'editMessageTimeLimit'        => 0,
             'maximumMessageLength'        => 0,
+            'maxParticipants'             => 0,
+            'spamLevel'                   => 'monitor',
+            'spamNewDays'                 => 3,
+            'spamNewMessages'             => 3,
+            'spamLinksAllowed'            => '',
+            'spamContactDetails'          => 'allow',
+            'spamMessageRequests'         => 'off',
+            'spamMessageRequestsChoice'   => '0',
+            'spamGuestsPerHour'           => 0,
+            'spamGuestsPerAddress'        => 10,
+            'spamDigestHours'             => 3,
+            'spamReviewEmails'            => '1',
+            'spamRules'                   => array(),
             'enableNiceLinks'             => '1',
             'userStatuses'                => '0',
             'accountRow'                  => '1',
@@ -320,6 +342,7 @@ class Better_Messages_Options
             'myProfileButton'             => '1',
             'titleNotifications'          => '1',
             'enableMiniCloseButton'       => '0',
+            'enableMiniMaximizeButton'    => '1',
             'bpProfileSlug'               => 'bp-messages',
             'bpGroupSlug'                 => 'bp-messages',
             'mobilePopupLocation'         => 'right',
@@ -342,6 +365,7 @@ class Better_Messages_Options
             'enableGroupsPushs'           => '0',
             'desktopFullScreen'           => '1',
             'restrictRoleBlock'           => [],
+            'roleListModes'               => [],
             'restrictRoleType'            => 'allow',
             'restrictRoleMessage'         => 'You are not allowed to send messages',
             'friendsOnSiteNotifications'  => '0',
@@ -390,10 +414,10 @@ class Better_Messages_Options
             'emailTemplateMode'             => 'simple',
             'emailLogoId'                   => 0,
             'emailLogoUrl'                  => '',
-            'emailPrimaryColor'             => '#21759b',
-            'emailBackgroundColor'          => '#f6f6f6',
+            'emailPrimaryColor'             => '',
+            'emailBackgroundColor'          => '#f4f4f5',
             'emailContentBgColor'           => '#ffffff',
-            'emailTextColor'                => '#333333',
+            'emailTextColor'                => '#18181b',
             'emailHeaderText'               => '',
             'emailFooterText'               => '',
             'emailButtonText'               => '',
@@ -522,6 +546,17 @@ class Better_Messages_Options
             'guestChat'                     => '0',
             'guestChatPage'                 => '0',
             'guestUniqueNames'              => '1',
+            'guestNameField'                => 'optional',
+            'guestEmailField'               => 'off',
+            'guestConfirmBeforeChat'        => '0',
+            'guestConsentText'              => '',
+            'guestCaptcha'                  => '0',
+            'guestPhotos'                   => '0',
+            'guestMoveOffer'                => '1',
+            'guestDeleteInactiveDays'       => 0,
+            'guestDeleteConfirmed'          => '0',
+            'profileName'                   => '0',
+            'profilePhoto'                  => '0',
             'deleteMessagesOnUserDelete'    => '0',
             'dokanIntegration'              => '0',
             'MultiVendorXIntegration'       => '0',
@@ -541,6 +576,16 @@ class Better_Messages_Options
             'wooCommerceOrderSupportUser'             => 0,
             'wooCommercePrePurchaseSupportUser'       => 0,
             'jetEngineAvatars'              => '0',
+            'bookingsAmelia'                => '0',
+            'bookingsLatePoint'             => '0',
+            'bookingsFluentBooking'         => '0',
+            'bookingsSSA'                   => '0',
+            'bookingsSupportUser'           => 0,
+            'bookingsGroupChats'            => '1',
+            'bookingsCallMinutes'           => 10,
+            'notifyLevelBookings'           => 'all',
+            'groupCallsBookings'            => '0',
+            'groupAudioCallsBookings'       => '0',
             'hivepressIntegration'          => '0',
             'hivepressMenuItem'             => '0',
             'directoristIntegration'         => '0',
@@ -651,6 +696,7 @@ class Better_Messages_Options
             'aiTranslationChatRooms'        => '1',
             'aiTranslationBots'             => '1',
             'aiTranslationRoles'            => [],
+            'invisibleModeRoles'            => [],
 
             'miniWidgetsOrder'              => [],
             'rememberLastTab'               => '0',
@@ -731,6 +777,18 @@ class Better_Messages_Options
 
         foreach ( array( 'miniWidgetsOrder', 'sidePanelTabsOrder', 'mobileTabsOrder' ) as $tabs_order_key ) {
             $settings[ $tabs_order_key ] = $this->with_conversations_tab( $settings[ $tabs_order_key ] );
+        }
+
+        $previous_email_colors = array(
+            'emailPrimaryColor'    => array( '#21759b', '' ),
+            'emailBackgroundColor' => array( '#f6f6f6', '#f4f4f5' ),
+            'emailTextColor'       => array( '#333333', '#18181b' ),
+        );
+
+        foreach ( $previous_email_colors as $email_color_key => $email_color_swap ) {
+            if ( is_string( $settings[ $email_color_key ] ) && strtolower( $settings[ $email_color_key ] ) === $email_color_swap[0] ) {
+                $settings[ $email_color_key ] = $email_color_swap[1];
+            }
         }
 
         return $settings;
@@ -1151,6 +1209,7 @@ class Better_Messages_Options
             'hasUsersWP'         => $has_userswp,
             'hasProfileGrid'     => $has_profile_grid,
             'hasWpUserManager'   => $has_wp_user_manager,
+            'profilePlugin'      => Better_Messages_Profiles()->profile_plugin(),
             'hasPeepSo'          => $has_peepso,
             'hasDokan'           => $has_dokan,
             'hasWcVendors'       => $has_wc_vendors,
@@ -1168,6 +1227,9 @@ class Better_Messages_Options
             'hasJetEngine'       => $has_jetengine,
             'hasLearnPress'      => $has_learnpress,
             'hasTutorLMS'        => $has_tutorlms,
+            'bookingPlugins'     => $this->booking_plugins_for_settings(),
+            'bookingsHasPage'    => class_exists( 'Better_Messages_Bookings' ) && '' !== Better_Messages_Bookings::instance()->page_url(),
+            'bookingsSupportUserData' => $resolve_support_user( $this->settings['bookingsSupportUser'] ?? 0 ),
             'hasLearnDash'       => $has_learndash,
             'hasLearnDashInstructorRole' => $has_learndash_instructor_role,
             'hasMasterStudy'     => $has_masterstudy,
@@ -1187,6 +1249,8 @@ class Better_Messages_Options
             'detectedServer'     => class_exists('Better_Messages_Files') ? Better_Messages_Files::detect_server_capabilities() : array( 'server' => 'unknown', 'available' => array( 'php' ) ),
             'uploadsPath'        => trailingslashit( wp_upload_dir()['basedir'] ),
             'adminUrl'           => admin_url(),
+            'spamRuleTables'     => Better_Messages()->anti_spam->rule_tables(),
+            'spamMonitorReport'  => Better_Messages_Anti_Spam_Admin()->monitor_report(),
             'fileFormats'        => array_diff_key( wp_get_ext_types(), array( 'code' => true ) ),
             'currentUserEmail'   => wp_get_current_user()->user_email,
             'phpVersionOk'       => class_exists( 'Better_Messages_AI' ) && Better_Messages_AI::available(),
@@ -1247,14 +1311,7 @@ class Better_Messages_Options
             'emojiSpriteStatus'  => Better_Messages_Emojis()->getLocalStatus(),
             'currentLocale'         => determine_locale(),
             'contactUrl'         => admin_url( 'admin.php?page=better-messages-contact' ),
-            'emailPreviewStrings' => array(
-                'testConversation' => __( 'Test Conversation', 'bp-better-messages' ),
-                'emailSubject'     => sprintf( _x( 'You have unread messages: "%s"', 'Email notification header for non BuddyPress websites', 'bp-better-messages' ), __( 'Test Conversation', 'bp-better-messages' ) ),
-                'hiUser'           => sprintf( __( 'Hi %s,', 'bp-better-messages' ), 'John' ),
-                'wroteLabel'       => sprintf( __( '%s wrote:', 'bp-better-messages' ), 'Jane Smith' ),
-                'viewConversation' => __( 'View Conversation', 'bp-better-messages' ),
-                'unsubscribe'      => _x( 'Unsubscribe from email notifications about unread messages', 'Email footer', 'bp-better-messages' ),
-            ),
+            'emailAccentColor'   => Better_Messages()->notifications->email_accent_color(),
         );
 
         ?>
@@ -1375,6 +1432,34 @@ class Better_Messages_Options
         <?php
     }
 
+    private function booking_plugins_for_settings()
+    {
+        $bookings = class_exists( 'Better_Messages_Bookings' ) && function_exists( 'wordplus_bookings' ) ? wordplus_bookings() : null;
+
+        if ( ! $bookings ) {
+            return array();
+        }
+
+        $plugins = array();
+
+        foreach ( $bookings->available() as $slug => $name ) {
+            $adapter = isset( Better_Messages_Bookings::SETTINGS[ $slug ] ) ? $bookings->adapter( $slug ) : null;
+
+            if ( $adapter ) {
+                $plugins[] = array(
+                    'slug'        => $slug,
+                    'name'        => $name,
+                    'setting'     => Better_Messages_Bookings::SETTINGS[ $slug ],
+                    'placeholder' => $adapter->placeholder( Better_Messages_Bookings::LINK_CHAT ),
+                    'callPlaceholder' => $adapter->placeholder( Better_Messages_Bookings::LINK_CALL ),
+                    'meetingPlaceholder' => method_exists( $adapter, 'meeting_placeholder' ) ? $adapter->meeting_placeholder( Better_Messages_Bookings::LINK_CALL ) : '',
+                );
+            }
+        }
+
+        return $plugins;
+    }
+
     private function live_stream_offer()
     {
         $nothing = array( 'action' => '', 'url' => '', 'modal' => false );
@@ -1458,6 +1543,19 @@ class Better_Messages_Options
 
     public function moderation_page_html(){
         include $this->path . 'layout-moderation.php';
+    }
+
+    public function sanitize_role_list_modes( $modes ) {
+        $lists     = Better_Messages()->functions->role_lists();
+        $sanitized = array();
+
+        foreach ( (array) $modes as $key => $mode ) {
+            if ( is_string( $key ) && isset( $lists[ $key ] ) && in_array( $mode, array( 'restrict', 'allow' ), true ) ) {
+                $sanitized[ $key ] = $mode;
+            }
+        }
+
+        return $sanitized;
     }
 
     public function sanitize_array_recursive( $arr ) {
@@ -2204,6 +2302,11 @@ class Better_Messages_Options
             $settings['aiTranslationRoles'] = isset( $existing['aiTranslationRoles'] ) ? $existing['aiTranslationRoles'] : [];
         }
 
+        if ( ! isset( $settings['invisibleModeRoles'] ) ) {
+            $existing = $this->settings;
+            $settings['invisibleModeRoles'] = isset( $existing['invisibleModeRoles'] ) ? $existing['invisibleModeRoles'] : [];
+        }
+
         if ( !isset( $settings['restrictBlockUsers'] ) ) {
             $settings['restrictBlockUsers'] = [];
         }
@@ -2366,6 +2469,9 @@ class Better_Messages_Options
         if ( !isset( $settings['disableUsersSearch'] ) ) {
             $settings['disableUsersSearch'] = '0';
         }
+        if ( !isset( $settings['miniChatMaximize'] ) ) {
+            $settings['miniChatMaximize'] = '0';
+        }
         if ( !isset( $settings['disableOnSiteNotification'] ) ) {
             $settings['disableOnSiteNotification'] = '0';
         }
@@ -2408,6 +2514,10 @@ class Better_Messages_Options
             $settings['maximumMessageLength'] = 0;
         }
 
+        if ( !isset( $settings['maxParticipants'] ) ) {
+            $settings['maxParticipants'] = 0;
+        }
+
         if ( !isset( $settings['enableNiceLinks'] ) ) {
             $settings['enableNiceLinks'] = '0';
         }
@@ -2438,6 +2548,10 @@ class Better_Messages_Options
 
         if ( !isset( $settings['enableMiniCloseButton'] ) ) {
             $settings['enableMiniCloseButton'] = '0';
+        }
+
+        if ( !isset( $settings['enableMiniMaximizeButton'] ) ) {
+            $settings['enableMiniMaximizeButton'] = '1';
         }
 
         if( ! isset( $settings['groupCallsGroups'] ) ){
@@ -2644,6 +2758,24 @@ class Better_Messages_Options
             $settings['guestUniqueNames'] = '1';
         }
 
+        foreach ( array( 'guestConfirmBeforeChat' => '0', 'guestCaptcha' => '0', 'guestPhotos' => '0', 'guestMoveOffer' => '1', 'guestDeleteConfirmed' => '0', 'profileName' => '0', 'profilePhoto' => '0' ) as $guest_key => $guest_default ) {
+            if( ! isset( $settings[ $guest_key ] ) ) {
+                $settings[ $guest_key ] = $guest_default;
+            }
+        }
+
+        if( ! isset( $settings['guestNameField'] ) || ! in_array( $settings['guestNameField'], array( 'optional', 'required' ), true ) ) {
+            $settings['guestNameField'] = 'optional';
+        }
+
+        if( ! isset( $settings['guestEmailField'] ) || ! in_array( $settings['guestEmailField'], array( 'off', 'optional', 'required' ), true ) ) {
+            $settings['guestEmailField'] = 'off';
+        }
+
+        if( isset( $settings['guestDeleteInactiveDays'] ) ) {
+            $settings['guestDeleteInactiveDays'] = max( 0, min( 3650, (int) $settings['guestDeleteInactiveDays'] ) );
+        }
+
         if( ! isset( $settings['dokanIntegration'] ) ) {
             $settings['dokanIntegration'] = '0';
         }
@@ -2686,6 +2818,20 @@ class Better_Messages_Options
 
         if( ! isset( $settings['jetEngineAvatars'] ) ) {
             $settings['jetEngineAvatars'] = '0';
+        }
+
+        foreach ( array( 'bookingsAmelia', 'bookingsLatePoint', 'bookingsFluentBooking', 'bookingsSSA', 'groupCallsBookings', 'groupAudioCallsBookings' ) as $booking_switch ) {
+            if ( ! isset( $settings[ $booking_switch ] ) ) {
+                $settings[ $booking_switch ] = '0';
+            }
+        }
+
+        if ( ! isset( $settings['bookingsGroupChats'] ) ) {
+            $settings['bookingsGroupChats'] = '1';
+        }
+
+        if ( ! isset( $settings['bookingsCallMinutes'] ) ) {
+            $settings['bookingsCallMinutes'] = 10;
         }
 
         if( ! isset( $settings['hivepressIntegration'] ) ) {
@@ -2916,7 +3062,7 @@ class Better_Messages_Options
             $settings['mentionsForceNotifications'] = '0';
         }
 
-        foreach ( array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses' ) as $level_key ) {
+        foreach ( array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses', 'notifyLevelBookings' ) as $level_key ) {
             if( ! isset( $settings[ $level_key ] ) || ! in_array( $settings[ $level_key ], array( 'all', 'mentions', 'none' ), true ) ) {
                 $settings[ $level_key ] = isset( $this->settings[ $level_key ] ) && in_array( $this->settings[ $level_key ], array( 'all', 'mentions', 'none' ), true ) ? $this->settings[ $level_key ] : 'all';
             }
@@ -2924,6 +3070,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['emailScopeDefault'] ) || ! in_array( $settings['emailScopeDefault'], array( 'all', 'direct', 'off' ), true ) ) {
             $settings['emailScopeDefault'] = isset( $this->settings['emailScopeDefault'] ) && in_array( $this->settings['emailScopeDefault'], array( 'all', 'direct', 'off' ), true ) ? $this->settings['emailScopeDefault'] : 'all';
+        }
+
+        if( ! isset( $settings['emailContent'] ) || ! in_array( $settings['emailContent'], array( 'full', 'senders', 'notice' ), true ) ) {
+            $settings['emailContent'] = isset( $this->settings['emailContent'] ) && in_array( $this->settings['emailContent'], array( 'full', 'senders', 'notice' ), true ) ? $this->settings['emailContent'] : 'full';
         }
 
         if( ! isset( $settings['mentionAllPermission'] ) || ! in_array( $settings['mentionAllPermission'], array( 'nobody', 'moderators', 'everyone' ), true ) ) {
@@ -2942,7 +3092,7 @@ class Better_Messages_Options
             $settings['groupCallAlertsUserLimit'] = min( 100, max( 0, intval( $settings['groupCallAlertsUserLimit'] ) ) );
         }
 
-        $notify_defaults = array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses', 'emailScopeDefault' );
+        $notify_defaults = array( 'notifyLevelGroupThreads', 'notifyLevelGroups', 'notifyLevelCourses', 'notifyLevelBookings', 'emailScopeDefault' );
 
         foreach ( $notify_defaults as $notify_key ) {
             if( isset( $this->settings[ $notify_key ] ) && $this->settings[ $notify_key ] !== $settings[ $notify_key ] ) {
@@ -2980,6 +3130,10 @@ class Better_Messages_Options
 
         if( ! isset( $settings['locationRestrictRoles'] ) ) {
             $settings['locationRestrictRoles'] = [];
+        }
+
+        if( ! isset( $settings['pollsRestrictRoles'] ) ) {
+            $settings['pollsRestrictRoles'] = [];
         }
 
         if( ! isset( $settings['locationPrecision'] ) || ! in_array( (string) $settings['locationPrecision'], ['0', '4', '3', '2'], true ) ) {
@@ -3141,6 +3295,7 @@ class Better_Messages_Options
         $settings['wooCommerceProductSupportUser']     = isset( $settings['wooCommerceProductSupportUser'] ) ? (int) $settings['wooCommerceProductSupportUser'] : 0;
         $settings['wooCommerceOrderSupportUser']       = isset( $settings['wooCommerceOrderSupportUser'] ) ? (int) $settings['wooCommerceOrderSupportUser'] : 0;
         $settings['wooCommercePrePurchaseSupportUser'] = isset( $settings['wooCommercePrePurchaseSupportUser'] ) ? (int) $settings['wooCommercePrePurchaseSupportUser'] : 0;
+        $settings['bookingsSupportUser']               = isset( $settings['bookingsSupportUser'] ) ? (int) $settings['bookingsSupportUser'] : 0;
 
         $links_allowed = [
             'restrictBadWordsList',
@@ -3159,10 +3314,11 @@ class Better_Messages_Options
             'GamiPressNewMessageChargeMessage',
             'GamiPressNewThreadChargeMessage',
             'GamiPressCallPricingStartMessage',
-            'GamiPressCallPricingEndMessage'
+            'GamiPressCallPricingEndMessage',
+            'guestConsentText'
         ];
 
-        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules', 'aiModerationSiteContext' ];
+        $textareas = [ 'badWordsList', 'messagesModerationNotificationEmails', 'voiceTranscriptionPrompt', 'aiModerationCustomRules', 'aiModerationSiteContext', 'spamLinksAllowed' ];
 
         $html_fields = [ 'emailCustomHtml' ];
 
@@ -3221,13 +3377,23 @@ class Better_Messages_Options
             'emailLogoId'               => 0,
             'editMessageTimeLimit'      => 0,
             'maximumMessageLength'      => 0,
+            'maxParticipants'           => 0,
+            'spamNewDays'               => 0,
+            'spamNewMessages'           => 0,
+            'spamGuestsPerHour'         => 0,
+            'spamGuestsPerAddress'      => 0,
+            'spamDigestHours'           => 0,
+            'bookingsCallMinutes'       => 0,
+            'guestDeleteInactiveDays'   => 0,
         ];
 
         $arrays = [
             'rateLimitReply',
             'restrictRoleBlock',
             'locationRestrictRoles',
+            'pollsRestrictRoles',
             'aiTranslationRoles',
+            'invisibleModeRoles',
             'myCredNewMessageCharge',
             'myCredNewMessageChargeTypes',
             'myCredNewThreadCharge',
@@ -3242,7 +3408,8 @@ class Better_Messages_Options
             'suggestedConversations',
             'messagesPremoderationRolesNewConv',
             'messagesPremoderationRolesReplies',
-            'stickerPacksSummary'
+            'stickerPacksSummary',
+            'spamRules'
         ];
 
         foreach ( $settings as $key => $value ) {
@@ -3251,6 +3418,8 @@ class Better_Messages_Options
                 $this->settings[$key] = Better_Messages_Navigation::sanitize_custom_tabs( $value );
             } else if ( $key === 'tabLabels' ) {
                 $this->settings[$key] = Better_Messages_Navigation::sanitize_tab_labels( $value );
+            } else if ( $key === 'roleListModes' ) {
+                $this->settings[$key] = $this->sanitize_role_list_modes( $value );
             } else if( in_array( $key, $arrays ) ){
                 $this->settings[$key] = $this->sanitize_array_recursive( (array) $value );
             } else if ( is_array( $value ) ) {
@@ -3327,10 +3496,10 @@ class Better_Messages_Options
 
         $email_color_keys = ['emailPrimaryColor', 'emailBackgroundColor', 'emailContentBgColor', 'emailTextColor'];
         $email_color_defaults = [
-            'emailPrimaryColor'     => '#21759b',
-            'emailBackgroundColor'  => '#f6f6f6',
+            'emailPrimaryColor'     => '',
+            'emailBackgroundColor'  => '#f4f4f5',
             'emailContentBgColor'   => '#ffffff',
-            'emailTextColor'        => '#333333'
+            'emailTextColor'        => '#18181b'
         ];
 
         foreach ( $email_color_keys as $color_key ) {
